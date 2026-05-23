@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Herramientas · Puntal Agro</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F0F2F5;--card:#fff;--border:#E4E8EE;--text:#0F1923;--muted:#7A8899;--radius:12px;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:15px;min-height:100vh;display:flex;flex-direction:column}
+header{background:var(--card);border-bottom:1px solid var(--border);padding:10px 24px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:30px;height:30px;background:#0F1923;border-radius:8px;display:flex;align-items:center;justify-content:center}
+.logo-icon svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-width:1.5}
+.logo-title{font-size:13px;font-weight:600;letter-spacing:-.2px}
+.logo-sub{font-size:11px;color:var(--muted)}
+.h-right{font-size:11px;color:var(--muted);background:var(--bg);padding:3px 10px;border-radius:20px;border:1px solid var(--border);font-family:var(--mono);white-space:nowrap}
+.hero{padding:28px 24px 8px}
+.hero h1{font-size:22px;font-weight:600;letter-spacing:-.4px;margin-bottom:4px}
+.hero p{font-size:13px;color:var(--muted);max-width:640px;line-height:1.5}
+main{padding:16px 24px 28px;display:flex;flex-direction:column;gap:18px;flex:1}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.tool{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);border-left:3px solid transparent;padding:16px 18px;display:flex;flex-direction:column;gap:10px;text-decoration:none;color:inherit;transition:border-color .12s,box-shadow .12s,transform .12s}
+.tool:hover{box-shadow:0 4px 14px rgba(15,25,35,.07);transform:translateY(-2px)}
+.t-gra{border-left-color:#3B6D11}
+.t-var{border-left-color:#185FA5}
+.tool-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.tool-name{font-size:15px;font-weight:600;letter-spacing:-.2px;line-height:1.25}
+.tool-tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;padding:2px 8px;border-radius:10px;font-family:var(--mono);white-space:nowrap}
+.tag-gra{background:#F0FDF4;color:#166534}
+.tag-var{background:#EFF6FF;color:#0C447C}
+.tool-desc{font-size:12.5px;color:var(--muted);line-height:1.5;flex:1}
+.tool-foot{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--muted);font-family:var(--mono);padding-top:6px;border-top:1px solid var(--border)}
+.tool-go{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:500;color:var(--text);font-family:var(--sans)}
+.tool-go svg{width:13px;height:13px;stroke:currentColor;stroke-width:2;fill:none}
+footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--card);font-size:11px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+@media (max-width:768px){.grid{grid-template-columns:1fr}.hero h1{font-size:19px}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+    <div>
+      <div class="logo-title">Herramientas · Toma de decisiones agropecuarias</div>
+      <div class="logo-sub">Puntal Agro</div>
+    </div>
+  </div>
+  <div class="h-right" id="fts">—</div>
+</header>
+
+<div class="hero">
+  <h1>Tableros Puntal Agro</h1>
+  <p>Herramientas de análisis para la toma de decisiones en el sector agropecuario. Elegí un tablero para abrirlo.</p>
+</div>
+
+<main>
+  <div class="grid">
+
+    <a class="tool t-gra" href="tablero_agro.html">
+      <div class="tool-top">
+        <div class="tool-name">Tablero Comercial Agropecuario</div>
+        <span class="tool-tag tag-gra">Comercial</span>
+      </div>
+      <div class="tool-desc">Disponible, futuros y pizarra de granos. Precios de referencia y escenarios comerciales para la toma de decisión.</div>
+      <div class="tool-foot">
+        <span>Comercial / granos</span>
+        <span class="tool-go">Abrir <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </div>
+    </a>
+
+    <a class="tool t-var" href="tablero_evolucion.html">
+      <div class="tool-top">
+        <div class="tool-name">Evolución de Variables</div>
+        <span class="tool-tag tag-var">Contexto</span>
+      </div>
+      <div class="tool-desc">Series del contexto económico-financiero: inflación, tipos de cambio, tasas, descuento de cheque y créditos.</div>
+      <div class="tool-foot">
+        <span>Económico-financiero</span>
+        <span class="tool-go">Abrir <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </div>
+    </a>
+
+  </div>
+</main>
+
+<footer>
+  <span>Herramientas · Puntal Agro</span>
+  <span id="fts2">—</span>
+</footer>
+
+<script>
+function stamp(){
+  var s=new Date().toLocaleString('es-AR');
+  document.getElementById('fts').textContent=s;
+  document.getElementById('fts2').textContent=s;
+}
+stamp();
+</script>
+
+</body>
+</html>
