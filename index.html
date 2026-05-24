@@ -11,8 +11,8 @@
 body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:15px;min-height:100vh;display:flex;flex-direction:column}
 header{background:var(--card);border-bottom:1px solid var(--border);padding:10px 24px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 .logo{display:flex;align-items:center;gap:10px}
-.logo-icon{width:30px;height:30px;background:#0F1923;border-radius:8px;display:flex;align-items:center;justify-content:center}
-.logo-icon svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-width:1.5}
+.logo-icon{height:34px;display:flex;align-items:center;justify-content:center}
+.logo-icon img{height:34px;width:auto;display:block}
 .logo-title{font-size:13px;font-weight:600;letter-spacing:-.2px}
 .logo-sub{font-size:11px;color:var(--muted)}
 .h-right{font-size:11px;color:var(--muted);background:var(--bg);padding:3px 10px;border-radius:20px;border:1px solid var(--border);font-family:var(--mono);white-space:nowrap}
@@ -42,9 +42,9 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
 
 <header>
   <div class="logo">
-    <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+    <div class="logo-icon"><img src="logo-iso.png" alt="Puntal Agro"></div>
     <div>
-      <div class="logo-title">Herramientas para la toma de Decisiones</div>
+      <div class="logo-title">Herramientas · Toma de decisiones agropecuarias</div>
       <div class="logo-sub">Puntal Agro</div>
     </div>
   </div>
@@ -53,7 +53,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
 
 <div class="hero">
   <h1>Tableros Puntal Agro</h1>
-  <p>Herramientas de análisis para la toma de decisiones.</p>
+  <p>Herramientas de análisis para la toma de decisiones en el sector agropecuario. Elegí un tablero para abrirlo.</p>
 </div>
 
 <main>
@@ -61,10 +61,10 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
 
     <a class="tool t-gra" href="tablero_agro.html">
       <div class="tool-top">
-        <div class="tool-name">Tablero Comercial</div>
+        <div class="tool-name">Tablero Comercial Agropecuario</div>
         <span class="tool-tag tag-gra">Comercial</span>
       </div>
-      <div class="tool-desc">Tablero Comercial · Contexto variables económicas y de mercados.</div>
+      <div class="tool-desc">Disponible, futuros y pizarra de granos. Precios de referencia y escenarios comerciales para la toma de decisión.</div>
       <div class="tool-foot">
         <span>Comercial / granos</span>
         <span class="tool-go">Abrir <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
@@ -76,7 +76,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
         <div class="tool-name">Evolución de Variables</div>
         <span class="tool-tag tag-var">Contexto</span>
       </div>
-      <div class="tool-desc">Variables como: inflación, tipos de cambio, granos, hacienda, etc.</div>
+      <div class="tool-desc">Series del contexto económico-financiero: inflación, tipos de cambio, tasas, descuento de cheque y créditos.</div>
       <div class="tool-foot">
         <span>Económico-financiero</span>
         <span class="tool-go">Abrir <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
