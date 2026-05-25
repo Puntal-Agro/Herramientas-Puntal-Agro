@@ -25,11 +25,13 @@ main{padding:16px 24px 28px;display:flex;flex-direction:column;gap:18px;flex:1}
 .tool:hover{box-shadow:0 4px 14px rgba(15,25,35,.07);transform:translateY(-2px)}
 .t-gra{border-left-color:#3B6D11}
 .t-var{border-left-color:#185FA5}
+.t-ins{border-left-color:#854F0B}
 .tool-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
 .tool-name{font-size:15px;font-weight:600;letter-spacing:-.2px;line-height:1.25}
 .tool-tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;padding:2px 8px;border-radius:10px;font-family:var(--mono);white-space:nowrap}
 .tag-gra{background:#F0FDF4;color:#166534}
 .tag-var{background:#EFF6FF;color:#0C447C}
+.tag-ins{background:#FFF7ED;color:#7C2D12}
 .tool-desc{font-size:12.5px;color:var(--muted);line-height:1.5;flex:1}
 .tool-foot{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--muted);font-family:var(--mono);padding-top:6px;border-top:1px solid var(--border)}
 .tool-go{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:500;color:var(--text);font-family:var(--sans)}
@@ -79,6 +81,18 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
       <div class="tool-desc">Series del contexto económico-financiero: inflación, tipos de cambio, tasas, descuento de cheque y créditos.</div>
       <div class="tool-foot">
         <span>Económico-financiero</span>
+        <span class="tool-go">Abrir <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </div>
+    </a>
+
+    <a class="tool t-ins" href="tablero_insumos_ot.html">
+      <div class="tool-top">
+        <div class="tool-name">Registro de Labores e Insumos</div>
+        <span class="tool-tag tag-ins">Operativo</span>
+      </div>
+      <div class="tool-desc">Registro y seguimiento de labores, órdenes de trabajo e insumos aplicados. Planificación operativa de campaña.</div>
+      <div class="tool-foot">
+        <span>Operativo / insumos</span>
         <span class="tool-go">Abrir <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
       </div>
     </a>
