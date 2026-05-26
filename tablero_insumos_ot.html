@@ -1788,22 +1788,26 @@ function renderDestinos(){
     var arrSub=(byId('o_labor_tipo').value==='LP')?state.laboresLP:state.laboresLC;
     var optSub='<option value="">— Seleccionar —</option>';
     for(var s=0;s<arrSub.length;s++){ optSub+='<option value="'+esc(arrSub[s].nombre)+'"'+(arrSub[s].nombre===d.subact?' selected':'')+'>'+esc(arrSub[s].nombre)+'</option>'; }
-    // líneas insumos
+    // líneas insumos (editables a nivel lote: cambiar insumo, dosis, quitar)
     var lrows='';
     for(var j=0;j<d.lineas.length;j++){
       var ln=d.lineas[j], ins=getInsumo(ln.insumoId);
       var cant=(Number(ln.dosis)||0)*(Number(d.ha)||0);
       var stockA=ins?calcStockInsumo(ins.id).actual:0;
       var stockClass=(ins && cant>stockA)?'br':'bg';
+      // selector de insumo (permite elegir/cambiar)
+      var optIns='<option value="">— Elegir insumo —</option>';
+      for(var ii=0;ii<state.insumos.length;ii++){ optIns+='<option value="'+state.insumos[ii].id+'"'+(state.insumos[ii].id===ln.insumoId?' selected':'')+'>'+esc(state.insumos[ii].nombre)+'</option>'; }
       lrows+='<tr>'+
-        '<td class="tdname">'+(ins?esc(ins.nombre):'—')+'</td>'+
+        '<td><select onchange="updateDestLineaInsumo('+i+','+j+',this.value)" style="width:100%;font-family:var(--sans);font-size:12px;border:1px solid var(--border);border-radius:6px;padding:3px 6px;background:var(--card)">'+optIns+'</select></td>'+
         '<td>'+(ins?esc(ins.un):'—')+'</td>'+
         '<td class="num"><input type="number" step="0.001" min="0" value="'+ln.dosis+'" oninput="updateDestLineaDosis('+i+','+j+',this.value)" style="width:75px;text-align:right;font-family:var(--mono);font-size:12px;border:1px solid var(--border);border-radius:6px;padding:2px 5px"></td>'+
         '<td class="num" id="destCant_'+i+'_'+j+'"><strong>'+f(cant,2)+'</strong></td>'+
         '<td class="num">'+(ins?'<span class="bdg '+stockClass+'">'+f(stockA,2)+'</span>':'—')+'</td>'+
+        '<td class="num"><button type="button" class="btn btn-sm btn-danger" onclick="delDestLinea('+i+','+j+')" title="Quitar este insumo de este lote">✕</button></td>'+
         '</tr>';
     }
-    if(!lrows) lrows='<tr><td colspan="5" class="empty">Este lote no tiene insumos (cargá la plantilla antes de agregarlo, o agregalos aquí).</td></tr>';
+    if(!lrows) lrows='<tr><td colspan="6" class="empty">Este lote no tiene insumos. Agregá uno con el botón de abajo.</td></tr>';
     html+='<div class="dest-card'+(d._open?' open':'')+'">'+
       '<div class="dest-head" onclick="toggleDestino('+i+')">'+
         '<span class="caret">▶</span>'+
@@ -1820,7 +1824,8 @@ function renderDestinos(){
           '<div class="fld"><label>Subactividad</label><select onchange="updateDestCampo('+i+',\'subact\',this.value)">'+optSub+'</select></div>'+
           '<div class="fld"><label>Hectáreas</label><input type="number" step="0.01" min="0" value="'+d.ha+'" oninput="updateDestHa('+i+',this.value)" style="font-family:var(--mono)"></div>'+
         '</div>'+
-        '<div class="tw"><table><thead><tr><th>Insumo</th><th>Un.</th><th class="num">Dosis/ha</th><th class="num">Cant. total</th><th class="num">Stock</th></tr></thead><tbody>'+lrows+'</tbody></table></div>'+
+        '<div class="tw"><table><thead><tr><th>Insumo</th><th>Un.</th><th class="num">Dosis/ha</th><th class="num">Cant. total</th><th class="num">Stock</th><th></th></tr></thead><tbody>'+lrows+'</tbody></table></div>'+
+        '<button type="button" class="btn btn-primary btn-sm" style="margin-top:8px" onclick="addDestLinea('+i+')">+ Agregar insumo a este lote</button>'+
       '</div>'+
     '</div>';
   }
@@ -1840,6 +1845,20 @@ function updateDestLineaDosis(i, j, val){
   destinosTmp[i].lineas[j].dosis=Number(val)||0;
   var cell=byId('destCant_'+i+'_'+j);
   if(cell){ var cant=(Number(destinosTmp[i].lineas[j].dosis)||0)*(Number(destinosTmp[i].ha)||0); cell.innerHTML='<strong>'+f(cant,2)+'</strong>'; }
+}
+// Agregar / quitar / cambiar insumos a NIVEL LOTE (no afecta receta base ni otros lotes)
+function addDestLinea(i){
+  destinosTmp[i]._open=true;
+  destinosTmp[i].lineas.push({insumoId:'', dosis:0});
+  renderDestinos();
+}
+function delDestLinea(i, j){
+  destinosTmp[i].lineas.splice(j,1);
+  renderDestinos();
+}
+function updateDestLineaInsumo(i, j, val){
+  destinosTmp[i].lineas[j].insumoId=val;
+  renderDestinos();
 }
 
 function saveOT(e){
