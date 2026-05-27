@@ -48,6 +48,9 @@ header{background:var(--card);border-bottom:1px solid var(--border);padding:10px
 .cg-grp{margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border)}
 .cg-grp:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
 .cg-head{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.cg-head-toggle{border-radius:6px;padding:2px 4px;margin:-2px -4px 6px;transition:background .12s}
+.cg-head-toggle:hover{background:#F7FAF3}
+.cg-caret{display:inline-block;width:12px;color:#7B9A6D;font-size:10px}
 .cg-name{font-size:13px;font-weight:600;color:var(--text);margin-right:4px}
 .cg-pct{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
 .cg-bar{position:relative;height:24px;background:#E3ECDB;border-radius:7px;overflow:hidden;border:1px solid #D4DFC8}
@@ -118,11 +121,22 @@ main{padding:16px 24px;display:flex;flex-direction:column;gap:12px;flex:1}
 
 /* KPIs */
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
-.kpi{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);border-left:3px solid #4A6533;padding:10px 14px;box-shadow:0 1px 3px rgba(15,25,35,.04),0 1px 2px rgba(15,25,35,.03)}
+.kpi{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);border-left:3px solid #9CA98C;padding:10px 14px;box-shadow:0 1px 3px rgba(15,25,35,.04),0 1px 2px rgba(15,25,35,.03)}
 .kpi-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-weight:500;margin-bottom:4px}
 .kpi-val{font-size:18px;font-weight:600;font-family:var(--mono)}
 .kpi-sub{font-size:10px;color:var(--muted);margin-top:2px;font-family:var(--mono)}
-.kpi-ok{border-left-color:#3B6D11}.kpi-warn{border-left-color:#8A5A2B}.kpi-bad{border-left-color:#C0392B}.kpi-info{border-left-color:#5C6E3A}
+/* === Criterio semántico de KPIs (paleta verde / naranja) ===
+   neutral (base): informativo · primary: principal/positivo · attention: requiere atención · total: destacado */
+.kpi-neutral{border-left-color:#9CA98C}
+.kpi-primary{border-left-color:#4A6533}.kpi-primary .kpi-val{color:#3B5226}
+.kpi-attention{border-left-color:#C07A30}.kpi-attention .kpi-val{color:#9A5B1E}
+.kpi-total{border-left-color:#4A6533;background:#F1F5EC}.kpi-total .kpi-val{color:#3B5226}
+/* Alias de compatibilidad: mapean los nombres antiguos al criterio semántico */
+.kpi-ok{border-left-color:#4A6533}.kpi-ok .kpi-val{color:#3B5226}
+.kpi-info{border-left-color:#4A6533}.kpi-info .kpi-val{color:#3B5226}
+.kpi-warn{border-left-color:#C07A30}.kpi-warn .kpi-val{color:#9A5B1E}
+.kpi-bad{border-left-color:#C07A30}.kpi-bad .kpi-val{color:#9A5B1E}
+.kpi-strong{border-left-color:#4A6533;background:#F1F5EC}.kpi-strong .kpi-val{color:#3B5226}
 
 /* Tablas */
 .tw{overflow-x:auto}
@@ -135,6 +149,11 @@ tbody tr:hover td{background:#FAFBFC}
 .num{text-align:right;font-variant-numeric:tabular-nums}
 .center{text-align:center}
 .row-total{background:#F5F7FA;font-weight:600}
+.mb-table .mb-sub td{background:#EDEFE9;color:#4A6533;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.04em;padding-top:8px}
+.mb-table .mb-row:hover{background:#F7FAF3}
+.mb-table .mb-caret{display:inline-block;width:12px;color:#7B9A6D;font-size:10px}
+.mb-table .mb-subtotal td{border-top:1px solid var(--border);background:#FAFBF8}
+.mb-table .mb-det td{background:#FCFDFB;font-size:11px;color:var(--muted);border-bottom:1px dashed var(--border)}
 .row-total td{border-bottom:none}
 
 /* Badges */
@@ -285,6 +304,7 @@ tbody tr:hover td{background:#FAFBFC}
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(15,25,35,.5);z-index:100;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto}
 .modal-bg.on{display:flex}
 .modal{background:var(--card);border-radius:var(--radius);max-width:740px;width:100%;padding:18px;border:1px solid var(--border)}
+.modal.modal-lg{max-width:680px}
 .modal h3{font-size:14px;font-weight:600;margin-bottom:12px}
 .modal-danger{border:2px solid #FECACA;background:#FEF8F8}
 
@@ -341,6 +361,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
   <button class="inst-btn" data-tab="ot" onclick="setTab('ot',this)">Órdenes de trabajo</button>
   <button class="inst-btn" data-tab="consumos" onclick="setTab('consumos',this)">Consumos por lote</button>
   <button class="inst-btn" data-tab="contratistas" onclick="setTab('contratistas',this)">Contratistas</button>
+  <button class="inst-btn" data-tab="costos" onclick="setTab('costos',this)">Costos</button>
   <button class="inst-btn" data-tab="maestros" onclick="setTab('maestros',this)">Maestros</button>
   <div class="inst-right">
     <button class="btn btn-sm btn-danger" onclick="openResetModal()" title="Borrar todos los datos del espacio activo">↺ Reset</button>
@@ -605,6 +626,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
         <div id="contrFiltrosActivos" class="titulo-filtros"></div>
       </div>
       <div class="tools">
+        <button class="btn btn-sm" onclick="toggleAllContrGrp()" id="contrToggleAllBtn">Colapsar todos</button>
         <span class="leg-item"><span class="leg-sw" style="background:#7B9A6D"></span>Aplicado</span>
         <span class="leg-item"><span class="leg-sw" style="background:#E3ECDB"></span>Pendiente</span>
       </div>
@@ -618,10 +640,68 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
       <table>
         <thead><tr>
           <th>Contratista</th><th>OT</th><th>Tipo labor</th><th>Campo(s)</th><th>Cultivo(s)</th>
-          <th class="num">Ha total</th><th class="num">Ha aplic.</th><th class="num">Tarifa $/ha</th><th class="num">Importe</th>
+          <th class="num">Ha total</th><th class="num">Ha aplic.</th><th class="num">Tarifa</th><th class="num">Tarifa (otra mon.)</th><th class="num">Importe</th>
           <th>Estado fact.</th><th class="num">Facturado</th>
         </tr></thead>
         <tbody id="contrBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- =============== COSTOS =============== -->
+<div class="page" id="page-costos">
+  <div class="kpis" id="costKpis"></div>
+
+  <div class="card">
+    <div class="chd">
+      <span class="ct-lg">Filtros</span>
+      <div class="tools">
+        <select id="costCampoFilter" onchange="renderCostos()"><option value="">Todos los campos</option></select>
+        <select id="costLoteFilter" onchange="renderCostos()"><option value="">Todos los lotes</option></select>
+        <select id="costActFilter" onchange="renderCostos()"><option value="">Todas las actividades</option></select>
+        <select id="costCultFilter" onchange="renderCostos()"><option value="">Todos los cultivos</option></select>
+        <input type="date" id="costDesde" onchange="renderCostos()" title="Desde">
+        <input type="date" id="costHasta" onchange="renderCostos()" title="Hasta">
+        <button class="btn btn-sm" onclick="clearCostFilters()">Limpiar filtros</button>
+        <span style="display:inline-flex;align-items:center;gap:4px;margin-left:auto">
+          <button class="pill on" id="costMonARS" onclick="setCostMoneda('ARS')">$</button>
+          <button class="pill" id="costMonUSD" onclick="setCostMoneda('USD')">U$S</button>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="chd">
+      <span class="ct-lg">Resumen de costos</span>
+      <span style="font-size:11px;color:var(--muted)">Clic en una fila para ver el detalle</span>
+    </div>
+    <div class="tw">
+      <table class="mb-table">
+        <thead><tr>
+          <th>Concepto</th><th class="num">Por ha</th><th class="num">Total</th><th class="num">% s/total</th>
+        </tr></thead>
+        <tbody id="costMBBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card" id="costAvisoCard" style="display:none">
+    <div style="font-size:12px;color:var(--muted);padding:4px 2px">
+      <strong>Nota:</strong> <span id="costAvisoTxt"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="chd"><span class="ct-lg">Detalle por aplicación</span></div>
+    <div class="tw" style="max-height:460px;overflow-y:auto">
+      <table>
+        <thead><tr>
+          <th>Fecha</th><th>Campo</th><th>Lote</th><th>Cultivo</th><th>Concepto</th>
+          <th class="num">Cant.</th><th>Un.</th><th class="num">Precio</th><th class="num">Costo</th>
+        </tr></thead>
+        <tbody id="costDetBody"></tbody>
       </table>
     </div>
   </div>
@@ -640,6 +720,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
     <button class="pill" data-mtab="laboresLC" onclick="setMTab('laboresLC',this)">Labores contratadas</button>
     <button class="pill" data-mtab="contratistas" onclick="setMTab('contratistas',this)">Contratistas</button>
     <button class="pill" data-mtab="categorias" onclick="setMTab('categorias',this)">Categorías de insumo</button>
+    <button class="pill" data-mtab="tc" onclick="setMTab('tc',this)">Tipo de cambio</button>
   </div>
   <div class="card" id="maestrosCard"></div>
 </div>
@@ -707,7 +788,11 @@ function baseStateEmpty(){
     movtos:[],
     contratistas:[],
     ots:[],
-    nextOt:1
+    nextOt:1,
+    tcUSD:1000,
+    tcMensual:{},
+    tcApertura:0,
+    tcCierre:0
   };
 }
 
@@ -877,6 +962,11 @@ function migrarOTsADestinos(st){
       }
     }
   }
+  // TC USD→ARS para valorizar insumos en USD (editable por espacio)
+  if(st.tcUSD===undefined || !(Number(st.tcUSD)>0)) st.tcUSD=1000;
+  if(!st.tcMensual || typeof st.tcMensual!=='object') st.tcMensual={};
+  if(st.tcApertura===undefined) st.tcApertura=0;
+  if(st.tcCierre===undefined) st.tcCierre=0;
   if(!st.ots){ return movLimpiados; }
   // Campos de facturación de contratista (default)
   for(var fi=0;fi<st.ots.length;fi++){
@@ -1054,8 +1144,55 @@ function calcStockInsumo(insumoId){
 }
 
 /* ================================================================
-   ESPACIOS DE TRABAJO
+   CIERRE / NUEVA CAMPAÑA
 ================================================================ */
+// Calcula el stock por insumo·depósito de un STATE dado, considerando solo movimientos
+// hasta la fecha de corte (inclusive). Devuelve { insumoId: { depNombre: saldo } }.
+function calcCierrePorFecha(st, fechaCorte){
+  var tipos={}; for(var t=0;t<st.tiposMov.length;t++) tipos[st.tiposMov[t].nombre]=st.tiposMov[t];
+  var res={};
+  function dep(insId){ if(!res[insId]) res[insId]={}; return res[insId]; }
+  // 1) stock inicial de cada insumo por depósito
+  for(var i=0;i<st.insumos.length;i++){
+    var ins=st.insumos[i];
+    var d=dep(ins.id);
+    if(ins.stockInicialPorDep){
+      for(var dn in ins.stockInicialPorDep){ if(ins.stockInicialPorDep.hasOwnProperty(dn)){ d[dn]=(d[dn]||0)+(Number(ins.stockInicialPorDep[dn])||0); } }
+    } else if(ins.deposito){
+      d[ins.deposito]=(d[ins.deposito]||0)+(Number(ins.stockInicial)||0);
+    }
+  }
+  // 2) aplicar movimientos hasta la fecha de corte
+  for(var m=0;m<st.movtos.length;m++){
+    var mv=st.movtos[m];
+    if(fechaCorte && (mv.fecha||'')>fechaCorte) continue; // ignora posteriores al corte
+    var tp=tipos[mv.tipo]; if(!tp) continue;
+    var c=Number(mv.cant)||0;
+    var d2=dep(mv.insumoId);
+    if(tp.signo===1){ if(mv.destino){ d2[mv.destino]=(d2[mv.destino]||0)+c; } }
+    else if(tp.signo===-1){ if(mv.origen){ d2[mv.origen]=(d2[mv.origen]||0)-c; } }
+    else if(tp.signo===0){ if(mv.origen){ d2[mv.origen]=(d2[mv.origen]||0)-c; } if(mv.destino){ d2[mv.destino]=(d2[mv.destino]||0)+c; } }
+  }
+  return res;
+}
+// Clona los maestros de un state (sin movimientos ni OTs). Mantiene los mismos IDs para
+// que las OTs pendientes arrastradas sigan apuntando a los lotes/campos correctos.
+function clonarMaestros(st){
+  var clone=JSON.parse(JSON.stringify({
+    contexto:{empresa:st.contexto?st.contexto.empresa:'', campaña:''},
+    catInsumos:st.catInsumos, insumos:st.insumos, campos:st.campos, lotes:st.lotes,
+    depositos:st.depositos, actividades:st.actividades, laboresLP:st.laboresLP, laboresLC:st.laboresLC,
+    tiposMov:st.tiposMov, contratistas:st.contratistas
+  }));
+  // limpiar stock inicial de los insumos (se setea con el cierre)
+  for(var i=0;i<clone.insumos.length;i++){ clone.insumos[i].stockInicialPorDep={}; clone.insumos[i].stockInicial=0; }
+  clone.movtos=[];
+  clone.ots=[];
+  clone.nextOt=1;
+  return clone;
+}
+// Estado temporal del asistente de nueva campaña
+var nuevaCampTmp=null;
 function refreshWsSelect(){
   var sel=byId('wsSel');
   sel.innerHTML='';
@@ -1096,7 +1233,10 @@ function openWsModal(){
     '<p style="font-size:11px;color:var(--muted);margin-bottom:10px">Cada espacio tiene sus propios datos. Útil para manejar varios clientes / campañas. Cuando pasemos a servidor, cada espacio será una cuenta separada.</p>'+
     '<div class="tw"><table><thead><tr><th>Nombre</th><th>Contexto</th><th>Estado</th><th></th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
     '<div class="fact" style="justify-content:space-between">'+
-      '<button class="btn btn-primary" onclick="createWs()">+ Nuevo espacio</button>'+
+      '<div style="display:flex;gap:8px">'+
+        '<button class="btn btn-primary" onclick="createWs()">+ Nuevo espacio</button>'+
+        '<button class="btn" onclick="openNuevaCampania()" title="Cerrar la campaña actual y arrancar una nueva con el stock final como inicial">🌱 Iniciar nueva campaña</button>'+
+      '</div>'+
       '<button class="btn" onclick="closeModal()">Cerrar</button>'+
     '</div>';
   byId('modalBg').classList.add('on');
@@ -1144,6 +1284,137 @@ function duplicateWs(id){
   openWsModal();
   toast('Espacio duplicado');
 }
+/* ===== Asistente: Iniciar nueva campaña ===== */
+function openNuevaCampania(){
+  var campActual = (state.contexto && state.contexto.campaña) ? state.contexto.campaña : '';
+  // sugerir fecha de corte (30/6 del año en curso) y nombre de campaña siguiente
+  var hoy=new Date();
+  var anioCorte = hoy.getMonth()>=6 ? hoy.getFullYear() : hoy.getFullYear(); // sugerencia simple
+  var corteSug = anioCorte+'-06-30';
+  var nombreSug = sugerirCampaniaSiguiente(campActual);
+  byId('modalContent').className='modal modal-lg';
+  byId('modalContent').innerHTML=
+    '<h3>🌱 Iniciar nueva campaña</h3>'+
+    '<p style="font-size:12px;color:var(--muted);margin-bottom:14px">Se creará una <strong>campaña nueva</strong> copiando los maestros (campos, lotes, insumos, depósitos, contratistas, tarifas) y arrastrando el <strong>stock al cierre</strong> como stock inicial. Las OTs 100% pendientes se mueven a la nueva campaña. La campaña actual <strong>"'+esc(campActual||'actual')+'"</strong> queda intacta y accesible desde el selector.</p>'+
+    '<div class="form-row r3">'+
+      '<div class="fld"><label>Fecha de corte</label><input type="date" id="nc_corte" value="'+corteSug+'"></div>'+
+      '<div class="fld"><label>Nombre nueva campaña</label><input id="nc_nombre" value="'+esc(nombreSug)+'" placeholder="Ej: 25-26"></div>'+
+      '<div class="fld"><label>Nombre del espacio</label><input id="nc_ws" value="'+esc((state.contexto&&state.contexto.empresa?state.contexto.empresa:'Campaña')+' '+nombreSug)+'"></div>'+
+    '</div>'+
+    '<div class="fact">'+
+      '<button class="btn" onclick="openWsModal()">Cancelar</button>'+
+      '<button class="btn btn-primary" onclick="nuevaCampaniaPaso2()">Siguiente: revisar stock →</button>'+
+    '</div>';
+  byId('modalBg').classList.add('on');
+  setTimeout(function(){ var e=byId('nc_corte'); if(e) e.focus(); },50);
+}
+function sugerirCampaniaSiguiente(actual){
+  // intenta "24-25" -> "25-26"
+  var m=String(actual||'').match(/(\d{2})\s*[-/]\s*(\d{2})/);
+  if(m){ var a=parseInt(m[1],10), b=parseInt(m[2],10); return ('0'+((a+1)%100)).slice(-2)+'-'+('0'+((b+1)%100)).slice(-2); }
+  return '';
+}
+function nuevaCampaniaPaso2(){
+  var corte=byId('nc_corte').value;
+  var nombreCamp=byId('nc_nombre').value.trim();
+  var nombreWs=byId('nc_ws').value.trim();
+  if(!corte){ alert('Elegí una fecha de corte.'); return; }
+  if(!nombreWs){ alert('Poné un nombre para el espacio de la nueva campaña.'); return; }
+  // calcular cierre sobre el state actual
+  var cierre=calcCierrePorFecha(state, corte);
+  // armar filas editables: insumo · depósito · saldo
+  nuevaCampTmp={corte:corte, nombreCamp:nombreCamp, nombreWs:nombreWs, filas:[]};
+  for(var i=0;i<state.insumos.length;i++){
+    var ins=state.insumos[i];
+    var deps=cierre[ins.id]||{};
+    for(var dn in deps){ if(deps.hasOwnProperty(dn)){
+      var saldo=deps[dn];
+      if(Math.abs(saldo)<0.0001) continue; // omitir saldos en cero
+      nuevaCampTmp.filas.push({insumoId:ins.id, insumo:ins.nombre, un:ins.un, dep:dn, saldo:Math.round(saldo*1000)/1000});
+    }}
+  }
+  // contar OTs 100% pendientes
+  var otsPend= otsCompletamentePendientes(state);
+  nuevaCampTmp.otsPendCount=otsPend.length;
+  renderNuevaCampaniaPaso2();
+}
+function otsCompletamentePendientes(st){
+  var res=[];
+  for(var i=0;i<st.ots.length;i++){
+    var o=st.ots[i];
+    if(o.estado==='Cancelada') continue;
+    var dests=o.destinos||[];
+    if(!dests.length) continue;
+    var algoAplicado=false;
+    for(var d=0;d<dests.length;d++){ if(dests[d].estadoLote==='Aplicado'){ algoAplicado=true; break; } }
+    if(!algoAplicado) res.push(o);
+  }
+  return res;
+}
+function renderNuevaCampaniaPaso2(){
+  var t=nuevaCampTmp;
+  var rows='';
+  for(var i=0;i<t.filas.length;i++){
+    var fr=t.filas[i];
+    rows+='<tr>'+
+      '<td class="tdname">'+esc(fr.insumo)+'</td>'+
+      '<td>'+esc(fr.un)+'</td>'+
+      '<td class="tdname">'+esc(fr.dep)+'</td>'+
+      '<td class="num"><input type="number" step="0.001" value="'+fr.saldo+'" onchange="nuevaCampTmp.filas['+i+'].saldo=Number(this.value)||0" style="width:110px;text-align:right;font-family:var(--mono);font-size:12px;border:1px solid var(--border);border-radius:6px;padding:3px 6px"></td>'+
+      '</tr>';
+  }
+  if(!rows) rows='<tr><td colspan="4" class="empty">No hay stock con saldo al corte. La nueva campaña arrancará sin stock inicial.</td></tr>';
+  byId('modalContent').className='modal modal-lg';
+  byId('modalContent').innerHTML=
+    '<h3>🌱 Nueva campaña "'+esc(t.nombreCamp)+'" — revisar stock inicial</h3>'+
+    '<p style="font-size:12px;color:var(--muted);margin-bottom:6px">Stock al corte <strong>'+fd(t.corte)+'</strong> (calculado con los movimientos hasta esa fecha). Podés ajustar cualquier saldo antes de confirmar.</p>'+
+    '<p style="font-size:12px;color:#3B5226;margin-bottom:12px">Se moverán <strong>'+t.otsPendCount+' OT'+(t.otsPendCount===1?'':'s')+' 100% pendiente'+(t.otsPendCount===1?'':'s')+'</strong> a la nueva campaña (salen de la actual).</p>'+
+    '<div class="tw" style="max-height:380px;overflow-y:auto"><table><thead><tr><th>Insumo</th><th>Un.</th><th>Depósito</th><th class="num">Stock inicial nueva campaña</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+    '<div class="fact">'+
+      '<button class="btn" onclick="openNuevaCampania()">← Volver</button>'+
+      '<button class="btn btn-primary" onclick="confirmarNuevaCampania()">Crear campaña '+esc(t.nombreCamp)+'</button>'+
+    '</div>';
+  byId('modalBg').classList.add('on');
+}
+function confirmarNuevaCampania(){
+  var t=nuevaCampTmp; if(!t) return;
+  // 1) clonar maestros del state actual
+  var nuevo=clonarMaestros(state);
+  nuevo.contexto.campaña=t.nombreCamp;
+  // 2) setear stock inicial por depósito a partir de las filas (editadas)
+  var porIns={};
+  for(var i=0;i<t.filas.length;i++){
+    var fr=t.filas[i];
+    if(!porIns[fr.insumoId]) porIns[fr.insumoId]={};
+    porIns[fr.insumoId][fr.dep]=fr.saldo;
+  }
+  for(var k=0;k<nuevo.insumos.length;k++){
+    var ins=nuevo.insumos[k];
+    if(porIns[ins.id]){ ins.stockInicialPorDep=porIns[ins.id]; }
+  }
+  // 3) mover OTs 100% pendientes desde el state actual
+  var pend=otsCompletamentePendientes(state);
+  var pendIds={};
+  var maxNum=0;
+  for(var p=0;p<pend.length;p++){
+    var oClone=JSON.parse(JSON.stringify(pend[p]));
+    pendIds[pend[p].id]=true;
+    nuevo.ots.push(oClone);
+    if(oClone.num>maxNum) maxNum=oClone.num;
+  }
+  nuevo.nextOt = maxNum+1 > 1 ? maxNum+1 : 1;
+  // sacar esas OTs de la campaña vieja
+  state.ots = state.ots.filter(function(o){ return !pendIds[o.id]; });
+  // 4) crear el espacio nuevo y persistir
+  var newId=uid();
+  root.espacios[newId]={nombre:t.nombreWs, state:nuevo};
+  saveRoot();
+  refreshWsSelect();
+  switchWs(newId);
+  nuevaCampTmp=null;
+  closeModal();
+  toast('Nueva campaña "'+t.nombreCamp+'" creada');
+}
 function deleteWs(id){
   if(Object.keys(root.espacios).length===1){ alert('No podés borrar el único espacio.'); return; }
   var ws=root.espacios[id]; if(!ws) return;
@@ -1178,6 +1449,7 @@ function setTab(tab,btn){
   else if(tab==='ot') renderOtList();
   else if(tab==='consumos') renderConsumos();
   else if(tab==='contratistas') renderContratistas();
+  else if(tab==='costos') renderCostos();
   else if(tab==='maestros') renderMaestros();
 }
 
@@ -1378,12 +1650,12 @@ function renderStock(){
     if(hit) totOt++;
   }
   byId('stockKpis').innerHTML=
-    '<div class="kpi kpi-info"><div class="kpi-lbl">Insumos</div><div class="kpi-val">'+totFilas+'</div></div>'+
-    '<div class="kpi"><div class="kpi-lbl">OK</div><div class="kpi-val">'+totOK+'</div></div>'+
-    '<div class="kpi '+(totAgot>0?'kpi-warn':'')+'"><div class="kpi-lbl">Agotados</div><div class="kpi-val">'+totAgot+'</div></div>'+
-    '<div class="kpi '+(totNeg>0?'kpi-bad':'')+'"><div class="kpi-lbl">Negativos</div><div class="kpi-val">'+totNeg+'</div></div>'+
-    '<div class="kpi"><div class="kpi-lbl">Movimientos (filtro)</div><div class="kpi-val">'+totMov+'</div></div>'+
-    '<div class="kpi"><div class="kpi-lbl">Órdenes (filtro)</div><div class="kpi-val">'+totOt+'</div></div>';
+    '<div class="kpi kpi-neutral"><div class="kpi-lbl">Insumos</div><div class="kpi-val">'+totFilas+'</div></div>'+
+    '<div class="kpi kpi-primary"><div class="kpi-lbl">OK</div><div class="kpi-val">'+totOK+'</div></div>'+
+    '<div class="kpi '+(totAgot>0?'kpi-attention':'kpi-neutral')+'"><div class="kpi-lbl">Agotados</div><div class="kpi-val">'+totAgot+'</div></div>'+
+    '<div class="kpi '+(totNeg>0?'kpi-attention':'kpi-neutral')+'"><div class="kpi-lbl">Negativos</div><div class="kpi-val">'+totNeg+'</div></div>'+
+    '<div class="kpi kpi-neutral"><div class="kpi-lbl">Movimientos (filtro)</div><div class="kpi-val">'+totMov+'</div></div>'+
+    '<div class="kpi kpi-neutral"><div class="kpi-lbl">Órdenes (filtro)</div><div class="kpi-val">'+totOt+'</div></div>';
   marcarFiltrosActivos(['stockSearch','stockCampoFilter','stockCatFilter','stockDepFilter','stockEstadoFilter'],'stockClearBtn');
 }
 
@@ -2724,10 +2996,10 @@ function renderConsumos(){
   var nLotes=0; for(var lz in lotesSet){ if(lotesSet.hasOwnProperty(lz)) nLotes++; }
   var nIns=0; for(var iz in insDistintos){ if(insDistintos.hasOwnProperty(iz)) nIns++; }
   byId('consKpis').innerHTML=
-    '<div class="kpi kpi-info"><div class="kpi-lbl">Registros (filtro)</div><div class="kpi-val">'+nReg+'</div></div>'+
-    '<div class="kpi"><div class="kpi-lbl">Ha aplicadas</div><div class="kpi-val">'+f(haTot,1)+'</div></div>'+
-    '<div class="kpi"><div class="kpi-lbl">Lotes</div><div class="kpi-val">'+nLotes+'</div></div>'+
-    '<div class="kpi"><div class="kpi-lbl">Insumos distintos</div><div class="kpi-val">'+nIns+'</div></div>';
+    '<div class="kpi kpi-neutral"><div class="kpi-lbl">Registros (filtro)</div><div class="kpi-val">'+nReg+'</div></div>'+
+    '<div class="kpi kpi-neutral"><div class="kpi-lbl">Ha aplicadas</div><div class="kpi-val">'+f(haTot,1)+'</div></div>'+
+    '<div class="kpi kpi-neutral"><div class="kpi-lbl">Lotes</div><div class="kpi-val">'+nLotes+'</div></div>'+
+    '<div class="kpi kpi-neutral"><div class="kpi-lbl">Insumos distintos</div><div class="kpi-val">'+nIns+'</div></div>';
 }
 
 /* ================================================================
@@ -2781,12 +3053,21 @@ function contrFilasFiltradas(){
     var cultNom=[]; for(var uk in cultSet){ if(cultSet.hasOwnProperty(uk)) cultNom.push(uk); }
     var contrNom = o.contratistaId ? getContratistaNombre(o.contratistaId) : ETIQUETA_PROPIO;
     var tarifa=Number(o.tarifa)||0;
-    var importe=haApl*tarifa;
+    var tarMon=o.tarifaMoneda||'ARS';
+    var tcRef=tcDeFecha(o.fecha||'');
+    // Importe SIEMPRE en ARS para los totales y la facturación
+    var tarifaARS = (tarMon==='USD') ? tarifa*tcRef : tarifa;
+    var importe=haApl*tarifaARS;
+    // Texto de la tarifa equivalente en la otra moneda
+    var tarifaOtraTxt;
+    if(tarMon==='USD'){ tarifaOtraTxt = '$ '+f(tarifa*tcRef,0)+'/ha'; }
+    else { tarifaOtraTxt = tcRef>0 ? ('U$S '+f(tarifa/tcRef,2)+'/ha') : '—'; }
+    if(tarifa<=0) tarifaOtraTxt='—';
     if(q){
       var hay='OT'+o.num+' '+contrNom+' '+(o.laborTipo||'')+' '+camposNom.join(' ')+' '+cultNom.join(' ');
       if(hay.toLowerCase().indexOf(q)<0) continue;
     }
-    filas.push({o:o, contrNom:contrNom, camposNom:camposNom, cultNom:cultNom, haTot:haTot, haApl:haApl, subSet:subSet, tarifa:tarifa, importe:importe, esPropio:!o.contratistaId});
+    filas.push({o:o, contrNom:contrNom, camposNom:camposNom, cultNom:cultNom, haTot:haTot, haApl:haApl, subSet:subSet, tarifa:tarifa, tarifaARS:tarifaARS, tarifaOtraTxt:tarifaOtraTxt, importe:importe, esPropio:!o.contratistaId});
   }
   return filas;
 }
@@ -2834,7 +3115,12 @@ function renderContratistas(){
       '<td class="tdname">'+esc(x.cultNom.join(', ')||'—')+'</td>'+
       '<td class="num">'+f(x.haTot,1)+'</td>'+
       '<td class="num">'+f(x.haApl,1)+'</td>'+
-      '<td class="num"><input type="number" step="0.01" min="0" value="'+x.tarifa+'" onchange="updateContrTarifa(\''+o.id+'\',this.value)" style="width:90px;text-align:right;font-size:12px;border:1px solid var(--border);border-radius:6px;padding:3px 6px"></td>'+
+      '<td class="num"><input type="number" step="0.01" min="0" value="'+x.tarifa+'" onchange="updateContrTarifa(\''+o.id+'\',this.value)" style="width:80px;text-align:right;font-size:12px;border:1px solid var(--border);border-radius:6px;padding:3px 6px"> '+
+        '<select onchange="updateContrTarifaMon(\''+o.id+'\',this.value)" style="font-size:11px;border:1px solid var(--border);border-radius:6px;padding:3px 4px;background:var(--card)">'+
+        '<option value="ARS"'+((o.tarifaMoneda||'ARS')==='ARS'?' selected':'')+'>$</option>'+
+        '<option value="USD"'+((o.tarifaMoneda)==='USD'?' selected':'')+'>U$S</option>'+
+        '</select></td>'+
+      '<td class="num" style="color:var(--muted);font-size:11px">'+x.tarifaOtraTxt+'</td>'+
       '<td class="num"><strong>'+fm(x.importe)+'</strong></td>'+
       '<td><select onchange="updateContrEstado(\''+o.id+'\',this.value)" style="font-size:12px;border:1px solid var(--border);border-radius:6px;padding:3px 6px;background:var(--card)">'+
         '<option'+(est==='Sin facturar'?' selected':'')+'>Sin facturar</option>'+
@@ -2847,17 +3133,17 @@ function renderContratistas(){
       '</tr>';
   }
   totPend=totImporte-totFact;
-  byId('contrBody').innerHTML=rows || '<tr><td colspan="11" class="empty">Sin labores para los filtros aplicados.</td></tr>';
+  byId('contrBody').innerHTML=rows || '<tr><td colspan="12" class="empty">Sin labores para los filtros aplicados.</td></tr>';
 
   // KPIs
   var totHaPend=totHaTot-totHaApl;
   byId('contrKpis').innerHTML=
-    '<div class="kpi kpi-info"><div class="kpi-lbl">Total a facturar</div><div class="kpi-val">'+fm(totImporte)+'</div></div>'+
-    '<div class="kpi kpi-ok"><div class="kpi-lbl">Facturado</div><div class="kpi-val">'+fm(totFact)+'</div></div>'+
-    '<div class="kpi kpi-warn"><div class="kpi-lbl">Pendiente fact.</div><div class="kpi-val">'+fm(totPend)+'</div></div>'+
-    '<div class="kpi"><div class="kpi-lbl">Ha adjudicadas</div><div class="kpi-val">'+f(totHaTot,1)+'</div></div>'+
-    '<div class="kpi kpi-ok"><div class="kpi-lbl">Ha aplicadas</div><div class="kpi-val">'+f(totHaApl,1)+'</div></div>'+
-    '<div class="kpi kpi-warn"><div class="kpi-lbl">Ha pendientes</div><div class="kpi-val">'+f(totHaPend,1)+'</div></div>';
+    '<div class="kpi kpi-primary"><div class="kpi-lbl">Total a facturar</div><div class="kpi-val">'+fm(totImporte)+'</div></div>'+
+    '<div class="kpi kpi-primary"><div class="kpi-lbl">Facturado</div><div class="kpi-val">'+fm(totFact)+'</div></div>'+
+    '<div class="kpi kpi-attention"><div class="kpi-lbl">Pendiente fact.</div><div class="kpi-val">'+fm(totPend)+'</div></div>'+
+    '<div class="kpi kpi-neutral"><div class="kpi-lbl">Ha adjudicadas</div><div class="kpi-val">'+f(totHaTot,1)+'</div></div>'+
+    '<div class="kpi kpi-primary"><div class="kpi-lbl">Ha aplicadas</div><div class="kpi-val">'+f(totHaApl,1)+'</div></div>'+
+    '<div class="kpi kpi-attention"><div class="kpi-lbl">Ha pendientes</div><div class="kpi-val">'+f(totHaPend,1)+'</div></div>';
 
   // Gráfico de avance (doble color)
   renderContrGrafico(filas);
@@ -2906,6 +3192,8 @@ function renderContrChips(){
   marcarFiltrosActivos(['contrSearch','contrContrFilter','contrTipoFilter','contrSubactFilter','contrCampoFilter','contrCultFilter','contrEstadoFilter','contrDesde','contrHasta'],'contrClearBtn');
 }
 function renderContrGrafico(filas){
+  // Estado de colapsado por contratista (arrancan expandidos)
+  if(!window.contrCollapsed) window.contrCollapsed={};
   // Agrupar por contratista: ha adjudicadas (tot) y aplicadas (apl), y desglose por subactividad
   var grupos={}; var orden=[];
   for(var i=0;i<filas.length;i++){
@@ -2929,11 +3217,15 @@ function renderContrGrafico(filas){
     var subArr=[]; for(var sn2 in g.subs){ if(g.subs.hasOwnProperty(sn2)) subArr.push({n:sn2,tot:g.subs[sn2].tot,apl:g.subs[sn2].apl}); }
     subArr.sort(function(a,b){ return b.tot-a.tot; });
     var nAct=subArr.length;
+    var colapsado = !!window.contrCollapsed[k];
+    var keyEsc = k.replace(/'/g,"\\'");
     html+='<div class="cg-grp">'+
-      '<div class="cg-head">'+
+      '<div class="cg-head cg-head-toggle" onclick="toggleContrGrp(\''+keyEsc+'\')" style="cursor:pointer">'+
+        '<span class="cg-caret">'+(colapsado?'▸':'▾')+'</span>'+
         '<span class="cg-name">'+esc(k)+'</span>'+
         '<span class="cg-pct">'+nAct+' actividad'+(nAct===1?'':'es')+' · '+f(g.tot,1)+' ha adjudicadas · '+f(g.apl,1)+' aplicadas · '+f(pend,1)+' pendientes</span>'+
       '</div>';
+    if(!colapsado){
     if(subArr.length){
       html+='<div class="cg-sub cg-sub-solo">';
       for(var si=0;si<subArr.length;si++){
@@ -2950,23 +3242,58 @@ function renderContrGrafico(filas){
     } else {
       html+='<p style="font-size:11px;color:var(--muted);margin:2px 0 0 2px">Sin actividades para mostrar.</p>';
     }
+    }
     html+='</div>';
   }
   byId('contrGrafico').innerHTML=html;
+  // Actualizar texto del botón colapsar/expandir todos
+  var btnAll=byId('contrToggleAllBtn');
+  if(btnAll){
+    var algunoExp=false;
+    for(var ci=0;ci<orden.length;ci++){ if(!window.contrCollapsed[orden[ci]]){ algunoExp=true; break; } }
+    btnAll.textContent = algunoExp ? 'Colapsar todos' : 'Expandir todos';
+  }
+}
+function toggleContrGrp(k){
+  if(!window.contrCollapsed) window.contrCollapsed={};
+  window.contrCollapsed[k]=!window.contrCollapsed[k];
+  renderContratistas();
+}
+function toggleAllContrGrp(){
+  if(!window.contrCollapsed) window.contrCollapsed={};
+  // Determinar contratistas actualmente visibles
+  var filas=contrFilasFiltradas();
+  var keys={}; for(var i=0;i<filas.length;i++) keys[filas[i].contrNom]=true;
+  // Si hay al menos uno expandido, colapsar todos; si están todos colapsados, expandir todos
+  var algunoExpandido=false;
+  for(var k in keys){ if(keys.hasOwnProperty(k) && !window.contrCollapsed[k]){ algunoExpandido=true; break; } }
+  for(var k2 in keys){ if(keys.hasOwnProperty(k2)) window.contrCollapsed[k2]=algunoExpandido; }
+  renderContratistas();
 }
 function updateContrTarifa(otId, val){
   var o=getOtById(otId); if(!o) return;
   o.tarifa=Number(val)||0;
   save(); renderContratistas();
 }
+function updateContrTarifaMon(otId, val){
+  var o=getOtById(otId); if(!o) return;
+  o.tarifaMoneda=(val==='USD'?'USD':'ARS');
+  save(); renderContratistas();
+}
+// Tarifa de la OT expresada en ARS (convierte si está cargada en USD, con el TC de la fecha de la OT)
+function tarifaARSDeOt(o){
+  var t=Number(o.tarifa)||0;
+  if((o.tarifaMoneda||'ARS')==='USD'){ return t*tcDeFecha(o.fecha||''); }
+  return t;
+}
 function updateContrEstado(otId, val){
   var o=getOtById(otId); if(!o) return;
   if((val==='Parcial'||val==='Facturado') && (!o.tarifa || Number(o.tarifa)<=0)){
-    alert('Para marcar "'+val+'" tenés que cargar primero la tarifa $/ha.');
+    alert('Para marcar "'+val+'" tenés que cargar primero la tarifa.');
     renderContratistas(); return;
   }
   o.estadoFact=val;
-  if(val==='Facturado'){ o.montoFacturado=otHaAplicada(o)*(Number(o.tarifa)||0); }
+  if(val==='Facturado'){ o.montoFacturado=otHaAplicada(o)*tarifaARSDeOt(o); }
   else if(val==='Sin facturar'){ o.montoFacturado=0; }
   save(); renderContratistas();
 }
@@ -2977,7 +3304,7 @@ function updateContrMonto(otId, val){
 }
 function openMontoModal(otId){
   var o=getOtById(otId); if(!o) return;
-  var haApl=otHaAplicada(o), tarifa=Number(o.tarifa)||0;
+  var haApl=otHaAplicada(o), tarifa=tarifaARSDeOt(o);
   var importe=haApl*tarifa;
   var actual=Number(o.montoFacturado)||0;
   var contrNom = o.contratistaId ? getContratistaNombre(o.contratistaId) : 'Labor propia';
@@ -3025,6 +3352,359 @@ function setMTab(t,btn){
   if(btn) btn.classList.add('on');
   renderMaestros();
 }
+/* ================================================================
+   COSTOS
+================================================================ */
+function clearCostFilters(){
+  byId('costCampoFilter').value=''; byId('costLoteFilter').value='';
+  byId('costActFilter').value=''; byId('costCultFilter').value='';
+  byId('costDesde').value=''; byId('costHasta').value='';
+  renderCostos();
+}
+function updateTC(val){
+  var v=Number(val)||0;
+  state.tcUSD = v>0 ? v : 1000;
+  save();
+  renderCostos();
+}
+// Devuelve el TC (USD→ARS) aplicable a una fecha 'YYYY-MM-DD'.
+// Usa el TC del mes correspondiente; si no hay, cae al TC global.
+function tcDeFecha(fecha){
+  var global=Number(state.tcUSD)||1000;
+  if(!fecha || typeof fecha!=='string' || fecha.length<7) return global;
+  var ym=fecha.slice(0,7); // YYYY-MM
+  var tm=state.tcMensual||{};
+  var v=Number(tm[ym])||0;
+  return v>0 ? v : global;
+}
+// Convierte un importe entre monedas usando el TC de una fecha.
+// from/to ∈ {'ARS','USD'}. Devuelve número en la moneda 'to'.
+function convertirMoneda(monto, from, to, fecha){
+  monto=Number(monto)||0;
+  if(from===to) return monto;
+  var tc=tcDeFecha(fecha);
+  if(from==='USD' && to==='ARS') return monto*tc;
+  if(from==='ARS' && to==='USD') return tc>0 ? monto/tc : 0;
+  return monto;
+}
+// Valoriza una línea de insumo a ARS usando el TC del mes de la aplicación.
+// Devuelve {costo(ARS), precio, moneda, sinPrecio, tc}
+function valorizarInsumo(ins, usado, fecha){
+  if(!ins) return {costo:0, precio:0, moneda:'ARS', sinPrecio:true, tc:0};
+  var precio=Number(ins.precioUnitario)||0;
+  var mon=ins.moneda||'ARS';
+  var tc=tcDeFecha(fecha);
+  var costoARS = (mon==='USD') ? usado*precio*tc : usado*precio;
+  return {costo:costoARS, precio:precio, moneda:mon, sinPrecio:(precio<=0), tc:tc};
+}
+// Estado de UI de la sección Costos
+var costExpand={};            // categorías/labores expandidas en el resumen MB
+window.costMoneda='ARS';      // moneda de visualización
+function toggleCostDet(key){ costExpand[key]=!costExpand[key]; renderCostos(); }
+function setCostMoneda(m){ window.costMoneda=(m==='USD'?'USD':'ARS'); renderCostos(); }
+
+function renderCostos(){
+  // === Poblar selects de filtros ===
+  var cc=byId('costCampoFilter'); var curCa=cc.value;
+  cc.innerHTML='<option value="">Todos los campos</option>';
+  for(var ca=0;ca<state.campos.length;ca++){
+    cc.innerHTML+='<option value="'+state.campos[ca].id+'"'+(state.campos[ca].id===curCa?' selected':'')+'>'+esc(state.campos[ca].nombre)+'</option>';
+  }
+  var fcamp=cc.value;
+  var ls=byId('costLoteFilter'); var curL=ls.value;
+  ls.innerHTML='<option value="">Todos los lotes</option>';
+  for(var li=0;li<state.lotes.length;li++){
+    if(fcamp && state.lotes[li].campoId!==fcamp) continue;
+    ls.innerHTML+='<option value="'+state.lotes[li].id+'"'+(state.lotes[li].id===curL?' selected':'')+'>'+esc(state.lotes[li].nombre)+' ('+esc(getCampoNombre(state.lotes[li].campoId))+')</option>';
+  }
+  var fl=ls.value;
+  var cultSet={};
+  for(var k0=0;k0<state.ots.length;k0++){
+    var o0=state.ots[k0]; if(o0.estado==='Cancelada') continue;
+    var ds0=o0.destinos||[];
+    for(var d0=0;d0<ds0.length;d0++){ if(ds0[d0].estadoLote==='Aplicado' && ds0[d0].cultivo) cultSet[ds0[d0].cultivo]=true; }
+  }
+  var as=byId('costActFilter'); var curA=as.value;
+  as.innerHTML='<option value="">Todas las actividades</option>';
+  for(var cu0 in cultSet){ if(cultSet.hasOwnProperty(cu0)){ as.innerHTML+='<option value="'+esc(cu0)+'"'+(cu0===curA?' selected':'')+'>'+esc(cu0)+'</option>'; } }
+  var fact=as.value;
+  var cuS=byId('costCultFilter'); var curCu=cuS.value;
+  cuS.innerHTML='<option value="">Todos los cultivos</option>';
+  for(var cu in cultSet){ if(cultSet.hasOwnProperty(cu)){ cuS.innerHTML+='<option value="'+esc(cu)+'"'+(cu===curCu?' selected':'')+'>'+esc(cu)+'</option>'; } }
+  var fcult=cuS.value;
+  var fd1=byId('costDesde').value, fh=byId('costHasta').value;
+
+  // Moneda de visualización
+  var monVis = (window.costMoneda==='USD') ? 'USD' : 'ARS';
+  var fMon = function(vARS, fecha){
+    // vARS está en ARS; si visualizo en USD, convierto con TC de la fecha (o global si no hay fecha)
+    if(monVis==='ARS') return fm(vARS);
+    var tc=tcDeFecha(fecha||'');
+    return 'U$S '+ (tc>0 ? Number(vARS/tc).toLocaleString('es-AR',{minimumFractionDigits:0,maximumFractionDigits:0}) : '—');
+  };
+  // Para totales agregados (varias fechas) uso un TC ponderado: convierto cada componente en su fecha al acumular.
+  // Por eso acumulo SIEMPRE en ARS y, además, acumulo el equivalente en USD fecha-a-fecha.
+
+  // === Acumuladores ===
+  // Estructura MB: insumos por categoría + labor propia + labor contratada
+  var catTot={};        // categoria -> {ars, usd}
+  var labProp={ars:0, usd:0};
+  var labContr={ars:0, usd:0};
+  var totHa=0;
+  var haySinPrecio=false;
+  var detalle=[];       // filas línea por línea
+  var lotesContados={}; // para no sumar la misma ha-lote dos veces en superficie
+
+  function addUSD(acc, vARS, fecha){
+    var tc=tcDeFecha(fecha||'');
+    acc.usd += (tc>0 ? vARS/tc : 0);
+  }
+
+  for(var k=0;k<state.ots.length;k++){
+    var o=state.ots[k]; if(o.estado==='Cancelada') continue;
+    var esContratada = (o.laborTipo==='LC');
+    var ds=o.destinos||[];
+    for(var d=0;d<ds.length;d++){
+      var de=ds[d];
+      if(de.estadoLote!=='Aplicado') continue;
+      if(fcamp && de.campoId!==fcamp) continue;
+      if(fl && de.loteId!==fl) continue;
+      var actDest=de.cultivo||o.actividad||'(sin actividad)';
+      if(fact && actDest!==fact) continue;
+      if(fcult && de.cultivo!==fcult) continue;
+      var fApp=de.fechaAplicReal||'';
+      if(fd1 && fApp<fd1) continue;
+      if(fh && fApp>fh) continue;
+
+      var haDest=Number(de.ha)||0;
+      totHa+=haDest;
+
+      var loteNom = getLoteById(de.loteId) ? getLoteById(de.loteId).nombre : '(lote?)';
+      var campoNom = getCampoNombre(de.campoId);
+
+      // --- Labor ---
+      // Si la tarifa está en USD, se valoriza con el TC del mes de ESTA aplicación
+      var tarifaDestARS = ((o.tarifaMoneda||'ARS')==='USD') ? (Number(o.tarifa)||0)*tcDeFecha(fApp) : (Number(o.tarifa)||0);
+      var labDest=haDest*tarifaDestARS;
+      var labKey = esContratada ? labContr : labProp;
+      labKey.ars += labDest;
+      addUSD(labKey, labDest, fApp);
+      var tcLab=tcDeFecha(fApp);
+      var labUSDdest = tcLab>0 ? labDest/tcLab : 0;
+      var tarifaShow = (Number(o.tarifa)||0);
+      var tarifaMonShow = (o.tarifaMoneda||'ARS');
+
+      // Subactividad del destino (tipo de labor: pulverización, siembra, etc.)
+      var subLab = de.subact || o.actividad || '(sin subactividad)';
+
+      // Detalle: fila de labor
+      if(labDest>0){
+        detalle.push({
+          fecha:fApp, campo:campoNom, lote:loteNom, cultivo:actDest,
+          concepto:(esContratada?'Labor contratada':'Labor propia')+' · OT#'+o.num+(de.subact?(' · '+de.subact):''),
+          subact:subLab, laborClase:(esContratada?'LC':'LP'),
+          tipo:'labor', cant:haDest, un:'ha', precio:tarifaShow, monedaOrig:tarifaMonShow,
+          costoARS:labDest, costoUSD:labUSDdest, tc:tcLab
+        });
+      }
+
+      // --- Insumos ---
+      var lns=de.lineas||[];
+      for(var j=0;j<lns.length;j++){
+        var ln=lns[j];
+        var usado=Number(ln.usado)||0;
+        if(usado<=0) continue;
+        var ins=getInsumo(ln.insumoId);
+        if(!ins) continue;
+        var val=valorizarInsumo(ins, usado, fApp);
+        if(val.sinPrecio) haySinPrecio=true;
+        var cat=ins.cat||'Sin categoría';
+        if(!catTot[cat]) catTot[cat]={ars:0, usd:0};
+        catTot[cat].ars += val.costo;
+        addUSD(catTot[cat], val.costo, fApp);
+        var costoUSDdest = val.tc>0 ? val.costo/val.tc : 0;
+        detalle.push({
+          fecha:fApp, campo:campoNom, lote:loteNom, cultivo:actDest,
+          concepto:ins.nombre, insumoId:ln.insumoId, tipo:'insumo', cat:cat,
+          cant:usado, un:ins.un||'', precio:val.precio, monedaOrig:val.moneda,
+          costoARS:val.costo, costoUSD:costoUSDdest, tc:val.tc, sinPrecio:val.sinPrecio
+        });
+      }
+    }
+  }
+
+  // Totales
+  var totInsARS=0, totInsUSD=0;
+  for(var c in catTot){ if(catTot.hasOwnProperty(c)){ totInsARS+=catTot[c].ars; totInsUSD+=catTot[c].usd; } }
+  var totLabARS=labProp.ars+labContr.ars, totLabUSD=labProp.usd+labContr.usd;
+  var totGenARS=totInsARS+totLabARS, totGenUSD=totInsUSD+totLabUSD;
+
+  var pick = function(ars,usd){ return monVis==='USD' ? usd : ars; };
+  var fMM = function(ars,usd){ // formatea según moneda visible usando el acumulado correcto
+    var v=pick(ars,usd);
+    if(monVis==='USD') return 'U$S '+Number(v).toLocaleString('es-AR',{minimumFractionDigits:0,maximumFractionDigits:0});
+    return fm(v);
+  };
+  var fHa = function(ars,usd){ // $/ha o U$S/ha
+    if(totHa<=0) return '—';
+    var v=pick(ars,usd)/totHa;
+    if(monVis==='USD') return 'U$S '+Number(v).toLocaleString('es-AR',{minimumFractionDigits:1,maximumFractionDigits:1});
+    return fm(v);
+  };
+
+  // === KPIs ===
+  byId('costKpis').innerHTML=
+    '<div class="kpi kpi-neutral"><div class="kpi-lbl">Insumos</div><div class="kpi-val">'+fMM(totInsARS,totInsUSD)+'</div></div>'+
+    '<div class="kpi kpi-neutral"><div class="kpi-lbl">Labores</div><div class="kpi-val">'+fMM(totLabARS,totLabUSD)+'</div></div>'+
+    '<div class="kpi kpi-total"><div class="kpi-lbl">Costo total</div><div class="kpi-val">'+fMM(totGenARS,totGenUSD)+'</div></div>'+
+    '<div class="kpi kpi-primary"><div class="kpi-lbl">Costo por ha ('+f(totHa,1)+' ha)</div><div class="kpi-val">'+fHa(totGenARS,totGenUSD)+'</div></div>';
+
+  // === BLOQUE 1: Resumen tipo Margen Bruto (expandible) ===
+  // Orden de categorías: las de insumo en orden del maestro, luego el resto
+  var ordenCat = (state.catInsumos||[]).slice();
+  var catKeys=[];
+  for(var oc=0;oc<ordenCat.length;oc++){ if(catTot[ordenCat[oc]]) catKeys.push(ordenCat[oc]); }
+  for(var ck in catTot){ if(catTot.hasOwnProperty(ck) && catKeys.indexOf(ck)<0) catKeys.push(ck); }
+
+  var rowsMB='';
+  // Subtítulo Insumos
+  rowsMB+='<tr class="mb-sub"><td colspan="4">Insumos</td></tr>';
+  for(var ic=0;ic<catKeys.length;ic++){
+    var cat=catKeys[ic]; var cv=catTot[cat];
+    var detKey='cat::'+cat;
+    var abierto = !!costExpand[detKey];
+    rowsMB+='<tr class="mb-row" onclick="toggleCostDet(\''+detKey.replace(/'/g,"\\'")+'\')" style="cursor:pointer">'+
+      '<td class="tdname"><span class="mb-caret">'+(abierto?'▾':'▸')+'</span> '+esc(cat)+'</td>'+
+      '<td class="num">'+fHa(cv.ars,cv.usd)+'</td>'+
+      '<td class="num">'+fMM(cv.ars,cv.usd)+'</td>'+
+      '<td class="num">'+(totGenARS>0?fp(pick(cv.ars,cv.usd)/pick(totGenARS,totGenUSD)*100):'—')+'</td>'+
+      '</tr>';
+    if(abierto){
+      rowsMB+=detalleAgrupado(detalle, function(x){ return x.tipo==='insumo' && x.cat===cat; }, monVis, 'insumo');
+    }
+  }
+  // Subtotal insumos
+  rowsMB+='<tr class="mb-subtotal"><td class="tdname"><strong>Subtotal insumos</strong></td>'+
+    '<td class="num"><strong>'+fHa(totInsARS,totInsUSD)+'</strong></td>'+
+    '<td class="num"><strong>'+fMM(totInsARS,totInsUSD)+'</strong></td>'+
+    '<td class="num">'+(totGenARS>0?fp(pick(totInsARS,totInsUSD)/pick(totGenARS,totGenUSD)*100):'—')+'</td></tr>';
+
+  // Subtítulo Labores
+  rowsMB+='<tr class="mb-sub"><td colspan="4">Labores</td></tr>';
+  // Labor propia
+  var dkLP='lab::LP', abLP=!!costExpand[dkLP];
+  rowsMB+='<tr class="mb-row" onclick="toggleCostDet(\'lab::LP\')" style="cursor:pointer">'+
+    '<td class="tdname"><span class="mb-caret">'+(abLP?'▾':'▸')+'</span> Labores propias</td>'+
+    '<td class="num">'+fHa(labProp.ars,labProp.usd)+'</td>'+
+    '<td class="num">'+fMM(labProp.ars,labProp.usd)+'</td>'+
+    '<td class="num">'+(totGenARS>0?fp(pick(labProp.ars,labProp.usd)/pick(totGenARS,totGenUSD)*100):'—')+'</td></tr>';
+  if(abLP) rowsMB+=detalleAgrupado(detalle, function(x){ return x.tipo==='labor' && x.laborClase==='LP'; }, monVis, 'subact');
+  // Labor contratada
+  var dkLC='lab::LC', abLC=!!costExpand[dkLC];
+  rowsMB+='<tr class="mb-row" onclick="toggleCostDet(\'lab::LC\')" style="cursor:pointer">'+
+    '<td class="tdname"><span class="mb-caret">'+(abLC?'▾':'▸')+'</span> Labores contratadas</td>'+
+    '<td class="num">'+fHa(labContr.ars,labContr.usd)+'</td>'+
+    '<td class="num">'+fMM(labContr.ars,labContr.usd)+'</td>'+
+    '<td class="num">'+(totGenARS>0?fp(pick(labContr.ars,labContr.usd)/pick(totGenARS,totGenUSD)*100):'—')+'</td></tr>';
+  if(abLC) rowsMB+=detalleAgrupado(detalle, function(x){ return x.tipo==='labor' && x.laborClase==='LC'; }, monVis, 'subact');
+  // Subtotal labores
+  rowsMB+='<tr class="mb-subtotal"><td class="tdname"><strong>Subtotal labores</strong></td>'+
+    '<td class="num"><strong>'+fHa(totLabARS,totLabUSD)+'</strong></td>'+
+    '<td class="num"><strong>'+fMM(totLabARS,totLabUSD)+'</strong></td>'+
+    '<td class="num">'+(totGenARS>0?fp(pick(totLabARS,totLabUSD)/pick(totGenARS,totGenUSD)*100):'—')+'</td></tr>';
+
+  // Total general
+  rowsMB+='<tr class="row-total"><td class="tdname"><strong>COSTO TOTAL</strong></td>'+
+    '<td class="num"><strong>'+fHa(totGenARS,totGenUSD)+'</strong></td>'+
+    '<td class="num"><strong>'+fMM(totGenARS,totGenUSD)+'</strong></td>'+
+    '<td class="num">100%</td></tr>';
+
+  byId('costMBBody').innerHTML = (catKeys.length||totLabARS>0) ? rowsMB : '<tr><td colspan="4" class="empty">Sin labores aplicadas para los filtros aplicados.</td></tr>';
+
+  // === BLOQUE 2: Detalle completo línea por línea ===
+  detalle.sort(function(a,b){ return (b.fecha||'').localeCompare(a.fecha||''); });
+  byId('costDetBody').innerHTML = detalle.length ? detalleRows(detalle, function(){return true;}, monVis, true) : '<tr><td colspan="9" class="empty">Sin movimientos.</td></tr>';
+
+  // === Aviso sin precio ===
+  var avisoCard=byId('costAvisoCard'), avisoTxt=byId('costAvisoTxt');
+  if(haySinPrecio){
+    avisoCard.style.display='';
+    avisoTxt.textContent='Hay insumos consumidos sin precio cargado (cuentan como 0). Cargá los precios en Maestros → Insumos para completar el costo.';
+  } else { avisoCard.style.display='none'; }
+
+  // Sincronizar botones de moneda
+  var bAr=byId('costMonARS'), bUs=byId('costMonUSD');
+  if(bAr&&bUs){ if(monVis==='USD'){bUs.classList.add('on');bAr.classList.remove('on');} else {bAr.classList.add('on');bUs.classList.remove('on');} }
+}
+
+// Construye filas de detalle para el resumen expandible o el bloque de detalle completo
+function detalleRows(detalle, filtro, monVis, full){
+  var html='';
+  for(var i=0;i<detalle.length;i++){
+    var x=detalle[i];
+    if(!filtro(x)) continue;
+    var costo = monVis==='USD' ? x.costoUSD : x.costoARS;
+    var costoTxt = (monVis==='USD'?'U$S ':'$ ')+Number(costo).toLocaleString('es-AR',{minimumFractionDigits:0,maximumFractionDigits:0});
+    var precioTxt = x.precio>0 ? (x.monedaOrig==='USD'?'U$S ':'$ ')+f(x.precio,2) : (x.sinPrecio?'<span style="color:#C0392B">sin precio</span>':'—');
+    if(full){
+      html+='<tr>'+
+        '<td>'+esc(x.fecha||'—')+'</td>'+
+        '<td class="tdname">'+esc(x.campo)+'</td>'+
+        '<td class="tdname">'+esc(x.lote)+'</td>'+
+        '<td class="tdname">'+esc(x.cultivo)+'</td>'+
+        '<td class="tdname">'+esc(x.concepto)+'</td>'+
+        '<td class="num">'+f(x.cant,2)+'</td>'+
+        '<td>'+esc(x.un)+'</td>'+
+        '<td class="num">'+precioTxt+'</td>'+
+        '<td class="num"><strong>'+costoTxt+'</strong></td>'+
+        '</tr>';
+    } else {
+      html+='<tr class="mb-det">'+
+        '<td class="tdname" style="padding-left:24px">'+esc(x.concepto)+' <span style="color:var(--muted);font-size:10px">· '+esc(x.lote)+' · '+esc(x.fecha||'')+'</span></td>'+
+        '<td class="num"></td>'+
+        '<td class="num">'+costoTxt+'</td>'+
+        '<td class="num"></td>'+
+        '</tr>';
+    }
+  }
+  return html;
+}
+// Filas de detalle AGRUPADO para el resumen expandible.
+// modo 'insumo' → agrupa por insumo (suma cantidades y costos del mismo insumo)
+// modo 'subact' → agrupa por subactividad (pulverización, siembra, etc.)
+function detalleAgrupado(detalle, filtro, monVis, modo){
+  var grupos={}; var orden=[];
+  for(var i=0;i<detalle.length;i++){
+    var x=detalle[i];
+    if(!filtro(x)) continue;
+    var clave, label, un;
+    if(modo==='insumo'){ clave=x.insumoId||x.concepto; label=x.concepto; un=x.un||''; }
+    else { clave=x.subact||'(sin subactividad)'; label=x.subact||'(sin subactividad)'; un='ha'; }
+    if(!grupos[clave]){ grupos[clave]={label:label, un:un, cant:0, ars:0, usd:0, sinPrecio:false}; orden.push(clave); }
+    grupos[clave].cant += Number(x.cant)||0;
+    grupos[clave].ars  += Number(x.costoARS)||0;
+    grupos[clave].usd  += Number(x.costoUSD)||0;
+    if(x.sinPrecio) grupos[clave].sinPrecio=true;
+    // si las unidades difieren dentro del mismo grupo, no mostramos unidad agregada
+    if(grupos[clave].un!==un) grupos[clave].un='';
+  }
+  // ordenar por costo desc
+  orden.sort(function(a,b){ return (grupos[b].ars)-(grupos[a].ars); });
+  var html='';
+  for(var g=0;g<orden.length;g++){
+    var v=grupos[orden[g]];
+    var costo = monVis==='USD' ? v.usd : v.ars;
+    var costoTxt = (monVis==='USD'?'U$S ':'$ ')+Number(costo).toLocaleString('es-AR',{minimumFractionDigits:0,maximumFractionDigits:0});
+    var cantTxt = f(v.cant,2)+(v.un?(' '+v.un):'');
+    html+='<tr class="mb-det">'+
+      '<td class="tdname" style="padding-left:24px">'+esc(v.label)+(v.sinPrecio?' <span style="color:#C07A30;font-size:10px">(sin precio)</span>':'')+' <span style="color:var(--muted);font-size:10px">· '+cantTxt+'</span></td>'+
+      '<td class="num"></td>'+
+      '<td class="num">'+costoTxt+'</td>'+
+      '<td class="num"></td>'+
+      '</tr>';
+  }
+  return html;
+}
 function renderMaestros(){
   if(curMTab==='insumos') renderMInsumos();
   else if(curMTab==='campos') renderMCampos();
@@ -3034,6 +3714,7 @@ function renderMaestros(){
   else if(curMTab==='laboresLP') renderMLabores('laboresLP', true);
   else if(curMTab==='laboresLC') renderMLabores('laboresLC', false);
   else if(curMTab==='categorias') renderMSimple('catInsumos','Categorías de insumo');
+  else if(curMTab==='tc') renderMTC();
   else if(curMTab==='contratistas') renderMContratistas();
 }
 function renderMContratistas(){
@@ -3057,6 +3738,78 @@ function delContratista(id){
   save(); renderMContratistas();
 }
 function getContratistaNombre(id){ if(!id) return ''; for(var i=0;i<state.contratistas.length;i++) if(state.contratistas[i].id===id) return state.contratistas[i].nombre; return ''; }
+
+/* ===== Maestros: Tipo de cambio mensual (campaña julio→junio) ===== */
+// Deriva los años de la campaña a partir de contexto.campaña ("24-25" → 2024/2025).
+function aniosCampania(){
+  var camp=(state.contexto && state.contexto.campaña) ? String(state.contexto.campaña) : '';
+  var m=camp.match(/(\d{2,4})\s*[-\/]\s*(\d{2,4})/);
+  var y1, y2;
+  if(m){
+    y1=Number(m[1]); y2=Number(m[2]);
+    if(y1<100) y1+=2000; if(y2<100) y2+=2000;
+  } else {
+    var hoy=new Date(); var Y=hoy.getFullYear();
+    // si estamos antes de julio, la campaña arrancó el año anterior
+    y1 = (hoy.getMonth()>=6) ? Y : Y-1; y2 = y1+1;
+  }
+  return {y1:y1, y2:y2};
+}
+// Devuelve [{ym:'YYYY-MM', label:'Jul 2024'}, ...] de julio(y1) a junio(y2)
+function mesesCampania(){
+  var ac=aniosCampania();
+  var nombres=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  var arr=[];
+  // Julio (mes 7) a Diciembre del y1
+  for(var mo=7;mo<=12;mo++){ arr.push({ym:ac.y1+'-'+(mo<10?'0':'')+mo, label:nombres[mo-1]+' '+ac.y1}); }
+  // Enero a Junio del y2
+  for(var mo2=1;mo2<=6;mo2++){ arr.push({ym:ac.y2+'-'+(mo2<10?'0':'')+mo2, label:nombres[mo2-1]+' '+ac.y2}); }
+  return arr;
+}
+function updateTCMes(ym,val){
+  if(!state.tcMensual) state.tcMensual={};
+  var v=Number(val)||0;
+  if(v>0) state.tcMensual[ym]=v; else delete state.tcMensual[ym];
+  save();
+}
+function updateTCEspecial(campo,val){
+  var v=Number(val)||0;
+  if(campo==='apertura') state.tcApertura=v;
+  else if(campo==='cierre') state.tcCierre=v;
+  else if(campo==='global'){ state.tcUSD = v>0?v:1000; }
+  save();
+}
+function renderMTC(){
+  var ac=aniosCampania();
+  var meses=mesesCampania();
+  var tm=state.tcMensual||{};
+  var filas='';
+  for(var i=0;i<meses.length;i++){
+    var ms=meses[i];
+    var val=Number(tm[ms.ym])||0;
+    filas+='<tr>'+
+      '<td class="tdname">'+esc(ms.label)+'</td>'+
+      '<td class="num"><input type="number" step="0.01" min="0" value="'+(val>0?val:'')+'" placeholder="—" onchange="updateTCMes(\''+ms.ym+'\',this.value)" style="width:120px;text-align:right;font-family:var(--mono);font-size:12px;border:1px solid var(--border);border-radius:6px;padding:4px 6px"></td>'+
+      '</tr>';
+  }
+  var inp=function(id,val,ph){ return '<input type="number" step="0.01" min="0" value="'+(val>0?val:'')+'" placeholder="'+(ph||'—')+'" onchange="updateTCEspecial(\''+id+'\',this.value)" style="width:130px;text-align:right;font-family:var(--mono);font-size:13px;border:1px solid var(--border);border-radius:6px;padding:5px 7px">'; };
+  byId('maestrosCard').innerHTML=
+    '<div class="chd"><span class="ct-lg">Tipo de cambio U$S → $ · Campaña '+ac.y1+'/'+ac.y2+'</span></div>'+
+    '<p style="font-size:11px;color:var(--muted);margin-bottom:14px">El TC de cada mes valoriza las aplicaciones de insumos en USD y las labores realizadas ese mes. Si un mes no tiene TC cargado, se usa el <strong>TC general</strong> como respaldo. El TC de apertura (1/7) valoriza el stock inicial y el de cierre (30/6) el stock final.</p>'+
+    '<div class="g2">'+
+      '<div>'+
+        '<div class="tw" style="max-height:420px;overflow-y:auto"><table><thead><tr><th>Mes</th><th class="num">TC ($/U$S)</th></tr></thead><tbody>'+filas+'</tbody></table></div>'+
+      '</div>'+
+      '<div>'+
+        '<div style="display:flex;flex-direction:column;gap:14px;padding:4px 2px">'+
+          '<div class="fld"><label style="font-weight:600;color:#4A6533">TC general (respaldo)</label><div style="font-size:11px;color:var(--muted);margin-bottom:6px">Se usa cuando un mes no tiene TC propio.</div>'+inp('global',Number(state.tcUSD)||1000,'1000')+'</div>'+
+          '<div class="fld"><label style="font-weight:600">TC apertura · 1/7/'+ac.y1+'</label><div style="font-size:11px;color:var(--muted);margin-bottom:6px">Valoriza el stock inicial de la campaña.</div>'+inp('apertura',Number(state.tcApertura)||0,'—')+'</div>'+
+          '<div class="fld"><label style="font-weight:600">TC cierre · 30/6/'+ac.y2+'</label><div style="font-size:11px;color:var(--muted);margin-bottom:6px">Valoriza el stock final de la campaña.</div>'+inp('cierre',Number(state.tcCierre)||0,'—')+'</div>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+}
+
 // Estado de orden de la tabla de insumos. Default: categoría + nombre.
 var insSort={key:'cat', dir:1};
 function setInsSort(key){
