@@ -3115,19 +3115,20 @@ function renderContratistas(){
       '<td class="tdname">'+esc(x.cultNom.join(', ')||'—')+'</td>'+
       '<td class="num">'+f(x.haTot,1)+'</td>'+
       '<td class="num">'+f(x.haApl,1)+'</td>'+
-      '<td class="num"><input type="number" step="0.01" min="0" value="'+x.tarifa+'" onchange="updateContrTarifa(\''+o.id+'\',this.value)" style="width:80px;text-align:right;font-size:12px;border:1px solid var(--border);border-radius:6px;padding:3px 6px"> '+
-        '<select onchange="updateContrTarifaMon(\''+o.id+'\',this.value)" style="font-size:11px;border:1px solid var(--border);border-radius:6px;padding:3px 4px;background:var(--card)">'+
+      '<td class="num" style="white-space:nowrap"><div style="display:inline-flex;align-items:center;gap:4px;flex-wrap:nowrap;justify-content:flex-end">'+
+        '<input type="number" step="0.01" min="0" value="'+x.tarifa+'" onchange="updateContrTarifa(\''+o.id+'\',this.value)" style="width:72px;text-align:right;font-size:12px;border:1px solid var(--border);border-radius:6px;padding:3px 6px">'+
+        '<select onchange="updateContrTarifaMon(\''+o.id+'\',this.value)" style="font-size:11px;border:1px solid var(--border);border-radius:6px;padding:3px 4px;background:var(--card);flex-shrink:0">'+
         '<option value="ARS"'+((o.tarifaMoneda||'ARS')==='ARS'?' selected':'')+'>$</option>'+
         '<option value="USD"'+((o.tarifaMoneda)==='USD'?' selected':'')+'>U$S</option>'+
-        '</select></td>'+
-      '<td class="num" style="color:var(--muted);font-size:11px">'+x.tarifaOtraTxt+'</td>'+
-      '<td class="num"><strong>'+fm(x.importe)+'</strong></td>'+
+        '</select></div></td>'+
+      '<td class="num" style="color:var(--muted);font-size:11px;white-space:nowrap">'+x.tarifaOtraTxt+'</td>'+
+      '<td class="num" style="white-space:nowrap"><strong>'+fm(x.importe)+'</strong></td>'+
       '<td><select onchange="updateContrEstado(\''+o.id+'\',this.value)" style="font-size:12px;border:1px solid var(--border);border-radius:6px;padding:3px 6px;background:var(--card)">'+
         '<option'+(est==='Sin facturar'?' selected':'')+'>Sin facturar</option>'+
         '<option'+(est==='Parcial'?' selected':'')+'>Parcial</option>'+
         '<option'+(est==='Facturado'?' selected':'')+'>Facturado</option>'+
         '</select></td>'+
-      '<td class="num">'+(est==='Parcial'
+      '<td class="num" style="white-space:nowrap">'+(est==='Parcial'
           ? '<span class="mnt-edit"><span class="mnt-val">'+fm(Number(o.montoFacturado)||0)+'</span><button class="mnt-lapiz" title="Editar monto facturado" onclick="openMontoModal(\''+o.id+'\')">✏️</button></span>'
           : '<span>'+fm(fact)+'</span>')+'</td>'+
       '</tr>';
