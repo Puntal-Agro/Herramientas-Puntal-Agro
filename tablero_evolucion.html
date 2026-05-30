@@ -767,13 +767,14 @@ function renderBig(){
             var valReal=null;
             for(var p=0;p<sTr2.length;p++)if(sTr2[p].f===iso){valReal=sTr2[p].v;break;}
             var dec=(vista==='usd')?2:vMatch.d;
+            if(vista==='usd'&&vMatch.tipo==='tc')dec=3;
             var unT=vMatch.u, preT='', postT='';
             if(vista==='usd'&&vMatch.tipo==='tc'){preT='';postT=' ratio';}
             else if(vista==='usd'&&vMatch.tipo==='nivel'){preT='';postT=' idx U$S';}
             else if(vista==='usd'&&(vMatch.tipo==='pesos_kg'||vMatch.tipo==='pesos_cab'||vMatch.tipo==='pesos_unit')){preT='U$S ';postT=' '+unT.replace('$','').trim();}
             else if((vista==='nom'||vista==='real')&&vMatch.tipo==='usd_ton'){preT='$ ';postT=' /ton'+(vista==='real'?' const.':'');}
             else{preT=unT.indexOf('$')===0?'$ ':(unT.indexOf('U$S')===0?'U$S ':'');postT=preT?'':' '+unT;}
-            return ' '+vMatch.n+': idx '+f(ctx.parsed.y,1)+(valReal!=null?'  ·  '+preT+f(valReal,dec)+postT:'');
+            return ' '+vMatch.n+': idx '+f(ctx.parsed.y,2)+(valReal!=null?'  ·  '+preT+f(valReal,dec)+postT:'');
           }}
         }
       },
