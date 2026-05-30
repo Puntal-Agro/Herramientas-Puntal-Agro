@@ -48,7 +48,7 @@ main{padding:18px 24px;display:flex;flex-direction:column;gap:18px}
 .leg{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text);padding:2px 5px;border-radius:4px}
 .leg-line{width:14px;height:2px;display:inline-block;flex-shrink:0;border-radius:1px}
 .leg-bar{width:11px;height:11px;display:inline-block;flex-shrink:0;border-radius:2px}
-.cw{position:relative;width:100%;height:400px}
+.cw{position:relative;width:100%;height:clamp(240px, 38vh, 360px)}
 .pnote{font-size:11px;color:var(--muted);margin-top:8px;padding:8px 12px;background:var(--bg);border-radius:6px;line-height:1.5}
 .varpanel-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px}
 .varpanel-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
@@ -102,11 +102,11 @@ main{padding:18px 24px;display:flex;flex-direction:column;gap:18px}
 .vc-spark-area canvas{width:100%!important;height:100%!important}
 .vc-empty{background:#FAFBFC;color:var(--muted);font-size:11px;text-align:center;padding:28px 8px;font-style:italic;display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:130px;border:1px dashed var(--border);border-radius:var(--radius)}
 .vc-empty-name{font-style:normal;font-weight:600;color:#475569;font-size:12px;margin-bottom:4px}
-.vc-s-ipc .vc-top{border-left-color:#8A5A2B}
-.vc-s-ipn .vc-top{border-left-color:#A86A1F}
-.vc-s-tco .vc-top{border-left-color:#5C6E3A}
-.vc-s-tcm .vc-top{border-left-color:#7A8B4A}
-.vc-s-tcb .vc-top{border-left-color:#9AA86B}
+.vc-s-ipc .vc-top{border-left-color:#6E1F2A}
+.vc-s-ipn .vc-top{border-left-color:#8B2E3C}
+.vc-s-tco .vc-top{border-left-color:#A8434F}
+.vc-s-tcm .vc-top{border-left-color:#C25E5E}
+.vc-s-tcb .vc-top{border-left-color:#D08A7E}
 .vc-s-trg .vc-top{border-left-color:#3B6D11}
 .vc-s-mai .vc-top{border-left-color:#639922}
 .vc-s-sor .vc-top{border-left-color:#86A832}
@@ -120,7 +120,7 @@ main{padding:18px 24px;display:flex;flex-direction:column;gap:18px}
 .vc-s-h6 .vc-top{border-left-color:#8A3D15}
 .vc-s-lec .vc-top{border-left-color:#C99A2E}
 footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--card);font-size:11px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
-@media (max-width:768px){.block-grid{grid-template-columns:1fr 1fr}.cw{height:300px}main{padding:12px 14px;gap:14px}.inst-bar,.fbar{padding:7px 14px}.varbar-row{grid-template-columns:100px 1fr 78px 52px;gap:6px}.sticky-top{position:relative}}
+@media (max-width:768px){.block-grid{grid-template-columns:1fr 1fr}.cw{height:260px}main{padding:12px 14px;gap:14px}.inst-bar,.fbar{padding:7px 14px}.varbar-row{grid-template-columns:100px 1fr 78px 52px;gap:6px}.sticky-top{position:relative}}
 @media (max-width:480px){.block-grid{grid-template-columns:1fr}.varbar-row{grid-template-columns:80px 1fr 66px 46px;font-size:10px;gap:5px}}
 </style>
 </head><body>
@@ -140,6 +140,11 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
   <button class="inst-btn active" id="vistaNom" onclick="setVista('nom',this)">Nominal</button>
   <button class="inst-btn" id="vistaReal" onclick="setVista('real',this)">Constante</button>
   <button class="inst-btn" id="vistaUsd" onclick="setVista('usd',this)">USD</button>
+  <span class="inst-sep" style="width:1px;height:20px;background:var(--border);margin:0 4px;display:inline-block"></span>
+  <span class="inst-lbl">Dólar:</span>
+  <button class="inst-btn dol active" id="dolOf" onclick="setDolar('TC_Oficial_Venta',this)">Oficial</button>
+  <button class="inst-btn dol" id="dolMep" onclick="setDolar('TC_MEP_Venta',this)">MEP</button>
+  <button class="inst-btn dol" id="dolBlue" onclick="setDolar('TC_Blue_Venta',this)">Blue</button>
   <span class="inst-desc" id="vistaDesc">Valores en su unidad natural</span>
   <div class="inst-right">
     <div class="upd" id="updBadge">—</div>
@@ -169,6 +174,8 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
 
 <div class="fbar" style="background:var(--bg);padding-top:9px;padding-bottom:9px">
   <span class="fl">Variables activas</span>
+  <button class="per-btn" onclick="seleccionarTodas()">Seleccionar todas</button>
+  <button class="per-btn" onclick="limpiarSeleccion()">Limpiar selección</button>
   <div class="pills" id="pillsRow"></div>
 </div>
 </div><!-- /sticky-top -->
@@ -242,11 +249,11 @@ var FECHA_DATOS='2026-05-29';
 
 // chart: 'line' para dólar+IPC, 'bar' para granos/hacienda/leche
 var VARS=[
-  {k:'IPC_Pampeana',         n:'Inflación Mensual',     u:'%',       src:'INDEC',     grp:'macro', cls:'ipc', col:'#8A5A2B', pill:'p-macro', d:1, tipo:'tasa',      chart:'line'},
-  {k:'IPC_Nivel',            n:'IPC Nivel (índice)',   u:'índice',  src:'INDEC',     grp:'macro', cls:'ipn', col:'#A86A1F', pill:'p-macro', d:0, tipo:'nivel',     chart:'line'},
-  {k:'TC_Oficial_Venta',     n:'U$S oficial venta',    u:'$/USD',   src:'BCRA',      grp:'macro', cls:'tco', col:'#5C6E3A', pill:'p-macro', d:0, tipo:'tc',        chart:'line'},
-  {k:'TC_MEP_Venta',         n:'U$S MEP venta',        u:'$/USD',   src:'Ámbito',    grp:'macro', cls:'tcm', col:'#7A8B4A', pill:'p-macro', d:0, tipo:'tc',        chart:'line'},
-  {k:'TC_Blue_Venta',        n:'U$S Blue venta',       u:'$/USD',   src:'Ámbito',    grp:'macro', cls:'tcb', col:'#9AA86B', pill:'p-macro', d:0, tipo:'tc',        chart:'line'},
+  {k:'IPC_Pampeana',         n:'Inflación Mensual',     u:'%',       src:'INDEC',     grp:'macro', cls:'ipc', col:'#6E1F2A', pill:'p-macro', d:1, tipo:'tasa',      chart:'line'},
+  {k:'IPC_Nivel',            n:'IPC Nivel (índice)',   u:'índice',  src:'INDEC',     grp:'macro', cls:'ipn', col:'#8B2E3C', pill:'p-macro', d:0, tipo:'nivel',     chart:'line'},
+  {k:'TC_Oficial_Venta',     n:'U$S oficial venta',    u:'$/USD',   src:'BCRA',      grp:'macro', cls:'tco', col:'#A8434F', pill:'p-macro', d:0, tipo:'tc',        chart:'line'},
+  {k:'TC_MEP_Venta',         n:'U$S MEP venta',        u:'$/USD',   src:'Ámbito',    grp:'macro', cls:'tcm', col:'#C25E5E', pill:'p-macro', d:0, tipo:'tc',        chart:'line'},
+  {k:'TC_Blue_Venta',        n:'U$S Blue venta',       u:'$/USD',   src:'Ámbito',    grp:'macro', cls:'tcb', col:'#D08A7E', pill:'p-macro', d:0, tipo:'tc',        chart:'line'},
   {k:'Trigo_Disp_Rosario',   n:'Trigo disp Rosario',   u:'U$S/ton', src:'Agroseries',grp:'granos',cls:'trg', col:'#3B6D11', pill:'p-granos',d:1, tipo:'usd_ton',   chart:'bar'},
   {k:'Maiz_Disp_Rosario',    n:'Maíz disp Rosario',    u:'U$S/ton', src:'Agroseries',grp:'granos',cls:'mai', col:'#639922', pill:'p-granos',d:1, tipo:'usd_ton',   chart:'bar'},
   {k:'Sorgo_Disp_Rosario',   n:'Sorgo disp Rosario',   u:'U$S/ton', src:'Agroseries',grp:'granos',cls:'sor', col:'#86A832', pill:'p-granos',d:1, tipo:'usd_ton',   chart:'bar'},
@@ -268,6 +275,9 @@ var ML=['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Di
 
 // ── Estado ────────────────────────────────────────────────────────────────────
 var vista='nom';
+var tcSel='TC_Oficial_Venta';
+function getTC(){return SERIE[tcSel]||SERIE.TC_Oficial_Venta;}
+var TC_NOMBRE={TC_Oficial_Venta:'Oficial',TC_MEP_Venta:'MEP',TC_Blue_Venta:'Blue'};
 var periodo=12;
 var customFrom=null, customTo=null;
 var actV={};
@@ -309,22 +319,59 @@ function buildIPCNivel(){
 function transformar(varK){
   var v=getVar(varK), raw=SERIE[varK]||[];
   if(!raw.length)return[];
-  if(vista==='nom')return raw.slice();
+
+  if(vista==='nom'){
+    if(v.tipo==='usd_ton'){
+      var tcN=getTC();
+      return raw.map(function(p){
+        var tcF=lookup(tcN,p.f);
+        if(tcF==null)return{f:p.f,v:null};
+        return{f:p.f,v:p.v*tcF};
+      });
+    }
+    return raw.slice();
+  }
+
   if(vista==='real'){
-    if(v.tipo==='tasa'||v.tipo==='usd_ton'||v.tipo==='nivel')return raw.slice();
+    if(v.tipo==='tasa'||v.tipo==='nivel')return raw.slice();
     var ipcNiv=buildIPCNivel();
     if(!ipcNiv.length)return raw.slice();
     var ipcUlt=ipcNiv[ipcNiv.length-1].v;
+    if(v.tipo==='usd_ton'){
+      var tcR=getTC();
+      return raw.map(function(p){
+        var tcF=lookup(tcR,p.f), ipcF=lookup(ipcNiv,p.f);
+        if(tcF==null||ipcF==null)return{f:p.f,v:null};
+        return{f:p.f,v:p.v*tcF*ipcUlt/ipcF};
+      });
+    }
     return raw.map(function(p){
       var ipcF=lookup(ipcNiv,p.f);
       if(ipcF==null)return{f:p.f,v:null};
       return{f:p.f,v:p.v*ipcUlt/ipcF};
     });
   }
+
   if(vista==='usd'){
-    if(v.tipo==='tasa'||v.tipo==='usd_ton'||v.tipo==='nivel')return raw.slice();
-    if(v.tipo==='tc')return raw.map(function(p){return{f:p.f,v:null};});
-    var tc=SERIE.TC_Oficial_Venta;
+    if(v.tipo==='tasa')return raw.slice();
+    if(v.tipo==='usd_ton')return raw.slice();
+    if(v.tipo==='nivel'){
+      var tcI=getTC();
+      return raw.map(function(p){
+        var tcF=lookup(tcI,p.f);
+        if(tcF==null||tcF===0)return{f:p.f,v:null};
+        return{f:p.f,v:p.v/tcF};
+      });
+    }
+    if(v.tipo==='tc'){
+      var tcBase=getTC();
+      return raw.map(function(p){
+        var tcF=lookup(tcBase,p.f);
+        if(tcF==null||tcF===0)return{f:p.f,v:null};
+        return{f:p.f,v:p.v/tcF};
+      });
+    }
+    var tc=getTC();
     return raw.map(function(p){
       var tcF=lookup(tc,p.f);
       if(tcF==null||tcF===0)return{f:p.f,v:null};
@@ -450,29 +497,40 @@ function renderCards(){
       for(var j=fil.length-1;j>=0;j--){if(fil[j].v!=null){ultPto=fil[j];break;}}
       var ultNom=sNom[sNom.length-1];
 
+      var nomDol=TC_NOMBRE[tcSel]||'Oficial';
       var valMostr=null, unMostr=v.u;
-      if(vista==='nom'){valMostr=ultNom?ultNom.v:null;}
+      if(vista==='nom'){
+        valMostr=ultPto?ultPto.v:null;
+        if(v.tipo==='usd_ton')unMostr='$/ton';
+      }
       else if(vista==='real'){
-        if(v.tipo==='tasa'||v.tipo==='usd_ton'||v.tipo==='nivel'){valMostr=ultNom?ultNom.v:null;}
-        else{valMostr=ultNom?ultNom.v:null;unMostr=v.u+' const.';}
+        valMostr=ultPto?ultPto.v:null;
+        if(v.tipo==='tasa'||v.tipo==='nivel'){}
+        else if(v.tipo==='usd_ton'){unMostr='$/ton const.';}
+        else{unMostr=v.u+' const.';}
       } else {
-        if(v.tipo==='tasa'||v.tipo==='usd_ton'||v.tipo==='nivel'){valMostr=ultNom?ultNom.v:null;}
-        else if(v.tipo==='tc'){valMostr=null;unMostr='n/a';}
-        else{
-          var tcA=ultNom?lookup(SERIE.TC_Oficial_Venta,ultNom.f):null;
-          valMostr=(ultNom&&tcA)?ultNom.v/tcA:null;
-          unMostr=v.u.replace('$','U$S');
-        }
+        valMostr=ultPto?ultPto.v:null;
+        if(v.tipo==='tasa'){}
+        else if(v.tipo==='usd_ton'){}
+        else if(v.tipo==='nivel'){unMostr='índice U$S';}
+        else if(v.tipo==='tc'){unMostr='ratio vs '+nomDol;}
+        else{unMostr=v.u.replace('$','U$S');}
       }
 
       var dPer=calcVarPeriodo(v.k);
       var dPctil=calcPercentil(ultPto?ultPto.v:null, v.k);
       var rango2=getRango();
 
-      var fmtVal=function(val){if(val==null)return'—';return f(val,v.d);};
+      var decTarj=(vista==='usd')?2:v.d;
+      if(v.tipo==='tc'&&vista==='usd')decTarj=2;
+      if(v.tipo==='nivel'&&vista==='usd')decTarj=2;
+      if(v.tipo==='usd_ton'&&(vista==='nom'||vista==='real'))decTarj=0;
+      var fmtVal=function(val){if(val==null)return'—';return f(val,decTarj);};
 
+      var unidadSimple=(unMostr==='índice U$S'||unMostr.indexOf('ratio')===0);
       var pre='', post='';
-      if(unMostr.indexOf('U$S')===0){pre='U$S ';post=' '+unMostr.replace('U$S','').trim();}
+      if(unidadSimple){post=' '+unMostr;}
+      else if(unMostr.indexOf('U$S')===0){pre='U$S ';post=' '+unMostr.replace('U$S','').trim();}
       else if(unMostr.indexOf('$')===0){pre='$ ';post=' '+unMostr.replace('$','').trim();}
       else{post=' '+unMostr;}
       if(post.trim()==='')post='';
@@ -485,8 +543,8 @@ function renderCards(){
           var signo=dPer.abs>0?'+':'−';
           var absNum=Math.abs(dPer.abs);
           if(v.tipo==='tasa'){varAbsStr=signo+f(absNum,1)+' pp';}
-          else if(pre){varAbsStr=signo+pre+f(absNum,v.d);}
-          else{varAbsStr=signo+f(absNum,v.d);}
+          else if(pre){varAbsStr=signo+pre+f(absNum,decTarj);}
+          else{varAbsStr=signo+f(absNum,decTarj);}
         }
         if(dPer.pct!=null&&dPer.abs!==0){varPctStr=fp(dPer.pct,1);}
       }
@@ -680,7 +738,10 @@ function renderBig(){
     document.getElementById('legRow').innerHTML='';
     return;
   }
-  document.getElementById('baseInfo').textContent='base 100 = '+lblMA(labelsOrdered[0])+' · '+labelsOrdered.length+' meses · vista '+(vista==='nom'?'Nominal':vista==='real'?'Constante':'USD');
+  var nomDolB=TC_NOMBRE[tcSel]||'Oficial';
+  var vistaTxt=vista==='nom'?'Nominal':vista==='real'?'Constante':'USD';
+  var extraTxt=' · dólar '+nomDolB+(vista==='usd'?' · dólares en brecha (base='+nomDolB+'=1,00)':'');
+  document.getElementById('baseInfo').textContent='base 100 = '+lblMA(labelsOrdered[0])+' · '+labelsOrdered.length+' meses · vista '+vistaTxt+extraTxt;
   var legHTML='';
   for(var z=0;z<datasets.length;z++){
     var isBar=datasets[z].type==='bar';
@@ -695,7 +756,7 @@ function renderBig(){
       responsive:true,maintainAspectRatio:false,
       plugins:{
         legend:{display:false},
-        tooltip:{mode:'index',intersect:false,
+        tooltip:{mode:'nearest',intersect:false,usePointStyle:true,boxWidth:10,boxHeight:10,
           callbacks:{label:function(ctx){
             if(ctx.parsed.y==null)return'';
             var vMatch=null;
@@ -705,9 +766,14 @@ function renderBig(){
             var sTr2=transformar(vMatch.k);
             var valReal=null;
             for(var p=0;p<sTr2.length;p++)if(sTr2[p].f===iso){valReal=sTr2[p].v;break;}
-            var pre=vMatch.u.indexOf('$')===0?'$ ':(vMatch.u.indexOf('U$S')===0?'U$S ':'');
-            var post=pre?'':' '+vMatch.u;
-            return ' '+vMatch.n+': idx '+f(ctx.parsed.y,1)+(valReal!=null?'  ·  '+pre+f(valReal,vMatch.d)+post:'');
+            var dec=(vista==='usd')?2:vMatch.d;
+            var unT=vMatch.u, preT='', postT='';
+            if(vista==='usd'&&vMatch.tipo==='tc'){preT='';postT=' ratio';}
+            else if(vista==='usd'&&vMatch.tipo==='nivel'){preT='';postT=' idx U$S';}
+            else if(vista==='usd'&&(vMatch.tipo==='pesos_kg'||vMatch.tipo==='pesos_cab'||vMatch.tipo==='pesos_unit')){preT='U$S ';postT=' '+unT.replace('$','').trim();}
+            else if((vista==='nom'||vista==='real')&&vMatch.tipo==='usd_ton'){preT='$ ';postT=' /ton'+(vista==='real'?' const.':'');}
+            else{preT=unT.indexOf('$')===0?'$ ':(unT.indexOf('U$S')===0?'U$S ':'');postT=preT?'':' '+unT;}
+            return ' '+vMatch.n+': idx '+f(ctx.parsed.y,1)+(valReal!=null?'  ·  '+preT+f(valReal,dec)+postT:'');
           }}
         }
       },
@@ -716,7 +782,7 @@ function renderBig(){
         y:{ticks:{font:{size:9,family:'DM Mono'},callback:function(v){return f(v,0);}},grid:{color:'rgba(0,0,0,0.05)'},
            title:{display:true,text:'índice (base 100)',font:{size:10,family:'DM Sans'},color:'#7A8899'}}
       },
-      interaction:{mode:'nearest',axis:'x',intersect:false}
+      interaction:{mode:'nearest',axis:'xy',intersect:false}
     }
   });
 }
@@ -733,12 +799,28 @@ function applyBlockState(g){
 // ── Eventos ──────────────────────────────────────────────────────────────────
 function setVista(v,btn){
   vista=v;
-  var btns=document.querySelectorAll('.inst-btn');
+  var btns=document.querySelectorAll('.inst-btn:not(.dol)');
   for(var i=0;i<btns.length;i++)btns[i].classList.remove('active');
   btn.classList.add('active');
-  var d={nom:'Valores en su unidad natural',real:'Pesos constantes (deflactados por IPC al último mes)',usd:'$ convertidos a USD por TC oficial mensual'};
-  document.getElementById('vistaDesc').textContent=d[v];
+  actualizarVistaDesc();
   renderAll();
+}
+function setDolar(k,btn){
+  tcSel=k;
+  var btns=document.querySelectorAll('.inst-btn.dol');
+  for(var i=0;i<btns.length;i++)btns[i].classList.remove('active');
+  btn.classList.add('active');
+  actualizarVistaDesc();
+  renderAll();
+}
+function actualizarVistaDesc(){
+  var nom=TC_NOMBRE[tcSel]||'Oficial';
+  var d={
+    nom:'Valores en pesos corrientes · granos convertidos por dólar '+nom,
+    real:'Pesos constantes (deflactados por IPC) · granos vía dólar '+nom,
+    usd:'Valores en USD por dólar '+nom+' · dólares en brecha (base = '+nom+') · IPC dolarizado'
+  };
+  document.getElementById('vistaDesc').textContent=d[vista];
 }
 function setPer(p,btn){
   periodo=p;
@@ -766,6 +848,15 @@ function applyCustom(){
   periodo='custom';renderAll();
 }
 function togVar(k){actV[k]=!actV[k];renderPills();renderCards();renderSparks();renderVarPanel();renderBig();applyAllBlockStates();}
+
+function seleccionarTodas(){
+  for(var i=0;i<VARS.length;i++){if(SERIE[VARS[i].k]&&SERIE[VARS[i].k].length)actV[VARS[i].k]=true;}
+  renderPills();renderCards();renderSparks();renderVarPanel();renderBig();applyAllBlockStates();
+}
+function limpiarSeleccion(){
+  for(var i=0;i<VARS.length;i++){actV[VARS[i].k]=false;}
+  renderPills();renderCards();renderSparks();renderVarPanel();renderBig();applyAllBlockStates();
+}
 
 function applyAllBlockStates(){applyBlockState('macro');applyBlockState('granos');applyBlockState('hac');applyBlockState('leche');}
 
