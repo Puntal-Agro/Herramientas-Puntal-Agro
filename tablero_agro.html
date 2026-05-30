@@ -458,7 +458,8 @@ function renderMetrics(){
     var pval=planVals[instancia+'_'+prod]||'';
     var refP=getPrecioRef(prod);
     var dispExact=DISP_MAP[prod+'|'+mesRef+'_'+anoRef]||(mesRef===MES_ACTUAL&&anoRef===ANO_ACTUAL?getDispActualUSD(prod):null);
-    var refVal=preciosRef[prod]!=null?preciosRef[prod]:(dispExact!=null?dispExact:'');
+    var cosechaRef=instancia===1?null:getPrecioRef(prod);
+    var refVal=preciosRef[prod]!=null?preciosRef[prod]:(instancia===1?(dispExact!=null?dispExact:''):(cosechaRef!=null?cosechaRef:''));
     var refP=getPrecioRef(prod);
     var ars=PIZ_MAP[prod]||null;
     var campLabel=instancia===2?camp0:camp1;
