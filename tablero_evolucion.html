@@ -588,10 +588,15 @@ function renderSparks(){
     canvas.style.display='block';
     var data=fil.map(function(p){return p.v;});
     var labels=fil.map(function(p){return lblMA(p.f);});
-    // Prefijo/sufijo de unidad para el tooltip (captura por variable)
-    var pre=v.u.indexOf('U$S')===0?'U$S ':(v.u.indexOf('$')===0?'$ ':'');
-    var post=pre?'':' '+v.u;
-    var dec=v.d;
+    // Prefijo/sufijo de unidad para el tooltip (según vista, igual que el gráfico grande)
+    var pre, post, dec;
+    if(vista==='usd'&&v.tipo==='tc'){pre='';post=' ratio';dec=3;}
+    else if(vista==='usd'&&v.tipo==='nivel'){pre='';post=' idx U$S';dec=2;}
+    else if(vista==='usd'&&(v.tipo==='pesos_kg'||v.tipo==='pesos_cab'||v.tipo==='pesos_unit')){pre='U$S ';post=' '+v.u.replace('$','').trim();dec=2;}
+    else if(vista==='usd'&&v.tipo==='usd_ton'){pre='U$S ';post=' /ton';dec=2;}
+    else if((vista==='nom'||vista==='real')&&v.tipo==='usd_ton'){pre='$ ';post=' /ton'+(vista==='real'?' const.':'');dec=0;}
+    else if(vista==='usd'&&v.tipo==='tasa'){pre='';post='%';dec=v.d;}
+    else{pre=v.u.indexOf('U$S')===0?'U$S ':(v.u.indexOf('$')===0?'$ ':'');post=pre?'':' '+v.u;dec=(vista==='usd')?2:v.d;}
     var tipUnit=(function(pre,post,dec){
       return function(ctx){
         var val=ctx.parsed.y;
