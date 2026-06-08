@@ -47,6 +47,8 @@ main{padding:16px 24px 28px;display:flex;flex-direction:column;gap:18px;flex:1}
 .t-sue{border-left-color:#7A8B3F}
 .t-sie{border-left-color:#5E7A2C}
 .t-hac{border-left-color:#A85A2C}
+.t-lab{border-left-color:#8E5A18}
+.t-fit{border-left-color:#6B7E2E}
 .t-ext{border-left-color:#7A8899}
 
 .tag-gra{background:#EEF3E8;color:#3A5128}
@@ -55,6 +57,8 @@ main{padding:16px 24px 28px;display:flex;flex-direction:column;gap:18px;flex:1}
 .tag-sue{background:#F2F5E8;color:#4F5C28}
 .tag-sie{background:#EBF1DF;color:#3F5520}
 .tag-hac{background:#FBEAD9;color:#8A4520}
+.tag-lab{background:#F8EDD9;color:#6E4612}
+.tag-fit{background:#EFF1E0;color:#4A5520}
 .tag-ext{background:#EEF0F3;color:#475569}
 
 footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--card);font-size:11px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
@@ -153,6 +157,30 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
       </a>
       <button class="tool-toggle" onclick="tog(this)"><span class="ico">+</span> Detalle</button>
       <div class="tool-detail">Relaciones de precios y categorías de hacienda para análisis de la actividad ganadera.</div>
+    </div>
+
+    <div class="tool t-lab">
+      <a class="tool-main" href="tablero_labores.html">
+        <span class="tool-name">Tarifa de Labores y Fletes</span>
+        <span class="tool-right">
+          <span class="tool-tag tag-lab">Costos</span>
+          <svg class="tool-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </span>
+      </a>
+      <button class="tool-toggle" onclick="tog(this)"><span class="ico">+</span> Detalle</button>
+      <div class="tool-detail">Tarifas de referencia para labores agrícolas y fletes. Valores actualizados para presupuestar y comparar contratos.</div>
+    </div>
+
+    <div class="tool t-fit">
+      <a class="tool-main" href="Fitosanitarios.html">
+        <span class="tool-name">Requerimiento de Fitosanitarios</span>
+        <span class="tool-right">
+          <span class="tool-tag tag-fit">Insumos</span>
+          <svg class="tool-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </span>
+      </a>
+      <button class="tool-toggle" onclick="tog(this)"><span class="ico">+</span> Detalle</button>
+      <div class="tool-detail">Cálculo de requerimientos de fitosanitarios por lote y cultivo para planificar compras y aplicaciones de campaña.</div>
     </div>
 
   </div>
