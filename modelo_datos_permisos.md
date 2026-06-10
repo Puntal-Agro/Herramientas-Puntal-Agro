@@ -5,7 +5,7 @@
 >
 > **Audiencia:** la programadora que construirá la base de datos y la API. Este documento describe el **modelo lógico** (entidades, relaciones, reglas de negocio). No prescribe motor de base de datos, esquema físico ni tecnología de backend; eso queda a criterio de la implementación.
 >
-> **Estado:** diseño cerrado y validado con Puntal Agro. Listo para implementar.
+> **Estado:** **VERSIÓN EN REVISIÓN.** La parte de **usuarios, roles y permisos** (§7) y la **jerarquía** (§1–§2) están firmes y se pueden implementar/probar ya. Las **entidades de negocio** (§3–§4) son borrador avanzado: pueden ajustarse a medida que se estabiliza la estructura de datos de los tableros (p. ej. actividades en uso_suelo). No tomar §3–§4 como definitivo todavía.
 
 ---
 
@@ -108,7 +108,7 @@ Convención: `id` = identificador único estable (string). `parentId` = referenc
 
 La mayoría cuelga de `empresaId` y se carga **una sola vez por empresa**; las consumen todos los tableros. (La excepción es TIPO_INSUMO, §3.1.1, que es una lista **global** de Puntal y se incluye aquí por estar junto al insumo que la usa.)
 
-Los catálogos compartidos — **insumos, depósitos, proveedores, compradores, contratistas y labores** — se dan de alta en un **módulo de Maestros** a nivel empresa, independiente de los tableros operativos. Los tableros (Insumos/OT, Fitosanitarios, Labores, etc.) solo los **consumen**; no los crean. Esto evita que la posibilidad de dar de alta un dato compartido dependa de tener acceso a un tablero operativo en particular. (La asignación de cultivos a lotes —ACTIVIDAD, §3.7— y la propia CAMPAÑA no son maestros de empresa: ver §3.7, §4.1 y §8.)
+Los catálogos compartidos — **insumos, depósitos, proveedores, compradores, contratistas, labores y tipos de actividad (cultivos/usos)** — se dan de alta en un **módulo de Maestros** a nivel empresa, independiente de los tableros operativos. Los tableros (Insumos/OT, Fitosanitarios, Labores, etc.) solo los **consumen**; no los crean. Esto evita que la posibilidad de dar de alta un dato compartido dependa de tener acceso a un tablero operativo en particular. (La asignación de cultivos a lotes —ACTIVIDAD, §3.7— y la propia CAMPAÑA no son maestros de empresa: ver §3.7, §4.1 y §8.)
 
 ### 3.1 INSUMO (catálogo unificado)
 
@@ -230,7 +230,7 @@ A quién le **vende** la empresa (granos, hacienda). Es el cliente comercial de 
 
 ### 3.7 ACTIVIDAD (uso del suelo)
 
-Asignación de un cultivo a un lote en una campaña. Es una **lista de filas**: un lote en una campaña puede tener **N actividades** (no un cultivo "1º" y "2º" en posiciones fijas como en el modelo viejo, sino tantas filas como cultivos se le asignen). Cubre por igual las aperturas temporales (un cultivo después de otro sobre las mismas hectáreas) y las espaciales (el lote partido en pedazos), sin distinguir el motivo en el dato.
+Asignación de una actividad (cultivo o uso) a un lote en una campaña. Es una **lista de filas**: un lote en una campaña puede tener **N actividades** (no un cultivo "1º" y "2º" en posiciones fijas como en el modelo viejo, sino tantas filas como se le asignen). Cubre por igual las aperturas temporales (una actividad después de otra sobre las mismas hectáreas) y las espaciales (el lote partido en pedazos), sin distinguir el motivo en el dato.
 
 | Campo | Tipo | Notas |
 |---|---|---|
@@ -238,12 +238,24 @@ Asignación de un cultivo a un lote en una campaña. Es una **lista de filas**: 
 | `empresaId` | string | FK → Empresa |
 | `loteId` | string | FK → Lote |
 | `campañaId` | string | FK → Campaña |
-| `cultivo` | string | |
+| `tipoActividadId` | string | FK → TIPO_ACTIVIDAD (§3.7.1). Antes era texto libre; ahora sale del maestro |
 | `ha` | número | Hectáreas de esta actividad |
 
 > **Validación:** cada actividad se valida de forma **individual** contra la superficie física del lote (`ha` de la actividad ≤ superficie del lote). **No se suman** las actividades entre sí ni se las ordena. Si el usuario quiere partir el lote o secuenciar cultivos, agrega filas; cada una se valida sola.
 
 > No lleva campo de orden/secuencia ni etiqueta temporal/espacial: las aperturas no son necesariamente secuenciales, y la validación individual no requiere distinguir el tipo.
+
+#### 3.7.1 TIPO_ACTIVIDAD (maestro)
+
+Lista de actividades posibles (cultivos y usos del suelo), maestro **a nivel empresa** (cada empresa gestiona la suya). Sigue el mismo patrón que TIPO_INSUMO → INSUMO: TIPO_ACTIVIDAD es el catálogo; ACTIVIDAD (§3.7) es la asignación concreta a un lote/campaña.
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `id` | string | PK |
+| `empresaId` | string | FK → Empresa |
+| `nombre` | string | |
+
+Valores iniciales (de la lista en uso en el tablero): Trigo, Avena, Centeno, Girasol, Maíz, Maíz tardío, Maíz 2ª, Soja 1ª, Soja 2ª, Sementeras (Trigo/Cebada/Avena/Maíz/Soja 1ª/Maíz tardío/Vicia), Verdeo invierno, Verdeo verano, Verdeo diferido, Implantación praderas, Conservación praderas, Promociones Rye grass, Silajes, Rollos/Fardos, Silo bolsa, Barbecho, Estructura, Vicia cosecha. Incluye tanto cultivos como usos no productivos (Barbecho, Estructura).
 
 ### 3.8 ORDEN DE TRABAJO (OT)
 
@@ -273,7 +285,7 @@ Una OT registra una labor sobre uno o varios lotes. Tiene tres niveles de estado
 | `id` | string | PK |
 | `loteId` | string | FK → Lote |
 | `campoId` | string | FK → Campo (denormalizado desde el lote, para filtrar la OT por permiso — una OT puede tocar lotes de campos distintos) |
-| `cultivo` | string | |
+| `tipoActividadId` | string | FK → TIPO_ACTIVIDAD (§3.7.1) — cultivo/uso del lote |
 | `subact` | string | |
 | `ha` | número | |
 | `estadoLote` | enum | `Pendiente` / `Aplicado` |
@@ -559,8 +571,9 @@ El criterio que ordena dónde se crea cada cosa:
 |---|---|---|
 | Cliente, Empresa, **Campo** | **Administración** (admin general / admin cliente, según permisos) | Todos |
 | **Lote** | **Plan de Uso del Suelo** | Insumos/OT, Fitosanitarios, Siembra, Labores, Hacienda |
-| **Actividad** (lote + cultivo + campaña) | **Plan de Uso del Suelo** | Siembra, Insumos/OT, Labores |
+| **Actividad** (lote + tipo de actividad + campaña) | **Plan de Uso del Suelo** | Siembra, Insumos/OT, Labores |
 | **Insumo** (catálogo unificado) | **Maestros** (nivel empresa) | Insumos/OT, Fitosanitarios |
+| **Tipo de actividad** (cultivos/usos) | **Maestros** (nivel empresa) | Plan de Uso, Siembra, Insumos/OT |
 | **Proveedor** | **Maestros** (nivel empresa) | Insumos/OT, Compras |
 | **Comprador** | **Maestros** (nivel empresa) | Comercial, Hacienda |
 | **Contratista** | **Maestros** (nivel empresa) | OTs |
