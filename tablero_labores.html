@@ -76,6 +76,13 @@ main{padding:18px 24px;display:flex;flex-direction:column;gap:18px}
 .res-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:500;margin-bottom:6px}
 .res-val{font-family:var(--mono);font-size:26px;font-weight:600;line-height:1.05;color:var(--verde)}
 .res-factor{font-size:13px;color:var(--text);background:var(--bg);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-family:var(--mono)}
+.rf-pct{font-size:22px;font-weight:700;color:var(--verde);margin-right:10px}
+.rf-fac{font-size:12px;color:var(--muted);margin-right:10px}
+.rf-cmp{font-size:11px;color:var(--muted)}
+.tc-edit{display:flex;gap:8px}
+.tce{flex:1;display:flex;flex-direction:column;gap:3px}
+.tce-lbl{font-size:10px;color:var(--muted);font-family:var(--mono)}
+.tce input{font-family:var(--mono);font-size:14px;color:var(--text);background:#E8F5E9;border:1.5px solid var(--border);border-radius:8px;padding:7px 9px;width:100%}
 .desglose{margin-bottom:12px}
 .desglose-t{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:500;margin-bottom:6px}
 .dg-row{display:flex;align-items:center;gap:8px;font-size:12px;margin-bottom:4px}
@@ -86,6 +93,22 @@ main{padding:18px 24px;display:flex;flex-direction:column;gap:18px}
 .aviso{font-size:12px;padding:10px 12px;border-radius:8px;margin-bottom:12px;line-height:1.5}
 .aviso-warn{background:#FDF0E6;border:1px solid #E8C4A0;color:#8A4B1F}
 .aviso-strong{background:#FBE3DA;border:1px solid #E0A088;color:#993C1D}
+.pill-add{border-style:dashed;color:var(--verde)}
+.cos-pills-sticky{position:sticky;top:96px;z-index:50;background:var(--bg);padding-top:6px;padding-bottom:6px}
+.cos-row{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
+.cos-row .cfgf{flex:1;min-width:130px}
+.cos-actions{display:flex;gap:8px;flex-wrap:wrap}
+.cos-cfg{display:flex;flex-direction:column;gap:14px}
+.cos-params{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.cfgf label{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-weight:500;margin-bottom:6px}
+.cfgf input{font-family:var(--sans);font-size:14px;color:var(--text);background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;width:100%}
+.cos-table-wrap{overflow-x:auto;max-width:560px}
+.cos-table{width:100%;border-collapse:collapse;font-size:14px}
+.cos-table th{text-align:left;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:600;padding:8px 10px;border-bottom:2px solid var(--border)}
+.cos-table td{padding:6px 10px;border-bottom:1px solid var(--border)}
+.cos-cell{font-family:var(--mono);font-size:14px;color:var(--text);background:var(--bg);border:1.5px solid var(--border);border-radius:6px;padding:6px 8px;width:120px;text-align:right}
+.cos-edited{background:#E8F5E9;border-color:var(--verde)}
+.cos-usd{font-family:var(--mono);color:var(--muted)}
 .pnote{font-size:11px;color:var(--muted);margin-top:8px;padding:8px 12px;background:var(--bg);border-radius:6px;line-height:1.5}
 .placeholder{padding:60px 20px;text-align:center;color:var(--muted);font-size:13px}
 .kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
@@ -100,6 +123,44 @@ main{padding:18px 24px;display:flex;flex-direction:column;gap:18px}
 .leg-line{width:14px;height:2px;display:inline-block;border-radius:1px}
 .leg-bar{width:11px;height:11px;display:inline-block;border-radius:2px}
 footer{padding:14px 24px 30px;color:var(--muted);font-size:11px;line-height:1.6}
+
+/* ───────── Responsive celular ───────── */
+@media(max-width:640px){
+  body{font-size:14px}
+  header{padding:8px 14px;gap:8px}
+  .logo-img{height:32px}
+  .logo-title{font-size:12px}
+  .logo-sub{display:none}
+  /* tabs: scroll horizontal en una fila */
+  .tabbar{padding:6px 10px;gap:6px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .tab-btn{padding:6px 13px;font-size:12px;white-space:nowrap;flex:0 0 auto}
+  .tab-right{display:none}
+  main{padding:12px 12px;gap:12px}
+  .card{padding:12px}
+  /* filtros y filas de config: apilar / envolver */
+  .fbar{gap:8px}
+  .cos-row{flex-direction:column;align-items:stretch}
+  .cos-row .cfgf{min-width:0;width:100%}
+  .cos-params{grid-template-columns:1fr 1fr}
+  .calc-grid{grid-template-columns:1fr}
+  .chart-2col{grid-template-columns:1fr}
+  .res-main{grid-template-columns:1fr}
+  .kpi-row{grid-template-columns:1fr 1fr}
+  /* pills cosecha: dejan de ser sticky (el header móvil varía de alto) */
+  .cos-pills-sticky{position:static}
+  /* gráficos: alto cómodo; scroll horizontal sin desbordar la card */
+  .cw{height:300px}
+  .cw-340{height:300px}
+  .cw-260{height:240px}
+  .cw, .cw-340, .cw-260{overflow-x:auto;max-width:100%}
+  /* el canvas se ajusta al contenedor (Chart responsive); no forzar min-width
+     para evitar desborde del layout en pantallas chicas */
+  /* tabla cosecha: ancho completo con scroll propio */
+  .cos-table-wrap{max-width:100%}
+  .cos-cell{width:90px}
+  /* inputs un poco más compactos */
+  .field select,.field input{font-size:13px;padding:7px 9px}
+}
 </style>
 </head>
 <body>
@@ -117,6 +178,7 @@ footer{padding:14px 24px 30px;color:var(--muted);font-size:11px;line-height:1.6}
   <button class="tab-btn active" id="tabbtn-catac" onclick="setTab('catac',this)">CATAC</button>
   <button class="tab-btn" id="tabbtn-vars" onclick="setTab('vars',this)">Variables</button>
   <button class="tab-btn" id="tabbtn-calc" onclick="setTab('calc',this)">Precio de Labores</button>
+  <button class="tab-btn" id="tabbtn-cos" onclick="setTab('cos',this)">Tarifa Cosecha</button>
   <div class="tab-right"><div class="upd" id="updBadge">—</div></div>
 </div>
 </div>
@@ -248,7 +310,7 @@ footer{padding:14px 24px 30px;color:var(--muted);font-size:11px;line-height:1.6}
 
         <div class="field">
           <label>Mes de referencia (cuándo se pagó)</label>
-          <select id="calcMesRef" onchange="recalc()"></select>
+          <select id="calcMesRef" onchange="onMesChange()"></select>
         </div>
 
         <div class="field">
@@ -264,17 +326,19 @@ footer{padding:14px 24px 30px;color:var(--muted);font-size:11px;line-height:1.6}
         </div>
 
         <div class="field">
-          <label>Dólar para convertir $ ↔ U$S</label>
-          <select id="calcDolarConv" onchange="recalc()">
-            <option value="TC_Oficial">Oficial (BCRA)</option>
-            <option value="TC_MEP">MEP</option>
-            <option value="TC_Blue">Blue</option>
-          </select>
+          <label>Mes destino (actualizar a)</label>
+          <select id="calcMesDest" onchange="onMesChange()"></select>
         </div>
 
+        <div class="divider"></div>
+
         <div class="field">
-          <label>Mes destino (actualizar a)</label>
-          <select id="calcMesDest" onchange="recalc()"></select>
+          <label>Dólar oficial · editable</label>
+          <div class="tc-edit">
+            <div class="tce"><span class="tce-lbl" id="tcRefLbl">Ref.</span><input type="number" id="tcRef" oninput="recalc()"></div>
+            <div class="tce"><span class="tce-lbl" id="tcDstLbl">Dest.</span><input type="number" id="tcDst" oninput="recalc()"></div>
+          </div>
+          <div class="hint">Arranca con el dato de cada mes; podés sobrescribirlo.</div>
         </div>
 
         <div class="divider"></div>
@@ -291,26 +355,20 @@ footer{padding:14px 24px 30px;color:var(--muted);font-size:11px;line-height:1.6}
           <div class="field">
             <label>Pesos del índice (%)</label>
             <div class="weights">
-              <div class="wrow">
-                <span class="wlbl"><span class="pdot" style="background:#C8642D"></span>Gasoil</span>
-                <span class="gas-toggle">
-                  <button class="gtg active" id="gasArs" onclick="setGasUnit('ars',this)">$/L</button><button class="gtg" id="gasUsd" onclick="setGasUnit('usd',this)">U$S/L</button>
-                </span>
-                <input type="number" id="wGas" value="33.3" oninput="recalc()"><span class="wpct">%</span>
-              </div>
+              <div class="wrow"><span class="wlbl"><span class="pdot" style="background:#C8642D"></span>Gasoil</span><input type="number" id="wGas" value="33.3" oninput="recalc()"><span class="wpct">%</span></div>
               <div class="wrow"><span class="wlbl"><span class="pdot" style="background:#B8923A"></span>Dólar</span><input type="number" id="wDol" value="33.3" oninput="recalc()"><span class="wpct">%</span></div>
               <div class="wrow"><span class="wlbl"><span class="pdot" style="background:#7A8C5A"></span>Inflación <span class="wcalc">(resto)</span></span><span class="winf-val" id="wInfVal">33,3</span><span class="wpct">%</span></div>
             </div>
             <div class="hint" id="wHint">Inflación se completa hasta 100% según Gasoil y Dólar.</div>
           </div>
           <div class="field">
-            <label>Dólar del índice</label>
-            <select id="calcDolarIdx" onchange="recalc()">
-              <option value="TC_Oficial">Oficial (BCRA)</option>
-              <option value="TC_MEP">MEP</option>
-              <option value="TC_Blue">Blue</option>
-            </select>
+            <label>Gasoil $/L · editable</label>
+            <div class="tc-edit">
+              <div class="tce"><span class="tce-lbl" id="gasRefLbl">Ref.</span><input type="number" id="gasRef" oninput="recalc()"></div>
+              <div class="tce"><span class="tce-lbl" id="gasDstLbl">Dest.</span><input type="number" id="gasDst" oninput="recalc()"></div>
+            </div>
           </div>
+          <div class="hint" style="margin-top:-6px">El componente Dólar usa los valores de TC de arriba.</div>
         </div>
       </div>
 
@@ -329,6 +387,52 @@ footer{padding:14px 24px 30px;color:var(--muted);font-size:11px;line-height:1.6}
       </div>
     </div>
   </section>
+
+  <!-- ============ TAB TARIFA COSECHA ============ -->
+  <section class="tab-panel" id="tab-cos">
+    <div class="fbar cos-pills-sticky">
+      <span class="fl">Cultivo</span>
+      <div class="per-row" id="cosPills"></div>
+    </div>
+
+    <div class="card">
+      <div class="ct" style="margin-bottom:14px">Configuración · <span id="cosCultActivo">—</span></div>
+      <div class="cos-row">
+        <div class="cfgf">
+          <label>Modo de cálculo</label>
+          <div class="per-row">
+            <button class="inst-btn active" id="cosModoEsc" onclick="setCosModo('esc',this)">Escalonado</button>
+            <button class="inst-btn" id="cosModoBase" onclick="setCosModo('base',this)">Base + rinde</button>
+          </div>
+        </div>
+        <div class="cfgf"><label>Rinde mín (kg/ha)</label><input type="number" id="cosMin" oninput="cosRecalc()"></div>
+        <div class="cfgf"><label>Rinde máx (kg/ha)</label><input type="number" id="cosMax" oninput="cosRecalc()"></div>
+        <div class="cfgf"><label>Salto (kg)</label><input type="number" id="cosSalto" oninput="cosRecalc()"></div>
+        <div class="cfgf"><label>Tarifa base ($/ha)</label><input type="number" id="cosBase" oninput="cosRecalc()"></div>
+        <div class="cfgf" id="cfgInc"><label>Incremento x escalón ($)</label><input type="number" id="cosInc" oninput="cosRecalc()"></div>
+        <div class="cfgf" id="cfgQq" style="display:none"><label>$/kg</label><input type="number" id="cosQq" oninput="cosRecalc()"></div>
+        <div class="cfgf"><label>Dólar oficial ($) · editable</label><input type="number" id="cosTc" oninput="cosRecalc()"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="chd">
+        <div><span class="ct">Tabla de tarifas</span><span class="ct-sub" id="cosTcLbl"></span></div>
+        <div class="cos-actions">
+          <button class="inst-btn" onclick="cosExportXlsx()">Exportar Excel</button>
+          <button class="inst-btn" onclick="cosExportPdf()">Exportar PDF</button>
+          <button class="inst-btn" onclick="cosReset()">Restablecer tabla</button>
+        </div>
+      </div>
+      <div class="cos-table-wrap">
+        <table class="cos-table" id="cosTable">
+          <thead><tr><th>Rinde (kg/ha)</th><th>Tarifa $/ha</th><th>Tarifa U$S/ha</th></tr></thead>
+          <tbody id="cosTbody"></tbody>
+        </table>
+      </div>
+      <div class="pnote">La tarifa U$S se calcula al dólar oficial editable de arriba. Podés editar cualquier celda de $/ha a mano; al cambiar la configuración se regenera la tabla.</div>
+    </div>
+  </section>
 </main>
 
 <footer>
@@ -337,6 +441,7 @@ footer{padding:14px 24px 30px;color:var(--muted);font-size:11px;line-height:1.6}
 
 <script>
 var FECHA_DATOS='2026-05-29';
+var PA_LOGO='data:image/png;base64,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';
 
 // ── Datos embebidos (10 series) ──────────────────────────────────────────────
 var SERIES_UTA_Pesos=[{"f":"2016-01-01","v":429.62},{"f":"2016-02-01","v":430.43},{"f":"2016-03-01","v":453.74},{"f":"2016-04-01","v":470.13},{"f":"2016-05-01","v":479.82},{"f":"2016-06-01","v":478.8},{"f":"2016-07-01","v":480.14},{"f":"2016-08-01","v":520.37},{"f":"2016-09-01","v":515.44},{"f":"2016-10-01","v":520.66},{"f":"2016-11-01","v":520.37},{"f":"2016-12-01","v":539.68},{"f":"2017-01-01","v":560.52},{"f":"2017-02-01","v":559.36},{"f":"2017-03-01","v":559.84},{"f":"2017-04-01","v":559.28},{"f":"2017-05-01","v":559.91},{"f":"2017-06-01","v":560.12},{"f":"2017-07-01","v":581.75},{"f":"2017-08-01","v":580.77},{"f":"2017-09-01","v":580.91},{"f":"2017-10-01","v":600.37},{"f":"2017-11-01","v":629.34},{"f":"2017-12-01","v":629.36},{"f":"2018-01-01","v":649.1},{"f":"2018-02-01","v":650.1},{"f":"2018-03-01","v":699.05},{"f":"2018-04-01","v":699.39},{"f":"2018-05-01","v":720.92},{"f":"2018-06-01","v":755.79},{"f":"2018-07-01","v":820.06},{"f":"2018-08-01","v":818.67},{"f":"2018-09-01","v":925.25},{"f":"2018-10-01","v":978.24},{"f":"2018-11-01","v":981.49},{"f":"2018-12-01","v":1043.46},{"f":"2019-01-01","v":1050.67},{"f":"2019-02-01","v":1049.69},{"f":"2019-03-01","v":1082.26},{"f":"2019-04-01","v":1149.13},{"f":"2019-05-01","v":1203.89},{"f":"2019-06-01","v":1199.38},{"f":"2019-07-01","v":1256.57},{"f":"2019-08-01","v":1251.25},{"f":"2019-09-01","v":1629.64},{"f":"2019-10-01","v":1640.73},{"f":"2019-11-01","v":1716.79},{"f":"2019-12-01","v":1799.8},{"f":"2020-01-01","v":1801.8},{"f":"2020-02-01","v":1796.92},{"f":"2020-03-01","v":1802.92},{"f":"2020-04-01","v":1898.38},{"f":"2020-05-01","v":1901.9},{"f":"2020-06-01","v":1934.19},{"f":"2020-07-01","v":2016.34},{"f":"2020-08-01","v":2130.59},{"f":"2020-09-01","v":2198.0},{"f":"2020-10-01","v":2302.8},{"f":"2020-11-01","v":2397.24},{"f":"2020-12-01","v":2469.38},{"f":"2021-01-01","v":2598.34},{"f":"2021-02-01","v":2752.5},{"f":"2021-03-01","v":2796.53},{"f":"2021-04-01","v":2903.76},{"f":"2021-05-01","v":3152.97},{"f":"2021-06-01","v":3201.28},{"f":"2021-07-01","v":3204.87},{"f":"2021-08-01","v":3304.8},{"f":"2021-09-01","v":3296.0},{"f":"2021-10-01","v":3598.35},{"f":"2021-11-01","v":3604.68},{"f":"2021-12-01","v":3695.55},{"f":"2022-01-01","v":3699.85},{"f":"2022-02-01","v":4003.49},{"f":"2022-03-01","v":3995.96},{"f":"2022-04-01","v":4202.04},{"f":"2022-05-01","v":4501.2},{"f":"2022-06-01","v":4998.23},{"f":"2022-07-01","v":5498.26},{"f":"2022-08-01","v":5504.18},{"f":"2022-09-01","v":5996.49},{"f":"2022-10-01","v":6305.18},{"f":"2022-11-01","v":6292.69},{"f":"2022-12-01","v":7001.46},{"f":"2023-01-01","v":7304.76},{"f":"2023-02-01","v":7604.95},{"f":"2023-03-01","v":7996.8},{"f":"2023-04-01","v":8000.32},{"f":"2023-05-01","v":8989.5},{"f":"2023-06-01","v":9505.95},{"f":"2023-07-01","v":10510.92},{"f":"2023-08-01","v":11309.2},{"f":"2023-09-01","v":13505.0},{"f":"2023-10-01","v":15010.3},{"f":"2023-11-01","v":16008.0},{"f":"2023-12-01","v":17017.1},{"f":"2024-01-01","v":26466.1},{"f":"2024-02-01","v":28980.28},{"f":"2024-03-01","v":30038.06},{"f":"2024-04-01","v":31504.44},{"f":"2024-05-01","v":37044.38},{"f":"2024-06-01","v":37976.85},{"f":"2024-07-01","v":39960.03},{"f":"2024-08-01","v":40976.2},{"f":"2024-09-01","v":42513.9},{"f":"2024-10-01","v":42210.0},{"f":"2024-11-01","v":42984.1},{"f":"2024-12-01","v":43451.4},{"f":"2025-01-01","v":43966.8},{"f":"2025-02-01","v":44969.6},{"f":"2025-03-01","v":45948.0},{"f":"2025-04-01","v":46036.8},{"f":"2025-05-01","v":48032.0},{"f":"2025-06-01","v":51960.0},{"f":"2025-07-01","v":52983.0},{"f":"2025-08-01","v":55000.0},{"f":"2025-09-01","v":55958.4},{"f":"2025-10-01","v":56968.7},{"f":"2025-11-01","v":59926.1},{"f":"2025-12-01","v":61950.0},{"f":"2026-01-01","v":63537.5},{"f":"2026-02-01","v":63547.2},{"f":"2026-03-01","v":64048.4},{"f":"2026-04-01","v":66976.8},{"f":"2026-05-01","v":67972.5}];
@@ -583,7 +688,7 @@ var VAR_CAT=[
   {k:'uta',   nombre:'UTA',    pesos:'SERIES_UTA_Pesos',   usd:'SERIES_UTA_USD',   tipo:'precio', uni:'$/UTA',  uniUsd:'U$S/UTA', color:'#4A6533', eje:'L', on:true},
   {k:'gasoil',nombre:'Gasoil', pesos:'SERIES_Gasoil_Pesos',usd:'SERIES_Gasoil_USD',tipo:'precio', uni:'$/L',    uniUsd:'U$S/L',   color:'#C8642D', eje:'R', on:true},
   {k:'dolar', nombre:'Dólar',  pesos:'SERIES_TC_Oficial',  usd:null,               tipo:'tc',     uni:'$/U$S',  uniUsd:'—',       color:'#B8923A', eje:'R', on:true},
-  {k:'ipc',   nombre:'IPC',    pesos:'SERIES_IPC_Nivel',   usd:null,               tipo:'nivel',  uni:'índice', uniUsd:'índice/U$S', color:'#7A8C5A', eje:'L', on:false}
+  {k:'ipc',   nombre:'IPC',    pesos:'SERIES_IPC_Nivel',   usd:null,               tipo:'nivel',  uni:'índice', uniUsd:'índice/U$S', color:'#7A8C5A', eje:'L', on:true}
 ];
 var varsState={}; VAR_CAT.forEach(function(v){varsState[v.k]=v.on;});
 var perVars=12, customFromVars=null, customToVars=null, vistaVars='corr';
@@ -748,7 +853,7 @@ function initCustomVars(){
 }
 
 // ── Calculadora Precio de Labores ─────────────────────────────────────────────
-var calcMetodo='uta', calcGasUnit='ars', calcChart=null;
+var calcMetodo='uta', calcChart=null;
 
 function calcMonthsUTA(){return SERIES_UTA_Pesos.map(function(p){return p.f;});}
 function fillCalcSelects(){
@@ -761,7 +866,25 @@ function fillCalcSelects(){
   dst.value=meses[meses.length-1];
 }
 
-function tcConv(iso){return lookup(window['SERIES_'+document.getElementById('calcDolarConv').value],iso);}
+// ── Helpers de valores editables (oficial) ──
+function tcRefVal(){var v=parseFloat(document.getElementById('tcRef').value);return isNaN(v)?null:v;}
+function tcDstVal(){var v=parseFloat(document.getElementById('tcDst').value);return isNaN(v)?null:v;}
+function gasRefVal(){var v=parseFloat(document.getElementById('gasRef').value);return isNaN(v)?null:v;}
+function gasDstVal(){var v=parseFloat(document.getElementById('gasDst').value);return isNaN(v)?null:v;}
+
+// al cambiar un mes, recargar los campos editables con el dato de ese mes
+function onMesChange(){
+  var ref=document.getElementById('calcMesRef').value, dst=document.getElementById('calcMesDest').value;
+  document.getElementById('tcRef').value = lookup(SERIES_TC_Oficial,ref)!=null?lookup(SERIES_TC_Oficial,ref):'';
+  document.getElementById('tcDst').value = lookup(SERIES_TC_Oficial,dst)!=null?lookup(SERIES_TC_Oficial,dst):'';
+  document.getElementById('gasRef').value = compVal(SERIES_Gasoil_Pesos,ref).v!=null?f(compVal(SERIES_Gasoil_Pesos,ref).v,1).replace(/\./g,'').replace(',','.'):'';
+  document.getElementById('gasDst').value = compVal(SERIES_Gasoil_Pesos,dst).v!=null?f(compVal(SERIES_Gasoil_Pesos,dst).v,1).replace(/\./g,'').replace(',','.'):'';
+  document.getElementById('tcRefLbl').textContent=lblMA(ref);
+  document.getElementById('tcDstLbl').textContent=lblMA(dst);
+  document.getElementById('gasRefLbl').textContent=lblMA(ref);
+  document.getElementById('gasDstLbl').textContent=lblMA(dst);
+  recalc();
+}
 
 // factor por UTA
 function factorUTA(ref,dst){
@@ -770,17 +893,10 @@ function factorUTA(ref,dst){
   return {factor:b/a, ok:true};
 }
 
-// devuelve {serie, label, color} de un componente del índice
-function compSerie(key){
-  if(key==='gas')return calcGasUnit==='usd'?{s:SERIES_Gasoil_USD,l:'Gasoil U$S/L',c:'#C8642D'}:{s:SERIES_Gasoil_Pesos,l:'Gasoil $/L',c:'#C8642D'};
-  if(key==='dol')return {s:window['SERIES_'+document.getElementById('calcDolarIdx').value],l:'Dólar',c:'#B8923A'};
-  if(key==='inf')return {s:SERIES_IPC_Nivel,l:'IPC',c:'#7A8C5A'};
-}
 // valor de un componente con fallback al primer dato disponible; flag si usó fallback
 function compVal(serie,iso){
   var v=lookup(serie,iso);
   if(v!=null)return {v:v,fb:false};
-  // fallback: primer dato disponible (más cercano hacia atrás, sino el primero)
   var best=null;
   for(var i=0;i<serie.length;i++){ if(serie[i].f<=iso){best=serie[i];} }
   if(best)return {v:best.v,fb:true};
@@ -806,23 +922,28 @@ function pesosNorm(){
   return{g:g/sum,d:d/sum,i:i/sum,sum:sum,exceso:false};
 }
 
-// factor por índice; devuelve factor + desglose + avisos
+// factor por índice usando valores editables (gasoil y dólar) + IPC de la serie
 function factorIDX(ref,dst){
   var w=pesosNorm();
   if(w.exceso)return {exceso:true};
-  var comps=[{k:'gas',w:w.g},{k:'dol',w:w.d},{k:'inf',w:w.i}];
   var factor=0, desg=[], avisoFB=[], avisoStrong=[];
+  // Gasoil (editable)
+  var g0=gasRefVal(), g1=gasDstVal();
+  // Dólar (editable, mismo TC)
+  var d0=tcRefVal(), d1=tcDstVal();
+  // IPC (serie, con fallback)
+  var i0r=compVal(SERIES_IPC_Nivel,ref), i1r=compVal(SERIES_IPC_Nivel,dst);
+  var comps=[
+    {l:'Gasoil',c:'#C8642D',w:w.g,v0:g0,v1:g1,fb0:false,fb1:false},
+    {l:'Dólar', c:'#B8923A',w:w.d,v0:d0,v1:d1,fb0:false,fb1:false},
+    {l:'IPC',   c:'#7A8C5A',w:w.i,v0:i0r.v,v1:i1r.v,fb0:i0r.fb,fb1:i1r.fb}
+  ];
   comps.forEach(function(c){
-    var cs=compSerie(c.k);
-    var r0=compVal(cs.s,ref), r1=compVal(cs.s,dst);
-    if(r0.v==null||r1.v==null||r0.v===0){return;}
-    var ratio=r1.v/r0.v;
+    if(c.v0==null||c.v1==null||c.v0===0)return;
+    var ratio=c.v1/c.v0;
     factor+=c.w*ratio;
-    desg.push({l:cs.l,c:cs.c,w:c.w,ratio:ratio,aporte:c.w*ratio});
-    if(r0.fb||r1.fb){
-      avisoFB.push(cs.l);
-      if(c.w>0.20)avisoStrong.push(cs.l);
-    }
+    desg.push({l:c.l,c:c.c,w:c.w,ratio:ratio});
+    if(c.fb0||c.fb1){avisoFB.push(c.l);if(c.w>0.20)avisoStrong.push(c.l);}
   });
   return {factor:factor, desglose:desg, avisoFB:avisoFB, avisoStrong:avisoStrong, w:w};
 }
@@ -834,20 +955,18 @@ function recalc(){
   var valor=parseFloat(document.getElementById('calcValor').value);
   if(!ref||!dst)return;
 
-  // otra moneda del valor pagado
-  var tcRef=tcConv(ref);
+  // otra moneda del valor pagado (usa TC oficial editable de referencia)
+  var tcR=tcRefVal();
   var otraTxt='—';
-  if(!isNaN(valor)&&tcRef){
-    if(moneda==='ars')otraTxt='≈ U$S '+f(valor/tcRef,2)+' (al TC de '+lblMA(ref)+')';
-    else otraTxt='≈ $ '+f(valor*tcRef,0)+' (al TC de '+lblMA(ref)+')';
+  if(!isNaN(valor)&&tcR){
+    if(moneda==='ars')otraTxt='≈ U$S '+f(valor/tcR,2)+' (TC oficial '+lblMA(ref)+': $'+f(tcR,1)+')';
+    else otraTxt='≈ $ '+f(valor*tcR,0)+' (TC oficial '+lblMA(ref)+': $'+f(tcR,1)+')';
   }
   document.getElementById('calcOtraMoneda').textContent=otraTxt;
 
-  // valor en pesos de referencia
   var valArsRef=null;
-  if(!isNaN(valor)){ valArsRef=(moneda==='ars')?valor:(tcRef?valor*tcRef:null); }
+  if(!isNaN(valor)){ valArsRef=(moneda==='ars')?valor:(tcR?valor*tcR:null); }
 
-  // factor
   var res, avisoHtml='', desgHtml='', factor=null;
   if(calcMetodo==='uta'){
     res=factorUTA(ref,dst);
@@ -864,7 +983,6 @@ function recalc(){
       return;
     }
     factor=res.factor;
-    // avisos
     if(res.avisoStrong.length){
       avisoHtml+='<div class="aviso aviso-strong"><b>Atención:</b> falta dato de '+res.avisoStrong.join(', ')+
         ' en el mes de referencia y su peso supera el 20%. El factor puede ser engañoso. Considerá usar el método por UTA o redistribuir los pesos.</div>';
@@ -873,16 +991,16 @@ function recalc(){
     if(soloFB.length){
       avisoHtml+='<div class="aviso aviso-warn">Se usó el primer dato disponible para: '+soloFB.join(', ')+' (no había dato en el mes de referencia).</div>';
     }
-    // desglose
+    // desglose (sin "aporta" ni línea de suma)
     desgHtml='<div class="desglose"><div class="desglose-t">Cómo se forma el factor</div>';
     res.desglose.forEach(function(d){
       var varPct=(d.ratio-1)*100;
       var verbo=varPct>=0?'subió':'bajó';
       desgHtml+='<div class="dg-row"><span class="dg-lbl"><span class="pdot" style="background:'+d.c+'"></span>'+
         d.l+' <span class="dg-w">('+f(d.w*100,1)+'%)</span></span>'+
-        '<span class="dg-val">'+verbo+' '+f(Math.abs(varPct),1)+'% · aporta '+f(d.aporte,3)+'</span></div>';
+        '<span class="dg-val">'+verbo+' '+f(Math.abs(varPct),1)+'%</span></div>';
     });
-    desgHtml+='<div class="dg-total">Factor = suma de aportes = ×'+f(res.factor,3)+'</div></div>';
+    desgHtml+='</div>';
   }
   document.getElementById('calcAviso').innerHTML=avisoHtml;
   document.getElementById('resDesglose').innerHTML=desgHtml;
@@ -890,11 +1008,12 @@ function recalc(){
   // resultado
   if(factor!=null&&valArsRef!=null){
     var outArs=valArsRef*factor;
-    var tcDst=tcConv(dst);
-    var outUsd=tcDst?outArs/tcDst:null;
+    var tcD=tcDstVal();
+    var outUsd=tcD?outArs/tcD:null;
     document.getElementById('resArs').textContent='$ '+f(outArs,0);
     document.getElementById('resUsd').textContent=outUsd!=null?'U$S '+f(outUsd,2):'—';
-    document.getElementById('resFactor').innerHTML='Factor de actualización: <b>×'+f(factor,3)+'</b> ('+fp((factor-1)*100,1)+')  ·  '+lblMA(ref)+' → '+lblMA(dst);
+    // cambio 2: % destacado, factor secundario
+    document.getElementById('resFactor').innerHTML='<span class="rf-pct">'+fp((factor-1)*100,1)+'</span><span class="rf-fac">factor ×'+f(factor,3)+'</span><span class="rf-cmp">'+lblMA(ref)+' → '+lblMA(dst)+'</span>';
   } else {
     document.getElementById('resArs').textContent='—';
     document.getElementById('resUsd').textContent='—';
@@ -916,8 +1035,8 @@ function renderCalcChart(ref,dst){
     var data=meses.map(function(m){var v=lookup(SERIES_UTA_Pesos,m);return(v!=null&&base)?v/base*100:null;});
     datasets.push({label:'UTA',data:data,borderColor:'#4A6533',backgroundColor:hexToRgba('#4A6533',0.12),borderWidth:2,fill:true,pointRadius:0,tension:.2,spanGaps:true});
   } else {
-    [['gas'],['dol'],['inf']].forEach(function(a){
-      var cs=compSerie(a[0]);
+    var comps=[{s:SERIES_Gasoil_Pesos,l:'Gasoil',c:'#C8642D'},{s:SERIES_TC_Oficial,l:'Dólar',c:'#B8923A'},{s:SERIES_IPC_Nivel,l:'IPC',c:'#7A8C5A'}];
+    comps.forEach(function(cs){
       var base=compVal(cs.s,ref).v;
       var data=meses.map(function(m){var v=lookup(cs.s,m);return(v!=null&&base)?v/base*100:null;});
       datasets.push({label:cs.l,data:data,borderColor:cs.c,backgroundColor:cs.c,borderWidth:2,pointRadius:0,tension:.2,spanGaps:true});
@@ -941,12 +1060,214 @@ function setMetodo(m,btn){
   document.getElementById('idxPanel').style.display=(m==='idx')?'block':'none';
   recalc();
 }
-function setGasUnit(u,btn){
-  calcGasUnit=u;
-  document.getElementById('gasArs').classList.toggle('active',u==='ars');
-  document.getElementById('gasUsd').classList.toggle('active',u==='usd');
-  recalc();
+
+// ── Tarifa Cosecha ────────────────────────────────────────────────────────────
+var COS_DEFAULT={
+  soja:   {modo:'base',min:1000,max:5000,salto:500,base:60000,inc:8000,qq:18},
+  maiz:   {modo:'base',min:4000,max:12000,salto:1000,base:70000,inc:9000,qq:12},
+  trigo:  {modo:'base',min:1000,max:5000,salto:500,base:55000,inc:7000,qq:15},
+  girasol:{modo:'esc', min:1000,max:4000,salto:500,base:58000,inc:7500,qq:16},
+  sorgo:  {modo:'esc', min:2000,max:8000,salto:1000,base:52000,inc:6500,qq:9}
+};
+var COS_NOMBRES={soja:'Soja',maiz:'Maíz',trigo:'Trigo',girasol:'Girasol',sorgo:'Sorgo'};
+var COS_COLORES={soja:'#4A6533',maiz:'#A86A1F',trigo:'#B8923A',girasol:'#C8642D',sorgo:'#6B7F3A'};
+var COS_PALETA=['#4A6533','#A86A1F','#B8923A','#C8642D','#6B7F3A','#8A5A2A','#7A8C5A'];
+var cosCultivos=['soja','maiz','trigo','girasol','sorgo'];
+var cosCfg={}; // estado por cultivo
+cosCultivos.forEach(function(k){cosCfg[k]=JSON.parse(JSON.stringify(COS_DEFAULT[k]));cosCfg[k].overrides={};cosCfg[k].tc=null;});
+var cosActivo='soja';
+
+function cosTcActual(){return SERIES_TC_Oficial.length?SERIES_TC_Oficial[SERIES_TC_Oficial.length-1].v:null;}
+
+function cosColor(k){return COS_COLORES[k]||COS_PALETA[cosCultivos.indexOf(k)%COS_PALETA.length];}
+
+function renderCosPills(){
+  var html=cosCultivos.map(function(k){
+    var on=(k===cosActivo); var col=cosColor(k);
+    return '<button class="pill'+(on?' pon':'')+'" onclick="setCosCultivo(\''+k+'\')" style="'+(on?'--pc:'+col+';':'')+'">'+
+      '<span class="pdot" style="background:'+col+'"></span>'+(COS_NOMBRES[k]||k)+'</button>';
+  }).join('');
+  html+='<button class="pill pill-add" onclick="cosAgregar()">+ Agregar</button>';
+  document.getElementById('cosPills').innerHTML=html;
 }
+
+function loadCosCfg(){
+  var c=cosCfg[cosActivo];
+  document.getElementById('cosCultActivo').textContent=COS_NOMBRES[cosActivo]||cosActivo;
+  document.getElementById('cosModoEsc').classList.toggle('active',c.modo==='esc');
+  document.getElementById('cosModoBase').classList.toggle('active',c.modo==='base');
+  document.getElementById('cfgInc').style.display=(c.modo==='esc')?'block':'none';
+  document.getElementById('cfgQq').style.display=(c.modo==='base')?'block':'none';
+  document.getElementById('cosMin').value=c.min;
+  document.getElementById('cosMax').value=c.max;
+  document.getElementById('cosSalto').value=c.salto;
+  document.getElementById('cosBase').value=c.base;
+  document.getElementById('cosInc').value=c.inc;
+  document.getElementById('cosQq').value=c.qq;
+  // TC: si el cultivo no tiene tc guardado, arranca con el oficial actual
+  if(c.tc==null){var t=SERIES_TC_Oficial.length?SERIES_TC_Oficial[SERIES_TC_Oficial.length-1].v:null;c.tc=t;}
+  document.getElementById('cosTc').value=c.tc;
+}
+
+function cosRangos(c){
+  var r=[],min=parseFloat(c.min),max=parseFloat(c.max),salto=parseFloat(c.salto);
+  if(isNaN(min)||isNaN(max)||isNaN(salto)||salto<=0||max<=min)return r;
+  var i=0;
+  for(var lo=min;lo<max;lo+=salto){
+    var hi=Math.min(lo+salto,max);
+    r.push({i:i,lo:lo,hi:hi}); i++;
+    if(i>500)break;
+  }
+  return r;
+}
+
+// tarifa calculada de un rango según modo (rinde en kg)
+function cosTarifaCalc(c,rango){
+  var base=parseFloat(c.base)||0;
+  if(c.modo==='esc'){
+    return base+(parseFloat(c.inc)||0)*rango.i;
+  } else {
+    var rinde=(rango.lo+rango.hi)/2; // kg
+    return base+(parseFloat(c.qq)||0)*rinde; // $/kg × kg
+  }
+}
+
+function cosRecalc(){
+  var c=cosCfg[cosActivo];
+  c.min=document.getElementById('cosMin').value;
+  c.max=document.getElementById('cosMax').value;
+  c.salto=document.getElementById('cosSalto').value;
+  c.base=document.getElementById('cosBase').value;
+  c.inc=document.getElementById('cosInc').value;
+  c.qq=document.getElementById('cosQq').value;
+  var tcv=parseFloat(document.getElementById('cosTc').value);
+  c.tc=isNaN(tcv)?null:tcv;
+
+  var tc=c.tc;
+  document.getElementById('cosTcLbl').textContent=tc?('U$S al oficial $'+f(tc,1)):'';
+  var rangos=cosRangos(c);
+  var tb=document.getElementById('cosTbody');
+  if(!rangos.length){tb.innerHTML='<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:20px">Configurá rinde mín/máx y salto válidos.</td></tr>';return;}
+  var html=rangos.map(function(r){
+    var key=r.lo+'_'+r.hi;
+    var calc=cosTarifaCalc(c,r);
+    var ov=c.overrides[key];
+    var val=(ov!=null)?ov:calc;
+    var usd=(tc&&tc!==0)?val/tc:null;
+    var edited=(ov!=null);
+    return '<tr><td>'+f(r.lo,0)+' – '+f(r.hi,0)+'</td>'+
+      '<td><input class="cos-cell'+(edited?' cos-edited':'')+'" type="number" value="'+Math.round(val)+'" '+
+      'onchange="cosEditCell(\''+key+'\',this.value)"></td>'+
+      '<td class="cos-usd">U$S '+f(usd,1)+'</td></tr>';
+  }).join('');
+  tb.innerHTML=html;
+}
+
+function cosEditCell(key,value){
+  var v=parseFloat(value);
+  if(isNaN(v)){delete cosCfg[cosActivo].overrides[key];}
+  else{cosCfg[cosActivo].overrides[key]=v;}
+  cosRecalc();
+}
+function cosReset(){cosCfg[cosActivo].overrides={};cosRecalc();}
+function setCosCultivo(k){cosActivo=k;renderCosPills();loadCosCfg();cosRecalc();}
+function setCosModo(m,btn){
+  cosCfg[cosActivo].modo=m;
+  cosCfg[cosActivo].overrides={};
+  loadCosCfg();cosRecalc();
+}
+function cosAgregar(){
+  var nombre=prompt('Nombre del nuevo cultivo:');
+  if(!nombre)return;
+  var key='c'+Date.now();
+  COS_NOMBRES[key]=nombre;
+  cosCultivos.push(key);
+  cosCfg[key]={modo:'base',min:1000,max:5000,salto:500,base:60000,inc:8000,qq:15,tc:null,overrides:{}};
+  setCosCultivo(key);
+}
+
+// datos de la tabla actual para exportar
+function cosTableData(){
+  var c=cosCfg[cosActivo], tc=c.tc, rangos=cosRangos(c);
+  var rows=[['Rinde (kg/ha)','Tarifa $/ha','Tarifa U$S/ha']];
+  rangos.forEach(function(r){
+    var key=r.lo+'_'+r.hi, ov=c.overrides[key];
+    var val=(ov!=null)?ov:cosTarifaCalc(c,r);
+    var usd=(tc&&tc!==0)?val/tc:null;
+    rows.push([f(r.lo,0)+' – '+f(r.hi,0), Math.round(val), usd!=null?Math.round(usd*10)/10:'']);
+  });
+  return rows;
+}
+function cosHoy(){var d=new Date();return d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear();}
+
+function cosExportXlsx(){
+  if(typeof XLSX==='undefined'){var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=cosExportXlsx;document.head.appendChild(s);return;}
+  var c=cosCfg[cosActivo], nombre=COS_NOMBRES[cosActivo]||cosActivo;
+  var data=cosTableData();
+  var head=[
+    ['Puntal Agro'],
+    ['Tarifa de Cosecha'],
+    ['Cultivo:',nombre],
+    ['Fecha:',cosHoy()],
+    ['Dólar oficial:','$'+f(c.tc,1)],
+    ['Modo:',c.modo==='esc'?'Escalonado':'Base + rinde'],
+    []
+  ];
+  var ws=XLSX.utils.aoa_to_sheet(head.concat(data));
+  ws['!cols']=[{wch:18},{wch:14},{wch:14}];
+  var wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,nombre.substring(0,28));
+  XLSX.writeFile(wb,'TarifaCosecha_'+nombre+'.xlsx');
+}
+
+function cosExportPdf(){
+  function need(cond,src,cb){if(cond)return cb();var s=document.createElement('script');s.src=src;s.onload=cb;document.head.appendChild(s);}
+  need(typeof jspdf!=='undefined','https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',function(){
+    need(typeof window.jspdf!=='undefined'&&jspdf.jsPDF.API.autoTable,'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js',function(){
+      cosBuildPdf();
+    });
+  });
+}
+function cosBuildPdf(){
+  var c=cosCfg[cosActivo], nombre=COS_NOMBRES[cosActivo]||cosActivo;
+  var doc=new jspdf.jsPDF('p','mm','a4');
+  var W=doc.internal.pageSize.getWidth();
+  var verde=[74,101,51], terra=[200,100,45], gris=[122,136,153];
+  // logo discreto arriba a la derecha (ratio real 113×128 = 0.883)
+  try{var lw=13, lh=lw*128/113; doc.addImage(PA_LOGO,'PNG',W-16-lw,11,lw,lh);}catch(e){}
+  // título
+  doc.setTextColor(verde[0],verde[1],verde[2]);
+  doc.setFont('helvetica','bold');doc.setFontSize(18);
+  doc.text('Tarifa de Cosecha',16,22);
+  doc.setFontSize(10);doc.setTextColor(gris[0],gris[1],gris[2]);doc.setFont('helvetica','normal');
+  doc.text('Puntal Agro · herramientas para el agro',16,28);
+  // datos
+  doc.setDrawColor(225,228,235);doc.line(16,33,W-16,33);
+  doc.setFontSize(11);doc.setTextColor(40,40,40);
+  var y=41;
+  doc.setFont('helvetica','bold');doc.text('Cultivo:',16,y);doc.setFont('helvetica','normal');doc.text(nombre,40,y);
+  doc.setFont('helvetica','bold');doc.text('Fecha:',16,y+6);doc.setFont('helvetica','normal');doc.text(cosHoy(),40,y+6);
+  doc.setFont('helvetica','bold');doc.text('Dólar oficial:',110,y);doc.setFont('helvetica','normal');doc.text('$ '+f(c.tc,1),140,y);
+  doc.setFont('helvetica','bold');doc.text('Modo:',110,y+6);doc.setFont('helvetica','normal');doc.text(c.modo==='esc'?'Escalonado':'Base + rinde',140,y+6);
+  // tabla
+  var data=cosTableData();
+  doc.autoTable({
+    startY:y+14,
+    head:[data[0]],
+    body:data.slice(1).map(function(r){return [r[0],'$ '+f(r[1],0),'U$S '+f(r[2],1)];}),
+    theme:'grid',
+    headStyles:{fillColor:verde,textColor:255,fontStyle:'bold',halign:'left'},
+    alternateRowStyles:{fillColor:[245,247,242]},
+    bodyStyles:{textColor:[40,40,40]},
+    columnStyles:{1:{halign:'right'},2:{halign:'right',textColor:terra}},
+    styles:{fontSize:10,cellPadding:2.5},
+    margin:{left:16,right:16}
+  });
+  doc.setFontSize(8);doc.setTextColor(gris[0],gris[1],gris[2]);
+  doc.text('Tarifa U$S calculada al dólar oficial indicado. Documento generado automáticamente.',16,doc.internal.pageSize.getHeight()-12);
+  doc.save('TarifaCosecha_'+nombre+'.pdf');
+}
+function initCos(){renderCosPills();loadCosCfg();cosRecalc();}
 
 document.getElementById('updBadge').textContent='Datos al '+FECHA_DATOS;
 initCustomCatac();
@@ -954,7 +1275,8 @@ renderCatac();
 initCustomVars();
 renderVars();
 fillCalcSelects();
-recalc();
+onMesChange();
+initCos();
 </script>
 </body>
 </html>
