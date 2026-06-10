@@ -18,7 +18,7 @@ Hoy cada tablero funciona de forma aislada guardando datos en `localStorage` del
 Tres ideas estructurales:
 
 1. **Jerarquía de 4 niveles:** Cliente → Empresa → Campo → Lote.
-2. **Catálogo de datos único por empresa:** insumos, contratistas, labores y lotes se cargan una sola vez y los consumen todos los tableros (elimina la doble carga actual).
+2. **Catálogo único por empresa, gestionado en un módulo de Maestros:** insumos, proveedores, compradores, contratistas y labores se cargan una sola vez en un módulo de Maestros a nivel empresa, y los consumen todos los tableros (elimina la carga duplicada actual, en que insumos_ot y Fitosanitarios mantenían catálogos de insumos separados).
 3. **Permisos de 3 ejes por empresa:** cada usuario tiene, para cada empresa a la que accede, un conjunto de (campos visibles + herramientas habilitadas + nivel de acción).
 
 ---
@@ -35,7 +35,7 @@ CLIENTE                      (tenant raíz — lo administra Puntal)
 Reglas de la jerarquía:
 
 - Un **campo pertenece a una sola empresa** (no hay campos compartidos entre empresas).
-- Los datos de negocio (insumos, contratistas, labores, campañas, OTs) cuelgan a **nivel Empresa**, no de Cliente. Cada empresa es su propia unidad contable.
+- Los datos de negocio (insumos, proveedores, compradores, contratistas, labores, OTs, lotes, actividades) cuelgan a **nivel Empresa**, no de Cliente. La campaña es global de Puntal (§4.1). Cada empresa es su propia unidad contable.
 - El **Cliente** es principalmente el contenedor administrativo y de permisos (y el sujeto de facturación del servicio Puntal).
 - El selector principal en el encabezado de cada tablero es la **Empresa**; dentro de ella se filtra por campo/lote.
 
@@ -94,53 +94,74 @@ Convención: `id` = identificador único estable (string). `parentId` = referenc
 |---|---|---|
 | `id` | string | PK |
 | `campoId` | string | FK → Campo |
+| `empresaId` | string | FK → Empresa (denormalizado desde el campo, para filtrar/validar permisos directo) |
 | `nombre` | string | |
 | `ha` | número | Superficie física del lote |
 
-> El lote es la unidad física. La asignación de cultivo/campaña a un lote (la "actividad" de uso del suelo) se modela aparte — ver §3.6.
+> El lote es la unidad física. La asignación de cultivo/campaña a un lote (la "actividad" de uso del suelo) se modela aparte — ver §3.7.
+>
+> **Regla de denormalización:** toda entidad que cuelga de un campo (lote, depósito) lleva además `empresaId`, aunque sea deducible vía campo. El filtro por empresa es el eje de todos los tableros y de los permisos, así que tenerlo a mano evita resolver la cadena campo→empresa en cada consulta. El costo (actualizar si un campo cambiara de empresa) es despreciable porque ese evento es prácticamente inexistente.
 
 ---
 
 ## 3. Entidades de negocio (nivel Empresa)
 
-Todas cuelgan de `empresaId`. Se cargan **una sola vez por empresa** y las consumen todos los tableros.
+La mayoría cuelga de `empresaId` y se carga **una sola vez por empresa**; las consumen todos los tableros. (La excepción es TIPO_INSUMO, §3.1.1, que es una lista **global** de Puntal y se incluye aquí por estar junto al insumo que la usa.)
+
+Los catálogos compartidos — **insumos, depósitos, proveedores, compradores, contratistas y labores** — se dan de alta en un **módulo de Maestros** a nivel empresa, independiente de los tableros operativos. Los tableros (Insumos/OT, Fitosanitarios, Labores, etc.) solo los **consumen**; no los crean. Esto evita que la posibilidad de dar de alta un dato compartido dependa de tener acceso a un tablero operativo en particular. (La asignación de cultivos a lotes —ACTIVIDAD, §3.7— y la propia CAMPAÑA no son maestros de empresa: ver §3.7, §4.1 y §8.)
 
 ### 3.1 INSUMO (catálogo unificado)
 
-Reemplaza los dos catálogos hoy separados (el de Registro de Labores e Insumos y el de Fitosanitarios). Es **un solo insumo** con un bloque técnico opcional que solo se completa para fitosanitarios.
+Reemplaza los dos catálogos hoy separados (el de Registro de Labores e Insumos y el de Fitosanitarios). Es **un solo insumo** con un bloque técnico opcional que solo se completa en agroquímicos (cuando se carga `claseFito`).
 
 | Campo | Tipo | Notas |
 |---|---|---|
 | `id` | string | PK |
 | `empresaId` | string | FK → Empresa |
 | `nombre` | string | |
-| `tipo` | enum | Lista cerrada — ver §6.1 |
+| `tipo` | string | FK → TIPO_INSUMO (lista global de Puntal — ver §3.1.1). Clasificación general del insumo |
 | `categoria` | string | Categoría libre/administrativa *(opcional)* |
 | `unidad` | string | Lista sugerida — ver §6.1 |
 | `precioUnitario` | número | |
 | `moneda` | enum | `ARS` / `USD` |
-| **Técnicos (opcionales, fitosanitarios)** | | |
+| **Técnicos (opcionales, solo agroquímicos)** | | Se completan solo si `claseFito` está cargada |
+| `claseFito` | enum | *(opcional)* — `Herbicida` / `Insecticida` / `Fungicida`. **Dispara el bloque técnico y la lista de modo de acción.** Independiente de `tipo` |
 | `principioActivo` | string | Texto libre **con lista de sugerencias** (autocompletado contra valores ya cargados) |
 | `concentracionValor` | número | *(opcional)* |
 | `concentracionUnidad` | string | *(opcional)* — texto libre, ej. `% p/v`, `g/L` |
 | `eiq` | número | *(opcional)* — Environmental Impact Quotient |
-| `modoAccion` | string | *(opcional)* — sigla; lista **dependiente del `tipo`** — ver §6.2 |
+| `modoAccion` | string | *(opcional)* — sigla; lista **dependiente de `claseFito`** — ver §6.2 |
 | `banda` | enum | *(opcional)* — banda toxicológica — ver §6.3 |
 
-### 3.2 STOCK / MOVIMIENTOS DE INSUMO
+> **`tipo` vs `claseFito`:** `tipo` es la clasificación general administrable (Herbicida, Fertilizante, Balanceados, Combustibles y Lubricantes, Otros…) que tiene **todo** insumo. `claseFito` es opcional y solo se carga en agroquímicos; es lo que activa los campos técnicos y la lista de modo de acción (HRAC/IRAC/FRAC). Un Balanceado tiene `tipo: "Balanceados"` y `claseFito` vacía → sin bloque técnico.
 
-El stock no es un atributo del insumo: es el resultado de sus movimientos en cada depósito. Se modela como movimientos.
+#### 3.1.1 TIPO_INSUMO (lista global)
 
-**DEPOSITO**
+Lista de clasificación general de insumos, **mantenida solo por el admin general** (Puntal). Los clientes no agregan tipos; eso evita que cada empresa fragmente la clasificación.
 
 | Campo | Tipo | Notas |
 |---|---|---|
 | `id` | string | PK |
-| `empresaId` | string | FK → Empresa |
 | `nombre` | string | |
-| `campoId` | string | FK → Campo *(opcional; vacío = depósito general de la empresa)* |
 
-**MOVIMIENTO**
+Valores iniciales: `Herbicida`, `Fungicida`, `Insecticida`, `Coadyuvante`, `Fertilizante`, `Curasemilla`, `Inoculante`, `Balanceados`, `Combustibles y Lubricantes`, `Otros`. Puntal puede agregar más sin tocar código.
+
+### 3.2 STOCK / MOVIMIENTOS DE INSUMO
+
+El stock no es un atributo del insumo: es el resultado de sus movimientos en cada depósito. Se modela como movimientos. El **depósito** es un maestro (se da de alta en el módulo de Maestros, ver §3.2.1); los **movimientos** son operativos (se generan en el tablero de Insumos/OT).
+
+#### 3.2.1 DEPÓSITO (maestro)
+
+Se da de alta en **Maestros** (nivel empresa). Puede estar asociado a un campo o ser un depósito general de la empresa.
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `id` | string | PK |
+| `empresaId` | string | FK → Empresa (siempre) |
+| `campoId` | string | FK → Campo *(opcional; vacío = depósito general de la empresa, no atado a un campo)* |
+| `nombre` | string | |
+
+#### 3.2.2 MOVIMIENTO (operativo)
 
 | Campo | Tipo | Notas |
 |---|---|---|
@@ -148,14 +169,18 @@ El stock no es un atributo del insumo: es el resultado de sus movimientos en cad
 | `empresaId` | string | FK → Empresa |
 | `insumoId` | string | FK → Insumo |
 | `fecha` | fecha | |
-| `tipo` | enum | Entrada / Salida / Traslado / Ajuste (definir lista final con la operatoria actual) |
+| `tipo` | string | FK → TIPO_MOVIMIENTO (lista administrable — ver abajo) |
 | `cantidad` | número | |
-| `origenDepositoId` | string | *(según tipo)* |
-| `destinoDepositoId` | string | *(según tipo)* |
+| `origenDepositoId` | string | *(según tipo)* FK → Depósito |
+| `destinoDepositoId` | string | *(según tipo)* FK → Depósito |
 | `comprobanteTipo` | string | *(opcional)* |
 | `comprobanteNro` | string | *(opcional)* |
-| `otId` | string | *(opcional)* — FK → OT si el movimiento proviene de una orden |
+| `otId` | string | *(opcional)* — FK → OT si el movimiento proviene de la aplicación de una orden |
 | `obs` | string | *(opcional)* |
+
+**TIPO_MOVIMIENTO** — lista administrable por Puntal. Valores iniciales: `Ajuste inventario (+)`, `Ajuste inventario (−)`, `Compra`, `Traslado`, `Consumo`, `Devolución a depósito`, `Ingreso por propia producción`, `Baja por vencimiento`, `Baja por rotura de envase`. Puntal puede agregar más.
+
+> El signo sobre el stock (suma o resta) y qué depósitos usa (origen, destino o ambos en Traslado) se derivan del tipo de movimiento. El `Consumo` se genera automáticamente al **confirmar la aplicación** de una OT en un lote (ver §3.8), no al emitir la OT.
 
 ### 3.3 CONTRATISTA
 
@@ -177,19 +202,35 @@ El stock no es un atributo del insumo: es el resultado de sus movimientos en cad
 | `nombre` | string | |
 | `tarifaDefault` | número | $/ha; se autocompleta al emitir la OT (editable por OT). Solo aplica a LP |
 
-### 3.5 CAMPAÑA
+### 3.5 PROVEEDOR
+
+A quién le **compra** la empresa (insumos, servicios).
 
 | Campo | Tipo | Notas |
 |---|---|---|
 | `id` | string | PK |
 | `empresaId` | string | FK → Empresa |
-| `nombre` | string | Ej. `2024/25` |
+| `nombre` | string | |
+| `cuit` | string | *(opcional)* |
+| `contacto` | string | *(opcional)* |
 
-> El rango temporal de la campaña se deriva de la lógica de meses ya usada en el Tablero Comercial: meses < 7 → campaña `(año-1)/año`; meses ≥ 7 → campaña `año/(año+1)`. No se cargan fechas a mano para no duplicar criterio.
+### 3.6 COMPRADOR
 
-### 3.6 ACTIVIDAD (uso del suelo)
+A quién le **vende** la empresa (granos, hacienda). Es el cliente comercial de la empresa.
 
-Asignación de un cultivo a un lote en una campaña. Un lote puede tener varias actividades por campaña.
+> No confundir con CLIENTE (§2.1), que es el tenant administrado por Puntal. COMPRADOR es un cliente comercial de la empresa.
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `id` | string | PK |
+| `empresaId` | string | FK → Empresa |
+| `nombre` | string | |
+| `cuit` | string | *(opcional)* |
+| `contacto` | string | *(opcional)* |
+
+### 3.7 ACTIVIDAD (uso del suelo)
+
+Asignación de un cultivo a un lote en una campaña. Es una **lista de filas**: un lote en una campaña puede tener **N actividades** (no un cultivo "1º" y "2º" en posiciones fijas como en el modelo viejo, sino tantas filas como cultivos se le asignen). Cubre por igual las aperturas temporales (un cultivo después de otro sobre las mismas hectáreas) y las espaciales (el lote partido en pedazos), sin distinguir el motivo en el dato.
 
 | Campo | Tipo | Notas |
 |---|---|---|
@@ -198,28 +239,52 @@ Asignación de un cultivo a un lote en una campaña. Un lote puede tener varias 
 | `loteId` | string | FK → Lote |
 | `campañaId` | string | FK → Campaña |
 | `cultivo` | string | |
-| `ha` | número | Hectáreas sembradas de esta actividad |
-| `ambiente` | string | *(opcional)* |
+| `ha` | número | Hectáreas de esta actividad |
 
-> Validación: cada actividad se valida contra la superficie física del lote de forma **individual**, no como suma. Se distingue "ha sembradas/cultivo" de "ha físicas".
+> **Validación:** cada actividad se valida de forma **individual** contra la superficie física del lote (`ha` de la actividad ≤ superficie del lote). **No se suman** las actividades entre sí ni se las ordena. Si el usuario quiere partir el lote o secuenciar cultivos, agrega filas; cada una se valida sola.
 
-### 3.7 ORDEN DE TRABAJO (OT)
+> No lleva campo de orden/secuencia ni etiqueta temporal/espacial: las aperturas no son necesariamente secuenciales, y la validación individual no requiere distinguir el tipo.
+
+### 3.8 ORDEN DE TRABAJO (OT)
+
+Una OT registra una labor sobre uno o varios lotes. Tiene tres niveles de estado: por lote (la aplicación real), global de la OT (derivado) y de facturación (eje aparte).
 
 | Campo | Tipo | Notas |
 |---|---|---|
 | `id` | string | PK |
 | `empresaId` | string | FK → Empresa |
-| `campañaId` | string | FK → Campaña *(opcional)* |
+| `num` | número | Número de OT |
+| `campañaId` | string | FK → Campaña — a qué campaña pertenece la OT |
 | `fecha` | fecha | |
 | `laborId` | string | FK → Labor |
 | `subactividad` | string | |
 | `contratistaId` | string | *(opcional)* FK → Contratista |
 | `tarifa` | número | $/ha aplicada (parte del default de la labor, editable) |
 | `obs` | string | *(opcional)* |
-| **Detalle por lote** | | Una OT abarca uno o varios lotes |
-| `lineas[]` | array | Cada línea: `{ loteId, ha }` |
-| **Receta de insumos** | | |
-| `receta[]` | array | Cada ítem: `{ insumoId, dosisPorHa }` |
+| `estado` | enum | **DERIVADO, no se carga a mano:** `Pendiente` / `Parcial` / `Aplicada` / `Cancelada` (ver regla abajo) |
+| `estadoFact` | enum | Facturación, eje independiente de la aplicación: `Sin facturar` / `Parcial` / `Facturado` |
+| `plantilla[]` | array | Receta base de insumos: cada ítem `{ insumoId, dosisPorHa }` |
+| `destinos[]` | array | Un destino por lote — ver DESTINO |
+
+**DESTINO (línea de OT por lote)**
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `id` | string | PK |
+| `loteId` | string | FK → Lote |
+| `campoId` | string | FK → Campo (denormalizado desde el lote, para filtrar la OT por permiso — una OT puede tocar lotes de campos distintos) |
+| `cultivo` | string | |
+| `subact` | string | |
+| `ha` | número | |
+| `estadoLote` | enum | `Pendiente` / `Aplicado` |
+| `fechaAplicReal` | fecha | *(se completa al aplicar)* |
+| `lineas[]` | array | Insumos efectivamente usados/devueltos en ese lote: `{ insumoId, usado, devuelto }` |
+
+**Reglas:**
+
+- Marcar un destino como **`Aplicado`** genera los MOVIMIENTOS de `Consumo` de stock de ese lote. La emisión de la OT (destinos en `Pendiente`) **no** descuenta stock.
+- El **`estado` de la OT se deriva** de sus destinos: todos `Pendiente` → `Pendiente`; algunos `Aplicado` → `Parcial`; todos `Aplicado` → `Aplicada`. `Cancelada` es un estado manual aparte.
+- `estadoFact` es independiente: una OT puede estar `Aplicada` pero todavía `Sin facturar`. La lógica fina de facturación se detalla con la operatoria del tablero.
 
 ---
 
@@ -234,20 +299,32 @@ Estos datos **no pertenecen a ningún cliente**. Los carga el **admin general** 
 | `GASOIL` | Serie de precio de gasoil | `GAS_OIL_Agroseries.xlsx` |
 | `TARIFA_LABOR_BASE` | Tarifas base de labores (referencia Puntal) | — |
 | `PRECIOS_GRANOS` | Pizarra / disponible / futuros | (Tablero Comercial) |
+| `CAMPAÑA` | Lista de campañas (`{id, nombre}`, ej. `24/25`) | — |
 
 **Regla del dólar (transversal a todo el sistema):** el selector de dólar siempre ofrece las tres cotizaciones **Oficial / MEP / Blue**. Las series nativas en USD de los archivos (UTACATAC, Gasoil) **nunca** se usan como tipo de cambio.
 
-### 4.1 Override de tarifa por cliente
+### 4.1 CAMPAÑA (entidad global)
 
-Las tarifas de labores y CATAC son **globales pero ajustables por cliente**.
+La campaña es una **lista desplegable mantenida por Puntal**, no una entidad de empresa. Es una **etiqueta de período** para clasificar a qué ciclo pertenece cada movimiento, labor, OT o actividad.
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `id` | string | PK |
+| `nombre` | string | Ej. `24/25` |
+
+> No tiene `empresaId` (es global) ni se deriva de fechas. La lógica de meses (meses < 7 → `(año-1)/año`; meses ≥ 7 → `año/(año+1)`) sigue usándose **internamente en el Tablero Comercial** para ubicar un dato en su campaña, pero la campaña como entidad es una etiqueta simple que carga Puntal.
+
+### 4.2 Override de tarifa por empresa
+
+Las tarifas de labores y CATAC son **globales pero ajustables por empresa**. Las tarifas base las mantiene Puntal; cada empresa puede ajustarlas.
 
 | Entidad | Campo | Notas |
 |---|---|---|
-| `TARIFA_OVERRIDE` | `clienteId` | FK → Cliente |
+| `TARIFA_OVERRIDE` | `empresaId` | FK → Empresa |
 | | `tarifaBaseId` | Referencia a la tarifa global ajustada |
-| | `valor` | Valor que reemplaza al global para ese cliente |
+| | `valor` | Valor que reemplaza al global para esa empresa |
 
-Si un cliente no tiene override para una tarifa, usa el valor global.
+Si una empresa no tiene override para una tarifa, usa el valor global.
 
 ---
 
@@ -291,15 +368,15 @@ Las externas (Simpleza, CREA, Ingeniería en Fertilizantes, Zorraquín + Meneses
 
 Estas listas ya están en uso en el tablero Fitosanitarios y se reutilizan tal cual para mantener consistencia.
 
-### 6.1 Tipo de insumo y unidades
-
-**Tipo:** `Herbicida`, `Fungicida`, `Insecticida`, `Coadyuvante`, `Fertilizante`, `Curasemilla`, `Inoculante`.
+### 6.1 Unidades y clasificación
 
 **Unidades sugeridas:** `Lt`, `Kg`, `g`, `cc`, `ml`, `u`, `tn`.
 
-### 6.2 Modo de acción (dependiente del tipo)
+**Nota sobre el `tipo`:** la lista de tipos de insumo (Herbicida, Fertilizante, Balanceados, etc.) ya no es cerrada: es la entidad administrable **TIPO_INSUMO** (§3.1.1). La clasificación técnica que dispara los campos de agroquímico es **`claseFito`** (`Herbicida` / `Insecticida` / `Fungicida`), independiente del `tipo`.
 
-El modo de acción disponible depende del `tipo` del insumo. Solo aplica a Herbicida / Insecticida / Fungicida. Cada entrada tiene una sigla (el valor guardado) y una descripción (lo que se muestra).
+### 6.2 Modo de acción (dependiente de `claseFito`)
+
+El modo de acción disponible depende de la **`claseFito`** del insumo. Solo aplica a Herbicida / Insecticida / Fungicida. Cada entrada tiene una sigla (el valor guardado) y una descripción (lo que se muestra).
 
 **Herbicida (clasificación HRAC):**
 
@@ -414,11 +491,15 @@ Un usuario tiene una **lista** de permisos: **uno por empresa** a la que accede.
 | `herramientas` | array | IDs de herramientas habilitadas para esa empresa (de las `asignable: true`) |
 | `nivel` | enum | `ver` / `cargar` / `administrar` |
 
+> **El permiso llega hasta nivel CAMPO, nunca hasta lote.** `campoIds` lista campos; los lotes y actividades de un campo permitido se ven todos. No hay filtrado por lote individual.
+
 **Significado de los niveles:**
 
-- `ver` — solo lectura. No carga, no edita, no borra.
-- `cargar` — puede agregar y editar registros operativos. No borra de forma masiva ni edita maestros/configuración.
-- `administrar` — control total dentro del alcance (incluye borrar y gestionar maestros).
+- `ver` — solo lectura. No carga, no edita, no borra. No toca maestros.
+- `cargar` — puede agregar y editar registros operativos **y maestros** de la empresa (insumos, depósitos, proveedores, compradores, contratistas, labores). No borra de forma masiva.
+- `administrar` — todo lo de `cargar`, más borrar y gestionar la configuración de la(s) empresa(s) a las que el permiso aplica.
+
+> Los niveles aplican **dentro del alcance del permiso** (empresa + campos + herramientas). El alta de clientes, empresas y campos, y la gestión de datos globales (TC, IPC, tarifas base, campañas, listas globales), son atribución de los roles administrativos (§7.3), no del nivel del permiso.
 
 ### 7.3 Jerarquía de roles
 
@@ -463,24 +544,38 @@ Cada permiso es independiente: el asesor puede tener `administrar` en una empres
 
 ---
 
-## 8. Propiedad del dato entre tableros (evitar doble carga)
+## 8. Propiedad del dato entre tableros (evitar carga duplicada)
 
-Hoy varios tableros crean las mismas entidades por separado (Plan de Uso del Suelo y Registro de Labores e Insumos crean campos y lotes; Fitosanitarios mantiene su propio catálogo de insumos). En el modelo central, **cada entidad tiene un único dueño que la da de alta**; los demás tableros la **leen**.
+Hoy varios tableros crean las mismas entidades por separado (Fitosanitarios mantiene su propio catálogo de insumos aparte del de Registro de Labores e Insumos). En el modelo central, **cada entidad tiene un único lugar donde se da de alta**; los demás tableros la **leen**.
 
-| Entidad | Creada por (dueño) | Leída por |
+El criterio que ordena dónde se crea cada cosa:
+
+- Lo que es **estructura sobre la que se reparten permisos** (cliente, empresa, campo) → se crea en **Administración**.
+- Lo que es **catálogo compartido por varios tableros** (insumos, proveedores, compradores, contratistas, labores) → se crea en el módulo de **Maestros** (nivel empresa).
+- Lo que es **puramente operativo y depende de algo ya existente** (lote, actividad, OT, movimientos) → se crea en **su tablero**.
+- Lo que es **transversal a todos los clientes** (TC, IPC, tarifas base, precios, campaña) → lo mantiene **Puntal** (global).
+
+| Entidad | Creada en (dueño) | Leída por |
 |---|---|---|
-| Cliente / Empresa | Panel de administración (admin general / admin cliente) | Todos |
-| Campo | Panel de administración / Maestros | Uso del Suelo, Insumos/OT, Fitosanitarios, Siembra, etc. |
-| Lote | Maestros (módulo único de campos/lotes) | Uso del Suelo, Insumos/OT, Fitosanitarios, Siembra |
-| Insumo (catálogo unificado) | Módulo de insumos (Registro de Labores e Insumos) | Fitosanitarios, OTs |
-| Contratista | Registro de Labores e Insumos | OTs |
-| Labor | Registro de Labores e Insumos | OTs, Precio de Labores |
-| Campaña | Maestros | Uso del Suelo, Siembra, Insumos/OT |
-| Actividad (uso suelo) | Plan de Uso del Suelo | Siembra, Insumos/OT |
-| OT / Movimientos | Registro de Labores e Insumos | Costos, reportes |
-| Datos globales (TC, IPC, CATAC, gasoil, precios granos) | Admin general (carga Excel) | Todos |
+| Cliente, Empresa, **Campo** | **Administración** (admin general / admin cliente, según permisos) | Todos |
+| **Lote** | **Plan de Uso del Suelo** | Insumos/OT, Fitosanitarios, Siembra, Labores, Hacienda |
+| **Actividad** (lote + cultivo + campaña) | **Plan de Uso del Suelo** | Siembra, Insumos/OT, Labores |
+| **Insumo** (catálogo unificado) | **Maestros** (nivel empresa) | Insumos/OT, Fitosanitarios |
+| **Proveedor** | **Maestros** (nivel empresa) | Insumos/OT, Compras |
+| **Comprador** | **Maestros** (nivel empresa) | Comercial, Hacienda |
+| **Contratista** | **Maestros** (nivel empresa) | OTs |
+| **Labor** | **Maestros** (nivel empresa) | OTs, Precio de Labores |
+| **Depósito** | **Maestros** (nivel empresa) | Stock, movimientos |
+| OT | Registro de Labores e Insumos (Insumos/OT) | Costos, reportes |
+| Movimientos de insumo | Registro de Labores e Insumos (Insumos/OT) | Stock, costos |
+| Campaña | Global (Puntal) | Todos |
+| Datos globales (TC, IPC, CATAC, gasoil, precios granos, tarifas base) | Admin general (carga Excel) | Todos |
 
-> Recomendación de implementación: unificar la gestión de **campos, lotes y campañas** en un único módulo de "Maestros" (puede vivir dentro del panel de administración o de un tablero designado), para que dejen de crearse en tres lugares distintos.
+> **Campo** se da de alta en Administración (no en un tablero operativo) porque es la estructura sobre la que se reparten los permisos. **Lote y Actividad** sí se crean en Plan de Uso del Suelo, porque son operativos y cuelgan de un campo que ya existe; el permiso llega hasta nivel campo, así que no hay dependencia problemática.
+>
+> Los **maestros de empresa** (insumo, proveedor, comprador, contratista, labor) se crean en un módulo de Maestros independiente, para que la posibilidad de dar de alta un catálogo compartido no dependa de tener acceso a un tablero operativo puntual (p. ej. poder crear un fitosanitario sin necesitar el tablero de Insumos/OT).
+>
+> Nota de migración: hoy `tablero_uso_suelo` guarda el lote con su plan de cultivos por campaña **embebido** en un mismo registro (`{l, c, s, a, p:{campaña:[ha, cultivo, segundo]}}`, con dos posiciones fijas de cultivo). El modelo central **normaliza** eso en LOTE (físico) y una **lista de ACTIVIDAD** (lote + cultivo + campaña, N filas por lote/campaña, sin tope de dos). Este cambio fue pensado pero **aún no implementado** en `tablero_uso_suelo`; se hará por separado. Los tableros nuevos deben adoptar la separación desde el inicio.
 
 ---
 
@@ -515,12 +610,17 @@ JSON ilustrativo. Los `id` son de ejemplo.
   ],
 
   "lotes": [
-    { "id": "lote_p1", "campoId": "campo_elpuntal", "nombre": "Lote 1", "ha": 120 },
-    { "id": "lote_p2", "campoId": "campo_elpuntal", "nombre": "Lote 2", "ha": 95 }
+    { "id": "lote_p1", "campoId": "campo_elpuntal", "empresaId": "emp_albor_sa", "nombre": "Lote 1", "ha": 120 },
+    { "id": "lote_p2", "campoId": "campo_elpuntal", "empresaId": "emp_albor_sa", "nombre": "Lote 2", "ha": 95 }
   ],
 
   "campanias": [
-    { "id": "camp_2425", "empresaId": "emp_albor_sa", "nombre": "2024/25" }
+    { "id": "camp_2425", "nombre": "2024/25" }
+  ],
+
+  "depositos": [
+    { "id": "dep_central", "empresaId": "emp_albor_sa", "campoId": null, "nombre": "Depósito central" },
+    { "id": "dep_puntal", "empresaId": "emp_albor_sa", "campoId": "campo_elpuntal", "nombre": "Galpón El Puntal" }
   ],
 
   "insumos": [
@@ -528,6 +628,7 @@ JSON ilustrativo. Los `id` son de ejemplo.
       "id": "ins_glifo", "empresaId": "emp_albor_sa", "nombre": "Glifosato 48%",
       "tipo": "Herbicida", "categoria": "Herbicidas", "unidad": "Lt",
       "precioUnitario": 4.20, "moneda": "USD",
+      "claseFito": "Herbicida",
       "principioActivo": "Glifosato", "concentracionValor": 48, "concentracionUnidad": "% p/v",
       "eiq": 15.33, "modoAccion": "EPSPS", "banda": "IV"
     },
@@ -536,6 +637,14 @@ JSON ilustrativo. Los `id` son de ejemplo.
       "tipo": "Fertilizante", "categoria": "Fertilizantes", "unidad": "tn",
       "precioUnitario": 520, "moneda": "USD"
     }
+  ],
+
+  "proveedores": [
+    { "id": "prov_agro", "empresaId": "emp_albor_sa", "nombre": "Agroinsumos del Centro", "cuit": "30-60000000-7", "contacto": "358-444-0000" }
+  ],
+
+  "compradores": [
+    { "id": "comp_acopio", "empresaId": "emp_albor_sa", "nombre": "Acopio San Martín", "cuit": "30-65000000-4", "contacto": "358-466-0000" }
   ],
 
   "contratistas": [
@@ -571,7 +680,7 @@ JSON ilustrativo. Los `id` son de ejemplo.
     },
     {
       "usuarioId": "usr_asesor", "empresaId": "emp_albor_sa",
-      "campoIds": ["lote_p1"], "herramientas": ["tablero_agro"],
+      "campoIds": ["campo_elpuntal"], "herramientas": ["tablero_agro"],
       "nivel": "ver"
     }
   ]
@@ -597,7 +706,9 @@ JSON ilustrativo. Los `id` son de ejemplo.
 - **Aplicación efectiva de los permisos del lado del servidor** (el cliente solo oculta botones; la seguridad real vive en el backend, que debe negar datos fuera del alcance del usuario).
 - Esquema físico de base de datos y elección de motor.
 - **Migración de los datos cargados hoy** en `localStorage` de cada tablero: se asume **arranque desde cero** con el backend. No se migra el estado local actual.
-- El **contrato de integración** entre los tableros y el backend (funciones de acceso, modo asíncrono, modo demo/fallback): se especifica en el documento aparte `contrato_contexto.md`.
+- El **contrato de integración** entre los tableros y el backend (funciones de acceso, modo asíncrono, modo demo/fallback, cómo se calcula/consulta el saldo de stock): se especifica en el documento aparte `contrato_contexto.md`.
+- **Entidades de Programa de Siembra y de Hacienda:** todavía no modeladas; se definirán al integrar esos tableros (sus archivos aún no se revisaron contra este modelo).
+- **Ventas y precios de granos** (entidad VENTA, registro de operaciones comerciales con COMPRADOR): fuera de alcance por ahora. COMPRADOR queda definido como maestro para uso futuro.
 
 ---
 
