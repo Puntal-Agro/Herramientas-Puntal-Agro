@@ -31,9 +31,10 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted
 .btn:hover{background:#3c5429}
 .btn-sm{font-size:11px;padding:5px 9px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer}
 .btn-sm:hover{color:var(--terra);border-color:var(--terra)}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
-.chip{font-size:11px;font-family:var(--mono);background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:3px 7px;cursor:pointer;user-select:none}
-.chip.on{background:#EEF3E8;border-color:#4A6533;color:#3A5128;font-weight:600}
+.checklist{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.checklist label{display:flex;align-items:center;gap:9px;font-size:13px;padding:7px 10px;border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:background .1s,border-color .1s}
+.checklist label.on{border-color:var(--olive);background:#EEF3E8;color:#3A5128}
+.checklist input{width:auto;min-width:0}
 .bdg{font-size:10px;font-family:var(--mono);padding:2px 7px;border-radius:10px;background:var(--bg);border:1px solid var(--border)}
 .note{font-size:11px;color:var(--muted);background:#FBF1E0;border:1px solid #EAD9B8;border-radius:8px;padding:10px 12px;line-height:1.5}
 </style>
@@ -81,25 +82,27 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted
   </div>
 
   <div class="panel">
-    <h2>Asignar permiso a un usuario</h2>
+    <h2>Asignar / editar permiso</h2>
     <div class="row">
-      <div class="fld"><label>Usuario</label><select id="p-usuario"></select></div>
-      <div class="fld"><label>Empresa</label><select id="p-empresa"></select></div>
+      <div class="fld"><label>Usuario</label><select id="p-usuario" onchange="precargar()"></select></div>
+      <div class="fld"><label>Empresa</label><select id="p-empresa" onchange="precargar()"></select></div>
       <div class="fld"><label>Nivel</label>
         <select id="p-nivel"><option value="ver">ver</option><option value="cargar">cargar</option><option value="administrar">administrar</option></select>
       </div>
     </div>
-    <div class="fld" style="margin-top:12px"><label>Herramientas habilitadas</label>
-      <div class="chips" id="p-herramientas"></div>
+    <div class="fld" style="margin-top:14px"><label>Herramientas habilitadas</label>
+      <div class="checklist" id="p-herramientas"></div>
     </div>
-    <button class="btn" style="margin-top:14px" onclick="asignarPermiso()">Guardar permiso</button>
+    <div class="row" style="margin-top:14px">
+      <button class="btn" onclick="asignarPermiso()">Guardar permiso</button>
+      <button class="btn-sm" id="btn-borrar" style="display:none" onclick="borrarPermisoActual()">Quitar acceso a esta empresa</button>
+      <span id="p-estado" style="font-size:11px;color:var(--muted)"></span>
+    </div>
   </div>
 </main>
 
 <script src="pa-core.js"></script>
 <script>
-var seleccionadas = {};
-
 function renderUsuarios(){
   var us = PA.demo.listarUsuarios();
   var ps = PA.demo.listarPermisos();
@@ -132,17 +135,43 @@ function renderUsuarios(){
   for (var m=0;m<emp.length;m++){ var oe=document.createElement('option');oe.value=emp[m].id;oe.textContent=emp[m].razonSocial;se.appendChild(oe); }
 }
 
-function renderChips(){
+// dibuja la checklist; marca las que están en 'habilitadas' (array de ids)
+function renderChecklist(habilitadas){
+  habilitadas = habilitadas || [];
   var cont=document.getElementById('p-herramientas'); cont.innerHTML='';
   var hs=PA.demo.herramientasPropias();
   for (var i=0;i<hs.length;i++){
     (function(h){
-      var c=document.createElement('span');
-      c.className='chip'+(seleccionadas[h]?' on':'');
-      c.textContent=h;
-      c.onclick=function(){ seleccionadas[h]=!seleccionadas[h]; c.className='chip'+(seleccionadas[h]?' on':''); };
-      cont.appendChild(c);
+      var marcada = habilitadas.indexOf(h.id) >= 0;
+      var lab=document.createElement('label');
+      lab.className = marcada ? 'on' : '';
+      var cb=document.createElement('input'); cb.type='checkbox'; cb.value=h.id; cb.checked=marcada;
+      cb.onchange=function(){ lab.className = cb.checked ? 'on' : ''; };
+      var sp=document.createElement('span'); sp.textContent=h.nombre;
+      lab.appendChild(cb); lab.appendChild(sp);
+      cont.appendChild(lab);
     })(hs[i]);
+  }
+}
+
+// al elegir usuario+empresa, precargar el permiso existente (para editar)
+function precargar(){
+  var usuarioId=document.getElementById('p-usuario').value;
+  var empresaId=document.getElementById('p-empresa').value;
+  var estado=document.getElementById('p-estado');
+  var btnBorrar=document.getElementById('btn-borrar');
+  if(!usuarioId||!empresaId){ renderChecklist([]); return; }
+  var p = PA.demo.buscarPermiso(usuarioId, empresaId);
+  if(p){
+    document.getElementById('p-nivel').value = p.nivel;
+    renderChecklist(p.herramientas);
+    estado.textContent='Editando permiso existente.';
+    btnBorrar.style.display='';
+  } else {
+    document.getElementById('p-nivel').value='ver';
+    renderChecklist([]);
+    estado.textContent='Nuevo permiso (sin acceso todavía).';
+    btnBorrar.style.display='none';
   }
 }
 
@@ -153,9 +182,9 @@ function crearUsuario(){
   if(!nombre||!email){ alert('Completá nombre y email.'); return; }
   PA.demo.guardarUsuario({ nombre:nombre, email:email, rol:rol, clienteId: rol==='admin_general'?null:'cli_demo' });
   document.getElementById('u-nombre').value=''; document.getElementById('u-email').value='';
-  renderUsuarios();
+  renderUsuarios(); precargar();
 }
-function borrarUsuario(id){ if(confirm('¿Borrar este usuario y sus permisos?')){ PA.demo.borrarUsuario(id); renderUsuarios(); } }
+function borrarUsuario(id){ if(confirm('¿Borrar este usuario y sus permisos?')){ PA.demo.borrarUsuario(id); renderUsuarios(); precargar(); } }
 
 function asignarPermiso(){
   var usuarioId=document.getElementById('p-usuario').value;
@@ -163,17 +192,27 @@ function asignarPermiso(){
   var nivel=document.getElementById('p-nivel').value;
   if(!usuarioId){ alert('No hay usuarios (que no sean admin_general) para asignar.'); return; }
   var herr=[];
-  for (var h in seleccionadas){ if(seleccionadas[h]) herr.push(h); }
+  var cbs=document.querySelectorAll('#p-herramientas input[type=checkbox]');
+  for (var i=0;i<cbs.length;i++){ if(cbs[i].checked) herr.push(cbs[i].value); }
   PA.demo.guardarPermiso({ usuarioId:usuarioId, empresaId:empresaId, campoIds:[], herramientas:herr, nivel:nivel });
-  alert('Permiso guardado.');
-  renderUsuarios();
+  document.getElementById('p-estado').textContent='Permiso guardado ('+herr.length+' herramientas, nivel '+nivel+').';
+  renderUsuarios(); precargar();
 }
 
-function resetDemo(){ if(confirm('¿Reiniciar todos los datos demo?')){ PA.demo.resetDemo(); seleccionadas={}; renderUsuarios(); renderChips(); } }
+function borrarPermisoActual(){
+  var usuarioId=document.getElementById('p-usuario').value;
+  var empresaId=document.getElementById('p-empresa').value;
+  if(confirm('¿Quitarle a este usuario todo el acceso a esta empresa?')){
+    PA.demo.borrarPermiso(usuarioId, empresaId);
+    renderUsuarios(); precargar();
+  }
+}
+
+function resetDemo(){ if(confirm('¿Reiniciar todos los datos demo?')){ PA.demo.resetDemo(); renderUsuarios(); precargar(); } }
 
 PA.init({ modo:'demo' }, function(){
   renderUsuarios();
-  renderChips();
+  precargar();
 });
 </script>
 

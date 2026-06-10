@@ -16,12 +16,23 @@
   var LS_EMPRESAS = 'pa_empresas';      // empresas demo
   var LS_SESION   = 'pa_sesion';        // sesión activa { usuarioId, empresaActivaId }
 
-  // IDs de herramientas PROPIAS (asignable=true). Deben coincidir con los
-  // data-tool del index y con §5.2 del modelo de datos.
+  // Herramientas PROPIAS (asignable=true): id + nombre legible.
+  // Deben coincidir con los data-tool del index y con §5.2 del modelo.
   var HERRAMIENTAS_PROPIAS = [
-    'tablero_agro', 'tablero_evolucion', 'tablero_insumos_ot', 'tablero_uso_suelo',
-    'ProgramaSiembra', 'tablero_hacienda', 'tablero_labores', 'Fitosanitarios'
+    { id: 'tablero_agro',       nombre: 'Tablero Comercial Agropecuario' },
+    { id: 'tablero_evolucion',  nombre: 'Evolución de Variables' },
+    { id: 'tablero_insumos_ot', nombre: 'Registro de Labores e Insumos' },
+    { id: 'tablero_uso_suelo',  nombre: 'Plan de Uso del Suelo' },
+    { id: 'ProgramaSiembra',    nombre: 'Programa de Siembra' },
+    { id: 'tablero_hacienda',   nombre: 'Tablero de Relaciones Ganaderas' },
+    { id: 'tablero_labores',    nombre: 'Tarifa de Labores y Fletes' },
+    { id: 'Fitosanitarios',     nombre: 'Requerimiento de Fitosanitarios' }
   ];
+  function idsHerramientasPropias() {
+    var out = [];
+    for (var i = 0; i < HERRAMIENTAS_PROPIAS.length; i++) out.push(HERRAMIENTAS_PROPIAS[i].id);
+    return out;
+  }
 
   /* ---------- helpers de localStorage ---------- */
   function lsGet(key, def) {
@@ -123,7 +134,7 @@
   function permisoPara(usuario, empresaId) {
     if (usuario.rol === 'admin_general') {
       // acceso total: todas las herramientas propias, todos los campos, administrar
-      return { empresaId: empresaId, campoIds: [], herramientas: HERRAMIENTAS_PROPIAS.slice(), nivel: 'administrar' };
+      return { empresaId: empresaId, campoIds: [], herramientas: idsHerramientasPropias(), nivel: 'administrar' };
     }
     var permisos = lsGet(LS_PERMISOS, []);
     for (var i = 0; i < permisos.length; i++) {
@@ -199,6 +210,14 @@
     listarEmpresas: function () { return lsGet(LS_EMPRESAS, []); },
     listarPermisos: function () { return lsGet(LS_PERMISOS, []); },
     herramientasPropias: function () { return HERRAMIENTAS_PROPIAS.slice(); },
+
+    buscarPermiso: function (usuarioId, empresaId) {
+      var ps = lsGet(LS_PERMISOS, []);
+      for (var i = 0; i < ps.length; i++) {
+        if (ps[i].usuarioId === usuarioId && ps[i].empresaId === empresaId) return ps[i];
+      }
+      return null;
+    },
 
     guardarUsuario: function (u) {
       var us = lsGet(LS_USUARIOS, []);
