@@ -4,28 +4,26 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Herramientas · Puntal Agro</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#F0F2F5;--card:#fff;--border:#E4E8EE;--text:#0F1923;--muted:#7A8899;--radius:12px;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;}
+:root{--bg:#F0F2F5;--card:#fff;--border:#E4E8EE;--text:#0F1923;--muted:#7A8899;--olive:#4A6533;--ochre:#A86A1F;--terra:#C8642D;--radius:12px;--mono:ui-monospace,SFMono-Regular,Menlo,monospace;--sans:'DM Sans',sans-serif;}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:15px;min-height:100vh;display:flex;flex-direction:column}
-header{background:var(--card);border-bottom:1px solid var(--border);padding:10px 24px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-.logo{display:flex;align-items:center;gap:10px}
-.logo-icon{height:34px;display:flex;align-items:center;justify-content:center}
-.logo-icon img{height:34px;width:auto;display:block}
-.logo-title{font-size:13px;font-weight:600;letter-spacing:-.2px}
-.logo-sub{font-size:11px;color:var(--muted)}
+.topbar{height:4px;background:var(--olive)}
+header{background:var(--card);border-bottom:1px solid var(--border);padding:18px 24px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:16px}
+.logo-icon{height:52px;display:flex;align-items:center;justify-content:center}
+.logo-icon img{height:52px;width:auto;display:block}
+.logo-sub{font-size:11px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--ochre);margin-bottom:3px}
+.logo-title{font-size:22px;font-weight:700;letter-spacing:-.5px;line-height:1.2}
 .h-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.h-user{font-size:11px;color:var(--muted);font-family:var(--mono);white-space:nowrap}
+.h-user{font-size:11px;color:var(--muted);white-space:nowrap}
 .h-user strong{color:var(--text);font-weight:600}
 .h-emp{font-family:var(--sans);font-size:12px;border:1px solid var(--border);border-radius:8px;padding:5px 8px;color:var(--text);background:var(--bg)}
 .h-emp:focus{outline:none;border-color:#4A6533}
 .h-out{font-family:var(--sans);font-size:11px;font-weight:600;border:1px solid var(--border);background:var(--card);color:var(--muted);border-radius:20px;padding:5px 12px;cursor:pointer}
 .h-out:hover{color:#C8642D;border-color:#C8642D}
-.hero{padding:28px 24px 8px}
-.hero h1{font-size:22px;font-weight:600;letter-spacing:-.4px;margin-bottom:4px}
-.hero p{font-size:13px;color:var(--muted);max-width:640px;line-height:1.5}
-main{padding:16px 24px 28px;display:flex;flex-direction:column;gap:18px;flex:1}
+main{padding:28px 24px 28px;display:flex;flex-direction:column;gap:18px;flex:1}
 .sec-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);padding:0 4px;margin-bottom:-6px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
 .empty{font-size:13px;color:var(--muted);padding:8px 4px;font-style:italic}
@@ -35,7 +33,7 @@ main{padding:16px 24px 28px;display:flex;flex-direction:column;gap:18px;flex:1}
 .tool-main:hover{background:#FAFBFC}
 .tool-name{font-size:14.5px;font-weight:600;letter-spacing:-.2px;line-height:1.25;flex:1}
 .tool-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
-.tool-tag{font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;padding:2px 7px;border-radius:10px;font-family:var(--mono);white-space:nowrap}
+.tool-tag{font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;padding:2px 7px;border-radius:10px;font-family:var(--sans);white-space:nowrap}
 .tool-arrow{width:14px;height:14px;stroke:var(--muted);stroke-width:2;fill:none}
 .tool-toggle{background:none;border:none;border-top:1px solid var(--border);padding:7px 16px;width:100%;text-align:left;font-family:var(--sans);font-size:11px;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:5px}
 .tool-toggle:hover{color:var(--text);background:#FAFBFC}
@@ -43,7 +41,7 @@ main{padding:16px 24px 28px;display:flex;flex-direction:column;gap:18px;flex:1}
 .tool-toggle.open .ico{transform:rotate(45deg)}
 .tool-detail{display:none;padding:0 16px 14px;font-size:12.5px;color:var(--muted);line-height:1.55}
 .tool-detail.open{display:block}
-.tool-detail .src{display:block;margin-top:6px;font-family:var(--mono);font-size:10.5px}
+.tool-detail .src{display:block;margin-top:6px;font-family:var(--sans);font-size:10.5px;color:var(--ochre)}
 .t-gra{border-left-color:#4A6533}.t-var{border-left-color:#A86A1F}.t-ins{border-left-color:#C8642D}
 .t-sue{border-left-color:#7A8B3F}.t-sie{border-left-color:#5E7A2C}.t-hac{border-left-color:#A85A2C}
 .t-lab{border-left-color:#8E5A18}.t-fit{border-left-color:#6B7E2E}.t-ext{border-left-color:#7A8899}
@@ -51,17 +49,18 @@ main{padding:16px 24px 28px;display:flex;flex-direction:column;gap:18px;flex:1}
 .tag-sue{background:#F2F5E8;color:#4F5C28}.tag-sie{background:#EBF1DF;color:#3F5520}.tag-hac{background:#FBEAD9;color:#8A4520}
 .tag-lab{background:#F8EDD9;color:#6E4612}.tag-fit{background:#EFF1E0;color:#4A5520}.tag-ext{background:#EEF0F3;color:#475569}
 footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--card);font-size:11px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
-@media (max-width:768px){.grid{grid-template-columns:1fr}.hero h1{font-size:19px}}
+@media (max-width:768px){.grid{grid-template-columns:1fr}.logo-title{font-size:18px}}
 </style>
 </head>
 <body>
 
+<div class="topbar"></div>
 <header>
   <div class="logo">
     <div class="logo-icon"><img src="logo-iso.png" alt="Puntal Agro"></div>
     <div>
-      <div class="logo-title">Herramientas · Toma de decisiones agropecuarias</div>
       <div class="logo-sub">Puntal Agro</div>
+      <div class="logo-title">Herramientas de Gestión y Tableros de Decisión</div>
     </div>
   </div>
   <div class="h-right">
@@ -70,11 +69,6 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
     <button class="h-out" onclick="salir()">Salir</button>
   </div>
 </header>
-
-<div class="hero">
-  <h1>Tableros Puntal Agro</h1>
-  <p>Herramientas de análisis para la toma de decisiones en el sector agropecuario.</p>
-</div>
 
 <main>
   <div class="sec-title">Tableros propios</div>
