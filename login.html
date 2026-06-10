@@ -10,9 +10,11 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:15px;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);width:100%;max-width:380px;overflow:hidden;box-shadow:0 8px 30px rgba(15,25,35,.08)}
-.top{background:linear-gradient(135deg,var(--olive),var(--ochre) 60%,var(--terra));padding:26px 24px;color:#fff}
-.top .logo-sub{font-size:11px;opacity:.85;font-family:var(--mono);letter-spacing:.5px;text-transform:uppercase}
-.top h1{font-size:19px;font-weight:600;letter-spacing:-.3px;margin-top:4px}
+.top{background:var(--bg);padding:22px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+.top .top-logo{width:40px;height:40px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.top .top-logo img{max-width:40px;max-height:40px;width:auto;height:auto;display:block}
+.top .logo-sub{font-size:11px;font-family:var(--mono);letter-spacing:.5px;text-transform:uppercase;color:var(--ochre)}
+.top h1{font-size:18px;font-weight:600;letter-spacing:-.3px;margin-top:2px;color:var(--olive)}
 .body{padding:22px 24px 24px}
 label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;margin-top:14px}
 label:first-child{margin-top:0}
@@ -29,8 +31,11 @@ input:focus{outline:none;border-color:var(--olive)}
 
 <div class="card">
   <div class="top">
-    <div class="logo-sub">Puntal Agro</div>
-    <h1>Herramientas de decisión</h1>
+    <div class="top-logo"><img src="logo-iso.png" alt="Puntal Agro"></div>
+    <div>
+      <div class="logo-sub">Puntal Agro</div>
+      <h1>Herramientas de decisión</h1>
+    </div>
   </div>
   <div class="body">
     <label for="email">Email</label>
