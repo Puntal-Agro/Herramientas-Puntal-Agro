@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Usuarios y permisos · Puntal Agro</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F0F2F5;--card:#fff;--border:#E4E8EE;--text:#0F1923;--muted:#7A8899;--olive:#4A6533;--ochre:#A86A1F;--terra:#C8642D;--radius:12px;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:15px;min-height:100vh;display:flex;flex-direction:column}
+header{background:var(--card);border-bottom:1px solid var(--border);padding:10px 24px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.logo-title{font-size:13px;font-weight:600}.logo-sub{font-size:11px;color:var(--muted)}
+.h-actions{display:flex;gap:8px}
+.lnk{font-size:11px;font-weight:600;border:1px solid var(--border);background:var(--card);color:var(--muted);border-radius:20px;padding:5px 12px;cursor:pointer;text-decoration:none}
+.lnk:hover{color:var(--olive);border-color:var(--olive)}
+main{padding:20px 24px;display:flex;flex-direction:column;gap:18px;flex:1;max-width:1000px;width:100%;margin:0 auto}
+h1{font-size:20px;font-weight:600;letter-spacing:-.3px}
+.sub{font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.5}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px}
+.panel h2{font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:12px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.fld{display:flex;flex-direction:column;gap:4px}
+.fld label{font-size:11px;font-weight:600;color:var(--muted)}
+.fld input,.fld select{border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px;min-width:160px}
+.fld input:focus,.fld select:focus{outline:none;border-color:var(--olive)}
+.btn{background:var(--olive);color:#fff;border:none;border-radius:8px;padding:9px 14px;font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer}
+.btn:hover{background:#3c5429}
+.btn-sm{font-size:11px;padding:5px 9px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer}
+.btn-sm:hover{color:var(--terra);border-color:var(--terra)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.chip{font-size:11px;font-family:var(--mono);background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:3px 7px;cursor:pointer;user-select:none}
+.chip.on{background:#EEF3E8;border-color:#4A6533;color:#3A5128;font-weight:600}
+.bdg{font-size:10px;font-family:var(--mono);padding:2px 7px;border-radius:10px;background:var(--bg);border:1px solid var(--border)}
+.note{font-size:11px;color:var(--muted);background:#FBF1E0;border:1px solid #EAD9B8;border-radius:8px;padding:10px 12px;line-height:1.5}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo-title">Usuarios y permisos · Puntal Agro</div>
+    <div class="logo-sub">Administración (modo demo)</div>
+  </div>
+  <div class="h-actions">
+    <a class="lnk" href="index.html">← Volver al menú</a>
+    <button class="lnk" onclick="resetDemo()">Reiniciar demo</button>
+  </div>
+</header>
+
+<main>
+  <div>
+    <h1>Usuarios y permisos</h1>
+    <p class="sub">Alta de usuarios y asignación de permisos por empresa (herramientas + nivel). En modo demo todo se guarda en localStorage; al conectar el backend, esta pantalla usará las mismas funciones contra el servidor.</p>
+  </div>
+
+  <div class="note">El permiso es <strong>por empresa</strong>: un usuario puede tener distinto conjunto de herramientas y nivel en cada empresa. El permiso llega hasta nivel campo (acá, en demo, se asignan todas).</div>
+
+  <div class="panel">
+    <h2>Nuevo usuario</h2>
+    <div class="row">
+      <div class="fld"><label>Nombre</label><input id="u-nombre" placeholder="Nombre y apellido"></div>
+      <div class="fld"><label>Email (login)</label><input id="u-email" placeholder="usuario@empresa.com"></div>
+      <div class="fld"><label>Rol</label>
+        <select id="u-rol">
+          <option value="usuario">usuario</option>
+          <option value="admin_cliente">admin_cliente</option>
+          <option value="admin_general">admin_general</option>
+        </select>
+      </div>
+      <button class="btn" onclick="crearUsuario()">Crear usuario</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Usuarios</h2>
+    <table id="tbl-usuarios"><thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Permisos</th><th></th></tr></thead><tbody></tbody></table>
+  </div>
+
+  <div class="panel">
+    <h2>Asignar permiso a un usuario</h2>
+    <div class="row">
+      <div class="fld"><label>Usuario</label><select id="p-usuario"></select></div>
+      <div class="fld"><label>Empresa</label><select id="p-empresa"></select></div>
+      <div class="fld"><label>Nivel</label>
+        <select id="p-nivel"><option value="ver">ver</option><option value="cargar">cargar</option><option value="administrar">administrar</option></select>
+      </div>
+    </div>
+    <div class="fld" style="margin-top:12px"><label>Herramientas habilitadas</label>
+      <div class="chips" id="p-herramientas"></div>
+    </div>
+    <button class="btn" style="margin-top:14px" onclick="asignarPermiso()">Guardar permiso</button>
+  </div>
+</main>
+
+<script src="pa-core.js"></script>
+<script>
+var seleccionadas = {};
+
+function renderUsuarios(){
+  var us = PA.demo.listarUsuarios();
+  var ps = PA.demo.listarPermisos();
+  var emp = PA.demo.listarEmpresas();
+  var nombreEmp = {};
+  for (var e=0;e<emp.length;e++) nombreEmp[emp[e].id]=emp[e].razonSocial;
+  var tb = document.querySelector('#tbl-usuarios tbody');
+  tb.innerHTML='';
+  for (var i=0;i<us.length;i++){
+    var u=us[i];
+    var permisosTxt='';
+    if (u.rol==='admin_general'){ permisosTxt='<span class="bdg">acceso total</span>'; }
+    else {
+      for (var j=0;j<ps.length;j++){
+        if (ps[j].usuarioId===u.id){
+          permisosTxt += '<div style="margin-bottom:3px"><span class="bdg">'+(nombreEmp[ps[j].empresaId]||ps[j].empresaId)+'</span> '+ps[j].nivel+' · '+ps[j].herramientas.length+' herr.</div>';
+        }
+      }
+      if(!permisosTxt) permisosTxt='<span style="color:var(--muted)">sin permisos</span>';
+    }
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td>'+u.nombre+'</td><td>'+u.email+'</td><td><span class="bdg">'+u.rol+'</span></td><td>'+permisosTxt+'</td>'+
+      '<td><button class="btn-sm" onclick="borrarUsuario(\''+u.id+'\')">Borrar</button></td>';
+    tb.appendChild(tr);
+  }
+  // refrescar selects
+  var su=document.getElementById('p-usuario'); su.innerHTML='';
+  for (var k=0;k<us.length;k++){ if(us[k].rol==='admin_general')continue; var o=document.createElement('option');o.value=us[k].id;o.textContent=us[k].nombre;su.appendChild(o); }
+  var se=document.getElementById('p-empresa'); se.innerHTML='';
+  for (var m=0;m<emp.length;m++){ var oe=document.createElement('option');oe.value=emp[m].id;oe.textContent=emp[m].razonSocial;se.appendChild(oe); }
+}
+
+function renderChips(){
+  var cont=document.getElementById('p-herramientas'); cont.innerHTML='';
+  var hs=PA.demo.herramientasPropias();
+  for (var i=0;i<hs.length;i++){
+    (function(h){
+      var c=document.createElement('span');
+      c.className='chip'+(seleccionadas[h]?' on':'');
+      c.textContent=h;
+      c.onclick=function(){ seleccionadas[h]=!seleccionadas[h]; c.className='chip'+(seleccionadas[h]?' on':''); };
+      cont.appendChild(c);
+    })(hs[i]);
+  }
+}
+
+function crearUsuario(){
+  var nombre=document.getElementById('u-nombre').value.trim();
+  var email=document.getElementById('u-email').value.trim();
+  var rol=document.getElementById('u-rol').value;
+  if(!nombre||!email){ alert('Completá nombre y email.'); return; }
+  PA.demo.guardarUsuario({ nombre:nombre, email:email, rol:rol, clienteId: rol==='admin_general'?null:'cli_demo' });
+  document.getElementById('u-nombre').value=''; document.getElementById('u-email').value='';
+  renderUsuarios();
+}
+function borrarUsuario(id){ if(confirm('¿Borrar este usuario y sus permisos?')){ PA.demo.borrarUsuario(id); renderUsuarios(); } }
+
+function asignarPermiso(){
+  var usuarioId=document.getElementById('p-usuario').value;
+  var empresaId=document.getElementById('p-empresa').value;
+  var nivel=document.getElementById('p-nivel').value;
+  if(!usuarioId){ alert('No hay usuarios (que no sean admin_general) para asignar.'); return; }
+  var herr=[];
+  for (var h in seleccionadas){ if(seleccionadas[h]) herr.push(h); }
+  PA.demo.guardarPermiso({ usuarioId:usuarioId, empresaId:empresaId, campoIds:[], herramientas:herr, nivel:nivel });
+  alert('Permiso guardado.');
+  renderUsuarios();
+}
+
+function resetDemo(){ if(confirm('¿Reiniciar todos los datos demo?')){ PA.demo.resetDemo(); seleccionadas={}; renderUsuarios(); renderChips(); } }
+
+PA.init({ modo:'demo' }, function(){
+  renderUsuarios();
+  renderChips();
+});
+</script>
+
+</body>
+</html>
