@@ -17,6 +17,8 @@
   var LS_EMPRESAS = 'pa_empresas';      // empresas demo
   var LS_CAMPOS   = 'pa_campos';        // campos/establecimientos demo
   var LS_SESION   = 'pa_sesion';        // sesión activa { usuarioId, empresaActivaId }
+  var LS_SEEDVER  = 'pa_seed_ver';      // versión del seed demo
+  var SEED_VER    = '3';                // subir este número al cambiar la estructura del seed
 
   // Herramientas PROPIAS (asignable=true): id + nombre legible.
   // Deben coincidir con los data-tool del index y con §5.2 del modelo.
@@ -53,7 +55,17 @@
 
   /* ---------- siembra de datos demo (solo si no hay nada) ---------- */
   function seedDemo() {
-    if (lsGet(LS_CLIENTES, null)) return; // ya sembrado
+    // si ya está sembrado con la versión actual, no hacer nada
+    if (lsGet(LS_SEEDVER, null) === SEED_VER && lsGet(LS_USUARIOS, null)) return;
+
+    // limpiar cualquier dato de versiones anteriores para evitar estados inconsistentes
+    try {
+      localStorage.removeItem(LS_CLIENTES);
+      localStorage.removeItem(LS_EMPRESAS);
+      localStorage.removeItem(LS_CAMPOS);
+      localStorage.removeItem(LS_USUARIOS);
+      localStorage.removeItem(LS_PERMISOS);
+    } catch (e) {}
 
     var clientes = [
       { id: 'cli_albor', nombre: 'Grupo Albor', email: 'contacto@albor.com', telefono: '358-400-0000',
@@ -71,19 +83,26 @@
     ];
     var usuarios = [
       { id: 'usr_admin', nombre: 'Admin Puntal', email: 'admin@puntal.com', rol: 'admin_general', clienteId: null },
-      { id: 'usr_maria', nombre: 'María Pereyra', email: 'maria@albor.com', rol: 'admin_cliente', clienteId: 'cli_albor' }
+      { id: 'usr_maria', nombre: 'María Pereyra', email: 'maria@albor.com', rol: 'admin_cliente', clienteId: 'cli_albor' },
+      { id: 'usr_jose',  nombre: 'José Gómez', email: 'jose@albor.com', rol: 'usuario', clienteId: 'cli_albor' },
+      { id: 'usr_ana',   nombre: 'Ana Ruiz', email: 'ana@albor.com', rol: 'usuario', clienteId: 'cli_albor' }
     ];
     var permisos = [
       { usuarioId: 'usr_maria', empresaId: 'emp_albor_sa', campoIds: [],
         herramientas: ['tablero_agro', 'tablero_insumos_ot', 'tablero_uso_suelo', 'Fitosanitarios'], nivel: 'administrar' },
       { usuarioId: 'usr_maria', empresaId: 'emp_lospinos', campoIds: [],
-        herramientas: ['tablero_insumos_ot', 'tablero_uso_suelo'], nivel: 'cargar' }
+        herramientas: ['tablero_insumos_ot', 'tablero_uso_suelo'], nivel: 'cargar' },
+      { usuarioId: 'usr_jose', empresaId: 'emp_albor_sa', campoIds: ['campo_elpuntal'],
+        herramientas: ['tablero_insumos_ot', 'tablero_uso_suelo'], nivel: 'cargar' },
+      { usuarioId: 'usr_ana', empresaId: 'emp_albor_sa', campoIds: [],
+        herramientas: ['tablero_agro'], nivel: 'ver' }
     ];
     lsSet(LS_CLIENTES, clientes);
     lsSet(LS_EMPRESAS, empresas);
     lsSet(LS_CAMPOS, campos);
     lsSet(LS_USUARIOS, usuarios);
     lsSet(LS_PERMISOS, permisos);
+    lsSet(LS_SEEDVER, SEED_VER);
   }
 
   /* ---------- estado en memoria del contexto activo ---------- */
@@ -223,6 +242,37 @@
     listarPermisos: function () { return lsGet(LS_PERMISOS, []); },
     herramientasPropias: function () { return HERRAMIENTAS_PROPIAS.slice(); },
 
+    // Usuarios que el usuario logueado puede ver/gestionar.
+    // admin_general: todos. admin_cliente: solo los de su clienteId. usuario: ninguno.
+    usuariosVisibles: function () {
+      var ctx = _ctx;
+      var us = lsGet(LS_USUARIOS, []);
+      if (!ctx) return us; // sin contexto (demo directo) -> no filtra
+      if (ctx.usuario.rol === 'admin_general') return us;
+      if (ctx.usuario.rol === 'admin_cliente') {
+        var out = [];
+        for (var i = 0; i < us.length; i++) {
+          if (us[i].clienteId === ctx.clienteId) out.push(us[i]);
+        }
+        return out;
+      }
+      return [];
+    },
+    // Empresas que el usuario logueado puede ver (para los selectores de permiso).
+    empresasVisibles: function () {
+      var ctx = _ctx;
+      var es = lsGet(LS_EMPRESAS, []);
+      if (!ctx || ctx.usuario.rol === 'admin_general') return es;
+      if (ctx.usuario.rol === 'admin_cliente') {
+        var out = [];
+        for (var i = 0; i < es.length; i++) {
+          if (es[i].clienteId === ctx.clienteId) out.push(es[i]);
+        }
+        return out;
+      }
+      return [];
+    },
+
     buscarPermiso: function (usuarioId, empresaId) {
       var ps = lsGet(LS_PERMISOS, []);
       for (var i = 0; i < ps.length; i++) {
@@ -335,6 +385,7 @@
         localStorage.removeItem(LS_USUARIOS);
         localStorage.removeItem(LS_PERMISOS);
         localStorage.removeItem(LS_SESION);
+        localStorage.removeItem(LS_SEEDVER);
       } catch (e) {}
       seedDemo();
     }
