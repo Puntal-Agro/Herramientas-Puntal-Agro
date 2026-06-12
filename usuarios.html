@@ -108,6 +108,7 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted
 
 <script src="pa-core.js"></script>
 <script>
+var CTX = null;  // contexto del admin logueado
 function renderUsuarios(){
   var us = PA.demo.usuariosVisibles();
   var ps = PA.demo.listarPermisos();
@@ -232,7 +233,20 @@ function crearUsuario(){
   var email=document.getElementById('u-email').value.trim();
   var rol=document.getElementById('u-rol').value;
   if(!nombre||!email){ alert('Completá nombre y email.'); return; }
-  PA.demo.guardarUsuario({ nombre:nombre, email:email, rol:rol, clienteId: rol==='admin_general'?null:'cli_demo' });
+  // clienteId del nuevo usuario:
+  // - admin_general: null (es de Puntal, no de un cliente)
+  // - resto: el cliente del admin que lo crea. Si el admin es admin_general,
+  //   por ahora (demo) toma el primer cliente disponible.
+  var clienteId = null;
+  if (rol !== 'admin_general'){
+    if (CTX && CTX.usuario.rol === 'admin_cliente'){
+      clienteId = CTX.clienteId;
+    } else {
+      var cls = PA.demo.listarClientes();
+      clienteId = cls.length ? cls[0].id : null;
+    }
+  }
+  PA.demo.guardarUsuario({ nombre:nombre, email:email, rol:rol, clienteId: clienteId });
   document.getElementById('u-nombre').value=''; document.getElementById('u-email').value='';
   renderUsuarios(); precargar();
 }
@@ -273,6 +287,7 @@ PA.init({ modo:'demo' }, function(){
   if (!PA.haySesion()) { location.href='login.html'; return; }
   PA.loadContext(null, function(err, ctx){
     if (err) { location.href='login.html'; return; }
+    CTX = ctx;
     // un usuario común no debería entrar al ABM
     if (ctx.usuario.rol !== 'admin_general' && ctx.usuario.rol !== 'admin_cliente'){
       location.href='index.html'; return;
