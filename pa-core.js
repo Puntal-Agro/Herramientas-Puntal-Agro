@@ -13,7 +13,9 @@
 
   var LS_USUARIOS = 'pa_usuarios';      // catálogo de usuarios demo
   var LS_PERMISOS = 'pa_permisos';      // lista de permisos (uno por usuario+empresa)
+  var LS_CLIENTES = 'pa_clientes';      // clientes (tenants) demo
   var LS_EMPRESAS = 'pa_empresas';      // empresas demo
+  var LS_CAMPOS   = 'pa_campos';        // campos/establecimientos demo
   var LS_SESION   = 'pa_sesion';        // sesión activa { usuarioId, empresaActivaId }
 
   // Herramientas PROPIAS (asignable=true): id + nombre legible.
@@ -51,25 +53,35 @@
 
   /* ---------- siembra de datos demo (solo si no hay nada) ---------- */
   function seedDemo() {
-    if (lsGet(LS_EMPRESAS, null)) return; // ya sembrado
+    if (lsGet(LS_CLIENTES, null)) return; // ya sembrado
 
+    var clientes = [
+      { id: 'cli_albor', nombre: 'Grupo Albor', email: 'contacto@albor.com', telefono: '358-400-0000',
+        nombreContacto: 'María Pereyra', activo: true, fechaAlta: '2025-01-15',
+        cuit: '30-71000000-1', razonSocial: 'Grupo Albor S.A.', direccion: 'Río Cuarto, Córdoba', facturaCentralizada: true }
+    ];
     var empresas = [
-      { id: 'emp_albor_sa', razonSocial: 'Albor Agropecuaria S.A.' },
-      { id: 'emp_lospinos', razonSocial: 'Los Pinos S.R.L.' }
+      { id: 'emp_albor_sa', clienteId: 'cli_albor', razonSocial: 'Albor Agropecuaria S.A.', cuit: '30-71000000-1', direccion: 'Río Cuarto, Córdoba', condicionIVA: 'RI', activo: true },
+      { id: 'emp_lospinos', clienteId: 'cli_albor', razonSocial: 'Los Pinos S.R.L.', cuit: '30-71000111-2', direccion: 'General Cabrera, Córdoba', condicionIVA: 'RI', activo: true }
+    ];
+    var campos = [
+      { id: 'campo_elpuntal', empresaId: 'emp_albor_sa', nombre: 'El Puntal', localidad: 'Río Cuarto', partido: 'Río Cuarto', provincia: 'Córdoba', haTotales: 850 },
+      { id: 'campo_laloma',  empresaId: 'emp_albor_sa', nombre: 'La Loma', localidad: 'Las Higueras', partido: 'Río Cuarto', provincia: 'Córdoba', haTotales: 420 },
+      { id: 'campo_sanjose', empresaId: 'emp_lospinos', nombre: 'San José', localidad: 'General Cabrera', partido: 'Juárez Celman', provincia: 'Córdoba', haTotales: 610 }
     ];
     var usuarios = [
       { id: 'usr_admin', nombre: 'Admin Puntal', email: 'admin@puntal.com', rol: 'admin_general', clienteId: null },
       { id: 'usr_maria', nombre: 'María Pereyra', email: 'maria@albor.com', rol: 'admin_cliente', clienteId: 'cli_albor' }
     ];
-    // admin_general: acceso a todo (se resuelve en loadContext sin permisos explícitos)
-    // maria: permisos explícitos en las dos empresas
     var permisos = [
       { usuarioId: 'usr_maria', empresaId: 'emp_albor_sa', campoIds: [],
         herramientas: ['tablero_agro', 'tablero_insumos_ot', 'tablero_uso_suelo', 'Fitosanitarios'], nivel: 'administrar' },
       { usuarioId: 'usr_maria', empresaId: 'emp_lospinos', campoIds: [],
         herramientas: ['tablero_insumos_ot', 'tablero_uso_suelo'], nivel: 'cargar' }
     ];
+    lsSet(LS_CLIENTES, clientes);
     lsSet(LS_EMPRESAS, empresas);
+    lsSet(LS_CAMPOS, campos);
     lsSet(LS_USUARIOS, usuarios);
     lsSet(LS_PERMISOS, permisos);
   }
@@ -257,9 +269,69 @@
       }
       lsSet(LS_PERMISOS, out);
     },
+
+    /* ---- ABM estructura: Cliente / Empresa / Campo ---- */
+    listarClientes: function () { return lsGet(LS_CLIENTES, []); },
+    listarCampos: function () { return lsGet(LS_CAMPOS, []); },
+    empresasDeCliente: function (clienteId) {
+      var es = lsGet(LS_EMPRESAS, []), out = [];
+      for (var i = 0; i < es.length; i++) { if (es[i].clienteId === clienteId) out.push(es[i]); }
+      return out;
+    },
+    camposDeEmpresa: function (empresaId) {
+      var cs = lsGet(LS_CAMPOS, []), out = [];
+      for (var i = 0; i < cs.length; i++) { if (cs[i].empresaId === empresaId) out.push(cs[i]); }
+      return out;
+    },
+    guardarCliente: function (c) {
+      var cs = lsGet(LS_CLIENTES, []);
+      if (!c.id) { c.id = uid('cli'); cs.push(c); }
+      else { var f=false; for (var i=0;i<cs.length;i++){ if(cs[i].id===c.id){cs[i]=c;f=true;break;} } if(!f) cs.push(c); }
+      lsSet(LS_CLIENTES, cs); return c;
+    },
+    guardarEmpresa: function (e) {
+      var es = lsGet(LS_EMPRESAS, []);
+      if (!e.id) { e.id = uid('emp'); es.push(e); }
+      else { var f=false; for (var i=0;i<es.length;i++){ if(es[i].id===e.id){es[i]=e;f=true;break;} } if(!f) es.push(e); }
+      lsSet(LS_EMPRESAS, es); return e;
+    },
+    guardarCampo: function (k) {
+      var ks = lsGet(LS_CAMPOS, []);
+      if (!k.id) { k.id = uid('campo'); ks.push(k); }
+      else { var f=false; for (var i=0;i<ks.length;i++){ if(ks[i].id===k.id){ks[i]=k;f=true;break;} } if(!f) ks.push(k); }
+      lsSet(LS_CAMPOS, ks); return k;
+    },
+    borrarCliente: function (id) {
+      // borra cliente + sus empresas + campos de esas empresas (cascada demo)
+      var cs = lsGet(LS_CLIENTES, []), outc = [];
+      for (var i=0;i<cs.length;i++){ if(cs[i].id!==id) outc.push(cs[i]); }
+      lsSet(LS_CLIENTES, outc);
+      var es = lsGet(LS_EMPRESAS, []), empIds = {}, oute = [];
+      for (var j=0;j<es.length;j++){ if(es[j].clienteId===id) empIds[es[j].id]=true; else oute.push(es[j]); }
+      lsSet(LS_EMPRESAS, oute);
+      var ks = lsGet(LS_CAMPOS, []), outk = [];
+      for (var m=0;m<ks.length;m++){ if(!empIds[ks[m].empresaId]) outk.push(ks[m]); }
+      lsSet(LS_CAMPOS, outk);
+    },
+    borrarEmpresa: function (id) {
+      var es = lsGet(LS_EMPRESAS, []), oute = [];
+      for (var i=0;i<es.length;i++){ if(es[i].id!==id) oute.push(es[i]); }
+      lsSet(LS_EMPRESAS, oute);
+      var ks = lsGet(LS_CAMPOS, []), outk = [];
+      for (var j=0;j<ks.length;j++){ if(ks[j].empresaId!==id) outk.push(ks[j]); }
+      lsSet(LS_CAMPOS, outk);
+    },
+    borrarCampo: function (id) {
+      var ks = lsGet(LS_CAMPOS, []), out = [];
+      for (var i=0;i<ks.length;i++){ if(ks[i].id!==id) out.push(ks[i]); }
+      lsSet(LS_CAMPOS, out);
+    },
+
     resetDemo: function () {
       try {
+        localStorage.removeItem(LS_CLIENTES);
         localStorage.removeItem(LS_EMPRESAS);
+        localStorage.removeItem(LS_CAMPOS);
         localStorage.removeItem(LS_USUARIOS);
         localStorage.removeItem(LS_PERMISOS);
         localStorage.removeItem(LS_SESION);
