@@ -346,13 +346,13 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
           <th style="width:24px"></th>
           <th class="th-sort" onclick="sortBy('campo')">Campo <span class="sort-ind" id="si-campo"></span></th>
           <th class="th-sort" onclick="sortBy('lote')">Lote <span class="sort-ind" id="si-lote"></span></th>
+          <th class="th-sort" onclick="sortBy('sup')">Sup lote <span class="sort-ind" id="si-sup"></span></th>
           <th class="th-sort" onclick="sortBy('amb')">Ambiente <span class="sort-ind" id="si-amb"></span></th>
           <th class="th-sort" onclick="sortBy('tipo')">Tipo <span class="sort-ind" id="si-tipo"></span></th>
           <th class="th-hist-global" id="thHist0" style="display:none">—</th>
           <th class="th-hist-global" id="thHist1" style="display:none">—</th>
           <th class="th-hist-global" id="thHist2" style="display:none">—</th>
           <th>Antec. (<span id="thAntCamp">—</span>)</th>
-          <th class="th-sort" onclick="sortBy('sup')">Sup lote <span class="sort-ind" id="si-sup"></span></th>
           <th>Actividades (<span id="thActCamp">—</span>)</th>
           <th class="th-sort" onclick="sortBy('fisica')">Sup física <span class="sort-ind" id="si-fisica"></span></th>
           <th class="th-sort" onclick="sortBy('sembrada')">Sup sembrada <span class="sort-ind" id="si-sembrada"></span></th>
@@ -554,6 +554,43 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
     <div class="modal-actions">
       <button class="modal-cancel" onclick="closeLoteModal()">Cancelar</button>
       <button class="modal-ok" onclick="confirmLoteModal()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Editor de ACTIVIDADES de una celda (lote × campaña) -->
+<div class="modal-bg" id="modalActs">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-title" id="modalActsTitle">Actividades</div>
+    <div class="modal-sub" id="modalActsSub">—</div>
+    <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.3px;margin-bottom:6px">Actividades del lote en esta campaña</div>
+    <div id="modalActsList"></div>
+    <div style="margin-top:14px;padding:12px;background:var(--bg);border-radius:8px;border:1px solid var(--border)">
+      <div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:8px">Agregar actividad</div>
+      <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap">
+        <div style="flex:1.6;min-width:160px">
+          <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px">Cultivo / Uso</label>
+          <select class="modal-input" id="maNuevoCult" style="width:100%;box-sizing:border-box"></select>
+        </div>
+        <div style="flex:1;min-width:80px">
+          <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px">Ha</label>
+          <input type="number" class="modal-input" id="maNuevoHa" min="0" step="0.1" style="width:100%;box-sizing:border-box">
+        </div>
+        <label style="font-size:11px;cursor:pointer;display:flex;align-items:center;gap:4px;padding-bottom:8px;white-space:nowrap">
+          <input type="checkbox" id="maNuevoSeg"> 2ª
+        </label>
+        <button class="modal-ok" style="padding-bottom:8px;padding-top:8px" onclick="maAgregarActividad()">+ Agregar</button>
+      </div>
+    </div>
+    <div class="modal-warn" id="modalActsWarn" style="display:none"></div>
+    <div style="display:flex;gap:20px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border);font-size:12px">
+      <span>Sup. física: <strong id="maTotFisica" style="font-variant-numeric:tabular-nums">0</strong> ha</span>
+      <span>Sup. sembrada: <strong id="maTotSembrada" style="font-variant-numeric:tabular-nums">0</strong> ha</span>
+      <span style="color:var(--muted)">Lote: <strong id="maSupLote" style="font-variant-numeric:tabular-nums">0</strong> ha</span>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeActsModal()">Cancelar</button>
+      <button class="modal-ok" onclick="guardarActividades()">Guardar</button>
     </div>
   </div>
 </div>
@@ -803,10 +840,11 @@ function cultsCell(acts, opts){
   opts = opts || {};
   acts = acts || [];
   if(!acts.length) return '<span style="color:var(--muted)">—</span>';
+  var chipOpts = {}; for(var k in opts){ chipOpts[k] = opts[k]; } chipOpts.hideName = true;
   var parts = [];
   for(var i=0;i<acts.length;i++){
     var a = acts[i];
-    var base = opts.ro ? cultRoHtml(a.c, opts) : cultHtml(a.c, null, opts);
+    var base = chipOpts.ro ? cultRoHtml(a.c, chipOpts) : cultHtml(a.c, null, chipOpts);
     var ha = (opts.showHa!==false && a.ha!=null) ? '<span class="cult-ha">'+fInt(a.ha)+'</span>' : '';
     var seg = a.seg ? '<span class="seg-badge" title="Cultivo de 2ª">2ª</span>' : '';
     parts.push('<span class="act-chip">'+base+ha+seg+'</span>');
@@ -1528,9 +1566,9 @@ function renderPlan(){
     totSemb += supSembrada(acts);
   }
   var histCols = state.histGlobal ? '<td></td><td></td><td></td>' : '';
-  // Orden: [btn][campo][lote][amb][tipo][hist x3][antecesor][sup lote][actividades][física][sembrada][%]
-  // TOTAL ocupa campo+lote+amb+tipo = colspan 4
-  document.getElementById('planFoot').innerHTML = '<tr class="tot-row"><td></td><td colspan="4" class="tdname">TOTAL</td>'+histCols+'<td></td><td>'+fInt(totSupLote)+'</td><td></td><td>'+fInt(totFis)+'</td><td>'+fInt(totSemb)+'</td><td>'+f(totSupLote>0?totFis/totSupLote*100:0,0)+'%</td></tr>';
+  // Orden: [btn][campo][lote][sup lote][amb][tipo][hist x3][antecesor][actividades][física][sembrada][%]
+  // TOTAL ocupa campo+lote = colspan 2; luego sup lote; luego amb+tipo vacíos
+  document.getElementById('planFoot').innerHTML = '<tr class="tot-row"><td></td><td colspan="2" class="tdname">TOTAL</td><td>'+fInt(totSupLote)+'</td><td></td><td></td>'+histCols+'<td></td><td></td><td>'+fInt(totFis)+'</td><td>'+fInt(totSemb)+'</td><td>'+f(totSupLote>0?totFis/totSupLote*100:0,0)+'%</td></tr>';
 }
 
 function renderMassBanner(lts){
@@ -1609,11 +1647,11 @@ function renderRows(lts, cls){
     html += '<td>'+btnExp+'</td>';
     html += '<td class="tdcampo">'+(l.c||'—')+'</td>';
     html += '<td class="tdname">'+l.l+'</td>';
+    html += '<td>'+f(sup,1)+'</td>';
     html += '<td>'+ambHtml+'</td>';
     html += '<td>'+tipoHtml+'</td>';
     html += histCells;
     html += '<td>'+antHtml+'</td>';
-    html += '<td>'+f(sup,1)+'</td>';
     html += '<td>'+actsHtml+'</td>';
     html += fisicaHtml;
     html += sembradaHtml;
@@ -1642,15 +1680,170 @@ function renderRows(lts, cls){
   return html;
 }
 
-// Placeholder de edición — el editor modal de actividades llega en la próxima tanda.
+// ────────────────────────────────────────────────────────────
+// EDITOR DE ACTIVIDADES (lote × campaña) — modal con guardado explícito
+// Trabaja sobre una copia temporal; recién al Guardar se escribe en el lote.
+// ────────────────────────────────────────────────────────────
+var maEstado = { loteName: null, acts: [] };
+
 function openCeldaActividades(loteName){
-  alert('El editor de actividades (alta/edición) se implementa en la próxima etapa.\n\nLote: '+loteName+' · Campaña: '+state.campania);
+  var l = LOTES.find(function(x){return x.l===loteName;});
+  if(!l) return;
+  // Copia temporal de las actividades de la campaña activa
+  var orig = actsDe(l, state.campania);
+  maEstado = { loteName: loteName, acts: [] };
+  for(var i=0;i<orig.length;i++){
+    maEstado.acts.push({ c: orig[i].c, ha: orig[i].ha, seg: !!orig[i].seg });
+  }
+  document.getElementById('modalActsTitle').textContent = l.l + ' · Campaña ' + state.campania;
+  document.getElementById('modalActsSub').textContent = fInt(l.s||0) + ' ha · ambiente ' + (l.a || '—');
+  document.getElementById('maSupLote').textContent = fInt(l.s||0);
+  // Poblar el select de cultivo/uso desde el padrón
+  poblarSelectCultivos('maNuevoCult');
+  document.getElementById('maNuevoHa').value = (l.s!=null ? l.s : '');
+  document.getElementById('maNuevoSeg').checked = false;
+  document.getElementById('modalActsWarn').style.display = 'none';
+  renderActsList();
+  document.getElementById('modalActs').classList.add('on');
+}
+function closeActsModal(){ document.getElementById('modalActs').classList.remove('on'); maEstado = { loteName:null, acts:[] }; }
+
+// Llena un <select> con las opciones de cultivo/uso del padrón, agrupadas por tipo
+function poblarSelectCultivos(selId){
+  var sel = document.getElementById(selId);
+  if(!sel) return;
+  var agr = [], gan = [];
+  for(var sigla in CULTIVOS){
+    var item = { sigla: sigla, n: CULTIVOS[sigla].n, t: CULTIVOS[sigla].t };
+    if(item.t==='GAN') gan.push(item); else agr.push(item);
+  }
+  var byName = function(a,b){ return a.n.localeCompare(b.n); };
+  agr.sort(byName); gan.sort(byName);
+  var html = '';
+  if(agr.length){
+    html += '<optgroup label="Agrícolas">';
+    for(var i=0;i<agr.length;i++) html += '<option value="'+agr[i].sigla+'">'+agr[i].sigla+' — '+agr[i].n+'</option>';
+    html += '</optgroup>';
+  }
+  if(gan.length){
+    html += '<optgroup label="Ganaderos / forrajeros">';
+    for(var j=0;j<gan.length;j++) html += '<option value="'+gan[j].sigla+'">'+gan[j].sigla+' — '+gan[j].n+'</option>';
+    html += '</optgroup>';
+  }
+  sel.innerHTML = html;
+}
+
+// Devuelve las ha del lote en edición
+function maSupLote(){
+  var l = LOTES.find(function(x){return x.l===maEstado.loteName;});
+  return l ? (l.s||0) : 0;
+}
+
+function renderActsList(){
+  var cont = document.getElementById('modalActsList');
+  if(!maEstado.acts.length){
+    cont.innerHTML = '<div style="font-size:12px;color:var(--muted);font-style:italic;padding:8px 0">Sin actividades. Agregá una abajo.</div>';
+  } else {
+    var html = '';
+    for(var i=0;i<maEstado.acts.length;i++){
+      var a = maEstado.acts[i];
+      html += '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)">';
+      html += '<span class="cult-sig" style="min-width:48px;font-weight:500">'+a.c+'</span>';
+      html += '<span style="flex:1;font-size:12px;color:var(--muted)">'+cultName(a.c)+'</span>';
+      html += '<input type="number" min="0" step="0.1" value="'+(a.ha!=null?a.ha:'')+'" style="width:80px;padding:5px 8px;border:1.5px solid #CBD5E1;border-radius:6px;font-size:12px;font-variant-numeric:tabular-nums;text-align:right" onchange="maEditarHa('+i+',this.value)"> <span style="font-size:11px;color:var(--muted)">ha</span>';
+      html += '<label style="font-size:11px;cursor:pointer;display:flex;align-items:center;gap:4px"><input type="checkbox" '+(a.seg?'checked':'')+' onchange="maToggleSeg('+i+')"> 2ª</label>';
+      html += '<button class="btn-icon btn-icon-del" title="Quitar" onclick="maQuitarActividad('+i+')">×</button>';
+      html += '</div>';
+    }
+    cont.innerHTML = html;
+  }
+  maActualizarTotales();
+}
+
+function maActualizarTotales(){
+  var fis = supFisica(maEstado.acts);
+  var semb = supSembrada(maEstado.acts);
+  document.getElementById('maTotFisica').textContent = f(fis,1);
+  document.getElementById('maTotSembrada').textContent = f(semb,1);
+  // Aviso si la física supera la del lote
+  var warn = document.getElementById('modalActsWarn');
+  if(fis > maSupLote() + 0.01){
+    warn.textContent = 'La superficie física ('+f(fis,1)+' ha) supera la del lote ('+f(maSupLote(),1)+' ha).';
+    warn.style.display = '';
+  } else {
+    warn.style.display = 'none';
+  }
+}
+
+function maParseHa(val){
+  var n = parseFloat(String(val).replace(/\./g,'').replace(',','.'));
+  if(isNaN(n)) n = parseFloat(val);
+  return isNaN(n) ? null : n;
+}
+
+function maEditarHa(idx, val){
+  var n = maParseHa(val);
+  if(n===null || n<0){ renderActsList(); return; }
+  if(n > maSupLote() + 0.01){
+    alert('La superficie de la actividad ('+f(n,1)+' ha) no puede superar la del lote ('+f(maSupLote(),1)+' ha).');
+    renderActsList();
+    return;
+  }
+  maEstado.acts[idx].ha = n;
+  maActualizarTotales();
+}
+
+function maToggleSeg(idx){
+  maEstado.acts[idx].seg = !maEstado.acts[idx].seg;
+  maActualizarTotales();
+}
+
+function maQuitarActividad(idx){
+  maEstado.acts.splice(idx, 1);
+  renderActsList();
+}
+
+function maAgregarActividad(){
+  var sigla = document.getElementById('maNuevoCult').value;
+  var ha = maParseHa(document.getElementById('maNuevoHa').value);
+  var seg = document.getElementById('maNuevoSeg').checked;
+  if(!sigla){ alert('Elegí un cultivo/uso.'); return; }
+  if(ha===null || ha<0){ alert('Poné las hectáreas.'); return; }
+  if(ha > maSupLote() + 0.01){
+    alert('La superficie de la actividad ('+f(ha,1)+' ha) no puede superar la del lote ('+f(maSupLote(),1)+' ha).');
+    return;
+  }
+  maEstado.acts.push({ c: sigla, ha: ha, seg: seg });
+  // resetear el bloque agregar (dejo las ha del lote como default otra vez)
+  document.getElementById('maNuevoHa').value = maSupLote() || '';
+  document.getElementById('maNuevoSeg').checked = false;
+  renderActsList();
+}
+
+function guardarActividades(){
+  var l = LOTES.find(function(x){return x.l===maEstado.loteName;});
+  if(!l){ closeActsModal(); return; }
+  // Validación final: ninguna actividad supera el lote
+  for(var i=0;i<maEstado.acts.length;i++){
+    if((maEstado.acts[i].ha||0) > l.s + 0.01){
+      alert('Hay una actividad cuya superficie supera la del lote. Corregila antes de guardar.');
+      return;
+    }
+  }
+  // Escribir la copia en el lote (array nuevo, sin referencias compartidas)
+  var nuevos = [];
+  for(var j=0;j<maEstado.acts.length;j++){
+    nuevos.push({ c: maEstado.acts[j].c, ha: maEstado.acts[j].ha, seg: !!maEstado.acts[j].seg });
+  }
+  l.p[state.campania] = nuevos; // vacío [] = sin plan esa campaña; el lote permanece
+  closeActsModal();
+  renderAll();
 }
 
 // ────────────────────────────────────────────────────────────
 // EDITAR DATOS
-// La edición de actividades (alta/baja/ha/2ª) se hace en el editor modal de celda,
-// que se implementa en la próxima etapa. Estas entradas redirigen a ese editor.
+// La edición de actividades (alta/baja/ha/2ª) se hace en el editor modal de celda.
+// Estas entradas redirigen a ese editor.
 // ────────────────────────────────────────────────────────────
 function editHa(loteName, val){ openCeldaActividades(loteName); }
 function editCultivo(loteName, slot, triggerEl){ openCeldaActividades(loteName); }
