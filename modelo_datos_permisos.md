@@ -5,7 +5,9 @@
 >
 > **Audiencia:** la programadora que construirá la base de datos y la API. Este documento describe el **modelo lógico** (entidades, relaciones, reglas de negocio). No prescribe motor de base de datos, esquema físico ni tecnología de backend; eso queda a criterio de la implementación.
 >
-> **Estado:** **VERSIÓN EN REVISIÓN.** La parte de **usuarios, roles y permisos** (§7) y la **jerarquía** (§1–§2) están firmes y se pueden implementar/probar ya. Las **entidades de negocio** (§3–§4) son borrador avanzado: pueden ajustarse a medida que se estabiliza la estructura de datos de los tableros (p. ej. actividades en uso_suelo). No tomar §3–§4 como definitivo todavía.
+> **Estado:** **VERSIÓN EN REVISIÓN.** La parte de **usuarios, roles y permisos** (§7) y la **jerarquía** (§1–§2) están firmes y se pueden implementar/probar ya. Las **entidades de negocio** (§3–§4) son borrador avanzado: pueden ajustarse a medida que se estabiliza la estructura de datos de los tableros.
+>
+> **Actualización (uso del suelo ya implementado):** la entidad **ACTIVIDAD** (§3.5) y su modelo de N filas por lote/campaña **ya está implementado** en `tablero_uso_suelo`, junto con el maestro **TIPO_ACTIVIDAD** (§3.5.1) y la entidad global **ESPECIE** (§3.5.2). El modelo de esas secciones refleja lo realmente construido y se puede tomar como base sólida. Lo que sigue siendo borrador son las entidades de los tableros aún no migrados (OT/movimientos a fondo, Hacienda, Siembra).
 
 ---
 
@@ -18,7 +20,7 @@ Hoy cada tablero funciona de forma aislada guardando datos en `localStorage` del
 Tres ideas estructurales:
 
 1. **Jerarquía de 4 niveles:** Cliente → Empresa → Campo → Lote.
-2. **Catálogo único por empresa, gestionado en un módulo de Maestros:** insumos, proveedores, compradores, contratistas y labores se cargan una sola vez en un módulo de Maestros a nivel empresa, y los consumen todos los tableros (elimina la carga duplicada actual, en que insumos_ot y Fitosanitarios mantenían catálogos de insumos separados).
+2. **Catálogo único por empresa, gestionado en un módulo de Maestros:** insumos, terceros (proveedores y clientes), choferes y labores se cargan una sola vez en un módulo de Maestros a nivel empresa, y los consumen todos los tableros (elimina la carga duplicada actual, en que insumos_ot y Fitosanitarios mantenían catálogos de insumos separados).
 3. **Permisos de 3 ejes por empresa:** cada usuario tiene, para cada empresa a la que accede, un conjunto de (campos visibles + herramientas habilitadas + nivel de acción).
 
 ---
@@ -35,7 +37,7 @@ CLIENTE                      (tenant raíz — lo administra Puntal)
 Reglas de la jerarquía:
 
 - Un **campo pertenece a una sola empresa** (no hay campos compartidos entre empresas).
-- Los datos de negocio (insumos, proveedores, compradores, contratistas, labores, OTs, lotes, actividades) cuelgan a **nivel Empresa**, no de Cliente. La campaña es global de Puntal (§4.1). Cada empresa es su propia unidad contable.
+- Los datos de negocio (insumos, terceros, choferes, labores, OTs, lotes, actividades) cuelgan a **nivel Empresa**, no de Cliente. La campaña es global de Puntal (§4.1). Cada empresa es su propia unidad contable.
 - El **Cliente** es principalmente el contenedor administrativo y de permisos (y el sujeto de facturación del servicio Puntal).
 - El selector principal en el encabezado de cada tablero es la **Empresa**; dentro de ella se filtra por campo/lote.
 
@@ -98,7 +100,7 @@ Convención: `id` = identificador único estable (string). `parentId` = referenc
 | `nombre` | string | |
 | `ha` | número | Superficie física del lote |
 
-> El lote es la unidad física. La asignación de cultivo/campaña a un lote (la "actividad" de uso del suelo) se modela aparte — ver §3.7.
+> El lote es la unidad física. La asignación de cultivo/campaña a un lote (la "actividad" de uso del suelo) se modela aparte — ver §3.5.
 >
 > **Regla de denormalización:** toda entidad que cuelga de un campo (lote, depósito) lleva además `empresaId`, aunque sea deducible vía campo. El filtro por empresa es el eje de todos los tableros y de los permisos, así que tenerlo a mano evita resolver la cadena campo→empresa en cada consulta. El costo (actualizar si un campo cambiara de empresa) es despreciable porque ese evento es prácticamente inexistente.
 
@@ -108,7 +110,7 @@ Convención: `id` = identificador único estable (string). `parentId` = referenc
 
 La mayoría cuelga de `empresaId` y se carga **una sola vez por empresa**; las consumen todos los tableros. (La excepción es TIPO_INSUMO, §3.1.1, que es una lista **global** de Puntal y se incluye aquí por estar junto al insumo que la usa.)
 
-Los catálogos compartidos — **insumos, depósitos, proveedores, compradores, contratistas, labores y tipos de actividad (cultivos/usos)** — se dan de alta en un **módulo de Maestros** a nivel empresa, independiente de los tableros operativos. Los tableros (Insumos/OT, Fitosanitarios, Labores, etc.) solo los **consumen**; no los crean. Esto evita que la posibilidad de dar de alta un dato compartido dependa de tener acceso a un tablero operativo en particular. (La asignación de cultivos a lotes —ACTIVIDAD, §3.7— y la propia CAMPAÑA no son maestros de empresa: ver §3.7, §4.1 y §8.)
+Los catálogos compartidos — **insumos, depósitos, terceros (proveedores y clientes), choferes, labores y tipos de actividad (cultivos/usos)** — se dan de alta en un **módulo de Maestros** a nivel empresa, independiente de los tableros operativos. Los tableros (Insumos/OT, Fitosanitarios, Labores, etc.) solo los **consumen**; no los crean. Esto evita que la posibilidad de dar de alta un dato compartido dependa de tener acceso a un tablero operativo en particular. (La asignación de cultivos a lotes —ACTIVIDAD, §3.5— y la propia CAMPAÑA no son maestros de empresa: ver §3.5, §4.1 y §8.)
 
 ### 3.1 INSUMO (catálogo unificado)
 
@@ -180,17 +182,56 @@ Se da de alta en **Maestros** (nivel empresa). Puede estar asociado a un campo o
 
 **TIPO_MOVIMIENTO** — lista administrable por Puntal. Valores iniciales: `Ajuste inventario (+)`, `Ajuste inventario (−)`, `Compra`, `Traslado`, `Consumo`, `Devolución a depósito`, `Ingreso por propia producción`, `Baja por vencimiento`, `Baja por rotura de envase`. Puntal puede agregar más.
 
-> El signo sobre el stock (suma o resta) y qué depósitos usa (origen, destino o ambos en Traslado) se derivan del tipo de movimiento. El `Consumo` se genera automáticamente al **confirmar la aplicación** de una OT en un lote (ver §3.8), no al emitir la OT.
+> El signo sobre el stock (suma o resta) y qué depósitos usa (origen, destino o ambos en Traslado) se derivan del tipo de movimiento. El `Consumo` se genera automáticamente al **confirmar la aplicación** de una OT en un lote (ver §3.6), no al emitir la OT.
 
-### 3.3 CONTRATISTA
+### 3.3 TERCERO (Proveedores y Clientes)
+
+Catálogo unificado de las personas/empresas con las que opera la empresa. **Reemplaza las entidades antes separadas** Proveedor, Comprador y Contratista: como en la práctica el mismo tercero suele cumplir varios roles (el que vende gasoil también hace el flete; el contratista que siembra también compra grano), se carga **una sola vez** y se le marcan los roles que cumple.
 
 | Campo | Tipo | Notas |
 |---|---|---|
 | `id` | string | PK |
 | `empresaId` | string | FK → Empresa |
-| `nombre` | string | |
+| `nombre` | string | Nombre / razón social |
 | `cuit` | string | *(opcional)* |
-| `contacto` | string | *(opcional)* |
+| `telefono` | string | *(opcional)* |
+| `email` | string | *(opcional)* |
+| `direccion` | string | *(opcional)* |
+| `esProveedor` | bool | Le provee algo a la empresa |
+| `esCliente` | bool | Le compra a la empresa (cliente comercial) |
+| `tiposProveedor` | array | Solo si `esProveedor`. Valores de TIPO_PROVEEDOR (§3.3.1) |
+| `activo` | bool | Baja lógica |
+
+> Un tercero puede tener **ambos** roles (`esProveedor` y `esCliente`). El filtrado por rol se hace sobre estos campos: "los proveedores" = terceros con `esProveedor: true`; "los contratistas" = terceros con `esProveedor: true` y `'contratista'` en `tiposProveedor`.
+
+> **`esCliente` vs CLIENTE (§2.1):** acá "cliente" es el cliente **comercial** de la empresa (a quién le vende). No confundir con CLIENTE (§2.1), que es el tenant administrado por Puntal.
+
+> **Referencias desde otras entidades:** lo que antes apuntaba a `contratistaId`, `proveedorId` o `compradorId` ahora apunta a **`terceroId`** (un tercero que tenga el rol correspondiente). Ej.: la OT (§3.6) referencia un `terceroId` con `'contratista'` en `tiposProveedor`.
+
+#### 3.3.1 TIPO_PROVEEDOR (lista administrable)
+
+Subtipos de proveedor. Lista **administrable solo por el admin general (Puntal)**, los clientes no la editan.
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `id` | string | PK |
+| `nombre` | string | |
+
+Valores iniciales: `transportista`, `contratista`, `prestador de servicios`, `insumos`. Puntal puede agregar más.
+
+#### 3.3.2 CHOFER
+
+Persona que maneja para un tercero con tipo `transportista`. Cuelga del tercero transportista.
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `id` | string | PK |
+| `empresaId` | string | FK → Empresa |
+| `terceroId` | string | FK → Tercero (que tenga `'transportista'` en `tiposProveedor`) |
+| `nombre` | string | |
+| `dni` | string | *(opcional)* |
+| `licencia` | string | *(opcional)* |
+| `activo` | bool | |
 
 ### 3.4 LABOR
 
@@ -198,39 +239,27 @@ Se da de alta en **Maestros** (nivel empresa). Puede estar asociado a un campo o
 |---|---|---|
 | `id` | string | PK |
 | `empresaId` | string | FK → Empresa |
-| `tipo` | enum | `LP` (propia) / `LC` (contratada) |
+| `tipo` | enum | `LP` (propia) / `LC` (contratada) — quién la ejecuta |
+| `tipoLabor` | string | FK → TIPO_LABOR (§3.4.1) — qué clase de labor es |
 | `nombre` | string | |
 | `tarifaDefault` | número | $/ha; se autocompleta al emitir la OT (editable por OT). Solo aplica a LP |
 
-### 3.5 PROVEEDOR
+> Dos clasificaciones independientes: `tipo` (LP/LC) indica **quién la hace**; `tipoLabor` indica **qué clase de labor es** (Siembra, Pulverización, etc.).
 
-A quién le **compra** la empresa (insumos, servicios).
+#### 3.4.1 TIPO_LABOR (lista administrable)
 
-| Campo | Tipo | Notas |
-|---|---|---|
-| `id` | string | PK |
-| `empresaId` | string | FK → Empresa |
-| `nombre` | string | |
-| `cuit` | string | *(opcional)* |
-| `contacto` | string | *(opcional)* |
-
-### 3.6 COMPRADOR
-
-A quién le **vende** la empresa (granos, hacienda). Es el cliente comercial de la empresa.
-
-> No confundir con CLIENTE (§2.1), que es el tenant administrado por Puntal. COMPRADOR es un cliente comercial de la empresa.
+Lista **administrable solo por el admin general (Puntal)**, los clientes no la editan.
 
 | Campo | Tipo | Notas |
 |---|---|---|
 | `id` | string | PK |
-| `empresaId` | string | FK → Empresa |
 | `nombre` | string | |
-| `cuit` | string | *(opcional)* |
-| `contacto` | string | *(opcional)* |
 
-### 3.7 ACTIVIDAD (uso del suelo)
+Valores iniciales: `Siembra`, `Pulv. Terrestre`, `Pulv. Aérea`, `Desmalezado`, `Corte-hilerado`, `Enrrollado`, `Embolsado`, `Extracción bolsa`, `Clasificación semillas`, `Elaboración ración`, `Distribución ración`, `Gerenciamiento`, `Fertilización líquida`, `Monitoreos`, `Acarreos`, `Labor Fardos`, `Disco-Rastra-Rolo`, `Fertilización voleo`, `Rolo triturador`. Puntal puede agregar más.
 
-Asignación de una actividad (cultivo o uso) a un lote en una campaña. Es una **lista de filas**: un lote en una campaña puede tener **N actividades** (no un cultivo "1º" y "2º" en posiciones fijas como en el modelo viejo, sino tantas filas como se le asignen). Cubre por igual las aperturas temporales (una actividad después de otra sobre las mismas hectáreas) y las espaciales (el lote partido en pedazos), sin distinguir el motivo en el dato.
+### 3.5 ACTIVIDAD (uso del suelo) — **IMPLEMENTADO**
+
+Asignación de una actividad (cultivo o uso) a un lote en una campaña. Es una **lista de filas**: un lote en una campaña puede tener **N actividades** (no un cultivo "1º" y "2º" en posiciones fijas como en el modelo viejo, sino tantas filas como se le asignen). Cubre por igual las aperturas temporales (una actividad después de otra sobre las mismas hectáreas, ej. un cultivo de 1ª y luego uno de 2ª) y las espaciales (el lote partido en pedazos).
 
 | Campo | Tipo | Notas |
 |---|---|---|
@@ -238,26 +267,53 @@ Asignación de una actividad (cultivo o uso) a un lote en una campaña. Es una *
 | `empresaId` | string | FK → Empresa |
 | `loteId` | string | FK → Lote |
 | `campañaId` | string | FK → Campaña |
-| `tipoActividadId` | string | FK → TIPO_ACTIVIDAD (§3.7.1). Antes era texto libre; ahora sale del maestro |
+| `tipoActividadId` | string | FK → TIPO_ACTIVIDAD (§3.5.1). Identifica el cultivo/uso |
 | `ha` | número | Hectáreas de esta actividad |
+| `esSegunda` | bool | `true` = actividad de **2ª** (se siembra sobre superficie ya ocupada en el mismo ciclo). Default `false`. Ver regla de superficies |
 
-> **Validación:** cada actividad se valida de forma **individual** contra la superficie física del lote (`ha` de la actividad ≤ superficie del lote). **No se suman** las actividades entre sí ni se las ordena. Si el usuario quiere partir el lote o secuenciar cultivos, agrega filas; cada una se valida sola.
+> **Las dos superficies de un lote en una campaña** (cálculo derivado, no se almacena):
+> - **Superficie física** = suma de las ha de las actividades **NO** de 2ª (`esSegunda = false`). Es la tierra efectivamente ocupada; no debería superar la superficie del lote.
+> - **Superficie sembrada** = suma de **todas** las actividades (incluye las de 2ª). Puede superar la superficie del lote (un mismo pedazo se siembra dos veces en el ciclo: 1ª + 2ª).
+>
+> Ejemplo: lote de 45 ha con Trigo (1ª, 45 ha) + Soja 2ª (2ª, 45 ha) → física 45, sembrada 90.
 
-> No lleva campo de orden/secuencia ni etiqueta temporal/espacial: las aperturas no son necesariamente secuenciales, y la validación individual no requiere distinguir el tipo.
+> **Validación:** cada actividad se valida de forma **individual** contra la superficie física del lote (`ha` de la actividad ≤ superficie del lote). **No se suman** las actividades entre sí para validar. El flag `esSegunda` no cambia la validación individual; solo define en qué total (física / sembrada) entra la actividad.
 
-#### 3.7.1 TIPO_ACTIVIDAD (maestro)
+> **Antecesor:** el "antecesor" de un lote en una campaña (lo que se muestra como cultivo previo) se deriva leyendo las actividades de la **campaña inmediata anterior** de ese lote, ordenadas por ha descendente. No es un campo almacenado.
 
-Lista de actividades posibles (cultivos y usos del suelo), maestro **a nivel empresa** (cada empresa gestiona la suya). Sigue el mismo patrón que TIPO_INSUMO → INSUMO: TIPO_ACTIVIDAD es el catálogo; ACTIVIDAD (§3.7) es la asignación concreta a un lote/campaña.
+> **Nota de implementación (estructura local actual del tablero):** mientras `tablero_uso_suelo` corre en modo demo (`localStorage`), guarda el plan embebido en el lote como `p: { "26-27": [ { c, ha, seg }, ... ], ... }`, donde la clave es el **nombre de campaña**, `c` es la **sigla** del tipo de actividad, `ha` el número y `seg` el booleano de 2ª. Al migrar al backend esto se **normaliza** en filas ACTIVIDAD: `c` (sigla) → `tipoActividadId` (resolviendo la sigla contra TIPO_ACTIVIDAD de la empresa), `seg` → `esSegunda`, y la clave de campaña → `campañaId`. La sigla es estable y única por empresa, así que el mapeo sigla→id es directo.
+
+#### 3.5.1 TIPO_ACTIVIDAD (maestro) — **IMPLEMENTADO**
+
+Lista de actividades posibles (cultivos y usos del suelo), maestro **a nivel empresa** (cada empresa gestiona la suya). Sigue el mismo patrón que TIPO_INSUMO → INSUMO: TIPO_ACTIVIDAD es el catálogo; ACTIVIDAD (§3.5) es la asignación concreta a un lote/campaña.
 
 | Campo | Tipo | Notas |
 |---|---|---|
 | `id` | string | PK |
 | `empresaId` | string | FK → Empresa |
 | `nombre` | string | |
+| `sigla` | string | Abreviatura usada en planillas y en la UI (ej. `Tr`, `Sj1ª`, `MzT`). **Estable y única por empresa**; es la clave por la que el tablero referencia la actividad en modo demo |
+| `actividad` | enum | *(opcional)* — `AGR` (agrícola) / `GAN` (ganadera) / vacío. Sirve para agrupar superficie por tipo de actividad y para sugerir el tipo del lote (agrícola/ganadero) |
+| `especieId` | string | *(opcional)* — FK → ESPECIE (§3.5.2). La especie botánica detrás del cultivo (ej. `Soja 1ª` y `Soja 2ª` comparten la especie `Soja`). Vacío en usos que no son un grano (verdeos, praderas, campo natural) |
+| `activo` | bool | Baja lógica |
 
-Valores iniciales (de la lista en uso en el tablero): Trigo, Avena, Centeno, Girasol, Maíz, Maíz tardío, Maíz 2ª, Soja 1ª, Soja 2ª, Sementeras (Trigo/Cebada/Avena/Maíz/Soja 1ª/Maíz tardío/Vicia), Verdeo invierno, Verdeo verano, Verdeo diferido, Implantación praderas, Conservación praderas, Promociones Rye grass, Silajes, Rollos/Fardos, Silo bolsa, Barbecho, Estructura, Vicia cosecha. Incluye tanto cultivos como usos no productivos (Barbecho, Estructura).
+Valores iniciales (lista por defecto, cultivos y usos del suelo, con sigla, clasificación y especie):
+Trigo (Tr, AGR, Trigo), Cebada (Cb, AGR, Cebada), Avena (Av, AGR, Avena), Girasol (G, AGR, Girasol), Maíz (Mz, AGR, Maíz), Maíz Tardío (MzT, AGR, Maíz), Maíz 2ª (Mz2ª, AGR, Maíz), Maíz Silo PE (MzSPE, AGR, Maíz Planta Entera), Soja 1ª (Sj1ª, AGR, Soja), Soja 2ª (Sj2ª, AGR, Soja), Cultivo de cobertura (Ccob, AGR, —), Sorgo (Sg, AGR, Sorgo), Verdeo invierno (VI, GAN, —), Maíz pastoreo (MzP, GAN, —), Sorgo forrajero (SgF, GAN, —), Maíz pastoreo diferido (MzD, GAN, —), Sorgo pastoreo diferido (SgD, GAN, —), Promoción Rye Grass (PRG, GAN, —), Pradera impl. (PI, GAN, —), Pradera festuca (PPFe, GAN, —), Pradera alfalfa (PPAlf, GAN, —), Pradera agropiro (PPAg, GAN, —), Pradera degradada (PD, GAN, —), Campo natural (CN, GAN, —), Campo natural degradado (CND, GAN, —). Las columnas `actividad` y `especieId` son opcionales: un tipo puede quedar sin clasificar y/o sin especie.
 
-### 3.8 ORDEN DE TRABAJO (OT)
+#### 3.5.2 ESPECIE (lista global) — **IMPLEMENTADO**
+
+Especies / granos. Lista **global de Puntal** (no por empresa), compartida con el Tablero Comercial y con el armado de cultivos. Permite que varios tipos de actividad agrícola (ej. `Soja 1ª` y `Soja 2ª`) compartan una misma especie a efectos de agregación comercial.
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `id` | string | PK |
+| `nombre` | string | Ej. `Soja`, `Maíz`, `Trigo` |
+| `sigla` | string | Ej. `Sj`, `Mz`, `Tr` |
+| `activo` | bool | |
+
+Valores iniciales: Soja (Sj), Maíz (Mz), Trigo (Tr), Sorgo (Sg), Girasol (G), Cebada (Cb), Avena (Av), Maíz Planta Entera (MzPE).
+
+### 3.6 ORDEN DE TRABAJO (OT)
 
 Una OT registra una labor sobre uno o varios lotes. Tiene tres niveles de estado: por lote (la aplicación real), global de la OT (derivado) y de facturación (eje aparte).
 
@@ -270,7 +326,7 @@ Una OT registra una labor sobre uno o varios lotes. Tiene tres niveles de estado
 | `fecha` | fecha | |
 | `laborId` | string | FK → Labor |
 | `subactividad` | string | |
-| `contratistaId` | string | *(opcional)* FK → Contratista |
+| `terceroId` | string | *(opcional)* FK → Tercero con `'contratista'` en `tiposProveedor` (§3.3) |
 | `tarifa` | número | $/ha aplicada (parte del default de la labor, editable) |
 | `obs` | string | *(opcional)* |
 | `estado` | enum | **DERIVADO, no se carga a mano:** `Pendiente` / `Parcial` / `Aplicada` / `Cancelada` (ver regla abajo) |
@@ -285,7 +341,7 @@ Una OT registra una labor sobre uno o varios lotes. Tiene tres niveles de estado
 | `id` | string | PK |
 | `loteId` | string | FK → Lote |
 | `campoId` | string | FK → Campo (denormalizado desde el lote, para filtrar la OT por permiso — una OT puede tocar lotes de campos distintos) |
-| `tipoActividadId` | string | FK → TIPO_ACTIVIDAD (§3.7.1) — cultivo/uso del lote |
+| `tipoActividadId` | string | FK → TIPO_ACTIVIDAD (§3.5.1) — cultivo/uso del lote |
 | `subact` | string | |
 | `ha` | número | |
 | `estadoLote` | enum | `Pendiente` / `Aplicado` |
@@ -312,6 +368,7 @@ Estos datos **no pertenecen a ningún cliente**. Los carga el **admin general** 
 | `TARIFA_LABOR_BASE` | Tarifas base de labores (referencia Puntal) | — |
 | `PRECIOS_GRANOS` | Pizarra / disponible / futuros | (Tablero Comercial) |
 | `CAMPAÑA` | Lista de campañas (`{id, nombre}`, ej. `24/25`) | — |
+| `ESPECIE` | Lista de especies / granos (`{id, nombre, sigla}`) — ver §3.5.2 | — |
 
 **Regla del dólar (transversal a todo el sistema):** el selector de dólar siempre ofrece las tres cotizaciones **Oficial / MEP / Blue**. Las series nativas en USD de los archivos (UTACATAC, Gasoil) **nunca** se usan como tipo de cambio.
 
@@ -508,7 +565,7 @@ Un usuario tiene una **lista** de permisos: **uno por empresa** a la que accede.
 **Significado de los niveles:**
 
 - `ver` — solo lectura. No carga, no edita, no borra. No toca maestros.
-- `cargar` — puede agregar y editar registros operativos **y maestros** de la empresa (insumos, depósitos, proveedores, compradores, contratistas, labores). No borra de forma masiva.
+- `cargar` — puede agregar y editar registros operativos **y maestros** de la empresa (insumos, depósitos, terceros, choferes, labores). No borra de forma masiva.
 - `administrar` — todo lo de `cargar`, más borrar y gestionar la configuración de la(s) empresa(s) a las que el permiso aplica.
 
 > Los niveles aplican **dentro del alcance del permiso** (empresa + campos + herramientas). El alta de clientes, empresas y campos, y la gestión de datos globales (TC, IPC, tarifas base, campañas, listas globales), son atribución de los roles administrativos (§7.3), no del nivel del permiso.
@@ -563,7 +620,7 @@ Hoy varios tableros crean las mismas entidades por separado (Fitosanitarios mant
 El criterio que ordena dónde se crea cada cosa:
 
 - Lo que es **estructura sobre la que se reparten permisos** (cliente, empresa, campo) → se crea en **Administración**.
-- Lo que es **catálogo compartido por varios tableros** (insumos, proveedores, compradores, contratistas, labores) → se crea en el módulo de **Maestros** (nivel empresa).
+- Lo que es **catálogo compartido por varios tableros** (insumos, terceros, choferes, labores) → se crea en el módulo de **Maestros** (nivel empresa).
 - Lo que es **puramente operativo y depende de algo ya existente** (lote, actividad, OT, movimientos) → se crea en **su tablero**.
 - Lo que es **transversal a todos los clientes** (TC, IPC, tarifas base, precios, campaña) → lo mantiene **Puntal** (global).
 
@@ -574,9 +631,9 @@ El criterio que ordena dónde se crea cada cosa:
 | **Actividad** (lote + tipo de actividad + campaña) | **Plan de Uso del Suelo** | Siembra, Insumos/OT, Labores |
 | **Insumo** (catálogo unificado) | **Maestros** (nivel empresa) | Insumos/OT, Fitosanitarios |
 | **Tipo de actividad** (cultivos/usos) | **Maestros** (nivel empresa) | Plan de Uso, Siembra, Insumos/OT |
-| **Proveedor** | **Maestros** (nivel empresa) | Insumos/OT, Compras |
-| **Comprador** | **Maestros** (nivel empresa) | Comercial, Hacienda |
-| **Contratista** | **Maestros** (nivel empresa) | OTs |
+| **Especie** (granos) | Global (Puntal) | Maestros (tipo de actividad), Comercial |
+| **Tercero** (proveedores y clientes) | **Maestros** (nivel empresa) | Insumos/OT, Comercial, OTs |
+| **Chofer** | **Maestros** (nivel empresa) | Transporte, OTs |
 | **Labor** | **Maestros** (nivel empresa) | OTs, Precio de Labores |
 | **Depósito** | **Maestros** (nivel empresa) | Stock, movimientos |
 | OT | Registro de Labores e Insumos (Insumos/OT) | Costos, reportes |
@@ -586,9 +643,9 @@ El criterio que ordena dónde se crea cada cosa:
 
 > **Campo** se da de alta en Administración (no en un tablero operativo) porque es la estructura sobre la que se reparten los permisos. **Lote y Actividad** sí se crean en Plan de Uso del Suelo, porque son operativos y cuelgan de un campo que ya existe; el permiso llega hasta nivel campo, así que no hay dependencia problemática.
 >
-> Los **maestros de empresa** (insumo, proveedor, comprador, contratista, labor) se crean en un módulo de Maestros independiente, para que la posibilidad de dar de alta un catálogo compartido no dependa de tener acceso a un tablero operativo puntual (p. ej. poder crear un fitosanitario sin necesitar el tablero de Insumos/OT).
+> Los **maestros de empresa** (insumo, tercero, chofer, labor) se crean en un módulo de Maestros independiente, para que la posibilidad de dar de alta un catálogo compartido no dependa de tener acceso a un tablero operativo puntual (p. ej. poder crear un fitosanitario sin necesitar el tablero de Insumos/OT).
 >
-> Nota de migración: hoy `tablero_uso_suelo` guarda el lote con su plan de cultivos por campaña **embebido** en un mismo registro (`{l, c, s, a, p:{campaña:[ha, cultivo, segundo]}}`, con dos posiciones fijas de cultivo). El modelo central **normaliza** eso en LOTE (físico) y una **lista de ACTIVIDAD** (lote + cultivo + campaña, N filas por lote/campaña, sin tope de dos). Este cambio fue pensado pero **aún no implementado** en `tablero_uso_suelo`; se hará por separado. Los tableros nuevos deben adoptar la separación desde el inicio.
+> Nota de migración: hoy `tablero_uso_suelo` guarda el lote con su plan de cultivos por campaña **embebido** en un mismo registro. El modelo viejo usaba dos posiciones fijas de cultivo (`[ha, c1, c2]`); el modelo **actual ya implementado** usa una **lista de N actividades** por campaña: `p: { "26-27": [ { c:sigla, ha, seg }, ... ] }`. El modelo central **normaliza** eso en LOTE (físico) y una **lista de ACTIVIDAD** (lote + tipo de actividad + campaña, N filas por lote/campaña, con flag `esSegunda`). El mapeo desde el dato local: clave de campaña → `campañaId`, `c` (sigla) → `tipoActividadId`, `seg` → `esSegunda`. Los tableros nuevos deben adoptar la separación normalizada desde el inicio.
 
 ---
 
@@ -631,6 +688,25 @@ JSON ilustrativo. Los `id` son de ejemplo.
     { "id": "camp_2425", "nombre": "2024/25" }
   ],
 
+  "especies": [
+    { "id": "esp_0", "nombre": "Soja", "sigla": "Sj", "activo": true },
+    { "id": "esp_1", "nombre": "Maíz", "sigla": "Mz", "activo": true },
+    { "id": "esp_2", "nombre": "Trigo", "sigla": "Tr", "activo": true }
+  ],
+
+  "tiposActividad": [
+    { "id": "ta_sj1", "empresaId": "emp_albor_sa", "nombre": "Soja 1ª", "sigla": "Sj1ª", "actividad": "AGR", "especieId": "esp_0", "activo": true },
+    { "id": "ta_sj2", "empresaId": "emp_albor_sa", "nombre": "Soja 2ª", "sigla": "Sj2ª", "actividad": "AGR", "especieId": "esp_0", "activo": true },
+    { "id": "ta_tr",  "empresaId": "emp_albor_sa", "nombre": "Trigo",   "sigla": "Tr",   "actividad": "AGR", "especieId": "esp_2", "activo": true },
+    { "id": "ta_vi",  "empresaId": "emp_albor_sa", "nombre": "Verdeo invierno", "sigla": "VI", "actividad": "GAN", "especieId": null, "activo": true }
+  ],
+
+  "actividades": [
+    { "id": "act_1", "empresaId": "emp_albor_sa", "loteId": "lote_p1", "campañaId": "camp_2425", "tipoActividadId": "ta_tr",  "ha": 120, "esSegunda": false },
+    { "id": "act_2", "empresaId": "emp_albor_sa", "loteId": "lote_p1", "campañaId": "camp_2425", "tipoActividadId": "ta_sj2", "ha": 120, "esSegunda": true },
+    { "id": "act_3", "empresaId": "emp_albor_sa", "loteId": "lote_p2", "campañaId": "camp_2425", "tipoActividadId": "ta_sj1", "ha": 95,  "esSegunda": false }
+  ],
+
   "depositos": [
     { "id": "dep_central", "empresaId": "emp_albor_sa", "campoId": null, "nombre": "Depósito central" },
     { "id": "dep_puntal", "empresaId": "emp_albor_sa", "campoId": "campo_elpuntal", "nombre": "Galpón El Puntal" }
@@ -652,16 +728,17 @@ JSON ilustrativo. Los `id` son de ejemplo.
     }
   ],
 
-  "proveedores": [
-    { "id": "prov_agro", "empresaId": "emp_albor_sa", "nombre": "Agroinsumos del Centro", "cuit": "30-60000000-7", "contacto": "358-444-0000" }
+  "terceros": [
+    { "id": "ter_agro", "empresaId": "emp_albor_sa", "nombre": "Agroinsumos del Centro", "cuit": "30-60000000-7", "telefono": "358-444-0000",
+      "esProveedor": true, "esCliente": false, "tiposProveedor": ["insumos", "transportista"], "activo": true },
+    { "id": "ter_acopio", "empresaId": "emp_albor_sa", "nombre": "Acopio San Martín", "cuit": "30-65000000-4", "telefono": "358-466-0000",
+      "esProveedor": false, "esCliente": true, "tiposProveedor": [], "activo": true },
+    { "id": "ter_gomez", "empresaId": "emp_albor_sa", "nombre": "Servicios Gómez", "cuit": "20-20000000-3", "telefono": "351-555-0000",
+      "esProveedor": true, "esCliente": false, "tiposProveedor": ["contratista"], "activo": true }
   ],
 
-  "compradores": [
-    { "id": "comp_acopio", "empresaId": "emp_albor_sa", "nombre": "Acopio San Martín", "cuit": "30-65000000-4", "contacto": "358-466-0000" }
-  ],
-
-  "contratistas": [
-    { "id": "con_gomez", "empresaId": "emp_albor_sa", "nombre": "Servicios Gómez", "cuit": "20-20000000-3", "contacto": "351-555-0000" }
+  "choferes": [
+    { "id": "cho_perez", "empresaId": "emp_albor_sa", "terceroId": "ter_agro", "nombre": "Juan Pérez", "dni": "25000000", "licencia": "E1", "activo": true }
   ],
 
   "labores": [
@@ -702,6 +779,8 @@ JSON ilustrativo. Los `id` son de ejemplo.
 
 > En el ejemplo, `usr_asesor` pertenece a `clienteId: null` porque cruza varios clientes; su acceso se define exclusivamente por la lista de permisos. Aquí solo ve el Tablero Comercial de Albor S.A., acotado a un campo, en modo lectura.
 
+> Sobre las actividades del ejemplo: `lote_p1` (120 ha) tiene en 2024/25 **Trigo de 1ª** (120 ha, `esSegunda: false`) seguido de **Soja de 2ª** (120 ha, `esSegunda: true`). Su superficie física es 120 (solo la de 1ª) y su superficie sembrada es 240 (ambas). En modo demo el tablero guardaría esto como `p: { "24-25": [ {c:"Tr",ha:120,seg:false}, {c:"Sj2ª",ha:120,seg:true} ] }`; al migrar, cada `c` (sigla) se resuelve al `tipoActividadId` correspondiente de la empresa.
+
 ---
 
 ## 10. Alcance y supuestos
@@ -712,6 +791,7 @@ JSON ilustrativo. Los `id` son de ejemplo.
 - Modelo de usuarios, roles y permisos (3 ejes + regla "= o menor" + aislamiento entre clientes).
 - Listas cerradas y campos técnicos de insumos.
 - Propiedad del dato entre tableros.
+- **Plan de Uso del Suelo (LOTE, ACTIVIDAD, TIPO_ACTIVIDAD, ESPECIE):** modelado e implementado en el tablero; estructura estabilizada y lista para normalizar en backend.
 
 **Fuera de alcance (responsabilidad del backend / a definir aparte):**
 
