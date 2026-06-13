@@ -91,8 +91,11 @@ td.editable.exceeded{color:#991B1B;box-shadow:inset 0 0 0 1px #FCA5A5;background
 .cult:hover{background:#fff;box-shadow:inset 0 0 0 1px #CBD5E1}
 .cult-sig{font-family:var(--mono);font-weight:400;font-size:12px}
 .cult-nom{font-family:var(--sans);font-weight:400;font-size:11px;color:var(--muted)}
-.cult-multi{display:inline-flex;flex-wrap:wrap;gap:0px 4px;align-items:baseline}
+.cult-multi{display:flex;flex-direction:column;gap:3px;align-items:flex-start}
 .cult-multi .cult{padding:1px 2px;box-shadow:none;background:transparent}
+.act-chip{display:inline-flex;align-items:baseline;gap:5px}
+.cult-ha{font-family:var(--mono);font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.seg-badge{font-family:var(--sans);font-size:9px;font-weight:600;line-height:1;padding:2px 4px;border-radius:3px;background:#F6E6D5;color:#9A5418;align-self:center}
 .cult-empty{display:inline-flex;align-items:center;cursor:pointer;padding:3px 8px;border-radius:6px;font-family:var(--sans);font-size:11px;color:var(--muted);font-style:italic;box-shadow:inset 0 0 0 1px #E4E8EE;background:#FAFBFC}
 .cult-empty:hover{background:#fff;color:var(--text);font-style:normal;box-shadow:inset 0 0 0 1px #CBD5E1}
 /* Cultivo en lectura (sin click) - matriz, mini historia, etc */
@@ -309,8 +312,14 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
       </div>
       <div class="ms-dd" id="msAmbiente"></div>
       <div class="ms-dd" id="msAntecesor"></div>
-      <div class="ms-dd" id="msCult1"></div>
-      <div class="ms-dd" id="msCult2"></div>
+      <div class="ms-dd" id="msCult"></div>
+      <div class="ms-dd-wrap" id="filtroSeg"><span class="filtro-lbl-inline">Momento:</span>
+        <select class="filtro-select" id="selSeg" onchange="setSegSel(this.value)">
+          <option value="">Todos</option>
+          <option value="1">Tiene 1ª</option>
+          <option value="2">Tiene 2ª</option>
+        </select>
+      </div>
       <button class="btn-toggle" id="btnHistGlobal" onclick="toggleHistGlobal()" style="margin-left:auto">▸ Mostrar historia</button>
       <button class="nav-reset" id="btnLimpiarFiltros" onclick="clearFiltros()">↺ Limpiar filtros</button>
     </div>
@@ -343,12 +352,10 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
           <th class="th-hist-global" id="thHist1" style="display:none">—</th>
           <th class="th-hist-global" id="thHist2" style="display:none">—</th>
           <th>Antec. (<span id="thAntCamp">—</span>)</th>
-          <th class="th-sort" onclick="sortBy('sup')">Sup (ha) <span class="sort-ind" id="si-sup"></span></th>
-          <th class="th-sort" onclick="sortBy('c1')">Actividad 1ª <span class="sort-ind" id="si-c1"></span></th>
-          <th class="th-sort" onclick="sortBy('ha1')">Sup (ha) <span class="sort-ind" id="si-ha1"></span></th>
-          <th class="th-sort" onclick="sortBy('c2')">Actividad 2ª <span class="sort-ind" id="si-c2"></span></th>
-          <th class="th-sort" onclick="sortBy('ha2')">Sup (ha) <span class="sort-ind" id="si-ha2"></span></th>
-          <th class="th-sort" onclick="sortBy('usada')">Sup usada <span class="sort-ind" id="si-usada"></span></th>
+          <th class="th-sort" onclick="sortBy('sup')">Sup lote <span class="sort-ind" id="si-sup"></span></th>
+          <th>Actividades (<span id="thActCamp">—</span>)</th>
+          <th class="th-sort" onclick="sortBy('fisica')">Sup física <span class="sort-ind" id="si-fisica"></span></th>
+          <th class="th-sort" onclick="sortBy('sembrada')">Sup sembrada <span class="sort-ind" id="si-sembrada"></span></th>
           <th class="th-sort" onclick="sortBy('pct')">% uso <span class="sort-ind" id="si-pct"></span></th>
         </tr></thead>
         <tbody id="planBody"></tbody>
@@ -693,7 +700,7 @@ var CAMPANIAS = ['22-23','23-24','24-25','25-26','26-27','27-28'];
 // ────────────────────────────────────────────────────────────
 // DATOS (lotes con plan multicampaña)
 // ────────────────────────────────────────────────────────────
-var LOTES = [{"l":"EC 1A","c":"EC","s":28.0,"a":"G1","p":{"22-23":[28.0,"PPFe",null],"23-24":[28.0,"PPFe",null],"24-25":[28.0,"G","PI"],"25-26":[28.0,"PPAlf",null],"26-27":[28.0,"PPAlf",null],"27-28":[28.0,null,null]}},{"l":"EC 1A CN","c":"EC","s":21.0,"a":"G2","p":{"22-23":[21.0,"CN",null],"23-24":[21.0,"CN",null],"24-25":[21.0,"CN",null],"25-26":[21.0,"CN",null],"26-27":[21.0,"CN",null],"27-28":[21.0,null,null]}},{"l":"EC 1B","c":"EC","s":27.0,"a":"G1","p":{"22-23":[27.0,"PPFe",null],"23-24":[20.0,"PPFe",null],"24-25":[20.0,"G","PI"],"25-26":[20.0,"PPFe",null],"26-27":[20.0,"PPFe",null],"27-28":[20.0,null,null]}},{"l":"EC 1B CN","c":"EC","s":20.0,"a":"G2","p":{"22-23":[20.0,"CN",null],"23-24":[20.0,"CN",null],"24-25":[20.0,"CN",null],"25-26":[20.0,"CN",null],"26-27":[20.0,"CN",null],"27-28":[20.0,null,null]}},{"l":"EC 2A","c":"EC","s":27.0,"a":"G1","p":{"22-23":[27.0,"PPFe",null],"23-24":[19.0,"PPFe",null],"24-25":[19.0,"G","PI"],"25-26":[19.0,"PPFe",null],"26-27":[19.0,"PPFe",null],"27-28":[19.0,null,null]}},{"l":"EC 2A CN","c":"EC","s":20.0,"a":"G2","p":{"22-23":[20.0,"CN",null],"23-24":[20.0,"CN",null],"24-25":[20.0,"CN",null],"25-26":[10.5,"CN",null],"26-27":[10.5,"CN",null],"27-28":[10.5,null,null]}},{"l":"EC 2A CN1","c":"EC","s":0,"a":"G1","p":{"25-26":[9.5,"CN",null],"26-27":[9.5,"CN","VI"],"27-28":[9.5,"MzP","PI"]}},{"l":"EC 2B","c":"EC","s":45.0,"a":"G2","p":{"22-23":[45.0,"CN",null],"23-24":[45.0,"CN",null],"24-25":[45.0,"CN",null],"25-26":[30.0,"CN",null],"26-27":[30.0,"CN",null],"27-28":[30.0,null,null]}},{"l":"EC 2B CN1","c":"EC","s":0,"a":"G1","p":{"25-26":[15.0,"CN","VI"],"26-27":[15.0,"G","VI"],"27-28":[15.0,"MzP","PI"]}},{"l":"EC 3 loma","c":"EC","s":26.0,"a":"A2","p":{"22-23":[26.0,"Mz",null],"23-24":[26.0,"G","PI"],"24-25":[26.0,"PPAlf",null],"25-26":[26.0,"PPAlf",null],"26-27":[26.0,"PPAlf",null],"27-28":[26.0,null,null]}},{"l":"EC 3 CN","c":"EC","s":57.0,"a":"G2","p":{"22-23":[57.0,"CN",null],"23-24":[57.0,"CN",null],"24-25":[57.0,"CN",null],"25-26":[57.0,"CN",null],"26-27":[57.0,"CN",null],"27-28":[57.0,null,null]}},{"l":"EC 4","c":"EC","s":35.0,"a":"G1","p":{"22-23":[35.0,"PPFe",null],"23-24":[35.0,"PPFe",null],"24-25":[35.0,"G","VI"],"25-26":[35.0,"Sj1ª",null],"26-27":[35.0,"G","PI"],"27-28":[35.0,"PPAlf",null]}},{"l":"EC 4","c":"EC","s":20.0,"a":"A2","p":{"22-23":[20.0,"PPFe",null],"23-24":[20.0,"PPFe",null],"24-25":[20.0,"G","VI"],"25-26":[20.0,"Mz",null],"26-27":[20.0,"Sj1ª",null],"27-28":[20.0,"Tr","Sj2ª"]}},{"l":"EC 5","c":"EC","s":78.0,"a":"G1","p":{"22-23":[78.0,"CN","VI"],"23-24":[78.0,"VI","PI"],"24-25":[78.0,"PPAlf",null],"25-26":[78.0,"PPAlf",null],"26-27":[78.0,"PPAlf",null],"27-28":[78.0,null,null]}},{"l":"EC 6 loma","c":"EC","s":30.0,"a":"G1","p":{"22-23":[30.0,"MzP","VI"],"23-24":[30.0,"VI","PI"],"24-25":[30.0,"PPAlf",null],"25-26":[30.0,"PPAlf",null],"26-27":[30.0,"PPAlf",null],"27-28":[30.0,null,null]}},{"l":"EC 6 bajo","c":"EC","s":36.0,"a":"G4","p":{"22-23":[36.0,"CN",null],"23-24":[36.0,"CN",null],"24-25":[36.0,"CN",null],"25-26":[36.0,"CN",null],"26-27":[36.0,"CN",null],"27-28":[36.0,null,null]}},{"l":"EC 7","c":"EC","s":27.0,"a":"G1","p":{"22-23":[27.0,"PPAlf",null],"23-24":[27.0,"PPAlf",null],"24-25":[27.0,"G","VI"],"25-26":[27.0,"Sj1ª",null],"26-27":[27.0,"G","PI"],"27-28":[27.0,"PPAlf",null]}},{"l":"EC 12 loma","c":"EC","s":4.0,"a":"A2","p":{"22-23":[4.0,"PPAlf",null],"23-24":[4.0,"PPAlf",null],"24-25":[4.0,"G","VI"],"25-26":[4.0,"Mz",null],"26-27":[4.0,"Sj1ª",null],"27-28":[4.0,"Tr","Sj2ª"]}},{"l":"EC 8","c":"EC","s":20.0,"a":"G1","p":{"22-23":[20.0,"CN",null],"23-24":[18.0,"MzSPE",null],"24-25":[18.0,"G","PI"],"25-26":[18.0,"PPAlf",null],"26-27":[18.0,"PPAlf",null],"27-28":[18.0,null,null]}},{"l":"EC 10-1","c":"EC","s":26.0,"a":"G1","p":{"22-23":[26.0,"PPFe",null],"23-24":[25.0,"MzT",null],"24-25":[25.0,"G","PI"],"25-26":[25.0,"PPAlf",null],"26-27":[25.0,"PPAlf",null],"27-28":[25.0,null,null]}},{"l":"EC 10-2","c":"EC","s":27.0,"a":"G1","p":{"22-23":[27.0,"CN",null],"23-24":[25.0,"MzD",null],"24-25":[25.0,"G","PI"],"25-26":[25.0,"PPAlf",null],"26-27":[25.0,"PPAlf",null],"27-28":[25.0,null,null]}},{"l":"EC 10-3","c":"EC","s":20.0,"a":"G1","p":{"22-23":[20.0,"MzP",null],"23-24":[20.0,"MzP",null],"24-25":[20.0,"G","PI"],"25-26":[20.0,"PPAlf",null],"26-27":[20.0,"PPAlf",null],"27-28":[20.0,null,null]}},{"l":"EC 11 loma","c":"EC","s":25.0,"a":"G1","p":{"22-23":[25.0,"PPFe",null],"23-24":[25.0,"PPFe",null],"24-25":[25.0,"PPFe",null],"25-26":[25.0,"G","PI"],"26-27":[25.0,"PPAlf",null],"27-28":[25.0,null,null]}},{"l":"EC 11 bajo","c":"EC","s":33.0,"a":"G4","p":{"22-23":[33.0,"CN",null],"23-24":[33.0,"CN",null],"24-25":[33.0,"CN",null],"25-26":[33.0,"CN",null],"26-27":[33.0,"CN",null],"27-28":[33.0,null,null]}},{"l":"EC 12","c":"EC","s":54.0,"a":"G3","p":{"22-23":[54.0,"CN",null],"23-24":[54.0,"CN",null],"24-25":[54.0,"CN",null],"25-26":[54.0,"CN",null],"26-27":[54.0,"CN",null],"27-28":[54.0,null,null]}},{"l":"EC 13 loma","c":"EC","s":35.0,"a":"A2","p":{"22-23":[35.0,"Tr","Sj2ª"],"23-24":[34.0,"G",null],"24-25":[34.0,"Tr","Sj2ª"],"25-26":[34.0,"Mz",null],"26-27":[34.0,"Sj1ª",null],"27-28":[34.0,"Tr","Sj2ª"]}},{"l":"EC 13 CN","c":"EC","s":40.0,"a":"G3","p":{"22-23":[40.0,"CN",null],"23-24":[40.0,"CN",null],"24-25":[40.0,"CN",null],"25-26":[40.0,"CN",null],"26-27":[40.0,"CN",null],"27-28":[40.0,null,null]}},{"l":"EC 14","c":"EC","s":65.0,"a":"A2","p":{"22-23":[65.0,"G",null],"23-24":[65.0,"Tr","Sj2ª"],"24-25":[64.0,"Mz",null],"25-26":[64.0,"Tr","Sj2ª"],"26-27":[64.0,"Mz",null],"27-28":[64.0,"Sj1ª",null]}},{"l":"EC 14 CN","c":"EC","s":13.0,"a":"G3","p":{"22-23":[10.0,"CN",null],"23-24":[10.0,"CN",null],"24-25":[10.0,"CN",null],"25-26":[10.0,"CN",null],"26-27":[10.0,"CN",null],"27-28":[10.0,null,null]}},{"l":"EC 15","c":"EC","s":17.0,"a":"A2","p":{"22-23":[17.0,"G",null],"23-24":[17.0,"PI",null],"24-25":[17.0,"PPFe",null],"25-26":[17.0,"PPFe",null],"26-27":[17.0,"PPFe",null],"27-28":[17.0,null,null]}},{"l":"EC 15 CN","c":"EC","s":42.0,"a":"G3","p":{"22-23":[40.0,"CN",null],"23-24":[40.0,"CN",null],"24-25":[40.0,"CN",null],"25-26":[40.0,"CN",null],"26-27":[40.0,"CN",null],"27-28":[40.0,null,null]}},{"l":"EC 16","c":"EC","s":29.0,"a":"A2","p":{"22-23":[29.0,"G",null],"23-24":[29.0,"PI",null],"24-25":[29.0,"PPAlf",null],"25-26":[29.0,"PPAlf",null],"26-27":[29.0,"PPAlf",null],"27-28":[29.0,null,null]}},{"l":"EC 16 bajo","c":"EC","s":20.0,"a":"G1","p":{"22-23":[20.0,"PPAlf",null],"23-24":[20.0,"PPAlf",null],"24-25":[20.0,"PPAlf","VI"],"25-26":[20.0,"G","PI"],"26-27":[20.0,"PPFe",null],"27-28":[20.0,null,null]}},{"l":"EC DP1","c":"EC","s":47.0,"a":"A2","p":{"22-23":[45.0,"PPFe",null],"23-24":[45.0,"MzT",null],"24-25":[45.0,"G",null],"25-26":[45.0,"Tr","Sj2ª"],"26-27":[45.0,"G","VI"],"27-28":[45.0,"MzT",null]}},{"l":"EC DP2 CN","c":"EC","s":37.0,"a":"G2","p":{"22-23":[37.0,"CN",null],"23-24":[37.0,"CN",null],"24-25":[37.0,"CN",null],"25-26":[30.0,"CN",null],"26-27":[30.0,"CN",null],"27-28":[30.0,null,null]}},{"l":"EC DP2 CN1","c":"EC","s":0,"a":"G1","p":{"25-26":[7.0,"CN",null],"26-27":[7.0,"CN","VI"],"27-28":[7.0,"MzP","PI"]}},{"l":"EC DP3 CN","c":"EC","s":66.0,"a":"G4","p":{"22-23":[66.0,"CND",null],"23-24":[66.0,"CND",null],"24-25":[66.0,"CND",null],"25-26":[61.0,"CND",null],"26-27":[61.0,"CND",null],"27-28":[61.0,null,null]}},{"l":"EC DP3 CN1","c":"EC","s":0,"a":"G1","p":{"25-26":[5.0,"CN",null],"26-27":[5.0,"CN","VI"],"27-28":[5.0,"MzP","PI"]}},{"l":"EC DP2-3 laguna","c":"EC","s":26.0,"a":"G6","p":{"22-23":[26.0,"CND",null],"23-24":[26.0,"CND",null],"24-25":[26.0,"CND",null],"25-26":[26.0,"CND",null],"26-27":[26.0,"CND",null],"27-28":[26.0,null,null]}},{"l":"EC Desperdicios","c":"EC","s":46.0,"a":"DESP","p":{}},{"l":"EM 18","c":"EM","s":44.0,"a":"A1","p":{"22-23":[44.0,"Mz",null],"23-24":[44.0,"Sj1ª",null],"24-25":[44.0,"Mz",null],"25-26":[44.0,"Sj1ª",null],"26-27":[44.0,"Tr","Sj2ª"],"27-28":[44.0,"Mz",null]}},{"l":"EM 19","c":"EM","s":46.0,"a":"A1","p":{"22-23":[45.0,"Mz",null],"23-24":[45.0,"Sj1ª",null],"24-25":[45.0,"Tr","Sj2ª"],"25-26":[45.0,"Mz",null],"26-27":[45.0,"Sj1ª",null],"27-28":[45.0,"Tr","Sj2ª"]}},{"l":"EM 20","c":"EM","s":38.0,"a":"A1","p":{"22-23":[38.0,"Tr","Sj2ª"],"23-24":[38.0,"Mz",null],"24-25":[38.0,"Sj1ª",null],"25-26":[38.0,"Tr","Sj2ª"],"26-27":[38.0,"Sj1ª",null],"27-28":[38.0,"Tr","Sj2ª"]}},{"l":"EM 21","c":"EM","s":45.0,"a":"A1","p":{"22-23":[45.0,"Sj1ª",null],"23-24":[45.0,"Tr","Sj2ª"],"24-25":[45.0,null,"VI"],"25-26":[45.0,"Sj1ª",null],"26-27":[45.0,"Tr","Sj2ª"],"27-28":[45.0,"Mz",null]}},{"l":"EM 50/51","c":"EM","s":90.0,"a":"A1","p":{"22-23":[95.0,"Sj1ª",null],"23-24":[95.0,"Mz",null],"24-25":[95.0,"Sj1ª",null],"25-26":[95.0,"Tr","Sj2ª"],"26-27":[95.0,"Mz",null],"27-28":[95.0,"Sj1ª",null]}},{"l":"EM 50/51 CN","c":"EM","s":18.0,"a":"G3","p":{"22-23":[14.0,"CN",null],"23-24":[14.0,"CN",null],"24-25":[14.0,"CN",null],"25-26":[14.0,"CN",null],"26-27":[14.0,"CN",null],"27-28":[14.0,null,null]}},{"l":"EM 52 loma","c":"EM","s":22.0,"a":"G1","p":{"22-23":[22.0,"PPFe",null],"23-24":[22.0,"PPFe",null],"24-25":[22.0,"G","VI"],"25-26":[22.0,"Sj1ª",null],"26-27":[22.0,"G","PI"],"27-28":[22.0,"PPAlf",null]}},{"l":"EM 52 CN","c":"EM","s":4.0,"a":"G3","p":{"22-23":[4.0,"CN",null],"23-24":[4.0,"CN",null],"24-25":[4.0,"CN",null],"25-26":[4.0,"CN",null],"26-27":[4.0,"CN",null],"27-28":[4.0,null,null]}},{"l":"EM 53","c":"EM","s":28.0,"a":"G1","p":{"22-23":[28.0,"PPFe",null],"23-24":[28.0,"PPFe",null],"24-25":[28.0,"G","VI"],"25-26":[28.0,"Sj1ª",null],"26-27":[28.0,"G","PI"],"27-28":[28.0,"PPAlf",null]}},{"l":"EM 53 CN","c":"EM","s":10.0,"a":"G3","p":{"22-23":[10.0,"CN",null],"23-24":[10.0,"CN",null],"24-25":[10.0,"CN",null],"25-26":[10.0,"CN",null],"26-27":[10.0,"CN",null],"27-28":[10.0,null,null]}},{"l":"EM 54","c":"EM","s":167.0,"a":"G6","p":{"22-23":[126.0,"CND",null],"23-24":[126.0,"CND",null],"24-25":[126.0,"CND",null],"25-26":[126.0,"CND",null],"26-27":[126.0,"CND",null],"27-28":[126.0,null,null]}},{"l":"EM 56","c":"EM","s":67.0,"a":"G6","p":{"22-23":[67.0,"CND",null],"23-24":[67.0,"CND",null],"24-25":[67.0,"CND",null],"25-26":[67.0,"CND",null],"26-27":[67.0,"CND",null],"27-28":[67.0,null,null]}},{"l":"EM 57","c":"EM","s":23.0,"a":"G1","p":{"22-23":[18.0,"MzP",null],"23-24":[16.0,"MzP","PI"],"24-25":[16.0,"PPFe",null],"25-26":[16.0,"PPFe",null],"26-27":[16.0,"PPFe",null],"27-28":[16.0,null,null]}},{"l":"EM 57 bajo","c":"EM","s":24.0,"a":"G3","p":{"22-23":[24.0,"CN",null],"23-24":[24.0,"CN",null],"24-25":[24.0,"CN",null],"25-26":[24.0,"CN",null],"26-27":[24.0,"CN",null],"27-28":[24.0,null,null]}},{"l":"EM 58 CN","c":"EM","s":53.0,"a":"G6","p":{"22-23":[53.0,"CND",null],"23-24":[53.0,"CND",null],"24-25":[53.0,"CND",null],"25-26":[53.0,"CND",null],"26-27":[53.0,"CND",null],"27-28":[53.0,null,null]}},{"l":"EM 58","c":"EM","s":10.0,"a":"G1","p":{"22-23":[7.0,"MzP",null],"23-24":[7.0,"MzP","PI"],"24-25":[7.0,"PPFe",null],"25-26":[7.0,"PPFe",null],"26-27":[7.0,"PPFe",null],"27-28":[7.0,null,null]}},{"l":"EM 59","c":"EM","s":26.0,"a":"A2","p":{"22-23":[25.0,"MzP",null],"23-24":[26.0,"G","PI"],"24-25":[26.0,"PPFe",null],"25-26":[26.0,"PPFe",null],"26-27":[26.0,"PPFe",null],"27-28":[26.0,null,null]}},{"l":"EM 59 CN","c":"EM","s":6.0,"a":"G6","p":{"22-23":[6.0,"CN",null],"23-24":[6.0,"CN",null],"24-25":[6.0,"CN",null],"25-26":[6.0,"CN",null],"26-27":[6.0,"CN",null],"27-28":[6.0,null,null]}},{"l":"EM 60","c":"EM","s":25.0,"a":"G1","p":{"22-23":[25.0,"PPFe",null],"23-24":[25.0,"PPFe",null],"24-25":[25.0,"G","PI"],"25-26":[25.0,"PPAlf",null],"26-27":[25.0,"PPAlf",null],"27-28":[25.0,null,null]}},{"l":"EM 60 CN","c":"EM","s":11.0,"a":"G3","p":{"22-23":[11.0,"CN",null],"23-24":[11.0,"CN",null],"24-25":[11.0,"CN",null],"25-26":[11.0,"CN",null],"26-27":[11.0,"CN",null],"27-28":[11.0,null,null]}},{"l":"EM 61","c":"EM","s":32.0,"a":"A2","p":{"22-23":[28.0,"MzT",null],"23-24":[28.0,"Sj1ª",null],"24-25":[28.0,"Tr","Sj2ª"],"25-26":[28.0,"MzT",null],"26-27":[28.0,"Sj1ª",null],"27-28":[28.0,"Tr","Sj2ª"]}},{"l":"EM 62","c":"EM","s":39.0,"a":"G1","p":{"22-23":[39.0,"PPFe",null],"23-24":[39.0,"PPFe",null],"24-25":[39.0,"PPFe",null],"25-26":[39.0,"PPFe",null],"26-27":[39.0,"G","VI"],"27-28":[39.0,"MzT",null]}},{"l":"EM 62 CN","c":"EM","s":8.0,"a":"G2","p":{"22-23":[8.0,"CN",null],"23-24":[8.0,"CN",null],"24-25":[8.0,"CN",null],"25-26":[8.0,"CN",null],"26-27":[8.0,"CN",null],"27-28":[8.0,null,null]}},{"l":"EM 63","c":"EM","s":45.0,"a":"A2","p":{"22-23":[45.0,"Tr","Sj2ª"],"23-24":[43.0,"G","PI"],"24-25":[43.0,"PPAlf",null],"25-26":[43.0,"PPAlf",null],"26-27":[43.0,"PPAlf",null],"27-28":[43.0,null,null]}},{"l":"EM 64","c":"EM","s":43.0,"a":"A2","p":{"22-23":[42.0,"MzT",null],"23-24":[43.0,"Sj1ª",null],"24-25":[43.0,"Tr","Sj2ª"],"25-26":[43.0,"MzT",null],"26-27":[43.0,"Sj1ª",null],"27-28":[43.0,"Tr","Sj2ª"]}},{"l":"EM 64 CN","c":"EM","s":8.0,"a":"G3","p":{"22-23":[8.0,"CND",null],"23-24":[8.0,"CND",null],"24-25":[8.0,"CND",null],"25-26":[8.0,"CND",null],"26-27":[8.0,"CND",null],"27-28":[8.0,null,null]}},{"l":"EM 65","c":"EM","s":12.0,"a":"G1","p":{"22-23":[12.0,"PPFe",null],"23-24":[12.0,"PPFe",null],"24-25":[12.0,"PPFe","VI"],"25-26":[12.0,"G","PI"],"26-27":[12.0,"PPAlf",null],"27-28":[12.0,null,null]}},{"l":"EM 65 CN","c":"EM","s":43.0,"a":"G2","p":{"22-23":[43.0,"CN",null],"23-24":[43.0,"CN",null],"24-25":[43.0,"CN",null],"25-26":[33.0,"CN",null],"26-27":[33.0,"CN",null],"27-28":[33.0,null,null]}},{"l":"EM 65 CN1","c":"EM","s":0,"a":"G1","p":{"25-26":[10.0,"CN","VI"],"26-27":[10.0,"G","VI"],"27-28":[10.0,"MzP","PI"]}},{"l":"EM 66","c":"EM","s":50.0,"a":"A1","p":{"22-23":[50.0,"Mz",null],"23-24":[50.0,"Sj1ª",null],"24-25":[36.0,"Mz",null],"25-26":[36.0,"Sj1ª",null],"26-27":[36.0,"Tr","Sj2ª"],"27-28":[36.0,"Mz",null]}},{"l":"EM 66","c":"EM","s":0,"a":"A1","p":{"24-25":[14.0,"MzSPE","VI"],"25-26":[14.0,"Sj1ª",null],"26-27":[14.0,"Tr","Sj2ª"],"27-28":[14.0,"Mz",null]}},{"l":"EM 66 CN","c":"EM","s":3.0,"a":"G3","p":{"22-23":[3.0,"CND",null],"23-24":[3.0,"CND",null],"24-25":[3.0,"CND",null],"25-26":[3.0,"CND",null],"26-27":[3.0,"CND",null],"27-28":[3.0,null,null]}},{"l":"EM 67","c":"EM","s":12.0,"a":"G1","p":{"22-23":[12.0,"PPFe",null],"23-24":[12.0,"PPFe",null],"24-25":[12.0,"PPFe","VI"],"25-26":[12.0,"G","PI"],"26-27":[12.0,"PPAlf",null],"27-28":[12.0,null,null]}},{"l":"EM 67 CN","c":"EM","s":7.0,"a":"G3","p":{"22-23":[7.0,"CND",null],"23-24":[7.0,"CND",null],"24-25":[7.0,"CND",null],"25-26":[7.0,"CND",null],"26-27":[7.0,"CND",null],"27-28":[7.0,null,null]}},{"l":"EM 68","c":"EM","s":25.0,"a":"G2","p":{"22-23":[25.0,"CN",null],"23-24":[25.0,"CN","VI"],"24-25":[25.0,"MzD",null],"25-26":[25.0,"CN","VI"],"26-27":[25.0,"G","PI"],"27-28":[25.0,"PPFe",null]}},{"l":"EM 69 CN","c":"EM","s":9.0,"a":"G2","p":{"22-23":[9.0,"CND",null],"23-24":[9.0,"CND",null],"24-25":[9.0,"CND",null],"25-26":[9.0,"CND",null],"26-27":[9.0,"CND",null],"27-28":[9.0,null,null]}},{"l":"EM 69","c":"EM","s":16.0,"a":"G4","p":{"22-23":[16.0,"CN",null],"23-24":[16.0,"CN",null],"24-25":[16.0,"CN",null],"25-26":[16.0,"CN",null],"26-27":[16.0,"CN",null],"27-28":[16.0,null,null]}},{"l":"EM 69 laguna","c":"EM","s":18.0,"a":"G6","p":{"22-23":[18.0,"CN",null],"23-24":[18.0,"CN",null],"24-25":[18.0,"CN",null],"25-26":[18.0,"CN",null],"26-27":[18.0,"CN",null],"27-28":[18.0,null,null]}},{"l":"EM 70","c":"EM","s":59.0,"a":"G3","p":{"22-23":[59.0,"CN",null],"23-24":[59.0,"CN",null],"24-25":[59.0,"CN",null],"25-26":[59.0,"CN",null],"26-27":[59.0,"CN",null],"27-28":[59.0,null,null]}},{"l":"EM 70/73","c":"EM","s":56.0,"a":"A1","p":{"22-23":[56.0,"Sj1ª",null],"23-24":[56.0,"Mz",null],"24-25":[56.0,"Sj1ª",null],"25-26":[56.0,"Tr","Sj2ª"],"26-27":[56.0,"Mz",null],"27-28":[56.0,"Sj1ª",null]}},{"l":"EM 72","c":"EM","s":57.0,"a":"G4","p":{"22-23":[57.0,"CN",null],"23-24":[57.0,"CN",null],"24-25":[57.0,"CN",null],"25-26":[50.0,"CN",null],"26-27":[50.0,"CN",null],"27-28":[50.0,null,null]}},{"l":"EM 72 CN1","c":"EM","s":0,"a":"G1","p":{"25-26":[7.0,"CN",null],"26-27":[7.0,"CN",null],"27-28":[7.0,null,null]}},{"l":"EM 72 laguna","c":"EM","s":36.0,"a":"G6","p":{"22-23":[36.0,"CN",null],"23-24":[36.0,"CN",null],"24-25":[36.0,"CN",null],"25-26":[36.0,"CN",null],"26-27":[36.0,"CN",null],"27-28":[36.0,null,null]}},{"l":"EM 73A","c":"EM","s":20.0,"a":"G1","p":{"22-23":[20.0,"PPFe",null],"23-24":[20.0,"PPFe",null],"24-25":[20.0,"G","PI"],"25-26":[20.0,"PPAlf",null],"26-27":[20.0,"PPAlf",null],"27-28":[20.0,null,null]}},{"l":"EM 73 CN","c":"EM","s":5.0,"a":"G3","p":{"22-23":[5.0,"CN",null],"23-24":[5.0,"CN",null],"24-25":[5.0,"CN",null],"25-26":[5.0,"PPAlf",null],"26-27":[5.0,"PPAlf",null],"27-28":[5.0,null,null]}},{"l":"EM 73 laguna","c":"EM","s":25.0,"a":"G6","p":{"22-23":[25.0,"CN",null],"23-24":[25.0,"CN",null],"24-25":[25.0,"CN",null],"25-26":[25.0,"CN",null],"26-27":[25.0,"CN",null],"27-28":[25.0,null,null]}},{"l":"EM Desperdicios","c":"EM","s":35.0,"a":"DESP","p":{}},{"l":"LR 1","c":"LR","s":117.0,"a":"G5","p":{"22-23":[87.0,"CND",null],"23-24":[87.0,"CND",null],"24-25":[87.0,"CND",null],"25-26":[87.0,"CND",null],"26-27":[87.0,"CND",null],"27-28":[87.0,null,null]}},{"l":"LR 2","c":"LR","s":76.0,"a":"G5","p":{"22-23":[46.0,"CND",null],"23-24":[46.0,"CND",null],"24-25":[46.0,"CND",null],"25-26":[46.0,"CND",null],"26-27":[46.0,"CND",null],"27-28":[46.0,null,null]}},{"l":"LR 3 loma","c":"LR","s":40.0,"a":"A2","p":{"22-23":[40.0,"PPAlf",null],"23-24":[40.0,"PPAlf",null],"24-25":[40.0,"G","PI"],"25-26":[40.0,"PPFe",null],"26-27":[40.0,"PPFe",null],"27-28":[40.0,null,null]}},{"l":"LR 3 bajo","c":"LR","s":22.0,"a":"G2","p":{"22-23":[22.0,"CN",null],"23-24":[22.0,"CN",null],"24-25":[22.0,"G","CN"],"25-26":[22.0,"CN",null],"26-27":[22.0,"CN",null],"27-28":[22.0,null,null]}},{"l":"LR 4","c":"LR","s":12.0,"a":"G1","p":{"22-23":[10.0,"PPFe",null],"23-24":[10.0,"PPFe",null],"24-25":[10.0,"G","PI"],"25-26":[10.0,"PPFe",null],"26-27":[10.0,"PPFe",null],"27-28":[10.0,null,null]}},{"l":"LR 4 CN","c":"LR","s":38.0,"a":"G4","p":{"22-23":[38.0,"CND",null],"23-24":[38.0,"CND",null],"24-25":[38.0,"CND",null],"25-26":[38.0,"CND",null],"26-27":[38.0,"CND",null],"27-28":[38.0,null,null]}},{"l":"LR 5","c":"LR","s":28.0,"a":"G2","p":{"22-23":[28.0,"CN",null],"23-24":[28.0,"CN",null],"24-25":[28.0,"CN",null],"25-26":[28.0,"CN",null],"26-27":[28.0,"CN",null],"27-28":[28.0,null,null]}},{"l":"LR 5","c":"LR","s":10.0,"a":"G2","p":{"22-23":[10.0,"CN",null],"23-24":[10.0,"CN",null],"24-25":[10.0,"CN",null],"25-26":[10.0,"CN",null],"26-27":[10.0,"CN",null],"27-28":[10.0,null,null]}},{"l":"LR 6/7","c":"LR","s":45.0,"a":"G1","p":{"22-23":[42.0,"Tr","Sj2ª"],"23-24":[39.0,"G","PI"],"24-25":[39.0,"PPAlf",null],"25-26":[39.0,"PPAlf",null],"26-27":[39.0,"PPAlf",null],"27-28":[39.0,null,null]}},{"l":"LR 6/7 CN","c":"LR","s":75.0,"a":"G4","p":{"22-23":[75.0,"CN",null],"23-24":[75.0,"CN",null],"24-25":[75.0,"CN",null],"25-26":[75.0,"CN",null],"26-27":[75.0,"CN",null],"27-28":[75.0,null,null]}},{"l":"LR 8","c":"LR","s":7.0,"a":"A1","p":{"22-23":[7.0,"Sj1ª",null],"23-24":[6.0,"MzSPE",null],"24-25":[6.0,"Av","Mz2ª"],"25-26":[6.0,"Sj1ª",null],"26-27":[6.0,"Av","Sj2ª"],"27-28":[6.0,"Mz",null]}},{"l":"LR 9","c":"LR","s":41.0,"a":"A1","p":{"22-23":[41.0,"Tr","Sj2ª"],"23-24":[41.0,"MzT",null],"24-25":[41.0,"Sj1ª",null],"25-26":[41.0,"Mz",null],"26-27":[41.0,"Sj1ª",null],"27-28":[41.0,"Tr","Sj2ª"]}},{"l":"LR 10A","c":"LR","s":7.0,"a":"A2","p":{"22-23":[7.0,"Sj1ª",null],"23-24":[7.0,"MzSPE","PI"],"24-25":[7.0,"PPFe",null],"25-26":[7.0,"PPFe",null],"26-27":[7.0,"PPFe",null],"27-28":[7.0,null,null]}},{"l":"LR 10B","c":"LR","s":15.0,"a":"A2","p":{"22-23":[15.0,"Sj1ª",null],"23-24":[16.0,"MzSPE","PI"],"24-25":[16.0,"PPFe",null],"25-26":[16.0,"PPFe",null],"26-27":[16.0,"PPFe",null],"27-28":[16.0,null,null]}},{"l":"LR 10C","c":"LR","s":13.0,"a":"A2","p":{"22-23":[13.0,"Sj1ª",null],"23-24":[13.0,"MzSPE","PI"],"24-25":[13.0,"PPFe",null],"25-26":[13.0,"PPFe",null],"26-27":[13.0,"PPFe",null],"27-28":[13.0,null,null]}},{"l":"LR 11","c":"LR","s":24.0,"a":"A2","p":{"22-23":[24.0,"Tr","Sj2ª"],"23-24":[24.0,"MzT",null],"24-25":[24.0,"G","PI"],"25-26":[24.0,"PPAlf",null],"26-27":[24.0,"PPAlf",null],"27-28":[24.0,null,null]}},{"l":"LR 12","c":"LR","s":26.0,"a":"A2","p":{"22-23":[26.0,"MzSPE",null],"23-24":[26.0,"PI",null],"24-25":[26.0,"PPAlf",null],"25-26":[26.0,"PPAlf",null],"26-27":[26.0,"PPAlf",null],"27-28":[26.0,null,null]}},{"l":"LR 12 CN","c":"LR","s":19.0,"a":"G3","p":{"22-23":[19.0,"CND",null],"23-24":[19.0,"CND",null],"24-25":[19.0,"CND",null],"25-26":[19.0,"CND",null],"26-27":[19.0,"CND",null],"27-28":[19.0,null,null]}},{"l":"LR 13","c":"LR","s":33.0,"a":"A1","p":{"22-23":[33.0,"Tr","Sj2ª"],"23-24":[32.0,"MzT",null],"24-25":[32.0,"Sj1ª",null],"25-26":[32.0,"Tr","Sj2ª"],"26-27":[32.0,"Mz",null],"27-28":[32.0,"Sj1ª",null]}},{"l":"LR 13 CN","c":"LR","s":5.0,"a":"G3","p":{"22-23":[5.0,"CN",null],"23-24":[5.0,"CN",null],"24-25":[5.0,"CN",null],"25-26":[5.0,"CN",null],"26-27":[5.0,"CN",null],"27-28":[5.0,null,null]}},{"l":"LR 14","c":"LR","s":34.0,"a":"G1","p":{"22-23":[34.0,"Sj1ª",null],"23-24":[34.0,"G","PI"],"24-25":[34.0,"PPFe",null],"25-26":[34.0,"PPFe",null],"26-27":[34.0,"PPFe",null],"27-28":[34.0,null,null]}},{"l":"LR 15","c":"LR","s":30.0,"a":"A2","p":{"22-23":[30.0,"PPAlf",null],"23-24":[30.0,"PPAlf",null],"24-25":[30.0,"PPAlf",null],"25-26":[30.0,"PPAlf","VI"],"26-27":[30.0,"Sj1ª",null],"27-28":[30.0,"Mz",null]}},{"l":"LR 16","c":"LR","s":24.0,"a":"A2","p":{"22-23":[24.0,"PPAlf",null],"23-24":[24.0,"MzT",null],"24-25":[24.0,"G","PI"],"25-26":[24.0,"PPAlf",null],"26-27":[24.0,"PPAlf",null],"27-28":[24.0,null,null]}},{"l":"LR 16 bajo","c":"LR","s":10.0,"a":"G2","p":{"22-23":[10.0,"PPAlf",null],"23-24":[10.0,"MzT",null],"24-25":[10.0,"G","PI"],"25-26":[10.0,"PPAg",null],"26-27":[10.0,"PPAg",null],"27-28":[10.0,null,null]}},{"l":"LR 16 CN","c":"LR","s":6.0,"a":"G3","p":{"22-23":[6.0,"CN",null],"23-24":[6.0,"CN",null],"24-25":[6.0,"CN",null],"25-26":[6.0,"CN",null],"26-27":[6.0,"CN",null],"27-28":[6.0,null,null]}},{"l":"LR 17 loma","c":"LR","s":16.0,"a":"G1","p":{"22-23":[16.0,"PPFe",null],"23-24":[16.0,"PPFe",null],"24-25":[16.0,"PPFe",null],"25-26":[16.0,"MzT",null],"26-27":[16.0,"Sj1ª",null],"27-28":[16.0,"G",null]}},{"l":"LR 17","c":"LR","s":17.0,"a":"G1","p":{"22-23":[17.0,"MzP",null],"23-24":[17.0,"MzP","PI"],"24-25":[17.0,"PPFe",null],"25-26":[17.0,"PPFe",null],"26-27":[17.0,"PPFe",null],"27-28":[17.0,null,null]}},{"l":"LR 18","c":"LR","s":40.0,"a":"A2","p":{"22-23":[40.0,"PPAlf",null],"23-24":[40.0,"PPAlf",null],"24-25":[40.0,"Mz",null],"25-26":[40.0,"Sj1ª",null],"26-27":[40.0,"G","PI"],"27-28":[40.0,"PPAlf",null]}},{"l":"LR 18 CN","c":"LR","s":10.0,"a":"G3","p":{"22-23":[10.0,"CN",null],"23-24":[10.0,"CN",null],"24-25":[10.0,"CN",null],"25-26":[10.0,"CN",null],"26-27":[10.0,"CN",null],"27-28":[10.0,null,null]}},{"l":"LR 19","c":"LR","s":39.0,"a":"A2","p":{"22-23":[34.0,"PPFe",null],"23-24":[34.0,"PPFe",null],"24-25":[39.0,"Mz",null],"25-26":[39.0,"Sj1ª",null],"26-27":[39.0,"Mz",null],"27-28":[39.0,"Sj1ª",null]}},{"l":"LR 19 CN","c":"LR","s":11.0,"a":"G3","p":{"22-23":[11.0,"CN",null],"23-24":[11.0,"CN",null],"24-25":[11.0,"CN",null],"25-26":[11.0,"CN",null],"26-27":[11.0,"CN",null],"27-28":[11.0,null,null]}},{"l":"LR 20","c":"LR","s":35.0,"a":"G2","p":{"22-23":[35.0,"MzP",null],"23-24":[40.0,"CN","VI"],"24-25":[40.0,"MzD",null],"25-26":[36.0,"CN","PI"],"26-27":[36.0,"CN",null],"27-28":[36.0,null,null]}},{"l":"LR 20 CN","c":"LR","s":43.0,"a":"G5","p":{"22-23":[43.0,"CND",null],"23-24":[43.0,"CND",null],"24-25":[43.0,"CND",null],"25-26":[43.0,"CND",null],"26-27":[43.0,"CND",null],"27-28":[43.0,null,null]}},{"l":"LR 22","c":"LR","s":35.0,"a":"G3","p":{"22-23":[35.0,"CN",null],"23-24":[35.0,"CN",null],"24-25":[35.0,"CN",null],"25-26":[35.0,"CN",null],"26-27":[35.0,"CN",null],"27-28":[35.0,null,null]}},{"l":"LR 23","c":"LR","s":37.0,"a":"G5","p":{"22-23":[29.0,"CND",null],"23-24":[29.0,"CND",null],"24-25":[29.0,"CND",null],"25-26":[29.0,"CND",null],"26-27":[29.0,"CND",null],"27-28":[29.0,null,null]}},{"l":"LR 25 loma","c":"LR","s":10.0,"a":"A2","p":{"22-23":[10.0,"Tr","Sj2ª"],"23-24":[10.0,"G",null],"24-25":[10.0,"Av","Mz2ª"],"25-26":[10.0,"Sj1ª",null],"26-27":[10.0,"Av","Sj2ª"],"27-28":[10.0,"Mz",null]}},{"l":"LR 25 CN","c":"LR","s":106.0,"a":"G5","p":{"22-23":[93.0,"CND",null],"23-24":[93.0,"CND",null],"24-25":[93.0,"CND",null],"25-26":[93.0,"CND",null],"26-27":[93.0,"CND",null],"27-28":[93.0,null,null]}},{"l":"LR Monte casco","c":"LR","s":5.0,"a":"A2","p":{"22-23":[5.0,"CN",null],"23-24":[5.0,"CN",null],"24-25":[5.0,"CN",null],"25-26":[5.0,"MzP","VI"],"26-27":[5.0,"MzP",null],"27-28":[5.0,null,null]}},{"l":"LR Desperdicios","c":"LR","s":39.0,"a":"DESP","p":{}},{"l":"LM 1","c":"LM","s":64.0,"a":"A1","p":{"22-23":[62.0,"G",null],"23-24":[62.0,"Sj1ª",null],"24-25":[62.0,"Tr","Sj2ª"],"25-26":[62.0,"MzT",null],"26-27":[62.0,"Sj1ª",null],"27-28":[62.0,"Tr","Sj2ª"]}},{"l":"LM 2","c":"LM","s":36.3,"a":"A1","p":{"22-23":[32.0,"Sj1ª",null],"23-24":[35.0,"Sj1ª",null],"24-25":[35.0,"Tr","Sj2ª"],"25-26":[35.0,"MzT",null],"26-27":[35.0,"Sj1ª",null],"27-28":[35.0,"Tr","Sj2ª"]}},{"l":"LM 3","c":"LM","s":12.6,"a":"G1","p":{"22-23":[12.0,"MzP",null],"23-24":[12.0,"MzP","VI"],"24-25":[12.0,"MzP","VI"],"25-26":[12.0,"G","PI"],"26-27":[12.0,"PPAlf",null],"27-28":[12.0,null,null]}},{"l":"LM 6 medio","c":"LM","s":49.7,"a":"A2","p":{"22-23":[40.0,"PPFe",null],"23-24":[40.0,"PPFe",null],"24-25":[40.0,"PPFe","VI"],"25-26":[40.0,"Sj1ª",null],"26-27":[40.0,"MzT",null],"27-28":[40.0,"G","PI"]}},{"l":"LM 7-9","c":"LM","s":39.6,"a":"A1","p":{"22-23":[39.0,"Mz",null],"23-24":[37.0,"G",null],"24-25":[37.0,"Tr","Sj2ª"],"25-26":[37.0,"Mz",null],"26-27":[37.0,"Sj1ª",null],"27-28":[37.0,"Tr","Sj2ª"]}},{"l":"LM 8 N","c":"LM","s":6.6,"a":"A1","p":{"22-23":[6.0,"Mz",null],"23-24":[6.0,"G",null],"24-25":[6.0,"Tr","Sj2ª"],"25-26":[6.0,"MzT",null],"26-27":[6.0,"Sj1ª",null],"27-28":[6.0,"Tr","Sj2ª"]}},{"l":"LM 8 S","c":"LM","s":12.3,"a":"A2","p":{"22-23":[11.0,"Mz",null],"23-24":[11.0,"G",null],"24-25":[11.0,"Tr","Sj2ª"],"25-26":[11.0,"Mz",null],"26-27":[11.0,"Sj1ª",null],"27-28":[11.0,"Tr","Sj2ª"]}},{"l":"LM 10","c":"LM","s":12.1,"a":"A1","p":{"22-23":[10.0,"Mz",null],"23-24":[10.0,"G",null],"24-25":[10.0,"Av","Mz2ª"],"25-26":[10.0,"G","PI"],"26-27":[10.0,"PPAlf",null],"27-28":[10.0,null,null]}},{"l":"LM 1 CNI S","c":"LM","s":5.76,"a":"G6","p":{"22-23":[5.76,"CND",null],"23-24":[5.76,"CND",null],"24-25":[5.76,"CND",null],"25-26":[5.76,"CND",null],"26-27":[5.76,"CND",null],"27-28":[5.76,null,null]}},{"l":"LM 1 CN N","c":"LM","s":15.3,"a":"G3","p":{"22-23":[15.3,"CN",null],"23-24":[15.3,"CN",null],"24-25":[15.3,"CN",null],"25-26":[15.3,"CN",null],"26-27":[15.3,"CN",null],"27-28":[15.3,null,null]}},{"l":"LM 2 CN","c":"LM","s":31.3,"a":"G1","p":{"22-23":[31.3,"CN",null],"23-24":[31.3,"CN",null],"24-25":[31.3,"CN",null],"25-26":[31.3,"CN",null],"26-27":[31.3,"CN","VI"],"27-28":[31.3,null,null]}},{"l":"LM 2 CNI","c":"LM","s":14.8,"a":"G6","p":{"22-23":[14.8,"CND",null],"23-24":[14.8,"CND",null],"24-25":[14.8,"CND",null],"25-26":[14.8,"CND",null],"26-27":[14.8,"CND",null],"27-28":[14.8,null,null]}},{"l":"LM 3-4 CNI","c":"LM","s":107.0,"a":"G6","p":{"22-23":[107.0,"CND",null],"23-24":[107.0,"CND",null],"24-25":[107.0,"CND",null],"25-26":[107.0,"CND",null],"26-27":[107.0,"CND",null],"27-28":[107.0,null,null]}},{"l":"LM 3-4 agropiro","c":"LM","s":14.8,"a":"G4","p":{"22-23":[14.8,"PPAg",null],"23-24":[14.8,"PPAg",null],"24-25":[14.8,"PPAg",null],"25-26":[14.8,"PPAg",null],"26-27":[14.8,"PPAg",null],"27-28":[14.8,null,null]}},{"l":"LM 5 CNI","c":"LM","s":30.8,"a":"G6","p":{"22-23":[30.8,"CND",null],"23-24":[30.8,"CND",null],"24-25":[30.8,"CND",null],"25-26":[30.8,"CND",null],"26-27":[30.8,"CND",null],"27-28":[30.8,null,null]}},{"l":"LM 5 CN","c":"LM","s":28.2,"a":"G3","p":{"22-23":[28.2,"CN",null],"23-24":[28.2,"CN",null],"24-25":[28.2,"CN",null],"25-26":[28.2,"CN",null],"26-27":[28.2,"CN",null],"27-28":[28.2,null,null]}},{"l":"LM 7-8 CN","c":"LM","s":28.0,"a":"G3","p":{"22-23":[28.0,"CN",null],"23-24":[28.0,"CN",null],"24-25":[28.0,"CN",null],"25-26":[28.0,"CN",null],"26-27":[28.0,"CN",null],"27-28":[28.0,null,null]}},{"l":"LM 7-8 CNI","c":"LM","s":14.6,"a":"G6","p":{"22-23":[14.6,"CND",null],"23-24":[14.6,"CND",null],"24-25":[14.6,"CND",null],"25-26":[14.6,"CND",null],"26-27":[14.6,"CND",null],"27-28":[14.6,null,null]}},{"l":"LM 6 CN N","c":"LM","s":30.2,"a":"G3","p":{"22-23":[30.2,"CN",null],"23-24":[30.2,"CN",null],"24-25":[30.2,"CN",null],"25-26":[30.2,"CN",null],"26-27":[30.2,"CN",null],"27-28":[30.2,null,null]}},{"l":"LM 6 CN S","c":"LM","s":34.2,"a":"A2","p":{"22-23":[34.2,"CN",null],"23-24":[34.2,"CN",null],"24-25":[34.2,"CN",null],"25-26":[34.2,"CN",null],"26-27":[34.2,"CN","VI"],"27-28":[34.2,null,null]}},{"l":"LM 6 CNI","c":"LM","s":73.9,"a":"G6","p":{"22-23":[73.9,"CND",null],"23-24":[73.9,"CND",null],"24-25":[73.9,"CND",null],"25-26":[73.9,"CND",null],"26-27":[73.9,"CND",null],"27-28":[73.9,null,null]}},{"l":"LM Desperdicios","c":"LM","s":9.93999999999994,"a":"DESP","p":{}}];
+var LOTES = [{"l":"EC 1A","c":"EC","s":28.0,"a":"G1","p":{"22-23":[{"c":"PPFe","ha":28.0,"seg":false}],"23-24":[{"c":"PPFe","ha":28.0,"seg":false}],"24-25":[{"c":"G","ha":28.0,"seg":false},{"c":"PI","ha":28.0,"seg":true}],"25-26":[{"c":"PPAlf","ha":28.0,"seg":false}],"26-27":[{"c":"PPAlf","ha":28.0,"seg":false}],"27-28":[]}},{"l":"EC 1A CN","c":"EC","s":21.0,"a":"G2","p":{"22-23":[{"c":"CN","ha":21.0,"seg":false}],"23-24":[{"c":"CN","ha":21.0,"seg":false}],"24-25":[{"c":"CN","ha":21.0,"seg":false}],"25-26":[{"c":"CN","ha":21.0,"seg":false}],"26-27":[{"c":"CN","ha":21.0,"seg":false}],"27-28":[]}},{"l":"EC 1B","c":"EC","s":27.0,"a":"G1","p":{"22-23":[{"c":"PPFe","ha":27.0,"seg":false}],"23-24":[{"c":"PPFe","ha":20.0,"seg":false}],"24-25":[{"c":"G","ha":20.0,"seg":false},{"c":"PI","ha":20.0,"seg":true}],"25-26":[{"c":"PPFe","ha":20.0,"seg":false}],"26-27":[{"c":"PPFe","ha":20.0,"seg":false}],"27-28":[]}},{"l":"EC 1B CN","c":"EC","s":20.0,"a":"G2","p":{"22-23":[{"c":"CN","ha":20.0,"seg":false}],"23-24":[{"c":"CN","ha":20.0,"seg":false}],"24-25":[{"c":"CN","ha":20.0,"seg":false}],"25-26":[{"c":"CN","ha":20.0,"seg":false}],"26-27":[{"c":"CN","ha":20.0,"seg":false}],"27-28":[]}},{"l":"EC 2A","c":"EC","s":27.0,"a":"G1","p":{"22-23":[{"c":"PPFe","ha":27.0,"seg":false}],"23-24":[{"c":"PPFe","ha":19.0,"seg":false}],"24-25":[{"c":"G","ha":19.0,"seg":false},{"c":"PI","ha":19.0,"seg":true}],"25-26":[{"c":"PPFe","ha":19.0,"seg":false}],"26-27":[{"c":"PPFe","ha":19.0,"seg":false}],"27-28":[]}},{"l":"EC 2A CN","c":"EC","s":20.0,"a":"G2","p":{"22-23":[{"c":"CN","ha":20.0,"seg":false}],"23-24":[{"c":"CN","ha":20.0,"seg":false}],"24-25":[{"c":"CN","ha":20.0,"seg":false}],"25-26":[{"c":"CN","ha":10.5,"seg":false}],"26-27":[{"c":"CN","ha":10.5,"seg":false}],"27-28":[]}},{"l":"EC 2A CN1","c":"EC","s":0,"a":"G1","p":{"25-26":[{"c":"CN","ha":9.5,"seg":false}],"26-27":[{"c":"CN","ha":9.5,"seg":false},{"c":"VI","ha":9.5,"seg":true}],"27-28":[{"c":"MzP","ha":9.5,"seg":false},{"c":"PI","ha":9.5,"seg":true}]}},{"l":"EC 2B","c":"EC","s":45.0,"a":"G2","p":{"22-23":[{"c":"CN","ha":45.0,"seg":false}],"23-24":[{"c":"CN","ha":45.0,"seg":false}],"24-25":[{"c":"CN","ha":45.0,"seg":false}],"25-26":[{"c":"CN","ha":30.0,"seg":false}],"26-27":[{"c":"CN","ha":30.0,"seg":false}],"27-28":[]}},{"l":"EC 2B CN1","c":"EC","s":0,"a":"G1","p":{"25-26":[{"c":"CN","ha":15.0,"seg":false},{"c":"VI","ha":15.0,"seg":true}],"26-27":[{"c":"G","ha":15.0,"seg":false},{"c":"VI","ha":15.0,"seg":true}],"27-28":[{"c":"MzP","ha":15.0,"seg":false},{"c":"PI","ha":15.0,"seg":true}]}},{"l":"EC 3 loma","c":"EC","s":26.0,"a":"A2","p":{"22-23":[{"c":"Mz","ha":26.0,"seg":false}],"23-24":[{"c":"G","ha":26.0,"seg":false},{"c":"PI","ha":26.0,"seg":true}],"24-25":[{"c":"PPAlf","ha":26.0,"seg":false}],"25-26":[{"c":"PPAlf","ha":26.0,"seg":false}],"26-27":[{"c":"PPAlf","ha":26.0,"seg":false}],"27-28":[]}},{"l":"EC 3 CN","c":"EC","s":57.0,"a":"G2","p":{"22-23":[{"c":"CN","ha":57.0,"seg":false}],"23-24":[{"c":"CN","ha":57.0,"seg":false}],"24-25":[{"c":"CN","ha":57.0,"seg":false}],"25-26":[{"c":"CN","ha":57.0,"seg":false}],"26-27":[{"c":"CN","ha":57.0,"seg":false}],"27-28":[]}},{"l":"EC 4","c":"EC","s":35.0,"a":"G1","p":{"22-23":[{"c":"PPFe","ha":35.0,"seg":false}],"23-24":[{"c":"PPFe","ha":35.0,"seg":false}],"24-25":[{"c":"G","ha":35.0,"seg":false},{"c":"VI","ha":35.0,"seg":true}],"25-26":[{"c":"Sj1ª","ha":35.0,"seg":false}],"26-27":[{"c":"G","ha":35.0,"seg":false},{"c":"PI","ha":35.0,"seg":true}],"27-28":[{"c":"PPAlf","ha":35.0,"seg":false}]}},{"l":"EC 4","c":"EC","s":20.0,"a":"A2","p":{"22-23":[{"c":"PPFe","ha":20.0,"seg":false}],"23-24":[{"c":"PPFe","ha":20.0,"seg":false}],"24-25":[{"c":"G","ha":20.0,"seg":false},{"c":"VI","ha":20.0,"seg":true}],"25-26":[{"c":"Mz","ha":20.0,"seg":false}],"26-27":[{"c":"Sj1ª","ha":20.0,"seg":false}],"27-28":[{"c":"Tr","ha":20.0,"seg":false},{"c":"Sj2ª","ha":20.0,"seg":true}]}},{"l":"EC 5","c":"EC","s":78.0,"a":"G1","p":{"22-23":[{"c":"CN","ha":78.0,"seg":false},{"c":"VI","ha":78.0,"seg":true}],"23-24":[{"c":"VI","ha":78.0,"seg":false},{"c":"PI","ha":78.0,"seg":true}],"24-25":[{"c":"PPAlf","ha":78.0,"seg":false}],"25-26":[{"c":"PPAlf","ha":78.0,"seg":false}],"26-27":[{"c":"PPAlf","ha":78.0,"seg":false}],"27-28":[]}},{"l":"EC 6 loma","c":"EC","s":30.0,"a":"G1","p":{"22-23":[{"c":"MzP","ha":30.0,"seg":false},{"c":"VI","ha":30.0,"seg":true}],"23-24":[{"c":"VI","ha":30.0,"seg":false},{"c":"PI","ha":30.0,"seg":true}],"24-25":[{"c":"PPAlf","ha":30.0,"seg":false}],"25-26":[{"c":"PPAlf","ha":30.0,"seg":false}],"26-27":[{"c":"PPAlf","ha":30.0,"seg":false}],"27-28":[]}},{"l":"EC 6 bajo","c":"EC","s":36.0,"a":"G4","p":{"22-23":[{"c":"CN","ha":36.0,"seg":false}],"23-24":[{"c":"CN","ha":36.0,"seg":false}],"24-25":[{"c":"CN","ha":36.0,"seg":false}],"25-26":[{"c":"CN","ha":36.0,"seg":false}],"26-27":[{"c":"CN","ha":36.0,"seg":false}],"27-28":[]}},{"l":"EC 7","c":"EC","s":27.0,"a":"G1","p":{"22-23":[{"c":"PPAlf","ha":27.0,"seg":false}],"23-24":[{"c":"PPAlf","ha":27.0,"seg":false}],"24-25":[{"c":"G","ha":27.0,"seg":false},{"c":"VI","ha":27.0,"seg":true}],"25-26":[{"c":"Sj1ª","ha":27.0,"seg":false}],"26-27":[{"c":"G","ha":27.0,"seg":false},{"c":"PI","ha":27.0,"seg":true}],"27-28":[{"c":"PPAlf","ha":27.0,"seg":false}]}},{"l":"EC 12 loma","c":"EC","s":4.0,"a":"A2","p":{"22-23":[{"c":"PPAlf","ha":4.0,"seg":false}],"23-24":[{"c":"PPAlf","ha":4.0,"seg":false}],"24-25":[{"c":"G","ha":4.0,"seg":false},{"c":"VI","ha":4.0,"seg":true}],"25-26":[{"c":"Mz","ha":4.0,"seg":false}],"26-27":[{"c":"Sj1ª","ha":4.0,"seg":false}],"27-28":[{"c":"Tr","ha":4.0,"seg":false},{"c":"Sj2ª","ha":4.0,"seg":true}]}},{"l":"EC 8","c":"EC","s":20.0,"a":"G1","p":{"22-23":[{"c":"CN","ha":20.0,"seg":false}],"23-24":[{"c":"MzSPE","ha":18.0,"seg":false}],"24-25":[{"c":"G","ha":18.0,"seg":false},{"c":"PI","ha":18.0,"seg":true}],"25-26":[{"c":"PPAlf","ha":18.0,"seg":false}],"26-27":[{"c":"PPAlf","ha":18.0,"seg":false}],"27-28":[]}},{"l":"EC 10-1","c":"EC","s":26.0,"a":"G1","p":{"22-23":[{"c":"PPFe","ha":26.0,"seg":false}],"23-24":[{"c":"MzT","ha":25.0,"seg":false}],"24-25":[{"c":"G","ha":25.0,"seg":false},{"c":"PI","ha":25.0,"seg":true}],"25-26":[{"c":"PPAlf","ha":25.0,"seg":false}],"26-27":[{"c":"PPAlf","ha":25.0,"seg":false}],"27-28":[]}},{"l":"EC 10-2","c":"EC","s":27.0,"a":"G1","p":{"22-23":[{"c":"CN","ha":27.0,"seg":false}],"23-24":[{"c":"MzD","ha":25.0,"seg":false}],"24-25":[{"c":"G","ha":25.0,"seg":false},{"c":"PI","ha":25.0,"seg":true}],"25-26":[{"c":"PPAlf","ha":25.0,"seg":false}],"26-27":[{"c":"PPAlf","ha":25.0,"seg":false}],"27-28":[]}},{"l":"EC 10-3","c":"EC","s":20.0,"a":"G1","p":{"22-23":[{"c":"MzP","ha":20.0,"seg":false}],"23-24":[{"c":"MzP","ha":20.0,"seg":false}],"24-25":[{"c":"G","ha":20.0,"seg":false},{"c":"PI","ha":20.0,"seg":true}],"25-26":[{"c":"PPAlf","ha":20.0,"seg":false}],"26-27":[{"c":"PPAlf","ha":20.0,"seg":false}],"27-28":[]}},{"l":"EC 11 loma","c":"EC","s":25.0,"a":"G1","p":{"22-23":[{"c":"PPFe","ha":25.0,"seg":false}],"23-24":[{"c":"PPFe","ha":25.0,"seg":false}],"24-25":[{"c":"PPFe","ha":25.0,"seg":false}],"25-26":[{"c":"G","ha":25.0,"seg":false},{"c":"PI","ha":25.0,"seg":true}],"26-27":[{"c":"PPAlf","ha":25.0,"seg":false}],"27-28":[]}},{"l":"EC 11 bajo","c":"EC","s":33.0,"a":"G4","p":{"22-23":[{"c":"CN","ha":33.0,"seg":false}],"23-24":[{"c":"CN","ha":33.0,"seg":false}],"24-25":[{"c":"CN","ha":33.0,"seg":false}],"25-26":[{"c":"CN","ha":33.0,"seg":false}],"26-27":[{"c":"CN","ha":33.0,"seg":false}],"27-28":[]}},{"l":"EC 12","c":"EC","s":54.0,"a":"G3","p":{"22-23":[{"c":"CN","ha":54.0,"seg":false}],"23-24":[{"c":"CN","ha":54.0,"seg":false}],"24-25":[{"c":"CN","ha":54.0,"seg":false}],"25-26":[{"c":"CN","ha":54.0,"seg":false}],"26-27":[{"c":"CN","ha":54.0,"seg":false}],"27-28":[]}},{"l":"EC 13 loma","c":"EC","s":35.0,"a":"A2","p":{"22-23":[{"c":"Tr","ha":35.0,"seg":false},{"c":"Sj2ª","ha":35.0,"seg":true}],"23-24":[{"c":"G","ha":34.0,"seg":false}],"24-25":[{"c":"Tr","ha":34.0,"seg":false},{"c":"Sj2ª","ha":34.0,"seg":true}],"25-26":[{"c":"Mz","ha":34.0,"seg":false}],"26-27":[{"c":"Sj1ª","ha":34.0,"seg":false}],"27-28":[{"c":"Tr","ha":34.0,"seg":false},{"c":"Sj2ª","ha":34.0,"seg":true}]}},{"l":"EC 13 CN","c":"EC","s":40.0,"a":"G3","p":{"22-23":[{"c":"CN","ha":40.0,"seg":false}],"23-24":[{"c":"CN","ha":40.0,"seg":false}],"24-25":[{"c":"CN","ha":40.0,"seg":false}],"25-26":[{"c":"CN","ha":40.0,"seg":false}],"26-27":[{"c":"CN","ha":40.0,"seg":false}],"27-28":[]}},{"l":"EC 14","c":"EC","s":65.0,"a":"A2","p":{"22-23":[{"c":"G","ha":65.0,"seg":false}],"23-24":[{"c":"Tr","ha":65.0,"seg":false},{"c":"Sj2ª","ha":65.0,"seg":true}],"24-25":[{"c":"Mz","ha":64.0,"seg":false}],"25-26":[{"c":"Tr","ha":64.0,"seg":false},{"c":"Sj2ª","ha":64.0,"seg":true}],"26-27":[{"c":"Mz","ha":64.0,"seg":false}],"27-28":[{"c":"Sj1ª","ha":64.0,"seg":false}]}},{"l":"EC 14 CN","c":"EC","s":13.0,"a":"G3","p":{"22-23":[{"c":"CN","ha":10.0,"seg":false}],"23-24":[{"c":"CN","ha":10.0,"seg":false}],"24-25":[{"c":"CN","ha":10.0,"seg":false}],"25-26":[{"c":"CN","ha":10.0,"seg":false}],"26-27":[{"c":"CN","ha":10.0,"seg":false}],"27-28":[]}},{"l":"EC 15","c":"EC","s":17.0,"a":"A2","p":{"22-23":[{"c":"G","ha":17.0,"seg":false}],"23-24":[{"c":"PI","ha":17.0,"seg":false}],"24-25":[{"c":"PPFe","ha":17.0,"seg":false}],"25-26":[{"c":"PPFe","ha":17.0,"seg":false}],"26-27":[{"c":"PPFe","ha":17.0,"seg":false}],"27-28":[]}},{"l":"EC 15 CN","c":"EC","s":42.0,"a":"G3","p":{"22-23":[{"c":"CN","ha":40.0,"seg":false}],"23-24":[{"c":"CN","ha":40.0,"seg":false}],"24-25":[{"c":"CN","ha":40.0,"seg":false}],"25-26":[{"c":"CN","ha":40.0,"seg":false}],"26-27":[{"c":"CN","ha":40.0,"seg":false}],"27-28":[]}},{"l":"EC 16","c":"EC","s":29.0,"a":"A2","p":{"22-23":[{"c":"G","ha":29.0,"seg":false}],"23-24":[{"c":"PI","ha":29.0,"seg":false}],"24-25":[{"c":"PPAlf","ha":29.0,"seg":false}],"25-26":[{"c":"PPAlf","ha":29.0,"seg":false}],"26-27":[{"c":"PPAlf","ha":29.0,"seg":false}],"27-28":[]}},{"l":"EC 16 bajo","c":"EC","s":20.0,"a":"G1","p":{"22-23":[{"c":"PPAlf","ha":20.0,"seg":false}],"23-24":[{"c":"PPAlf","ha":20.0,"seg":false}],"24-25":[{"c":"PPAlf","ha":20.0,"seg":false},{"c":"VI","ha":20.0,"seg":true}],"25-26":[{"c":"G","ha":20.0,"seg":false},{"c":"PI","ha":20.0,"seg":true}],"26-27":[{"c":"PPFe","ha":20.0,"seg":false}],"27-28":[]}},{"l":"EC DP1","c":"EC","s":47.0,"a":"A2","p":{"22-23":[{"c":"PPFe","ha":45.0,"seg":false}],"23-24":[{"c":"MzT","ha":45.0,"seg":false}],"24-25":[{"c":"G","ha":45.0,"seg":false}],"25-26":[{"c":"Tr","ha":45.0,"seg":false},{"c":"Sj2ª","ha":45.0,"seg":true}],"26-27":[{"c":"G","ha":45.0,"seg":false},{"c":"VI","ha":45.0,"seg":true}],"27-28":[{"c":"MzT","ha":45.0,"seg":false}]}},{"l":"EC DP2 CN","c":"EC","s":37.0,"a":"G2","p":{"22-23":[{"c":"CN","ha":37.0,"seg":false}],"23-24":[{"c":"CN","ha":37.0,"seg":false}],"24-25":[{"c":"CN","ha":37.0,"seg":false}],"25-26":[{"c":"CN","ha":30.0,"seg":false}],"26-27":[{"c":"CN","ha":30.0,"seg":false}],"27-28":[]}},{"l":"EC DP2 CN1","c":"EC","s":0,"a":"G1","p":{"25-26":[{"c":"CN","ha":7.0,"seg":false}],"26-27":[{"c":"CN","ha":7.0,"seg":false},{"c":"VI","ha":7.0,"seg":true}],"27-28":[{"c":"MzP","ha":7.0,"seg":false},{"c":"PI","ha":7.0,"seg":true}]}},{"l":"EC DP3 CN","c":"EC","s":66.0,"a":"G4","p":{"22-23":[{"c":"CND","ha":66.0,"seg":false}],"23-24":[{"c":"CND","ha":66.0,"seg":false}],"24-25":[{"c":"CND","ha":66.0,"seg":false}],"25-26":[{"c":"CND","ha":61.0,"seg":false}],"26-27":[{"c":"CND","ha":61.0,"seg":false}],"27-28":[]}},{"l":"EC DP3 CN1","c":"EC","s":0,"a":"G1","p":{"25-26":[{"c":"CN","ha":5.0,"seg":false}],"26-27":[{"c":"CN","ha":5.0,"seg":false},{"c":"VI","ha":5.0,"seg":true}],"27-28":[{"c":"MzP","ha":5.0,"seg":false},{"c":"PI","ha":5.0,"seg":true}]}},{"l":"EC DP2-3 laguna","c":"EC","s":26.0,"a":"G6","p":{"22-23":[{"c":"CND","ha":26.0,"seg":false}],"23-24":[{"c":"CND","ha":26.0,"seg":false}],"24-25":[{"c":"CND","ha":26.0,"seg":false}],"25-26":[{"c":"CND","ha":26.0,"seg":false}],"26-27":[{"c":"CND","ha":26.0,"seg":false}],"27-28":[]}},{"l":"EC Desperdicios","c":"EC","s":46.0,"a":"DESP","p":{}},{"l":"EM 18","c":"EM","s":44.0,"a":"A1","p":{"22-23":[{"c":"Mz","ha":44.0,"seg":false}],"23-24":[{"c":"Sj1ª","ha":44.0,"seg":false}],"24-25":[{"c":"Mz","ha":44.0,"seg":false}],"25-26":[{"c":"Sj1ª","ha":44.0,"seg":false}],"26-27":[{"c":"Tr","ha":44.0,"seg":false},{"c":"Sj2ª","ha":44.0,"seg":true}],"27-28":[{"c":"Mz","ha":44.0,"seg":false}]}},{"l":"EM 19","c":"EM","s":46.0,"a":"A1","p":{"22-23":[{"c":"Mz","ha":45.0,"seg":false}],"23-24":[{"c":"Sj1ª","ha":45.0,"seg":false}],"24-25":[{"c":"Tr","ha":45.0,"seg":false},{"c":"Sj2ª","ha":45.0,"seg":true}],"25-26":[{"c":"Mz","ha":45.0,"seg":false}],"26-27":[{"c":"Sj1ª","ha":45.0,"seg":false}],"27-28":[{"c":"Tr","ha":45.0,"seg":false},{"c":"Sj2ª","ha":45.0,"seg":true}]}},{"l":"EM 20","c":"EM","s":38.0,"a":"A1","p":{"22-23":[{"c":"Tr","ha":38.0,"seg":false},{"c":"Sj2ª","ha":38.0,"seg":true}],"23-24":[{"c":"Mz","ha":38.0,"seg":false}],"24-25":[{"c":"Sj1ª","ha":38.0,"seg":false}],"25-26":[{"c":"Tr","ha":38.0,"seg":false},{"c":"Sj2ª","ha":38.0,"seg":true}],"26-27":[{"c":"Sj1ª","ha":38.0,"seg":false}],"27-28":[{"c":"Tr","ha":38.0,"seg":false},{"c":"Sj2ª","ha":38.0,"seg":true}]}},{"l":"EM 21","c":"EM","s":45.0,"a":"A1","p":{"22-23":[{"c":"Sj1ª","ha":45.0,"seg":false}],"23-24":[{"c":"Tr","ha":45.0,"seg":false},{"c":"Sj2ª","ha":45.0,"seg":true}],"24-25":[{"c":"VI","ha":45.0,"seg":true}],"25-26":[{"c":"Sj1ª","ha":45.0,"seg":false}],"26-27":[{"c":"Tr","ha":45.0,"seg":false},{"c":"Sj2ª","ha":45.0,"seg":true}],"27-28":[{"c":"Mz","ha":45.0,"seg":false}]}},{"l":"EM 50/51","c":"EM","s":90.0,"a":"A1","p":{"22-23":[{"c":"Sj1ª","ha":95.0,"seg":false}],"23-24":[{"c":"Mz","ha":95.0,"seg":false}],"24-25":[{"c":"Sj1ª","ha":95.0,"seg":false}],"25-26":[{"c":"Tr","ha":95.0,"seg":false},{"c":"Sj2ª","ha":95.0,"seg":true}],"26-27":[{"c":"Mz","ha":95.0,"seg":false}],"27-28":[{"c":"Sj1ª","ha":95.0,"seg":false}]}},{"l":"EM 50/51 CN","c":"EM","s":18.0,"a":"G3","p":{"22-23":[{"c":"CN","ha":14.0,"seg":false}],"23-24":[{"c":"CN","ha":14.0,"seg":false}],"24-25":[{"c":"CN","ha":14.0,"seg":false}],"25-26":[{"c":"CN","ha":14.0,"seg":false}],"26-27":[{"c":"CN","ha":14.0,"seg":false}],"27-28":[]}},{"l":"EM 52 loma","c":"EM","s":22.0,"a":"G1","p":{"22-23":[{"c":"PPFe","ha":22.0,"seg":false}],"23-24":[{"c":"PPFe","ha":22.0,"seg":false}],"24-25":[{"c":"G","ha":22.0,"seg":false},{"c":"VI","ha":22.0,"seg":true}],"25-26":[{"c":"Sj1ª","ha":22.0,"seg":false}],"26-27":[{"c":"G","ha":22.0,"seg":false},{"c":"PI","ha":22.0,"seg":true}],"27-28":[{"c":"PPAlf","ha":22.0,"seg":false}]}},{"l":"EM 52 CN","c":"EM","s":4.0,"a":"G3","p":{"22-23":[{"c":"CN","ha":4.0,"seg":false}],"23-24":[{"c":"CN","ha":4.0,"seg":false}],"24-25":[{"c":"CN","ha":4.0,"seg":false}],"25-26":[{"c":"CN","ha":4.0,"seg":false}],"26-27":[{"c":"CN","ha":4.0,"seg":false}],"27-28":[]}},{"l":"EM 53","c":"EM","s":28.0,"a":"G1","p":{"22-23":[{"c":"PPFe","ha":28.0,"seg":false}],"23-24":[{"c":"PPFe","ha":28.0,"seg":false}],"24-25":[{"c":"G","ha":28.0,"seg":false},{"c":"VI","ha":28.0,"seg":true}],"25-26":[{"c":"Sj1ª","ha":28.0,"seg":false}],"26-27":[{"c":"G","ha":28.0,"seg":false},{"c":"PI","ha":28.0,"seg":true}],"27-28":[{"c":"PPAlf","ha":28.0,"seg":false}]}},{"l":"EM 53 CN","c":"EM","s":10.0,"a":"G3","p":{"22-23":[{"c":"CN","ha":10.0,"seg":false}],"23-24":[{"c":"CN","ha":10.0,"seg":false}],"24-25":[{"c":"CN","ha":10.0,"seg":false}],"25-26":[{"c":"CN","ha":10.0,"seg":false}],"26-27":[{"c":"CN","ha":10.0,"seg":false}],"27-28":[]}},{"l":"EM 54","c":"EM","s":167.0,"a":"G6","p":{"22-23":[{"c":"CND","ha":126.0,"seg":false}],"23-24":[{"c":"CND","ha":126.0,"seg":false}],"24-25":[{"c":"CND","ha":126.0,"seg":false}],"25-26":[{"c":"CND","ha":126.0,"seg":false}],"26-27":[{"c":"CND","ha":126.0,"seg":false}],"27-28":[]}},{"l":"EM 56","c":"EM","s":67.0,"a":"G6","p":{"22-23":[{"c":"CND","ha":67.0,"seg":false}],"23-24":[{"c":"CND","ha":67.0,"seg":false}],"24-25":[{"c":"CND","ha":67.0,"seg":false}],"25-26":[{"c":"CND","ha":67.0,"seg":false}],"26-27":[{"c":"CND","ha":67.0,"seg":false}],"27-28":[]}},{"l":"EM 57","c":"EM","s":23.0,"a":"G1","p":{"22-23":[{"c":"MzP","ha":18.0,"seg":false}],"23-24":[{"c":"MzP","ha":16.0,"seg":false},{"c":"PI","ha":16.0,"seg":true}],"24-25":[{"c":"PPFe","ha":16.0,"seg":false}],"25-26":[{"c":"PPFe","ha":16.0,"seg":false}],"26-27":[{"c":"PPFe","ha":16.0,"seg":false}],"27-28":[]}},{"l":"EM 57 bajo","c":"EM","s":24.0,"a":"G3","p":{"22-23":[{"c":"CN","ha":24.0,"seg":false}],"23-24":[{"c":"CN","ha":24.0,"seg":false}],"24-25":[{"c":"CN","ha":24.0,"seg":false}],"25-26":[{"c":"CN","ha":24.0,"seg":false}],"26-27":[{"c":"CN","ha":24.0,"seg":false}],"27-28":[]}},{"l":"EM 58 CN","c":"EM","s":53.0,"a":"G6","p":{"22-23":[{"c":"CND","ha":53.0,"seg":false}],"23-24":[{"c":"CND","ha":53.0,"seg":false}],"24-25":[{"c":"CND","ha":53.0,"seg":false}],"25-26":[{"c":"CND","ha":53.0,"seg":false}],"26-27":[{"c":"CND","ha":53.0,"seg":false}],"27-28":[]}},{"l":"EM 58","c":"EM","s":10.0,"a":"G1","p":{"22-23":[{"c":"MzP","ha":7.0,"seg":false}],"23-24":[{"c":"MzP","ha":7.0,"seg":false},{"c":"PI","ha":7.0,"seg":true}],"24-25":[{"c":"PPFe","ha":7.0,"seg":false}],"25-26":[{"c":"PPFe","ha":7.0,"seg":false}],"26-27":[{"c":"PPFe","ha":7.0,"seg":false}],"27-28":[]}},{"l":"EM 59","c":"EM","s":26.0,"a":"A2","p":{"22-23":[{"c":"MzP","ha":25.0,"seg":false}],"23-24":[{"c":"G","ha":26.0,"seg":false},{"c":"PI","ha":26.0,"seg":true}],"24-25":[{"c":"PPFe","ha":26.0,"seg":false}],"25-26":[{"c":"PPFe","ha":26.0,"seg":false}],"26-27":[{"c":"PPFe","ha":26.0,"seg":false}],"27-28":[]}},{"l":"EM 59 CN","c":"EM","s":6.0,"a":"G6","p":{"22-23":[{"c":"CN","ha":6.0,"seg":false}],"23-24":[{"c":"CN","ha":6.0,"seg":false}],"24-25":[{"c":"CN","ha":6.0,"seg":false}],"25-26":[{"c":"CN","ha":6.0,"seg":false}],"26-27":[{"c":"CN","ha":6.0,"seg":false}],"27-28":[]}},{"l":"EM 60","c":"EM","s":25.0,"a":"G1","p":{"22-23":[{"c":"PPFe","ha":25.0,"seg":false}],"23-24":[{"c":"PPFe","ha":25.0,"seg":false}],"24-25":[{"c":"G","ha":25.0,"seg":false},{"c":"PI","ha":25.0,"seg":true}],"25-26":[{"c":"PPAlf","ha":25.0,"seg":false}],"26-27":[{"c":"PPAlf","ha":25.0,"seg":false}],"27-28":[]}},{"l":"EM 60 CN","c":"EM","s":11.0,"a":"G3","p":{"22-23":[{"c":"CN","ha":11.0,"seg":false}],"23-24":[{"c":"CN","ha":11.0,"seg":false}],"24-25":[{"c":"CN","ha":11.0,"seg":false}],"25-26":[{"c":"CN","ha":11.0,"seg":false}],"26-27":[{"c":"CN","ha":11.0,"seg":false}],"27-28":[]}},{"l":"EM 61","c":"EM","s":32.0,"a":"A2","p":{"22-23":[{"c":"MzT","ha":28.0,"seg":false}],"23-24":[{"c":"Sj1ª","ha":28.0,"seg":false}],"24-25":[{"c":"Tr","ha":28.0,"seg":false},{"c":"Sj2ª","ha":28.0,"seg":true}],"25-26":[{"c":"MzT","ha":28.0,"seg":false}],"26-27":[{"c":"Sj1ª","ha":28.0,"seg":false}],"27-28":[{"c":"Tr","ha":28.0,"seg":false},{"c":"Sj2ª","ha":28.0,"seg":true}]}},{"l":"EM 62","c":"EM","s":39.0,"a":"G1","p":{"22-23":[{"c":"PPFe","ha":39.0,"seg":false}],"23-24":[{"c":"PPFe","ha":39.0,"seg":false}],"24-25":[{"c":"PPFe","ha":39.0,"seg":false}],"25-26":[{"c":"PPFe","ha":39.0,"seg":false}],"26-27":[{"c":"G","ha":39.0,"seg":false},{"c":"VI","ha":39.0,"seg":true}],"27-28":[{"c":"MzT","ha":39.0,"seg":false}]}},{"l":"EM 62 CN","c":"EM","s":8.0,"a":"G2","p":{"22-23":[{"c":"CN","ha":8.0,"seg":false}],"23-24":[{"c":"CN","ha":8.0,"seg":false}],"24-25":[{"c":"CN","ha":8.0,"seg":false}],"25-26":[{"c":"CN","ha":8.0,"seg":false}],"26-27":[{"c":"CN","ha":8.0,"seg":false}],"27-28":[]}},{"l":"EM 63","c":"EM","s":45.0,"a":"A2","p":{"22-23":[{"c":"Tr","ha":45.0,"seg":false},{"c":"Sj2ª","ha":45.0,"seg":true}],"23-24":[{"c":"G","ha":43.0,"seg":false},{"c":"PI","ha":43.0,"seg":true}],"24-25":[{"c":"PPAlf","ha":43.0,"seg":false}],"25-26":[{"c":"PPAlf","ha":43.0,"seg":false}],"26-27":[{"c":"PPAlf","ha":43.0,"seg":false}],"27-28":[]}},{"l":"EM 64","c":"EM","s":43.0,"a":"A2","p":{"22-23":[{"c":"MzT","ha":42.0,"seg":false}],"23-24":[{"c":"Sj1ª","ha":43.0,"seg":false}],"24-25":[{"c":"Tr","ha":43.0,"seg":false},{"c":"Sj2ª","ha":43.0,"seg":true}],"25-26":[{"c":"MzT","ha":43.0,"seg":false}],"26-27":[{"c":"Sj1ª","ha":43.0,"seg":false}],"27-28":[{"c":"Tr","ha":43.0,"seg":false},{"c":"Sj2ª","ha":43.0,"seg":true}]}},{"l":"EM 64 CN","c":"EM","s":8.0,"a":"G3","p":{"22-23":[{"c":"CND","ha":8.0,"seg":false}],"23-24":[{"c":"CND","ha":8.0,"seg":false}],"24-25":[{"c":"CND","ha":8.0,"seg":false}],"25-26":[{"c":"CND","ha":8.0,"seg":false}],"26-27":[{"c":"CND","ha":8.0,"seg":false}],"27-28":[]}},{"l":"EM 65","c":"EM","s":12.0,"a":"G1","p":{"22-23":[{"c":"PPFe","ha":12.0,"seg":false}],"23-24":[{"c":"PPFe","ha":12.0,"seg":false}],"24-25":[{"c":"PPFe","ha":12.0,"seg":false},{"c":"VI","ha":12.0,"seg":true}],"25-26":[{"c":"G","ha":12.0,"seg":false},{"c":"PI","ha":12.0,"seg":true}],"26-27":[{"c":"PPAlf","ha":12.0,"seg":false}],"27-28":[]}},{"l":"EM 65 CN","c":"EM","s":43.0,"a":"G2","p":{"22-23":[{"c":"CN","ha":43.0,"seg":false}],"23-24":[{"c":"CN","ha":43.0,"seg":false}],"24-25":[{"c":"CN","ha":43.0,"seg":false}],"25-26":[{"c":"CN","ha":33.0,"seg":false}],"26-27":[{"c":"CN","ha":33.0,"seg":false}],"27-28":[]}},{"l":"EM 65 CN1","c":"EM","s":0,"a":"G1","p":{"25-26":[{"c":"CN","ha":10.0,"seg":false},{"c":"VI","ha":10.0,"seg":true}],"26-27":[{"c":"G","ha":10.0,"seg":false},{"c":"VI","ha":10.0,"seg":true}],"27-28":[{"c":"MzP","ha":10.0,"seg":false},{"c":"PI","ha":10.0,"seg":true}]}},{"l":"EM 66","c":"EM","s":50.0,"a":"A1","p":{"22-23":[{"c":"Mz","ha":50.0,"seg":false}],"23-24":[{"c":"Sj1ª","ha":50.0,"seg":false}],"24-25":[{"c":"Mz","ha":36.0,"seg":false}],"25-26":[{"c":"Sj1ª","ha":36.0,"seg":false}],"26-27":[{"c":"Tr","ha":36.0,"seg":false},{"c":"Sj2ª","ha":36.0,"seg":true}],"27-28":[{"c":"Mz","ha":36.0,"seg":false}]}},{"l":"EM 66","c":"EM","s":0,"a":"A1","p":{"24-25":[{"c":"MzSPE","ha":14.0,"seg":false},{"c":"VI","ha":14.0,"seg":true}],"25-26":[{"c":"Sj1ª","ha":14.0,"seg":false}],"26-27":[{"c":"Tr","ha":14.0,"seg":false},{"c":"Sj2ª","ha":14.0,"seg":true}],"27-28":[{"c":"Mz","ha":14.0,"seg":false}]}},{"l":"EM 66 CN","c":"EM","s":3.0,"a":"G3","p":{"22-23":[{"c":"CND","ha":3.0,"seg":false}],"23-24":[{"c":"CND","ha":3.0,"seg":false}],"24-25":[{"c":"CND","ha":3.0,"seg":false}],"25-26":[{"c":"CND","ha":3.0,"seg":false}],"26-27":[{"c":"CND","ha":3.0,"seg":false}],"27-28":[]}},{"l":"EM 67","c":"EM","s":12.0,"a":"G1","p":{"22-23":[{"c":"PPFe","ha":12.0,"seg":false}],"23-24":[{"c":"PPFe","ha":12.0,"seg":false}],"24-25":[{"c":"PPFe","ha":12.0,"seg":false},{"c":"VI","ha":12.0,"seg":true}],"25-26":[{"c":"G","ha":12.0,"seg":false},{"c":"PI","ha":12.0,"seg":true}],"26-27":[{"c":"PPAlf","ha":12.0,"seg":false}],"27-28":[]}},{"l":"EM 67 CN","c":"EM","s":7.0,"a":"G3","p":{"22-23":[{"c":"CND","ha":7.0,"seg":false}],"23-24":[{"c":"CND","ha":7.0,"seg":false}],"24-25":[{"c":"CND","ha":7.0,"seg":false}],"25-26":[{"c":"CND","ha":7.0,"seg":false}],"26-27":[{"c":"CND","ha":7.0,"seg":false}],"27-28":[]}},{"l":"EM 68","c":"EM","s":25.0,"a":"G2","p":{"22-23":[{"c":"CN","ha":25.0,"seg":false}],"23-24":[{"c":"CN","ha":25.0,"seg":false},{"c":"VI","ha":25.0,"seg":true}],"24-25":[{"c":"MzD","ha":25.0,"seg":false}],"25-26":[{"c":"CN","ha":25.0,"seg":false},{"c":"VI","ha":25.0,"seg":true}],"26-27":[{"c":"G","ha":25.0,"seg":false},{"c":"PI","ha":25.0,"seg":true}],"27-28":[{"c":"PPFe","ha":25.0,"seg":false}]}},{"l":"EM 69 CN","c":"EM","s":9.0,"a":"G2","p":{"22-23":[{"c":"CND","ha":9.0,"seg":false}],"23-24":[{"c":"CND","ha":9.0,"seg":false}],"24-25":[{"c":"CND","ha":9.0,"seg":false}],"25-26":[{"c":"CND","ha":9.0,"seg":false}],"26-27":[{"c":"CND","ha":9.0,"seg":false}],"27-28":[]}},{"l":"EM 69","c":"EM","s":16.0,"a":"G4","p":{"22-23":[{"c":"CN","ha":16.0,"seg":false}],"23-24":[{"c":"CN","ha":16.0,"seg":false}],"24-25":[{"c":"CN","ha":16.0,"seg":false}],"25-26":[{"c":"CN","ha":16.0,"seg":false}],"26-27":[{"c":"CN","ha":16.0,"seg":false}],"27-28":[]}},{"l":"EM 69 laguna","c":"EM","s":18.0,"a":"G6","p":{"22-23":[{"c":"CN","ha":18.0,"seg":false}],"23-24":[{"c":"CN","ha":18.0,"seg":false}],"24-25":[{"c":"CN","ha":18.0,"seg":false}],"25-26":[{"c":"CN","ha":18.0,"seg":false}],"26-27":[{"c":"CN","ha":18.0,"seg":false}],"27-28":[]}},{"l":"EM 70","c":"EM","s":59.0,"a":"G3","p":{"22-23":[{"c":"CN","ha":59.0,"seg":false}],"23-24":[{"c":"CN","ha":59.0,"seg":false}],"24-25":[{"c":"CN","ha":59.0,"seg":false}],"25-26":[{"c":"CN","ha":59.0,"seg":false}],"26-27":[{"c":"CN","ha":59.0,"seg":false}],"27-28":[]}},{"l":"EM 70/73","c":"EM","s":56.0,"a":"A1","p":{"22-23":[{"c":"Sj1ª","ha":56.0,"seg":false}],"23-24":[{"c":"Mz","ha":56.0,"seg":false}],"24-25":[{"c":"Sj1ª","ha":56.0,"seg":false}],"25-26":[{"c":"Tr","ha":56.0,"seg":false},{"c":"Sj2ª","ha":56.0,"seg":true}],"26-27":[{"c":"Mz","ha":56.0,"seg":false}],"27-28":[{"c":"Sj1ª","ha":56.0,"seg":false}]}},{"l":"EM 72","c":"EM","s":57.0,"a":"G4","p":{"22-23":[{"c":"CN","ha":57.0,"seg":false}],"23-24":[{"c":"CN","ha":57.0,"seg":false}],"24-25":[{"c":"CN","ha":57.0,"seg":false}],"25-26":[{"c":"CN","ha":50.0,"seg":false}],"26-27":[{"c":"CN","ha":50.0,"seg":false}],"27-28":[]}},{"l":"EM 72 CN1","c":"EM","s":0,"a":"G1","p":{"25-26":[{"c":"CN","ha":7.0,"seg":false}],"26-27":[{"c":"CN","ha":7.0,"seg":false}],"27-28":[]}},{"l":"EM 72 laguna","c":"EM","s":36.0,"a":"G6","p":{"22-23":[{"c":"CN","ha":36.0,"seg":false}],"23-24":[{"c":"CN","ha":36.0,"seg":false}],"24-25":[{"c":"CN","ha":36.0,"seg":false}],"25-26":[{"c":"CN","ha":36.0,"seg":false}],"26-27":[{"c":"CN","ha":36.0,"seg":false}],"27-28":[]}},{"l":"EM 73A","c":"EM","s":20.0,"a":"G1","p":{"22-23":[{"c":"PPFe","ha":20.0,"seg":false}],"23-24":[{"c":"PPFe","ha":20.0,"seg":false}],"24-25":[{"c":"G","ha":20.0,"seg":false},{"c":"PI","ha":20.0,"seg":true}],"25-26":[{"c":"PPAlf","ha":20.0,"seg":false}],"26-27":[{"c":"PPAlf","ha":20.0,"seg":false}],"27-28":[]}},{"l":"EM 73 CN","c":"EM","s":5.0,"a":"G3","p":{"22-23":[{"c":"CN","ha":5.0,"seg":false}],"23-24":[{"c":"CN","ha":5.0,"seg":false}],"24-25":[{"c":"CN","ha":5.0,"seg":false}],"25-26":[{"c":"PPAlf","ha":5.0,"seg":false}],"26-27":[{"c":"PPAlf","ha":5.0,"seg":false}],"27-28":[]}},{"l":"EM 73 laguna","c":"EM","s":25.0,"a":"G6","p":{"22-23":[{"c":"CN","ha":25.0,"seg":false}],"23-24":[{"c":"CN","ha":25.0,"seg":false}],"24-25":[{"c":"CN","ha":25.0,"seg":false}],"25-26":[{"c":"CN","ha":25.0,"seg":false}],"26-27":[{"c":"CN","ha":25.0,"seg":false}],"27-28":[]}},{"l":"EM Desperdicios","c":"EM","s":35.0,"a":"DESP","p":{}},{"l":"LR 1","c":"LR","s":117.0,"a":"G5","p":{"22-23":[{"c":"CND","ha":87.0,"seg":false}],"23-24":[{"c":"CND","ha":87.0,"seg":false}],"24-25":[{"c":"CND","ha":87.0,"seg":false}],"25-26":[{"c":"CND","ha":87.0,"seg":false}],"26-27":[{"c":"CND","ha":87.0,"seg":false}],"27-28":[]}},{"l":"LR 2","c":"LR","s":76.0,"a":"G5","p":{"22-23":[{"c":"CND","ha":46.0,"seg":false}],"23-24":[{"c":"CND","ha":46.0,"seg":false}],"24-25":[{"c":"CND","ha":46.0,"seg":false}],"25-26":[{"c":"CND","ha":46.0,"seg":false}],"26-27":[{"c":"CND","ha":46.0,"seg":false}],"27-28":[]}},{"l":"LR 3 loma","c":"LR","s":40.0,"a":"A2","p":{"22-23":[{"c":"PPAlf","ha":40.0,"seg":false}],"23-24":[{"c":"PPAlf","ha":40.0,"seg":false}],"24-25":[{"c":"G","ha":40.0,"seg":false},{"c":"PI","ha":40.0,"seg":true}],"25-26":[{"c":"PPFe","ha":40.0,"seg":false}],"26-27":[{"c":"PPFe","ha":40.0,"seg":false}],"27-28":[]}},{"l":"LR 3 bajo","c":"LR","s":22.0,"a":"G2","p":{"22-23":[{"c":"CN","ha":22.0,"seg":false}],"23-24":[{"c":"CN","ha":22.0,"seg":false}],"24-25":[{"c":"G","ha":22.0,"seg":false},{"c":"CN","ha":22.0,"seg":true}],"25-26":[{"c":"CN","ha":22.0,"seg":false}],"26-27":[{"c":"CN","ha":22.0,"seg":false}],"27-28":[]}},{"l":"LR 4","c":"LR","s":12.0,"a":"G1","p":{"22-23":[{"c":"PPFe","ha":10.0,"seg":false}],"23-24":[{"c":"PPFe","ha":10.0,"seg":false}],"24-25":[{"c":"G","ha":10.0,"seg":false},{"c":"PI","ha":10.0,"seg":true}],"25-26":[{"c":"PPFe","ha":10.0,"seg":false}],"26-27":[{"c":"PPFe","ha":10.0,"seg":false}],"27-28":[]}},{"l":"LR 4 CN","c":"LR","s":38.0,"a":"G4","p":{"22-23":[{"c":"CND","ha":38.0,"seg":false}],"23-24":[{"c":"CND","ha":38.0,"seg":false}],"24-25":[{"c":"CND","ha":38.0,"seg":false}],"25-26":[{"c":"CND","ha":38.0,"seg":false}],"26-27":[{"c":"CND","ha":38.0,"seg":false}],"27-28":[]}},{"l":"LR 5","c":"LR","s":28.0,"a":"G2","p":{"22-23":[{"c":"CN","ha":28.0,"seg":false}],"23-24":[{"c":"CN","ha":28.0,"seg":false}],"24-25":[{"c":"CN","ha":28.0,"seg":false}],"25-26":[{"c":"CN","ha":28.0,"seg":false}],"26-27":[{"c":"CN","ha":28.0,"seg":false}],"27-28":[]}},{"l":"LR 5","c":"LR","s":10.0,"a":"G2","p":{"22-23":[{"c":"CN","ha":10.0,"seg":false}],"23-24":[{"c":"CN","ha":10.0,"seg":false}],"24-25":[{"c":"CN","ha":10.0,"seg":false}],"25-26":[{"c":"CN","ha":10.0,"seg":false}],"26-27":[{"c":"CN","ha":10.0,"seg":false}],"27-28":[]}},{"l":"LR 6/7","c":"LR","s":45.0,"a":"G1","p":{"22-23":[{"c":"Tr","ha":42.0,"seg":false},{"c":"Sj2ª","ha":42.0,"seg":true}],"23-24":[{"c":"G","ha":39.0,"seg":false},{"c":"PI","ha":39.0,"seg":true}],"24-25":[{"c":"PPAlf","ha":39.0,"seg":false}],"25-26":[{"c":"PPAlf","ha":39.0,"seg":false}],"26-27":[{"c":"PPAlf","ha":39.0,"seg":false}],"27-28":[]}},{"l":"LR 6/7 CN","c":"LR","s":75.0,"a":"G4","p":{"22-23":[{"c":"CN","ha":75.0,"seg":false}],"23-24":[{"c":"CN","ha":75.0,"seg":false}],"24-25":[{"c":"CN","ha":75.0,"seg":false}],"25-26":[{"c":"CN","ha":75.0,"seg":false}],"26-27":[{"c":"CN","ha":75.0,"seg":false}],"27-28":[]}},{"l":"LR 8","c":"LR","s":7.0,"a":"A1","p":{"22-23":[{"c":"Sj1ª","ha":7.0,"seg":false}],"23-24":[{"c":"MzSPE","ha":6.0,"seg":false}],"24-25":[{"c":"Av","ha":6.0,"seg":false},{"c":"Mz2ª","ha":6.0,"seg":true}],"25-26":[{"c":"Sj1ª","ha":6.0,"seg":false}],"26-27":[{"c":"Av","ha":6.0,"seg":false},{"c":"Sj2ª","ha":6.0,"seg":true}],"27-28":[{"c":"Mz","ha":6.0,"seg":false}]}},{"l":"LR 9","c":"LR","s":41.0,"a":"A1","p":{"22-23":[{"c":"Tr","ha":41.0,"seg":false},{"c":"Sj2ª","ha":41.0,"seg":true}],"23-24":[{"c":"MzT","ha":41.0,"seg":false}],"24-25":[{"c":"Sj1ª","ha":41.0,"seg":false}],"25-26":[{"c":"Mz","ha":41.0,"seg":false}],"26-27":[{"c":"Sj1ª","ha":41.0,"seg":false}],"27-28":[{"c":"Tr","ha":41.0,"seg":false},{"c":"Sj2ª","ha":41.0,"seg":true}]}},{"l":"LR 10A","c":"LR","s":7.0,"a":"A2","p":{"22-23":[{"c":"Sj1ª","ha":7.0,"seg":false}],"23-24":[{"c":"MzSPE","ha":7.0,"seg":false},{"c":"PI","ha":7.0,"seg":true}],"24-25":[{"c":"PPFe","ha":7.0,"seg":false}],"25-26":[{"c":"PPFe","ha":7.0,"seg":false}],"26-27":[{"c":"PPFe","ha":7.0,"seg":false}],"27-28":[]}},{"l":"LR 10B","c":"LR","s":15.0,"a":"A2","p":{"22-23":[{"c":"Sj1ª","ha":15.0,"seg":false}],"23-24":[{"c":"MzSPE","ha":16.0,"seg":false},{"c":"PI","ha":16.0,"seg":true}],"24-25":[{"c":"PPFe","ha":16.0,"seg":false}],"25-26":[{"c":"PPFe","ha":16.0,"seg":false}],"26-27":[{"c":"PPFe","ha":16.0,"seg":false}],"27-28":[]}},{"l":"LR 10C","c":"LR","s":13.0,"a":"A2","p":{"22-23":[{"c":"Sj1ª","ha":13.0,"seg":false}],"23-24":[{"c":"MzSPE","ha":13.0,"seg":false},{"c":"PI","ha":13.0,"seg":true}],"24-25":[{"c":"PPFe","ha":13.0,"seg":false}],"25-26":[{"c":"PPFe","ha":13.0,"seg":false}],"26-27":[{"c":"PPFe","ha":13.0,"seg":false}],"27-28":[]}},{"l":"LR 11","c":"LR","s":24.0,"a":"A2","p":{"22-23":[{"c":"Tr","ha":24.0,"seg":false},{"c":"Sj2ª","ha":24.0,"seg":true}],"23-24":[{"c":"MzT","ha":24.0,"seg":false}],"24-25":[{"c":"G","ha":24.0,"seg":false},{"c":"PI","ha":24.0,"seg":true}],"25-26":[{"c":"PPAlf","ha":24.0,"seg":false}],"26-27":[{"c":"PPAlf","ha":24.0,"seg":false}],"27-28":[]}},{"l":"LR 12","c":"LR","s":26.0,"a":"A2","p":{"22-23":[{"c":"MzSPE","ha":26.0,"seg":false}],"23-24":[{"c":"PI","ha":26.0,"seg":false}],"24-25":[{"c":"PPAlf","ha":26.0,"seg":false}],"25-26":[{"c":"PPAlf","ha":26.0,"seg":false}],"26-27":[{"c":"PPAlf","ha":26.0,"seg":false}],"27-28":[]}},{"l":"LR 12 CN","c":"LR","s":19.0,"a":"G3","p":{"22-23":[{"c":"CND","ha":19.0,"seg":false}],"23-24":[{"c":"CND","ha":19.0,"seg":false}],"24-25":[{"c":"CND","ha":19.0,"seg":false}],"25-26":[{"c":"CND","ha":19.0,"seg":false}],"26-27":[{"c":"CND","ha":19.0,"seg":false}],"27-28":[]}},{"l":"LR 13","c":"LR","s":33.0,"a":"A1","p":{"22-23":[{"c":"Tr","ha":33.0,"seg":false},{"c":"Sj2ª","ha":33.0,"seg":true}],"23-24":[{"c":"MzT","ha":32.0,"seg":false}],"24-25":[{"c":"Sj1ª","ha":32.0,"seg":false}],"25-26":[{"c":"Tr","ha":32.0,"seg":false},{"c":"Sj2ª","ha":32.0,"seg":true}],"26-27":[{"c":"Mz","ha":32.0,"seg":false}],"27-28":[{"c":"Sj1ª","ha":32.0,"seg":false}]}},{"l":"LR 13 CN","c":"LR","s":5.0,"a":"G3","p":{"22-23":[{"c":"CN","ha":5.0,"seg":false}],"23-24":[{"c":"CN","ha":5.0,"seg":false}],"24-25":[{"c":"CN","ha":5.0,"seg":false}],"25-26":[{"c":"CN","ha":5.0,"seg":false}],"26-27":[{"c":"CN","ha":5.0,"seg":false}],"27-28":[]}},{"l":"LR 14","c":"LR","s":34.0,"a":"G1","p":{"22-23":[{"c":"Sj1ª","ha":34.0,"seg":false}],"23-24":[{"c":"G","ha":34.0,"seg":false},{"c":"PI","ha":34.0,"seg":true}],"24-25":[{"c":"PPFe","ha":34.0,"seg":false}],"25-26":[{"c":"PPFe","ha":34.0,"seg":false}],"26-27":[{"c":"PPFe","ha":34.0,"seg":false}],"27-28":[]}},{"l":"LR 15","c":"LR","s":30.0,"a":"A2","p":{"22-23":[{"c":"PPAlf","ha":30.0,"seg":false}],"23-24":[{"c":"PPAlf","ha":30.0,"seg":false}],"24-25":[{"c":"PPAlf","ha":30.0,"seg":false}],"25-26":[{"c":"PPAlf","ha":30.0,"seg":false},{"c":"VI","ha":30.0,"seg":true}],"26-27":[{"c":"Sj1ª","ha":30.0,"seg":false}],"27-28":[{"c":"Mz","ha":30.0,"seg":false}]}},{"l":"LR 16","c":"LR","s":24.0,"a":"A2","p":{"22-23":[{"c":"PPAlf","ha":24.0,"seg":false}],"23-24":[{"c":"MzT","ha":24.0,"seg":false}],"24-25":[{"c":"G","ha":24.0,"seg":false},{"c":"PI","ha":24.0,"seg":true}],"25-26":[{"c":"PPAlf","ha":24.0,"seg":false}],"26-27":[{"c":"PPAlf","ha":24.0,"seg":false}],"27-28":[]}},{"l":"LR 16 bajo","c":"LR","s":10.0,"a":"G2","p":{"22-23":[{"c":"PPAlf","ha":10.0,"seg":false}],"23-24":[{"c":"MzT","ha":10.0,"seg":false}],"24-25":[{"c":"G","ha":10.0,"seg":false},{"c":"PI","ha":10.0,"seg":true}],"25-26":[{"c":"PPAg","ha":10.0,"seg":false}],"26-27":[{"c":"PPAg","ha":10.0,"seg":false}],"27-28":[]}},{"l":"LR 16 CN","c":"LR","s":6.0,"a":"G3","p":{"22-23":[{"c":"CN","ha":6.0,"seg":false}],"23-24":[{"c":"CN","ha":6.0,"seg":false}],"24-25":[{"c":"CN","ha":6.0,"seg":false}],"25-26":[{"c":"CN","ha":6.0,"seg":false}],"26-27":[{"c":"CN","ha":6.0,"seg":false}],"27-28":[]}},{"l":"LR 17 loma","c":"LR","s":16.0,"a":"G1","p":{"22-23":[{"c":"PPFe","ha":16.0,"seg":false}],"23-24":[{"c":"PPFe","ha":16.0,"seg":false}],"24-25":[{"c":"PPFe","ha":16.0,"seg":false}],"25-26":[{"c":"MzT","ha":16.0,"seg":false}],"26-27":[{"c":"Sj1ª","ha":16.0,"seg":false}],"27-28":[{"c":"G","ha":16.0,"seg":false}]}},{"l":"LR 17","c":"LR","s":17.0,"a":"G1","p":{"22-23":[{"c":"MzP","ha":17.0,"seg":false}],"23-24":[{"c":"MzP","ha":17.0,"seg":false},{"c":"PI","ha":17.0,"seg":true}],"24-25":[{"c":"PPFe","ha":17.0,"seg":false}],"25-26":[{"c":"PPFe","ha":17.0,"seg":false}],"26-27":[{"c":"PPFe","ha":17.0,"seg":false}],"27-28":[]}},{"l":"LR 18","c":"LR","s":40.0,"a":"A2","p":{"22-23":[{"c":"PPAlf","ha":40.0,"seg":false}],"23-24":[{"c":"PPAlf","ha":40.0,"seg":false}],"24-25":[{"c":"Mz","ha":40.0,"seg":false}],"25-26":[{"c":"Sj1ª","ha":40.0,"seg":false}],"26-27":[{"c":"G","ha":40.0,"seg":false},{"c":"PI","ha":40.0,"seg":true}],"27-28":[{"c":"PPAlf","ha":40.0,"seg":false}]}},{"l":"LR 18 CN","c":"LR","s":10.0,"a":"G3","p":{"22-23":[{"c":"CN","ha":10.0,"seg":false}],"23-24":[{"c":"CN","ha":10.0,"seg":false}],"24-25":[{"c":"CN","ha":10.0,"seg":false}],"25-26":[{"c":"CN","ha":10.0,"seg":false}],"26-27":[{"c":"CN","ha":10.0,"seg":false}],"27-28":[]}},{"l":"LR 19","c":"LR","s":39.0,"a":"A2","p":{"22-23":[{"c":"PPFe","ha":34.0,"seg":false}],"23-24":[{"c":"PPFe","ha":34.0,"seg":false}],"24-25":[{"c":"Mz","ha":39.0,"seg":false}],"25-26":[{"c":"Sj1ª","ha":39.0,"seg":false}],"26-27":[{"c":"Mz","ha":39.0,"seg":false}],"27-28":[{"c":"Sj1ª","ha":39.0,"seg":false}]}},{"l":"LR 19 CN","c":"LR","s":11.0,"a":"G3","p":{"22-23":[{"c":"CN","ha":11.0,"seg":false}],"23-24":[{"c":"CN","ha":11.0,"seg":false}],"24-25":[{"c":"CN","ha":11.0,"seg":false}],"25-26":[{"c":"CN","ha":11.0,"seg":false}],"26-27":[{"c":"CN","ha":11.0,"seg":false}],"27-28":[]}},{"l":"LR 20","c":"LR","s":35.0,"a":"G2","p":{"22-23":[{"c":"MzP","ha":35.0,"seg":false}],"23-24":[{"c":"CN","ha":40.0,"seg":false},{"c":"VI","ha":40.0,"seg":true}],"24-25":[{"c":"MzD","ha":40.0,"seg":false}],"25-26":[{"c":"CN","ha":36.0,"seg":false},{"c":"PI","ha":36.0,"seg":true}],"26-27":[{"c":"CN","ha":36.0,"seg":false}],"27-28":[]}},{"l":"LR 20 CN","c":"LR","s":43.0,"a":"G5","p":{"22-23":[{"c":"CND","ha":43.0,"seg":false}],"23-24":[{"c":"CND","ha":43.0,"seg":false}],"24-25":[{"c":"CND","ha":43.0,"seg":false}],"25-26":[{"c":"CND","ha":43.0,"seg":false}],"26-27":[{"c":"CND","ha":43.0,"seg":false}],"27-28":[]}},{"l":"LR 22","c":"LR","s":35.0,"a":"G3","p":{"22-23":[{"c":"CN","ha":35.0,"seg":false}],"23-24":[{"c":"CN","ha":35.0,"seg":false}],"24-25":[{"c":"CN","ha":35.0,"seg":false}],"25-26":[{"c":"CN","ha":35.0,"seg":false}],"26-27":[{"c":"CN","ha":35.0,"seg":false}],"27-28":[]}},{"l":"LR 23","c":"LR","s":37.0,"a":"G5","p":{"22-23":[{"c":"CND","ha":29.0,"seg":false}],"23-24":[{"c":"CND","ha":29.0,"seg":false}],"24-25":[{"c":"CND","ha":29.0,"seg":false}],"25-26":[{"c":"CND","ha":29.0,"seg":false}],"26-27":[{"c":"CND","ha":29.0,"seg":false}],"27-28":[]}},{"l":"LR 25 loma","c":"LR","s":10.0,"a":"A2","p":{"22-23":[{"c":"Tr","ha":10.0,"seg":false},{"c":"Sj2ª","ha":10.0,"seg":true}],"23-24":[{"c":"G","ha":10.0,"seg":false}],"24-25":[{"c":"Av","ha":10.0,"seg":false},{"c":"Mz2ª","ha":10.0,"seg":true}],"25-26":[{"c":"Sj1ª","ha":10.0,"seg":false}],"26-27":[{"c":"Av","ha":10.0,"seg":false},{"c":"Sj2ª","ha":10.0,"seg":true}],"27-28":[{"c":"Mz","ha":10.0,"seg":false}]}},{"l":"LR 25 CN","c":"LR","s":106.0,"a":"G5","p":{"22-23":[{"c":"CND","ha":93.0,"seg":false}],"23-24":[{"c":"CND","ha":93.0,"seg":false}],"24-25":[{"c":"CND","ha":93.0,"seg":false}],"25-26":[{"c":"CND","ha":93.0,"seg":false}],"26-27":[{"c":"CND","ha":93.0,"seg":false}],"27-28":[]}},{"l":"LR Monte casco","c":"LR","s":5.0,"a":"A2","p":{"22-23":[{"c":"CN","ha":5.0,"seg":false}],"23-24":[{"c":"CN","ha":5.0,"seg":false}],"24-25":[{"c":"CN","ha":5.0,"seg":false}],"25-26":[{"c":"MzP","ha":5.0,"seg":false},{"c":"VI","ha":5.0,"seg":true}],"26-27":[{"c":"MzP","ha":5.0,"seg":false}],"27-28":[]}},{"l":"LR Desperdicios","c":"LR","s":39.0,"a":"DESP","p":{}},{"l":"LM 1","c":"LM","s":64.0,"a":"A1","p":{"22-23":[{"c":"G","ha":62.0,"seg":false}],"23-24":[{"c":"Sj1ª","ha":62.0,"seg":false}],"24-25":[{"c":"Tr","ha":62.0,"seg":false},{"c":"Sj2ª","ha":62.0,"seg":true}],"25-26":[{"c":"MzT","ha":62.0,"seg":false}],"26-27":[{"c":"Sj1ª","ha":62.0,"seg":false}],"27-28":[{"c":"Tr","ha":62.0,"seg":false},{"c":"Sj2ª","ha":62.0,"seg":true}]}},{"l":"LM 2","c":"LM","s":36.3,"a":"A1","p":{"22-23":[{"c":"Sj1ª","ha":32.0,"seg":false}],"23-24":[{"c":"Sj1ª","ha":35.0,"seg":false}],"24-25":[{"c":"Tr","ha":35.0,"seg":false},{"c":"Sj2ª","ha":35.0,"seg":true}],"25-26":[{"c":"MzT","ha":35.0,"seg":false}],"26-27":[{"c":"Sj1ª","ha":35.0,"seg":false}],"27-28":[{"c":"Tr","ha":35.0,"seg":false},{"c":"Sj2ª","ha":35.0,"seg":true}]}},{"l":"LM 3","c":"LM","s":12.6,"a":"G1","p":{"22-23":[{"c":"MzP","ha":12.0,"seg":false}],"23-24":[{"c":"MzP","ha":12.0,"seg":false},{"c":"VI","ha":12.0,"seg":true}],"24-25":[{"c":"MzP","ha":12.0,"seg":false},{"c":"VI","ha":12.0,"seg":true}],"25-26":[{"c":"G","ha":12.0,"seg":false},{"c":"PI","ha":12.0,"seg":true}],"26-27":[{"c":"PPAlf","ha":12.0,"seg":false}],"27-28":[]}},{"l":"LM 6 medio","c":"LM","s":49.7,"a":"A2","p":{"22-23":[{"c":"PPFe","ha":40.0,"seg":false}],"23-24":[{"c":"PPFe","ha":40.0,"seg":false}],"24-25":[{"c":"PPFe","ha":40.0,"seg":false},{"c":"VI","ha":40.0,"seg":true}],"25-26":[{"c":"Sj1ª","ha":40.0,"seg":false}],"26-27":[{"c":"MzT","ha":40.0,"seg":false}],"27-28":[{"c":"G","ha":40.0,"seg":false},{"c":"PI","ha":40.0,"seg":true}]}},{"l":"LM 7-9","c":"LM","s":39.6,"a":"A1","p":{"22-23":[{"c":"Mz","ha":39.0,"seg":false}],"23-24":[{"c":"G","ha":37.0,"seg":false}],"24-25":[{"c":"Tr","ha":37.0,"seg":false},{"c":"Sj2ª","ha":37.0,"seg":true}],"25-26":[{"c":"Mz","ha":37.0,"seg":false}],"26-27":[{"c":"Sj1ª","ha":37.0,"seg":false}],"27-28":[{"c":"Tr","ha":37.0,"seg":false},{"c":"Sj2ª","ha":37.0,"seg":true}]}},{"l":"LM 8 N","c":"LM","s":6.6,"a":"A1","p":{"22-23":[{"c":"Mz","ha":6.0,"seg":false}],"23-24":[{"c":"G","ha":6.0,"seg":false}],"24-25":[{"c":"Tr","ha":6.0,"seg":false},{"c":"Sj2ª","ha":6.0,"seg":true}],"25-26":[{"c":"MzT","ha":6.0,"seg":false}],"26-27":[{"c":"Sj1ª","ha":6.0,"seg":false}],"27-28":[{"c":"Tr","ha":6.0,"seg":false},{"c":"Sj2ª","ha":6.0,"seg":true}]}},{"l":"LM 8 S","c":"LM","s":12.3,"a":"A2","p":{"22-23":[{"c":"Mz","ha":11.0,"seg":false}],"23-24":[{"c":"G","ha":11.0,"seg":false}],"24-25":[{"c":"Tr","ha":11.0,"seg":false},{"c":"Sj2ª","ha":11.0,"seg":true}],"25-26":[{"c":"Mz","ha":11.0,"seg":false}],"26-27":[{"c":"Sj1ª","ha":11.0,"seg":false}],"27-28":[{"c":"Tr","ha":11.0,"seg":false},{"c":"Sj2ª","ha":11.0,"seg":true}]}},{"l":"LM 10","c":"LM","s":12.1,"a":"A1","p":{"22-23":[{"c":"Mz","ha":10.0,"seg":false}],"23-24":[{"c":"G","ha":10.0,"seg":false}],"24-25":[{"c":"Av","ha":10.0,"seg":false},{"c":"Mz2ª","ha":10.0,"seg":true}],"25-26":[{"c":"G","ha":10.0,"seg":false},{"c":"PI","ha":10.0,"seg":true}],"26-27":[{"c":"PPAlf","ha":10.0,"seg":false}],"27-28":[]}},{"l":"LM 1 CNI S","c":"LM","s":5.76,"a":"G6","p":{"22-23":[{"c":"CND","ha":5.76,"seg":false}],"23-24":[{"c":"CND","ha":5.76,"seg":false}],"24-25":[{"c":"CND","ha":5.76,"seg":false}],"25-26":[{"c":"CND","ha":5.76,"seg":false}],"26-27":[{"c":"CND","ha":5.76,"seg":false}],"27-28":[]}},{"l":"LM 1 CN N","c":"LM","s":15.3,"a":"G3","p":{"22-23":[{"c":"CN","ha":15.3,"seg":false}],"23-24":[{"c":"CN","ha":15.3,"seg":false}],"24-25":[{"c":"CN","ha":15.3,"seg":false}],"25-26":[{"c":"CN","ha":15.3,"seg":false}],"26-27":[{"c":"CN","ha":15.3,"seg":false}],"27-28":[]}},{"l":"LM 2 CN","c":"LM","s":31.3,"a":"G1","p":{"22-23":[{"c":"CN","ha":31.3,"seg":false}],"23-24":[{"c":"CN","ha":31.3,"seg":false}],"24-25":[{"c":"CN","ha":31.3,"seg":false}],"25-26":[{"c":"CN","ha":31.3,"seg":false}],"26-27":[{"c":"CN","ha":31.3,"seg":false},{"c":"VI","ha":31.3,"seg":true}],"27-28":[]}},{"l":"LM 2 CNI","c":"LM","s":14.8,"a":"G6","p":{"22-23":[{"c":"CND","ha":14.8,"seg":false}],"23-24":[{"c":"CND","ha":14.8,"seg":false}],"24-25":[{"c":"CND","ha":14.8,"seg":false}],"25-26":[{"c":"CND","ha":14.8,"seg":false}],"26-27":[{"c":"CND","ha":14.8,"seg":false}],"27-28":[]}},{"l":"LM 3-4 CNI","c":"LM","s":107.0,"a":"G6","p":{"22-23":[{"c":"CND","ha":107.0,"seg":false}],"23-24":[{"c":"CND","ha":107.0,"seg":false}],"24-25":[{"c":"CND","ha":107.0,"seg":false}],"25-26":[{"c":"CND","ha":107.0,"seg":false}],"26-27":[{"c":"CND","ha":107.0,"seg":false}],"27-28":[]}},{"l":"LM 3-4 agropiro","c":"LM","s":14.8,"a":"G4","p":{"22-23":[{"c":"PPAg","ha":14.8,"seg":false}],"23-24":[{"c":"PPAg","ha":14.8,"seg":false}],"24-25":[{"c":"PPAg","ha":14.8,"seg":false}],"25-26":[{"c":"PPAg","ha":14.8,"seg":false}],"26-27":[{"c":"PPAg","ha":14.8,"seg":false}],"27-28":[]}},{"l":"LM 5 CNI","c":"LM","s":30.8,"a":"G6","p":{"22-23":[{"c":"CND","ha":30.8,"seg":false}],"23-24":[{"c":"CND","ha":30.8,"seg":false}],"24-25":[{"c":"CND","ha":30.8,"seg":false}],"25-26":[{"c":"CND","ha":30.8,"seg":false}],"26-27":[{"c":"CND","ha":30.8,"seg":false}],"27-28":[]}},{"l":"LM 5 CN","c":"LM","s":28.2,"a":"G3","p":{"22-23":[{"c":"CN","ha":28.2,"seg":false}],"23-24":[{"c":"CN","ha":28.2,"seg":false}],"24-25":[{"c":"CN","ha":28.2,"seg":false}],"25-26":[{"c":"CN","ha":28.2,"seg":false}],"26-27":[{"c":"CN","ha":28.2,"seg":false}],"27-28":[]}},{"l":"LM 7-8 CN","c":"LM","s":28.0,"a":"G3","p":{"22-23":[{"c":"CN","ha":28.0,"seg":false}],"23-24":[{"c":"CN","ha":28.0,"seg":false}],"24-25":[{"c":"CN","ha":28.0,"seg":false}],"25-26":[{"c":"CN","ha":28.0,"seg":false}],"26-27":[{"c":"CN","ha":28.0,"seg":false}],"27-28":[]}},{"l":"LM 7-8 CNI","c":"LM","s":14.6,"a":"G6","p":{"22-23":[{"c":"CND","ha":14.6,"seg":false}],"23-24":[{"c":"CND","ha":14.6,"seg":false}],"24-25":[{"c":"CND","ha":14.6,"seg":false}],"25-26":[{"c":"CND","ha":14.6,"seg":false}],"26-27":[{"c":"CND","ha":14.6,"seg":false}],"27-28":[]}},{"l":"LM 6 CN N","c":"LM","s":30.2,"a":"G3","p":{"22-23":[{"c":"CN","ha":30.2,"seg":false}],"23-24":[{"c":"CN","ha":30.2,"seg":false}],"24-25":[{"c":"CN","ha":30.2,"seg":false}],"25-26":[{"c":"CN","ha":30.2,"seg":false}],"26-27":[{"c":"CN","ha":30.2,"seg":false}],"27-28":[]}},{"l":"LM 6 CN S","c":"LM","s":34.2,"a":"A2","p":{"22-23":[{"c":"CN","ha":34.2,"seg":false}],"23-24":[{"c":"CN","ha":34.2,"seg":false}],"24-25":[{"c":"CN","ha":34.2,"seg":false}],"25-26":[{"c":"CN","ha":34.2,"seg":false}],"26-27":[{"c":"CN","ha":34.2,"seg":false},{"c":"VI","ha":34.2,"seg":true}],"27-28":[]}},{"l":"LM 6 CNI","c":"LM","s":73.9,"a":"G6","p":{"22-23":[{"c":"CND","ha":73.9,"seg":false}],"23-24":[{"c":"CND","ha":73.9,"seg":false}],"24-25":[{"c":"CND","ha":73.9,"seg":false}],"25-26":[{"c":"CND","ha":73.9,"seg":false}],"26-27":[{"c":"CND","ha":73.9,"seg":false}],"27-28":[]}},{"l":"LM Desperdicios","c":"LM","s":9.93999999999994,"a":"DESP","p":{}}];
 
 // ────────────────────────────────────────────────────────────
 // ESTADO
@@ -706,8 +713,8 @@ var state = {
   search: '',
   fAmb: [],       // ambientes seleccionados (multi)
   fAnt: [],       // antecesores (cultivos) seleccionados
-  fC1: [],        // cultivos 1ª seleccionados
-  fC2: [],        // cultivos 2ª seleccionados
+  fCult: [],      // cultivos/usos seleccionados (cualquier actividad de la campaña)
+  fSeg: '',       // '' todos | '1' tiene 1ª | '2' tiene 2ª
   histGlobal: false, // mostrar historia inline en todas las filas
   expandedRows: {}, // {loteName: true} para filas expandidas individualmente
   sortKey: null,    // columna de ordenamiento (Plan/Padrón); null = agrupado por tipo
@@ -761,13 +768,49 @@ function cultRoHtml(sigla, opts){
            nomHtml+
          '</span>';
 }
-// Múltiples cultivos en celda (1ª y 2ª juntos)
-function cultsCell(c1, c2, opts){
+// ── Modelo de ACTIVIDADES (N por lote/campaña) ──
+// p[campaña] = [ { c:sigla, ha:Number, seg:Boolean }, ... ]
+// ACTIVIDAD = lote + cultivo/uso + campaña. seg=true => cultivo de 2ª.
+function actsDe(lote, camp){
+  var a = lote && lote.p ? lote.p[camp] : null;
+  return (a && a.length) ? a : [];
+}
+// Superficie física: suma de actividades que NO son de 2ª (las de 2ª van sobre tierra ya contada)
+function supFisica(acts){
+  var s = 0;
+  for(var i=0;i<acts.length;i++){ if(!acts[i].seg) s += (acts[i].ha||0); }
+  return s;
+}
+// Superficie sembrada: suma de TODAS las actividades (incluye 2ª)
+function supSembrada(acts){
+  var s = 0;
+  for(var i=0;i<acts.length;i++){ s += (acts[i].ha||0); }
+  return s;
+}
+// Actividades ordenadas por ha desc (1ª antes que 2ª a igualdad), para antecesor/cadenas
+function actsOrdenadas(acts){
+  var c = acts.slice();
+  c.sort(function(a,b){
+    if((b.ha||0)!==(a.ha||0)) return (b.ha||0)-(a.ha||0);
+    return (a.seg?1:0)-(b.seg?1:0);
+  });
+  return c;
+}
+
+// Celda de actividades como chips. Recibe el array de actividades.
+// opts.ro = solo lectura. El ² marca las de 2ª. Muestra ha por chip.
+function cultsCell(acts, opts){
   opts = opts || {};
+  acts = acts || [];
+  if(!acts.length) return '<span style="color:var(--muted)">—</span>';
   var parts = [];
-  if(c1) parts.push(opts.ro ? cultRoHtml(c1, opts) : cultHtml(c1, null, opts));
-  if(c2) parts.push(opts.ro ? cultRoHtml(c2, opts) : cultHtml(c2, null, opts));
-  if(!parts.length) return '<span style="color:var(--muted)">—</span>';
+  for(var i=0;i<acts.length;i++){
+    var a = acts[i];
+    var base = opts.ro ? cultRoHtml(a.c, opts) : cultHtml(a.c, null, opts);
+    var ha = (opts.showHa!==false && a.ha!=null) ? '<span class="cult-ha">'+fInt(a.ha)+'</span>' : '';
+    var seg = a.seg ? '<span class="seg-badge" title="Cultivo de 2ª">2ª</span>' : '';
+    parts.push('<span class="act-chip">'+base+ha+seg+'</span>');
+  }
   return '<div class="cult-multi">'+parts.join('')+'</div>';
 }
 
@@ -792,15 +835,14 @@ function histCampanias(camp){
   }
   return res; // siempre longitud 3 (con nulls al principio si no hay suficientes)
 }
-// Devuelve los cultivos (sigla) del antecesor de un lote (campaña previa)
+// Devuelve los cultivos (sigla) del antecesor de un lote (campaña previa),
+// ordenados por superficie desc. El primero es el antecesor principal.
 function antecesoresDeLote(lote){
   var prev = campAnterior(state.campania);
   if(!prev) return [];
-  var p = lote.p[prev];
-  if(!p) return [];
+  var acts = actsOrdenadas(actsDe(lote, prev));
   var r = [];
-  if(p[1]) r.push(p[1]);
-  if(p[2]) r.push(p[2]);
+  for(var i=0;i<acts.length;i++) r.push(acts[i].c);
   return r;
 }
 
@@ -809,16 +851,11 @@ function antecesoresDeLote(lote){
 function lotTipoSugerido(lote){
   var agr=0, gan=0;
   for(var c in lote.p){
-    var p=lote.p[c];
-    if(p[1]){
-      var t=cultTipo(p[1]);
-      if(t==='AGR')agr+=p[0]||0;
-      else if(t==='GAN')gan+=p[0]||0;
-    }
-    if(p[2]){
-      var t2=cultTipo(p[2]);
-      if(t2==='AGR')agr+=p[0]||0;
-      else if(t2==='GAN')gan+=p[0]||0;
+    var acts = lote.p[c] || [];
+    for(var i=0;i<acts.length;i++){
+      var t = cultTipo(acts[i].c);
+      if(t==='AGR') agr += acts[i].ha||0;
+      else if(t==='GAN') gan += acts[i].ha||0;
     }
   }
   // Si el ambiente es agrícola (A1, A2) → AGR
@@ -851,18 +888,26 @@ function lotesFiltrados(){
       return false;
     });
   }
-  // Filtro cultivo 1ª en campaña activa
-  if(state.fC1.length){
+  // Filtro cultivo/uso: alguna actividad de la campaña activa con ese cultivo
+  if(state.fCult.length){
     res = res.filter(function(l){
-      var p = l.p[state.campania];
-      return p && p[1] && state.fC1.indexOf(p[1])>=0;
+      var acts = actsDe(l, state.campania);
+      for(var i=0;i<acts.length;i++) if(state.fCult.indexOf(acts[i].c)>=0) return true;
+      return false;
     });
   }
-  // Filtro cultivo 2ª en campaña activa
-  if(state.fC2.length){
+  // Filtro por momento de siembra (1ª / 2ª)
+  if(state.fSeg === '1'){
     res = res.filter(function(l){
-      var p = l.p[state.campania];
-      return p && p[2] && state.fC2.indexOf(p[2])>=0;
+      var acts = actsDe(l, state.campania);
+      for(var i=0;i<acts.length;i++) if(!acts[i].seg) return true;
+      return false;
+    });
+  } else if(state.fSeg === '2'){
+    res = res.filter(function(l){
+      var acts = actsDe(l, state.campania);
+      for(var i=0;i<acts.length;i++) if(acts[i].seg) return true;
+      return false;
     });
   }
   return res;
@@ -875,25 +920,25 @@ function editLoteTipo(loteName, val){
 }
 
 // Ordena un array de lotes según state.sortKey / state.sortDir
-// Claves: 'campo','lote','amb','tipo','sup','c1','ha1','c2','ha2','usada','pct'
+// Claves: 'campo','lote','amb','tipo','sup','cult','fisica','sembrada','pct'
 function sortLotes(arr){
   if(!state.sortKey) return arr;
   var k = state.sortKey, dir = state.sortDir==='desc' ? -1 : 1;
   var camp = state.campania;
   function val(l){
-    var p = l.p[camp] || [null,null,null];
+    var acts = actsDe(l, camp);
+    var ordn = actsOrdenadas(acts);
+    var fis = supFisica(acts);
     switch(k){
       case 'campo': return (l.c||'').toLowerCase();
       case 'lote':  return (l.l||'').toLowerCase();
       case 'amb':   return (l.a||'').toLowerCase();
       case 'tipo':  return lotTipo(l);
       case 'sup':   return l.s||0;
-      case 'c1':    return (p[1]||'').toLowerCase();
-      case 'ha1':   return p[1]?(p[0]||0):0;
-      case 'c2':    return (p[2]||'').toLowerCase();
-      case 'ha2':   return p[2]?(p[0]||0):0;
-      case 'usada': return (p[1]?(p[0]||0):0);
-      case 'pct':   return (l.s>0 && p[1])?((p[0]||0)/l.s):0;
+      case 'cult':  return ordn.length ? (ordn[0].c||'').toLowerCase() : '';
+      case 'fisica': return fis;
+      case 'sembrada': return supSembrada(acts);
+      case 'pct':   return (l.s>0) ? (fis/l.s) : 0;
       default: return (l.l||'').toLowerCase();
     }
   }
@@ -965,19 +1010,16 @@ function buildFiltros(){
   });
   buildMultiSelect('msAntecesor', 'Antecesor'+(prev?' '+prev:''), antOpts, 'fAnt', {grouped:true, showSig:true});
   
-  // Cultivo 1ª y 2ª: los que aparecen en campaña activa
-  var c1Count = {}, c2Count = {};
+  // Cultivo/Uso: todos los que aparecen en alguna actividad de la campaña activa
+  var cultCount = {};
   for(var i=0;i<base.length;i++){
-    var pa = base[i].p[state.campania];
-    if(pa){
-      if(pa[1]) c1Count[pa[1]] = (c1Count[pa[1]]||0)+1;
-      if(pa[2]) c2Count[pa[2]] = (c2Count[pa[2]]||0)+1;
+    var acts = actsDe(base[i], state.campania);
+    for(var j=0;j<acts.length;j++){
+      cultCount[acts[j].c] = (cultCount[acts[j].c]||0)+1;
     }
   }
-  var c1Opts = Object.keys(c1Count).sort().map(function(k){return {val:k,label:k,desc:cultName(k),count:c1Count[k],grupo:cultTipo(k)};});
-  var c2Opts = Object.keys(c2Count).sort().map(function(k){return {val:k,label:k,desc:cultName(k),count:c2Count[k],grupo:cultTipo(k)};});
-  buildMultiSelect('msCult1', 'Actividad 1ª', c1Opts, 'fC1', {grouped:true, showSig:true});
-  buildMultiSelect('msCult2', 'Actividad 2ª', c2Opts, 'fC2', {grouped:true, showSig:true});
+  var cultOpts = Object.keys(cultCount).sort().map(function(k){return {val:k,label:k,desc:cultName(k),count:cultCount[k],grupo:cultTipo(k)};});
+  buildMultiSelect('msCult', 'Cultivo / Uso', cultOpts, 'fCult', {grouped:true, showSig:true});
 }
 
 function buildMultiSelect(containerId, label, opts, stateKey, cfg){
@@ -1143,9 +1185,11 @@ function toggleFiltro(key, val){
 }
 
 function clearFiltros(){
-  state.fAmb = []; state.fAnt = []; state.fC1 = []; state.fC2 = [];
+  state.fAmb = []; state.fAnt = []; state.fCult = []; state.fSeg = '';
+  var sg = document.getElementById('selSeg'); if(sg) sg.value = '';
   renderAll();
 }
+function setSegSel(v){ state.fSeg = v || ''; renderAll(); }
 
 // ────────────────────────────────────────────────────────────
 // VIEWS
@@ -1167,8 +1211,8 @@ function setView(v, btn){
   // los filtros por campaña (Tipo, Antecesor, Actividad 1ª/2ª, Mostrar historia) se ocultan.
   var fp = document.getElementById('filtroTipo'); if(fp) fp.style.display = esPadron ? 'none' : '';
   var fa = document.getElementById('msAntecesor'); if(fa) fa.style.display = esPadron ? 'none' : '';
-  var f1 = document.getElementById('msCult1'); if(f1) f1.style.display = esPadron ? 'none' : '';
-  var f2 = document.getElementById('msCult2'); if(f2) f2.style.display = esPadron ? 'none' : '';
+  var f1 = document.getElementById('msCult'); if(f1) f1.style.display = esPadron ? 'none' : '';
+  var f2 = document.getElementById('filtroSeg'); if(f2) f2.style.display = esPadron ? 'none' : '';
   // "Mostrar historia" solo tiene sentido en el Plan de uso
   document.getElementById('btnHistGlobal').style.display = (v==='plan') ? '' : 'none';
   renderAll();
@@ -1399,8 +1443,8 @@ function renderKpis(){
     var t = lotTipo(l);
     if(t==='AGR'){agrSup += l.s||0; lotesAgr++;}
     else {ganSup += l.s||0; lotesGan++;}
-    var p = l.p[state.campania];
-    if(p && p[0]) usado += p[0];
+    var acts = actsDe(l, state.campania);
+    usado += supFisica(acts);
   }
   var libre = totSup - usado;
   var pctUso = totSup>0 ? (usado/totSup*100) : 0;
@@ -1423,6 +1467,8 @@ function renderPlan(){
   var prev = campAnterior(state.campania);
   var thAnt = document.getElementById('thAntCamp');
   if(thAnt) thAnt.textContent = prev || 'no hay';
+  var thAct = document.getElementById('thActCamp');
+  if(thAct) thAct.textContent = state.campania;
   // Sincronizar las 3 columnas de historia (nombres de campaña + visibilidad)
   var hcamps = histCampanias(state.campania);
   for(var hk=0; hk<3; hk++){
@@ -1434,19 +1480,18 @@ function renderPlan(){
   }
   var lts = lotesFiltrados();
   document.getElementById('planSubt').textContent = lts.length + ' lotes';
-  
+
   // Sincronizar indicadores de orden en encabezados
-  updateSortInds(['campo','lote','amb','tipo','sup','c1','ha1','c2','ha2','usada','pct'], 'si-');
-  
+  updateSortInds(['campo','lote','amb','tipo','sup','fisica','sembrada','pct'], 'si-');
+
   // Banner de acción masiva (visible cuando hay algún filtro activo aparte de campo/tipo)
   renderMassBanner(lts);
-  
-  // Determinar el colspan según historia global on/off (13 columnas base + 3 historia)
-  var colspan = state.histGlobal ? 16 : 13;
-  
+
+  // Columnas base: 11 (sin historia) / 14 (con historia global, +3)
+  var colspan = state.histGlobal ? 14 : 11;
+
   var html = '';
   if(state.sortKey){
-    // Orden manual activo → tabla plana ordenada (sin agrupar por tipo)
     var ordenados = sortLotes(lts);
     if(ordenados.length){
       html += renderRows(ordenados, 'row-flat');
@@ -1454,7 +1499,6 @@ function renderPlan(){
       html += '<tr><td colspan="'+colspan+'" style="text-align:center;padding:20px;color:var(--muted);font-style:italic">No hay lotes que coincidan con los filtros aplicados.</td></tr>';
     }
   } else {
-    // Sin orden → agrupado por tipo (Agrícolas / Ganaderos)
     var agrs = lts.filter(function(l){return lotTipo(l)==='AGR';});
     var gans = lts.filter(function(l){return lotTipo(l)==='GAN';});
     if(agrs.length){
@@ -1470,31 +1514,27 @@ function renderPlan(){
     }
   }
   document.getElementById('planBody').innerHTML = html;
-  
-  // Asegurar visibilidad de columna historia global
+
   document.querySelectorAll('.th-hist-global, .td-hist-global').forEach(function(el){
     el.style.display = state.histGlobal ? '' : 'none';
   });
-  
-  // Totales
-  var totFis=0, totHa1=0, totHa2=0;
+
+  // Totales: sup lote, física, sembrada, % uso global
+  var totSupLote=0, totFis=0, totSemb=0;
   for(var i=0;i<lts.length;i++){
-    totFis += lts[i].s||0;
-    var p = lts[i].p[state.campania];
-    if(p){
-      if(p[1]) totHa1 += p[0]||0;
-      if(p[2]) totHa2 += p[0]||0;
-    }
+    totSupLote += lts[i].s||0;
+    var acts = actsDe(lts[i], state.campania);
+    totFis += supFisica(acts);
+    totSemb += supSembrada(acts);
   }
-  var totUsada = totHa1;
   var histCols = state.histGlobal ? '<td></td><td></td><td></td>' : '';
-  // Orden columnas: [btn][campo][lote][amb][tipo][hist x3][antecesor][sup][c1][ha1][c2][ha2][usada][%]
+  // Orden: [btn][campo][lote][amb][tipo][hist x3][antecesor][sup lote][actividades][física][sembrada][%]
   // TOTAL ocupa campo+lote+amb+tipo = colspan 4
-  document.getElementById('planFoot').innerHTML = '<tr class="tot-row"><td></td><td colspan="4" class="tdname">TOTAL</td>'+histCols+'<td></td><td>'+fInt(totFis)+'</td><td></td><td>'+fInt(totHa1)+'</td><td></td><td>'+fInt(totHa2)+'</td><td>'+fInt(totUsada)+'</td><td>'+f(totFis>0?totUsada/totFis*100:0,0)+'%</td></tr>';
+  document.getElementById('planFoot').innerHTML = '<tr class="tot-row"><td></td><td colspan="4" class="tdname">TOTAL</td>'+histCols+'<td></td><td>'+fInt(totSupLote)+'</td><td></td><td>'+fInt(totFis)+'</td><td>'+fInt(totSemb)+'</td><td>'+f(totSupLote>0?totFis/totSupLote*100:0,0)+'%</td></tr>';
 }
 
 function renderMassBanner(lts){
-  var hayFiltros = state.fAmb.length || state.fAnt.length || state.fC1.length || state.fC2.length;
+  var hayFiltros = state.fAmb.length || state.fAnt.length || state.fCult.length || state.fSeg;
   var cont = document.getElementById('massBanner');
   if(!hayFiltros || lts.length===0){ cont.innerHTML = ''; return; }
   var totHa = lts.reduce(function(a,b){return a + (b.s||0);},0);
@@ -1502,78 +1542,69 @@ function renderMassBanner(lts){
   var resumen = [];
   if(state.fAmb.length) resumen.push('Ambiente: '+state.fAmb.join(', '));
   if(state.fAnt.length) resumen.push('Antecesor '+(prev||'')+': '+state.fAnt.join(', '));
-  if(state.fC1.length) resumen.push('Cult 1ª: '+state.fC1.join(', '));
-  if(state.fC2.length) resumen.push('Cult 2ª: '+state.fC2.join(', '));
-  cont.innerHTML = '<div class="mass-banner"><div class="mass-banner-info">📋 <strong>'+lts.length+' lotes</strong> · <strong>'+fInt(totHa)+' ha</strong> filtrados · '+resumen.join(' · ')+'</div><button class="mass-btn" onclick="openMasivo()">Aplicar cultivo a estos lotes →</button></div>';
+  if(state.fCult.length) resumen.push('Cultivo/Uso: '+state.fCult.join(', '));
+  if(state.fSeg==='1') resumen.push('con 1ª');
+  else if(state.fSeg==='2') resumen.push('con 2ª');
+  cont.innerHTML = '<div class="mass-banner"><div class="mass-banner-info">📋 <strong>'+lts.length+' lotes</strong> · <strong>'+fInt(totHa)+' ha</strong> filtrados · '+resumen.join(' · ')+'</div></div>';
 }
 
 function renderRows(lts, cls){
   var html = '';
   var prev = campAnterior(state.campania);
-  
+
   for(var i=0;i<lts.length;i++){
     var l = lts[i];
-    var p = l.p[state.campania] || [null,null,null];
-    var ha = p[0], c1 = p[1], c2 = p[2];
-    var usada = ha || 0;
+    var acts = actsDe(l, state.campania);
+    var fisica = supFisica(acts);
+    var sembrada = supSembrada(acts);
     var sup = l.s || 0;
-    var pct = sup>0 ? (usada/sup*100) : 0;
-    var exceeded = usada > sup + 0.01;
+    var pct = sup>0 ? (fisica/sup*100) : 0;
+    var exceeded = fisica > sup + 0.01;
     var escName = l.l.replace(/'/g,"\\'");
-    
+
     var ambHtml = l.a ? '<span class="amb-code" title="'+(ambDesc(l.a)||'')+'">'+l.a+'</span>' : '<span style="color:var(--muted)">—</span>';
-    
+
     // Tipo editable (Agrícola/Ganadero) con flechita
     var tipoVal = lotTipo(l);
     var tipoTxt = tipoVal==='AGR' ? 'Agrícola' : 'Ganadero';
     var tipoHtml = '<span class="cell-dd-trigger" onclick="openTipoLoteDd(this,\''+escName+'\',\''+tipoVal+'\')">'+tipoTxt+'<span class="cell-dd-arrow">▾</span></span>';
-    
-    // ANTECESOR (campaña previa) - solo sigla con tooltip, separadas con /
-    var antPrev = prev ? (l.p[prev] || [null,null,null]) : [null,null,null];
+
+    // ANTECESOR (campaña previa): siglas ordenadas por ha desc, separadas con /
+    var antActs = prev ? actsOrdenadas(actsDe(l, prev)) : [];
     var antParts = [];
-    if(antPrev[1]) antParts.push(cultRoHtml(antPrev[1], {hideName:true}));
-    if(antPrev[2]) antParts.push(cultRoHtml(antPrev[2], {hideName:true}));
-    var antHtml = antParts.length ? '<div class="cult-multi">'+antParts.join('<span class="cult-sep">/</span>')+'</div>' : '<span style="color:var(--muted)">—</span>';
-    
-    // HISTORIA: 3 columnas de campaña (anteriores al antecesor), orden cronológico
-    // Sigla(s) con tooltip, dato plano, separadas con /. Solo si histGlobal activo.
+    for(var ai=0; ai<antActs.length; ai++) antParts.push(cultRoHtml(antActs[ai].c, {hideName:true}));
+    var antHtml = antParts.length ? '<div class="cult-multi" style="flex-direction:row;flex-wrap:wrap">'+antParts.join('<span class="cult-sep">/</span>')+'</div>' : '<span style="color:var(--muted)">—</span>';
+
+    // HISTORIA: 3 columnas de campaña (anteriores al antecesor), solo si histGlobal
     var histCells = '';
     if(state.histGlobal){
-      var histCamps = histCampanias(state.campania); // 3 campañas previas al antecesor
+      var histCamps = histCampanias(state.campania);
       for(var hc=0; hc<3; hc++){
         var cc = histCamps[hc];
         var inner = '<span style="color:var(--muted)">—</span>';
         if(cc){
-          var pc = l.p[cc];
-          if(pc && (pc[1] || pc[2])){
+          var pa = actsOrdenadas(actsDe(l, cc));
+          if(pa.length){
             var parts = [];
-            if(pc[1]) parts.push(cultRoHtml(pc[1], {hideName:true}));
-            if(pc[2]) parts.push(cultRoHtml(pc[2], {hideName:true}));
-            inner = '<div class="cult-multi">'+parts.join('<span class="cult-sep">/</span>')+'</div>';
+            for(var pi=0; pi<pa.length; pi++) parts.push(cultRoHtml(pa[pi].c, {hideName:true}));
+            inner = '<div class="cult-multi" style="flex-direction:row;flex-wrap:wrap">'+parts.join('<span class="cult-sep">/</span>')+'</div>';
           }
         }
         histCells += '<td class="td-hist-global">'+inner+'</td>';
       }
     }
-    
-    // Cultivos editables (click → dropdown) - como dato plano
-    var c1Html = c1 
-      ? cultHtml(c1, 'editCultivo(\''+escName+'\',1,this)')
-      : '<span class="cult-empty" onclick="editCultivo(\''+escName+'\',1,this)">+ asignar</span>';
-    var c2Html = c2 
-      ? cultHtml(c2, 'editCultivo(\''+escName+'\',2,this)')
-      : (c1 ? '<span class="cult-empty" onclick="editCultivo(\''+escName+'\',2,this)">—</span>' : '<span style="color:var(--muted)">—</span>');
-    
-    var haHtml = ha != null 
-      ? '<td class="editable'+(exceeded?' exceeded':'')+'" contenteditable="true" onblur="editHa(\''+escName+'\',this.textContent)" onkeydown="if(event.key===\'Enter\'){event.preventDefault();this.blur();}">'+f(ha,1)+'</td>'
-      : '<td class="editable" contenteditable="true" onblur="editHa(\''+escName+'\',this.textContent)" onkeydown="if(event.key===\'Enter\'){event.preventDefault();this.blur();}" style="color:var(--muted)">—</td>';
-    var ha2Html = c2 && ha != null
-      ? '<td>'+f(ha,1)+'</td>'
-      : '<td style="color:var(--muted)">—</td>';
-    
+
+    // CELDA DE ACTIVIDADES (campaña activa) — chips. Click abre el editor (próxima tanda).
+    var actsHtml = acts.length
+      ? '<div class="acts-cell" onclick="openCeldaActividades(\''+escName+'\')" title="Click para editar actividades">'+cultsCell(acts, {})+'</div>'
+      : '<span class="cult-empty" onclick="openCeldaActividades(\''+escName+'\')">+ actividad</span>';
+
+    var fisicaHtml = '<td'+(exceeded?' class="exceeded"':'')+'>'+(acts.length?f(fisica,1):'<span style="color:var(--muted)">—</span>')+'</td>';
+    var sembradaHtml = '<td>'+(acts.length?f(sembrada,1):'<span style="color:var(--muted)">—</span>')+'</td>';
+
     var expanded = !!state.expandedRows[l.l];
     var btnExp = '<button class="btn-expand'+(expanded?' on':'')+'" onclick="toggleExpandRow(\''+escName+'\')" title="'+(expanded?'Ocultar':'Ver')+' historia completa">'+(expanded?'−':'+')+'</button>';
-    
+
     html += '<tr class="'+cls+'">';
     html += '<td>'+btnExp+'</td>';
     html += '<td class="tdcampo">'+(l.c||'—')+'</td>';
@@ -1583,172 +1614,54 @@ function renderRows(lts, cls){
     html += histCells;
     html += '<td>'+antHtml+'</td>';
     html += '<td>'+f(sup,1)+'</td>';
-    html += '<td>'+c1Html+'</td>';
-    html += haHtml;
-    html += '<td>'+c2Html+'</td>';
-    html += ha2Html;
-    html += '<td>'+f(usada,1)+'</td>';
+    html += '<td>'+actsHtml+'</td>';
+    html += fisicaHtml;
+    html += sembradaHtml;
     html += '<td style="color:'+(exceeded?'#991B1B':(pct>=95?'#3B6D11':(pct>=50?'#92400E':'#7A8899')))+';font-weight:600">'+f(pct,0)+'%</td>';
     html += '</tr>';
-    
-    // Fila expandida con historia completa de TODAS las campañas
+
+    // Fila expandida: historia completa de TODAS las campañas (chips por campaña)
     if(expanded){
-      var colspan = state.histGlobal ? 16 : 13;
+      var colspanE = state.histGlobal ? 14 : 11;
       var histRows = CAMPANIAS.map(function(c){
-        var pc = l.p[c];
+        var pa = actsDe(l, c);
         var isCurrent = c === state.campania;
         var rowStyle = isCurrent ? ' style="background:#F5F7FA"' : '';
-        if(!pc || (!pc[1] && !pc[2] && pc[0]==null)){
+        if(!pa.length){
           return '<tr'+rowStyle+'><td style="font-family:var(--mono);font-weight:500">'+c+(isCurrent?' ◀':'')+'</td><td style="color:var(--muted);font-style:italic">sin plan</td><td>—</td><td>—</td></tr>';
         }
-        var c1Txt = pc[1] ? cultRoHtml(pc[1]) : '<span style="color:var(--muted)">—</span>';
-        var c2Txt = pc[2] ? cultRoHtml(pc[2]) : '<span style="color:var(--muted)">—</span>';
-        var haStr = pc[0]!=null ? f(pc[0],1) : '—';
-        return '<tr'+rowStyle+'><td style="font-family:var(--mono);font-weight:500">'+c+(isCurrent?' ◀':'')+'</td><td>'+c1Txt+'</td><td>'+c2Txt+'</td><td style="font-family:var(--mono);text-align:right">'+haStr+'</td></tr>';
+        var actsTxt = cultsCell(pa, {ro:true});
+        return '<tr'+rowStyle+'><td style="font-family:var(--mono);font-weight:500">'+c+(isCurrent?' ◀':'')+'</td><td>'+actsTxt+'</td><td style="font-family:var(--mono);text-align:right">'+f(supFisica(pa),1)+'</td><td style="font-family:var(--mono);text-align:right">'+f(supSembrada(pa),1)+'</td></tr>';
       }).join('');
       var histTable = '<table class="hist-mini-table"><thead><tr>'+
-        '<th>Campaña</th><th>Actividad 1ª</th><th>Actividad 2ª</th><th style="text-align:right">Sup (ha)</th>'+
+        '<th>Campaña</th><th>Actividades</th><th style="text-align:right">Sup física</th><th style="text-align:right">Sup sembrada</th>'+
         '</tr></thead><tbody>'+histRows+'</tbody></table>';
-      html += '<tr class="row-history"><td colspan="'+colspan+'"><div style="font-size:10px;color:var(--muted);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.3px">Historia completa · '+l.l+'</div>'+histTable+'</td></tr>';
+      html += '<tr class="row-history"><td colspan="'+colspanE+'"><div style="font-size:10px;color:var(--muted);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.3px">Historia completa · '+l.l+'</div>'+histTable+'</td></tr>';
     }
   }
   return html;
 }
 
+// Placeholder de edición — el editor modal de actividades llega en la próxima tanda.
+function openCeldaActividades(loteName){
+  alert('El editor de actividades (alta/edición) se implementa en la próxima etapa.\n\nLote: '+loteName+' · Campaña: '+state.campania);
+}
+
 // ────────────────────────────────────────────────────────────
 // EDITAR DATOS
+// La edición de actividades (alta/baja/ha/2ª) se hace en el editor modal de celda,
+// que se implementa en la próxima etapa. Estas entradas redirigen a ese editor.
 // ────────────────────────────────────────────────────────────
-function editHa(loteName, val){
-  var l = LOTES.find(function(x){return x.l===loteName;});
-  if(!l) return;
-  var n = parseFloat(val.replace(/\./g,'').replace(',','.'));
-  if(isNaN(n) || n<0){ renderAll(); return; }
-  if(!l.p[state.campania]) l.p[state.campania] = [n, null, null];
-  else l.p[state.campania][0] = n;
-  renderAll();
-}
-
-function editCultivo(loteName, slot, triggerEl){
-  var l = LOTES.find(function(x){return x.l===loteName;});
-  if(!l) return;
-  var current = (l.p[state.campania] && l.p[state.campania][slot]) || null;
-  
-  openCultDropdown(triggerEl, current, function(newVal){
-    if(!l.p[state.campania]) l.p[state.campania] = [l.s, null, null];
-    l.p[state.campania][slot] = newVal || null;
-    // Si saco el 1ª, también saco el 2ª
-    if(slot===1 && !newVal){ l.p[state.campania][2] = null; }
-    // Si asigno 1ª y no había ha, uso sup física
-    if(slot===1 && newVal && l.p[state.campania][0]==null){ l.p[state.campania][0] = l.s; }
-    renderAll();
-  });
-}
+function editHa(loteName, val){ openCeldaActividades(loteName); }
+function editCultivo(loteName, slot, triggerEl){ openCeldaActividades(loteName); }
 
 // ────────────────────────────────────────────────────────────
-// ACCIÓN MASIVA (aplicar cultivo a lotes filtrados)
+// ACCIÓN MASIVA (aplicar cultivo/uso a lotes filtrados)
+// Se reimplementa para el modelo de actividades en la etapa de edición.
 // ────────────────────────────────────────────────────────────
-var masivoState = { c1: undefined, c2: undefined, haOpt: 'keep' };
+function openMasivo(){ alert('La acción masiva se reimplementa en la próxima etapa con el modelo de actividades.'); }
+function closeMasivo(){ var m=document.getElementById('modalMasivo'); if(m) m.classList.remove('on'); }
 
-function openMasivo(){
-  var lts = lotesFiltrados();
-  if(!lts.length){ alert('No hay lotes filtrados'); return; }
-  masivoState = { c1: undefined, c2: undefined, haOpt: 'keep' };
-  var totHa = lts.reduce(function(a,b){return a + (b.s||0);},0);
-  document.getElementById('modalMasivoSub').innerHTML = '<strong>'+lts.length+' lotes</strong> filtrados ('+fInt(totHa)+' ha de sup. física total) en la campaña <strong>'+state.campania+'</strong>';
-  
-  // Renderizar selectores dentro del modal
-  renderMasivoDd('modalC1Dd', 1);
-  renderMasivoDd('modalC2Dd', 2);
-  document.getElementById('modalMasivoWarn').style.display = 'none';
-  document.getElementById('modalMasivo').classList.add('on');
-}
-
-function renderMasivoDd(containerId, slot){
-  var cont = document.getElementById(containerId);
-  cont.innerHTML = '';
-  var trigger = document.createElement('button');
-  trigger.className = 'dd-trigger';
-  trigger.style.minWidth = '200px';
-  var val = slot===1 ? masivoState.c1 : masivoState.c2;
-  if(val === undefined) trigger.innerHTML = '<span style="color:var(--muted)">— Sin cambio —</span>';
-  else if(val === null) trigger.innerHTML = '<span style="color:#991B1B">⌀ Quitar actividad</span>';
-  else {
-    trigger.innerHTML = '<span class="cult-sig" style="font-family:var(--mono);font-weight:600">'+val+'</span> <span class="cult-nom" style="font-family:var(--sans);font-size:11px;color:var(--muted);margin-left:5px">'+cultName(val)+'</span>';
-  }
-  trigger.onclick = function(e){
-    e.stopPropagation();
-    openCultDropdown(trigger, val, function(newVal){
-      if(slot===1) masivoState.c1 = newVal;
-      else masivoState.c2 = newVal;
-      renderMasivoDd(containerId, slot);
-    });
-  };
-  cont.appendChild(trigger);
-}
-
-function closeMasivo(){
-  document.getElementById('modalMasivo').classList.remove('on');
-}
-
-function confirmMasivo(){
-  var lts = lotesFiltrados();
-  if(!lts.length){ closeMasivo(); return; }
-  
-  // Validación: si se pone un Cv2ª y no hay Cv1ª, no tiene sentido
-  if(masivoState.c1 === null && masivoState.c2 !== undefined && masivoState.c2 !== null){
-    var w = document.getElementById('modalMasivoWarn');
-    w.style.display = 'block';
-    w.textContent = 'No se puede asignar una actividad 2ª si se está quitando la 1ª.';
-    return;
-  }
-  
-  // Tomar opción ha
-  var haOpts = document.getElementsByName('mhaOpt');
-  var haOpt = 'keep';
-  for(var i=0;i<haOpts.length;i++) if(haOpts[i].checked){ haOpt = haOpts[i].value; break; }
-  
-  // Confirmación final
-  var desc = [];
-  if(masivoState.c1 === null) desc.push('quitar actividad 1ª');
-  else if(masivoState.c1) desc.push('actividad 1ª = '+masivoState.c1+' ('+cultName(masivoState.c1)+')');
-  if(masivoState.c2 === null) desc.push('quitar actividad 2ª');
-  else if(masivoState.c2) desc.push('actividad 2ª = '+masivoState.c2+' ('+cultName(masivoState.c2)+')');
-  if(!desc.length){
-    var w = document.getElementById('modalMasivoWarn');
-    w.style.display = 'block';
-    w.textContent = 'Elegí al menos un cultivo (1ª o 2ª) para aplicar.';
-    return;
-  }
-  desc.push('ha: '+(haOpt==='keep'?'mantener / sup. física si vacío':'usar sup. física'));
-  
-  var totHa = lts.reduce(function(a,b){return a + (b.s||0);},0);
-  if(!confirm('¿Aplicar a '+lts.length+' lotes ('+fInt(totHa)+' ha) en la campaña '+state.campania+'?\n\n'+desc.join('\n'))) return;
-  
-  // Aplicar
-  for(var i=0;i<lts.length;i++){
-    var l = lts[i];
-    if(!l.p[state.campania]) l.p[state.campania] = [null, null, null];
-    var p = l.p[state.campania];
-    
-    if(masivoState.c1 !== undefined){
-      p[1] = masivoState.c1;
-      if(masivoState.c1 === null) p[2] = null; // si quito 1ª, quito 2ª también
-    }
-    if(masivoState.c2 !== undefined && p[1]){  // solo asigno 2ª si hay 1ª
-      p[2] = masivoState.c2;
-    }
-    // Hectáreas
-    if(haOpt === 'fisica'){
-      p[0] = l.s;
-    } else {
-      // keep: si no hay ha pero hay cultivo, usar sup física
-      if(p[0] == null && p[1]) p[0] = l.s;
-    }
-  }
-  
-  closeMasivo();
-  renderAll();
-}
 
 // ────────────────────────────────────────────────────────────
 // RENDER PADRÓN
@@ -1761,7 +1674,7 @@ function renderPadron(){
   var html='';
   for(var i=0;i<lts.length;i++){
     var l = lts[i];
-    var nCamps = Object.keys(l.p).filter(function(k){return l.p[k][1];}).length;
+    var nCamps = Object.keys(l.p).filter(function(k){return l.p[k] && l.p[k].length;}).length;
     var en = l.l.replace(/'/g,"\\'");
     html += '<tr>';
     html += '<td class="tdcampo">'+(i+1)+'</td>';
@@ -1855,18 +1768,20 @@ function renderReportes(){
   var cultMap = {}, ambMap = {}, agrTot=0, ganTot=0;
   for(var i=0;i<lts.length;i++){
     var l = lts[i];
-    var p = l.p[state.campania];
-    if(!p) continue;
-    var ha = p[0] || 0;
-    if(p[1]){
-      cultMap[p[1]] = (cultMap[p[1]]||0) + ha;
-      if(cultTipo(p[1])==='AGR') agrTot += ha; else ganTot += ha;
+    var acts = actsDe(l, state.campania);
+    if(!acts.length) continue;
+    for(var j=0;j<acts.length;j++){
+      var a = acts[j];
+      var ha = a.ha || 0;
+      cultMap[a.c] = (cultMap[a.c]||0) + ha;
+      // Tipo agrícola/ganadero: por superficie física (no contar 2ª para no inflar)
+      if(!a.seg){
+        if(cultTipo(a.c)==='AGR') agrTot += ha; else ganTot += ha;
+      }
     }
-    if(p[2]){
-      cultMap[p[2]] = (cultMap[p[2]]||0) + ha;
-    }
+    // Ambiente: superficie física del lote en la campaña
     if(l.a){
-      ambMap[l.a] = (ambMap[l.a]||0) + ha;
+      ambMap[l.a] = (ambMap[l.a]||0) + supFisica(acts);
     }
   }
   
@@ -1962,19 +1877,18 @@ function renderHistorico(){
   for(var i=0;i<lts.length;i++){
     var l = lts[i];
     for(var c in l.p){
-      var p = l.p[c];
-      if(p[1]) cultByCamp[c][p[1]] = (cultByCamp[c][p[1]]||0)+(p[0]||0);
-      if(p[2]) cultByCamp[c][p[2]] = (cultByCamp[c][p[2]]||0)+(p[0]||0);
+      var acts = l.p[c] || [];
+      for(var j=0;j<acts.length;j++){
+        cultByCamp[c][acts[j].c] = (cultByCamp[c][acts[j].c]||0)+(acts[j].ha||0);
+      }
     }
   }
   // top cultivos totales
   var totals = {};
   for(var c in cultByCamp){ for(var k in cultByCamp[c]){ totals[k] = (totals[k]||0)+cultByCamp[c][k]; } }
-  // Si hay filtro activo de cultivos (1ª o 2ª), mostrar SOLO esos cultivos en el gráfico.
-  // Si no, mostrar el top 10 de los lotes filtrados (que ya respetan campo/tipo/ambiente/antecesor/búsqueda).
+  // Si hay filtro activo de cultivo/uso, mostrar SOLO esos cultivos en el gráfico.
   var cultFilter = [];
-  if(state.fC1 && state.fC1.length) cultFilter = cultFilter.concat(state.fC1);
-  if(state.fC2 && state.fC2.length) cultFilter = cultFilter.concat(state.fC2);
+  if(state.fCult && state.fCult.length) cultFilter = cultFilter.concat(state.fCult);
   var topCults;
   if(cultFilter.length){
     // dedup, solo los que tienen datos en algún período
@@ -2079,11 +1993,11 @@ function renderHistorico(){
     html += '<td>'+f(l.s,1)+'</td>';
     for(var j=0;j<CAMPANIAS.length;j++){
       var c = CAMPANIAS[j];
-      var p = l.p[c];
-      if(p && p[1]){
-        var cellParts = [cultRoHtml(p[1], {hideName:true})];
-        if(p[2]) cellParts.push(cultRoHtml(p[2], {hideName:true}));
-        var cell = '<div class="cult-multi">'+cellParts.join('<span class="cult-sep">/</span>')+'</div>';
+      var acts = actsOrdenadas(actsDe(l, c));
+      if(acts.length){
+        var cellParts = [];
+        for(var ci=0; ci<acts.length; ci++) cellParts.push(cultRoHtml(acts[ci].c, {hideName:true}));
+        var cell = '<div class="cult-multi" style="flex-direction:row;flex-wrap:wrap">'+cellParts.join('<span class="cult-sep">/</span>')+'</div>';
         html += '<td'+(c===state.campania?' style="background:#F5F7FA"':'')+'>'+cell+'</td>';
       } else {
         html += '<td style="color:var(--muted)">—</td>';
@@ -2105,8 +2019,7 @@ function campaniasConDatos(lts){
     var c = CAMPANIAS[i];
     var hay = false;
     for(var j=0; j<lts.length; j++){
-      var p = lts[j].p[c];
-      if(p && (p[1] || p[2])){ hay = true; break; }
+      if(actsDe(lts[j], c).length){ hay = true; break; }
     }
     if(hay) conDatos.push(c);
   }
@@ -2115,53 +2028,32 @@ function campaniasConDatos(lts){
 
 function exportPlanXLSX(){
   var lts = sortLotes(lotesFiltrados());
-  var camps = campaniasConDatos(lts);
-  // Headers: datos fijos del lote + por cada campaña con datos act 1ª/sup 1ª/act 2ª/sup 2ª
-  // + columnas de resumen de la campaña activa (sup usada, % uso) al final
-  var headers = ['Campo','Lote','Ambiente','Descripción ambiente','Sup física (ha)'];
-  for(var c=0; c<camps.length; c++){
-    headers.push(camps[c]+' · Actividad 1ª');
-    headers.push(camps[c]+' · Sup 1ª (ha)');
-    headers.push(camps[c]+' · Actividad 2ª');
-    headers.push(camps[c]+' · Sup 2ª (ha)');
-  }
-  headers.push('Sup usada en '+state.campania+' (ha)');
-  headers.push('% uso en '+state.campania);
-
+  // Una fila por ACTIVIDAD (lote+cultivo+campaña), repitiendo datos del lote.
+  var headers = ['Campo','Lote','Ambiente','Descripción ambiente','Sup lote (ha)',
+                 'Campaña','Cultivo/Uso','Sigla','Sup actividad (ha)','2ª','Sup física lote (ha)','Sup sembrada lote (ha)','% uso lote'];
   var rows = [];
   for(var i=0;i<lts.length;i++){
     var l = lts[i];
-    var fila = [l.c||'', l.l, l.a||'', ambDesc(l.a||'')||'', l.s||0];
-    for(var c=0; c<camps.length; c++){
-      var pc = l.p[camps[c]];
-      if(pc){
-        fila.push(pc[1] ? (pc[1]+' — '+cultName(pc[1])) : '');
-        fila.push(pc[1] && pc[0]!=null ? pc[0] : '');
-        fila.push(pc[2] ? (pc[2]+' — '+cultName(pc[2])) : '');
-        fila.push(pc[2] && pc[0]!=null ? pc[0] : '');
-      } else {
-        fila.push(''); fila.push(''); fila.push(''); fila.push('');
-      }
+    var acts = actsDe(l, state.campania);
+    var fis = supFisica(acts), semb = supSembrada(acts);
+    var pct = (l.s>0) ? Math.round(fis/l.s*1000)/10 : 0;
+    if(!acts.length){
+      rows.push([l.c||'', l.l, l.a||'', ambDesc(l.a||'')||'', l.s||0, state.campania, '', '', '', '', 0, 0, 0]);
+      continue;
     }
-    var pAct = l.p[state.campania] || [null,null,null];
-    var usada = pAct[1] ? (pAct[0]||0) : 0;
-    var pct = (l.s>0 && usada>0) ? Math.round(usada/l.s*1000)/10 : 0;
-    fila.push(usada);
-    fila.push(pct);
-    rows.push(fila);
+    for(var j=0;j<acts.length;j++){
+      var a = acts[j];
+      rows.push([l.c||'', l.l, l.a||'', ambDesc(l.a||'')||'', l.s||0,
+                 state.campania, cultName(a.c), a.c, a.ha!=null?a.ha:'', a.seg?'Sí':'', fis, semb, pct]);
+    }
   }
-  // Fila TOTAL al pie
-  var totFis = lts.reduce(function(a,b){return a+(b.s||0);},0);
-  var totUsada = 0;
+  // Fila TOTAL
+  var totFis=0, totSemb=0, totSupLote=0;
   for(var i=0;i<lts.length;i++){
-    var p = lts[i].p[state.campania];
-    if(p && p[1]) totUsada += (p[0]||0);
+    var ac = actsDe(lts[i], state.campania);
+    totFis += supFisica(ac); totSemb += supSembrada(ac); totSupLote += lts[i].s||0;
   }
-  var totalRow = ['', 'TOTAL', '', '', totFis];
-  for(var c=0; c<camps.length; c++){ totalRow.push(''); totalRow.push(''); totalRow.push(''); totalRow.push(''); }
-  totalRow.push(totUsada);
-  totalRow.push(totFis>0 ? Math.round(totUsada/totFis*1000)/10 : 0);
-  rows.push(totalRow);
+  rows.push(['', 'TOTAL', '', '', totSupLote, state.campania, '', '', '', '', totFis, totSemb, totSupLote>0?Math.round(totFis/totSupLote*1000)/10:0]);
 
   downloadXLSX('Plan_uso_suelo_'+state.campania+'_'+state.campo+'.xlsx', 'Plan '+state.campania, headers, rows);
 }
@@ -2171,7 +2063,7 @@ function exportPadronXLSX(){
   var rows = [];
   for(var i=0;i<lts.length;i++){
     var l=lts[i];
-    var nCamps = Object.keys(l.p).filter(function(k){return l.p[k][1];}).length;
+    var nCamps = Object.keys(l.p).filter(function(k){return l.p[k] && l.p[k].length;}).length;
     rows.push([l.c||'', l.l, l.a||'', l.s||0, nCamps+'/6']);
   }
   // Fila TOTAL al pie
@@ -2184,36 +2076,24 @@ function exportPadronXLSX(){
 function exportHistoricoXLSX(){
   var lts = sortLotes(lotesFiltrados());
   var camps = campaniasConDatos(lts);
-  // Headers: datos fijos del lote + por cada campaña con datos act 1ª/sup 1ª/act 2ª/sup 2ª
-  var headers = ['Campo','Lote','Ambiente','Descripción ambiente','Sup (ha)'];
-  for(var c=0; c<camps.length; c++){
-    headers.push(camps[c]+' · Actividad 1ª');
-    headers.push(camps[c]+' · Sup 1ª (ha)');
-    headers.push(camps[c]+' · Actividad 2ª');
-    headers.push(camps[c]+' · Sup 2ª (ha)');
-  }
+  // Una fila por ACTIVIDAD (lote+cultivo+campaña), repitiendo datos del lote.
+  var headers = ['Campo','Lote','Ambiente','Descripción ambiente','Sup lote (ha)',
+                 'Campaña','Cultivo/Uso','Sigla','Sup actividad (ha)','2ª'];
   var rows = [];
   for(var i=0;i<lts.length;i++){
     var l = lts[i];
-    var fila = [l.c||'', l.l, l.a||'', ambDesc(l.a||'')||'', l.s||0];
     for(var c=0; c<camps.length; c++){
-      var p = l.p[camps[c]];
-      if(p){
-        fila.push(p[1] ? (p[1]+' — '+cultName(p[1])) : '');
-        fila.push(p[1] && p[0]!=null ? p[0] : '');
-        fila.push(p[2] ? (p[2]+' — '+cultName(p[2])) : '');
-        fila.push(p[2] && p[0]!=null ? p[0] : '');
-      } else {
-        fila.push(''); fila.push(''); fila.push(''); fila.push('');
+      var acts = actsDe(l, camps[c]);
+      for(var j=0;j<acts.length;j++){
+        var a = acts[j];
+        rows.push([l.c||'', l.l, l.a||'', ambDesc(l.a||'')||'', l.s||0,
+                   camps[c], cultName(a.c), a.c, a.ha!=null?a.ha:'', a.seg?'Sí':'']);
       }
     }
-    rows.push(fila);
   }
-  // Fila TOTAL al pie con la suma de sup. física
+  // Fila TOTAL al pie con la suma de sup. física del lote
   var totSup = lts.reduce(function(a,b){return a+(b.s||0);},0);
-  var totalRow = ['', 'TOTAL', '', '', totSup];
-  for(var c=0; c<camps.length; c++){ totalRow.push(''); totalRow.push(''); totalRow.push(''); totalRow.push(''); }
-  rows.push(totalRow);
+  rows.push(['', 'TOTAL', '', '', totSup, '', '', '', '', '']);
   downloadXLSX('Historico_rotacion_'+state.campo+'.xlsx', 'Histórico', headers, rows);
 }
 
@@ -2277,8 +2157,13 @@ function countLotesAmb(code){
 function countLotesCult(sigla){
   var n=0;
   for(var i=0;i<LOTES.length;i++){
-    var p=LOTES[i].p;
-    for(var c in p){ if(p[c][1]===sigla || p[c][2]===sigla){ n++; break; } }
+    var p=LOTES[i].p, found=false;
+    for(var c in p){
+      var acts = p[c]||[];
+      for(var j=0;j<acts.length;j++){ if(acts[j].c===sigla){ found=true; break; } }
+      if(found) break;
+    }
+    if(found) n++;
   }
   return n;
 }
