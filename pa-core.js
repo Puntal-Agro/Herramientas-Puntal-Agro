@@ -24,9 +24,10 @@
   var LS_TIPOACT  = 'pa_tipo_act';      // tipos de actividad (cultivos/usos) demo
   var LS_ESPECIES = 'pa_especies';      // especies/granos (global Puntal)
   var LS_UNIDADES = 'pa_unidades';      // unidades de medida (global Puntal)
+  var LS_INSUMOS  = 'pa_insumos';       // insumos (por empresa)
   var LS_SESION   = 'pa_sesion';        // sesión activa { usuarioId, empresaActivaId }
   var LS_SEEDVER  = 'pa_seed_ver';      // versión del seed demo
-  var SEED_VER    = '9';                // subir este número al cambiar la estructura del seed
+  var SEED_VER    = '10';               // subir este número al cambiar la estructura del seed
 
   // Herramientas PROPIAS (asignable=true): id + nombre legible.
   // Deben coincidir con los data-tool del index y con §5.2 del modelo.
@@ -82,6 +83,7 @@
       localStorage.removeItem('pa_tipo_lab');
       localStorage.removeItem(LS_ESPECIES);
       localStorage.removeItem(LS_UNIDADES);
+      localStorage.removeItem(LS_INSUMOS);
     } catch (e) {}
 
     var clientes = [
@@ -174,6 +176,17 @@
     for (var ci=0; ci<cultivosBase.length; ci++){
       tiposAct.push({ id: 'ta_'+ci, empresaId: 'emp_albor_sa', nombre: cultivosBase[ci][0], sigla: cultivosBase[ci][1], actividad: cultivosBase[ci][2], especieId: cultivosBase[ci][3] ? espId(cultivosBase[ci][3]) : null, activo: true });
     }
+
+    var insumos = [
+      { id: 'ins_glifo', empresaId: 'emp_albor_sa', activo: true, nombre: 'Glifosato 48%', tipo: 'Herbicida', unidadId: 'uni_3',
+        modoAccion: 'Grupo 9 (HRAC)', bandaTox: 'IV', eiq: 15.33, concentracion: 480, concUnidad: 'g/l', nutrientes: null },
+      { id: 'ins_ciper', empresaId: 'emp_albor_sa', activo: true, nombre: 'Cipermetrina 25%', tipo: 'Insecticida', unidadId: 'uni_3',
+        modoAccion: 'Grupo 3A (IRAC)', bandaTox: 'II', eiq: 38.10, concentracion: 250, concUnidad: 'g/l', nutrientes: null },
+      { id: 'ins_uan', empresaId: 'emp_albor_sa', activo: true, nombre: 'UAN 32', tipo: 'Fertilizante', unidadId: 'uni_3',
+        modoAccion: '', bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: { n: 32, p: 0, k: 0, s: 0 } },
+      { id: 'ins_sojasem', empresaId: 'emp_albor_sa', activo: true, nombre: 'Semilla soja DM 46i17', tipo: 'Semilla', unidadId: 'uni_0',
+        modoAccion: '', bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null }
+    ];
     lsSet(LS_CLIENTES, clientes);
     lsSet(LS_EMPRESAS, empresas);
     lsSet(LS_CAMPOS, campos);
@@ -187,6 +200,7 @@
     lsSet(LS_TIPOACT, tiposAct);
     lsSet(LS_ESPECIES, especies);
     lsSet(LS_UNIDADES, unidades);
+    lsSet(LS_INSUMOS, insumos);
     lsSet(LS_SEEDVER, SEED_VER);
   }
 
@@ -597,6 +611,24 @@
       lsSet(LS_UNIDADES, out);
     },
 
+    /* ---- ABM Insumos (por empresa) ---- */
+    listarInsumos: function (empresaId) {
+      var is = lsGet(LS_INSUMOS, []), out = [];
+      for (var i=0;i<is.length;i++){ if(is[i].empresaId===empresaId) out.push(is[i]); }
+      return out;
+    },
+    guardarInsumo: function (x) {
+      var is = lsGet(LS_INSUMOS, []);
+      if (!x.id) { x.id = uid('ins'); is.push(x); }
+      else { var f=false; for(var i=0;i<is.length;i++){ if(is[i].id===x.id){is[i]=x;f=true;break;} } if(!f) is.push(x); }
+      lsSet(LS_INSUMOS, is); return x;
+    },
+    borrarInsumo: function (id) {
+      var is=lsGet(LS_INSUMOS, []), out=[];
+      for(var i=0;i<is.length;i++){ if(is[i].id!==id) out.push(is[i]); }
+      lsSet(LS_INSUMOS, out);
+    },
+
     resetDemo: function () {
       try {
         localStorage.removeItem(LS_CLIENTES);
@@ -615,6 +647,7 @@
         localStorage.removeItem('pa_tipo_lab');
         localStorage.removeItem(LS_ESPECIES);
         localStorage.removeItem(LS_UNIDADES);
+        localStorage.removeItem(LS_INSUMOS);
       } catch (e) {}
       seedDemo();
     }

@@ -38,6 +38,16 @@ th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);ver
 th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)}
 .rol-bdg{display:inline-block;font-size:10px;font-family:var(--mono);padding:2px 7px;border-radius:10px;margin:1px 2px 1px 0}
 .rb-prov{background:#FBEDE3;color:#9A4A20}.rb-cli{background:#EEF3E8;color:#3A5128}.rb-tipo{background:#EEF0F3;color:#475569}
+.banda-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.banda-chip{font-size:11.5px;font-weight:600;border:2px solid var(--border);background:var(--card);color:var(--muted);border-radius:8px;padding:6px 12px;cursor:pointer;font-family:var(--sans)}
+.banda-chip.on{color:#fff;border-color:transparent}
+.banda-chip.on.b-na{background:#7A8899}
+.banda-chip.on.b-ia{background:#C0392B}
+.banda-chip.on.b-ib{background:#E74C3C}
+.banda-chip.on.b-ii{background:#E67E22}
+.banda-chip.on.b-iii{background:#2980B9}
+.banda-chip.on.b-iv{background:#27AE60}
+.bdg-banda{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;color:#fff}
 .btn{background:var(--olive);color:#fff;border:none;border-radius:8px;padding:9px 14px;font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer}
 .btn:hover{background:#3c5429}
 .btn-sm{font-size:11px;padding:5px 9px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer}
@@ -94,7 +104,7 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted
   <div class="nav">
     <div class="nav-item sel" data-cat="terceros" onclick="seleccionarCat('terceros')">Proveedores y Clientes</div>
     <div class="nav-item" data-cat="choferes" onclick="seleccionarCat('choferes')">Choferes</div>
-    <div class="nav-item soon">Insumos <span class="soon-tag">pronto</span></div>
+    <div class="nav-item" data-cat="insumos" onclick="seleccionarCat('insumos')">Insumos</div>
     <div class="nav-item" data-cat="depositos" onclick="seleccionarCat('depositos')">Depósitos</div>
     <div class="nav-item" data-cat="labores" onclick="seleccionarCat('labores')">Labores</div>
     <div class="nav-item" data-cat="cultivos" onclick="seleccionarCat('cultivos')">Cultivos / Usos</div>
@@ -205,6 +215,20 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted
         <tbody></tbody>
       </table>
       <div class="empty" id="empty-uni" style="display:none">No hay unidades cargadas. Agregá una con "+ Nuevo".</div>
+    </div>
+
+    <!-- VISTA INSUMOS -->
+    <div id="vista-insumos" style="display:none">
+      <div class="panel-head">
+        <h2>Insumos</h2>
+        <button class="btn" onclick="abrirModalIns()">+ Nuevo</button>
+      </div>
+      <p style="font-size:12.5px;color:var(--muted);margin-bottom:12px;line-height:1.5">Padrón de insumos de la empresa. Los fitosanitarios llevan modo de acción, banda toxicológica, EIQ y concentración; los fertilizantes, su composición NPKS.</p>
+      <table id="tbl-ins">
+        <thead><tr><th>Nombre</th><th>Tipo</th><th>Unidad</th><th>Datos técnicos</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="empty" id="empty-ins" style="display:none">No hay insumos cargados. Agregá uno con "+ Nuevo".</div>
     </div>
   </div>
 </main>
@@ -363,6 +387,78 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted
   </div>
 </div>
 
+<!-- Modal INSUMO -->
+<div class="overlay" id="overlay-ins">
+  <div class="modal" style="max-width:560px">
+    <h3 id="modal-ins-title">Nuevo insumo</h3>
+    <div class="grid2">
+      <div class="fld full"><label>Nombre</label><input id="i-nombre"></div>
+      <div class="fld"><label>Tipo</label>
+        <select id="i-tipo" onchange="toggleBloqueIns()" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px">
+          <option value="Herbicida">Herbicida</option>
+          <option value="Insecticida">Insecticida</option>
+          <option value="Fungicida">Fungicida</option>
+          <option value="Curasemilla">Curasemilla</option>
+          <option value="Coadyuvante">Coadyuvante</option>
+          <option value="Fertilizante">Fertilizante</option>
+          <option value="Inoculante">Inoculante</option>
+          <option value="Semilla">Semilla</option>
+          <option value="Combustible">Combustible</option>
+          <option value="Otro">Otro</option>
+        </select>
+      </div>
+      <div class="fld"><label>Unidad</label>
+        <select id="i-unidad" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px"></select>
+      </div>
+    </div>
+
+    <!-- Bloque FITOSANITARIO -->
+    <div id="bloque-fito" style="display:none;border-top:1px solid var(--border);margin-top:14px;padding-top:12px">
+      <div style="font-size:11px;font-weight:700;color:var(--olive);text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px">Datos del fitosanitario</div>
+      <div class="grid2">
+        <div class="fld full"><label>Modo de acción <span class="opt">(HRAC / IRAC / FRAC)</span></label><input id="i-modo" placeholder="Ej: Grupo 9 (HRAC)"></div>
+        <div class="fld"><label>EIQ <span class="opt">(opcional)</span></label><input id="i-eiq" type="number" step="0.01"></div>
+        <div class="fld"><label>Concentración</label>
+          <div style="display:flex;gap:6px">
+            <input id="i-conc" type="number" step="0.01" style="flex:1">
+            <select id="i-concuni" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px;width:90px">
+              <option value="">—</option><option value="g/l">g/l</option><option value="g/kg">g/kg</option><option value="%">%</option><option value="ppm">ppm</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="fld full" style="margin-top:8px"><label>Banda toxicológica</label>
+        <div class="banda-row" id="i-banda-row">
+          <span class="banda-chip b-na on" data-b="" onclick="setBanda('')">Sin especificar</span>
+          <span class="banda-chip b-ia" data-b="Ia" onclick="setBanda('Ia')">Clase Ia</span>
+          <span class="banda-chip b-ib" data-b="Ib" onclick="setBanda('Ib')">Clase Ib</span>
+          <span class="banda-chip b-ii" data-b="II" onclick="setBanda('II')">Clase II</span>
+          <span class="banda-chip b-iii" data-b="III" onclick="setBanda('III')">Clase III</span>
+          <span class="banda-chip b-iv" data-b="IV" onclick="setBanda('IV')">Clase IV</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bloque FERTILIZANTE -->
+    <div id="bloque-ferti" style="display:none;border-top:1px solid var(--border);margin-top:14px;padding-top:12px">
+      <div style="font-size:11px;font-weight:700;color:var(--olive);text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px">Composición (NPKS, % p/p)</div>
+      <div class="grid2">
+        <div class="fld"><label>N <span class="opt">(Nitrógeno)</span></label><input id="i-n" type="number" step="0.1"></div>
+        <div class="fld"><label>P <span class="opt">(Fósforo)</span></label><input id="i-p" type="number" step="0.1"></div>
+        <div class="fld"><label>K <span class="opt">(Potasio)</span></label><input id="i-k" type="number" step="0.1"></div>
+        <div class="fld"><label>S <span class="opt">(Azufre)</span></label><input id="i-s" type="number" step="0.1"></div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn" onclick="guardarIns()">Guardar</button>
+      <button class="btn-out" onclick="cerrarModalIns()">Cancelar</button>
+      <button class="btn-out del" id="btn-del-ins" style="display:none" onclick="eliminarIns()">Eliminar</button>
+      <span class="msg" id="msg-ins"></span>
+    </div>
+  </div>
+</div>
+
 <script src="pa-core.js"></script>
 <script>
 var empresaId = null;
@@ -377,7 +473,7 @@ function setFiltro(f){
   render();
 }
 function seleccionarCat(c){
-  var vistas = ['terceros','choferes','depositos','labores','cultivos','especies','unidades'];
+  var vistas = ['terceros','choferes','depositos','labores','cultivos','especies','unidades','insumos'];
   for (var i=0;i<vistas.length;i++){
     document.getElementById('vista-'+vistas[i]).style.display = (c===vistas[i])?'':'none';
   }
@@ -391,6 +487,7 @@ function seleccionarCat(c){
   else if (c==='cultivos') renderCultivos();
   else if (c==='especies') renderEspecies();
   else if (c==='unidades') renderUnidades();
+  else if (c==='insumos') renderInsumos();
   else render();
 }
 
@@ -545,6 +642,96 @@ function editarUni(id){ var l=PA.demo.listarUnidades(); var x=null; for(var i=0;
 function cerrarModalUni(){ document.getElementById('overlay-uni').className='overlay'; }
 function guardarUni(){ var s=document.getElementById('u-sigla').value.trim(); if(!s){document.getElementById('msg-uni').textContent='Falta la sigla.';return;} PA.demo.guardarUnidad({id:editUni||undefined,sigla:s,nombre:document.getElementById('u-nombre').value.trim(),activo:true}); cerrarModalUni(); renderUnidades(); }
 function eliminarUni(){ if(editUni&&confirm('¿Eliminar esta unidad?')){PA.demo.borrarUnidad(editUni);cerrarModalUni();renderUnidades();} }
+
+/* ---- INSUMOS (por empresa) ---- */
+var editIns=null, bandaSel='';
+var TIPOS_FITO = ['Herbicida','Insecticida','Fungicida','Curasemilla','Coadyuvante'];
+function esFito(t){ for(var i=0;i<TIPOS_FITO.length;i++){ if(TIPOS_FITO[i]===t) return true; } return false; }
+function nombreUnidad(id){ if(!id) return '—'; var l=PA.demo.listarUnidades(); for(var i=0;i<l.length;i++){ if(l[i].id===id) return l[i].sigla; } return '—'; }
+function bandaBadge(b){ if(!b) return ''; var col={'Ia':'#C0392B','Ib':'#E74C3C','II':'#E67E22','III':'#2980B9','IV':'#27AE60'}[b]||'#7A8899'; return '<span class="bdg-banda" style="background:'+col+'">'+b+'</span>'; }
+function tecnicoResumen(x){
+  if(esFito(x.tipo)){
+    var p=[];
+    if(x.modoAccion) p.push(x.modoAccion);
+    if(x.concentracion) p.push(x.concentracion+(x.concUnidad||''));
+    if(x.bandaTox) p.push(bandaBadge(x.bandaTox));
+    return p.length?p.join(' · '):'<span style="color:var(--muted)">—</span>';
+  }
+  if(x.tipo==='Fertilizante' && x.nutrientes){
+    var n=x.nutrientes; return 'N '+(n.n||0)+' · P '+(n.p||0)+' · K '+(n.k||0)+' · S '+(n.s||0);
+  }
+  return '<span style="color:var(--muted)">—</span>';
+}
+function renderInsumos(){
+  var lista=PA.demo.listarInsumos(empresaId);
+  var tb=document.querySelector('#tbl-ins tbody'); tb.innerHTML='';
+  for(var i=0;i<lista.length;i++){(function(x){
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td><strong>'+x.nombre+'</strong></td><td><span class="rol-bdg rb-tipo">'+x.tipo+'</span></td><td>'+nombreUnidad(x.unidadId)+'</td><td>'+tecnicoResumen(x)+'</td>'+
+      '<td style="text-align:right"><button class="btn-sm" onclick="editarIns(\''+x.id+'\')">Editar</button></td>';
+    tb.appendChild(tr);
+  })(lista[i]);}
+  document.getElementById('empty-ins').style.display=lista.length?'none':'block';
+  document.getElementById('tbl-ins').style.display=lista.length?'':'none';
+}
+function poblarSelectUnidad(valor){
+  var sel=document.getElementById('i-unidad'); sel.innerHTML='';
+  var l=PA.demo.listarUnidades();
+  for(var i=0;i<l.length;i++){ var o=document.createElement('option'); o.value=l[i].id; o.textContent=l[i].sigla+' — '+l[i].nombre; if(l[i].id===valor) o.selected=true; sel.appendChild(o); }
+}
+function toggleBloqueIns(){
+  var t=document.getElementById('i-tipo').value;
+  document.getElementById('bloque-fito').style.display = esFito(t) ? '' : 'none';
+  document.getElementById('bloque-ferti').style.display = (t==='Fertilizante') ? '' : 'none';
+}
+function setBanda(b){
+  bandaSel=b;
+  var chips=document.querySelectorAll('#i-banda-row .banda-chip');
+  for(var i=0;i<chips.length;i++){ chips[i].className='banda-chip b-'+(chips[i].getAttribute('data-b')||'na').toLowerCase()+(chips[i].getAttribute('data-b')===b?' on':''); }
+}
+function abrirModalIns(){
+  editIns=null; document.getElementById('modal-ins-title').textContent='Nuevo insumo';
+  document.getElementById('i-nombre').value=''; document.getElementById('i-tipo').value='Herbicida';
+  poblarSelectUnidad(''); document.getElementById('i-modo').value=''; document.getElementById('i-eiq').value='';
+  document.getElementById('i-conc').value=''; document.getElementById('i-concuni').value='';
+  document.getElementById('i-n').value=''; document.getElementById('i-p').value=''; document.getElementById('i-k').value=''; document.getElementById('i-s').value='';
+  setBanda(''); toggleBloqueIns();
+  document.getElementById('btn-del-ins').style.display='none'; document.getElementById('msg-ins').textContent='';
+  document.getElementById('overlay-ins').className='overlay open';
+}
+function editarIns(id){
+  var l=PA.demo.listarInsumos(empresaId); var x=null; for(var i=0;i<l.length;i++){if(l[i].id===id){x=l[i];break;}} if(!x)return;
+  editIns=id; document.getElementById('modal-ins-title').textContent='Editar insumo';
+  document.getElementById('i-nombre').value=x.nombre||''; document.getElementById('i-tipo').value=x.tipo||'Herbicida';
+  poblarSelectUnidad(x.unidadId||'');
+  document.getElementById('i-modo').value=x.modoAccion||''; document.getElementById('i-eiq').value=(x.eiq!=null?x.eiq:'');
+  document.getElementById('i-conc').value=(x.concentracion!=null?x.concentracion:''); document.getElementById('i-concuni').value=x.concUnidad||'';
+  var n=x.nutrientes||{}; document.getElementById('i-n').value=(n.n!=null?n.n:''); document.getElementById('i-p').value=(n.p!=null?n.p:''); document.getElementById('i-k').value=(n.k!=null?n.k:''); document.getElementById('i-s').value=(n.s!=null?n.s:'');
+  setBanda(x.bandaTox||''); toggleBloqueIns();
+  document.getElementById('btn-del-ins').style.display=''; document.getElementById('msg-ins').textContent='';
+  document.getElementById('overlay-ins').className='overlay open';
+}
+function cerrarModalIns(){ document.getElementById('overlay-ins').className='overlay'; }
+function numOrNull(id){ var v=document.getElementById(id).value; return v===''?null:Number(v); }
+function guardarIns(){
+  var n=document.getElementById('i-nombre').value.trim();
+  if(!n){document.getElementById('msg-ins').textContent='Falta el nombre.';return;}
+  var t=document.getElementById('i-tipo').value;
+  var obj={ id:editIns||undefined, empresaId:empresaId, activo:true, nombre:n, tipo:t,
+    unidadId:document.getElementById('i-unidad').value||null,
+    modoAccion:'', bandaTox:'', eiq:null, concentracion:null, concUnidad:'', nutrientes:null };
+  if(esFito(t)){
+    obj.modoAccion=document.getElementById('i-modo').value.trim();
+    obj.bandaTox=bandaSel;
+    obj.eiq=numOrNull('i-eiq');
+    obj.concentracion=numOrNull('i-conc');
+    obj.concUnidad=document.getElementById('i-concuni').value;
+  } else if(t==='Fertilizante'){
+    obj.nutrientes={ n:Number(document.getElementById('i-n').value)||0, p:Number(document.getElementById('i-p').value)||0, k:Number(document.getElementById('i-k').value)||0, s:Number(document.getElementById('i-s').value)||0 };
+  }
+  PA.demo.guardarInsumo(obj); cerrarModalIns(); renderInsumos();
+}
+function eliminarIns(){ if(editIns&&confirm('¿Eliminar este insumo?')){PA.demo.borrarInsumo(editIns);cerrarModalIns();renderInsumos();} }
 
 /* ---- CHOFERES ---- */
 var editChofer = null;
