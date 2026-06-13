@@ -16,9 +16,17 @@
   var LS_CLIENTES = 'pa_clientes';      // clientes (tenants) demo
   var LS_EMPRESAS = 'pa_empresas';      // empresas demo
   var LS_CAMPOS   = 'pa_campos';        // campos/establecimientos demo
+  var LS_TERCEROS = 'pa_terceros';      // terceros (proveedores y clientes) demo
+  var LS_CHOFERES = 'pa_choferes';      // choferes demo
+  var LS_TIPOPROV = 'pa_tipo_prov';     // tipos de proveedor (global Puntal)
+  var LS_DEPOSITOS = 'pa_depositos';    // depósitos demo
+  var LS_LABORES  = 'pa_labores';       // labores demo
+  var LS_TIPOACT  = 'pa_tipo_act';      // tipos de actividad (cultivos/usos) demo
+  var LS_ESPECIES = 'pa_especies';      // especies/granos (global Puntal)
+  var LS_UNIDADES = 'pa_unidades';      // unidades de medida (global Puntal)
   var LS_SESION   = 'pa_sesion';        // sesión activa { usuarioId, empresaActivaId }
   var LS_SEEDVER  = 'pa_seed_ver';      // versión del seed demo
-  var SEED_VER    = '3';                // subir este número al cambiar la estructura del seed
+  var SEED_VER    = '9';                // subir este número al cambiar la estructura del seed
 
   // Herramientas PROPIAS (asignable=true): id + nombre legible.
   // Deben coincidir con los data-tool del index y con §5.2 del modelo.
@@ -65,6 +73,15 @@
       localStorage.removeItem(LS_CAMPOS);
       localStorage.removeItem(LS_USUARIOS);
       localStorage.removeItem(LS_PERMISOS);
+      localStorage.removeItem(LS_TERCEROS);
+      localStorage.removeItem(LS_CHOFERES);
+      localStorage.removeItem(LS_TIPOPROV);
+      localStorage.removeItem(LS_DEPOSITOS);
+      localStorage.removeItem(LS_LABORES);
+      localStorage.removeItem(LS_TIPOACT);
+      localStorage.removeItem('pa_tipo_lab');
+      localStorage.removeItem(LS_ESPECIES);
+      localStorage.removeItem(LS_UNIDADES);
     } catch (e) {}
 
     var clientes = [
@@ -97,11 +114,79 @@
       { usuarioId: 'usr_ana', empresaId: 'emp_albor_sa', campoIds: [],
         herramientas: ['tablero_agro'], nivel: 'ver' }
     ];
+    var tiposProv = [
+      { id: 'tp_transp', nombre: 'transportista' },
+      { id: 'tp_contrat', nombre: 'contratista' },
+      { id: 'tp_serv', nombre: 'prestador de servicios' },
+      { id: 'tp_insumos', nombre: 'insumos' }
+    ];
+    var terceros = [
+      { id: 'ter_agro', empresaId: 'emp_albor_sa', nombre: 'Agroinsumos del Centro', cuit: '30-60000000-7', telefono: '358-444-0000', email: '', direccion: 'Río Cuarto',
+        esProveedor: true, esCliente: false, tiposProveedor: ['insumos', 'transportista'], activo: true },
+      { id: 'ter_acopio', empresaId: 'emp_albor_sa', nombre: 'Acopio San Martín', cuit: '30-65000000-4', telefono: '358-466-0000', email: '', direccion: 'Las Higueras',
+        esProveedor: false, esCliente: true, tiposProveedor: [], activo: true },
+      { id: 'ter_gomez', empresaId: 'emp_albor_sa', nombre: 'Servicios Gómez', cuit: '20-20000000-3', telefono: '351-555-0000', email: '', direccion: 'Río Cuarto',
+        esProveedor: true, esCliente: false, tiposProveedor: ['contratista'], activo: true }
+    ];
+    var choferes = [
+      { id: 'cho_perez', empresaId: 'emp_albor_sa', terceroId: 'ter_agro', nombre: 'Juan Pérez', dni: '25000000', licencia: 'E1', activo: true }
+    ];
+    var depositos = [
+      { id: 'dep_central', empresaId: 'emp_albor_sa', campoId: null, nombre: 'Depósito central', clase: 'insumos', especieId: null, activo: true },
+      { id: 'dep_puntal', empresaId: 'emp_albor_sa', campoId: 'campo_elpuntal', nombre: 'Galpón El Puntal', clase: 'insumos', especieId: null, activo: true }
+    ];
+    var laboresBase = ['Siembra','Pulv. Terrestre','Pulv. Aérea','Desmalezado','Corte-hilerado','Enrrollado',
+      'Embolsado','Extracción bolsa','Clasificación semillas','Elaboración ración','Distribución ración',
+      'Gerenciamiento','Fertilización líquida','Monitoreos','Acarreos','Labor Fardos','Disco-Rastra-Rolo',
+      'Fertilización voleo','Rolo triturador'];
+    var labores = [];
+    for (var li=0; li<laboresBase.length; li++){ labores.push({ id: 'lab_'+li, nombre: laboresBase[li], precioRef: 0, activo: true }); }
+    var especiesBase = [
+      ['Soja','Sj'], ['Maíz','Mz'], ['Trigo','Tr'], ['Sorgo','Sg'],
+      ['Girasol','G'], ['Cebada','Cb'], ['Avena','Av'], ['Maíz Planta Entera','MzPE']
+    ];
+    var especies = [];
+    for (var ei=0; ei<especiesBase.length; ei++){
+      especies.push({ id: 'esp_'+ei, nombre: especiesBase[ei][0], sigla: especiesBase[ei][1], activo: true });
+    }
+    function espId(nombre){ for(var k=0;k<especies.length;k++){ if(especies[k].nombre===nombre) return especies[k].id; } return null; }
+
+    var unidadesBase = [
+      ['kg','Kilogramo'], ['g','Gramo'], ['tn','Tonelada'], ['l','Litro'], ['ml','Mililitro'],
+      ['cm³','Centímetro cúbico'], ['bolsa','Bolsa'], ['caja','Caja'], ['u','Unidad'], ['dosis','Dosis']
+    ];
+    var unidades = [];
+    for (var ui=0; ui<unidadesBase.length; ui++){
+      unidades.push({ id: 'uni_'+ui, sigla: unidadesBase[ui][0], nombre: unidadesBase[ui][1], activo: true });
+    }
+
+    var tiposAct = [];
+    var cultivosBase = [
+      ['Trigo','Tr','AGR','Trigo'],['Cebada','Cb','AGR','Cebada'],['Avena','Av','AGR','Avena'],['Girasol','G','AGR','Girasol'],
+      ['Maíz','Mz','AGR','Maíz'],['Maíz Tardío','MzT','AGR','Maíz'],['Maíz 2ª','Mz2ª','AGR','Maíz'],['Maíz Silo PE','MzSPE','AGR','Maíz Planta Entera'],
+      ['Soja 1ª','Sj1ª','AGR','Soja'],['Soja 2ª','Sj2ª','AGR','Soja'],['Cultivo de cobertura','Ccob','AGR',null],['Sorgo','Sg','AGR','Sorgo'],
+      ['Verdeo invierno','VI','GAN',null],['Maíz pastoreo','MzP','GAN',null],['Sorgo forrajero','SgF','GAN',null],
+      ['Maíz pastoreo diferido','MzD','GAN',null],['Sorgo pastoreo diferido','SgD','GAN',null],['Promoción Rye Grass','PRG','GAN',null],
+      ['Pradera impl.','PI','GAN',null],['Pradera festuca','PPFe','GAN',null],['Pradera alfalfa','PPAlf','GAN',null],
+      ['Pradera agropiro','PPAg','GAN',null],['Pradera degradada','PD','GAN',null],['Campo natural','CN','GAN',null],
+      ['Campo natural degradado','CND','GAN',null]
+    ];
+    for (var ci=0; ci<cultivosBase.length; ci++){
+      tiposAct.push({ id: 'ta_'+ci, empresaId: 'emp_albor_sa', nombre: cultivosBase[ci][0], sigla: cultivosBase[ci][1], actividad: cultivosBase[ci][2], especieId: cultivosBase[ci][3] ? espId(cultivosBase[ci][3]) : null, activo: true });
+    }
     lsSet(LS_CLIENTES, clientes);
     lsSet(LS_EMPRESAS, empresas);
     lsSet(LS_CAMPOS, campos);
     lsSet(LS_USUARIOS, usuarios);
     lsSet(LS_PERMISOS, permisos);
+    lsSet(LS_TIPOPROV, tiposProv);
+    lsSet(LS_TERCEROS, terceros);
+    lsSet(LS_CHOFERES, choferes);
+    lsSet(LS_DEPOSITOS, depositos);
+    lsSet(LS_LABORES, labores);
+    lsSet(LS_TIPOACT, tiposAct);
+    lsSet(LS_ESPECIES, especies);
+    lsSet(LS_UNIDADES, unidades);
     lsSet(LS_SEEDVER, SEED_VER);
   }
 
@@ -377,6 +462,141 @@
       lsSet(LS_CAMPOS, out);
     },
 
+    /* ---- ABM Terceros (proveedores y clientes) ---- */
+    listarTiposProveedor: function () { return lsGet(LS_TIPOPROV, []); },
+    // terceros de una empresa, con filtro opcional por rol: 'proveedor'|'cliente'|tipoProveedor
+    listarTerceros: function (empresaId, filtroRol) {
+      var ts = lsGet(LS_TERCEROS, []), out = [];
+      for (var i = 0; i < ts.length; i++) {
+        if (ts[i].empresaId !== empresaId) continue;
+        if (filtroRol === 'proveedor' && !ts[i].esProveedor) continue;
+        if (filtroRol === 'cliente' && !ts[i].esCliente) continue;
+        if (filtroRol && filtroRol !== 'proveedor' && filtroRol !== 'cliente') {
+          // filtro por tipo de proveedor
+          var tp = ts[i].tiposProveedor || [];
+          var ok = false;
+          for (var j = 0; j < tp.length; j++) { if (tp[j] === filtroRol) { ok = true; break; } }
+          if (!ok) continue;
+        }
+        out.push(ts[i]);
+      }
+      return out;
+    },
+    guardarTercero: function (t) {
+      var ts = lsGet(LS_TERCEROS, []);
+      if (!t.id) { t.id = uid('ter'); ts.push(t); }
+      else { var f=false; for (var i=0;i<ts.length;i++){ if(ts[i].id===t.id){ts[i]=t;f=true;break;} } if(!f) ts.push(t); }
+      lsSet(LS_TERCEROS, ts); return t;
+    },
+    borrarTercero: function (id) {
+      var ts = lsGet(LS_TERCEROS, []), out = [];
+      for (var i=0;i<ts.length;i++){ if(ts[i].id!==id) out.push(ts[i]); }
+      lsSet(LS_TERCEROS, out);
+      // borrar choferes que colgaban de ese tercero
+      var cs = lsGet(LS_CHOFERES, []), outc = [];
+      for (var j=0;j<cs.length;j++){ if(cs[j].terceroId!==id) outc.push(cs[j]); }
+      lsSet(LS_CHOFERES, outc);
+    },
+    // choferes de un tercero (o de toda la empresa si no se pasa terceroId)
+    listarChoferes: function (empresaId, terceroId) {
+      var cs = lsGet(LS_CHOFERES, []), out = [];
+      for (var i=0;i<cs.length;i++){
+        if (cs[i].empresaId !== empresaId) continue;
+        if (terceroId && cs[i].terceroId !== terceroId) continue;
+        out.push(cs[i]);
+      }
+      return out;
+    },
+    guardarChofer: function (c) {
+      var cs = lsGet(LS_CHOFERES, []);
+      if (!c.id) { c.id = uid('cho'); cs.push(c); }
+      else { var f=false; for (var i=0;i<cs.length;i++){ if(cs[i].id===c.id){cs[i]=c;f=true;break;} } if(!f) cs.push(c); }
+      lsSet(LS_CHOFERES, cs); return c;
+    },
+    borrarChofer: function (id) {
+      var cs = lsGet(LS_CHOFERES, []), out = [];
+      for (var i=0;i<cs.length;i++){ if(cs[i].id!==id) out.push(cs[i]); }
+      lsSet(LS_CHOFERES, out);
+    },
+
+    /* ---- ABM Depósitos ---- */
+    listarDepositos: function (empresaId) {
+      var ds = lsGet(LS_DEPOSITOS, []), out = [];
+      for (var i=0;i<ds.length;i++){ if(ds[i].empresaId===empresaId) out.push(ds[i]); }
+      return out;
+    },
+    guardarDeposito: function (d) {
+      var ds = lsGet(LS_DEPOSITOS, []);
+      if (!d.id) { d.id = uid('dep'); ds.push(d); }
+      else { var f=false; for(var i=0;i<ds.length;i++){ if(ds[i].id===d.id){ds[i]=d;f=true;break;} } if(!f) ds.push(d); }
+      lsSet(LS_DEPOSITOS, ds); return d;
+    },
+    borrarDeposito: function (id) {
+      var ds=lsGet(LS_DEPOSITOS, []), out=[];
+      for(var i=0;i<ds.length;i++){ if(ds[i].id!==id) out.push(ds[i]); }
+      lsSet(LS_DEPOSITOS, out);
+    },
+
+    /* ---- ABM Labores (global Puntal) ---- */
+    listarLabores: function () { return lsGet(LS_LABORES, []); },
+    guardarLabor: function (l) {
+      var ls = lsGet(LS_LABORES, []);
+      if (!l.id) { l.id = uid('lab'); ls.push(l); }
+      else { var f=false; for(var i=0;i<ls.length;i++){ if(ls[i].id===l.id){ls[i]=l;f=true;break;} } if(!f) ls.push(l); }
+      lsSet(LS_LABORES, ls); return l;
+    },
+    borrarLabor: function (id) {
+      var ls=lsGet(LS_LABORES, []), out=[];
+      for(var i=0;i<ls.length;i++){ if(ls[i].id!==id) out.push(ls[i]); }
+      lsSet(LS_LABORES, out);
+    },
+
+    /* ---- ABM Tipos de actividad (cultivos/usos) ---- */
+    listarTiposActividad: function (empresaId) {
+      var ts = lsGet(LS_TIPOACT, []), out = [];
+      for (var i=0;i<ts.length;i++){ if(ts[i].empresaId===empresaId) out.push(ts[i]); }
+      return out;
+    },
+    guardarTipoActividad: function (t) {
+      var ts = lsGet(LS_TIPOACT, []);
+      if (!t.id) { t.id = uid('ta'); ts.push(t); }
+      else { var f=false; for(var i=0;i<ts.length;i++){ if(ts[i].id===t.id){ts[i]=t;f=true;break;} } if(!f) ts.push(t); }
+      lsSet(LS_TIPOACT, ts); return t;
+    },
+    borrarTipoActividad: function (id) {
+      var ts=lsGet(LS_TIPOACT, []), out=[];
+      for(var i=0;i<ts.length;i++){ if(ts[i].id!==id) out.push(ts[i]); }
+      lsSet(LS_TIPOACT, out);
+    },
+
+    /* ---- ABM Especies / Granos (global Puntal) ---- */
+    listarEspecies: function () { return lsGet(LS_ESPECIES, []); },
+    guardarEspecie: function (e) {
+      var es = lsGet(LS_ESPECIES, []);
+      if (!e.id) { e.id = uid('esp'); es.push(e); }
+      else { var f=false; for(var i=0;i<es.length;i++){ if(es[i].id===e.id){es[i]=e;f=true;break;} } if(!f) es.push(e); }
+      lsSet(LS_ESPECIES, es); return e;
+    },
+    borrarEspecie: function (id) {
+      var es=lsGet(LS_ESPECIES, []), out=[];
+      for(var i=0;i<es.length;i++){ if(es[i].id!==id) out.push(es[i]); }
+      lsSet(LS_ESPECIES, out);
+    },
+
+    /* ---- ABM Unidades de medida (global Puntal) ---- */
+    listarUnidades: function () { return lsGet(LS_UNIDADES, []); },
+    guardarUnidad: function (u) {
+      var us = lsGet(LS_UNIDADES, []);
+      if (!u.id) { u.id = uid('uni'); us.push(u); }
+      else { var f=false; for(var i=0;i<us.length;i++){ if(us[i].id===u.id){us[i]=u;f=true;break;} } if(!f) us.push(u); }
+      lsSet(LS_UNIDADES, us); return u;
+    },
+    borrarUnidad: function (id) {
+      var us=lsGet(LS_UNIDADES, []), out=[];
+      for(var i=0;i<us.length;i++){ if(us[i].id!==id) out.push(us[i]); }
+      lsSet(LS_UNIDADES, out);
+    },
+
     resetDemo: function () {
       try {
         localStorage.removeItem(LS_CLIENTES);
@@ -386,6 +606,15 @@
         localStorage.removeItem(LS_PERMISOS);
         localStorage.removeItem(LS_SESION);
         localStorage.removeItem(LS_SEEDVER);
+        localStorage.removeItem(LS_TERCEROS);
+        localStorage.removeItem(LS_CHOFERES);
+        localStorage.removeItem(LS_TIPOPROV);
+        localStorage.removeItem(LS_DEPOSITOS);
+        localStorage.removeItem(LS_LABORES);
+        localStorage.removeItem(LS_TIPOACT);
+        localStorage.removeItem('pa_tipo_lab');
+        localStorage.removeItem(LS_ESPECIES);
+        localStorage.removeItem(LS_UNIDADES);
       } catch (e) {}
       seedDemo();
     }

@@ -93,30 +93,119 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted
 <main>
   <div class="nav">
     <div class="nav-item sel" data-cat="terceros" onclick="seleccionarCat('terceros')">Proveedores y Clientes</div>
-    <div class="nav-item soon">Choferes <span class="soon-tag">pronto</span></div>
+    <div class="nav-item" data-cat="choferes" onclick="seleccionarCat('choferes')">Choferes</div>
     <div class="nav-item soon">Insumos <span class="soon-tag">pronto</span></div>
-    <div class="nav-item soon">Depósitos <span class="soon-tag">pronto</span></div>
-    <div class="nav-item soon">Labores <span class="soon-tag">pronto</span></div>
-    <div class="nav-item soon">Cultivos / Usos <span class="soon-tag">pronto</span></div>
+    <div class="nav-item" data-cat="depositos" onclick="seleccionarCat('depositos')">Depósitos</div>
+    <div class="nav-item" data-cat="labores" onclick="seleccionarCat('labores')">Labores</div>
+    <div class="nav-item" data-cat="cultivos" onclick="seleccionarCat('cultivos')">Cultivos / Usos</div>
+    <div class="nav-item" data-cat="especies" onclick="seleccionarCat('especies')">Especies / Granos</div>
+    <div class="nav-item" data-cat="unidades" onclick="seleccionarCat('unidades')">Unidades</div>
   </div>
 
   <div class="panel" id="panel">
-    <div class="panel-head">
-      <h2>Proveedores y Clientes</h2>
-      <button class="btn" onclick="abrirModal()">+ Nuevo</button>
+    <!-- VISTA TERCEROS -->
+    <div id="vista-terceros">
+      <div class="panel-head">
+        <h2>Proveedores y Clientes</h2>
+        <button class="btn" onclick="abrirModal()">+ Nuevo</button>
+      </div>
+      <div class="filtros" id="filtros">
+        <span class="chip-f on" data-f="" onclick="setFiltro('')">Todos</span>
+        <span class="chip-f" data-f="proveedor" onclick="setFiltro('proveedor')">Proveedores</span>
+        <span class="chip-f" data-f="cliente" onclick="setFiltro('cliente')">Clientes</span>
+        <span class="chip-f" data-f="transportista" onclick="setFiltro('transportista')">Transportistas</span>
+        <span class="chip-f" data-f="contratista" onclick="setFiltro('contratista')">Contratistas</span>
+      </div>
+      <table id="tbl">
+        <thead><tr><th>Nombre</th><th>CUIT</th><th>Roles</th><th>Contacto</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="empty" id="empty" style="display:none">No hay terceros cargados para esta empresa con ese filtro.</div>
     </div>
-    <div class="filtros" id="filtros">
-      <span class="chip-f on" data-f="" onclick="setFiltro('')">Todos</span>
-      <span class="chip-f" data-f="proveedor" onclick="setFiltro('proveedor')">Proveedores</span>
-      <span class="chip-f" data-f="cliente" onclick="setFiltro('cliente')">Clientes</span>
-      <span class="chip-f" data-f="transportista" onclick="setFiltro('transportista')">Transportistas</span>
-      <span class="chip-f" data-f="contratista" onclick="setFiltro('contratista')">Contratistas</span>
+
+    <!-- VISTA CHOFERES -->
+    <div id="vista-choferes" style="display:none">
+      <div class="panel-head">
+        <h2>Choferes</h2>
+        <button class="btn" id="btn-nuevo-chofer" onclick="abrirModalChofer()">+ Nuevo</button>
+      </div>
+      <p style="font-size:12.5px;color:var(--muted);margin-bottom:12px;line-height:1.5">Cada chofer pertenece a un transportista (un tercero con rol transportista).</p>
+      <table id="tbl-chof">
+        <thead><tr><th>Nombre</th><th>DNI</th><th>Licencia</th><th>Transportista</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="empty" id="empty-chof" style="display:none"></div>
     </div>
-    <table id="tbl">
-      <thead><tr><th>Nombre</th><th>CUIT</th><th>Roles</th><th>Contacto</th><th></th></tr></thead>
-      <tbody></tbody>
-    </table>
-    <div class="empty" id="empty" style="display:none">No hay terceros cargados para esta empresa con ese filtro.</div>
+
+    <!-- VISTA DEPÓSITOS -->
+    <div id="vista-depositos" style="display:none">
+      <div class="panel-head">
+        <h2>Depósitos</h2>
+        <button class="btn" onclick="abrirModalDep()">+ Nuevo</button>
+      </div>
+      <p style="font-size:12.5px;color:var(--muted);margin-bottom:12px;line-height:1.5">Lugar físico de stock. Puede estar en un campo o ser un depósito general de la empresa.</p>
+      <table id="tbl-dep">
+        <thead><tr><th>Nombre</th><th>Ubicación</th><th>Tipo</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="empty" id="empty-dep" style="display:none">No hay depósitos cargados. Agregá uno con "+ Nuevo".</div>
+    </div>
+
+    <!-- VISTA LABORES -->
+    <div id="vista-labores" style="display:none">
+      <div class="panel-head">
+        <h2>Labores</h2>
+        <button class="btn" onclick="abrirModalLab()">+ Nuevo</button>
+      </div>
+      <p style="font-size:12.5px;color:var(--muted);margin-bottom:12px;line-height:1.5">Tareas que se ejecutan en los lotes. El precio de referencia es orientativo y se puede ajustar al usar la labor. Lista global de Puntal; propia o contratada se define al emitir la orden.</p>
+      <table id="tbl-lab">
+        <thead><tr><th>Nombre</th><th>Precio ref.</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="empty" id="empty-lab" style="display:none">No hay labores cargadas. Agregá una con "+ Nuevo".</div>
+    </div>
+
+    <!-- VISTA CULTIVOS / USOS -->
+    <div id="vista-cultivos" style="display:none">
+      <div class="panel-head">
+        <h2>Cultivos / Usos del suelo</h2>
+        <button class="btn" onclick="abrirModalCul()">+ Nuevo</button>
+      </div>
+      <p style="font-size:12.5px;color:var(--muted);margin-bottom:12px;line-height:1.5">Lista de actividades posibles para asignar a los lotes (cultivos y usos como barbecho o estructura).</p>
+      <table id="tbl-cul">
+        <thead><tr><th>Nombre</th><th>Sigla</th><th>Actividad</th><th>Especie</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="empty" id="empty-cul" style="display:none">No hay cultivos/usos cargados. Agregá uno con "+ Nuevo".</div>
+    </div>
+
+    <!-- VISTA ESPECIES / GRANOS -->
+    <div id="vista-especies" style="display:none">
+      <div class="panel-head">
+        <h2>Especies / Granos</h2>
+        <button class="btn" onclick="abrirModalEsp()">+ Nuevo</button>
+      </div>
+      <p style="font-size:12.5px;color:var(--muted);margin-bottom:12px;line-height:1.5">Especie base del grano. Varios cultivos pueden compartir especie (Soja 1ª y Soja 2ª → Soja) y un acopio se organiza por especie. Lista global de Puntal.</p>
+      <table id="tbl-esp">
+        <thead><tr><th>Nombre</th><th>Sigla</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="empty" id="empty-esp" style="display:none">No hay especies cargadas. Agregá una con "+ Nuevo".</div>
+    </div>
+
+    <!-- VISTA UNIDADES -->
+    <div id="vista-unidades" style="display:none">
+      <div class="panel-head">
+        <h2>Unidades de medida</h2>
+        <button class="btn" onclick="abrirModalUni()">+ Nuevo</button>
+      </div>
+      <p style="font-size:12.5px;color:var(--muted);margin-bottom:12px;line-height:1.5">Unidades para insumos, stock y dosis. Lista global de Puntal.</p>
+      <table id="tbl-uni">
+        <thead><tr><th>Sigla</th><th>Nombre</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="empty" id="empty-uni" style="display:none">No hay unidades cargadas. Agregá una con "+ Nuevo".</div>
+    </div>
   </div>
 </main>
 
@@ -147,6 +236,133 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted
   </div>
 </div>
 
+<!-- Modal alta/edición CHOFER -->
+<div class="overlay" id="overlay-chofer">
+  <div class="modal">
+    <h3 id="modal-chofer-title">Nuevo chofer</h3>
+    <div class="grid2">
+      <div class="fld full"><label>Nombre</label><input id="c-nombre"></div>
+      <div class="fld"><label>DNI <span class="opt">(opcional)</span></label><input id="c-dni"></div>
+      <div class="fld"><label>Licencia <span class="opt">(opcional)</span></label><input id="c-lic"></div>
+      <div class="fld full"><label>Transportista</label>
+        <select id="c-tercero" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px"></select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="guardarChofer()">Guardar</button>
+      <button class="btn-out" onclick="cerrarModalChofer()">Cancelar</button>
+      <button class="btn-out del" id="btn-del-chofer" style="display:none" onclick="eliminarChofer()">Eliminar</button>
+      <span class="msg" id="msg-chofer"></span>
+    </div>
+  </div>
+</div>
+
+<!-- Modal DEPÓSITO -->
+<div class="overlay" id="overlay-dep">
+  <div class="modal">
+    <h3 id="modal-dep-title">Nuevo depósito</h3>
+    <div class="grid2">
+      <div class="fld full"><label>Nombre</label><input id="d-nombre"></div>
+      <div class="fld full"><label>Campo <span class="opt">(opcional — vacío = depósito general de la empresa)</span></label>
+        <select id="d-campo" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px"></select>
+      </div>
+      <div class="fld full"><label>Clase</label>
+        <select id="d-clase" onchange="toggleClaseDep()" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px">
+          <option value="insumos">Depósito de insumos</option>
+          <option value="granos">Acopio de granos</option>
+        </select>
+      </div>
+      <div class="fld full" id="fld-d-especie" style="display:none"><label>Especie / Grano</label>
+        <select id="d-especie" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px"></select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="guardarDep()">Guardar</button>
+      <button class="btn-out" onclick="cerrarModalDep()">Cancelar</button>
+      <button class="btn-out del" id="btn-del-dep" style="display:none" onclick="eliminarDep()">Eliminar</button>
+      <span class="msg" id="msg-dep"></span>
+    </div>
+  </div>
+</div>
+
+<!-- Modal LABOR -->
+<div class="overlay" id="overlay-lab">
+  <div class="modal">
+    <h3 id="modal-lab-title">Nueva labor</h3>
+    <div class="grid2">
+      <div class="fld full"><label>Nombre</label><input id="l-nombre"></div>
+      <div class="fld"><label>Precio de referencia $ <span class="opt">(opcional)</span></label><input id="l-precio" type="number"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="guardarLab()">Guardar</button>
+      <button class="btn-out" onclick="cerrarModalLab()">Cancelar</button>
+      <button class="btn-out del" id="btn-del-lab" style="display:none" onclick="eliminarLab()">Eliminar</button>
+      <span class="msg" id="msg-lab"></span>
+    </div>
+  </div>
+</div>
+
+<!-- Modal CULTIVO -->
+<div class="overlay" id="overlay-cul">
+  <div class="modal">
+    <h3 id="modal-cul-title">Nuevo cultivo / uso</h3>
+    <div class="grid2">
+      <div class="fld full"><label>Nombre</label><input id="cu-nombre"></div>
+      <div class="fld"><label>Sigla <span class="opt">(opcional)</span></label><input id="cu-sigla"></div>
+      <div class="fld"><label>Actividad <span class="opt">(opcional)</span></label>
+        <select id="cu-activ" onchange="toggleEspecieCul()" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px">
+          <option value="">— sin clasificar —</option>
+          <option value="AGR">Agrícola</option>
+          <option value="GAN">Ganadera</option>
+        </select>
+      </div>
+      <div class="fld full" id="fld-cu-especie" style="display:none"><label>Especie / Grano</label>
+        <select id="cu-especie" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px"></select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="guardarCul()">Guardar</button>
+      <button class="btn-out" onclick="cerrarModalCul()">Cancelar</button>
+      <button class="btn-out del" id="btn-del-cul" style="display:none" onclick="eliminarCul()">Eliminar</button>
+      <span class="msg" id="msg-cul"></span>
+    </div>
+  </div>
+</div>
+
+<!-- Modal ESPECIE -->
+<div class="overlay" id="overlay-esp">
+  <div class="modal">
+    <h3 id="modal-esp-title">Nueva especie</h3>
+    <div class="grid2">
+      <div class="fld full"><label>Nombre</label><input id="e-nombre"></div>
+      <div class="fld"><label>Sigla <span class="opt">(opcional)</span></label><input id="e-sigla"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="guardarEsp()">Guardar</button>
+      <button class="btn-out" onclick="cerrarModalEsp()">Cancelar</button>
+      <button class="btn-out del" id="btn-del-esp" style="display:none" onclick="eliminarEsp()">Eliminar</button>
+      <span class="msg" id="msg-esp"></span>
+    </div>
+  </div>
+</div>
+
+<!-- Modal UNIDAD -->
+<div class="overlay" id="overlay-uni">
+  <div class="modal">
+    <h3 id="modal-uni-title">Nueva unidad</h3>
+    <div class="grid2">
+      <div class="fld"><label>Sigla</label><input id="u-sigla"></div>
+      <div class="fld"><label>Nombre</label><input id="u-nombre"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="guardarUni()">Guardar</button>
+      <button class="btn-out" onclick="cerrarModalUni()">Cancelar</button>
+      <button class="btn-out del" id="btn-del-uni" style="display:none" onclick="eliminarUni()">Eliminar</button>
+      <span class="msg" id="msg-uni"></span>
+    </div>
+  </div>
+</div>
+
 <script src="pa-core.js"></script>
 <script>
 var empresaId = null;
@@ -160,7 +376,271 @@ function setFiltro(f){
   for (var i=0;i<chips.length;i++){ chips[i].className = 'chip-f' + (chips[i].getAttribute('data-f')===f?' on':''); }
   render();
 }
-function seleccionarCat(c){ /* por ahora solo terceros */ }
+function seleccionarCat(c){
+  var vistas = ['terceros','choferes','depositos','labores','cultivos','especies','unidades'];
+  for (var i=0;i<vistas.length;i++){
+    document.getElementById('vista-'+vistas[i]).style.display = (c===vistas[i])?'':'none';
+  }
+  var items = document.querySelectorAll('.nav-item[data-cat]');
+  for (var j=0;j<items.length;j++){
+    items[j].className = 'nav-item' + (items[j].getAttribute('data-cat')===c?' sel':'');
+  }
+  if (c==='choferes') renderChoferes();
+  else if (c==='depositos') renderDepositos();
+  else if (c==='labores') renderLabores();
+  else if (c==='cultivos') renderCultivos();
+  else if (c==='especies') renderEspecies();
+  else if (c==='unidades') renderUnidades();
+  else render();
+}
+
+/* ---- DEPÓSITOS ---- */
+var editDep=null;
+function nombreCampo(id){
+  if(!id) return 'General de la empresa';
+  var ks=PA.demo.camposDeEmpresa(empresaId);
+  for(var i=0;i<ks.length;i++){ if(ks[i].id===id) return ks[i].nombre; }
+  return '—';
+}
+function renderDepositos(){
+  var lista=PA.demo.listarDepositos(empresaId);
+  var tb=document.querySelector('#tbl-dep tbody'); tb.innerHTML='';
+  for(var i=0;i<lista.length;i++){(function(d){
+    var tipo;
+    if(d.clase==='granos'){
+      var en=nombreEspecie(d.especieId);
+      tipo='<span class="rol-bdg rb-prov">Granos</span>'+(en?' · '+en:'');
+    } else {
+      tipo='<span class="rol-bdg rb-cli">Insumos</span>';
+    }
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td><strong>'+d.nombre+'</strong></td><td>'+nombreCampo(d.campoId)+'</td><td>'+tipo+'</td>'+
+      '<td style="text-align:right"><button class="btn-sm" onclick="editarDep(\''+d.id+'\')">Editar</button></td>';
+    tb.appendChild(tr);
+  })(lista[i]);}
+  document.getElementById('empty-dep').style.display=lista.length?'none':'block';
+  document.getElementById('tbl-dep').style.display=lista.length?'':'none';
+}
+function cargarSelectCampos(sel){
+  var s=document.getElementById('d-campo'); s.innerHTML='';
+  var o0=document.createElement('option'); o0.value=''; o0.textContent='(General de la empresa)'; s.appendChild(o0);
+  var ks=PA.demo.camposDeEmpresa(empresaId);
+  for(var i=0;i<ks.length;i++){ var o=document.createElement('option'); o.value=ks[i].id; o.textContent=ks[i].nombre; if(ks[i].id===sel)o.selected=true; s.appendChild(o); }
+}
+function toggleClaseDep(){
+  var c=document.getElementById('d-clase').value;
+  document.getElementById('fld-d-especie').style.display = (c==='granos') ? '' : 'none';
+}
+function abrirModalDep(){ editDep=null; document.getElementById('modal-dep-title').textContent='Nuevo depósito'; document.getElementById('d-nombre').value=''; cargarSelectCampos(null); document.getElementById('d-clase').value='insumos'; poblarSelectEspecie('d-especie',''); toggleClaseDep(); document.getElementById('btn-del-dep').style.display='none'; document.getElementById('msg-dep').textContent=''; document.getElementById('overlay-dep').className='overlay open'; }
+function editarDep(id){ var l=PA.demo.listarDepositos(empresaId); var d=null; for(var i=0;i<l.length;i++){if(l[i].id===id){d=l[i];break;}} if(!d)return; editDep=id; document.getElementById('modal-dep-title').textContent='Editar depósito'; document.getElementById('d-nombre').value=d.nombre||''; cargarSelectCampos(d.campoId); document.getElementById('d-clase').value=d.clase||'insumos'; poblarSelectEspecie('d-especie',d.especieId||''); toggleClaseDep(); document.getElementById('btn-del-dep').style.display=''; document.getElementById('msg-dep').textContent=''; document.getElementById('overlay-dep').className='overlay open'; }
+function cerrarModalDep(){ document.getElementById('overlay-dep').className='overlay'; }
+function guardarDep(){
+  var n=document.getElementById('d-nombre').value.trim();
+  if(!n){document.getElementById('msg-dep').textContent='Falta el nombre.';return;}
+  var clase=document.getElementById('d-clase').value;
+  var espId = (clase==='granos') ? document.getElementById('d-especie').value : null;
+  if(clase==='granos' && !espId){document.getElementById('msg-dep').textContent='Elegí la especie del acopio.';return;}
+  PA.demo.guardarDeposito({id:editDep||undefined,empresaId:empresaId,campoId:document.getElementById('d-campo').value||null,nombre:n,clase:clase,especieId:espId,activo:true});
+  cerrarModalDep(); renderDepositos();
+}
+function eliminarDep(){ if(editDep&&confirm('¿Eliminar este depósito?')){PA.demo.borrarDeposito(editDep);cerrarModalDep();renderDepositos();} }
+
+/* ---- LABORES (global) ---- */
+var editLab=null;
+function fmtPrecio(v){ if(!v) return '<span style="color:var(--muted)">—</span>'; return '$'+Number(v).toLocaleString('es-AR'); }
+function renderLabores(){
+  var lista=PA.demo.listarLabores();
+  var tb=document.querySelector('#tbl-lab tbody'); tb.innerHTML='';
+  for(var i=0;i<lista.length;i++){(function(l){
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td><strong>'+l.nombre+'</strong></td><td>'+fmtPrecio(l.precioRef)+'</td>'+
+      '<td style="text-align:right"><button class="btn-sm" onclick="editarLab(\''+l.id+'\')">Editar</button></td>';
+    tb.appendChild(tr);
+  })(lista[i]);}
+  document.getElementById('empty-lab').style.display=lista.length?'none':'block';
+  document.getElementById('tbl-lab').style.display=lista.length?'':'none';
+}
+function abrirModalLab(){ editLab=null; document.getElementById('modal-lab-title').textContent='Nueva labor'; document.getElementById('l-nombre').value=''; document.getElementById('l-precio').value=''; document.getElementById('btn-del-lab').style.display='none'; document.getElementById('msg-lab').textContent=''; document.getElementById('overlay-lab').className='overlay open'; }
+function editarLab(id){ var l=PA.demo.listarLabores(); var x=null; for(var i=0;i<l.length;i++){if(l[i].id===id){x=l[i];break;}} if(!x)return; editLab=id; document.getElementById('modal-lab-title').textContent='Editar labor'; document.getElementById('l-nombre').value=x.nombre||''; document.getElementById('l-precio').value=x.precioRef||''; document.getElementById('btn-del-lab').style.display=''; document.getElementById('msg-lab').textContent=''; document.getElementById('overlay-lab').className='overlay open'; }
+function cerrarModalLab(){ document.getElementById('overlay-lab').className='overlay'; }
+function guardarLab(){ var n=document.getElementById('l-nombre').value.trim(); if(!n){document.getElementById('msg-lab').textContent='Falta el nombre.';return;} PA.demo.guardarLabor({id:editLab||undefined,nombre:n,precioRef:Number(document.getElementById('l-precio').value)||0,activo:true}); cerrarModalLab(); renderLabores(); }
+function eliminarLab(){ if(editLab&&confirm('¿Eliminar esta labor?')){PA.demo.borrarLabor(editLab);cerrarModalLab();renderLabores();} }
+
+/* ---- CULTIVOS / USOS ---- */
+var editCul=null;
+function nombreEspecie(id){ if(!id) return null; var l=PA.demo.listarEspecies(); for(var i=0;i<l.length;i++){ if(l[i].id===id) return l[i].nombre; } return null; }
+function poblarSelectEspecie(selId, valor){
+  var sel=document.getElementById(selId); sel.innerHTML='<option value="">— elegí especie —</option>';
+  var l=PA.demo.listarEspecies();
+  for(var i=0;i<l.length;i++){ var o=document.createElement('option'); o.value=l[i].id; o.textContent=l[i].nombre; if(l[i].id===valor) o.selected=true; sel.appendChild(o); }
+}
+function toggleEspecieCul(){
+  var act=document.getElementById('cu-activ').value;
+  document.getElementById('fld-cu-especie').style.display = (act==='AGR') ? '' : 'none';
+}
+function renderCultivos(){
+  var lista=PA.demo.listarTiposActividad(empresaId);
+  var tb=document.querySelector('#tbl-cul tbody'); tb.innerHTML='';
+  for(var i=0;i<lista.length;i++){(function(c){
+    var act = c.actividad==='AGR' ? '<span class="rol-bdg rb-prov">Agrícola</span>' : (c.actividad==='GAN' ? '<span class="rol-bdg rb-cli">Ganadera</span>' : '<span style="color:var(--muted)">—</span>');
+    var esp = nombreEspecie(c.especieId) || '<span style="color:var(--muted)">—</span>';
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td><strong>'+c.nombre+'</strong></td><td>'+(c.sigla||'—')+'</td><td>'+act+'</td><td>'+esp+'</td>'+
+      '<td style="text-align:right"><button class="btn-sm" onclick="editarCul(\''+c.id+'\')">Editar</button></td>';
+    tb.appendChild(tr);
+  })(lista[i]);}
+  document.getElementById('empty-cul').style.display=lista.length?'none':'block';
+  document.getElementById('tbl-cul').style.display=lista.length?'':'none';
+}
+function abrirModalCul(){ editCul=null; document.getElementById('modal-cul-title').textContent='Nuevo cultivo / uso'; document.getElementById('cu-nombre').value=''; document.getElementById('cu-sigla').value=''; document.getElementById('cu-activ').value=''; poblarSelectEspecie('cu-especie',''); toggleEspecieCul(); document.getElementById('btn-del-cul').style.display='none'; document.getElementById('msg-cul').textContent=''; document.getElementById('overlay-cul').className='overlay open'; }
+function editarCul(id){ var l=PA.demo.listarTiposActividad(empresaId); var x=null; for(var i=0;i<l.length;i++){if(l[i].id===id){x=l[i];break;}} if(!x)return; editCul=id; document.getElementById('modal-cul-title').textContent='Editar cultivo / uso'; document.getElementById('cu-nombre').value=x.nombre||''; document.getElementById('cu-sigla').value=x.sigla||''; document.getElementById('cu-activ').value=x.actividad||''; poblarSelectEspecie('cu-especie',x.especieId||''); toggleEspecieCul(); document.getElementById('btn-del-cul').style.display=''; document.getElementById('msg-cul').textContent=''; document.getElementById('overlay-cul').className='overlay open'; }
+function cerrarModalCul(){ document.getElementById('overlay-cul').className='overlay'; }
+function guardarCul(){
+  var n=document.getElementById('cu-nombre').value.trim();
+  if(!n){document.getElementById('msg-cul').textContent='Falta el nombre.';return;}
+  var act=document.getElementById('cu-activ').value;
+  var espId = (act==='AGR') ? document.getElementById('cu-especie').value : null;
+  if(act==='AGR' && !espId){document.getElementById('msg-cul').textContent='Elegí la especie del cultivo agrícola.';return;}
+  PA.demo.guardarTipoActividad({id:editCul||undefined,empresaId:empresaId,nombre:n,sigla:document.getElementById('cu-sigla').value.trim(),actividad:act,especieId:espId,activo:true});
+  cerrarModalCul(); renderCultivos();
+}
+function eliminarCul(){ if(editCul&&confirm('¿Eliminar este cultivo/uso?')){PA.demo.borrarTipoActividad(editCul);cerrarModalCul();renderCultivos();} }
+
+/* ---- ESPECIES / GRANOS (global) ---- */
+var editEsp=null;
+function renderEspecies(){
+  var lista=PA.demo.listarEspecies();
+  var tb=document.querySelector('#tbl-esp tbody'); tb.innerHTML='';
+  for(var i=0;i<lista.length;i++){(function(e){
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td><strong>'+e.nombre+'</strong></td><td>'+(e.sigla||'—')+'</td>'+
+      '<td style="text-align:right"><button class="btn-sm" onclick="editarEsp(\''+e.id+'\')">Editar</button></td>';
+    tb.appendChild(tr);
+  })(lista[i]);}
+  document.getElementById('empty-esp').style.display=lista.length?'none':'block';
+  document.getElementById('tbl-esp').style.display=lista.length?'':'none';
+}
+function abrirModalEsp(){ editEsp=null; document.getElementById('modal-esp-title').textContent='Nueva especie'; document.getElementById('e-nombre').value=''; document.getElementById('e-sigla').value=''; document.getElementById('btn-del-esp').style.display='none'; document.getElementById('msg-esp').textContent=''; document.getElementById('overlay-esp').className='overlay open'; }
+function editarEsp(id){ var l=PA.demo.listarEspecies(); var x=null; for(var i=0;i<l.length;i++){if(l[i].id===id){x=l[i];break;}} if(!x)return; editEsp=id; document.getElementById('modal-esp-title').textContent='Editar especie'; document.getElementById('e-nombre').value=x.nombre||''; document.getElementById('e-sigla').value=x.sigla||''; document.getElementById('btn-del-esp').style.display=''; document.getElementById('msg-esp').textContent=''; document.getElementById('overlay-esp').className='overlay open'; }
+function cerrarModalEsp(){ document.getElementById('overlay-esp').className='overlay'; }
+function guardarEsp(){ var n=document.getElementById('e-nombre').value.trim(); if(!n){document.getElementById('msg-esp').textContent='Falta el nombre.';return;} PA.demo.guardarEspecie({id:editEsp||undefined,nombre:n,sigla:document.getElementById('e-sigla').value.trim(),activo:true}); cerrarModalEsp(); renderEspecies(); }
+function eliminarEsp(){ if(editEsp&&confirm('¿Eliminar esta especie?')){PA.demo.borrarEspecie(editEsp);cerrarModalEsp();renderEspecies();} }
+
+/* ---- UNIDADES (global) ---- */
+var editUni=null;
+function renderUnidades(){
+  var lista=PA.demo.listarUnidades();
+  var tb=document.querySelector('#tbl-uni tbody'); tb.innerHTML='';
+  for(var i=0;i<lista.length;i++){(function(u){
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td><strong>'+u.sigla+'</strong></td><td>'+(u.nombre||'—')+'</td>'+
+      '<td style="text-align:right"><button class="btn-sm" onclick="editarUni(\''+u.id+'\')">Editar</button></td>';
+    tb.appendChild(tr);
+  })(lista[i]);}
+  document.getElementById('empty-uni').style.display=lista.length?'none':'block';
+  document.getElementById('tbl-uni').style.display=lista.length?'':'none';
+}
+function abrirModalUni(){ editUni=null; document.getElementById('modal-uni-title').textContent='Nueva unidad'; document.getElementById('u-sigla').value=''; document.getElementById('u-nombre').value=''; document.getElementById('btn-del-uni').style.display='none'; document.getElementById('msg-uni').textContent=''; document.getElementById('overlay-uni').className='overlay open'; }
+function editarUni(id){ var l=PA.demo.listarUnidades(); var x=null; for(var i=0;i<l.length;i++){if(l[i].id===id){x=l[i];break;}} if(!x)return; editUni=id; document.getElementById('modal-uni-title').textContent='Editar unidad'; document.getElementById('u-sigla').value=x.sigla||''; document.getElementById('u-nombre').value=x.nombre||''; document.getElementById('btn-del-uni').style.display=''; document.getElementById('msg-uni').textContent=''; document.getElementById('overlay-uni').className='overlay open'; }
+function cerrarModalUni(){ document.getElementById('overlay-uni').className='overlay'; }
+function guardarUni(){ var s=document.getElementById('u-sigla').value.trim(); if(!s){document.getElementById('msg-uni').textContent='Falta la sigla.';return;} PA.demo.guardarUnidad({id:editUni||undefined,sigla:s,nombre:document.getElementById('u-nombre').value.trim(),activo:true}); cerrarModalUni(); renderUnidades(); }
+function eliminarUni(){ if(editUni&&confirm('¿Eliminar esta unidad?')){PA.demo.borrarUnidad(editUni);cerrarModalUni();renderUnidades();} }
+
+/* ---- CHOFERES ---- */
+var editChofer = null;
+
+function transportistasDeEmpresa(){
+  return PA.demo.listarTerceros(empresaId, 'transportista');
+}
+function nombreTercero(id){
+  var ts = PA.demo.listarTerceros(empresaId, null);
+  for (var i=0;i<ts.length;i++){ if(ts[i].id===id) return ts[i].nombre; }
+  return '—';
+}
+
+function renderChoferes(){
+  var lista = PA.demo.listarChoferes(empresaId);
+  var tb = document.querySelector('#tbl-chof tbody');
+  tb.innerHTML='';
+  for (var i=0;i<lista.length;i++){
+    (function(c){
+      var tr=document.createElement('tr');
+      tr.innerHTML='<td><strong>'+c.nombre+'</strong></td><td>'+(c.dni||'—')+'</td><td>'+(c.licencia||'—')+'</td>'+
+        '<td>'+nombreTercero(c.terceroId)+'</td>'+
+        '<td style="text-align:right"><button class="btn-sm" onclick="editarChofer(\''+c.id+'\')">Editar</button></td>';
+      tb.appendChild(tr);
+    })(lista[i]);
+  }
+  var hayTransp = transportistasDeEmpresa().length > 0;
+  var empty = document.getElementById('empty-chof');
+  document.getElementById('tbl-chof').style.display = lista.length ? '' : 'none';
+  if (!lista.length){
+    empty.style.display='block';
+    empty.textContent = hayTransp
+      ? 'No hay choferes cargados. Agregá uno con "+ Nuevo".'
+      : 'Primero cargá un transportista en "Proveedores y Clientes" (un tercero con tipo transportista), después podés asignarle choferes.';
+  } else { empty.style.display='none'; }
+  // habilitar/deshabilitar botón nuevo según haya transportistas
+  document.getElementById('btn-nuevo-chofer').disabled = !hayTransp;
+  document.getElementById('btn-nuevo-chofer').style.opacity = hayTransp ? '1' : '.5';
+}
+
+function cargarSelectTransportistas(seleccionado){
+  var sel=document.getElementById('c-tercero'); sel.innerHTML='';
+  var transp=transportistasDeEmpresa();
+  for (var i=0;i<transp.length;i++){
+    var o=document.createElement('option'); o.value=transp[i].id; o.textContent=transp[i].nombre;
+    if(transp[i].id===seleccionado) o.selected=true;
+    sel.appendChild(o);
+  }
+}
+
+function abrirModalChofer(){
+  if(!transportistasDeEmpresa().length){ alert('Primero cargá un transportista en Proveedores y Clientes.'); return; }
+  editChofer=null;
+  document.getElementById('modal-chofer-title').textContent='Nuevo chofer';
+  document.getElementById('c-nombre').value='';
+  document.getElementById('c-dni').value='';
+  document.getElementById('c-lic').value='';
+  cargarSelectTransportistas(null);
+  document.getElementById('btn-del-chofer').style.display='none';
+  document.getElementById('msg-chofer').textContent='';
+  document.getElementById('overlay-chofer').className='overlay open';
+}
+
+function editarChofer(id){
+  var lista=PA.demo.listarChoferes(empresaId);
+  var c=null; for(var i=0;i<lista.length;i++){ if(lista[i].id===id){c=lista[i];break;} }
+  if(!c) return;
+  editChofer=id;
+  document.getElementById('modal-chofer-title').textContent='Editar chofer';
+  document.getElementById('c-nombre').value=c.nombre||'';
+  document.getElementById('c-dni').value=c.dni||'';
+  document.getElementById('c-lic').value=c.licencia||'';
+  cargarSelectTransportistas(c.terceroId);
+  document.getElementById('btn-del-chofer').style.display='';
+  document.getElementById('msg-chofer').textContent='';
+  document.getElementById('overlay-chofer').className='overlay open';
+}
+
+function cerrarModalChofer(){ document.getElementById('overlay-chofer').className='overlay'; }
+
+function guardarChofer(){
+  var nombre=document.getElementById('c-nombre').value.trim();
+  if(!nombre){ document.getElementById('msg-chofer').textContent='Falta el nombre.'; return; }
+  var terceroId=document.getElementById('c-tercero').value;
+  if(!terceroId){ document.getElementById('msg-chofer').textContent='Elegí el transportista.'; return; }
+  PA.demo.guardarChofer({
+    id: editChofer||undefined, empresaId: empresaId, terceroId: terceroId,
+    nombre: nombre, dni: document.getElementById('c-dni').value.trim(),
+    licencia: document.getElementById('c-lic').value.trim(), activo: true
+  });
+  cerrarModalChofer(); renderChoferes();
+}
+
+function eliminarChofer(){
+  if(editChofer && confirm('¿Eliminar este chofer?')){ PA.demo.borrarChofer(editChofer); cerrarModalChofer(); renderChoferes(); }
+}
 
 function rolesBadges(t){
   var h = '';
