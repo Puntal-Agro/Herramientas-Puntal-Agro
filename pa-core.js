@@ -25,9 +25,10 @@
   var LS_ESPECIES = 'pa_especies';      // especies/granos (global Puntal)
   var LS_UNIDADES = 'pa_unidades';      // unidades de medida (global Puntal)
   var LS_INSUMOS  = 'pa_insumos';       // insumos (por empresa)
+  var LS_MODOSACC = 'pa_modos_acc';     // modos de acción HRAC/IRAC/FRAC (global Puntal)
   var LS_SESION   = 'pa_sesion';        // sesión activa { usuarioId, empresaActivaId }
   var LS_SEEDVER  = 'pa_seed_ver';      // versión del seed demo
-  var SEED_VER    = '10';               // subir este número al cambiar la estructura del seed
+  var SEED_VER    = '11';               // subir este número al cambiar la estructura del seed
 
   // Herramientas PROPIAS (asignable=true): id + nombre legible.
   // Deben coincidir con los data-tool del index y con §5.2 del modelo.
@@ -84,6 +85,7 @@
       localStorage.removeItem(LS_ESPECIES);
       localStorage.removeItem(LS_UNIDADES);
       localStorage.removeItem(LS_INSUMOS);
+      localStorage.removeItem(LS_MODOSACC);
     } catch (e) {}
 
     var clientes = [
@@ -177,15 +179,85 @@
       tiposAct.push({ id: 'ta_'+ci, empresaId: 'emp_albor_sa', nombre: cultivosBase[ci][0], sigla: cultivosBase[ci][1], actividad: cultivosBase[ci][2], especieId: cultivosBase[ci][3] ? espId(cultivosBase[ci][3]) : null, activo: true });
     }
 
+    // Modos de acción HRAC / IRAC / FRAC (global Puntal, editable)
+    var modosBase = [
+      // HRAC (herbicidas) — código de mecanismo
+      ['HRAC','ACCasa','Inhibidores de la acetil coenzima-A carboxilasa (ACCasa)'],
+      ['HRAC','ALSSulf','Inhibidores de la enzima acetolactato sintetasa (ALS)-Sulfonilureas'],
+      ['HRAC','ALSIMI','Inhibidores de la enzima acetolactato sintetasa (ALS)-Imidazolinonas'],
+      ['HRAC','InhF2','Inhibidores de la fotosíntesis en el fotosistema II'],
+      ['HRAC','InhF1','Inhibidores fotosistema I'],
+      ['HRAC','PPO','Inhibidores de la enzima protoporfirinógeno oxidasa (PPO)'],
+      ['HRAC','HPPD','Inhibidores de la biosíntesis de carotenoides (HPPD)'],
+      ['HRAC','EPSPS','Inhibidores de la enzima 5-enolpiruvilshikimato-3-fosfato sintetasa (EPSPS)'],
+      ['HRAC','IGS','Inhibidores de la glutamino sintetasa'],
+      ['HRAC','DHPs','Inhibidores de la 7,8-dihidropteroato sintetasa (DHPs)'],
+      ['HRAC','IDC','Inhibidores de la división celular'],
+      ['HRAC','ISC','Inhibidores de la síntesis de celulosa'],
+      ['HRAC','ISL','Inhibidores de la síntesis de lípidos'],
+      ['HRAC','AuxSin','Acción similar al ácido indol acético (auxinas sintéticas)'],
+      ['HRAC','ITA','Inhibidores del transporte de auxinas'],
+      ['HRAC','H-MOAD','Modo de acción desconocido'],
+      // IRAC (insecticidas) — número
+      ['IRAC','1','Inhibidores de la acetilcolinesterasa'],
+      ['IRAC','2','Antagonistas de canales de sodio'],
+      ['IRAC','3','Moduladores del canal de sodio'],
+      ['IRAC','4','Moduladores competitivos del receptor nicotínico de la acetilcolina'],
+      ['IRAC','5','Moduladores alostéricos del receptor nicotínico de la acetilcolina'],
+      ['IRAC','6','Moduladores alostéricos del canal de cloro dependiente del glutamato'],
+      ['IRAC','7','Miméticos de la hormona juvenil'],
+      ['IRAC','8','Diversos inhibidores no específicos (multisitio)'],
+      ['IRAC','9','Moduladores del canal TRPV de los órganos cordotonales'],
+      ['IRAC','10','Inhibidores del crecimiento de ácaros'],
+      ['IRAC','11','Disruptores microbianos de las membranas digestivas de insectos'],
+      ['IRAC','12','Inhibidores de ATP sintetasa'],
+      ['IRAC','13','Desacopladores de la fosforilación oxidativa vía interrupción del gradiente de protones'],
+      ['IRAC','14','Bloqueadores del canal del receptor de acetilcolina'],
+      ['IRAC','15','Inhibidores de la biosíntesis de quitina, Tipo 0'],
+      ['IRAC','16','Inhibidores de la biosíntesis de quitina, Tipo 1'],
+      ['IRAC','17','Disruptores de la hormona de la muda. Dípteros'],
+      ['IRAC','18','Agonistas del receptor de ecdisona'],
+      ['IRAC','19','Antagonistas de los receptores de la octopamina'],
+      ['IRAC','20','Inhibidores del transporte de electrones en el complejo mitocondrial III'],
+      ['IRAC','21','Inhibidores del transporte de electrones en el complejo mitocondrial I'],
+      ['IRAC','22','Bloqueadores del canal de sodio dependiente del voltaje'],
+      ['IRAC','23','Inhibidores de la acetil CoA carboxilasa'],
+      ['IRAC','24','Inhibidores del transporte de electrones en el complejo mitocondrial IV'],
+      ['IRAC','25','Inhibidores del transporte de electrones en el complejo mitocondrial II'],
+      ['IRAC','28','Moduladores del receptor de la rianodina'],
+      ['IRAC','29','Moduladores de los órganos cordonales sin punto de acción definido'],
+      ['IRAC','30','Antagonista canal clórico del receptor de ácido gamma-aminobutírico (GABA)'],
+      ['IRAC','F-MOAD','Compuestos de modo de acción desconocido o incierto'],
+      // FRAC (fungicidas) — letra de grupo
+      ['FRAC','A','Metabolismo de ácidos nucleicos'],
+      ['FRAC','B','Citoesqueleto y proteínas motoras'],
+      ['FRAC','C','Respiración'],
+      ['FRAC','D','Síntesis de aminoácidos y proteínas'],
+      ['FRAC','E','Señal de transducción'],
+      ['FRAC','F','Síntesis o transporte de lípidos (función o integridad de la membrana)'],
+      ['FRAC','G','Biosíntesis de esterol en las membranas'],
+      ['FRAC','H','Biosíntesis de pared celular'],
+      ['FRAC','I','Síntesis de melanina en la pared celular'],
+      ['FRAC','M','Químicos con actividad multisitio'],
+      ['FRAC','P','Inducción de la defensa de la planta huésped'],
+      ['FRAC','BM','Biológicos con múltiples modos de acción'],
+      ['FRAC','F-MOAD','Modo de acción desconocido']
+    ];
+    var modosAcc = [];
+    for (var mi=0; mi<modosBase.length; mi++){
+      modosAcc.push({ id: 'moa_'+mi, sistema: modosBase[mi][0], codigo: modosBase[mi][1], descripcion: modosBase[mi][2], activo: true });
+    }
+    function moaId(sistema, codigo){ for(var k=0;k<modosAcc.length;k++){ if(modosAcc[k].sistema===sistema && modosAcc[k].codigo===codigo) return modosAcc[k].id; } return null; }
+
     var insumos = [
       { id: 'ins_glifo', empresaId: 'emp_albor_sa', activo: true, nombre: 'Glifosato 48%', tipo: 'Herbicida', unidadId: 'uni_3',
-        modoAccion: 'Grupo 9 (HRAC)', bandaTox: 'IV', eiq: 15.33, concentracion: 480, concUnidad: 'g/l', nutrientes: null },
+        modoAccionId: moaId('HRAC','EPSPS'), bandaTox: 'IV', eiq: 15.33, concentracion: 480, concUnidad: 'g/l', nutrientes: null },
       { id: 'ins_ciper', empresaId: 'emp_albor_sa', activo: true, nombre: 'Cipermetrina 25%', tipo: 'Insecticida', unidadId: 'uni_3',
-        modoAccion: 'Grupo 3A (IRAC)', bandaTox: 'II', eiq: 38.10, concentracion: 250, concUnidad: 'g/l', nutrientes: null },
+        modoAccionId: moaId('IRAC','3'), bandaTox: 'II', eiq: 38.10, concentracion: 250, concUnidad: 'g/l', nutrientes: null },
       { id: 'ins_uan', empresaId: 'emp_albor_sa', activo: true, nombre: 'UAN 32', tipo: 'Fertilizante', unidadId: 'uni_3',
-        modoAccion: '', bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: { n: 32, p: 0, k: 0, s: 0 } },
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: { n: 32, p: 0, k: 0, s: 0 } },
       { id: 'ins_sojasem', empresaId: 'emp_albor_sa', activo: true, nombre: 'Semilla soja DM 46i17', tipo: 'Semilla', unidadId: 'uni_0',
-        modoAccion: '', bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null }
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null }
     ];
     lsSet(LS_CLIENTES, clientes);
     lsSet(LS_EMPRESAS, empresas);
@@ -201,6 +273,7 @@
     lsSet(LS_ESPECIES, especies);
     lsSet(LS_UNIDADES, unidades);
     lsSet(LS_INSUMOS, insumos);
+    lsSet(LS_MODOSACC, modosAcc);
     lsSet(LS_SEEDVER, SEED_VER);
   }
 
@@ -629,6 +702,24 @@
       lsSet(LS_INSUMOS, out);
     },
 
+    /* ---- ABM Modos de acción HRAC/IRAC/FRAC (global Puntal) ---- */
+    listarModosAccion: function (sistema) {
+      var ms = lsGet(LS_MODOSACC, []);
+      if (!sistema) return ms;
+      var out=[]; for(var i=0;i<ms.length;i++){ if(ms[i].sistema===sistema) out.push(ms[i]); } return out;
+    },
+    guardarModoAccion: function (m) {
+      var ms = lsGet(LS_MODOSACC, []);
+      if (!m.id) { m.id = uid('moa'); ms.push(m); }
+      else { var f=false; for(var i=0;i<ms.length;i++){ if(ms[i].id===m.id){ms[i]=m;f=true;break;} } if(!f) ms.push(m); }
+      lsSet(LS_MODOSACC, ms); return m;
+    },
+    borrarModoAccion: function (id) {
+      var ms=lsGet(LS_MODOSACC, []), out=[];
+      for(var i=0;i<ms.length;i++){ if(ms[i].id!==id) out.push(ms[i]); }
+      lsSet(LS_MODOSACC, out);
+    },
+
     resetDemo: function () {
       try {
         localStorage.removeItem(LS_CLIENTES);
@@ -648,6 +739,7 @@
         localStorage.removeItem(LS_ESPECIES);
         localStorage.removeItem(LS_UNIDADES);
         localStorage.removeItem(LS_INSUMOS);
+        localStorage.removeItem(LS_MODOSACC);
       } catch (e) {}
       seedDemo();
     }

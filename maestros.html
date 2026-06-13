@@ -105,6 +105,7 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted
     <div class="nav-item sel" data-cat="terceros" onclick="seleccionarCat('terceros')">Proveedores y Clientes</div>
     <div class="nav-item" data-cat="choferes" onclick="seleccionarCat('choferes')">Choferes</div>
     <div class="nav-item" data-cat="insumos" onclick="seleccionarCat('insumos')">Insumos</div>
+    <div class="nav-item" data-cat="modosacc" onclick="seleccionarCat('modosacc')">Modos de acción</div>
     <div class="nav-item" data-cat="depositos" onclick="seleccionarCat('depositos')">Depósitos</div>
     <div class="nav-item" data-cat="labores" onclick="seleccionarCat('labores')">Labores</div>
     <div class="nav-item" data-cat="cultivos" onclick="seleccionarCat('cultivos')">Cultivos / Usos</div>
@@ -229,6 +230,26 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted
         <tbody></tbody>
       </table>
       <div class="empty" id="empty-ins" style="display:none">No hay insumos cargados. Agregá uno con "+ Nuevo".</div>
+    </div>
+
+    <!-- VISTA MODOS DE ACCIÓN -->
+    <div id="vista-modosacc" style="display:none">
+      <div class="panel-head">
+        <h2>Modos de acción</h2>
+        <button class="btn" onclick="abrirModalMoa()">+ Nuevo</button>
+      </div>
+      <p style="font-size:12.5px;color:var(--muted);margin-bottom:12px;line-height:1.5">Clasificación de modos de acción de fitosanitarios: HRAC (herbicidas), IRAC (insecticidas) y FRAC (fungicidas). Lista global de Puntal.</p>
+      <div style="display:flex;gap:6px;margin-bottom:12px">
+        <span class="chip-f on" data-mf="" onclick="setFiltroMoa('')">Todos</span>
+        <span class="chip-f" data-mf="HRAC" onclick="setFiltroMoa('HRAC')">HRAC</span>
+        <span class="chip-f" data-mf="IRAC" onclick="setFiltroMoa('IRAC')">IRAC</span>
+        <span class="chip-f" data-mf="FRAC" onclick="setFiltroMoa('FRAC')">FRAC</span>
+      </div>
+      <table id="tbl-moa">
+        <thead><tr><th>Sistema</th><th>Código</th><th>Descripción</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="empty" id="empty-moa" style="display:none">No hay modos de acción para este filtro.</div>
     </div>
   </div>
 </main>
@@ -387,6 +408,30 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted
   </div>
 </div>
 
+<!-- Modal MODO DE ACCIÓN -->
+<div class="overlay" id="overlay-moa">
+  <div class="modal">
+    <h3 id="modal-moa-title">Nuevo modo de acción</h3>
+    <div class="grid2">
+      <div class="fld"><label>Sistema</label>
+        <select id="m-sistema" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px">
+          <option value="HRAC">HRAC (herbicidas)</option>
+          <option value="IRAC">IRAC (insecticidas)</option>
+          <option value="FRAC">FRAC (fungicidas)</option>
+        </select>
+      </div>
+      <div class="fld"><label>Código</label><input id="m-codigo" placeholder="Ej: EPSPS, 3, A"></div>
+      <div class="fld full"><label>Descripción</label><input id="m-desc"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="guardarMoa()">Guardar</button>
+      <button class="btn-out" onclick="cerrarModalMoa()">Cancelar</button>
+      <button class="btn-out del" id="btn-del-moa" style="display:none" onclick="eliminarMoa()">Eliminar</button>
+      <span class="msg" id="msg-moa"></span>
+    </div>
+  </div>
+</div>
+
 <!-- Modal INSUMO -->
 <div class="overlay" id="overlay-ins">
   <div class="modal" style="max-width:560px">
@@ -416,7 +461,9 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted
     <div id="bloque-fito" style="display:none;border-top:1px solid var(--border);margin-top:14px;padding-top:12px">
       <div style="font-size:11px;font-weight:700;color:var(--olive);text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px">Datos del fitosanitario</div>
       <div class="grid2">
-        <div class="fld full"><label>Modo de acción <span class="opt">(HRAC / IRAC / FRAC)</span></label><input id="i-modo" placeholder="Ej: Grupo 9 (HRAC)"></div>
+        <div class="fld full"><label>Modo de acción <span class="opt" id="i-modo-sistema">—</span></label>
+          <select id="i-modo" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px"></select>
+        </div>
         <div class="fld"><label>EIQ <span class="opt">(opcional)</span></label><input id="i-eiq" type="number" step="0.01"></div>
         <div class="fld"><label>Concentración</label>
           <div style="display:flex;gap:6px">
@@ -473,7 +520,7 @@ function setFiltro(f){
   render();
 }
 function seleccionarCat(c){
-  var vistas = ['terceros','choferes','depositos','labores','cultivos','especies','unidades','insumos'];
+  var vistas = ['terceros','choferes','depositos','labores','cultivos','especies','unidades','insumos','modosacc'];
   for (var i=0;i<vistas.length;i++){
     document.getElementById('vista-'+vistas[i]).style.display = (c===vistas[i])?'':'none';
   }
@@ -488,6 +535,7 @@ function seleccionarCat(c){
   else if (c==='especies') renderEspecies();
   else if (c==='unidades') renderUnidades();
   else if (c==='insumos') renderInsumos();
+  else if (c==='modosacc') renderModosAcc();
   else render();
 }
 
@@ -647,12 +695,21 @@ function eliminarUni(){ if(editUni&&confirm('¿Eliminar esta unidad?')){PA.demo.
 var editIns=null, bandaSel='';
 var TIPOS_FITO = ['Herbicida','Insecticida','Fungicida','Curasemilla','Coadyuvante'];
 function esFito(t){ for(var i=0;i<TIPOS_FITO.length;i++){ if(TIPOS_FITO[i]===t) return true; } return false; }
+function sistemaDeTipo(t){ if(t==='Herbicida') return 'HRAC'; if(t==='Insecticida') return 'IRAC'; if(t==='Fungicida') return 'FRAC'; return null; }
+function nombreModoAcc(id){ if(!id) return null; var l=PA.demo.listarModosAccion(); for(var i=0;i<l.length;i++){ if(l[i].id===id) return l[i].sistema+' '+l[i].codigo; } return null; }
+function poblarSelectModo(sistema, valor){
+  var sel=document.getElementById('i-modo'); sel.innerHTML='<option value="">— Sin especificar —</option>';
+  var lbl=document.getElementById('i-modo-sistema'); lbl.textContent = sistema ? '('+sistema+')' : '—';
+  if(!sistema) return;
+  var l=PA.demo.listarModosAccion(sistema);
+  for(var i=0;i<l.length;i++){ var o=document.createElement('option'); o.value=l[i].id; o.textContent=l[i].codigo+' — '+l[i].descripcion; if(l[i].id===valor) o.selected=true; sel.appendChild(o); }
+}
 function nombreUnidad(id){ if(!id) return '—'; var l=PA.demo.listarUnidades(); for(var i=0;i<l.length;i++){ if(l[i].id===id) return l[i].sigla; } return '—'; }
 function bandaBadge(b){ if(!b) return ''; var col={'Ia':'#C0392B','Ib':'#E74C3C','II':'#E67E22','III':'#2980B9','IV':'#27AE60'}[b]||'#7A8899'; return '<span class="bdg-banda" style="background:'+col+'">'+b+'</span>'; }
 function tecnicoResumen(x){
   if(esFito(x.tipo)){
     var p=[];
-    if(x.modoAccion) p.push(x.modoAccion);
+    var ma=nombreModoAcc(x.modoAccionId); if(ma) p.push(ma);
     if(x.concentracion) p.push(x.concentracion+(x.concUnidad||''));
     if(x.bandaTox) p.push(bandaBadge(x.bandaTox));
     return p.length?p.join(' · '):'<span style="color:var(--muted)">—</span>';
@@ -681,8 +738,14 @@ function poblarSelectUnidad(valor){
 }
 function toggleBloqueIns(){
   var t=document.getElementById('i-tipo').value;
-  document.getElementById('bloque-fito').style.display = esFito(t) ? '' : 'none';
+  var fito=esFito(t);
+  document.getElementById('bloque-fito').style.display = fito ? '' : 'none';
   document.getElementById('bloque-ferti').style.display = (t==='Fertilizante') ? '' : 'none';
+  if(fito){
+    var sis=sistemaDeTipo(t);
+    var actual=document.getElementById('i-modo').value;
+    poblarSelectModo(sis, actual);
+  }
 }
 function setBanda(b){
   bandaSel=b;
@@ -692,7 +755,7 @@ function setBanda(b){
 function abrirModalIns(){
   editIns=null; document.getElementById('modal-ins-title').textContent='Nuevo insumo';
   document.getElementById('i-nombre').value=''; document.getElementById('i-tipo').value='Herbicida';
-  poblarSelectUnidad(''); document.getElementById('i-modo').value=''; document.getElementById('i-eiq').value='';
+  poblarSelectUnidad(''); document.getElementById('i-eiq').value='';
   document.getElementById('i-conc').value=''; document.getElementById('i-concuni').value='';
   document.getElementById('i-n').value=''; document.getElementById('i-p').value=''; document.getElementById('i-k').value=''; document.getElementById('i-s').value='';
   setBanda(''); toggleBloqueIns();
@@ -704,7 +767,8 @@ function editarIns(id){
   editIns=id; document.getElementById('modal-ins-title').textContent='Editar insumo';
   document.getElementById('i-nombre').value=x.nombre||''; document.getElementById('i-tipo').value=x.tipo||'Herbicida';
   poblarSelectUnidad(x.unidadId||'');
-  document.getElementById('i-modo').value=x.modoAccion||''; document.getElementById('i-eiq').value=(x.eiq!=null?x.eiq:'');
+  poblarSelectModo(sistemaDeTipo(x.tipo), x.modoAccionId||'');
+  document.getElementById('i-eiq').value=(x.eiq!=null?x.eiq:'');
   document.getElementById('i-conc').value=(x.concentracion!=null?x.concentracion:''); document.getElementById('i-concuni').value=x.concUnidad||'';
   var n=x.nutrientes||{}; document.getElementById('i-n').value=(n.n!=null?n.n:''); document.getElementById('i-p').value=(n.p!=null?n.p:''); document.getElementById('i-k').value=(n.k!=null?n.k:''); document.getElementById('i-s').value=(n.s!=null?n.s:'');
   setBanda(x.bandaTox||''); toggleBloqueIns();
@@ -719,9 +783,9 @@ function guardarIns(){
   var t=document.getElementById('i-tipo').value;
   var obj={ id:editIns||undefined, empresaId:empresaId, activo:true, nombre:n, tipo:t,
     unidadId:document.getElementById('i-unidad').value||null,
-    modoAccion:'', bandaTox:'', eiq:null, concentracion:null, concUnidad:'', nutrientes:null };
+    modoAccionId:null, bandaTox:'', eiq:null, concentracion:null, concUnidad:'', nutrientes:null };
   if(esFito(t)){
-    obj.modoAccion=document.getElementById('i-modo').value.trim();
+    obj.modoAccionId=document.getElementById('i-modo').value||null;
     obj.bandaTox=bandaSel;
     obj.eiq=numOrNull('i-eiq');
     obj.concentracion=numOrNull('i-conc');
@@ -732,6 +796,33 @@ function guardarIns(){
   PA.demo.guardarInsumo(obj); cerrarModalIns(); renderInsumos();
 }
 function eliminarIns(){ if(editIns&&confirm('¿Eliminar este insumo?')){PA.demo.borrarInsumo(editIns);cerrarModalIns();renderInsumos();} }
+
+/* ---- MODOS DE ACCIÓN (global) ---- */
+var editMoa=null, filtroMoa='';
+function setFiltroMoa(s){
+  filtroMoa=s;
+  var chips=document.querySelectorAll('[data-mf]');
+  for(var i=0;i<chips.length;i++){ chips[i].className='chip-f'+(chips[i].getAttribute('data-mf')===s?' on':''); }
+  renderModosAcc();
+}
+function sisBadge(s){ var col={'HRAC':'#3A5128','IRAC':'#9A4A20','FRAC':'#2980B9'}[s]||'#7A8899'; return '<span class="bdg-banda" style="background:'+col+'">'+s+'</span>'; }
+function renderModosAcc(){
+  var lista=PA.demo.listarModosAccion(filtroMoa||null);
+  var tb=document.querySelector('#tbl-moa tbody'); tb.innerHTML='';
+  for(var i=0;i<lista.length;i++){(function(m){
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td>'+sisBadge(m.sistema)+'</td><td><strong>'+m.codigo+'</strong></td><td>'+m.descripcion+'</td>'+
+      '<td style="text-align:right"><button class="btn-sm" onclick="editarMoa(\''+m.id+'\')">Editar</button></td>';
+    tb.appendChild(tr);
+  })(lista[i]);}
+  document.getElementById('empty-moa').style.display=lista.length?'none':'block';
+  document.getElementById('tbl-moa').style.display=lista.length?'':'none';
+}
+function abrirModalMoa(){ editMoa=null; document.getElementById('modal-moa-title').textContent='Nuevo modo de acción'; document.getElementById('m-sistema').value=filtroMoa||'HRAC'; document.getElementById('m-codigo').value=''; document.getElementById('m-desc').value=''; document.getElementById('btn-del-moa').style.display='none'; document.getElementById('msg-moa').textContent=''; document.getElementById('overlay-moa').className='overlay open'; }
+function editarMoa(id){ var l=PA.demo.listarModosAccion(); var x=null; for(var i=0;i<l.length;i++){if(l[i].id===id){x=l[i];break;}} if(!x)return; editMoa=id; document.getElementById('modal-moa-title').textContent='Editar modo de acción'; document.getElementById('m-sistema').value=x.sistema||'HRAC'; document.getElementById('m-codigo').value=x.codigo||''; document.getElementById('m-desc').value=x.descripcion||''; document.getElementById('btn-del-moa').style.display=''; document.getElementById('msg-moa').textContent=''; document.getElementById('overlay-moa').className='overlay open'; }
+function cerrarModalMoa(){ document.getElementById('overlay-moa').className='overlay'; }
+function guardarMoa(){ var c=document.getElementById('m-codigo').value.trim(); var d=document.getElementById('m-desc').value.trim(); if(!c){document.getElementById('msg-moa').textContent='Falta el código.';return;} if(!d){document.getElementById('msg-moa').textContent='Falta la descripción.';return;} PA.demo.guardarModoAccion({id:editMoa||undefined,sistema:document.getElementById('m-sistema').value,codigo:c,descripcion:d,activo:true}); cerrarModalMoa(); renderModosAcc(); }
+function eliminarMoa(){ if(editMoa&&confirm('¿Eliminar este modo de acción?')){PA.demo.borrarModoAccion(editMoa);cerrarModalMoa();renderModosAcc();} }
 
 /* ---- CHOFERES ---- */
 var editChofer = null;
