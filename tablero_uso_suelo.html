@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="pa-core.js"></script>
 <style>
 :root{--bg:#F0F2F5;--card:#fff;--border:#E4E8EE;--text:#0F1923;--muted:#7A8899;--radius:12px;--mono:'DM Sans',sans-serif;--sans:'DM Sans',sans-serif;}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -262,26 +263,13 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
   </div>
   <div class="hdr-right">
     <span class="espacio-lbl">Cliente:</span>
-    <select class="ctx-sel" id="selCliente">
-      <option value="Don Eduardo">Don Eduardo</option>
-    </select>
+    <select class="ctx-sel" id="selCliente"></select>
     <span class="espacio-lbl">Campo:</span>
     <select class="ctx-sel" id="selCampo">
       <option value="TODOS">Todos los campos</option>
-      <option value="EC">EC</option>
-      <option value="EM">EM</option>
-      <option value="LR">LR</option>
-      <option value="LM">LM</option>
     </select>
     <span class="espacio-lbl">Campaña:</span>
-    <select class="ctx-sel" id="selCampania">
-      <option value="22-23">22-23</option>
-      <option value="23-24">23-24</option>
-      <option value="24-25">24-25</option>
-      <option value="25-26">25-26</option>
-      <option value="26-27" selected>26-27</option>
-      <option value="27-28">27-28</option>
-    </select>
+    <select class="ctx-sel" id="selCampania"></select>
     <span class="ctx-pill" id="ctxPill">Don Eduardo · 26-27</span>
     <button class="hdr-btn primary" onclick="exportActual()">Exportar Excel</button>
   </div>
@@ -481,14 +469,13 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
       <span class="ct">Actividades</span>
       <div class="ct-actions">
         <span style="font-size:10px;color:var(--muted);font-family:var(--mono);margin-right:6px" id="cultSubt">—</span>
-        <button class="btn-sm" onclick="addCultivo()">+ Agregar actividad</button>
       </div>
     </div>
-    <div class="help-row">Las actividades aparecen en los desplegables del Plan y en los filtros.</div>
+    <div class="help-row">Catálogo de actividades del padrón de Maestros (solo lectura). Aparecen en los desplegables del Plan y en los filtros. Para crear, editar o dar de baja actividades, usá el módulo Maestros.</div>
     <div class="scroll-y">
       <table>
         <thead><tr>
-          <th>Sigla</th><th>Nombre</th><th>Tipo</th><th>Lotes</th><th></th>
+          <th>Sigla</th><th>Nombre</th><th>Tipo</th><th>Lotes</th>
         </tr></thead>
         <tbody id="cultBody"></tbody>
       </table>
@@ -585,33 +572,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
   </div>
 </div>
 
-<!-- MODAL: Editar / Agregar CULTIVO -->
-<div class="modal-bg" id="modalCult">
-  <div class="modal">
-    <div class="modal-title" id="modalCultTitle">Editar actividad</div>
-    <div class="modal-sub">Las actividades aparecen en los desplegables del Plan y en los filtros.</div>
-    <div class="modal-row">
-      <span class="modal-lbl">Sigla:</span>
-      <input type="text" class="modal-input" id="mcSigla" placeholder="Ej: Lj, Cz">
-    </div>
-    <div class="modal-row">
-      <span class="modal-lbl">Nombre:</span>
-      <input type="text" class="modal-input" id="mcNombre" placeholder="Ej: Lenteja">
-    </div>
-    <div class="modal-row">
-      <span class="modal-lbl">Tipo:</span>
-      <select class="modal-input" id="mcTipo">
-        <option value="AGR">Agrícola</option>
-        <option value="GAN">Ganadero / forrajero</option>
-      </select>
-    </div>
-    <div class="modal-warn" id="modalCultWarn"></div>
-    <div class="modal-actions">
-      <button class="modal-cancel" onclick="closeCultModal()">Cancelar</button>
-      <button class="modal-ok" onclick="confirmCultModal()">Guardar</button>
-    </div>
-  </div>
-</div>
+<!-- (El modal de edición de cultivo se removió: el catálogo de actividades se gestiona en Maestros) -->
 
 <footer>
   <span>Puntal Agro · Plan de Uso de Suelo · v1</span>
@@ -620,9 +581,45 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
 
 <script>
 // ────────────────────────────────────────────────────────────
-// CATÁLOGOS
+// CONTEXTO (Puntal Agro / pa-core.js) + CATÁLOGOS
 // ────────────────────────────────────────────────────────────
-var CULTIVOS = {
+// Herramienta para chequeo de permisos
+var HERRAMIENTA = 'tablero_uso_suelo';
+
+// Contexto cargado desde PA (cliente/empresa/permisos). null en fallback demo.
+var CTX = null;
+
+// Mapa de COLOR por sigla de cultivo. El color es presentación del tablero,
+// NO vive en el padrón (Maestros). Base por especie/familia dentro de la paleta Puntal.
+// Si una sigla del padrón no está acá, cae a un gris neutro al construir CULTIVOS.
+var COLORES_CULT = {
+  // Cereales finos / invierno (verdes fríos)
+  'Tr':'#3B6D11','Cb':'#075985','Av':'#A8B84A',
+  // Girasol
+  'G':'#A8B84A',
+  // Maíces (gama verde-lima)
+  'Mz':'#639922','MzT':'#86A832','Mz2ª':'#9ABF3E','MzSPE':'#5A8A1E',
+  // Sojas (verde-oliva)
+  'Sj1ª':'#4A6533','Sj2ª':'#6E8B4F',
+  // Sorgo y coberturas
+  'Sg':'#86A832','Ccob':'#7A8B4A','CS-VG':'#7A8B4A','CS-G':'#9AA86B',
+  // Ganaderos / forrajeras (naranjas-terracota)
+  'VI':'#D87E3A','MzP':'#C8642D','SgF':'#B5602A','MzD':'#A84D1F','SgD':'#9A3412',
+  'PRG':'#E0934A','PI':'#E0934A','PPFe':'#C99A2E','PPAlf':'#854F0B','PPAg':'#B58844',
+  'PD':'#8A6342','CN':'#6E5635','CND':'#5A4528',
+  // Otros
+  'ARRTO':'#7A8899'
+};
+var COLOR_CULT_DEFAULT = '#7A8899';
+function colorCult(sigla){ return COLORES_CULT[sigla] || COLOR_CULT_DEFAULT; }
+
+// CULTIVOS: {sigla:{n:nombre, t:'AGR'|'GAN', c:color}}.
+// Se POBLA desde el padrón (PA.demo.listarTiposActividad) en cargarCultivos().
+// El catálogo es de Maestros; el tablero lo consume en SOLO LECTURA.
+var CULTIVOS = {};
+
+// Fallback: catálogo embebido para uso sin servidor (archivo suelto, PA ausente).
+var CULTIVOS_FALLBACK = {
   // sigla: {nombre, tipo (AGR/GAN), color}
   'Tr':   {n:'Trigo',                     t:'AGR', c:'#3B6D11'},
   'Cb':   {n:'Cebada',                    t:'AGR', c:'#075985'},
@@ -652,6 +649,28 @@ var CULTIVOS = {
   'CND':  {n:'Campo natural degradado',   t:'GAN', c:'#5A4528'},
   'ARRTO':{n:'Arrendamiento',             t:'AGR', c:'#7A8899'}
 };
+
+// Puebla CULTIVOS desde el padrón de Maestros (PA.demo.listarTiposActividad),
+// indexado por sigla, con la misma forma {sigla:{n,t,c}} que usa el resto del tablero.
+// - n: nombre del padrón
+// - t: actividad del padrón (AGR/GAN)
+// - c: color local del tablero (COLORES_CULT), NO del padrón
+// Si PA no está disponible (archivo suelto), cae al catálogo embebido (fallback demo).
+function cargarCultivos(){
+  CULTIVOS = {};
+  var usados = (typeof PA !== 'undefined' && PA.demo && CTX) ? PA.demo.listarTiposActividad(CTX.empresaActivaId) : null;
+  if(usados && usados.length){
+    for(var i=0;i<usados.length;i++){
+      var ta = usados[i];
+      if(ta.activo === false) continue;
+      CULTIVOS[ta.sigla] = { n: ta.nombre, t: ta.actividad, c: colorCult(ta.sigla) };
+    }
+    return true; // origen: padrón
+  }
+  // Fallback demo: catálogo embebido
+  for(var k in CULTIVOS_FALLBACK){ CULTIVOS[k] = CULTIVOS_FALLBACK[k]; }
+  return false; // origen: fallback
+}
 
 var AMBIENTES = {
   'A1':  {d:'Agricultura 1 - Rotación larga c/PP', t:'AGR', c:'#3B6D11'},
@@ -2300,34 +2319,22 @@ function renderMaestros(){
   document.getElementById('ambBody').innerHTML = h;
   if(nuevoAmbInline) setTimeout(function(){ var e=document.getElementById('inAmbCod'); if(e)e.focus(); },40);
 
-  // Cultivos (sigla + nombre + tipo + lotes, sin color)
+  // Cultivos (sigla + nombre + tipo + lotes) — SOLO LECTURA desde el padrón
   var cultKeys = Object.keys(CULTIVOS);
   document.getElementById('cultSubt').textContent = cultKeys.length+' actividades';
   var h2='';
-  if(nuevoCultInline){
-    h2 += '<tr class="row-nueva">';
-    h2 += '<td><input type="text" class="inline-input" id="inCultSig" placeholder="Sigla" style="width:70px" onkeydown="if(event.key===\'Enter\')commitNuevoCult();if(event.key===\'Escape\')cancelNuevoCult();"></td>';
-    h2 += '<td><input type="text" class="inline-input" id="inCultNom" placeholder="Nombre de la actividad" onkeydown="if(event.key===\'Enter\')commitNuevoCult();if(event.key===\'Escape\')cancelNuevoCult();"></td>';
-    h2 += '<td><select class="inline-input" id="inCultTipo" style="width:120px"><option value="AGR">Agrícola</option><option value="GAN">Ganadero</option></select></td>';
-    h2 += '<td><span class="lote-meta">0</span></td>';
-    h2 += '<td class="row-actions"><button class="btn-icon" title="Guardar" onclick="commitNuevoCult()">✓</button><button class="btn-icon btn-icon-del" title="Cancelar" onclick="cancelNuevoCult()">×</button></td>';
-    h2 += '</tr>';
-  }
   for(var i=0;i<cultKeys.length;i++){
     var k = cultKeys[i];
     var cv = CULTIVOS[k];
-    var en = k.replace(/'/g,"\\'");
     var nUso = countLotesCult(k);
     h2 += '<tr>';
     h2 += '<td class="tdname"><span class="cult-sigla">'+k+'</span></td>';
     h2 += '<td>'+cv.n+'</td>';
     h2 += '<td>'+tipoLabel(cv.t)+'</td>';
     h2 += '<td><span class="lote-meta">'+nUso+'</span></td>';
-    h2 += '<td class="row-actions"><button class="btn-icon" title="Editar" onclick="openCultModal(\''+en+'\')">✎</button><button class="btn-icon btn-icon-del" title="Eliminar" onclick="deleteCultivo(\''+en+'\')">×</button></td>';
     h2 += '</tr>';
   }
   document.getElementById('cultBody').innerHTML = h2;
-  if(nuevoCultInline) setTimeout(function(){ var e=document.getElementById('inCultSig'); if(e)e.focus(); },40);
 }
 
 // ---- Alta inline de Ambiente ----
@@ -2376,52 +2383,9 @@ function deleteAmbiente(code){
   renderAll();
 }
 
-// ---- Alta inline de Cultivo ----
-var nuevoCultInline = false;
-function addCultivo(){ nuevoCultInline = true; renderMaestros(); }
-function cancelNuevoCult(){ nuevoCultInline = false; renderMaestros(); }
-function commitNuevoCult(){
-  var sig = (document.getElementById('inCultSig').value||'').trim();
-  var nom = (document.getElementById('inCultNom').value||'').trim();
-  var t = document.getElementById('inCultTipo').value;
-  if(!sig){ alert('Poné una sigla.'); return; }
-  if(CULTIVOS[sig]){ alert('Ya existe un cultivo con esa sigla.'); return; }
-  CULTIVOS[sig] = {n:nom, t:t, c:tipoColor(t)};
-  nuevoCultInline = false;
-  renderAll();
-}
-
-// ---- Modal de Cultivo (editar) ----
-var cultEditando = null;
-function openCultModal(sigla){
-  cultEditando = sigla;
-  var cv = CULTIVOS[sigla]; if(!cv) return;
-  document.getElementById('modalCultTitle').textContent = 'Editar actividad · '+sigla;
-  document.getElementById('mcSigla').value = sigla;
-  document.getElementById('mcSigla').disabled = true; // la sigla no se cambia al editar
-  document.getElementById('mcNombre').value = cv.n || '';
-  document.getElementById('mcTipo').value = cv.t || 'AGR';
-  document.getElementById('modalCultWarn').style.display = 'none';
-  document.getElementById('modalCult').classList.add('on');
-  setTimeout(function(){ document.getElementById('mcNombre').focus(); }, 60);
-}
-function closeCultModal(){ document.getElementById('modalCult').classList.remove('on'); document.getElementById('mcSigla').disabled=false; cultEditando=null; }
-function confirmCultModal(){
-  if(!cultEditando) return;
-  var nom = (document.getElementById('mcNombre').value||'').trim();
-  var t = document.getElementById('mcTipo').value;
-  if(CULTIVOS[cultEditando]){ CULTIVOS[cultEditando].n = nom; CULTIVOS[cultEditando].t = t; CULTIVOS[cultEditando].c = tipoColor(t); }
-  closeCultModal();
-  renderAll();
-}
-function deleteCultivo(sigla){
-  var nUso = countLotesCult(sigla);
-  var msg = '¿Eliminar la actividad "'+sigla+'"?';
-  if(nUso>0) msg += '\n\nATENCIÓN: hay '+nUso+' lote(s) que usan este cultivo en algún plan. Esas asignaciones quedarán con la sigla pero sin definición de catálogo.';
-  if(!confirm(msg)) return;
-  delete CULTIVOS[sigla];
-  renderAll();
-}
+// NOTA: el ABM de actividades/cultivos se removió del tablero. El catálogo de
+// actividades es del padrón de Maestros; acá se consume en solo lectura
+// (ver cargarCultivos / renderMaestros). Para editarlo, usar el módulo Maestros.
 
 // ────────────────────────────────────────────────────────────
 // MAIN
@@ -2450,17 +2414,133 @@ function renderAll(){
   
   var pill = document.getElementById('ctxPill');
   if(pill){
-    var cli = document.getElementById('selCliente').value;
+    var selCli = document.getElementById('selCliente');
+    var cli = (selCli && selCli.options.length && selCli.selectedIndex>=0) ? selCli.options[selCli.selectedIndex].text : '';
     var campoTxt = state.campo==='TODOS' ? 'Todos los campos' : state.campo;
-    pill.textContent = cli + ' · ' + campoTxt + ' · ' + state.campania;
+    pill.textContent = (cli ? cli + ' · ' : '') + campoTxt + ' · ' + state.campania;
+  }
+}
+
+// ────────────────────────────────────────────────────────────
+// BOOT: contexto (cliente/empresa/permisos) + catálogos + selectores
+// ────────────────────────────────────────────────────────────
+
+// Llena el selector de campañas a partir de las campañas disponibles del tablero.
+function poblarCampanias(){
+  var sel = document.getElementById('selCampania');
+  if(!sel) return;
+  var actual = state.campania;
+  sel.innerHTML = '';
+  for(var i=0;i<CAMPANIAS.length;i++){
+    var o = document.createElement('option');
+    o.value = CAMPANIAS[i]; o.textContent = CAMPANIAS[i];
+    sel.appendChild(o);
+  }
+  // vigente: la que tenía el state si sigue siendo válida; si no, la última
+  var vig = (CAMPANIAS.indexOf(actual) >= 0) ? actual : CAMPANIAS[CAMPANIAS.length-1];
+  sel.value = vig;
+  state.campania = vig;
+}
+
+// Llena el selector de campos desde el contexto (camposDeEmpresa) o, en fallback,
+// desde los campos presentes en los LOTES.
+function poblarCampos(){
+  var sel = document.getElementById('selCampo');
+  if(!sel) return;
+  var prev = state.campo;
+  sel.innerHTML = '<option value="TODOS">Todos los campos</option>';
+  var nombres = [];
+  if(typeof PA !== 'undefined' && PA.demo && CTX){
+    var cs = PA.demo.camposDeEmpresa(CTX.empresaActivaId);
+    for(var i=0;i<cs.length;i++) nombres.push(cs[i].nombre);
+  } else {
+    // fallback: campos derivados de los lotes
+    var vistos = {};
+    for(var j=0;j<LOTES.length;j++){ if(!vistos[LOTES[j].c]){ vistos[LOTES[j].c]=true; nombres.push(LOTES[j].c); } }
+  }
+  for(var k=0;k<nombres.length;k++){
+    var o = document.createElement('option');
+    o.value = nombres[k]; o.textContent = nombres[k];
+    sel.appendChild(o);
+  }
+  sel.value = (prev && (prev==='TODOS' || nombres.indexOf(prev)>=0)) ? prev : 'TODOS';
+}
+
+// Llena el selector de cliente/empresa desde el contexto.
+// En este tablero multiempresa, el selector lista las empresas disponibles del usuario.
+function poblarClienteEmpresa(){
+  var sel = document.getElementById('selCliente');
+  if(!sel) return;
+  sel.innerHTML = '';
+  if(typeof PA !== 'undefined' && CTX && CTX.empresasDisponibles && CTX.empresasDisponibles.length){
+    for(var i=0;i<CTX.empresasDisponibles.length;i++){
+      var e = CTX.empresasDisponibles[i];
+      var o = document.createElement('option');
+      o.value = e.id; o.textContent = e.razonSocial || e.nombre || e.id;
+      sel.appendChild(o);
+    }
+    sel.value = CTX.empresaActivaId;
+  } else {
+    // fallback demo: nombre genérico
+    var o2 = document.createElement('option');
+    o2.value = 'demo'; o2.textContent = 'Demo (sin servidor)';
+    sel.appendChild(o2);
+  }
+}
+
+// Cambio de empresa activa: recarga contexto, cultivos, campos y re-renderiza.
+function onCambioEmpresa(){
+  var sel = document.getElementById('selCliente');
+  if(typeof PA !== 'undefined' && CTX && sel && sel.value){
+    PA.setEmpresaActiva(sel.value, function(err, ctx){
+      if(!err && ctx){ CTX = ctx; }
+      cargarCultivos();
+      poblarCampos();
+      renderAll();
+    });
+  } else {
+    renderAll();
   }
 }
 
 document.getElementById('selCampo').addEventListener('change', renderAll);
 document.getElementById('selCampania').addEventListener('change', renderAll);
-document.getElementById('selCliente').addEventListener('change', renderAll);
+document.getElementById('selCliente').addEventListener('change', onCambioEmpresa);
 
-renderAll();
+function boot(){
+  // Si PA está disponible, inicializa contexto; si no, arranca en fallback demo.
+  if(typeof PA !== 'undefined'){
+    PA.init({}, function(){
+      var arrancar = function(){
+        PA.loadContext(null, function(err, ctx){
+          if(!err && ctx){ CTX = ctx; }
+          cargarCultivos();
+          poblarClienteEmpresa();
+          poblarCampos();
+          poblarCampanias();
+          renderAll();
+        });
+      };
+      // En demo, si no hay sesión, logueamos al usuario del cliente Don Eduardo.
+      if(PA.haySesion && PA.haySesion()){
+        arrancar();
+      } else if(PA.login){
+        PA.login('eduardo@doneduardo.com', function(){ arrancar(); });
+      } else {
+        arrancar();
+      }
+    });
+  } else {
+    // Fallback total: sin pa-core.js
+    cargarCultivos();
+    poblarClienteEmpresa();
+    poblarCampos();
+    poblarCampanias();
+    renderAll();
+  }
+}
+
+boot();
 </script>
 </body>
 </html>

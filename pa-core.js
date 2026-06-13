@@ -28,7 +28,7 @@
   var LS_MODOSACC = 'pa_modos_acc';     // modos de acción HRAC/IRAC/FRAC (global Puntal)
   var LS_SESION   = 'pa_sesion';        // sesión activa { usuarioId, empresaActivaId }
   var LS_SEEDVER  = 'pa_seed_ver';      // versión del seed demo
-  var SEED_VER    = '11';               // subir este número al cambiar la estructura del seed
+  var SEED_VER    = '12';               // subir este número al cambiar la estructura del seed
 
   // Herramientas PROPIAS (asignable=true): id + nombre legible.
   // Deben coincidir con los data-tool del index y con §5.2 del modelo.
@@ -91,22 +91,31 @@
     var clientes = [
       { id: 'cli_albor', nombre: 'Grupo Albor', email: 'contacto@albor.com', telefono: '358-400-0000',
         nombreContacto: 'María Pereyra', activo: true, fechaAlta: '2025-01-15',
-        cuit: '30-71000000-1', razonSocial: 'Grupo Albor S.A.', direccion: 'Río Cuarto, Córdoba', facturaCentralizada: true }
+        cuit: '30-71000000-1', razonSocial: 'Grupo Albor S.A.', direccion: 'Río Cuarto, Córdoba', facturaCentralizada: true },
+      { id: 'cli_doneduardo', nombre: 'Agroganadera Don Eduardo', email: 'contacto@doneduardo.com', telefono: '',
+        nombreContacto: 'Eduardo', activo: true, fechaAlta: '2025-01-15',
+        cuit: '', razonSocial: 'Agroganadera Don Eduardo', direccion: '', facturaCentralizada: false }
     ];
     var empresas = [
       { id: 'emp_albor_sa', clienteId: 'cli_albor', razonSocial: 'Albor Agropecuaria S.A.', cuit: '30-71000000-1', direccion: 'Río Cuarto, Córdoba', condicionIVA: 'RI', activo: true },
-      { id: 'emp_lospinos', clienteId: 'cli_albor', razonSocial: 'Los Pinos S.R.L.', cuit: '30-71000111-2', direccion: 'General Cabrera, Córdoba', condicionIVA: 'RI', activo: true }
+      { id: 'emp_lospinos', clienteId: 'cli_albor', razonSocial: 'Los Pinos S.R.L.', cuit: '30-71000111-2', direccion: 'General Cabrera, Córdoba', condicionIVA: 'RI', activo: true },
+      { id: 'emp_doneduardo', clienteId: 'cli_doneduardo', razonSocial: 'Agroganadera Don Eduardo', cuit: '', direccion: '', condicionIVA: 'RI', activo: true }
     ];
     var campos = [
       { id: 'campo_elpuntal', empresaId: 'emp_albor_sa', nombre: 'El Puntal', localidad: 'Río Cuarto', partido: 'Río Cuarto', provincia: 'Córdoba', haTotales: 850 },
       { id: 'campo_laloma',  empresaId: 'emp_albor_sa', nombre: 'La Loma', localidad: 'Las Higueras', partido: 'Río Cuarto', provincia: 'Córdoba', haTotales: 420 },
-      { id: 'campo_sanjose', empresaId: 'emp_lospinos', nombre: 'San José', localidad: 'General Cabrera', partido: 'Juárez Celman', provincia: 'Córdoba', haTotales: 610 }
+      { id: 'campo_sanjose', empresaId: 'emp_lospinos', nombre: 'San José', localidad: 'General Cabrera', partido: 'Juárez Celman', provincia: 'Córdoba', haTotales: 610 },
+      { id: 'campo_ec', empresaId: 'emp_doneduardo', nombre: 'EC', localidad: '', partido: '', provincia: '', haTotales: 0 },
+      { id: 'campo_em', empresaId: 'emp_doneduardo', nombre: 'EM', localidad: '', partido: '', provincia: '', haTotales: 0 },
+      { id: 'campo_lr', empresaId: 'emp_doneduardo', nombre: 'LR', localidad: '', partido: '', provincia: '', haTotales: 0 },
+      { id: 'campo_lm', empresaId: 'emp_doneduardo', nombre: 'LM', localidad: '', partido: '', provincia: '', haTotales: 0 }
     ];
     var usuarios = [
       { id: 'usr_admin', nombre: 'Admin Puntal', email: 'admin@puntal.com', rol: 'admin_general', clienteId: null },
       { id: 'usr_maria', nombre: 'María Pereyra', email: 'maria@albor.com', rol: 'admin_cliente', clienteId: 'cli_albor' },
       { id: 'usr_jose',  nombre: 'José Gómez', email: 'jose@albor.com', rol: 'usuario', clienteId: 'cli_albor' },
-      { id: 'usr_ana',   nombre: 'Ana Ruiz', email: 'ana@albor.com', rol: 'usuario', clienteId: 'cli_albor' }
+      { id: 'usr_ana',   nombre: 'Ana Ruiz', email: 'ana@albor.com', rol: 'usuario', clienteId: 'cli_albor' },
+      { id: 'usr_eduardo', nombre: 'Eduardo', email: 'eduardo@doneduardo.com', rol: 'admin_cliente', clienteId: 'cli_doneduardo' }
     ];
     var permisos = [
       { usuarioId: 'usr_maria', empresaId: 'emp_albor_sa', campoIds: [],
@@ -116,7 +125,9 @@
       { usuarioId: 'usr_jose', empresaId: 'emp_albor_sa', campoIds: ['campo_elpuntal'],
         herramientas: ['tablero_insumos_ot', 'tablero_uso_suelo'], nivel: 'cargar' },
       { usuarioId: 'usr_ana', empresaId: 'emp_albor_sa', campoIds: [],
-        herramientas: ['tablero_agro'], nivel: 'ver' }
+        herramientas: ['tablero_agro'], nivel: 'ver' },
+      { usuarioId: 'usr_eduardo', empresaId: 'emp_doneduardo', campoIds: [],
+        herramientas: ['tablero_agro', 'tablero_insumos_ot', 'tablero_uso_suelo', 'Fitosanitarios'], nivel: 'administrar' }
     ];
     var tiposProv = [
       { id: 'tp_transp', nombre: 'transportista' },
@@ -175,8 +186,13 @@
       ['Pradera agropiro','PPAg','GAN',null],['Pradera degradada','PD','GAN',null],['Campo natural','CN','GAN',null],
       ['Campo natural degradado','CND','GAN',null]
     ];
-    for (var ci=0; ci<cultivosBase.length; ci++){
-      tiposAct.push({ id: 'ta_'+ci, empresaId: 'emp_albor_sa', nombre: cultivosBase[ci][0], sigla: cultivosBase[ci][1], actividad: cultivosBase[ci][2], especieId: cultivosBase[ci][3] ? espId(cultivosBase[ci][3]) : null, activo: true });
+    var empresasConCultivos = ['emp_albor_sa', 'emp_doneduardo'];
+    var taIdx = 0;
+    for (var ee=0; ee<empresasConCultivos.length; ee++){
+      for (var ci=0; ci<cultivosBase.length; ci++){
+        tiposAct.push({ id: 'ta_'+taIdx, empresaId: empresasConCultivos[ee], nombre: cultivosBase[ci][0], sigla: cultivosBase[ci][1], actividad: cultivosBase[ci][2], especieId: cultivosBase[ci][3] ? espId(cultivosBase[ci][3]) : null, activo: true });
+        taIdx++;
+      }
     }
 
     // Modos de acción HRAC / IRAC / FRAC (global Puntal, editable)
