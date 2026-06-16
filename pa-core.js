@@ -28,9 +28,10 @@
   var LS_MODOSACC = 'pa_modos_acc';     // modos de acción HRAC/IRAC/FRAC (global Puntal)
   var LS_LOTES    = 'pa_lotes';         // lotes (por empresa) — se crean en Plan de Uso
   var LS_ACTIVIDADES = 'pa_actividades';// actividades por lote/campaña — se crean en Plan de Uso
+  var LS_CAMPANIAS = 'pa_campanias';    // campañas (global Puntal) — etiqueta de gestión, sin fechas
   var LS_SESION   = 'pa_sesion';        // sesión activa { usuarioId, empresaActivaId }
   var LS_SEEDVER  = 'pa_seed_ver';      // versión del seed demo
-  var SEED_VER    = '13';               // subir este número al cambiar la estructura del seed
+  var SEED_VER    = '14';               // subir este número al cambiar la estructura del seed
 
   // Herramientas PROPIAS (asignable=true): id + nombre legible.
   // Deben coincidir con los data-tool del index y con §5.2 del modelo.
@@ -312,6 +313,16 @@
       {"id":"act_17","empresaId":"emp_doneduardo","loteId":"lot_doneduardo_4","campaniaId":"25-26","tipoActividadId":"ta_34","sigla":"Sj2ª","ha":38,"seg":true},
       {"id":"act_18","empresaId":"emp_doneduardo","loteId":"lot_doneduardo_4","campaniaId":"26-27","tipoActividadId":"ta_33","sigla":"Sj1ª","ha":38,"seg":false}
     ];
+    // Campañas (global Puntal): etiqueta de gestión, sin fechas. El id coincide con el
+    // nombre para que calce con los campaniaId ya usados en actividades/OT/movimientos.
+    // 'orden' fija el orden de listado; 'activa' marca la sugerida por defecto al registrar.
+    var campanias = [
+      {"id":"22-23","nombre":"22-23","orden":1,"activa":false},
+      {"id":"23-24","nombre":"23-24","orden":2,"activa":false},
+      {"id":"24-25","nombre":"24-25","orden":3,"activa":false},
+      {"id":"25-26","nombre":"25-26","orden":4,"activa":true},
+      {"id":"26-27","nombre":"26-27","orden":5,"activa":false}
+    ];
     lsSet(LS_CLIENTES, clientes);
     lsSet(LS_EMPRESAS, empresas);
     lsSet(LS_CAMPOS, campos);
@@ -329,6 +340,7 @@
     lsSet(LS_MODOSACC, modosAcc);
     lsSet(LS_LOTES, lotes);
     lsSet(LS_ACTIVIDADES, actividades);
+    lsSet(LS_CAMPANIAS, campanias);
     lsSet(LS_SEEDVER, SEED_VER);
   }
 
@@ -824,6 +836,31 @@
       lsSet(LS_ACTIVIDADES, out);
     },
 
+    /* ---- Campañas (global Puntal) ----
+       Etiqueta de gestión sin fechas; se elige en cada OT/movimiento y filtra vistas.
+       Listadas por 'orden'. activaPorDefecto() devuelve la marcada como activa. */
+    listarCampanias: function () {
+      var cs = lsGet(LS_CAMPANIAS, []).slice();
+      cs.sort(function(a,b){ return (a.orden||0)-(b.orden||0); });
+      return cs;
+    },
+    campaniaActiva: function () {
+      var cs = lsGet(LS_CAMPANIAS, []);
+      for (var i=0;i<cs.length;i++){ if(cs[i].activa) return cs[i]; }
+      return cs.length ? cs[cs.length-1] : null;
+    },
+    guardarCampania: function (c) {
+      var cs = lsGet(LS_CAMPANIAS, []);
+      if (!c.id) { c.id = uid('camp'); cs.push(c); }
+      else { var f=false; for(var i=0;i<cs.length;i++){ if(cs[i].id===c.id){cs[i]=c;f=true;break;} } if(!f) cs.push(c); }
+      lsSet(LS_CAMPANIAS, cs); return c;
+    },
+    borrarCampania: function (id) {
+      var cs=lsGet(LS_CAMPANIAS, []), out=[];
+      for(var i=0;i<cs.length;i++){ if(cs[i].id!==id) out.push(cs[i]); }
+      lsSet(LS_CAMPANIAS, out);
+    },
+
     resetDemo: function () {
       try {
         localStorage.removeItem(LS_CLIENTES);
@@ -846,6 +883,7 @@
         localStorage.removeItem(LS_MODOSACC);
         localStorage.removeItem(LS_LOTES);
         localStorage.removeItem(LS_ACTIVIDADES);
+        localStorage.removeItem(LS_CAMPANIAS);
       } catch (e) {}
       seedDemo();
     }
