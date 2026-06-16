@@ -26,9 +26,11 @@
   var LS_UNIDADES = 'pa_unidades';      // unidades de medida (global Puntal)
   var LS_INSUMOS  = 'pa_insumos';       // insumos (por empresa)
   var LS_MODOSACC = 'pa_modos_acc';     // modos de acción HRAC/IRAC/FRAC (global Puntal)
+  var LS_LOTES    = 'pa_lotes';         // lotes (por empresa) — se crean en Plan de Uso
+  var LS_ACTIVIDADES = 'pa_actividades';// actividades por lote/campaña — se crean en Plan de Uso
   var LS_SESION   = 'pa_sesion';        // sesión activa { usuarioId, empresaActivaId }
   var LS_SEEDVER  = 'pa_seed_ver';      // versión del seed demo
-  var SEED_VER    = '12';               // subir este número al cambiar la estructura del seed
+  var SEED_VER    = '13';               // subir este número al cambiar la estructura del seed
 
   // Herramientas PROPIAS (asignable=true): id + nombre legible.
   // Deben coincidir con los data-tool del index y con §5.2 del modelo.
@@ -275,6 +277,41 @@
       { id: 'ins_sojasem', empresaId: 'emp_albor_sa', activo: true, nombre: 'Semilla soja DM 46i17', tipo: 'Semilla', unidadId: 'uni_0',
         modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null }
     ];
+
+    // ── LOTES y ACTIVIDADES (subset de prueba de Don Eduardo) ──────────────
+    // Dato compartido: el LOTE (físico, §2.4) y la ACTIVIDAD (lote+cultivo+campaña, §3.5)
+    // se CREAN en Plan de Uso del Suelo y los LEEN los tableros operativos (Insumos/OT, etc.).
+    // Campos extra no-normativos que vienen del tablero de uso de suelo y se conservan
+    // por si sirven luego: LOTE.ambiente, ACTIVIDAD.sigla (atajo), ACTIVIDAD.seg (¿2º cultivo?).
+    // tipoActividadId apunta al maestro TIPO_ACTIVIDAD de la misma empresa (ta_25..ta_49 = Don Eduardo).
+    var lotes = [
+      {"id":"lot_doneduardo_0","campoId":"campo_ec","empresaId":"emp_doneduardo","nombre":"EC 4","ha":35,"ambiente":"G1"},
+      {"id":"lot_doneduardo_1","campoId":"campo_ec","empresaId":"emp_doneduardo","nombre":"EC 1A CN","ha":21,"ambiente":"G2"},
+      {"id":"lot_doneduardo_2","campoId":"campo_ec","empresaId":"emp_doneduardo","nombre":"EC 2A CN1","ha":0,"ambiente":"G1"},
+      {"id":"lot_doneduardo_3","campoId":"campo_em","empresaId":"emp_doneduardo","nombre":"EM 18","ha":44,"ambiente":"A1"},
+      {"id":"lot_doneduardo_4","campoId":"campo_em","empresaId":"emp_doneduardo","nombre":"EM 20","ha":38,"ambiente":"A1"}
+    ];
+    var actividades = [
+      {"id":"act_0","empresaId":"emp_doneduardo","loteId":"lot_doneduardo_0","campaniaId":"24-25","tipoActividadId":"ta_28","sigla":"G","ha":35,"seg":false},
+      {"id":"act_1","empresaId":"emp_doneduardo","loteId":"lot_doneduardo_0","campaniaId":"24-25","tipoActividadId":"ta_37","sigla":"VI","ha":35,"seg":true},
+      {"id":"act_2","empresaId":"emp_doneduardo","loteId":"lot_doneduardo_0","campaniaId":"25-26","tipoActividadId":"ta_33","sigla":"Sj1ª","ha":35,"seg":false},
+      {"id":"act_3","empresaId":"emp_doneduardo","loteId":"lot_doneduardo_0","campaniaId":"26-27","tipoActividadId":"ta_28","sigla":"G","ha":35,"seg":false},
+      {"id":"act_4","empresaId":"emp_doneduardo","loteId":"lot_doneduardo_0","campaniaId":"26-27","tipoActividadId":"ta_43","sigla":"PI","ha":35,"seg":true},
+      {"id":"act_5","empresaId":"emp_doneduardo","loteId":"lot_doneduardo_1","campaniaId":"24-25","tipoActividadId":"ta_48","sigla":"CN","ha":21,"seg":false},
+      {"id":"act_6","empresaId":"emp_doneduardo","loteId":"lot_doneduardo_1","campaniaId":"25-26","tipoActividadId":"ta_48","sigla":"CN","ha":21,"seg":false},
+      {"id":"act_7","empresaId":"emp_doneduardo","loteId":"lot_doneduardo_1","campaniaId":"26-27","tipoActividadId":"ta_48","sigla":"CN","ha":21,"seg":false},
+      {"id":"act_8","empresaId":"emp_doneduardo","loteId":"lot_doneduardo_2","campaniaId":"25-26","tipoActividadId":"ta_48","sigla":"CN","ha":9.5,"seg":false},
+      {"id":"act_9","empresaId":"emp_doneduardo","loteId":"lot_doneduardo_2","campaniaId":"26-27","tipoActividadId":"ta_48","sigla":"CN","ha":9.5,"seg":false},
+      {"id":"act_10","empresaId":"emp_doneduardo","loteId":"lot_doneduardo_2","campaniaId":"26-27","tipoActividadId":"ta_37","sigla":"VI","ha":9.5,"seg":true},
+      {"id":"act_11","empresaId":"emp_doneduardo","loteId":"lot_doneduardo_3","campaniaId":"24-25","tipoActividadId":"ta_29","sigla":"Mz","ha":44,"seg":false},
+      {"id":"act_12","empresaId":"emp_doneduardo","loteId":"lot_doneduardo_3","campaniaId":"25-26","tipoActividadId":"ta_33","sigla":"Sj1ª","ha":44,"seg":false},
+      {"id":"act_13","empresaId":"emp_doneduardo","loteId":"lot_doneduardo_3","campaniaId":"26-27","tipoActividadId":"ta_25","sigla":"Tr","ha":44,"seg":false},
+      {"id":"act_14","empresaId":"emp_doneduardo","loteId":"lot_doneduardo_3","campaniaId":"26-27","tipoActividadId":"ta_34","sigla":"Sj2ª","ha":44,"seg":true},
+      {"id":"act_15","empresaId":"emp_doneduardo","loteId":"lot_doneduardo_4","campaniaId":"24-25","tipoActividadId":"ta_33","sigla":"Sj1ª","ha":38,"seg":false},
+      {"id":"act_16","empresaId":"emp_doneduardo","loteId":"lot_doneduardo_4","campaniaId":"25-26","tipoActividadId":"ta_25","sigla":"Tr","ha":38,"seg":false},
+      {"id":"act_17","empresaId":"emp_doneduardo","loteId":"lot_doneduardo_4","campaniaId":"25-26","tipoActividadId":"ta_34","sigla":"Sj2ª","ha":38,"seg":true},
+      {"id":"act_18","empresaId":"emp_doneduardo","loteId":"lot_doneduardo_4","campaniaId":"26-27","tipoActividadId":"ta_33","sigla":"Sj1ª","ha":38,"seg":false}
+    ];
     lsSet(LS_CLIENTES, clientes);
     lsSet(LS_EMPRESAS, empresas);
     lsSet(LS_CAMPOS, campos);
@@ -290,6 +327,8 @@
     lsSet(LS_UNIDADES, unidades);
     lsSet(LS_INSUMOS, insumos);
     lsSet(LS_MODOSACC, modosAcc);
+    lsSet(LS_LOTES, lotes);
+    lsSet(LS_ACTIVIDADES, actividades);
     lsSet(LS_SEEDVER, SEED_VER);
   }
 
@@ -736,6 +775,55 @@
       lsSet(LS_MODOSACC, out);
     },
 
+    /* ---- Lotes (por empresa) ----
+       El LOTE es físico (§2.4) y se crea en Plan de Uso del Suelo; los tableros
+       operativos lo LEEN. Filtro opcional por campo. */
+    listarLotes: function (empresaId, campoId) {
+      var ls = lsGet(LS_LOTES, []), out = [];
+      for (var i=0;i<ls.length;i++){
+        if (ls[i].empresaId !== empresaId) continue;
+        if (campoId && ls[i].campoId !== campoId) continue;
+        out.push(ls[i]);
+      }
+      return out;
+    },
+    guardarLote: function (l) {
+      var ls = lsGet(LS_LOTES, []);
+      if (!l.id) { l.id = uid('lot'); ls.push(l); }
+      else { var f=false; for(var i=0;i<ls.length;i++){ if(ls[i].id===l.id){ls[i]=l;f=true;break;} } if(!f) ls.push(l); }
+      lsSet(LS_LOTES, ls); return l;
+    },
+    borrarLote: function (id) {
+      var ls=lsGet(LS_LOTES, []), out=[];
+      for(var i=0;i<ls.length;i++){ if(ls[i].id!==id) out.push(ls[i]); }
+      lsSet(LS_LOTES, out);
+    },
+
+    /* ---- Actividades (lote + tipo de actividad + campaña, §3.5) ----
+       Se crean en Plan de Uso; los tableros operativos las LEEN. N filas por
+       lote/campaña. Filtros opcionales por campaña y por lote. */
+    listarActividades: function (empresaId, campaniaId, loteId) {
+      var as = lsGet(LS_ACTIVIDADES, []), out = [];
+      for (var i=0;i<as.length;i++){
+        if (as[i].empresaId !== empresaId) continue;
+        if (campaniaId && as[i].campaniaId !== campaniaId) continue;
+        if (loteId && as[i].loteId !== loteId) continue;
+        out.push(as[i]);
+      }
+      return out;
+    },
+    guardarActividad: function (a) {
+      var as = lsGet(LS_ACTIVIDADES, []);
+      if (!a.id) { a.id = uid('act'); as.push(a); }
+      else { var f=false; for(var i=0;i<as.length;i++){ if(as[i].id===a.id){as[i]=a;f=true;break;} } if(!f) as.push(a); }
+      lsSet(LS_ACTIVIDADES, as); return a;
+    },
+    borrarActividad: function (id) {
+      var as=lsGet(LS_ACTIVIDADES, []), out=[];
+      for(var i=0;i<as.length;i++){ if(as[i].id!==id) out.push(as[i]); }
+      lsSet(LS_ACTIVIDADES, out);
+    },
+
     resetDemo: function () {
       try {
         localStorage.removeItem(LS_CLIENTES);
@@ -756,6 +844,8 @@
         localStorage.removeItem(LS_UNIDADES);
         localStorage.removeItem(LS_INSUMOS);
         localStorage.removeItem(LS_MODOSACC);
+        localStorage.removeItem(LS_LOTES);
+        localStorage.removeItem(LS_ACTIVIDADES);
       } catch (e) {}
       seedDemo();
     }
