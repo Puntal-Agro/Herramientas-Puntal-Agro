@@ -723,7 +723,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
     <button class="pill on" data-mtab="insumos" onclick="setMTab('insumos',this)">Insumos</button>
     <button class="pill" data-mtab="campos" onclick="setMTab('campos',this)">Campos</button>
     <button class="pill" data-mtab="lotes" onclick="setMTab('lotes',this)">Lotes</button>
-    <button class="pill" data-mtab="depositos" onclick="setMTab('depositos',this)">Depósitos</button>
+    <button class="pill" data-mtab="depositos" onclick="setMTab('depositos',this)">Depósitos / Acopios</button>
     <button class="pill" data-mtab="actividades" onclick="setMTab('actividades',this)">Actividades</button>
     <button class="pill" data-mtab="laboresLP" onclick="setMTab('laboresLP',this)">Labores propias</button>
     <button class="pill" data-mtab="laboresLC" onclick="setMTab('laboresLC',this)">Labores contratadas</button>
@@ -4212,23 +4212,36 @@ function removeLoteAct(idx, ci){
   state.lotes[idx].actividades.splice(ci,1); save(); renderMLotes();
 }
 function renderMDepositos(){
+  var ro = !!state.catalogosReadOnly; // depósitos vienen de pa-core (Maestros): solo lectura con contexto
   var rows='';
   for(var i=0;i<state.depositos.length;i++){
     var x=state.depositos[i];
-    var optsCampo='<option value="">— General del cliente —</option>';
-    for(var ca=0;ca<state.campos.length;ca++){
-      optsCampo+='<option value="'+state.campos[ca].id+'"'+(state.campos[ca].id===x.campoId?' selected':'')+'>'+esc(state.campos[ca].nombre)+'</option>';
+    var campoNom = x.campoId ? getCampoNombre(x.campoId) : '— General del cliente —';
+    if(ro){
+      rows+='<tr>'+
+        '<td style="padding:6px 8px">'+esc(x.nombre)+'</td>'+
+        '<td style="padding:6px 8px">'+esc(campoNom)+'</td>'+
+        '</tr>';
+    } else {
+      var optsCampo='<option value="">— General del cliente —</option>';
+      for(var ca=0;ca<state.campos.length;ca++){
+        optsCampo+='<option value="'+state.campos[ca].id+'"'+(state.campos[ca].id===x.campoId?' selected':'')+'>'+esc(state.campos[ca].nombre)+'</option>';
+      }
+      rows+='<tr>'+
+        '<td><input value="'+esc(x.nombre)+'" oninput="onDepositoRename('+i+',this.value)" style="width:100%;font-family:var(--sans);font-size:12px;border:1px solid var(--border);border-radius:6px;padding:4px 6px"></td>'+
+        '<td><select onchange="state.depositos['+i+'].campoId=this.value;save();renderStock()" style="width:100%;font-family:var(--sans);font-size:12px;border:1px solid var(--border);border-radius:6px;padding:4px 6px;background:var(--card)">'+optsCampo+'</select></td>'+
+        '<td><button class="btn btn-sm btn-danger" onclick="delDeposito('+i+')">✕</button></td>'+
+        '</tr>';
     }
-    rows+='<tr>'+
-      '<td><input value="'+esc(x.nombre)+'" oninput="onDepositoRename('+i+',this.value)" style="width:100%;font-family:var(--sans);font-size:12px;border:1px solid var(--border);border-radius:6px;padding:4px 6px"></td>'+
-      '<td><select onchange="state.depositos['+i+'].campoId=this.value;save();renderStock()" style="width:100%;font-family:var(--sans);font-size:12px;border:1px solid var(--border);border-radius:6px;padding:4px 6px;background:var(--card)">'+optsCampo+'</select></td>'+
-      '<td><button class="btn btn-sm btn-danger" onclick="delDeposito('+i+')">✕</button></td>'+
-      '</tr>';
   }
+  var head = ro
+    ? '<div class="chd"><span class="ct-lg">Depósitos / Acopios</span><span class="bdg" style="background:#E8EDF2;color:#475569">Solo lectura</span></div>'+
+      '<p style="font-size:11px;color:var(--muted);margin-bottom:10px">Los depósitos se administran en Maestros (nivel empresa). Acá se muestran para usarlos en stock y movimientos.</p>'
+    : '<div class="chd"><span class="ct-lg">Depósitos / Acopios</span><button class="btn btn-sm btn-primary" onclick="state.depositos.push({id:uid(),nombre:\'Nuevo depósito\',campoId:\'\'});save();renderMDepositos()">+ Nuevo depósito</button></div>'+
+      '<p style="font-size:11px;color:var(--muted);margin-bottom:10px">Un depósito puede pertenecer a un campo específico, o ser <strong>general del cliente</strong> (compartido entre campos).</p>';
   byId('maestrosCard').innerHTML=
-    '<div class="chd"><span class="ct-lg">Depósitos</span><button class="btn btn-sm btn-primary" onclick="state.depositos.push({id:uid(),nombre:\'Nuevo depósito\',campoId:\'\'});save();renderMDepositos()">+ Nuevo depósito</button></div>'+
-    '<p style="font-size:11px;color:var(--muted);margin-bottom:10px">Un depósito puede pertenecer a un campo específico, o ser <strong>general del cliente</strong> (compartido entre campos).</p>'+
-    '<div class="tw"><table><thead><tr><th>Nombre</th><th>Campo</th><th></th></tr></thead><tbody>'+(rows||'<tr><td colspan="3" class="empty">Sin depósitos.</td></tr>')+'</tbody></table></div>';
+    head+
+    '<div class="tw"><table><thead><tr><th>Nombre</th><th>Campo</th>'+(ro?'':'<th></th>')+'</tr></thead><tbody>'+(rows||'<tr><td colspan="'+(ro?2:3)+'" class="empty">Sin depósitos.</td></tr>')+'</tbody></table></div>';
 }
 function onDepositoRename(idx, newName){
   // Con el modelo por id, renombrar un depósito NO rompe nada: movimientos y stock
