@@ -57,6 +57,8 @@ header{background:var(--card);border-bottom:1px solid var(--border);padding:12px
 .fbar{background:transparent;padding:0;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .fl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:500}
 .filtro-lbl-inline{font-size:11px;color:var(--muted);margin-right:4px}
+.chk-solo-filtrado{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:#4A6533;background:rgba(74,101,51,.08);border:1.5px solid rgba(74,101,51,.25);border-radius:8px;padding:5px 10px;cursor:pointer;white-space:nowrap}
+.chk-solo-filtrado input{cursor:pointer;accent-color:#4A6533;margin:0}
 .filtro-select{font-family:var(--sans);font-size:12px;font-weight:500;color:var(--text);background:var(--card);border:1.5px solid #CBD5E1;border-radius:8px;padding:6px 10px;cursor:pointer}
 .ms-dd-wrap{display:inline-flex;align-items:center;background:var(--card);border:1.5px solid #CBD5E1;border-radius:8px;padding:0 4px 0 10px}
 .ms-dd-wrap .filtro-select{border:none;padding:6px 6px}
@@ -316,10 +318,13 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
       <div class="ms-dd-wrap" id="filtroSeg"><span class="filtro-lbl-inline">Momento:</span>
         <select class="filtro-select" id="selSeg" onchange="setSegSel(this.value)">
           <option value="">Todos</option>
-          <option value="1">Tiene 1ª</option>
-          <option value="2">Tiene 2ª</option>
+          <option value="1">Cultivos de 1ª</option>
+          <option value="2">Cultivos de 2ª</option>
         </select>
       </div>
+      <label class="chk-solo-filtrado" id="chkSoloFiltradoWrap" style="display:none">
+        <input type="checkbox" id="chkSoloFiltrado" onchange="setSoloFiltrado(this.checked)"> Ver solo actividad filtrada
+      </label>
       <button class="btn-toggle" id="btnHistGlobal" onclick="toggleHistGlobal()" style="margin-left:auto">▸ Mostrar historia</button>
       <button class="nav-reset" id="btnLimpiarFiltros" onclick="clearFiltros()">↺ Limpiar filtros</button>
     </div>
@@ -752,6 +757,7 @@ var state = {
   fAnt: [],       // antecesores (cultivos) seleccionados
   fCult: [],      // cultivos/usos seleccionados (cualquier actividad de la campaña)
   fSeg: '',       // '' todos | '1' tiene 1ª | '2' tiene 2ª
+  soloFiltrado: false, // recortar celdas/sumas a las actividades que matchean fCult/fSeg
   histGlobal: false, // mostrar historia inline en todas las filas
   expandedRows: {}, // {loteName: true} para filas expandidas individualmente
   sortKey: null,    // columna de ordenamiento (Plan/Padrón); null = agrupado por tipo
@@ -811,6 +817,24 @@ function cultRoHtml(sigla, opts){
 function actsDe(lote, camp){
   var a = lote && lote.p ? lote.p[camp] : null;
   return (a && a.length) ? a : [];
+}
+// ¿Hay algún filtro de ACTIVIDAD activo (cultivo y/o momento)? Habilita el toggle "ver solo filtrado".
+function hayFiltroActividad(){
+  return (state.fCult && state.fCult.length>0) || !!state.fSeg;
+}
+// Actividades visibles de un lote en una campaña. Si el toggle "soloFiltrado" está activo
+// y hay filtros de actividad, recorta a las que matchean fCult y/o fSeg. Si no, devuelve todo.
+// Nota: solo recorta para la CAMPAÑA ACTIVA (los filtros aplican sobre ella); para campañas
+// históricas/antecesor devuelve siempre todo.
+function actsVisibles(lote, camp){
+  var acts = actsDe(lote, camp);
+  if(!state.soloFiltrado || camp!==state.campania || !hayFiltroActividad()) return acts;
+  return acts.filter(function(a){
+    if(state.fCult.length && state.fCult.indexOf(a.c)<0) return false;
+    if(state.fSeg==='1' && a.seg) return false;
+    if(state.fSeg==='2' && !a.seg) return false;
+    return true;
+  });
 }
 // Superficie física: suma de actividades que NO son de 2ª (las de 2ª van sobre tierra ya contada)
 function supFisica(acts){
@@ -1224,10 +1248,24 @@ function toggleFiltro(key, val){
 
 function clearFiltros(){
   state.fAmb = []; state.fAnt = []; state.fCult = []; state.fSeg = '';
+  state.soloFiltrado = false;
   var sg = document.getElementById('selSeg'); if(sg) sg.value = '';
+  var ck = document.getElementById('chkSoloFiltrado'); if(ck) ck.checked = false;
   renderAll();
 }
 function setSegSel(v){ state.fSeg = v || ''; renderAll(); }
+function setSoloFiltrado(on){ state.soloFiltrado = !!on; renderAll(); }
+// Muestra/oculta la casilla "ver solo actividad filtrada" según haya filtros de actividad.
+// Si no hay filtros, fuerza el flag a false. Solo aplica en el Plan de uso.
+function syncSoloFiltrado(){
+  var wrap = document.getElementById('chkSoloFiltradoWrap');
+  if(!wrap) return;
+  var visible = (state.view==='plan') && hayFiltroActividad();
+  wrap.style.display = visible ? '' : 'none';
+  if(!visible && state.soloFiltrado) state.soloFiltrado = false;
+  var ck = document.getElementById('chkSoloFiltrado');
+  if(ck) ck.checked = state.soloFiltrado;
+}
 
 // ────────────────────────────────────────────────────────────
 // VIEWS
@@ -1481,7 +1519,7 @@ function renderKpis(){
     var t = lotTipo(l);
     if(t==='AGR'){agrSup += l.s||0; lotesAgr++;}
     else {ganSup += l.s||0; lotesGan++;}
-    var acts = actsDe(l, state.campania);
+    var acts = actsVisibles(l, state.campania);
     usado += supFisica(acts);
   }
   var libre = totSup - usado;
@@ -1561,7 +1599,7 @@ function renderPlan(){
   var totSupLote=0, totFis=0, totSemb=0;
   for(var i=0;i<lts.length;i++){
     totSupLote += lts[i].s||0;
-    var acts = actsDe(lts[i], state.campania);
+    var acts = actsVisibles(lts[i], state.campania);
     totFis += supFisica(acts);
     totSemb += supSembrada(acts);
   }
@@ -1592,7 +1630,7 @@ function renderRows(lts, cls){
 
   for(var i=0;i<lts.length;i++){
     var l = lts[i];
-    var acts = actsDe(l, state.campania);
+    var acts = actsVisibles(l, state.campania);
     var fisica = supFisica(acts);
     var sembrada = supSembrada(acts);
     var sup = l.s || 0;
@@ -1961,7 +1999,7 @@ function renderReportes(){
   var cultMap = {}, ambMap = {}, agrTot=0, ganTot=0;
   for(var i=0;i<lts.length;i++){
     var l = lts[i];
-    var acts = actsDe(l, state.campania);
+    var acts = actsVisibles(l, state.campania);
     if(!acts.length) continue;
     for(var j=0;j<acts.length;j++){
       var a = acts[j];
@@ -2227,7 +2265,7 @@ function exportPlanXLSX(){
   var rows = [];
   for(var i=0;i<lts.length;i++){
     var l = lts[i];
-    var acts = actsDe(l, state.campania);
+    var acts = actsVisibles(l, state.campania);
     var fis = supFisica(acts), semb = supSembrada(acts);
     var pct = (l.s>0) ? Math.round(fis/l.s*1000)/10 : 0;
     if(!acts.length){
@@ -2476,6 +2514,7 @@ function renderAll(){
   if(selTipo) state.tipo = selTipo.value;
   
   buildFiltros();
+  syncSoloFiltrado();
   renderKpis();
   
   if(state.view === 'plan'){
