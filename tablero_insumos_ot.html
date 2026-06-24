@@ -242,6 +242,10 @@ tbody tr:hover td{background:#FAFBFC}
 .div-pendiente span{flex:1;height:1px;background:var(--border)}
 .div-pendiente em{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-style:normal}
 .lotes-pick-hi{border:1.5px solid #4A6533;background:#F0F4EC}
+.zona-aplic{border-left:4px solid #3B6D11;border-radius:0;background:#F6F8F2;padding:10px 12px 12px;margin-bottom:16px}
+.zona-aplic .grp-aplic-tit{color:#3B6D11;margin:0 0 8px}
+.zona-pend{border-left:4px solid #C8642D;border-radius:0;background:#FCF4EC;padding:10px 12px 12px}
+.zona-pend .grp-aplic-tit{color:#8A5A2B;margin:0 0 8px}
 .prorr-tog{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);font-weight:500;cursor:pointer;margin:14px 0 0;user-select:none;display:flex;align-items:center;gap:6px}
 .prorr-tog .caret{font-size:10px;color:var(--muted)}
 .prorr-tog:hover{color:var(--text)}
@@ -443,7 +447,6 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
       <div class="tools">
         <input type="text" id="movSearch" placeholder="Buscar…" oninput="renderMovtos()" style="width:140px">
         <select id="movCampoFilter" onchange="renderMovtos()"><option value="">Todos los campos</option></select>
-        <select id="movCampaniaFilter" onchange="renderMovtos()"><option value="">Todas las campañas</option></select>
         <select id="movTipoFilter" onchange="renderMovtos()"><option value="">Todos los tipos</option></select>
         <select id="movOrigenFilter" onchange="renderMovtos()"><option value="">Manual + automático</option><option value="manual">Solo manual</option><option value="auto">Solo automático (OT)</option></select>
         <input type="date" id="movDesde" onchange="renderMovtos()" title="Desde">
@@ -1750,8 +1753,6 @@ function populateMovSelects(){
   for(var m=0;m<state.campos.length;m++){
     caf.innerHTML+='<option value="'+state.campos[m].id+'"'+(state.campos[m].id===curCa?' selected':'')+'>'+esc(state.campos[m].nombre)+'</option>';
   }
-  var mcf=byId('movCampaniaFilter');
-  if(mcf){ var curMcf=mcf.value; mcf.innerHTML=campaniaOptions(curMcf, true); }
   // (re)dibujar líneas
   if(!movLineasTmp.length) movLineasTmp=[nuevaMovLinea()];
   renderMovLineas();
@@ -1857,7 +1858,6 @@ function delMov(comprobanteId){
 }
 function clearMovFilters(){
   byId('movSearch').value=''; byId('movTipoFilter').value=''; byId('movOrigenFilter').value=''; byId('movDesde').value=''; byId('movHasta').value=''; byId('movCampoFilter').value='';
-  var mcf=byId('movCampaniaFilter'); if(mcf) mcf.value='';
   renderMovtos();
 }
 function renderMovtos(){
@@ -1867,17 +1867,15 @@ function renderMovtos(){
   var fOrigen=byId('movOrigenFilter').value;
   var fd1=byId('movDesde').value, fh=byId('movHasta').value;
   var fcamp=byId('movCampoFilter').value;
-  var fcampania=byId('movCampaniaFilter')?byId('movCampaniaFilter').value:'';
   // ordenar por fecha (de la cabecera) desc
   var sorted=state.movtos.slice().sort(function(a,b){ return (movFecha(b)||'').localeCompare(movFecha(a)||''); });
   var rows='';
   for(var i=0;i<sorted.length;i++){
     var m=sorted[i], ins=getInsumo(m.insumoId), cab=compDe(m);
-    var fechaM=movFecha(m), tipoM=movTipo(m), campM=movCampania(m);
+    var fechaM=movFecha(m), tipoM=movTipo(m);
     var oNom=movOrigenNom(m), dNom=movDestinoNom(m);
     var esAuto = !!(cab && cab.refOt) || !!m.refOt;
     if(ft && tipoM!==ft) continue;
-    if(fcampania && campM!==fcampania) continue;
     if(fOrigen==='auto' && !esAuto) continue;
     if(fOrigen==='manual' && esAuto) continue;
     if(fd1 && fechaM<fd1) continue;
@@ -2602,7 +2600,8 @@ function renderAplicacion(otId){
 
   // --- Lotes ya aplicados (lectura + deshacer) ---
   if(aplicados.length){
-    html+='<div class="grp-aplic-tit" style="margin:6px 0 7px"><span class="ic-ok">✓</span> Lotes ya aplicados <span class="grp-count grp-count-ok">'+aplicados.length+'</span></div>';
+    html+='<div class="zona-aplic">';
+    html+='<div class="grp-aplic-tit"><span class="ic-ok">✓</span> Lotes ya aplicados <span class="grp-count grp-count-ok">'+aplicados.length+'</span></div>';
     for(var a=0;a<aplicados.length;a++){
       var de=aplicados[a]; var lo=getLoteById(de.loteId);
       var lrows='';
@@ -2613,7 +2612,7 @@ function renderAplicacion(otId){
           '<td class="num">'+f(ln.entregada,2)+'</td><td class="num"><strong>'+f(ln.usado,2)+'</strong></td>'+
           '<td class="num">'+f(ln.devStock,2)+'</td><td class="num">'+f(ln.devBaja,2)+'</td></tr>';
       }
-      html+='<div style="border:1px solid #E4E8EE;border-radius:8px;padding:8px;margin-bottom:6px;background:#F5F6F4;opacity:.9">'+
+      html+='<div style="border:1px solid #E4E8EE;border-radius:8px;padding:8px;margin-bottom:6px;background:#FFFFFF">'+
         '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">'+
           '<strong style="font-size:12px;color:#5F5E5A">'+esc(getCampoNombre(de.campoId))+' · '+(lo?esc(lo.nombre):'')+'</strong>'+
           '<span class="bdg bn">'+(de.cultivo?esc(de.cultivo):'')+'</span>'+
@@ -2623,6 +2622,7 @@ function renderAplicacion(otId){
         '<div class="tw"><table><thead><tr><th>Insumo</th><th>Un.</th><th class="num">Entregada</th><th class="num">Usado</th><th class="num">Dev.stock</th><th class="num">Dev.baja</th></tr></thead><tbody>'+lrows+'</tbody></table></div>'+
       '</div>';
     }
+    html+='</div>';
   }
 
   if(!pendientes.length){
@@ -2631,9 +2631,9 @@ function renderAplicacion(otId){
   }
 
   // --- Paso 1: elegir lotes de la tanda ---
-  if(aplicados.length) html+='<div class="div-pendiente"><span></span><em>pendiente</em><span></span></div>';
-  html+='<div class="grp-aplic-tit" style="margin:0 0 7px"><span class="ic-pend">○</span> Lotes a cerrar en esta tanda <span class="grp-count grp-count-pend">'+pendientes.length+'</span></div>';
-  html+='<div class="lotes-pick lotes-pick-hi" style="margin-bottom:8px">';
+  html+='<div class="zona-pend">';
+  html+='<div class="grp-aplic-tit"><span class="ic-pend">○</span> Lotes a cerrar en esta tanda <span class="grp-count grp-count-pend">'+pendientes.length+'</span></div>';
+  html+='<div class="lotes-pick lotes-pick-hi" style="margin-bottom:0">';
   for(var q=0;q<pendientes.length;q++){
     var pd=pendientes[q]; var plo=getLoteById(pd.loteId);
     var checked=aplicTmp.lotesSel[pd.id]?' checked':'';
@@ -2641,7 +2641,8 @@ function renderAplicacion(otId){
       esc(getCampoNombre(pd.campoId))+' · '+(plo?esc(plo.nombre):'')+' ('+f(pd.ha,1)+' ha)</label>';
   }
   html+='</div>';
-  html+='<button type="button" class="btn btn-sm" onclick="selectAllAplicLotes(\''+otId+'\')">Seleccionar todos</button>';
+  html+='</div>';
+  html+='<button type="button" class="btn btn-sm" style="margin-top:8px" onclick="selectAllAplicLotes(\''+otId+'\')">Seleccionar todos</button>';
 
   // --- Paso 2: fecha ---
   html+='<div class="form-row r3" style="margin-top:10px"><div class="fld"><label>Fecha de aplicación</label>'+
