@@ -108,6 +108,7 @@ tr:hover td { background: var(--g50); }
 .prog-etapa-label { font-size:13px; font-weight:600; color:var(--gr700); }
 .prog-rec-summary { font-size:11px; color:var(--gr500); margin-top:3px; }
 .prog-meta { display:flex; gap:16px; background:var(--g50); border:1px solid var(--g100); border-radius:8px; padding:10px 16px; margin-bottom:16px; }
+#fi-emp-sel option, #fi-camp-sel option { color:#1a1a1a; background:#fff; }
 .prog-meta-item { display:flex; flex-direction:column; }
 .prog-meta-item .pm-label { font-size:11px; color:var(--gr500); text-transform:uppercase; letter-spacing:.4px; }
 .prog-meta-item .pm-val { font-size:14px; font-weight:700; color:var(--gr900); }
@@ -500,12 +501,15 @@ input::placeholder { color: var(--gr400); }
       <input type="hidden" id="prog-lote">
       <input type="hidden" id="prog-campo">
 
-      <!-- Cultivo + campaña + filtros -->
+      <!-- Campaña (del filtro general) -->
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:13px;color:var(--gr600)">
+        <span>Campaña:</span>
+        <strong id="prog-campaña-txt" style="color:var(--gr900)">—</strong>
+        <input type="hidden" id="prog-campaña">
+      </div>
+
+      <!-- Cultivo + filtros -->
       <div class="form-row" style="margin-bottom:12px">
-        <div class="form-group">
-          <label>Campaña *</label>
-          <select id="prog-campaña" onchange="onProgCampChange()"></select>
-        </div>
         <div class="form-group">
           <label>Cultivo *</label>
           <select id="prog-cultivo" onchange="onProgCulChange()"></select>
@@ -1854,13 +1858,20 @@ function renderProgramacion() {
 }
 
 function openProgForm(id) {
-  refreshInsumos();
   const p = id ? programas.find(function(x){return x.id===id;}) : null;
+  // Alta: la campaña sale del filtro general. Si está en "Todas", no se puede programar.
+  if (!p && !_fiCampaniaFiltro) {
+    toast('Seleccioná una campaña en el filtro de arriba para programar');
+    return;
+  }
+  refreshInsumos();
   document.getElementById('prog-form-title').textContent = p ? 'Editar programacion' : 'Nueva programacion';
   document.getElementById('prog-id').value = p ? p.id : '';
 
-  // Campaña — del filtro general (o desplegable si "Todas")
-  fiPoblarSelectCampania(document.getElementById('prog-campaña'), p?p.campaña:'');
+  // Campaña: del filtro general (alta) o la guardada (edición). Sólo informativa.
+  var campaniaForm = p ? (p.campaña||'') : _fiCampaniaFiltro;
+  document.getElementById('prog-campaña').value = campaniaForm;
+  document.getElementById('prog-campaña-txt').textContent = campaniaForm || '—';
 
   // Cultivo — value = tipoActividadId (para cruzar con uso del suelo); guardamos nombre aparte
   const culsList = fiCultivosCatalogo();
@@ -2008,7 +2019,6 @@ function _buildEtapaRows(campaña, cultivo, savedEtapas) {
   wrap.innerHTML = html || '<div style="padding:16px;text-align:center;color:var(--gr400)">Sin etapas configuradas en Listas</div>';
 }
 
-function onProgCampChange() { _progLotesSel = {}; _refreshEtapas(); renderProgLotePick(); }
 function onProgCulChange()  { _progLotesSel = {}; _refreshEtapas(); renderProgLotePick(); }
 function _refreshEtapas() {
   const campaña = document.getElementById('prog-campaña').value;
@@ -2021,7 +2031,7 @@ function saveProgram() {
   const campaña = document.getElementById('prog-campaña').value;
   const tipoId  = document.getElementById('prog-cultivo').value;
   const cultivo = tipoId ? fiNombreCultivoCat(tipoId) : '';
-  if (!campaña) return shake('prog-campaña');
+  if (!campaña) { toast('Seleccioná una campaña en el filtro de arriba'); return; }
   if (!tipoId)  return shake('prog-cultivo');
 
   // Recetas por etapa (común a todos los lotes de la tanda)
