@@ -496,9 +496,12 @@ input::placeholder { color: var(--gr400); }
     </div>
     <div class="tcard" style="padding:20px">
       <input type="hidden" id="prog-id">
+      <!-- En edición: un solo lote (hidden); en alta: multi-selección -->
+      <input type="hidden" id="prog-lote">
+      <input type="hidden" id="prog-campo">
 
-      <!-- Header selectors -->
-      <div class="form-row" style="margin-bottom:16px">
+      <!-- Cultivo + campaña + filtros -->
+      <div class="form-row" style="margin-bottom:12px">
         <div class="form-group">
           <label>Campaña *</label>
           <select id="prog-campaña" onchange="onProgCampChange()"></select>
@@ -508,24 +511,23 @@ input::placeholder { color: var(--gr400); }
           <select id="prog-cultivo" onchange="onProgCulChange()"></select>
         </div>
         <div class="form-group">
-          <label>Campo *</label>
-          <select id="prog-campo" onchange="onProgCampoChange()"></select>
+          <label>Filtrar campo</label>
+          <select id="prog-f-campo" onchange="renderProgLotePick()"><option value="">Todos</option></select>
         </div>
         <div class="form-group">
-          <label>Lote *</label>
-          <select id="prog-lote" onchange="onProgLoteChange()"></select>
+          <label>Filtrar ambiente</label>
+          <select id="prog-f-ambiente" onchange="renderProgLotePick()"><option value="">Todos</option></select>
         </div>
       </div>
 
-      <!-- Meta info (campo + has) -->
-      <div class="prog-meta" id="prog-meta" style="display:none">
-        <div class="prog-meta-item">
-          <span class="pm-label">Campo</span>
-          <span class="pm-val" id="prog-meta-campo">—</span>
+      <!-- Selección múltiple de lotes -->
+      <div id="prog-lote-pick-wrap" style="margin-bottom:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <span style="font-weight:700;font-size:13px;color:var(--gr700)">Lotes a programar <span id="prog-lote-count" style="font-weight:500;color:var(--gr500);font-size:12px"></span></span>
+          <button type="button" class="btn btn-ghost btn-xs" id="prog-lote-all" onclick="toggleAllProgLotes()" style="display:none">Seleccionar todos</button>
         </div>
-        <div class="prog-meta-item">
-          <span class="pm-label">Hectareas</span>
-          <span class="pm-val" id="prog-meta-has">—</span>
+        <div class="listas-card" id="prog-lote-pick" style="max-height:200px;overflow:auto;padding:8px">
+          <div style="padding:12px;text-align:center;color:var(--gr400);font-size:13px">Elegí cultivo para ver los lotes disponibles</div>
         </div>
       </div>
 
@@ -824,7 +826,7 @@ function fiLotes(campoId){
   var eid = fiEmpresaId();
   if (typeof PA !== 'undefined' && PA.demo && eid){
     var ls = PA.demo.listarLotes(eid, campoId || null) || [];
-    return ls.map(function(l){ return { id:l.id, nombre:l.nombre, campoId:l.campoId, has:(l.ha!=null?l.ha:0) }; });
+    return ls.map(function(l){ return { id:l.id, nombre:l.nombre, campoId:l.campoId, has:(l.ha!=null?l.ha:0), ambiente:(l.ambiente||'') }; });
   }
   var all = load('fi_l_lote');
   return campoId ? all.filter(function(l){ return l.campoId===campoId; }) : all;
@@ -957,6 +959,41 @@ function fiPoblarSelectCampania(selectEl, actual){
     var o=document.createElement('option'); o.value=pre; o.textContent=pre; o.selected=true;
     selectEl.appendChild(o);
   }
+}
+
+// Ambientes distintos de los lotes de la empresa activa.
+function fiAmbientes(){
+  var ls = fiLotes();
+  var vistos = {}, out = [];
+  for (var i=0;i<ls.length;i++){
+    var a = ls[i].ambiente;
+    if (a && !vistos[a]){ vistos[a]=1; out.push(a); }
+  }
+  out.sort();
+  return out;
+}
+
+// Lotes que TIENEN el cultivo (tipoActividadId) en la campaña indicada,
+// según el uso del suelo (actividades de pa-core). Filtros opcionales por
+// campo y ambiente. Devuelve [{id,nombre,campoId,campoNombre,ambiente,has}].
+function fiLotesConCultivo(tipoActividadId, campania, campoId, ambiente){
+  var eid = fiEmpresaId();
+  if (!(typeof PA !== 'undefined' && PA.demo && eid && PA.demo.listarActividades)) return [];
+  if (!tipoActividadId || !campania) return [];
+  var acts = PA.demo.listarActividades(eid, campania) || [];
+  var lotesConCult = {};
+  for (var i=0;i<acts.length;i++){
+    if (acts[i].tipoActividadId === tipoActividadId) lotesConCult[acts[i].loteId] = 1;
+  }
+  var ls = fiLotes(campoId || null);
+  var out = [];
+  for (var j=0;j<ls.length;j++){
+    var l = ls[j];
+    if (!lotesConCult[l.id]) continue;
+    if (ambiente && l.ambiente !== ambiente) continue;
+    out.push({ id:l.id, nombre:l.nombre, campoId:l.campoId, campoNombre:fiNombreCampo(l.campoId), ambiente:l.ambiente, has:l.has });
+  }
+  return out;
 }
 
 // one-time clear of old seeded data
@@ -1346,6 +1383,10 @@ const MODOS_BASE = {
 };
 
 let lEtapas   = load('fi_l_etapa');
+// PENDIENTE (coordinar con Mariana): MODOS DE ACCIÓN debería ser una tabla
+// de Maestros (catálogo global de Puntal, vía PA.demo.listarModosAccion),
+// no una lista local de este módulo. Por ahora queda acá; migrar más adelante
+// igual que se hizo con unidades/insumos. Clave local temporal: 'fi_l_modo'.
 let lModos    = load('fi_l_modo');
 
 if (!lEtapas.length) {
@@ -1568,14 +1609,6 @@ function buildInsOpts(selectedId, filter) {
       }).join('');
 }
 
-function filterInsSelect(rowId, q) {
-  var sel = document.querySelector('select[data-rowid="'+rowId+'"]');
-  if (!sel) return;
-  var cur = sel.value;
-  sel.innerHTML = buildInsOpts(cur, q);
-  if (cur && sel.querySelector('option[value="'+cur+'"]')) sel.value = cur;
-}
-
 function addRecLine(data) {
   const tbody = document.getElementById('rec-lines');
   const rowId = uid();
@@ -1584,9 +1617,6 @@ function addRecLine(data) {
   tr.dataset.rowid = rowId;
   tr.innerHTML =
     '<td style="min-width:200px">'
-      + '<input type="text" id="rl-search-'+rowId+'"'
-        + ' oninput="filterInsSelect(\''+rowId+'\',this.value)"'
-        + ' style="width:100%;margin-bottom:3px;padding:2px 6px;border:1px solid var(--gr300);border-radius:4px;font-size:12px;box-sizing:border-box">'
       + '<select onchange="syncRecLine(this)" data-rowid="'+rowId+'" style="width:100%">'+insOpts+'</select>'
     + '</td>'
     + '<td><span class="rec-ro" id="rl-tipo-'+rowId+'">—</span></td>'
@@ -1832,32 +1862,32 @@ function openProgForm(id) {
   // Campaña — del filtro general (o desplegable si "Todas")
   fiPoblarSelectCampania(document.getElementById('prog-campaña'), p?p.campaña:'');
 
-  // Cultivo
+  // Cultivo — value = tipoActividadId (para cruzar con uso del suelo); guardamos nombre aparte
   const culsList = fiCultivosCatalogo();
   const selCul = document.getElementById('prog-cultivo');
+  var curTipoId = '';
+  if (p && p.tipoActividadId) curTipoId = p.tipoActividadId;
+  else if (p && p.cultivo) { var m=culsList.find(function(c){return c.nombre===p.cultivo;}); if(m) curTipoId=m.id; }
   selCul.innerHTML = '<option value="">— Cultivo —</option>' +
-    culsList.map(function(c){ return '<option value="'+esc(c.nombre)+'"'+(p&&p.cultivo===c.nombre?' selected':'')+'>'+esc(c.nombre)+'</option>'; }).join('');
+    culsList.map(function(c){ return '<option value="'+c.id+'"'+(c.id===curTipoId?' selected':'')+'>'+esc(c.nombre)+'</option>'; }).join('');
 
-  // Campo
+  // Filtros de lote: campo y ambiente
   const camposList = fiCampos();
-  const selCampo = document.getElementById('prog-campo');
-  var selCampoId = '';
-  if (p && p.loteId) {
-    const allLotes = fiLotes();
-    const curLote = allLotes.find(function(l){ return l.id===p.loteId; });
-    if (curLote) selCampoId = curLote.campoId || '';
-  }
-  selCampo.innerHTML = '<option value="">— Campo —</option>' +
-    camposList.map(function(c){ return '<option value="'+c.id+'"'+(c.id===selCampoId?' selected':'')+'>'+esc(c.nombre)+'</option>'; }).join('');
+  document.getElementById('prog-f-campo').innerHTML = '<option value="">Todos</option>' +
+    camposList.map(function(c){ return '<option value="'+c.id+'">'+esc(c.nombre)+'</option>'; }).join('');
+  document.getElementById('prog-f-ambiente').innerHTML = '<option value="">Todos</option>' +
+    fiAmbientes().map(function(a){ return '<option value="'+esc(a)+'">'+esc(a)+'</option>'; }).join('');
 
-  // Lotes (filtered by campo if selected)
-  _buildProgLoteOptions(selCampoId, p ? p.loteId : null);
-
+  // Estado de lotes tildados (alta). En edición, el lote único viene de p.loteId.
+  _progLotesSel = {};
   if (p) {
-    _showProgMeta(p.loteId);
+    document.getElementById('prog-lote').value = p.loteId || '';
+    document.getElementById('prog-campo').value = '';
+    renderProgLotePick();       // mostrará el lote de la programación, ya tildado
     _buildEtapaRows(p.campaña, p.cultivo, p.etapas||[]);
   } else {
-    document.getElementById('prog-meta').style.display = 'none';
+    document.getElementById('prog-lote').value = '';
+    renderProgLotePick();
     document.getElementById('prog-etapas-wrap').innerHTML =
       '<div style="padding:16px;text-align:center;color:var(--gr400);font-size:13px">Selecciona campaña y cultivo para ver las etapas disponibles</div>';
   }
@@ -1871,32 +1901,74 @@ function closeProgForm() {
   document.getElementById('prog-form').style.display = 'none';
 }
 
-function _buildProgLoteOptions(campoId, selLoteId) {
-  const lotes = fiLotes();
-  const sel = document.getElementById('prog-lote');
-  const filtered = campoId ? lotes.filter(function(l){ return l.campoId===campoId; }) : lotes;
-  if (!campoId) {
-    sel.innerHTML = '<option value="">— Seleccionar campo primero —</option>';
-    sel.disabled = true;
+// Estado de selección múltiple de lotes (solo alta).
+var _progLotesSel = {};
+var _progEditMode  = false;
+
+// Pinta la lista de lotes candidatos según cultivo + campaña + filtros.
+function renderProgLotePick() {
+  var wrap   = document.getElementById('prog-lote-pick');
+  var btnAll = document.getElementById('prog-lote-all');
+  var countEl= document.getElementById('prog-lote-count');
+  var editId = document.getElementById('prog-id').value;
+  var tipoId = document.getElementById('prog-cultivo').value;
+  var camp   = document.getElementById('prog-campaña').value;
+
+  // En edición: mostrar solo el lote de esa programación (no se cambia el lote al editar)
+  if (editId) {
+    var loteId = document.getElementById('prog-lote').value;
+    var ls = fiLotes();
+    var lo = ls.find(function(l){ return l.id===loteId; });
+    btnAll.style.display = 'none';
+    countEl.textContent = '';
+    wrap.innerHTML = lo
+      ? '<label class="prog-lote-row" style="display:flex;align-items:center;gap:8px;padding:4px 2px;font-size:13px"><input type="checkbox" checked disabled> <strong>'+esc(lo.nombre)+'</strong> <span style="color:var(--gr500)">'+esc(fiNombreCampo(lo.campoId))+(lo.ambiente?' · '+esc(lo.ambiente):'')+' · '+fmt(lo.has)+' ha</span></label>'
+      : '<div style="padding:12px;color:var(--gr400);font-size:13px">Lote no encontrado</div>';
     return;
   }
-  sel.disabled = false;
-  sel.innerHTML = '<option value="">— Lote —</option>' +
-    filtered.map(function(l){
-      return '<option value="'+l.id+'"'+(l.id===selLoteId?' selected':'')+'>'+esc(l.nombre)+' ('+fmt(l.has)+' ha)</option>';
-    }).join('');
+
+  if (!tipoId || !camp) {
+    btnAll.style.display = 'none'; countEl.textContent = '';
+    wrap.innerHTML = '<div style="padding:12px;text-align:center;color:var(--gr400);font-size:13px">'
+      + (!camp ? 'Seleccioná una campaña' : 'Elegí cultivo para ver los lotes disponibles') + '</div>';
+    return;
+  }
+
+  var fCampo = document.getElementById('prog-f-campo').value;
+  var fAmb   = document.getElementById('prog-f-ambiente').value;
+  var lotes  = fiLotesConCultivo(tipoId, camp, fCampo, fAmb);
+
+  if (!lotes.length) {
+    btnAll.style.display = 'none'; countEl.textContent = '';
+    wrap.innerHTML = '<div style="padding:12px;text-align:center;color:var(--gr400);font-size:13px">Ningún lote tiene este cultivo en la campaña '+esc(camp)+(fCampo||fAmb?' con esos filtros':'')+'</div>';
+    return;
+  }
+
+  btnAll.style.display = '';
+  var nSel = lotes.filter(function(l){ return _progLotesSel[l.id]; }).length;
+  countEl.textContent = '· ' + nSel + ' de ' + lotes.length + ' seleccionados';
+  wrap.innerHTML = lotes.map(function(l){
+    var ck = _progLotesSel[l.id] ? ' checked' : '';
+    return '<label class="prog-lote-row" style="display:flex;align-items:center;gap:8px;padding:4px 2px;font-size:13px;cursor:pointer">'
+      + '<input type="checkbox"'+ck+' onchange="toggleProgLote(\''+l.id+'\',this.checked)"> '
+      + '<strong>'+esc(l.nombre)+'</strong> '
+      + '<span style="color:var(--gr500)">'+esc(l.campoNombre)+(l.ambiente?' · '+esc(l.ambiente):'')+' · '+fmt(l.has)+' ha</span>'
+      + '</label>';
+  }).join('');
 }
 
-function _showProgMeta(loteId) {
-  const lotes  = fiLotes();
-  const campos = fiCampos();
-  const lote   = lotes.find(function(l){return l.id===loteId;});
-  const meta   = document.getElementById('prog-meta');
-  if (!lote) { meta.style.display='none'; return; }
-  const campo = campos.find(function(c){return c.id===lote.campoId;});
-  document.getElementById('prog-meta-campo').textContent = campo ? campo.nombre : '—';
-  document.getElementById('prog-meta-has').textContent   = fmt(lote.has) + ' ha';
-  meta.style.display = 'flex';
+function toggleProgLote(id, on){
+  if (on) _progLotesSel[id] = 1; else delete _progLotesSel[id];
+  var lotes = fiLotesConCultivo(document.getElementById('prog-cultivo').value, document.getElementById('prog-campaña').value, document.getElementById('prog-f-campo').value, document.getElementById('prog-f-ambiente').value);
+  var nSel = lotes.filter(function(l){ return _progLotesSel[l.id]; }).length;
+  document.getElementById('prog-lote-count').textContent = '· ' + nSel + ' de ' + lotes.length + ' seleccionados';
+}
+
+function toggleAllProgLotes(){
+  var lotes = fiLotesConCultivo(document.getElementById('prog-cultivo').value, document.getElementById('prog-campaña').value, document.getElementById('prog-f-campo').value, document.getElementById('prog-f-ambiente').value);
+  var allSel = lotes.length && lotes.every(function(l){ return _progLotesSel[l.id]; });
+  lotes.forEach(function(l){ if (allSel) delete _progLotesSel[l.id]; else _progLotesSel[l.id]=1; });
+  renderProgLotePick();
 }
 
 function _buildEtapaRows(campaña, cultivo, savedEtapas) {
@@ -1936,40 +2008,23 @@ function _buildEtapaRows(campaña, cultivo, savedEtapas) {
   wrap.innerHTML = html || '<div style="padding:16px;text-align:center;color:var(--gr400)">Sin etapas configuradas en Listas</div>';
 }
 
-function onProgCampChange() { _refreshEtapas(); }
-function onProgCulChange()  { _refreshEtapas(); }
+function onProgCampChange() { _progLotesSel = {}; _refreshEtapas(); renderProgLotePick(); }
+function onProgCulChange()  { _progLotesSel = {}; _refreshEtapas(); renderProgLotePick(); }
 function _refreshEtapas() {
   const campaña = document.getElementById('prog-campaña').value;
-  const cultivo  = document.getElementById('prog-cultivo').value;
+  const tipoId  = document.getElementById('prog-cultivo').value;
+  const cultivo = tipoId ? fiNombreCultivoCat(tipoId) : '';
   _buildEtapaRows(campaña, cultivo, []);
-}
-
-function onProgCampoChange() {
-  const campoId = document.getElementById('prog-campo').value;
-  _buildProgLoteOptions(campoId, null);
-  document.getElementById('prog-meta').style.display = 'none';
-}
-
-function onProgLoteChange() {
-  const loteId = document.getElementById('prog-lote').value;
-  _showProgMeta(loteId);
 }
 
 function saveProgram() {
   const campaña = document.getElementById('prog-campaña').value;
-  const cultivo  = document.getElementById('prog-cultivo').value;
-  const loteId   = document.getElementById('prog-lote').value;
-  const campoId = document.getElementById('prog-campo').value;
+  const tipoId  = document.getElementById('prog-cultivo').value;
+  const cultivo = tipoId ? fiNombreCultivoCat(tipoId) : '';
   if (!campaña) return shake('prog-campaña');
-  if (!cultivo)  return shake('prog-cultivo');
-  if (!campoId)  return shake('prog-campo');
-  if (!loteId)   return shake('prog-lote');
+  if (!tipoId)  return shake('prog-cultivo');
 
-  const lotes  = fiLotes();
-  const campos = fiCampos();
-  const lote   = lotes.find(function(l){return l.id===loteId;}) || {};
-  const campo  = campos.find(function(c){return c.id===lote.campoId;}) || {};
-
+  // Recetas por etapa (común a todos los lotes de la tanda)
   const etapas = [];
   document.querySelectorAll('#prog-etapas-wrap .prog-etapa-row').forEach(function(row) {
     const etapaNombre = row.dataset.etapa;
@@ -1977,41 +2032,44 @@ function saveProgram() {
     etapas.push({ etapa: etapaNombre, recetaId: sel ? sel.value : '' });
   });
 
-  const id = document.getElementById('prog-id').value;
-  const obj = {
-    id: id || uid(),
-    campaña:    campaña,
-    cultivo:    cultivo,
-    loteId:     loteId,
-    loteNombre: lote.nombre || '',
-    campoNombre: campo.nombre || '',
-    has:        parseFloat(lote.has) || 0,
-    etapas:     etapas
-  };
-  // Upsert: if editing by id use that; otherwise find existing entry for same loteId+cultivo
-  const editIdx = id ? programas.findIndex(function(x){return x.id===id;}) : -1;
-  const dupeIdx = editIdx<0 ? programas.findIndex(function(x){return x.loteId===loteId && x.cultivo===cultivo && x.campaña===campaña;}) : -1;
-  if (editIdx>=0) {
-    programas[editIdx] = obj;
-  } else if (dupeIdx>=0) {
-    // Merge etapas into existing entry (new selections override old ones for same etapa)
-    const existing = programas[dupeIdx];
-    const merged = [...(existing.etapas||[])];
-    etapas.forEach(function(ne) {
-      const mi = merged.findIndex(function(me){ return me.etapa===ne.etapa; });
-      if (mi>=0) { if (ne.recetaId) merged[mi] = ne; }
-      else merged.push(ne);
-    });
-    programas[dupeIdx] = Object.assign({}, existing, { etapas: merged });
-    obj.id = existing.id;
-  } else {
-    programas.push(obj);
+  const lotes  = fiLotes();
+  const campos = fiCampos();
+  const editId = document.getElementById('prog-id').value;
+
+  if (editId) {
+    // Edición: una sola programación, su lote no cambia
+    var loteId = document.getElementById('prog-lote').value;
+    var lote   = lotes.find(function(l){return l.id===loteId;}) || {};
+    var campo  = campos.find(function(c){return c.id===lote.campoId;}) || {};
+    var i = programas.findIndex(function(x){return x.id===editId;});
+    if (i>=0) programas[i] = {
+      id: editId, campaña: campaña, cultivo: cultivo, tipoActividadId: tipoId,
+      loteId: loteId, loteNombre: lote.nombre||'', campoNombre: campo.nombre||'',
+      has: lote.has||0, etapas: etapas
+    };
+    save('fi_programacion', programas);
+    closeProgForm(); renderProgramacion();
+    toast('Programación actualizada');
+    return;
   }
+
+  // Alta: una programación por cada lote tildado
+  var seleccionados = Object.keys(_progLotesSel);
+  if (!seleccionados.length) { toast('Tildá al menos un lote'); return; }
+  var creadas = 0;
+  seleccionados.forEach(function(loteId){
+    var lote  = lotes.find(function(l){return l.id===loteId;}) || {};
+    var campo = campos.find(function(c){return c.id===lote.campoId;}) || {};
+    programas.push({
+      id: uid(), campaña: campaña, cultivo: cultivo, tipoActividadId: tipoId,
+      loteId: loteId, loteNombre: lote.nombre||'', campoNombre: campo.nombre||'',
+      has: lote.has||0, etapas: etapas.slice()
+    });
+    creadas++;
+  });
   save('fi_programacion', programas);
-  closeProgForm();
-  renderProgramacion();
-  updateCounts();
-  toast('Programacion guardada');
+  closeProgForm(); renderProgramacion();
+  toast(creadas+' programacion'+(creadas!==1?'es':'')+' creada'+(creadas!==1?'s':''));
 }
 
 function showRecetaDetalle(recId) {
@@ -2138,9 +2196,9 @@ function calcResumen() {
         if (!result[key]) {
           result[key] = {
             insumoKey:  key,
-            nombre:     linea.nombre,
-            tipo:       linea.tipo,
-            unidad:     linea.unidad,
+            nombre:     (item && item.nombre) || linea.nombre,
+            tipo:       (item && item.tipo)   || linea.tipo,
+            unidad:     (item && item.unidad) || linea.unidad,
             totalQty:   0,
             totalCost:  0
           };
@@ -2219,6 +2277,7 @@ function renderCultivoBreakdown() {
 }
 
 function renderResumen() {
+  refreshInsumos();
   var rows  = calcResumen();
   var tbody = document.getElementById('res-tbody');
   var cards = document.getElementById('res-cards');
