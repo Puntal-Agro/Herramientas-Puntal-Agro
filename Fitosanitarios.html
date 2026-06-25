@@ -282,8 +282,17 @@ input::placeholder { color: var(--gr400); }
 
 <header>
   <h1>Gestion Fitosanitaria</h1>
-  <button onclick="resetAllData()" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer;font-family:var(--font);">Borrar todos los datos</button>
-
+  <div style="display:flex;align-items:center;gap:12px;margin-left:auto">
+    <div id="fi-emp-wrap" style="display:flex;align-items:center;gap:6px">
+      <span style="color:rgba(255,255,255,.75);font-size:11px">Empresa:</span>
+      <select id="fi-emp-sel" onchange="fiOnCambioEmpresa()" style="font-family:var(--font);font-size:12px;border-radius:6px;padding:4px 8px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.12);color:#fff;cursor:pointer"></select>
+    </div>
+    <div id="fi-camp-wrap" style="display:flex;align-items:center;gap:6px">
+      <span style="color:rgba(255,255,255,.75);font-size:11px">Campaña:</span>
+      <select id="fi-camp-sel" onchange="fiOnCambioCampania(this.value)" style="font-family:var(--font);font-size:12px;border-radius:6px;padding:4px 8px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.12);color:#fff;cursor:pointer"></select>
+    </div>
+    <button onclick="resetAllData()" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer;font-family:var(--font);">Borrar todos los datos</button>
+  </div>
 </header>
 
 <nav class="tabs-nav">
@@ -303,68 +312,15 @@ input::placeholder { color: var(--gr400); }
 
     <!-- Sidebar nav -->
     <div class="listas-nav">
-      <button class="listas-nav-btn active" onclick="showLista('campaña',this)">Campaña <span class="lnb-cnt" id="lcnt-campaña">0</span></button>
-      <button class="listas-nav-btn" onclick="showLista('campo',this)">Campo <span class="lnb-cnt" id="lcnt-campo">0</span></button>
-      <button class="listas-nav-btn" onclick="showLista('lote',this)">Lotes <span class="lnb-cnt" id="lcnt-lote">0</span></button>
-      <button class="listas-nav-btn" onclick="showLista('cultivo',this)">Cultivos <span class="lnb-cnt" id="lcnt-cultivo">0</span></button>
-      <button class="listas-nav-btn" onclick="showLista('etapa',this)">Etapas <span class="lnb-cnt" id="lcnt-etapa">0</span></button>
-      <button class="listas-nav-btn" onclick="showLista('unidad',this)">Unidades <span class="lnb-cnt" id="lcnt-unidad">0</span></button>
+      <button class="listas-nav-btn active" onclick="showLista('etapa',this)">Etapas <span class="lnb-cnt" id="lcnt-etapa">0</span></button>
       <button class="listas-nav-btn" onclick="showLista('modo',this)">Modos de Accion <span class="lnb-cnt" id="lcnt-modo">0</span></button>
     </div>
 
     <!-- Panels -->
     <div style="min-width:0">
 
-      <!-- CAMPAÑA -->
-      <div class="listas-panel active" id="lp-campaña">
-        <div class="listas-card">
-          <div class="listas-card-hdr">
-            <div><h3>Campañas</h3><p>Periodos de siembra (ej. 25-26, 26-27)</p></div>
-            <button class="btn btn-primary btn-sm" onclick="openListaModal('campaña')">+ Agregar</button>
-          </div>
-          <table><thead><tr><th>#</th><th>Nombre</th><th></th></tr></thead>
-          <tbody id="lt-campaña"></tbody></table>
-        </div>
-      </div>
-
-      <!-- CAMPO -->
-      <div class="listas-panel" id="lp-campo">
-        <div class="listas-card">
-          <div class="listas-card-hdr">
-            <div><h3>Campos</h3><p>Unidades productivas o establecimientos</p></div>
-            <button class="btn btn-primary btn-sm" onclick="openListaModal('campo')">+ Agregar</button>
-          </div>
-          <table><thead><tr><th>#</th><th>Nombre</th><th></th></tr></thead>
-          <tbody id="lt-campo"></tbody></table>
-        </div>
-      </div>
-
-      <!-- LOTES -->
-      <div class="listas-panel" id="lp-lote">
-        <div class="listas-card">
-          <div class="listas-card-hdr">
-            <div><h3>Lotes</h3><p>Parcelas dentro de cada campo</p></div>
-            <button class="btn btn-primary btn-sm" onclick="openListaModal('lote')">+ Agregar</button>
-          </div>
-          <table><thead><tr><th>#</th><th>Lote</th><th>Campo</th><th class="num">Hectareas</th><th></th></tr></thead>
-          <tbody id="lt-lote"></tbody></table>
-        </div>
-      </div>
-
-      <!-- CULTIVOS -->
-      <div class="listas-panel" id="lp-cultivo">
-        <div class="listas-card">
-          <div class="listas-card-hdr">
-            <div><h3>Cultivos</h3><p>Especies o variedades a sembrar</p></div>
-            <button class="btn btn-primary btn-sm" onclick="openListaModal('cultivo')">+ Agregar</button>
-          </div>
-          <table><thead><tr><th>#</th><th>Nombre</th><th></th></tr></thead>
-          <tbody id="lt-cultivo"></tbody></table>
-        </div>
-      </div>
-
       <!-- ETAPAS -->
-      <div class="listas-panel" id="lp-etapa">
+      <div class="listas-panel active" id="lp-etapa">
         <div class="listas-card">
           <div class="listas-card-hdr">
             <div><h3>Etapas</h3><p>Momentos de aplicacion dentro del ciclo del cultivo</p></div>
@@ -372,18 +328,6 @@ input::placeholder { color: var(--gr400); }
           </div>
           <table><thead><tr><th>#</th><th>Nombre</th><th>Orden</th><th></th></tr></thead>
           <tbody id="lt-etapa"></tbody></table>
-        </div>
-      </div>
-
-      <!-- UNIDADES -->
-      <div class="listas-panel" id="lp-unidad">
-        <div class="listas-card">
-          <div class="listas-card-hdr">
-            <div><h3>Unidades de medida</h3><p>Unidades disponibles para los insumos (Lt, Kg, g, etc.)</p></div>
-            <button class="btn btn-primary btn-sm" onclick="openListaModal('unidad')">+ Agregar</button>
-          </div>
-          <table><thead><tr><th>#</th><th>Unidad</th><th></th></tr></thead>
-          <tbody id="lt-unidad"></tbody></table>
         </div>
       </div>
 
@@ -409,7 +353,7 @@ input::placeholder { color: var(--gr400); }
     <h2>Insumos</h2>
     <div class="toolbar-right">
       <div class="search-wrap"><span class="si">&#128269;</span><input type="text" id="ins-search" oninput="renderInsumos()"></div>
-      <button class="btn btn-primary" onclick="openInsModal()">+ Agregar insumo</button>
+      <span style="font-size:12px;color:var(--gr500)">Catálogo de Maestros · precio editable para planificar</span>
     </div>
   </div>
   <div class="tcard">
@@ -422,7 +366,7 @@ input::placeholder { color: var(--gr400); }
 <div class="tab-panel" id="panel-campos">
   <div class="toolbar">
     <h2>Campos y Lotes</h2>
-    <button class="btn btn-primary" onclick="openCampoModal()">+ Agregar campo</button>
+    <span style="font-size:12px;color:var(--gr500)">Se administran en Plan de Uso del Suelo</span>
   </div>
   <div id="campos-wrap"></div>
 </div>
@@ -532,7 +476,6 @@ input::placeholder { color: var(--gr400); }
     <!-- Filtros -->
     <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;background:var(--gr100);border-radius:8px;padding:8px 12px">
       <span style="font-size:11px;color:var(--gr500);font-weight:600;white-space:nowrap">Filtrar:</span>
-      <select id="pf-camp" onchange="renderProgramacion()" style="font-size:12px;padding:3px 6px;border:1px solid var(--gr300);border-radius:5px;flex:1;min-width:0"><option value="">Todas las campañas</option></select>
       <select id="pf-campo" onchange="renderProgramacion()" style="font-size:12px;padding:3px 6px;border:1px solid var(--gr300);border-radius:5px;flex:1;min-width:0"><option value="">Todos los campos</option></select>
       <select id="pf-cultivo" onchange="renderProgramacion()" style="font-size:12px;padding:3px 6px;border:1px solid var(--gr300);border-radius:5px;flex:1;min-width:0"><option value="">Todos los cultivos</option></select>
       <button onclick="clearProgFiltros()" style="font-size:10px;padding:2px 7px;border:1px solid var(--gr300);border-radius:4px;background:var(--white);color:var(--gr500);cursor:pointer;white-space:nowrap;flex-shrink:0">x Limpiar</button>
@@ -615,12 +558,6 @@ input::placeholder { color: var(--gr400); }
 
   <!-- Filtros -->
   <div class="res-filters">
-    <div class="form-group">
-      <label>Campaña</label>
-      <select id="res-f-camp" onchange="renderResumen()">
-        <option value="">Todas</option>
-      </select>
-    </div>
     <div class="form-group">
       <label>Campo</label>
       <select id="res-f-campo" onchange="renderResumen()">
@@ -713,93 +650,26 @@ input::placeholder { color: var(--gr400); }
 
 <div id="toast"></div>
 
-<!-- MODAL: INSUMO -->
+<!-- MODAL: INSUMO (precio de planificación; catálogo solo lectura) -->
 <div class="modal-backdrop hidden" id="m-ins">
   <div class="modal">
-    <div class="modal-hdr"><h3 id="m-ins-title">Agregar insumo</h3><button class="x-btn" onclick="closeModal('m-ins')">x</button></div>
+    <div class="modal-hdr"><h3 id="m-ins-title">Precio de planificación</h3><button class="x-btn" onclick="closeModal('m-ins')">x</button></div>
     <div class="modal-body">
       <input type="hidden" id="ins-id">
-      <div class="form-group"><label>Nombre *</label><input type="text" id="ins-nombre"></div>
+      <p style="font-size:12px;color:var(--gr500);margin:0 0 12px">El insumo viene del catálogo (Maestros). Acá solo editás el precio para planificar el costo del plan.</p>
+      <div class="form-group"><label>Insumo</label><input type="text" id="ins-nombre-ro" disabled></div>
       <div class="form-row">
-        <div class="form-group">
-          <label>Tipo *</label>
-          <select id="ins-tipo" onchange="populateModoSelect(this.value,'')">
-            <option value="">— Seleccionar —</option>
-            <option>Herbicida</option><option>Fungicida</option><option>Insecticida</option>
-            <option>Coadyuvante</option><option>Fertilizante</option><option>Curasemilla</option><option>Inoculante</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Unidad *</label>
-          <select id="ins-unidad"></select>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>U$S/u</label>
-          <input type="number" id="ins-precio" value="" min="0" step="0.01">
-        </div>
-        <div class="form-group">
-          <label>EIQ</label>
-          <input type="number" id="ins-eiq" value="" min="0" step="0.01">
-        </div>
+        <div class="form-group"><label>Tipo</label><input type="text" id="ins-tipo-ro" disabled></div>
+        <div class="form-group"><label>Unidad</label><input type="text" id="ins-unidad-ro" disabled></div>
       </div>
       <div class="form-group">
-        <label>Modo de Acción</label>
-        <select id="ins-modo"><option value="">— Sin especificar —</option></select>
-        <div class="modo-add-form" id="modo-add-form" style="display:none"></div>
-      </div>
-      <div class="form-group">
-        <label>Banda Toxicologica</label>
-        <input type="hidden" id="ins-banda" value="">
-        <div class="banda-selector">
-          <button type="button" class="banda-opt banda-none active" data-val="" onclick="selectBanda(this)">Sin especificar</button>
-          <button type="button" class="banda-opt" data-val="Ia" onclick="selectBanda(this)" style="background:#c0392b;color:#fff;border-color:#c0392b">Clase Ia</button>
-          <button type="button" class="banda-opt" data-val="Ib" onclick="selectBanda(this)" style="background:#e74c3c;color:#fff;border-color:#e74c3c">Clase Ib</button>
-          <button type="button" class="banda-opt" data-val="II" onclick="selectBanda(this)" style="background:#f39c12;color:#fff;border-color:#f39c12">Clase II</button>
-          <button type="button" class="banda-opt" data-val="III" onclick="selectBanda(this)" style="background:#2980b9;color:#fff;border-color:#2980b9">Clase III</button>
-          <button type="button" class="banda-opt" data-val="IV" onclick="selectBanda(this)" style="background:#27ae60;color:#fff;border-color:#27ae60">Clase IV</button>
-        </div>
+        <label>Precio de planificación (U$S/u)</label>
+        <input type="number" id="ins-precio" value="" min="0" step="0.01">
       </div>
     </div>
     <div class="modal-ftr">
       <button class="btn btn-secondary" onclick="closeModal('m-ins')">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveInsumo()">Guardar</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: CAMPO -->
-<div class="modal-backdrop hidden" id="m-campo">
-  <div class="modal">
-    <div class="modal-hdr"><h3 id="m-campo-title">Agregar campo</h3><button class="x-btn" onclick="closeModal('m-campo')">x</button></div>
-    <div class="modal-body">
-      <input type="hidden" id="campo-id">
-      <div class="form-group"><label>Nombre del campo *</label><input type="text" id="campo-nombre"></div>
-      <div class="form-group"><label>Descripcion / Ubicacion</label><input type="text" id="campo-desc"></div>
-    </div>
-    <div class="modal-ftr">
-      <button class="btn btn-secondary" onclick="closeModal('m-campo')">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveCampo()">Guardar</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: LOTE -->
-<div class="modal-backdrop hidden" id="m-lote">
-  <div class="modal">
-    <div class="modal-hdr"><h3 id="m-lote-title">Agregar lote</h3><button class="x-btn" onclick="closeModal('m-lote')">x</button></div>
-    <div class="modal-body">
-      <input type="hidden" id="lote-id">
-      <input type="hidden" id="lote-campo-id">
-      <div class="form-row">
-        <div class="form-group"><label>Nombre del lote *</label><input type="text" id="lote-nombre"></div>
-        <div class="form-group"><label>Superficie (has) *</label><input type="number" id="lote-has" min="0" step="0.01"></div>
-      </div>
-    </div>
-    <div class="modal-ftr">
-      <button class="btn btn-secondary" onclick="closeModal('m-lote')">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveLote()">Guardar</button>
+      <button class="btn btn-primary" onclick="saveInsumoPrecio()">Guardar precio</button>
     </div>
   </div>
 </div>
@@ -810,9 +680,9 @@ input::placeholder { color: var(--gr400); }
     <div class="modal-hdr"><h3 id="m-cul-title">Agregar cultivo</h3><button class="x-btn" onclick="closeModal('m-cultivo')">x</button></div>
     <div class="modal-body">
       <input type="hidden" id="cul-id">
-      <div class="form-group"><label>Nombre del cultivo *</label><input type="text" id="cul-nombre"></div>
+      <div class="form-group"><label>Cultivo *</label><select id="cul-tipo"></select></div>
       <div class="form-row">
-        <div class="form-group"><label>Campaña *</label><input type="text" id="cul-campaña"></div>
+        <div class="form-group"><label>Campaña *</label><select id="cul-campaña"></select></div>
         <div class="form-group"><label>Fecha</label><input type="date" id="cul-fecha"></div>
       </div>
     </div>
@@ -844,54 +714,6 @@ input::placeholder { color: var(--gr400); }
     <div class="modal-ftr">
       <button class="btn btn-secondary" onclick="closeModal('m-planteo')">Cancelar</button>
       <button class="btn btn-primary" onclick="savePlanteo()">Guardar planteo</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: PROGRAMACION -->
-<div class="modal-backdrop hidden" id="m-prog">
-  <div class="modal modal-xl">
-    <div class="modal-hdr"><h3 id="m-prog-title">Agregar programacion</h3><button class="x-btn" onclick="closeModal('m-prog')">x</button></div>
-    <div class="modal-body">
-      <input type="hidden" id="prog-id">
-      <div class="form-row">
-        <div class="form-group">
-          <label>Campo</label>
-          <select id="prog-campo" onchange="onProgCampoChange()"><option value="">— Sin campo —</option></select>
-        </div>
-        <div class="form-group">
-          <label>Lote</label>
-          <select id="prog-lote" onchange="onProgLoteChange()" disabled><option value="">— Seleccionar campo primero —</option></select>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Hectareas</label>
-          <input type="number" id="prog-has" min="0" step="0.01">
-        </div>
-        <div class="form-group">
-          <label>Cultivo *</label>
-          <select id="prog-cultivo" onchange="onProgCultivoChange()"><option value="">— Seleccionar —</option></select>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Etapa *</label>
-          <select id="prog-etapa" onchange="onProgEtapaChange()" disabled><option value="">— Seleccionar cultivo primero —</option></select>
-        </div>
-        <div class="form-group">
-          <label>Planteo tecnico *</label>
-          <select id="prog-planteo" onchange="showProgPreview()" disabled><option value="">— Seleccionar etapa primero —</option></select>
-        </div>
-      </div>
-      <div id="prog-preview" style="display:none;background:var(--g50);border:1px solid var(--g100);border-radius:var(--r);padding:12px;margin-top:4px">
-        <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--g800);letter-spacing:.05em;margin-bottom:8px">Vista previa de la receta</div>
-        <table class="ptbl" id="prog-prev-tbl"></table>
-      </div>
-    </div>
-    <div class="modal-ftr">
-      <button class="btn btn-secondary" onclick="closeModal('m-prog')">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveProg()">Guardar</button>
     </div>
   </div>
 </div>
@@ -964,6 +786,7 @@ input::placeholder { color: var(--gr400); }
   </div>
 </div>
 
+<script src="pa-core.js"></script>
 <script>
 // ══════════════════════════
 //  DATA
@@ -977,11 +800,164 @@ const save = (k,v) => localStorage.setItem(k, JSON.stringify(v));
 const uid  = () => Date.now().toString(36) + Math.random().toString(36).slice(2,6);
 
 let ins   = load('fi_ins');
-let camps = load('fi_camps');
 let culs  = load('fi_culs');
-let progs = load('fi_progs');
 let recs  = load('fi_recs');
 let programas = load('fi_programacion');
+
+// ──────────────────────────────────────────────────────────────
+//  FUENTE ÚNICA de campos y lotes (Etapa 2).
+//  Salen de pa-core, filtrados por la empresa activa. No se editan
+//  acá: se administran en Plan de Uso del Suelo. Fallback a claves
+//  locales solo si no hay pa-core/contexto (modo demo sin servidor).
+// ──────────────────────────────────────────────────────────────
+function fiEmpresaId(){ return (typeof CTX !== 'undefined' && CTX) ? CTX.empresaActivaId : null; }
+
+// Campos de la empresa activa: [{id, nombre, ...}]
+function fiCampos(){
+  var eid = fiEmpresaId();
+  if (typeof PA !== 'undefined' && PA.demo && eid) return PA.demo.camposDeEmpresa(eid) || [];
+  return load('fi_camps');
+}
+
+// Lotes de la empresa activa (opcional: de un campo). Normaliza ha→has para la vista.
+function fiLotes(campoId){
+  var eid = fiEmpresaId();
+  if (typeof PA !== 'undefined' && PA.demo && eid){
+    var ls = PA.demo.listarLotes(eid, campoId || null) || [];
+    return ls.map(function(l){ return { id:l.id, nombre:l.nombre, campoId:l.campoId, has:(l.ha!=null?l.ha:0) }; });
+  }
+  var all = load('fi_l_lote');
+  return campoId ? all.filter(function(l){ return l.campoId===campoId; }) : all;
+}
+
+function fiNombreCampo(campoId){
+  var cs = fiCampos();
+  for (var i=0;i<cs.length;i++){ if(cs[i].id===campoId) return cs[i].nombre; }
+  return '';
+}
+
+// ──────────────────────────────────────────────────────────────
+//  FUENTE ÚNICA de insumos (Etapa "pieza 2").
+//  El catálogo sale de pa-core (Maestros), filtrado por empresa activa.
+//  No se da de alta acá: los insumos nacen en Maestros.
+//
+//  PRECIO — PENDIENTE (coordinar con Mariana):
+//  El precio debería venir del catálogo central (insumo de pa-core),
+//  administrado en Maestros. Hoy el insumo de pa-core NO tiene campo
+//  'precio'. Hasta que Mariana lo agregue, el precio es editable acá
+//  como solución temporal y se guarda como OVERRIDE local de
+//  planificación (clave 'fi_precio_plan': { insumoId: precio }).
+//  Cuando exista el precio de catálogo, este override pasará a ser un
+//  ajuste de planificación sobre ese valor (precio efectivo =
+//  override local si existe, si no el de catálogo).
+// ──────────────────────────────────────────────────────────────
+function fiPreciosPlan(){ try { return JSON.parse(localStorage.getItem('fi_precio_plan')||'{}'); } catch(e){ return {}; } }
+function fiSetPrecioPlan(insumoId, precio){
+  var m = fiPreciosPlan();
+  if (precio==null || precio==='') delete m[insumoId]; else m[insumoId] = precio;
+  localStorage.setItem('fi_precio_plan', JSON.stringify(m));
+}
+
+// Mapea un insumo de pa-core a la forma que espera este módulo
+// (unidad/modo como texto), aplicando el precio efectivo.
+function fiMapInsumoCatalogo(x, precios){
+  var unidadTxt = '';
+  if (typeof PA !== 'undefined' && PA.demo && x.unidadId){
+    var us = PA.demo.listarUnidades() || [];
+    for (var i=0;i<us.length;i++){ if(us[i].id===x.unidadId){ unidadTxt = us[i].sigla || us[i].nombre || ''; break; } }
+  }
+  var modoTxt = '';
+  if (typeof PA !== 'undefined' && PA.demo && x.modoAccionId){
+    var ms = PA.demo.listarModosAccion() || [];
+    for (var j=0;j<ms.length;j++){ if(ms[j].id===x.modoAccionId){ modoTxt = ms[j].codigo || ms[j].sigla || ''; break; } }
+  }
+  var precioCatalogo = (x.precio!=null ? x.precio : null);  // PENDIENTE: hoy pa-core no lo trae
+  var precioOverride = precios[x.id];
+  var precioEfectivo = (precioOverride!=null ? precioOverride : precioCatalogo);
+  return {
+    id: x.id, nombre: x.nombre, tipo: x.tipo,
+    unidad: unidadTxt, modoAccion: modoTxt, banda: (x.bandaTox||''),
+    eiq: (x.eiq!=null ? x.eiq : null),
+    precio: precioEfectivo
+  };
+}
+
+// Lista de insumos de la empresa activa (catálogo + precio efectivo).
+function fiInsumos(){
+  var eid = fiEmpresaId();
+  if (typeof PA !== 'undefined' && PA.demo && eid){
+    var cat = PA.demo.listarInsumos(eid) || [];
+    var precios = fiPreciosPlan();
+    return cat.map(function(x){ return fiMapInsumoCatalogo(x, precios); });
+  }
+  return load('fi_ins');  // fallback demo sin servidor
+}
+
+// Refresca la variable global 'ins' (que usan recetas/resumen/etc.) desde el catálogo.
+function refreshInsumos(){ ins = fiInsumos(); }
+
+// ──────────────────────────────────────────────────────────────
+//  Catálogo de CULTIVOS (pieza 3).
+//  El NOMBRE del cultivo sale del catálogo de pa-core (tipos de
+//  actividad de la empresa activa). Las etapas/planteos/campaña/fecha
+//  son propios de este módulo y siguen viviendo en fi_culs.
+// ──────────────────────────────────────────────────────────────
+function fiCultivosCatalogo(){
+  var eid = fiEmpresaId();
+  if (typeof PA !== 'undefined' && PA.demo && eid){
+    return (PA.demo.listarTiposActividad(eid) || []).map(function(t){
+      return { id:t.id, nombre:t.nombre, sigla:(t.sigla||'') };
+    });
+  }
+  return [];
+}
+function fiNombreCultivoCat(tipoActividadId){
+  var cs = fiCultivosCatalogo();
+  for (var i=0;i<cs.length;i++){ if(cs[i].id===tipoActividadId) return cs[i].nombre; }
+  return '';
+}
+
+// ──────────────────────────────────────────────────────────────
+//  CAMPAÑAS (filtro general del módulo).
+//  La campaña es GLOBAL de Puntal (no de empresa) y se genera en la
+//  estructura, no acá. Esta versión de pa-core no expone la lista
+//  global todavía (PENDIENTE: PA.demo.listarCampanias), así que por
+//  ahora se DERIVAN de las actividades de la empresa activa (los
+//  campaniaId distintos). Helper único: cuando exista la lista global,
+//  se cambia solo acá.
+// ──────────────────────────────────────────────────────────────
+var _fiCampaniaFiltro = '';   // '' = todas
+
+function fiCampanias(){
+  var eid = fiEmpresaId();
+  if (typeof PA !== 'undefined' && PA.demo && eid && PA.demo.listarActividades){
+    var acts = PA.demo.listarActividades(eid) || [];
+    var vistos = {}, out = [];
+    for (var i=0;i<acts.length;i++){
+      var c = acts[i].campaniaId;
+      if (c && !vistos[c]){ vistos[c]=1; out.push(c); }
+    }
+    out.sort();
+    return out;  // array de strings, ej. ['24-25','25-26','26-27']
+  }
+  return [];
+}
+
+// Puebla un <select> de campaña para un modal de alta/edición.
+// Si hay campaña en el filtro general, la preselecciona; si está en "Todas",
+// deja elegir entre las disponibles. 'actual' = campaña ya guardada (edición).
+function fiPoblarSelectCampania(selectEl, actual){
+  if(!selectEl) return;
+  var camps = fiCampanias();
+  var pre = actual || _fiCampaniaFiltro || '';
+  selectEl.innerHTML = '<option value="">— Campaña —</option>' +
+    camps.map(function(c){ return '<option value="'+c+'"'+(c===pre?' selected':'')+'>'+c+'</option>'; }).join('');
+  if(pre && camps.indexOf(pre)<0){
+    // campaña guardada que ya no figura entre las derivadas: la agrego para no perderla
+    var o=document.createElement('option'); o.value=pre; o.textContent=pre; o.selected=true;
+    selectEl.appendChild(o);
+  }
+}
 
 // one-time clear of old seeded data
 if (!localStorage.getItem('fi_seed_clr')) { ins=[]; save('fi_ins',ins); localStorage.setItem('fi_seed_clr','1'); }
@@ -995,19 +971,21 @@ function showTab(name, btn) {
   document.getElementById('panel-'+name).classList.add('active');
   btn.classList.add('active');
   if(name==='listas')   renderAllListas();
+  if(name==='campos')   renderCampos();
   if(name==='insumos')  renderInsumos();
   if(name==='recetas')  renderRecetas();
   if(name==='prog')     renderProgramacion();
-  if(name==='resumen')  initResumenFilters(); renderResumen();
+  if(name==='resumen'){ initResumenFilters(); renderResumen(); }
   updateCounts();
 }
 
 function updateCounts() {
-  document.getElementById('cnt-ins').textContent = ins.length;
-  document.getElementById('cnt-cam').textContent = camps.length;
-  document.getElementById('cnt-cul').textContent = culs.length;
-  const recEl=document.getElementById('cnt-rec'); if(recEl) recEl.textContent=recs.length;
-  const progEl=document.getElementById('cnt-prog'); if(progEl) progEl.textContent=programas.length;
+  var setTxt = function(id, val){ var el=document.getElementById(id); if(el) el.textContent = val; };
+  setTxt('cnt-ins', ins.length);
+  setTxt('cnt-cam', fiCampos().length);
+  setTxt('cnt-cul', culs.length);
+  setTxt('cnt-rec', recs.length);
+  setTxt('cnt-prog', programas.length);
   // Campaña badge from latest prog
 }
 
@@ -1016,6 +994,7 @@ function updateCounts() {
 // ══════════════════════════
 function renderInsumos() {
   const q = (document.getElementById('ins-search').value||'').toLowerCase();
+  refreshInsumos();
   const list = ins.filter(i=>!q||i.nombre.toLowerCase().includes(q)||i.tipo.toLowerCase().includes(q));
   const tbody = document.getElementById('ins-tbody');
   if(!list.length){ tbody.innerHTML=`<tr><td colspan="9"><div class="empty"><div class="ei">—</div>Sin insumos${q?' para "'+q+'"':''}</div></td></tr>`; return; }
@@ -1030,63 +1009,32 @@ function renderInsumos() {
       <td class="num">${r.eiq!=null&&r.eiq!==''?fmt(r.eiq):'<span style="color:var(--gr400)">—</span>'}</td>
       <td>${r.modoAccion?'<span style="font-size:11px;font-weight:700;background:var(--g100);color:var(--g800);padding:2px 7px;border-radius:4px">'+esc(r.modoAccion)+'</span>':'<span style="color:var(--gr400)">—</span>'}</td>
       <td><div class="td-actions">
-        <button class="btn btn-ghost btn-xs" onclick="openInsModal('${r.id}')">Editar</button>
-        <button class="btn btn-ghost btn-xs" style="color:var(--red)" onclick="confirm2('insumo','${r.id}','${esc(r.nombre)}')">Eliminar</button>
+        <button class="btn btn-ghost btn-xs" onclick="openInsPrecioModal('${r.id}')">Editar precio</button>
       </div></td>
     </tr>`).join('');
   updateCounts();
 }
 
-function openInsModal(id) {
-  const r = id ? ins.find(x=>x.id===id) : null;
-  document.getElementById('m-ins-title').textContent = r?'Editar insumo':'Agregar insumo';
-  document.getElementById('ins-id').value = r?r.id:'';
-  // Populate units from Listas
-  const uSel = document.getElementById('ins-unidad');
-  const curU = r?r.unidad:'Lt';
-  uSel.innerHTML = lUnidades.map(function(u){
-    return '<option value="'+esc(u.nombre)+'"'+(u.nombre===curU?' selected':'')+'>'+esc(u.nombre)+'</option>';
-  }).join('') || '<option>Lt</option>';
-  document.getElementById('ins-nombre').value = r?r.nombre:'';
-  document.getElementById('ins-tipo').value = r?r.tipo:'';
-  document.getElementById('ins-unidad').value = r?r.unidad:'Lt';
-  document.getElementById('ins-precio').value = r&&r.precio!=null?r.precio:'';
-  document.getElementById('ins-eiq').value = r&&r.eiq!=null?r.eiq:'';
-  populateModoSelect(r?r.tipo||'':'', r?r.modoAccion||'':'');
-  selectBandaVal(r?r.banda||'':'');
-  document.getElementById('modo-add-form').style.display='none';
+function openInsPrecioModal(id) {
+  refreshInsumos();
+  const r = ins.find(x=>x.id===id);
+  if(!r) return;
+  document.getElementById('ins-id').value = r.id;
+  document.getElementById('ins-nombre-ro').value = r.nombre||'';
+  document.getElementById('ins-tipo-ro').value = r.tipo||'';
+  document.getElementById('ins-unidad-ro').value = r.unidad||'';
+  document.getElementById('ins-precio').value = (r.precio!=null && r.precio!=='') ? r.precio : '';
   openModal('m-ins');
 }
 
-function selectBanda(btn) {
-  document.querySelectorAll('.banda-opt').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('ins-banda').value = btn.dataset.val;
-}
-
-function selectBandaVal(val) {
-  document.querySelectorAll('.banda-opt').forEach(b=>{
-    b.classList.toggle('active', b.dataset.val === val);
-  });
-  document.getElementById('ins-banda').value = val;
-}
-
-function saveInsumo() {
-  const nombre = document.getElementById('ins-nombre').value.trim();
-  const tipo   = document.getElementById('ins-tipo').value;
-  const unidad = document.getElementById('ins-unidad').value;
-  const precioRaw = document.getElementById('ins-precio').value;
-  const precio = precioRaw!==''?parseFloat(precioRaw):null;
-  const modoAccion = document.getElementById('ins-modo').value;
-  const banda  = document.getElementById('ins-banda').value;
-  const eiqRaw = document.getElementById('ins-eiq').value;
-  const eiq    = eiqRaw!==''?parseFloat(eiqRaw):null;
-  if(!nombre) return shake('ins-nombre');
-  if(!tipo)   return shake('ins-tipo');
+function saveInsumoPrecio() {
   const id = document.getElementById('ins-id').value;
-  if(id) { const i=ins.findIndex(x=>x.id===id); if(i>=0) ins[i]={id,nombre,tipo,unidad,precio,modoAccion,banda,eiq}; }
-  else   ins.push({id:uid(),nombre,tipo,unidad,precio,modoAccion,banda,eiq});
-  save('fi_ins',ins); closeModal('m-ins'); renderInsumos(); toast(id?'Insumo actualizado':'Insumo agregado');
+  if(!id) return;
+  const raw = document.getElementById('ins-precio').value;
+  fiSetPrecioPlan(id, raw!=='' ? parseFloat(raw) : null);
+  closeModal('m-ins');
+  refreshInsumos(); renderInsumos();
+  toast('Precio actualizado');
 }
 
 // ══════════════════════════
@@ -1094,9 +1042,10 @@ function saveInsumo() {
 // ══════════════════════════
 function renderCampos() {
   const wrap = document.getElementById('campos-wrap');
-  if(!camps.length){ wrap.innerHTML=`<div class="tcard"><div class="empty"><div class="ei">—</div>Sin campos cargados</div></div>`; updateCounts(); return; }
-  wrap.innerHTML = camps.map(c=>{
-    const lotes = c.lotes||[];
+  const campos = fiCampos();
+  if(!campos.length){ wrap.innerHTML=`<div class="tcard"><div class="empty"><div class="ei">—</div>Sin campos para esta empresa</div></div>`; updateCounts(); return; }
+  wrap.innerHTML = campos.map(c=>{
+    const lotes = fiLotes(c.id);
     const totHas = lotes.reduce((s,l)=>s+(parseFloat(l.has)||0),0);
     return `
     <div class="campo-card" id="cc-${c.id}">
@@ -1106,83 +1055,29 @@ function renderCampos() {
           <div class="campo-meta">
             <span>${fmt(totHas)} has totales</span>
             <span>${lotes.length} lote${lotes.length!==1?'s':''}</span>
-            ${c.desc?`<span>${esc(c.desc)}</span>`:''}
           </div>
         </div>
-        <div class="campo-hdr-right" onclick="event.stopPropagation()">
-          <button class="btn btn-secondary btn-xs" onclick="openCampoModal('${c.id}')">Editar</button>
-          <button class="btn btn-danger btn-xs" onclick="confirm2('campo','${c.id}','${esc(c.nombre)}')">Eliminar</button>
+        <div class="campo-hdr-right">
           <span class="chevron">▼</span>
         </div>
       </div>
       <div class="campo-body">
         <table class="lotes-tbl">
-          <thead><tr><th>#</th><th>Lote</th><th class="num">Hectareas</th><th></th></tr></thead>
+          <thead><tr><th>#</th><th>Lote</th><th class="num">Hectareas</th></tr></thead>
           <tbody>${lotes.length?lotes.map((l,i)=>`
             <tr>
               <td style="color:var(--gr400);font-size:12px">${i+1}</td>
               <td style="font-weight:600">${esc(l.nombre)}</td>
               <td class="num">${fmt(l.has)} has</td>
-              <td><div class="td-actions">
-                <button class="btn btn-ghost btn-xs" onclick="openLoteModal('${c.id}','${l.id}')">Editar</button>
-                <button class="btn btn-ghost btn-xs" style="color:var(--red)" onclick="confirm2('lote','${l.id}','${esc(l.nombre)}','${c.id}')">Eliminar</button>
-              </div></td>
-            </tr>`).join(''):`<tr><td colspan="4"><div class="empty" style="padding:16px">Sin lotes</div></td></tr>`}
+            </tr>`).join(''):`<tr><td colspan="3"><div class="empty" style="padding:16px">Sin lotes</div></td></tr>`}
           </tbody>
         </table>
-        <div class="campo-footer"><button class="btn btn-primary btn-sm" onclick="openLoteModal('${c.id}')">+ Agregar lote</button></div>
       </div>
     </div>`; }).join('');
   updateCounts();
 }
 
 function toggleCampo(id){ document.getElementById('cc-'+id).classList.toggle('collapsed'); }
-
-function openCampoModal(id) {
-  const c = id?camps.find(x=>x.id===id):null;
-  document.getElementById('m-campo-title').textContent = c?'Editar campo':'Agregar campo';
-  document.getElementById('campo-id').value = c?c.id:'';
-  document.getElementById('campo-nombre').value = c?c.nombre:'';
-  document.getElementById('campo-desc').value = c?c.desc||'':'';
-  openModal('m-campo');
-}
-
-function saveCampo() {
-  const nombre = document.getElementById('campo-nombre').value.trim();
-  if(!nombre) return shake('campo-nombre');
-  const desc = document.getElementById('campo-desc').value.trim();
-  const id = document.getElementById('campo-id').value;
-  if(id){ const i=camps.findIndex(x=>x.id===id); if(i>=0) camps[i]={...camps[i],nombre,desc}; }
-  else camps.push({id:uid(),nombre,desc,lotes:[]});
-  save('fi_camps',camps); closeModal('m-campo'); renderCampos(); toast(id?'Campo actualizado':'Campo agregado');
-}
-
-function openLoteModal(campoId, loteId) {
-  const c = camps.find(x=>x.id===campoId);
-  if(!c) return;
-  const l = loteId?(c.lotes||[]).find(x=>x.id===loteId):null;
-  document.getElementById('m-lote-title').textContent = `${l?'Editar':'Agregar'} lote — ${c.nombre}`;
-  document.getElementById('lote-id').value = l?l.id:'';
-  document.getElementById('lote-campo-id').value = campoId;
-  document.getElementById('lote-nombre').value = l?l.nombre:'';
-  document.getElementById('lote-has').value = l?l.has:'';
-  openModal('m-lote');
-}
-
-function saveLote() {
-  const nombre = document.getElementById('lote-nombre').value.trim();
-  const has    = parseFloat(document.getElementById('lote-has').value)||0;
-  if(!nombre) return shake('lote-nombre');
-  if(!has)    return shake('lote-has');
-  const campoId = document.getElementById('lote-campo-id').value;
-  const loteId  = document.getElementById('lote-id').value;
-  const c = camps.find(x=>x.id===campoId);
-  if(!c) return;
-  if(!c.lotes) c.lotes=[];
-  if(loteId){ const i=c.lotes.findIndex(x=>x.id===loteId); if(i>=0) c.lotes[i]={id:loteId,nombre,has}; }
-  else c.lotes.push({id:uid(),nombre,has});
-  save('fi_camps',camps); closeModal('m-lote'); renderCampos(); toast(loteId?'Lote actualizado':'Lote agregado');
-}
 
 // ══════════════════════════
 //  CULTIVOS
@@ -1280,21 +1175,28 @@ function openCultivoModal(id) {
   const c = id?culs.find(x=>x.id===id):null;
   document.getElementById('m-cul-title').textContent = c?'Editar cultivo':'Agregar cultivo';
   document.getElementById('cul-id').value = c?c.id:'';
-  document.getElementById('cul-nombre').value = c?c.nombre:'';
+  // Cultivo: lista del catálogo de pa-core (tipos de actividad de la empresa)
+  const cat = fiCultivosCatalogo();
+  const curTipo = c ? (c.tipoActividadId||'') : '';
+  const sel = document.getElementById('cul-tipo');
+  sel.innerHTML = '<option value="">— Seleccionar cultivo —</option>' +
+    cat.map(function(t){ return '<option value="'+t.id+'"'+(t.id===curTipo?' selected':'')+'>'+esc(t.nombre)+'</option>'; }).join('');
   document.getElementById('cul-campaña').value = c?c.campaña:'';
+  fiPoblarSelectCampania(document.getElementById('cul-campaña'), c?c.campaña:'');
   document.getElementById('cul-fecha').value = c?c.fecha||'':'';
   openModal('m-cultivo');
 }
 
 function saveCultivo() {
-  const nombre  = document.getElementById('cul-nombre').value.trim();
+  const tipoActividadId = document.getElementById('cul-tipo').value;
   const campaña = document.getElementById('cul-campaña').value.trim();
-  if(!nombre)  return shake('cul-nombre');
+  if(!tipoActividadId) return shake('cul-tipo');
   if(!campaña) return shake('cul-campaña');
+  const nombre = fiNombreCultivoCat(tipoActividadId);
   const fecha = document.getElementById('cul-fecha').value;
   const id = document.getElementById('cul-id').value;
-  if(id){ const i=culs.findIndex(x=>x.id===id); if(i>=0) culs[i]={...culs[i],nombre,campaña,fecha}; }
-  else { const etapas={}; ETAPAS.forEach(e=>etapas[e]=[]); culs.push({id:uid(),nombre,campaña,fecha,etapas}); }
+  if(id){ const i=culs.findIndex(x=>x.id===id); if(i>=0) culs[i]={...culs[i],tipoActividadId,nombre,campaña,fecha}; }
+  else { const etapas={}; ETAPAS.forEach(e=>etapas[e]=[]); culs.push({id:uid(),tipoActividadId,nombre,campaña,fecha,etapas}); }
   save('fi_culs',culs); closeModal('m-cultivo');
   if(_curCulId){ const c=culs.find(x=>x.id===_curCulId); if(c){ document.getElementById('det-name').textContent=c.nombre; document.getElementById('det-meta').textContent=`Campaña ${c.campaña||'—'}${c.fecha?' · '+fmtDate(c.fecha):''}`;} }
   else renderCultivos();
@@ -1308,12 +1210,13 @@ function delCultivo(id) {
 // ══════════════════════════
 //  PLANTEOS
 // ══════════════════════════
-function buildInsOpts(selId) {
+function buildInsOptsPlanteo(selId) {
   const sorted = [...ins].sort((a,b)=>a.nombre.localeCompare(b.nombre));
   return `<option value="">— Insumo —</option>`+sorted.map(i=>`<option value="${i.id}" ${i.id===selId?'selected':''}>${esc(i.nombre)} (${i.unidad})</option>`).join('');
 }
 
 function openPTModal(id, etapa) {
+  refreshInsumos();
   const c = culs.find(x=>x.id===_curCulId); if(!c) return;
   const p = id?(c.etapas[etapa]||[]).find(x=>x.id===id):null;
   document.getElementById('m-pt-title').textContent = `${p?'Editar':'Nuevo'} Planteo — ${etapa}`;
@@ -1332,7 +1235,7 @@ function addIR(data) {
   const row = document.createElement('div');
   row.className='ir';
   row.innerHTML=`
-    <select onchange="syncUM(this)">${buildInsOpts(data?data.insumoId:'')}</select>
+    <select onchange="syncUM(this)">${buildInsOptsPlanteo(data?data.insumoId:'')}</select>
     <input type="text" value="${data?esc(data.um||''):''}" style="text-align:center">
     <input type="number" value="${data?data.dosis||'':''}" min="0" step="0.001" style="text-align:right">
     <button type="button" class="rm-row" onclick="this.closest('.ir').remove();updPTCount()">x</button>`;
@@ -1371,156 +1274,6 @@ function savePlanteo() {
   save('fi_culs',culs); closeModal('m-planteo'); renderStageTabs(); toast(ptId?'Planteo actualizado':'Planteo agregado');
 }
 
-// ══════════════════════════
-//  PROGRAMACIONES
-// ══════════════════════════
-function renderProgs() {
-  const tbody = document.getElementById('prog-tbody');
-  if(!progs.length){
-    tbody.innerHTML=`<tr><td colspan="8"><div class="empty">Sin programaciones. Agregá una con el boton de arriba.</div></td></tr>`;
-    return;
-  }
-  tbody.innerHTML = progs.map((p,i)=>`
-    <tr>
-      <td style="color:var(--gr400);font-size:12px">${i+1}</td>
-      <td>${esc(p.campoNombre||'—')}</td>
-      <td style="font-weight:600">${esc(p.loteNombre||'—')}</td>
-      <td class="num">${p.has?fmt(p.has)+' has':'—'}</td>
-      <td>${esc(p.cultivoNombre||'—')}</td>
-      <td><span style="font-size:11px;color:var(--gr500)">${esc(p.etapa||'—')}</span></td>
-      <td>${p.planteoNombre?`<span class="recipe-pill">${esc(p.planteoNombre)}</span>`:'<span style="color:var(--gr400)">—</span>'}</td>
-      <td><div class="td-actions">
-        <button class="btn btn-ghost btn-xs" onclick="openProgModal('${p.id}')">Editar</button>
-        <button class="btn btn-ghost btn-xs" style="color:var(--red)" onclick="confirm2('prog','${p.id}','programacion ${i+1}')">Eliminar</button>
-      </div></td>
-    </tr>`).join('');
-}
-
-function openProgModal(id) {
-  const p = id?progs.find(x=>x.id===id):null;
-  document.getElementById('m-prog-title').textContent = p?'Editar programacion':'Agregar programacion';
-  document.getElementById('prog-id').value = p?p.id:'';
-
-  // Campos
-  const sc = document.getElementById('prog-campo');
-  sc.innerHTML=`<option value="">— Sin campo —</option>`+camps.map(c=>`<option value="${c.id}" ${p&&p.campoId===c.id?'selected':''}>${esc(c.nombre)}</option>`).join('');
-
-  // Cultivos
-  const scul = document.getElementById('prog-cultivo');
-  scul.innerHTML=`<option value="">— Seleccionar —</option>`+culs.map(c=>`<option value="${c.id}" ${p&&p.cultivoId===c.id?'selected':''}>${esc(c.nombre)} (${c.campaña})</option>`).join('');
-
-  fillProgLotes(p?p.campoId:null, p?p.loteId:null);
-  fillProgEtapas(p?p.cultivoId:null, p?p.etapa:null);
-  fillProgPlanteos(p?p.cultivoId:null, p?p.etapa:null, p?p.planteoId:null);
-
-  document.getElementById('prog-has').value = p?p.has||'':'';
-  document.getElementById('prog-preview').style.display='none';
-  if(p&&p.planteoId) showProgPreview();
-  openModal('m-prog');
-}
-
-function onProgCampoChange() {
-  const id=document.getElementById('prog-campo').value;
-  fillProgLotes(id,null);
-  document.getElementById('prog-has').value='';
-}
-
-function onProgLoteChange() {
-  const campoId=document.getElementById('prog-campo').value;
-  const loteId=document.getElementById('prog-lote').value;
-  const c=camps.find(x=>x.id===campoId);
-  const l=c&&(c.lotes||[]).find(x=>x.id===loteId);
-  if(l) document.getElementById('prog-has').value=l.has;
-}
-
-function onProgCultivoChange() {
-  const id=document.getElementById('prog-cultivo').value;
-  fillProgEtapas(id,null);
-  fillProgPlanteos(null,null,null);
-  document.getElementById('prog-preview').style.display='none';
-}
-
-function onProgEtapaChange() {
-  const culId=document.getElementById('prog-cultivo').value;
-  const etapa=document.getElementById('prog-etapa').value;
-  fillProgPlanteos(culId,etapa,null);
-  document.getElementById('prog-preview').style.display='none';
-}
-
-function fillProgLotes(campoId, selLoteId) {
-  const sl=document.getElementById('prog-lote');
-  if(!campoId){ sl.innerHTML=`<option value="">— Seleccionar campo primero —</option>`; sl.disabled=true; return; }
-  const c=camps.find(x=>x.id===campoId);
-  const lotes=(c&&c.lotes)||[];
-  sl.disabled=false;
-  sl.innerHTML=`<option value="">— Sin lote —</option>`+lotes.map(l=>`<option value="${l.id}" ${l.id===selLoteId?'selected':''}>${esc(l.nombre)} (${fmt(l.has)} has)</option>`).join('');
-}
-
-function fillProgEtapas(culId, selEtapa) {
-  const se=document.getElementById('prog-etapa');
-  if(!culId){ se.innerHTML=`<option value="">— Seleccionar cultivo primero —</option>`; se.disabled=true; return; }
-  const c=culs.find(x=>x.id===culId);
-  se.disabled=false;
-  se.innerHTML=`<option value="">— Seleccionar etapa —</option>`+ETAPAS.map(e=>{
-    const n=c&&c.etapas&&c.etapas[e]?c.etapas[e].length:0;
-    return `<option value="${e}" ${e===selEtapa?'selected':''}>${esc(e)} (${n} planteo${n!==1?'s':''})</option>`;
-  }).join('');
-}
-
-function fillProgPlanteos(culId, etapa, selId) {
-  const sp=document.getElementById('prog-planteo');
-  if(!culId||!etapa){ sp.innerHTML=`<option value="">— Seleccionar etapa primero —</option>`; sp.disabled=true; return; }
-  const c=culs.find(x=>x.id===culId);
-  const pts=(c&&c.etapas&&c.etapas[etapa])||[];
-  sp.disabled=false;
-  sp.innerHTML=`<option value="">— Sin planteo especifico —</option>`+pts.map((p,i)=>`<option value="${p.id}" ${p.id===selId?'selected':''}>PT${i+1}: ${esc(p.nombre)}</option>`).join('');
-  sp.onchange=showProgPreview;
-}
-
-function showProgPreview() {
-  const culId=document.getElementById('prog-cultivo').value;
-  const etapa=document.getElementById('prog-etapa').value;
-  const pId=document.getElementById('prog-planteo').value;
-  const prev=document.getElementById('prog-preview');
-  if(!pId){ prev.style.display='none'; return; }
-  const c=culs.find(x=>x.id===culId);
-  const p=c&&c.etapas[etapa]?(c.etapas[etapa].find(x=>x.id===pId)):null;
-  if(!p){ prev.style.display='none'; return; }
-  document.getElementById('prog-prev-tbl').innerHTML=
-    `<thead><tr><th>Insumo</th><th>UM</th><th class="num">Dosis/ha</th></tr></thead><tbody>`+
-    (p.insumos||[]).map(r=>`<tr><td>${esc(r.insumoNombre)}</td><td>${esc(r.um)}</td><td class="num">${fmt(r.dosis)}</td></tr>`).join('')+
-    `</tbody>`;
-  prev.style.display='block';
-}
-
-function saveProg() {
-  const cultivoId=document.getElementById('prog-cultivo').value;
-  const etapa=document.getElementById('prog-etapa').value;
-  if(!cultivoId) return shake('prog-cultivo');
-  if(!etapa)     return shake('prog-etapa');
-  const id=document.getElementById('prog-id').value;
-  const campoId=document.getElementById('prog-campo').value;
-  const loteId=document.getElementById('prog-lote').value;
-  const planteoId=document.getElementById('prog-planteo').value;
-  const has=parseFloat(document.getElementById('prog-has').value)||null;
-  const campo=camps.find(x=>x.id===campoId);
-  const lote=campo&&(campo.lotes||[]).find(x=>x.id===loteId);
-  const cultivo=culs.find(x=>x.id===cultivoId);
-  const c=cultivo&&cultivo.etapas[etapa]?cultivo.etapas[etapa].find(x=>x.id===planteoId):null;
-  const rec={
-    id:id||uid(),
-    campoId, campoNombre: campo?campo.nombre:'',
-    loteId,  loteNombre:  lote?lote.nombre:'',
-    has: has||(lote?lote.has:null),
-    cultivoId, cultivoNombre: cultivo?cultivo.nombre:'',
-    campaña: cultivo?cultivo.campaña:'',
-    etapa, planteoId, planteoNombre: c?c.nombre:''
-  };
-  if(id){ const i=progs.findIndex(x=>x.id===id); if(i>=0) progs[i]=rec; } else progs.push(rec);
-  save('fi_progs',progs); closeModal('m-prog'); toast(id?'Programacion actualizada':'Programacion agregada');
-}
-
-// ══════════════════════════
 // ══════════════════════════
 //  LISTAS DATA
 // ══════════════════════════
@@ -1592,22 +1345,13 @@ const MODOS_BASE = {
   ]
 };
 
-let lCampañas = load('fi_l_camp');
-let lCampos   = load('fi_l_campo');
-let lLotes    = load('fi_l_lote');
-let lCultivos = load('fi_l_cultivo');
 let lEtapas   = load('fi_l_etapa');
-let lUnidades = load('fi_l_unidad');
 let lModos    = load('fi_l_modo');
 
 if (!lEtapas.length) {
   ['Barbecho largo','Barbecho corto','Presiembra / Premergencia','Posemergencia','Fungicidas / Insecticidas']
     .forEach((n,i) => lEtapas.push({id:uid(), nombre:n, orden:i+1}));
   save('fi_l_etapa', lEtapas);
-}
-if (!localStorage.getItem('fi_seed_unidades')) {
-  lUnidades = ['Lt','Kg','g','cc','ml','u','tn'].map(function(n){ return {id:uid(), nombre:n}; });
-  save('fi_l_unidad', lUnidades); localStorage.setItem('fi_seed_unidades','1');
 }
 if (!localStorage.getItem('fi_seed_modos_v3')) {
   const allModos = [];
@@ -1626,50 +1370,20 @@ function showLista(name, btn) {
 }
 
 function renderAllListas() {
-  ['campaña','campo','lote','cultivo','etapa','unidad','modo'].forEach(renderLista);
+  ['etapa','modo'].forEach(renderLista);
 }
 
 function renderLista(type) {
-  const counts = { campaña: lCampañas.length, campo: lCampos.length, lote: lLotes.length, cultivo: lCultivos.length, etapa: lEtapas.length, unidad: lUnidades.length, modo: lModos.length };
+  const counts = { etapa: lEtapas.length, modo: lModos.length };
   Object.entries(counts).forEach(([k,v]) => {
     const el = document.getElementById('lcnt-'+k); if(el) el.textContent = v;
   });
-  if (type === 'campaña') {
-    document.getElementById('lt-campaña').innerHTML = lCampañas.length
-      ? lCampañas.map((r,i) => `<tr><td style="color:var(--gr400);font-size:12px">${i+1}</td><td style="font-weight:600">${esc(r.nombre)}</td><td><div class="td-actions"><button class="btn btn-ghost btn-xs" onclick="openListaModal('campaña','${r.id}')">Editar</button><button class="btn btn-ghost btn-xs" style="color:var(--red)" onclick="delLista('campaña','${r.id}','${esc(r.nombre)}')">Eliminar</button></div></td></tr>`).join('')
-      : `<tr><td colspan="3"><div class="empty">Sin campañas cargadas</div></td></tr>`;
-  }
-  if (type === 'campo') {
-    document.getElementById('lt-campo').innerHTML = lCampos.length
-      ? lCampos.map((r,i) => `<tr><td style="color:var(--gr400);font-size:12px">${i+1}</td><td style="font-weight:600">${esc(r.nombre)}</td><td><div class="td-actions"><button class="btn btn-ghost btn-xs" onclick="openListaModal('campo','${r.id}')">Editar</button><button class="btn btn-ghost btn-xs" style="color:var(--red)" onclick="delLista('campo','${r.id}','${esc(r.nombre)}')">Eliminar</button></div></td></tr>`).join('')
-      : `<tr><td colspan="3"><div class="empty">Sin campos cargados</div></td></tr>`;
-  }
-  if (type === 'lote') {
-    const rows = [...lLotes].sort((a,b) => {
-      const ca = (lCampos.find(x=>x.id===a.campoId)||{}).nombre||'';
-      const cb = (lCampos.find(x=>x.id===b.campoId)||{}).nombre||'';
-      return ca.localeCompare(cb) || a.nombre.localeCompare(b.nombre);
-    });
-    document.getElementById('lt-lote').innerHTML = rows.length
-      ? rows.map((r,i) => { const c=(lCampos.find(x=>x.id===r.campoId)||{}).nombre||'—'; return `<tr><td style="color:var(--gr400);font-size:12px">${i+1}</td><td style="font-weight:600">${esc(r.nombre)}</td><td>${esc(c)}</td><td class="num">${fmt(r.has)} has</td><td><div class="td-actions"><button class="btn btn-ghost btn-xs" onclick="openListaModal('lote','${r.id}')">Editar</button><button class="btn btn-ghost btn-xs" style="color:var(--red)" onclick="delLista('lote','${r.id}','${esc(r.nombre)}')">Eliminar</button></div></td></tr>`; }).join('')
-      : `<tr><td colspan="5"><div class="empty">Sin lotes cargados</div></td></tr>`;
-  }
-  if (type === 'cultivo') {
-    document.getElementById('lt-cultivo').innerHTML = lCultivos.length
-      ? lCultivos.map((r,i) => `<tr><td style="color:var(--gr400);font-size:12px">${i+1}</td><td style="font-weight:600">${esc(r.nombre)}</td><td><div class="td-actions"><button class="btn btn-ghost btn-xs" onclick="openListaModal('cultivo','${r.id}')">Editar</button><button class="btn btn-ghost btn-xs" style="color:var(--red)" onclick="delLista('cultivo','${r.id}','${esc(r.nombre)}')">Eliminar</button></div></td></tr>`).join('')
-      : `<tr><td colspan="3"><div class="empty">Sin cultivos cargados</div></td></tr>`;
-  }
   if (type === 'etapa') {
     const rows = [...lEtapas].sort((a,b)=>(a.orden||99)-(b.orden||99));
     document.getElementById('lt-etapa').innerHTML = rows.length
       ? rows.map((r,i) => `<tr draggable="true" data-etapaid="${r.id}" class="etapa-drag-row" style="cursor:grab"><td style="color:var(--gr400);font-size:12px;padding-right:4px">&#8597;</td><td style="color:var(--gr400);font-size:12px">${i+1}</td><td style="font-weight:600">${esc(r.nombre)}</td><td><div class="td-actions"><button class="btn btn-ghost btn-xs" onclick="openListaModal('etapa','${r.id}')">Editar</button><button class="btn btn-ghost btn-xs" style="color:var(--red)" onclick="delLista('etapa','${r.id}','${esc(r.nombre)}')">Eliminar</button></div></td></tr>`).join('')
       : `<tr><td colspan="4"><div class="empty">Sin etapas</div></td></tr>`;
     setTimeout(initEtapaDrag, 0);
-  }
-  if (type === 'unidad') {
-    document.getElementById('lt-unidad').innerHTML = !lUnidades.length
-      ? `<tr><td colspan="3"><div class="empty"><div class="ei">—</div>Sin unidades</div></td></tr>`
-      : lUnidades.map((r,i) => `<tr><td style="color:var(--gr400);font-size:12px">${i+1}</td><td style="font-weight:600">${esc(r.nombre)}</td><td><div class="td-actions"><button class="btn btn-ghost btn-xs" onclick="openListaModal('unidad','${r.id}')">Editar</button><button class="btn btn-ghost btn-xs" style="color:var(--red)" onclick="delLista('unidad','${r.id}','${esc(r.nombre)}')">Eliminar</button></div></td></tr>`).join('');
   }
   if (type === 'modo') {
     document.getElementById('lt-modo').innerHTML = !lModos.length
@@ -1679,7 +1393,7 @@ function renderLista(type) {
 }
 
 function openListaModal(type, id) {
-  const maps = { campaña: lCampañas, campo: lCampos, lote: lLotes, cultivo: lCultivos, etapa: lEtapas, unidad: lUnidades, modo: lModos };
+  const maps = { etapa: lEtapas, modo: lModos };
   const r = id ? maps[type].find(x=>x.id===id) : null;
   document.getElementById('m-lista-title').textContent = (r?'Editar ':'Agregar ') + type;
   document.getElementById('lista-type').value = type;
@@ -1702,12 +1416,6 @@ function openListaModal(type, id) {
     document.getElementById('lista-modo-tipo').value = '';
     document.getElementById('lista-modo-sigla').value = '';
   }
-  if (type === 'lote') {
-    document.getElementById('lista-campo-sel').innerHTML =
-      '<option value="">— Seleccionar campo —</option>' +
-      lCampos.map(c=>`<option value="${c.id}" ${r&&r.campoId===c.id?'selected':''}>${esc(c.nombre)}</option>`).join('');
-    document.getElementById('lista-has').value = r ? r.has||'' : '';
-  }
   if (type === 'etapa') {
     document.getElementById('lista-orden').value = r ? r.orden||'' : lEtapas.length+1;
   }
@@ -1723,8 +1431,8 @@ function saveListaItem() {
     toast('El formato debe ser AA-AA, ej. 25-26');
     return shake('lista-nombre');
   }
-  const maps  = { campaña: lCampañas, campo: lCampos, lote: lLotes, cultivo: lCultivos, etapa: lEtapas, unidad: lUnidades, modo: lModos };
-  const saves = { campaña:'fi_l_camp', campo:'fi_l_campo', lote:'fi_l_lote', cultivo:'fi_l_cultivo', etapa:'fi_l_etapa', unidad:'fi_l_unidad', modo:'fi_l_modo' };
+  const maps  = { etapa: lEtapas, modo: lModos };
+  const saves = { etapa:'fi_l_etapa', modo:'fi_l_modo' };
   const list  = maps[type];
   let item = { id: id||uid(), nombre };
   if (type === 'modo') {
@@ -1733,13 +1441,6 @@ function saveListaItem() {
     if (!modoTipo)  return shake('lista-modo-tipo');
     if (!modoSigla) return shake('lista-modo-sigla');
     item = { ...item, tipo: modoTipo, sigla: modoSigla, desc: nombre };
-  }
-  if (type === 'lote') {
-    const campoId = document.getElementById('lista-campo-sel').value;
-    const has     = parseFloat(document.getElementById('lista-has').value)||0;
-    if (!campoId) return shake('lista-campo-sel');
-    if (!has)     return shake('lista-has');
-    item = { ...item, campoId, has };
   }
   if (type === 'etapa') {
     item.orden = parseInt(document.getElementById('lista-orden').value)||list.length+1;
@@ -1753,8 +1454,8 @@ function saveListaItem() {
 }
 
 function delLista(type, id, nombre) {
-  const maps  = { campaña: lCampañas, campo: lCampos, lote: lLotes, cultivo: lCultivos, etapa: lEtapas, unidad: lUnidades, modo: lModos };
-  const saves = { campaña:'fi_l_camp', campo:'fi_l_campo', lote:'fi_l_lote', cultivo:'fi_l_cultivo', etapa:'fi_l_etapa', unidad:'fi_l_unidad', modo:'fi_l_modo' };
+  const maps  = { etapa: lEtapas, modo: lModos };
+  const saves = { etapa:'fi_l_etapa', modo:'fi_l_modo' };
   confirm2('_lista', id, nombre, null, () => {
     const list = maps[type];
     const idx  = list.findIndex(x=>x.id===id);
@@ -1778,10 +1479,8 @@ function confirm2(type, id, nombre, extra, cb) {
   document.getElementById('conf-title').textContent = 'Confirmar eliminacion';
   document.getElementById('conf-msg').textContent = (msg[type]||'Eliminar "'+nombre+'"?') + ' Esta accion no se puede deshacer.';
   document.getElementById('conf-ok').onclick = function() {
-    if(type==='insumo')  { ins=ins.filter(x=>x.id!==id); save('fi_ins',ins); renderInsumos(); }
     if(type==='cultivo') { culs=culs.filter(x=>x.id!==id); save('fi_culs',culs); if(_curCulId===id) closeCulDetail(); else renderCultivos(); }
     if(type==='planteo') { const c=culs.find(x=>x.id===_curCulId); if(c&&c.etapas[extra]) c.etapas[extra]=c.etapas[extra].filter(x=>x.id!==id); save('fi_culs',culs); renderStageTabs(); }
-    if(type==='prog')    { progs=progs.filter(x=>x.id!==id); save('fi_progs',progs); }
     if(type==='_lista'&&cb) cb();
     closeModal('m-confirm'); toast('Eliminado');
   };
@@ -1795,6 +1494,7 @@ function confirm2(type, id, nombre, extra, cb) {
 function renderRecetas() {
   const tbody = document.getElementById('rec-tbody');
   if (!tbody) return;
+  refreshInsumos();
   const filtered = recs;
   document.getElementById('cnt-rec').textContent = recs.length;
   if (!filtered.length) {
@@ -1828,12 +1528,13 @@ function renderRecetas() {
 }
 
 function openRecForm(id) {
+  refreshInsumos();
   const r = id ? recs.find(function(x){return x.id===id;}) : null;
   document.getElementById('rec-form-title').textContent = r ? 'Editar receta' : 'Nueva receta';
   document.getElementById('rec-id').value = r ? r.id : '';
   document.getElementById('rec-titulo').value = r ? r.titulo||'' : '';
 
-  const culsList = load('fi_l_cultivo');
+  const culsList = fiCultivosCatalogo();
   document.getElementById('rec-cultivo').innerHTML =
     '<option value="">— Cultivo —</option>' +
     culsList.map(function(c){ return '<option value="'+esc(c.nombre)+'"'+(r&&r.cultivo===c.nombre?' selected':'')+'>'+esc(c.nombre)+'</option>'; }).join('');
@@ -2019,23 +1720,19 @@ function deleteRec(id, nombre) {
 //  PROGRAMACION
 // ══════════════════════════
 function populateProgFiltros() {
-  var selCamp   = document.getElementById('pf-camp');
   var selCampo  = document.getElementById('pf-campo');
   var selCultivo = document.getElementById('pf-cultivo');
-  if (!selCamp) return;
-  var curCamp   = selCamp.value;
+  if (!selCampo) return;
   var curCampo  = selCampo.value;
   var curCultivo = selCultivo.value;
-  var camps   = [...new Set(programas.map(function(p){return p.campaña||'';}).filter(Boolean))].sort();
   var campos  = [...new Set(programas.map(function(p){return p.campoNombre||'';}).filter(Boolean))].sort();
   var cultivos = [...new Set(programas.map(function(p){return p.cultivo||'';}).filter(Boolean))].sort();
-  selCamp.innerHTML   = '<option value="">Todas</option>'  + camps.map(function(v){return '<option value="'+esc(v)+'"'+(v===curCamp?' selected':'')+'>'+esc(v)+'</option>';}).join('');
   selCampo.innerHTML  = '<option value="">Todos</option>'  + campos.map(function(v){return '<option value="'+esc(v)+'"'+(v===curCampo?' selected':'')+'>'+esc(v)+'</option>';}).join('');
   selCultivo.innerHTML= '<option value="">Todos</option>'  + cultivos.map(function(v){return '<option value="'+esc(v)+'"'+(v===curCultivo?' selected':'')+'>'+esc(v)+'</option>';}).join('');
 }
 
 function clearProgFiltros() {
-  ['pf-camp','pf-campo','pf-cultivo'].forEach(function(id){
+  ['pf-campo','pf-cultivo'].forEach(function(id){
     var el = document.getElementById(id); if(el) el.value='';
   });
   renderProgramacion();
@@ -2050,8 +1747,8 @@ function renderProgramacion() {
 
   populateProgFiltros();
 
-  // Apply filters
-  var fCamp    = (document.getElementById('pf-camp')||{}).value||'';
+  // Apply filters — la campaña viene del filtro GENERAL del módulo
+  var fCamp    = _fiCampaniaFiltro || '';
   var fCampo   = (document.getElementById('pf-campo')||{}).value||'';
   var fCultivo = (document.getElementById('pf-cultivo')||{}).value||'';
   var filtered = programas.filter(function(p){
@@ -2127,28 +1824,26 @@ function renderProgramacion() {
 }
 
 function openProgForm(id) {
+  refreshInsumos();
   const p = id ? programas.find(function(x){return x.id===id;}) : null;
   document.getElementById('prog-form-title').textContent = p ? 'Editar programacion' : 'Nueva programacion';
   document.getElementById('prog-id').value = p ? p.id : '';
 
-  // Campaña
-  const campsList = load('fi_l_camp');
-  const selCamp = document.getElementById('prog-campaña');
-  selCamp.innerHTML = '<option value="">— Campaña —</option>' +
-    campsList.map(function(c){ var sel=(p&&p.campaña===c.nombre); return '<option value="'+esc(c.nombre)+'"'+(sel?' selected':'')+'>'+esc(c.nombre)+'</option>'; }).join('');
+  // Campaña — del filtro general (o desplegable si "Todas")
+  fiPoblarSelectCampania(document.getElementById('prog-campaña'), p?p.campaña:'');
 
   // Cultivo
-  const culsList = load('fi_l_cultivo');
+  const culsList = fiCultivosCatalogo();
   const selCul = document.getElementById('prog-cultivo');
   selCul.innerHTML = '<option value="">— Cultivo —</option>' +
     culsList.map(function(c){ return '<option value="'+esc(c.nombre)+'"'+(p&&p.cultivo===c.nombre?' selected':'')+'>'+esc(c.nombre)+'</option>'; }).join('');
 
   // Campo
-  const camposList = load('fi_l_campo');
+  const camposList = fiCampos();
   const selCampo = document.getElementById('prog-campo');
   var selCampoId = '';
   if (p && p.loteId) {
-    const allLotes = load('fi_l_lote');
+    const allLotes = fiLotes();
     const curLote = allLotes.find(function(l){ return l.id===p.loteId; });
     if (curLote) selCampoId = curLote.campoId || '';
   }
@@ -2177,8 +1872,7 @@ function closeProgForm() {
 }
 
 function _buildProgLoteOptions(campoId, selLoteId) {
-  const lotes = load('fi_l_lote');
-  const campos = load('fi_l_campo');
+  const lotes = fiLotes();
   const sel = document.getElementById('prog-lote');
   const filtered = campoId ? lotes.filter(function(l){ return l.campoId===campoId; }) : lotes;
   if (!campoId) {
@@ -2194,8 +1888,8 @@ function _buildProgLoteOptions(campoId, selLoteId) {
 }
 
 function _showProgMeta(loteId) {
-  const lotes  = load('fi_l_lote');
-  const campos = load('fi_l_campo');
+  const lotes  = fiLotes();
+  const campos = fiCampos();
   const lote   = lotes.find(function(l){return l.id===loteId;});
   const meta   = document.getElementById('prog-meta');
   if (!lote) { meta.style.display='none'; return; }
@@ -2271,8 +1965,8 @@ function saveProgram() {
   if (!campoId)  return shake('prog-campo');
   if (!loteId)   return shake('prog-lote');
 
-  const lotes  = load('fi_l_lote');
-  const campos = load('fi_l_campo');
+  const lotes  = fiLotes();
+  const campos = fiCampos();
   const lote   = lotes.find(function(l){return l.id===loteId;}) || {};
   const campo  = campos.find(function(c){return c.id===lote.campoId;}) || {};
 
@@ -2385,15 +2079,9 @@ function deleteProgramGroup(idsStr, nombre) {
 //  RESUMEN
 // ══════════════════════════
 function initResumenFilters() {
-  var campsList  = load('fi_l_camp');
-  var camposList = load('fi_l_campo');
-  var culsList   = load('fi_l_cultivo');
+  var camposList = fiCampos();
+  var culsList   = fiCultivosCatalogo();
   var etapasList = load('fi_l_etapa');
-
-  var selCamp = document.getElementById('res-f-camp');
-  var curCamp = selCamp.value || '';
-  selCamp.innerHTML = '<option value="">Todas</option>' +
-    campsList.map(function(c){ return '<option value="'+esc(c.nombre)+'"'+(c.nombre===curCamp?' selected':'')+'>'+esc(c.nombre)+'</option>'; }).join('');
 
   var selCampo = document.getElementById('res-f-campo');
   var curCampo = selCampo.value;
@@ -2413,14 +2101,14 @@ function initResumenFilters() {
 }
 
 function clearResFilters() {
-  ['res-f-camp','res-f-campo','res-f-cultivo','res-f-etapa'].forEach(function(id){
+  ['res-f-campo','res-f-cultivo','res-f-etapa'].forEach(function(id){
     document.getElementById(id).value = '';
   });
   renderResumen();
 }
 
 function calcResumen() {
-  var filtCamp   = document.getElementById('res-f-camp').value;
+  var filtCamp   = _fiCampaniaFiltro || '';
   var filtCampo  = document.getElementById('res-f-campo').value;
   var filtCul    = document.getElementById('res-f-cultivo').value;
   var filtEtapa  = document.getElementById('res-f-etapa').value;
@@ -2477,7 +2165,7 @@ function saveStock(insumoKey, val) {
 function renderCultivoBreakdown() {
   var wrap = document.getElementById('res-cultivo-wrap');
   if (!wrap) return;
-  var filtCamp  = document.getElementById('res-f-camp').value;
+  var filtCamp  = _fiCampaniaFiltro || '';
   var filtCampo = document.getElementById('res-f-campo').value;
   var filtCul   = document.getElementById('res-f-cultivo').value;
   var filtEtapa = document.getElementById('res-f-etapa').value;
@@ -2536,7 +2224,7 @@ function renderResumen() {
   var cards = document.getElementById('res-cards');
 
   var filtProg = programas.filter(function(p){
-    var fc = document.getElementById('res-f-camp').value;
+    var fc = _fiCampaniaFiltro || '';
     var fo = document.getElementById('res-f-campo').value;
     var fv = document.getElementById('res-f-cultivo').value;
     if (fc && p.campaña!==fc) return false;
@@ -2590,7 +2278,7 @@ function renderResumen() {
 
 function printResumen() {
   // Build filters label
-  var fc = document.getElementById('res-f-camp').value;
+  var fc = _fiCampaniaFiltro || '';
   var fo = document.getElementById('res-f-campo').value;
   var fv = document.getElementById('res-f-cultivo').value;
   var fe = document.getElementById('res-f-etapa').value;
@@ -2710,64 +2398,17 @@ function exportResumen() {
 
 
 // ══════════════════════════
-//  CAMPAÑA ACTIVA (header)
+//  BANNER DE CAMPAÑA (usa el filtro general del módulo)
 // ══════════════════════════
-var activeCampaña = '';
-
-function toggleCampDD(e) {
-  e.stopPropagation();
-  var dd = document.getElementById('hdr-camp-dd');
-  if (dd.classList.contains('open')) { dd.classList.remove('open'); return; }
-  _buildCampDD();
-  dd.classList.add('open');
-}
-
-function _buildCampDD() {
-  var camps = load('fi_l_camp');
-  var dd = document.getElementById('hdr-camp-dd');
-  if (!camps.length) {
-    dd.innerHTML = '<div class="hdr-camp-dd-empty">Sin campañas cargadas</div>';
-    return;
-  }
-  dd.innerHTML =
-    '<button class="hdr-camp-dd-item'+(activeCampaña===''?' active':'')+'" onclick="selectCamp(\'\')">Todas las campañas</button>' +
-    '<div class="hdr-camp-dd-sep"></div>' +
-    camps.map(function(c){
-      return '<button class="hdr-camp-dd-item'+(activeCampaña===c.nombre?' active':'')+'" onclick="selectCamp(\''+esc(c.nombre)+'\')">'+esc(c.nombre)+'</button>';
-    }).join('');
-}
-
-function selectCamp(nombre) {
-  activeCampaña = nombre;
-  localStorage.setItem('fi_active_camp', nombre);
-  document.getElementById('hdr-badge-txt').textContent = nombre ? 'Campaña ' + nombre : 'Todas las campañas';
-  document.getElementById('hdr-camp-dd').classList.remove('open');
-  // Refrescar la tab activa con la nueva campaña
-  var activePanel = document.querySelector('.tab-panel.active');
-  if (activePanel) {
-    var id = activePanel.id.replace('panel-','');
-    if (id==='recetas')  renderRecetas();
-    if (id==='prog')     renderProgramacion();
-    if (id==='resumen')  { initResumenFilters(); renderResumen(); }
-  }
-}
-
-// Close dropdown when clicking outside
-document.addEventListener('click', function() {
-  var dd = document.getElementById('hdr-camp-dd');
-  if (dd) dd.classList.remove('open');
-});
-
-
 function campBanner(tabId) {
   var wrap = document.getElementById('camp-banner-'+tabId);
   if (!wrap) return;
-  if (!activeCampaña) {
+  if (!_fiCampaniaFiltro) {
     wrap.style.display = 'none';
     return;
   }
   wrap.style.display = 'flex';
-  wrap.querySelector('.cb-txt').textContent = 'Campaña ' + activeCampaña;
+  wrap.querySelector('.cb-txt').textContent = 'Campaña ' + _fiCampaniaFiltro;
 }
 
 function openDupModal(id) {
@@ -2778,7 +2419,7 @@ function openDupModal(id) {
     '<strong>'+esc(r.titulo||r.cultivo)+'</strong> &mdash; '+esc(r.etapa)+
     '<br><span style="font-size:12px;color:var(--gr500)">'+(r.lineas||[]).length+' insumos</span>';
 
-  var culsList = load('fi_l_cultivo');
+  var culsList = fiCultivosCatalogo();
   document.getElementById('dup-cultivo').innerHTML = '<option value="">— Mismo cultivo —</option>' +
     culsList.map(function(c){
       return '<option value="'+esc(c.nombre)+'"'+(r.cultivo===c.nombre?' selected':'')+'>'+esc(c.nombre)+'</option>';
@@ -2813,47 +2454,6 @@ function saveDup() {
   renderRecetas();
   updateCounts();
   toast('Receta duplicada');
-}
-
-// ══════════════════════════
-//  MODOS DE ACCION
-// ══════════════════════════
-
-let customModos = load('fi_custom_modes') || [];
-
-function getModos(tipo) {
-  return lModos.filter(function(m){ return !tipo || m.tipo === tipo || m.tipo === 'General'; });
-}
-
-function populateModoSelect(tipo, selectedVal) {
-  const sel = document.getElementById('ins-modo');
-  if (!sel) return;
-  const modos = getModos(tipo);
-  sel.innerHTML = '<option value="">— Sin especificar —</option>' +
-    modos.map(function(m){
-      return '<option value="'+esc(m.sigla)+'"'+(m.sigla===selectedVal?' selected':'')+'>'+esc(m.sigla)+' — '+esc(m.desc)+'</option>';
-    }).join('');
-}
-
-function toggleModoAdd() {
-  const f = document.getElementById('modo-add-form');
-  f.style.display = f.style.display==='none'||!f.style.display ? 'block' : 'none';
-}
-
-function saveModoCustom() {
-  const tipo  = document.getElementById('ins-tipo').value;
-  const sigla = document.getElementById('modo-new-sigla').value.trim();
-  const desc  = document.getElementById('modo-new-desc').value.trim();
-  if (!tipo)  return shake('ins-tipo');
-  if (!sigla) return shake('modo-new-sigla');
-  if (!desc)  return shake('modo-new-desc');
-  customModos.push({tipo:tipo, sigla:sigla, desc:desc});
-  save('fi_custom_modes', customModos);
-  populateModoSelect(tipo, sigla);
-  document.getElementById('modo-add-form').style.display = 'none';
-  document.getElementById('modo-new-sigla').value = '';
-  document.getElementById('modo-new-desc').value = '';
-  toast('Modo de accion agregado');
 }
 
 // ══════════════════════════
@@ -2941,7 +2541,104 @@ function initEtapaDrag() {
   });
 }
 
-renderAllListas(); renderInsumos(); renderRecetas(); renderProgramacion(); updateCounts();
+// ══════════════════════════
+//  CONTEXTO (Etapa 1 — integración pa-core)
+//  Solo establece la empresa activa y el selector de cabecera.
+//  NO toca todavía maestros (campos/cultivos/insumos): eso es Etapa 2+.
+// ══════════════════════════
+var CTX = null;
+
+function fiPoblarEmpresas(){
+  var sel = document.getElementById('fi-emp-sel');
+  if(!sel) return;
+  sel.innerHTML = '';
+  if(typeof PA !== 'undefined' && CTX && CTX.empresasDisponibles && CTX.empresasDisponibles.length){
+    for(var i=0;i<CTX.empresasDisponibles.length;i++){
+      var e = CTX.empresasDisponibles[i];
+      var o = document.createElement('option');
+      o.value = e.id; o.textContent = e.razonSocial || e.nombre || e.id;
+      sel.appendChild(o);
+    }
+    sel.value = CTX.empresaActivaId;
+  } else {
+    var o2 = document.createElement('option');
+    o2.value = 'demo'; o2.textContent = 'Demo (sin servidor)';
+    sel.appendChild(o2);
+    document.getElementById('fi-emp-wrap').style.display = 'none';
+  }
+}
+
+// Puebla el filtro de campaña (derivado de pa-core para la empresa activa).
+function fiPoblarCampanias(){
+  var sel = document.getElementById('fi-camp-sel');
+  if(!sel) return;
+  var camps = fiCampanias();
+  if(!camps.length){
+    sel.innerHTML = '<option value="">Todas las campañas</option>';
+    document.getElementById('fi-camp-wrap').style.display = camps.length?'':'flex';
+    _fiCampaniaFiltro = '';
+    return;
+  }
+  // mantener selección si sigue existiendo
+  if(_fiCampaniaFiltro && camps.indexOf(_fiCampaniaFiltro)<0) _fiCampaniaFiltro = '';
+  sel.innerHTML = '<option value="">Todas las campañas</option>' +
+    camps.map(function(c){ return '<option value="'+c+'"'+(c===_fiCampaniaFiltro?' selected':'')+'>'+c+'</option>'; }).join('');
+}
+
+function fiOnCambioCampania(v){
+  _fiCampaniaFiltro = v || '';
+  fiRenderInicial();
+}
+
+// Cambio de empresa activa. Recarga contexto y repuebla campañas (cambian por empresa).
+function fiOnCambioEmpresa(){
+  var sel = document.getElementById('fi-emp-sel');
+  if(typeof PA !== 'undefined' && CTX && sel && sel.value){
+    PA.setEmpresaActiva(sel.value, function(err, ctx){
+      if(!err && ctx){ CTX = ctx; }
+      _fiCampaniaFiltro = '';
+      fiPoblarCampanias();
+      fiRenderInicial();
+    });
+  } else {
+    fiRenderInicial();
+  }
+}
+
+// Render inicial del módulo (lo que antes corría suelto al final del script).
+function fiRenderInicial(){
+  refreshInsumos();
+  renderAllListas(); renderCampos(); renderInsumos(); renderRecetas(); renderProgramacion(); updateCounts();
+}
+
+function fiBoot(){
+  if(typeof PA !== 'undefined'){
+    PA.init({}, function(){
+      var arrancar = function(){
+        PA.loadContext(null, function(err, ctx){
+          if(!err && ctx){ CTX = ctx; }
+          fiPoblarEmpresas();
+          fiPoblarCampanias();
+          fiRenderInicial();
+        });
+      };
+      if(PA.haySesion && PA.haySesion()){
+        arrancar();
+      } else if(PA.login){
+        PA.login('eduardo@doneduardo.com', function(){ arrancar(); });
+      } else {
+        arrancar();
+      }
+    });
+  } else {
+    // Sin pa-core: arranca igual que antes (fallback total).
+    fiPoblarEmpresas();
+    var cw=document.getElementById('fi-camp-wrap'); if(cw) cw.style.display='none';
+    fiRenderInicial();
+  }
+}
+
+fiBoot();
 </script>
 </body>
 </html>
