@@ -86,6 +86,12 @@ tr.tot td{background:#243d1e!important;color:#fff!important;font-weight:700}
 .empty h3{font-size:14px;font-weight:700;color:#888;margin-bottom:4px}
 .empty p{font-size:12px}
 .tag-amb{background:var(--vm);color:var(--v);padding:2px 6px;border-radius:5px;font-size:10px;font-weight:700;border:1px solid #b0d0a8}
+.lotes-pick-ps{display:flex;flex-wrap:wrap;gap:6px;padding:8px;border:1px solid var(--b);border-radius:8px;background:#fafcf9;min-height:40px;align-items:flex-start}
+.lote-chk-ps{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border:1px solid var(--b);border-radius:7px;background:#fff;font-size:12px;cursor:pointer;white-space:nowrap}
+.lote-chk-ps:hover{border-color:var(--v)}
+.lote-chk-ps.sel{border-color:var(--v);background:var(--vm)}
+.lote-chk-ps input[type=checkbox]{width:15px;height:15px;flex:0 0 auto;margin:0;cursor:pointer;accent-color:var(--v)}
+.lote-chk-ps .lc-meta{color:var(--ts)}
 @media(max-width:768px){.rcards{grid-template-columns:repeat(2,1fr)}.fg4,.fg3{grid-template-columns:1fr 1fr}.fg2{grid-template-columns:1fr}}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -97,6 +103,10 @@ tr.tot td{background:#243d1e!important;color:#fff!important;font-weight:700}
 
 
 <div style="background:var(--v);padding:7px 18px;display:flex;align-items:center;gap:12px">
+  <span id="ps-emp-wrap" style="display:inline-flex;align-items:center;gap:8px">
+    <span style="color:#fff;font-size:12px;font-weight:600;letter-spacing:.5px">EMPRESA:</span>
+    <select id="ps-emp-sel" onchange="psOnCambioEmpresa()" style="font-size:13px;font-weight:700;padding:4px 10px;border-radius:5px;border:none;background:#fff;color:var(--t);min-width:120px"></select>
+  </span>
   <span style="color:#fff;font-size:12px;font-weight:600;letter-spacing:.5px">CAMPAÑA:</span>
   <select id="sel-campana" onchange="onCampanaChange()" style="font-size:13px;font-weight:700;padding:4px 10px;border-radius:5px;border:none;background:#fff;color:var(--t);min-width:120px">
     <option value="">— Todas —</option>
@@ -107,79 +117,15 @@ tr.tot td{background:#243d1e!important;color:#fff!important;font-weight:700}
   </span>
 </div>
 <div class="tabs">
-  <div class="tab active" onclick="showTab('listas',this)">Listas</div>
-  <div class="tab" onclick="showTab('insumos',this)">Insumos</div>
+  <div class="tab active" onclick="showTab('insumos',this)">Partidas y Rangos</div>
   <div class="tab" onclick="showTab('datos',this)">Datos — Programación</div>
   <div class="tab" onclick="showTab('resumen',this)">Resumen</div>
 </div>
 
 <div class="main">
 
-<!-- ===== LISTAS ===== -->
-<div id="tp-listas" class="tp active">
-
-  <!-- CAMPANAS -->
-  <div class="card">
-    <div class="ch"><h3>Campañas</h3><div style="display:flex;gap:6px"><button class="btn btn-d btn-sm" onclick="addCampana()">+ Nueva campaña</button><button class="btn btn-r btn-sm" onclick="delCampana()">Eliminar seleccionada</button></div></div>
-    <p style="font-size:12px;color:var(--ts);margin:0 0 8px 0">La campaña activa se selecciona en la barra superior.</p>
-  </div>
-
-  <!-- CAMPOS -->
-  <div class="card">
-    <div class="ch"><h3>Campos del Establecimiento</h3><button class="btn btn-d btn-sm" onclick="openModal('campo')">+ Agregar Campo</button></div>
-    <div class="tw"><table>
-      <thead><tr><th>Campo</th><th style="width:90px">Acciones</th></tr></thead>
-      <tbody id="tb-campos"></tbody>
-    </table></div>
-  </div>
-
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
-    <!-- AMBIENTES -->
-    <div class="card">
-      <div class="ch"><h3>Ambientes</h3><button class="btn btn-d btn-sm" onclick="openModal('amb')">+ Agregar</button></div>
-      <div class="tw"><table>
-        <thead><tr><th>Código</th><th>Descripción</th><th style="width:80px">Acciones</th></tr></thead>
-        <tbody id="tb-ambs"></tbody>
-      </table></div>
-    </div>
-    <!-- CULTIVOS -->
-    <div class="card">
-      <div class="ch"><h3>Cultivos</h3><button class="btn btn-d btn-sm" onclick="openModal('cultivo')">+ Agregar</button></div>
-      <div class="tw"><table>
-        <thead><tr><th>Cultivo</th><th style="width:90px">Acciones</th></tr></thead>
-        <tbody id="tb-cultivos"></tbody>
-      </table></div>
-    </div>
-  </div>
-
-  <!-- LOTES (central) -->
-  <div class="card">
-    <div class="ch">
-      <h3>Lotes</h3>
-      <div style="display:flex;gap:8px;align-items:center">
-        <select id="f-lotes-campo" onchange="renderLotes()" style="padding:5px 9px;border:1px solid var(--b);border-radius:6px;font-size:12px;background:#fafcf9">
-          <option value="">Todos los campos</option>
-        </select>
-        <button class="btn btn-d btn-sm" onclick="openModal('lote')">+ Agregar Lote</button>
-      </div>
-    </div>
-    <div class="tw"><table>
-      <thead><tr><th>Campo</th><th>Lote</th><th class="num">Superficie (ha)</th><th>Ambiente</th><th style="width:90px">Acciones</th></tr></thead>
-      <tbody id="tb-lotes"></tbody>
-    </table></div>
-  </div>
-
-  <!-- RANGOS -->
-  <div class="card">
-    <div class="ch"><h3>Rangos de Siembra</h3><button class="btn btn-d btn-sm" onclick="openModal('rango')">+ Agregar</button></div>
-    <div style="padding:12px 14px">
-    <div class="rgrid" id="list-rangos"></div>
-    </div>
-  </div>
-</div>
-
-<!-- ===== INSUMOS ===== -->
-<div id="tp-insumos" class="tp">
+<!-- ===== PARTIDAS Y RANGOS ===== -->
+<div id="tp-insumos" class="tp active">
   <div class="card" style="margin-bottom:14px">
     <div class="ch"><h3>Genotipos / Partidas de Semilla</h3>
       <div style="display:flex;gap:8px;align-items:center">
@@ -192,10 +138,12 @@ tr.tot td{background:#243d1e!important;color:#fff!important;font-weight:700}
       <tbody id="tb-genos"></tbody>
     </table></div>
   </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
-    <div class="card"><div class="ch"><h3>Curasemillas</h3><button class="btn btn-d btn-sm" onclick="openModal('cura')">+ Agregar</button></div><div class="tw"><table><thead><tr><th>Producto</th><th>Dosificación</th><th>U. Producto</th><th style="width:120px">Acciones</th></tr></thead><tbody id="tb-curas"></tbody></table></div></div>
-    <div class="card"><div class="ch"><h3>Inoculantes</h3><button class="btn btn-d btn-sm" onclick="openModal('inoc')">+ Agregar</button></div><div class="tw"><table><thead><tr><th>Producto</th><th>Dosificación</th><th>U. Producto</th><th style="width:120px">Acciones</th></tr></thead><tbody id="tb-inocs"></tbody></table></div></div>
-    <div class="card"><div class="ch"><h3>Fertilizantes</h3><button class="btn btn-d btn-sm" onclick="openModal('fert')">+ Agregar</button></div><div class="tw"><table><thead><tr><th>Producto</th><th>Dosificación</th><th>U. Producto</th><th style="width:120px">Acciones</th></tr></thead><tbody id="tb-ferts"></tbody></table></div></div>
+  <!-- RANGOS DE SIEMBRA (propio del módulo) -->
+  <div class="card">
+    <div class="ch"><h3>Rangos de Siembra</h3><button class="btn btn-d btn-sm" onclick="openModal('rango')">+ Agregar</button></div>
+    <div style="padding:12px 14px">
+      <div class="rgrid" id="list-rangos"></div>
+    </div>
   </div>
 </div>
 
@@ -216,7 +164,7 @@ tr.tot td{background:#243d1e!important;color:#fff!important;font-weight:700}
       <button class="btn btn-d" onclick="openModal('prog')">+ Programar Lote</button>
     </div>
   </div>
-  <div id="empty-prog" class="card"><div class="empty"><div class="empty-icon"></div><h3>Sin programación cargada</h3><p>Primero cargá tus <b>Listas</b> (campos, lotes, cultivos) e <b>Insumos</b>, luego usá <b>"+ Programar Lote"</b>.</p></div></div>
+  <div id="empty-prog" class="card"><div class="empty"><div class="empty-icon"></div><h3>Sin programación cargada</h3><p>Cargá tus <b>Partidas y Rangos</b>, y asegurate de tener campos, lotes, cultivos e insumos en <b>Maestros</b>. Luego usá <b>"+ Programar Lote"</b>.</p></div></div>
   <div class="card" id="card-datos" style="display:none"><div class="tw"><table><thead><tr>
     <th onclick="sortDatos('campo')" style="cursor:pointer">Campo <span id="si-campo"></span></th>
     <th onclick="sortDatos('lote')" style="cursor:pointer">Lote <span id="si-lote"></span></th>
@@ -329,6 +277,7 @@ tr.tot td{background:#243d1e!important;color:#fff!important;font-weight:700}
   </div>
 </div>
 
+<script src="pa-core.js"></script>
 <script>
 // ====== DB ======
 const K={campanas:'edj_campanas',campos:'edj_campos',ambs:'edj_ambs',cultivos:'edj_cultivos',rangos:'edj_rangos',lotes:'edj_lotes',genos:'edj_genos',curas:'edj_curas',inocs:'edj_inocs',ferts:'edj_ferts',prog:'edj_prog'};
@@ -342,7 +291,142 @@ function migrateProg(arr){
     return p;
   });
 }
-let DB={campanas:ld('campanas'),campos:ld('campos'),ambs:ld('ambs'),cultivos:ld('cultivos'),rangos:ld('rangos'),lotes:ld('lotes'),genos:ld('genos'),curas:ld('curas'),inocs:ld('inocs'),ferts:ld('ferts'),prog:migrateProg(ld('prog'))};
+let DB={campanas:ld('campanas'),campos:ld('campos'),ambs:ld('ambs'),rangos:ld('rangos'),lotes:ld('lotes'),genos:ld('genos'),prog:migrateProg(ld('prog'))};
+
+// ====== FUENTES pa-core (pieza 2) ======
+// Campos, lotes y ambientes salen de pa-core (maestros / Plan de Uso). No se
+// editan acá. El ambiente está asignado en el plan de uso (lo trae el lote).
+// Las descripciones de ambiente NO están en pa-core todavía:
+//   PENDIENTE (Mariana): exponer descripciones de ambiente en Maestros.
+//   Mientras tanto se usa el catálogo local 'edj_ambs' SOLO para mostrar la
+//   descripción junto al código; no es editable en este módulo.
+function psEmpresaId(){ return (typeof CTX!=='undefined' && CTX) ? CTX.empresaActivaId : null; }
+
+function psCampos(){
+  var eid = psEmpresaId();
+  if(typeof PA!=='undefined' && PA.demo && eid) return PA.demo.camposDeEmpresa(eid)||[];
+  return DB.campos; // fallback demo sin servidor
+}
+function psNombreCampo(campoId){
+  var cs=psCampos(); for(var i=0;i<cs.length;i++){ if(cs[i].id===campoId) return cs[i].nombre; } return '';
+}
+// Lotes de pa-core, normalizados a la forma del módulo: {id, n, campo(nombre), campoId, sup, amb(código)}
+function psLotes(){
+  var eid = psEmpresaId();
+  if(typeof PA!=='undefined' && PA.demo && eid){
+    var ls = PA.demo.listarLotes(eid, null)||[];
+    return ls.map(function(l){
+      return { id:l.id, n:l.nombre, campoId:l.campoId, campo:psNombreCampo(l.campoId), sup:(l.ha!=null?l.ha:0), amb:(l.ambiente||'') };
+    });
+  }
+  return DB.lotes;
+}
+function psLoteById(id){ var ls=psLotes(); for(var i=0;i<ls.length;i++){ if(ls[i].id===id) return ls[i]; } return null; }
+// Descripción de un código de ambiente (catálogo local, solo lectura para mostrar)
+function psAmbDesc(codigo){
+  if(!codigo) return '';
+  for(var i=0;i<DB.ambs.length;i++){ if(DB.ambs[i].c===codigo) return DB.ambs[i].d||''; }
+  return '';
+}
+function psAmbLabel(codigo){
+  if(!codigo) return '';
+  var d=psAmbDesc(codigo);
+  return d ? (codigo+' — '+d) : codigo;
+}
+// Ambientes presentes en los lotes de la empresa (código + descripción si existe)
+function psAmbientes(){
+  var ls=psLotes(), vistos={}, out=[];
+  ls.forEach(function(l){ if(l.amb && !vistos[l.amb]){ vistos[l.amb]=1; out.push({c:l.amb, d:psAmbDesc(l.amb)}); } });
+  out.sort(function(a,b){ return a.c.localeCompare(b.c); });
+  return out;
+}
+// Campañas derivadas de las actividades de pa-core (igual criterio que Fitosanitarios)
+function psCampanias(){
+  var eid = psEmpresaId();
+  if(typeof PA!=='undefined' && PA.demo && eid && PA.demo.listarActividades){
+    var acts = PA.demo.listarActividades(eid)||[], vistos={}, out=[];
+    acts.forEach(function(a){ if(a.campaniaId && !vistos[a.campaniaId]){ vistos[a.campaniaId]=1; out.push(a.campaniaId); } });
+    out.sort();
+    return out;
+  }
+  return (DB.campanas||[]).map(function(c){ return c.n||c; });
+}
+
+// ====== INSUMOS desde pa-core (pieza 3) ======
+// Curasemillas, Inoculantes y Fertilizantes salen del catálogo de pa-core
+// (Maestros), filtrados por tipo. NO se dan de alta acá. Las PARTIDAS
+// (genéticas) sí son propias del módulo y se siguen cargando acá.
+//
+// Mapeo de tipos pa-core → categoría del módulo (los tres tipos YA existen
+// en el padrón de insumos de Maestros):
+//   Fertilizante  → 'Fertilizante'
+//   Curasemilla   → 'Curasemilla'
+//   Inoculante    → 'Inoculante'
+// Si una empresa no tiene insumos de algún tipo cargados en Maestros, esa
+// lista saldrá vacía hasta que se carguen ahí.
+//
+// Forma esperada por el módulo: {n:nombre, u:unidad dosificación, up:unidad producto, dosis}
+function psUnidadSigla(unidadId){
+  if(typeof PA!=='undefined' && PA.demo && unidadId){
+    var us=PA.demo.listarUnidades()||[];
+    for(var i=0;i<us.length;i++){ if(us[i].id===unidadId) return us[i].sigla||us[i].nombre||''; }
+  }
+  return '';
+}
+function psInsumosPorTipo(tipo){
+  var eid = psEmpresaId();
+  if(typeof PA!=='undefined' && PA.demo && eid){
+    var cat = PA.demo.listarInsumos(eid)||[];
+    return cat.filter(function(x){ return x.tipo===tipo; }).map(function(x){
+      var sig = psUnidadSigla(x.unidadId);
+      return { n:x.nombre, u:sig, up:sig, dosis:0 };
+    });
+  }
+  return [];
+}
+function psCuras(){ return psInsumosPorTipo('Curasemilla'); }
+function psInocs(){ return psInsumosPorTipo('Inoculante'); }
+function psFerts(){ return psInsumosPorTipo('Fertilizante'); }
+
+// Cultivos: del catálogo de tipos de actividad de pa-core (pieza 4).
+// El módulo busca por nombre (.n), así que devolvemos {n:nombre, id:tipoActividadId}.
+function psCultivos(){
+  var eid = psEmpresaId();
+  if(typeof PA!=='undefined' && PA.demo && eid){
+    return (PA.demo.listarTiposActividad(eid)||[]).map(function(t){ return { n:t.nombre, id:t.id }; });
+  }
+  return [];
+}
+function psTipoActividadIdPorNombre(nombre){
+  var cs=psCultivos(); for(var i=0;i<cs.length;i++){ if(cs[i].n===nombre) return cs[i].id; } return '';
+}
+// Lotes que tienen el cultivo (por nombre) en la campaña indicada, según uso del suelo.
+// Filtros opcionales por campo (nombre) y ambiente (código).
+function psLotesConCultivo(cultivoNombre, campania, campoNombre, ambiente){
+  var eid = psEmpresaId();
+  if(!(typeof PA!=='undefined' && PA.demo && eid && PA.demo.listarActividades)) return [];
+  var tipoId = psTipoActividadIdPorNombre(cultivoNombre);
+  if(!tipoId || !campania) return [];
+  var acts = PA.demo.listarActividades(eid, campania)||[];
+  var conCult={};
+  acts.forEach(function(a){ if(a.tipoActividadId===tipoId) conCult[a.loteId]=1; });
+  return psLotes().filter(function(l){
+    if(!conCult[l.id]) return false;
+    if(campoNombre && l.campo!==campoNombre) return false;
+    if(ambiente && l.amb!==ambiente) return false;
+    return true;
+  });
+}
+
+// Redirige DB.curas/inocs/ferts al catálogo de pa-core (solo lectura).
+// Así los ~25 usos existentes (DB.curas.find(...), .map(...)) siguen andando
+// sin tocarlos, pero leen del catálogo central en vez de la lista local.
+Object.defineProperty(DB, 'curas', { get:psCuras, enumerable:true, configurable:true });
+Object.defineProperty(DB, 'inocs', { get:psInocs, enumerable:true, configurable:true });
+Object.defineProperty(DB, 'ferts', { get:psFerts, enumerable:true, configurable:true });
+Object.defineProperty(DB, 'cultivos', { get:psCultivos, enumerable:true, configurable:true });
+
+
 
 // ====== UTILS ======
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
@@ -356,41 +440,6 @@ function emptyRow(msg,cols=10){return`<tr><td colspan="${cols}" style="text-alig
 let mMode='', mIdx=-1;
 
 const DEFS={
-  campo:{
-    title:i=>(i<0?' Nuevo Campo':' Editar Campo'),
-    html:d=>`<div class="fg"><div class="fld"><label>Nombre del Campo *</label><input id="fi-n" value="${esc(d.n||'')}" placeholder="Ej: San Martín"></div></div>`,
-    validate:()=>{const n=v('fi-n');if(!n){alert('El nombre es obligatorio.');return null;}return{n};},
-    key:'campos', after:()=>{renderCampos();refreshLoteFiltro();refreshDatosFiltros();}
-  },
-  lote:{
-    title:i=>(i<0?' Nuevo Lote':' Editar Lote'),
-    html:d=>{
-      const co=DB.campos.map(c=>`<option${d.campo===c.n?' selected':''}>${esc(c.n)}</option>`).join('');
-      const ao=`<option value="">— Sin ambiente —</option>`+DB.ambs.map(a=>`<option value="${esc(a.c)}"${d.amb===a.c?' selected':''}>${esc(a.c)} — ${esc(a.d)}</option>`).join('');
-      return`<div class="fg fg2">
-        <div class="fld"><label>Campo *</label><select id="fi-campo"><option value="">-- Seleccionar --</option>${co}</select></div>
-        <div class="fld"><label>Nombre del Lote *</label><input id="fi-n" value="${esc(d.n||'')}" placeholder="Ej: SM 5 loma"></div>
-        <div class="fld"><label>Superficie (ha)</label><input id="fi-sup" type="number" step="0.1" min="0" value="${d.sup||''}" placeholder="0.0"></div>
-        <div class="fld"><label>Ambiente</label><select id="fi-amb">${ao}</select></div>
-      </div>`;
-    },
-    validate:()=>{const campo=v('fi-campo'),n=v('fi-n');if(!campo||!n){alert('Campo y nombre son obligatorios.');return null;}return{campo,n,sup:parseFloat(v('fi-sup'))||0,amb:v('fi-amb')};},
-    key:'lotes', after:()=>{renderLotes();refreshProgLoteOpts();}
-  },
-  amb:{
-    title:i=>(i<0?' Nuevo Ambiente':' Editar Ambiente'),
-    html:d=>`<div class="fg fg2"><div class="fld"><label>Código *</label><input id="fi-c" value="${esc(d.c||'')}" placeholder="FAP"></div><div class="fld"><label>Descripción *</label><input id="fi-d" value="${esc(d.d||'')}" placeholder="Franco alto potencial"></div></div>`,
-    validate:()=>{const c=v('fi-c').toUpperCase(),d=v('fi-d');if(!c||!d){alert('Código y descripción son obligatorios.');return null;}return{c,d};},
-    key:'ambs', after:renderAmbs
-  },
-  cultivo:{
-    title:i=>(i<0?'Nuevo Cultivo':'Editar Cultivo'),
-    html:d=>`<div class="fg fg2">
-      <div class="fld" style="grid-column:1/-1"><label>Nombre *</label><input id="fi-n" value="${esc(d.n||'')}" placeholder="Ej: Trigo" style="max-width:320px"></div>
-    </div>`,
-    validate:()=>{const n=v('fi-n');if(!n){alert('El nombre es obligatorio.');return null;}return{n};},
-    key:'cultivos', after:()=>{renderCultivos();refreshDatosFiltros();}
-  },
   rango:{
     title:i=>(i<0?' Nuevo Rango':' Editar Rango'),
     html:d=>`<div class="fg fg3">
@@ -455,39 +504,6 @@ const DEFS={
     },
     key:'genos', after:renderGenos
   },
-  cura:{
-    title:i=>(i<0?' Nuevo Curasemilla':' Editar'),
-    html:d=>`<div class="fg fg3">
-      <div class="fld" style="grid-column:1/-1"><label>Producto *</label><input id="fi-n" value="${esc(d.n||'')}" placeholder="Ej: Compinche SX"></div>
-      <div class="fld"><label>Dosis referencia</label><input id="fi-d" type="number" step="0.01" min="0" value="${d.dosis||''}" placeholder="0.20"></div>
-      <div class="fld"><label>Unidad dosificación <span style="font-size:10px;color:#999">(ej: cc/100 kg)</span></label><input id="fi-u" value="${esc(d.u||'')}" placeholder="cc/100 kg semilla"></div>
-      <div class="fld"><label>Unidad del producto <span style="font-size:10px;color:#999">(ej: litro, kg)</span></label><input id="fi-up" value="${esc(d.up||'')}" placeholder="litro"></div>
-    </div>`,
-    validate:()=>{const n=v('fi-n');if(!n){alert('El nombre es obligatorio.');return null;}return{n,dosis:parseFloat(v('fi-d'))||0,u:v('fi-u'),up:v('fi-up')};},
-    key:'curas', after:renderCuras
-  },
-  inoc:{
-    title:i=>(i<0?' Nuevo Inoculante':' Editar'),
-    html:d=>`<div class="fg fg3">
-      <div class="fld" style="grid-column:1/-1"><label>Producto *</label><input id="fi-n" value="${esc(d.n||'')}" placeholder="Ej: Rilegum Top"></div>
-      <div class="fld"><label>Dosis referencia</label><input id="fi-d" type="number" step="0.01" min="0" value="${d.dosis||''}" placeholder="0.50"></div>
-      <div class="fld"><label>Unidad dosificación <span style="font-size:10px;color:#999">(ej: cc/100 kg)</span></label><input id="fi-u" value="${esc(d.u||'')}" placeholder="cc/100 kg semilla"></div>
-      <div class="fld"><label>Unidad del producto <span style="font-size:10px;color:#999">(ej: litro, kg)</span></label><input id="fi-up" value="${esc(d.up||'')}" placeholder="litro"></div>
-    </div>`,
-    validate:()=>{const n=v('fi-n');if(!n){alert('El nombre es obligatorio.');return null;}return{n,dosis:parseFloat(v('fi-d'))||0,u:v('fi-u'),up:v('fi-up')};},
-    key:'inocs', after:renderInocs
-  },
-  fert:{
-    title:i=>(i<0?' Nuevo Fertilizante':' Editar'),
-    html:d=>`<div class="fg fg3">
-      <div class="fld" style="grid-column:1/-1"><label>Producto *</label><input id="fi-n" value="${esc(d.n||'')}" placeholder="Ej: MAP 11-52-0"></div>
-      <div class="fld"><label>Dosis referencia</label><input id="fi-d" type="number" step="0.5" min="0" value="${d.dosis||''}" placeholder="60"></div>
-      <div class="fld"><label>Unidad dosificación <span style="font-size:10px;color:#999">(ej: kg/ha)</span></label><input id="fi-u" value="${esc(d.u||'')}" placeholder="kg/ha"></div>
-      <div class="fld"><label>Unidad del producto <span style="font-size:10px;color:#999">(ej: kg bolsa 50 kg)</span></label><input id="fi-up" value="${esc(d.up||'')}" placeholder="kg"></div>
-    </div>`,
-    validate:()=>{const n=v('fi-n');if(!n){alert('El nombre es obligatorio.');return null;}return{n,dosis:parseFloat(v('fi-d'))||0,u:v('fi-u')||'kg/ha',up:v('fi-up')};},
-    key:'ferts', after:renderFerts
-  },
   prog:{
     title:i=>(i<0?' Programar Lote':' Editar Programación'),
     html:buildProgForm, validate:validateProg,
@@ -538,7 +554,14 @@ function saveModal(){
   let res;
   try { res=def.validate(); } catch(e){ console.error('validate error:',e); return; }
   if(!res) return;
-  if(mIdx>=0) DB[def.key][mIdx]=res; else DB[def.key].push(res);
+  if(Array.isArray(res)){
+    // alta múltiple (una entrada por lote tildado)
+    res.forEach(function(o){ DB[def.key].push(o); });
+  } else if(mIdx>=0){
+    DB[def.key][mIdx]=res;
+  } else {
+    DB[def.key].push(res);
+  }
   sv(def.key);
   closeModal();
   try { def.after(); } catch(e){ console.error('after error:',e); }
@@ -552,55 +575,37 @@ function delItem(key,idx){
   refreshDatosFiltros(); refreshResumenFiltros(); actualizarStats();
 }
 
-// ====== CAMPANAS ======
-function renderCampanas(){
-  const sel=document.getElementById('sel-campana');
-  if(!sel) return;
-  const prev=sel.value;
-  sel.innerHTML='<option value="">— Todas —</option>';
-  DB.campanas.forEach(c=>sel.innerHTML+=`<option value="${esc(c.n)}"${prev===c.n?' selected':''}>${esc(c.n)}</option>`);
-}
-function addCampana(){
-  const n=prompt('Nombre de la campaña (ej: 2025/26):');
-  if(!n||!n.trim()) return;
-  const nombre=n.trim();
-  if(DB.campanas.find(c=>c.n===nombre)){alert('Ya existe esa campaña.');return;}
-  DB.campanas.push({n:nombre});
-  sv('campanas');
-  renderCampanas();
-  document.getElementById('sel-campana').value=nombre;
-  refreshDatosFiltros(); refreshResumenFiltros(); actualizarStats();
-}
-function delCampana(){
-  const sel=document.getElementById('sel-campana');
-  const nombre=sel?.value;
-  if(!nombre){alert('Primero seleccioná una campaña para eliminar.');return;}
-  if(!confirm(`¿Eliminar la campaña "${nombre}"? No borra los lotes programados con esa campaña.`)) return;
-  DB.campanas=DB.campanas.filter(c=>c.n!==nombre);
-  sv('campanas');
-  renderCampanas();
-  refreshDatosFiltros(); refreshResumenFiltros(); actualizarStats();
-}
-function onCampanaChange(){
-  refreshDatosFiltros(); refreshResumenFiltros(); renderDatos(); renderResumen(); actualizarStats();
-}
+// (Campañas: ver sección CAMPANAS más abajo — solo lectura desde pa-core)
 
 // ====== PROG FORM ======
 function buildProgForm(d){
-  const lo=`<option value="">-- Seleccionar lote --</option>`+DB.lotes.map((l,i)=>`<option value="${i}"${d._li===i?' selected':''}>${esc(l.campo)} › ${esc(l.n)} (${l.sup||'?'} ha)</option>`).join('');
   const ro=`<option value="">-- Sin rango --</option>`+[...DB.rangos].sort((a,b)=>a.c.localeCompare(b.c,undefined,{numeric:true})).map(r=>`<option value="${esc(r.c)}"${d.rango===r.c?' selected':''}>${esc(r.c)} — ${fmtDate(r.min)} al ${fmtDate(r.max)}</option>`).join('');
-  const co=`<option value="">-- Seleccionar --</option>`+DB.cultivos.map(c=>`<option${d.cultivo===c.n?' selected':''}>${esc(c.n)}</option>`).join('');
+  const co=`<option value="">-- Seleccionar --</option>`+psCultivos().map(c=>`<option${d.cultivo===c.n?' selected':''}>${esc(c.n)}</option>`).join('');
+  const editing = (typeof mIdx==='number' && mIdx>=0);
+  const campSel = `<option value="">-- Campaña --</option>`+psCampanias().map(c=>`<option${d.campana===c?' selected':''}>${esc(c)}</option>`).join('');
+  const campoFiltroOpts = `<option value="">Todos los campos</option>`+psCampos().map(c=>`<option>${esc(c.nombre)}</option>`).join('');
+  const ambFiltroOpts = `<option value="">Todos los ambientes</option>`+psAmbientes().map(a=>`<option value="${esc(a.c)}">${esc(a.c)}${a.d?(' — '+esc(a.d)):''}</option>`).join('');
   return`<div class="fg fg2">
-    <div class="sep"> Campaña</div>
-    <div class="fld" style="grid-column:1/-1"><label>Campaña *</label><select id="pi-campana">${DB.campanas.map(c=>`<option${d.campana===c.n?' selected':''}>${esc(c.n)}</option>`).join('')}</select></div>
-    <div class="sep"> Selección de Lote</div>
-    <div class="fld" style="grid-column:1/-1"><label>Lote *</label><select id="pi-lote" onchange="onProgLote()">${lo}</select></div>
-    <div class="fld"><label>Campo</label><input id="pi-campo" readonly value="${esc(d.campo||'')}"></div>
-    <div class="fld"><label>Superficie (ha)</label><input id="pi-sup" readonly value="${d.sup||''}"></div>
-    <div class="fld"><label>Ambiente</label><input id="pi-amb" readonly value="${esc(d.amb||'')}"></div>
+    <div class="sep"> Campaña y Cultivo</div>
+    <div class="fld"><label>Campaña *</label><select id="pi-campana">${campSel}</select></div>
+    <div class="fld"><label>Especie / Cultivo *</label><select id="pi-cult" onchange="onProgCultChange()">${co}</select></div>
 
-    <div class="sep"> Cultivo y Genotipo</div>
-    <div class="fld"><label>Especie / Cultivo *</label><select id="pi-cult" onchange="onProgCult()">${co}</select></div>
+    <div class="sep" style="grid-column:1/-1"> Selección de Lotes</div>
+    ${editing ? `
+      <div class="fld" style="grid-column:1/-1"><label>Lote</label><input id="pi-lote-edit" readonly value="${esc((psLoteById(d._lid)||{}).campo||'')} › ${esc((psLoteById(d._lid)||{}).n||'')}" style="background:var(--g)"><input type="hidden" id="pi-lote" value="${esc(d._lid||'')}"></div>
+    ` : `
+      <div class="fld"><label>Filtrar campo</label><select id="pi-f-campo" onchange="renderProgLotePick()">${campoFiltroOpts}</select></div>
+      <div class="fld"><label>Filtrar ambiente</label><select id="pi-f-amb" onchange="renderProgLotePick()">${ambFiltroOpts}</select></div>
+      <div style="grid-column:1/-1">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <label style="margin:0">Lotes a programar <span id="pi-lote-count" style="font-weight:400;color:var(--ts);font-size:11px"></span></label>
+          <button type="button" class="btn btn-o btn-sm" id="pi-lote-all" onclick="toggleAllProgLotes()" style="display:none">Seleccionar todos</button>
+        </div>
+        <div id="pi-lote-pick" class="lotes-pick-ps"><div style="padding:8px;color:var(--ts);font-size:12px;width:100%;text-align:center">Elegí cultivo para ver los lotes disponibles</div></div>
+      </div>
+    `}
+
+    <div class="sep"> Genotipo</div>
     <div class="fld"><label>Genotipo / Partida *</label><select id="pi-geno" onchange="onProgGeno()"><option value="">-- Seleccionar cultivo primero --</option></select></div>
     <div class="fld"><label>Rango de Fecha de Siembra</label><select id="pi-rango" onchange="onProgRango()">${ro}</select></div>
 
@@ -645,11 +650,12 @@ function buildProgForm(d){
 }
 
 function initProgForm(d){
-  if(typeof d._li==='number') document.getElementById('pi-lote').value=d._li;
-  onProgLote(true);
-  if(d.cultivo){document.getElementById('pi-cult').value=d.cultivo;onProgCult(true);}
-  if(d.genotipo){document.getElementById('pi-geno').value=d.genotipo;onProgGeno(true);}
+  const editing=(typeof mIdx==='number' && mIdx>=0);
+  _psLotesSel={};
+  if(d.cultivo){document.getElementById('pi-cult').value=d.cultivo;onProgCultChange(true);}
+  if(d.genotipo){const gs=document.getElementById('pi-geno');if(gs){gs.value=d.genotipo;}onProgGeno(true);}
   if(d.rango){document.getElementById('pi-rango').value=d.rango;}
+  if(!editing){ renderProgLotePick(); }
   // Poblar listas dinámicas de insumos — limpiar primero para evitar duplicados
   ['pi-curas-list','pi-inocs-list','pi-ferts-list'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML='';});
   const _curas=d.curas||(d.cura?[{n:d.cura,dosis:d.curaDosis||0,unit:d.curaUnit||'',uProd:d.curaUProd||''}]:[]);
@@ -661,27 +667,71 @@ function initProgForm(d){
   calcProg();
 }
 
-function onProgLote(silent){
-  const idx=parseInt(document.getElementById('pi-lote')?.value);
-  if(isNaN(idx)){document.getElementById('pi-campo').value='';document.getElementById('pi-sup').value='';document.getElementById('pi-amb').value='';return;}
-  const lt=DB.lotes[idx];
-  if(!lt) return;
-  document.getElementById('pi-campo').value=lt.campo||'';
-  document.getElementById('pi-sup').value=lt.sup||'';
-  document.getElementById('pi-amb').value=lt.amb||'';
-  calcProg();
+// Estado de selección múltiple de lotes (solo alta)
+var _psLotesSel = {};
+
+function _psFiltrosLote(){
+  return {
+    cultivo: (document.getElementById('pi-cult')||{}).value||'',
+    camp: (document.getElementById('pi-campana')||{}).value||'',
+    fCampo: (document.getElementById('pi-f-campo')||{}).value||'',
+    fAmb: (document.getElementById('pi-f-amb')||{}).value||''
+  };
 }
-function onProgCult(silent){
+function renderProgLotePick(){
+  var wrap=document.getElementById('pi-lote-pick'); if(!wrap) return; // en edición no existe
+  var btnAll=document.getElementById('pi-lote-all');
+  var countEl=document.getElementById('pi-lote-count');
+  var f=_psFiltrosLote();
+  if(!f.cultivo || !f.camp){
+    if(btnAll)btnAll.style.display='none'; if(countEl)countEl.textContent='';
+    wrap.innerHTML='<div style="padding:8px;color:var(--ts);font-size:12px;width:100%;text-align:center">'+(!f.camp?'Seleccioná una campaña':'Elegí cultivo para ver los lotes disponibles')+'</div>';
+    return;
+  }
+  var lotes=psLotesConCultivo(f.cultivo, f.camp, f.fCampo, f.fAmb);
+  if(!lotes.length){
+    if(btnAll)btnAll.style.display='none'; if(countEl)countEl.textContent='';
+    wrap.innerHTML='<div style="padding:8px;color:var(--ts);font-size:12px;width:100%;text-align:center">Ningún lote tiene '+esc(f.cultivo)+' en la campaña '+esc(f.camp)+(f.fCampo||f.fAmb?' con esos filtros':'')+'</div>';
+    return;
+  }
+  if(btnAll)btnAll.style.display='';
+  var nSel=lotes.filter(function(l){return _psLotesSel[l.id];}).length;
+  if(countEl)countEl.textContent='· '+nSel+' de '+lotes.length+' seleccionados';
+  wrap.innerHTML=lotes.map(function(l){
+    var on=!!_psLotesSel[l.id];
+    return '<label class="lote-chk-ps'+(on?' sel':'')+'">'
+      +'<input type="checkbox"'+(on?' checked':'')+' onchange="toggleProgLote(\''+l.id+'\',this.checked)"> '
+      +'<strong>'+esc(l.n)+'</strong> <span class="lc-meta">'+esc(l.campo)+(l.amb?' · '+esc(l.amb):'')+' · '+fmt(l.sup,1)+' ha</span>'
+      +'</label>';
+  }).join('');
+  var allSel=lotes.every(function(l){return _psLotesSel[l.id];});
+  if(btnAll)btnAll.textContent=allSel?'Quitar todos':'Seleccionar todos';
+}
+function toggleProgLote(id,on){ if(on)_psLotesSel[id]=1; else delete _psLotesSel[id]; renderProgLotePick(); }
+function toggleAllProgLotes(){
+  var f=_psFiltrosLote();
+  var lotes=psLotesConCultivo(f.cultivo, f.camp, f.fCampo, f.fAmb);
+  var allSel=lotes.length && lotes.every(function(l){return _psLotesSel[l.id];});
+  lotes.forEach(function(l){ if(allSel) delete _psLotesSel[l.id]; else _psLotesSel[l.id]=1; });
+  renderProgLotePick();
+}
+
+// Cambio de cultivo: puebla genotipos, fija DES sugerido, resetea y repinta lotes.
+function onProgCultChange(silent){
   const c=document.getElementById('pi-cult')?.value;
   const sel=document.getElementById('pi-geno');
-  if(!sel) return;
-  sel.innerHTML='<option value="">-- Seleccionar --</option>';
-  DB.genos.filter(g=>g.c===c).forEach(g=>sel.innerHTML+=`<option>${esc(g.n)}</option>`);
-  const ci=DB.cultivos.find(x=>x.n===c);
+  if(sel){
+    sel.innerHTML='<option value="">-- Seleccionar --</option>';
+    DB.genos.filter(g=>g.c===c).forEach(g=>sel.innerHTML+=`<option>${esc(g.n)}</option>`);
+  }
+  const ci=psCultivos().find(x=>x.n===c);
   const de=document.getElementById('pi-des');
-  if(ci&&ci.des&&(!de.value||!silent)) de.value=ci.des;
-  if(!silent){document.getElementById('pi-geno').value='';onProgGeno();}
+  if(de && ci && ci.des && (!de.value||!silent)) de.value=ci.des;
+  if(!silent){ if(sel) sel.value=''; onProgGeno(); }
+  _psLotesSel={}; renderProgLotePick();
 }
+// Compat: en edición se llama onProgCult para repoblar genotipos sin resetear lotes.
+function onProgCult(silent){ onProgCultChange(silent); }
 function onProgGeno(silent){
   const gn=document.getElementById('pi-geno')?.value;
   const g=DB.genos.find(x=>x.n===gn);
@@ -724,7 +774,7 @@ function getInsumoRows(listId,dbKey){
 function calcProg(){
   const obj=parseFloat(v('pi-obj'))||0, vc=parseFloat(v('pi-vc'))||0, perc=parseFloat(v('pi-perc'))||0, des=parseFloat(v('pi-des'))||0;
   const supEl=document.getElementById('pi-sup');
-  const sup=supEl?parseFloat(supEl.value)||0:0;
+  const sup=supEl?parseFloat(supEl.value)||0:0;  // solo existe en edición (lote único)
   const gn=v('pi-geno'), g=DB.genos.find(x=>x.n===gn);
   const warn=document.getElementById('c-warn');
   if(!obj||!vc||!des){['c-m2','c-ml','c-ha','c-lt'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent='—';});if(warn)warn.style.display='none';return;}
@@ -740,56 +790,73 @@ function calcProg(){
     if(densHa!==null&&sup>0)densLote=densHa*sup;
   }
   if(eha)eha.textContent=densHa!==null?densHa.toFixed(g&&g.u==='Bolsa'?3:1):'—';
-  if(elt)elt.textContent=densLote!==null?densLote.toFixed(g&&g.u==='Bolsa'?2:0):(densHa!==null?'(sin sup.)':'—');
+  // En alta multi-lote no hay superficie única: el total por lote se calcula al guardar.
+  if(elt)elt.textContent=densLote!==null?densLote.toFixed(g&&g.u==='Bolsa'?2:0):(densHa!==null?'(por lote)':'—');
   const warns=[];
   if(g&&g.u==='Kg'&&!g.p1000)warns.push(' P1000 no definido para este genotipo.');
   if(semM2>800)warns.push(' Densidad muy alta ('+semM2.toFixed(0)+' sem/m²). Verificar parámetros.');
   if(warn){warn.style.display=warns.length?'block':'none';warn.innerHTML=warns.join('<br>');}
 }
 
-function validateProg(){
-  const li=parseInt(v('pi-lote')||document.getElementById('pi-lote')?.value);
+// Construye el objeto programación para un lote dado, con el paquete común.
+function _buildProgObj(lt, pkg){
+  let densLote=0;
+  if(pkg.densHa && lt) densLote=pkg.densHa*(lt.sup||0);
+  return {_lid:lt?lt.id:'', campana:pkg.campana, campo:lt?lt.campo:'', lote:lt?lt.n:'', sup:lt?lt.sup:0, amb:lt?lt.amb:'',
+    cultivo:pkg.cult, genotipo:pkg.geno, rango:pkg.rango, fs:pkg.fs, orden:0,
+    des:pkg.des, obj:pkg.obj, vc:pkg.vc, perc:pkg.perc, semM2:pkg.semM2, semML:pkg.semML, densHa:pkg.densHa, densLote,
+    unidad:pkg.unidad, curas:pkg.curas, inocs:pkg.inocs, ferts:pkg.ferts};
+}
+// Valida y arma el paquete común (sin lote). Devuelve null si falta algo.
+function _buildProgPackage(){
   const cult=v('pi-cult'),geno=v('pi-geno');
-  if(isNaN(li)||!cult||!geno){alert('Obligatorios: Lote, Cultivo y Genotipo.');return null;}
-  const lt=DB.lotes[li];
+  if(!cult||!geno){alert('Obligatorios: Cultivo y Genotipo.');return null;}
   const obj=parseFloat(v('pi-obj'))||0,vc=parseFloat(v('pi-vc'))||0,perc=parseFloat(v('pi-perc'))||0,des=parseFloat(v('pi-des'))||0;
   const g=DB.genos.find(x=>x.n===geno);
-  let semM2=0,semML=0,densHa=0,densLote=0;
-  if(obj&&vc&&des){semM2=obj/((vc/100)*(1-perc/100));semML=parseFloat((semM2*des).toFixed(2));if(g){if(g.u==='Kg'&&g.p1000)densHa=semM2*g.p1000/100;else if(g.u==='Bolsa'&&g.sb)densHa=semM2*10000/g.sb;densLote=densHa*(lt?lt.sup:0);}}
+  let semM2=0,semML=0,densHa=0;
+  if(obj&&vc&&des){semM2=obj/((vc/100)*(1-perc/100));semML=parseFloat((semM2*des).toFixed(2));if(g){if(g.u==='Kg'&&g.p1000)densHa=semM2*g.p1000/100;else if(g.u==='Bolsa'&&g.sb)densHa=semM2*10000/g.sb;}}
   const rango=v('pi-rango'),ri=DB.rangos.find(x=>x.c===rango);
-  const campana=v('pi-campana');
-  const curas=getInsumoRows('pi-curas-list','curas');
-  const inocs=getInsumoRows('pi-inocs-list','inocs');
-  const ferts=getInsumoRows('pi-ferts-list','ferts');
-  return{_li:li,campana,campo:lt?lt.campo:'',lote:lt?lt.n:'',sup:lt?lt.sup:0,amb:lt?lt.amb:'',cultivo:cult,genotipo:geno,rango,fs:ri?`${fmtDate(ri.min)}–${fmtDate(ri.max)}`:'A confirmar',orden:mIdx>=0&&DB.prog[mIdx]?DB.prog[mIdx].orden||0:0,des,obj,vc,perc,semM2,semML,densHa,densLote,unidad:g?g.u:'Kg',curas,inocs,ferts};
+  return {campana:v('pi-campana'), cult, geno, rango, fs:ri?`${fmtDate(ri.min)}–${fmtDate(ri.max)}`:'A confirmar',
+    des,obj,vc,perc,semM2,semML,densHa, unidad:g?g.u:'Kg',
+    curas:getInsumoRows('pi-curas-list','curas'), inocs:getInsumoRows('pi-inocs-list','inocs'), ferts:getInsumoRows('pi-ferts-list','ferts')};
+}
+// validate del DEF prog: en EDICIÓN devuelve un objeto; en ALTA un array (uno por lote tildado).
+function validateProg(){
+  const editing=(typeof mIdx==='number' && mIdx>=0);
+  const pkg=_buildProgPackage(); if(!pkg) return null;
+  if(!pkg.campana){alert('Seleccioná una campaña.');return null;}
+  if(editing){
+    const lid=document.getElementById('pi-lote')?.value||'';
+    const lt=psLoteById(lid);
+    const obj=_buildProgObj(lt,pkg);
+    obj.orden=DB.prog[mIdx]?DB.prog[mIdx].orden||0:0;
+    return obj;
+  }
+  // alta multi-lote
+  const ids=Object.keys(_psLotesSel);
+  if(!ids.length){alert('Tildá al menos un lote para programar.');return null;}
+  return ids.map(function(id){ return _buildProgObj(psLoteById(id), pkg); });
 }
 
 // ====== RENDERS LISTAS ======
 function renderCampos(){
-  const tb=document.getElementById('tb-campos');tb.innerHTML='';
-  if(!DB.campos.length){tb.innerHTML=emptyRow('Sin campos cargados');return;}
-  DB.campos.forEach((c,i)=>tb.innerHTML+=`<tr><td><b>${esc(c.n)}</b></td><td><div style="display:flex;gap:4px"><button class="btn btn-az btn-sm" onclick="openModal('campo',${i})">Editar</button><button class="btn btn-r btn-sm" onclick="delItem('campos',${i})">Borrar</button></div></td></tr>`);
+  const tb=document.getElementById('tb-campos');if(!tb)return;tb.innerHTML='';
+  const campos=psCampos();
+  if(!campos.length){tb.innerHTML=emptyRow('Sin campos para esta empresa',1);return;}
+  campos.forEach(c=>tb.innerHTML+=`<tr><td><b>${esc(c.nombre)}</b></td></tr>`);
 }
 function renderLotes(){
   const filtro=document.getElementById('f-lotes-campo')?.value||'';
-  const tb=document.getElementById('tb-lotes');tb.innerHTML='';
-  const lista=filtro?DB.lotes.filter(l=>l.campo===filtro):DB.lotes;
-  if(!lista.length){tb.innerHTML=emptyRow(DB.lotes.length?'Sin lotes para este campo':'Sin lotes cargados');return;}
+  const tb=document.getElementById('tb-lotes');if(!tb)return;tb.innerHTML='';
+  const all=psLotes();
+  const lista=filtro?all.filter(l=>l.campo===filtro):all;
+  if(!lista.length){tb.innerHTML=emptyRow(all.length?'Sin lotes para este campo':'Sin lotes cargados',4);return;}
   lista.forEach((l)=>{
-    const i=DB.lotes.indexOf(l);
-    tb.innerHTML+=`<tr><td>${esc(l.campo)}</td><td><b>${esc(l.n)}</b></td><td class="num">${l.sup?fmt(l.sup,1):'—'} ha</td><td>${l.amb?`<span class="tag-amb">${esc(l.amb)}</span>`:'<span style="color:#bbb">—</span>'}</td><td><div style="display:flex;gap:4px"><button class="btn btn-az btn-sm" onclick="openModal('lote',${i})">Editar</button><button class="btn btn-r btn-sm" onclick="delItem('lotes',${i})">Borrar</button></div></td></tr>`;
+    tb.innerHTML+=`<tr><td>${esc(l.campo)}</td><td><b>${esc(l.n)}</b></td><td class="num">${l.sup?fmt(l.sup,1):'—'} ha</td><td>${l.amb?`<span class="tag-amb">${esc(psAmbLabel(l.amb))}</span>`:'<span style="color:#bbb">—</span>'}</td></tr>`;
   });
 }
-function renderAmbs(){
-  const tb=document.getElementById('tb-ambs');tb.innerHTML='';
-  if(!DB.ambs.length){tb.innerHTML=emptyRow('Sin ambientes');return;}
-  DB.ambs.forEach((a,i)=>tb.innerHTML+=`<tr><td><b style="background:var(--v);color:#fff;padding:2px 7px;border-radius:4px;font-size:11px">${esc(a.c)}</b></td><td>${esc(a.d)}</td><td><div style="display:flex;gap:4px"><button class="btn btn-az btn-sm" onclick="openModal('amb',${i})">Editar</button><button class="btn btn-r btn-sm" onclick="delItem('ambs',${i})">Borrar</button></div></td></tr>`);
-}
-function renderCultivos(){
-  const tb=document.getElementById('tb-cultivos');tb.innerHTML='';
-  if(!DB.cultivos.length){tb.innerHTML=emptyRow('Sin cultivos');return;}
-  DB.cultivos.forEach((c,i)=>tb.innerHTML+=`<tr><td><b>${esc(c.n)}</b></td><td><div style="display:flex;gap:4px"><button class="btn btn-az btn-sm" onclick="openModal('cultivo',${i})">Editar</button><button class="btn btn-r btn-sm" onclick="delItem('cultivos',${i})">Borrar</button></div></td></tr>`);
-}
+function renderAmbs(){ /* ambientes ya no se editan acá: vienen del lote (Plan de Uso) */ }
+function renderCultivos(){ /* cultivos vienen del catálogo (pa-core); ya no hay tabla acá */ }
 function fmtDate(iso){
   // "2025-06-01" → "01/06/2025"  |  legacy "dd/mm" → pasa tal cual
   if(!iso) return '';
@@ -841,23 +908,23 @@ function renderGenos(){
       </div></td></tr>`;
   });
 }
-function renderCuras(){const tb=document.getElementById('tb-curas');tb.innerHTML='';if(!DB.curas.length){tb.innerHTML=emptyRow('—');return;}DB.curas.forEach((x,i)=>tb.innerHTML+=`<tr><td><b>${esc(x.n)}</b></td><td style="font-size:11px">${x.dosis||'—'} ${esc(x.u)}</td><td style="font-size:11px;color:#333">${esc(x.up||'—')}</td><td><div style="display:flex;gap:3px"><button class="btn btn-az btn-sm" onclick="openModal('cura',${i})">Editar</button><button class="btn btn-r btn-sm" onclick="delItem('curas',${i})">Borrar</button></div></td></tr>`);}
-function renderInocs(){const tb=document.getElementById('tb-inocs');tb.innerHTML='';if(!DB.inocs.length){tb.innerHTML=emptyRow('—');return;}DB.inocs.forEach((x,i)=>tb.innerHTML+=`<tr><td><b>${esc(x.n)}</b></td><td style="font-size:11px">${x.dosis||'—'} ${esc(x.u)}</td><td style="font-size:11px;color:#333">${esc(x.up||'—')}</td><td><div style="display:flex;gap:3px"><button class="btn btn-az btn-sm" onclick="openModal('inoc',${i})">Editar</button><button class="btn btn-r btn-sm" onclick="delItem('inocs',${i})">Borrar</button></div></td></tr>`);}
-function renderFerts(){const tb=document.getElementById('tb-ferts');tb.innerHTML='';if(!DB.ferts.length){tb.innerHTML=emptyRow('—');return;}DB.ferts.forEach((x,i)=>tb.innerHTML+=`<tr><td><b>${esc(x.n)}</b></td><td style="font-size:11px">${x.dosis||'—'} ${esc(x.u)}</td><td style="font-size:11px;color:#333">${esc(x.up||'—')}</td><td><div style="display:flex;gap:3px"><button class="btn btn-az btn-sm" onclick="openModal('fert',${i})">Editar</button><button class="btn btn-r btn-sm" onclick="delItem('ferts',${i})">Borrar</button></div></td></tr>`);}
+function renderCuras(){const tb=document.getElementById('tb-curas');if(!tb)return;tb.innerHTML='';if(!DB.curas.length){tb.innerHTML=emptyRow('Sin curasemillas en el catálogo',2);return;}DB.curas.forEach(x=>tb.innerHTML+=`<tr><td><b>${esc(x.n)}</b></td><td style="font-size:11px;color:#333">${esc(x.up||'—')}</td></tr>`);}
+function renderInocs(){const tb=document.getElementById('tb-inocs');if(!tb)return;tb.innerHTML='';if(!DB.inocs.length){tb.innerHTML=emptyRow('Sin inoculantes en el catálogo',2);return;}DB.inocs.forEach(x=>tb.innerHTML+=`<tr><td><b>${esc(x.n)}</b></td><td style="font-size:11px;color:#333">${esc(x.up||'—')}</td></tr>`);}
+function renderFerts(){const tb=document.getElementById('tb-ferts');if(!tb)return;tb.innerHTML='';if(!DB.ferts.length){tb.innerHTML=emptyRow('Sin fertilizantes en el catálogo',2);return;}DB.ferts.forEach(x=>tb.innerHTML+=`<tr><td><b>${esc(x.n)}</b></td><td style="font-size:11px;color:#333">${esc(x.up||'—')}</td></tr>`);}
 
 // ====== FILTROS HELPER ======
 function refreshLoteFiltro(){
   const sel=document.getElementById('f-lotes-campo');if(!sel)return;
   const prev=sel.value;sel.innerHTML='<option value="">Todos los campos</option>';
-  DB.campos.forEach(c=>sel.innerHTML+=`<option${prev===c.n?' selected':''}>${esc(c.n)}</option>`);
+  psCampos().forEach(c=>sel.innerHTML+=`<option${prev===c.nombre?' selected':''}>${esc(c.nombre)}</option>`);
   renderLotes();
 }
 function refreshProgLoteOpts(){/* updated dynamically in buildProgForm */}
 function refreshDatosFiltros(){
-  // Actualizar filtro campaña
+  // Filtro campaña (datos) — desde pa-core
   const fca=document.getElementById('f-d-campana');
-  if(fca){const prev=fca.value;fca.innerHTML='<option value="">Todas las campañas</option>';DB.campanas.forEach(c=>fca.innerHTML+=`<option${prev===c.n?' selected':''}>${esc(c.n)}</option>`);}
-  ['f-d-campo','f-d-cultivo','f-d-rango'].forEach(id=>{const e=document.getElementById(id);if(!e)return;const prev=e.value;e.innerHTML='';if(id==='f-d-campo'){e.innerHTML='<option value="">Todos los campos</option>';DB.campos.forEach(c=>e.innerHTML+=`<option${prev===c.n?' selected':''}>${esc(c.n)}</option>`);}else if(id==='f-d-cultivo'){e.innerHTML='<option value="">Todos los cultivos</option>';DB.cultivos.forEach(c=>e.innerHTML+=`<option${prev===c.n?' selected':''}>${esc(c.n)}</option>`);}else if(id==='f-d-rango'){e.innerHTML='<option value="">Todos los rangos</option>';[...DB.rangos].sort((a,b)=>a.c.localeCompare(b.c,undefined,{numeric:true})).forEach(r=>e.innerHTML+=`<option value="${esc(r.c)}"${prev===r.c?' selected':''}>${esc(r.c)}</option>`);}});
+  if(fca){const prev=fca.value;fca.innerHTML='<option value="">Todas las campañas</option>';psCampanias().forEach(c=>fca.innerHTML+=`<option${prev===c?' selected':''}>${esc(c)}</option>`);}
+  ['f-d-campo','f-d-cultivo','f-d-rango'].forEach(id=>{const e=document.getElementById(id);if(!e)return;const prev=e.value;e.innerHTML='';if(id==='f-d-campo'){e.innerHTML='<option value="">Todos los campos</option>';psCampos().forEach(c=>e.innerHTML+=`<option${prev===c.nombre?' selected':''}>${esc(c.nombre)}</option>`);}else if(id==='f-d-cultivo'){e.innerHTML='<option value="">Todos los cultivos</option>';DB.cultivos.forEach(c=>e.innerHTML+=`<option${prev===c.n?' selected':''}>${esc(c.n)}</option>`);}else if(id==='f-d-rango'){e.innerHTML='<option value="">Todos los rangos</option>';[...DB.rangos].sort((a,b)=>a.c.localeCompare(b.c,undefined,{numeric:true})).forEach(r=>e.innerHTML+=`<option value="${esc(r.c)}"${prev===r.c?' selected':''}>${esc(r.c)}</option>`);}});
 }
 
 // ====== RENDER DATOS ======
@@ -941,7 +1008,7 @@ function refreshResumenFiltros(){
   if(!fca||!fc||!fcu) return;
   const prevCa=fca.value, prevC=fc.value, prevCu=fcu.value;
   fca.innerHTML='<option value="">Todas las campañas</option>';
-  DB.campanas.forEach(c=>fca.innerHTML+=`<option${prevCa===c.n?' selected':''}>${esc(c.n)}</option>`);
+  psCampanias().forEach(c=>fca.innerHTML+=`<option${prevCa===c?' selected':''}>${esc(c)}</option>`);
   const base=prevCa?DB.prog.filter(p=>p.campana===prevCa):DB.prog;
   fc.innerHTML='<option value="">Todos los campos</option>';
   fcu.innerHTML='<option value="">Todos los cultivos</option>';
@@ -1174,10 +1241,11 @@ function renderResumen(){
 
 function actualizarStats(){
   const P=DB.prog;
-  document.getElementById('s-ha').textContent=fmt(P.reduce((s,p)=>s+p.sup,0),1);
-  document.getElementById('s-prog').textContent=P.length;
-  document.getElementById('s-cult').textContent=new Set(P.map(p=>p.cultivo)).size;
-  document.getElementById('s-kg').textContent=fmtI(P.reduce((s,p)=>s+p.densLote,0));
+  var set=function(id,val){var e=document.getElementById(id);if(e)e.textContent=val;};
+  set('s-ha', fmt(P.reduce((s,p)=>s+p.sup,0),1));
+  set('s-prog', P.length);
+  set('s-cult', new Set(P.map(p=>p.cultivo)).size);
+  set('s-kg', fmtI(P.reduce((s,p)=>s+p.densLote,0)));
 }
 
 function exportCSV(){
@@ -1623,25 +1691,7 @@ function renderCampanas(){
   const sel=document.getElementById('sel-campana');if(!sel)return;
   const prev=sel.value;
   sel.innerHTML='<option value="">\u2014 Todas \u2014</option>';
-  DB.campanas.forEach(c=>sel.innerHTML+=`<option value="${esc(c.n)}"${prev===c.n?' selected':''}>${esc(c.n)}</option>`);
-}
-function addCampana(){
-  const n=prompt('Nombre de la campana (ej: 2025/26):');
-  if(!n||!n.trim())return;
-  const nombre=n.trim();
-  if(DB.campanas.find(c=>c.n===nombre)){alert('Ya existe esa campana.');return;}
-  DB.campanas.push({n:nombre});sv('campanas');
-  renderCampanas();
-  document.getElementById('sel-campana').value=nombre;
-  refreshDatosFiltros();refreshResumenFiltros();actualizarStats();
-}
-function delCampana(){
-  const sel=document.getElementById('sel-campana');
-  const nombre=sel?.value;
-  if(!nombre){alert('Primero selecciona una campana para eliminar.');return;}
-  if(!confirm('Eliminar campana "'+nombre+'"? No borra los lotes programados con esa campana.'))return;
-  DB.campanas=DB.campanas.filter(c=>c.n!==nombre);sv('campanas');
-  renderCampanas();refreshDatosFiltros();refreshResumenFiltros();actualizarStats();
+  psCampanias().forEach(c=>sel.innerHTML+=`<option value="${esc(c)}"${prev===c?' selected':''}>${esc(c)}</option>`);
 }
 function onCampanaChange(){
   refreshDatosFiltros();refreshResumenFiltros();renderDatos();renderResumen();actualizarStats();
@@ -1670,25 +1720,75 @@ function resetearTodo(){
 // ====== INIT ======
 function initApp(){
   try{renderCampanas();}catch(e){console.error('renderCampanas',e);}
-  try{renderCampos();}catch(e){console.error('renderCampos',e);}
-  try{refreshLoteFiltro();}catch(e){console.error('refreshLoteFiltro',e);}
-  try{renderAmbs();}catch(e){console.error('renderAmbs',e);}
-  try{renderCultivos();}catch(e){console.error('renderCultivos',e);}
   try{renderRangos();}catch(e){console.error('renderRangos',e);}
   try{renderGenos();}catch(e){console.error('renderGenos',e);}
-  try{renderCuras();}catch(e){console.error('renderCuras',e);}
-  try{renderInocs();}catch(e){console.error('renderInocs',e);}
-  try{renderFerts();}catch(e){console.error('renderFerts',e);}
   try{refreshDatosFiltros();}catch(e){console.error('refreshDatosFiltros',e);}
   try{refreshResumenFiltros();}catch(e){console.error('refreshResumenFiltros',e);}
   try{renderDatos();}catch(e){console.error('renderDatos',e);}
   try{renderResumen();}catch(e){console.error('renderResumen',e);}
   try{actualizarStats();}catch(e){console.error('actualizarStats',e);}
 }
+
+// ====== CONTEXTO (pieza 1 — integración pa-core) ======
+// Solo establece la empresa activa y el selector de cabecera.
+// NO toca todavía maestros (campos/lotes/cultivos/insumos): eso es pieza 2+.
+var CTX = null;
+
+function psPoblarEmpresas(){
+  var sel = document.getElementById('ps-emp-sel');
+  if(!sel) return;
+  sel.innerHTML = '';
+  if(typeof PA !== 'undefined' && CTX && CTX.empresasDisponibles && CTX.empresasDisponibles.length){
+    CTX.empresasDisponibles.forEach(function(e){
+      var o = document.createElement('option');
+      o.value = e.id; o.textContent = e.razonSocial || e.nombre || e.id;
+      sel.appendChild(o);
+    });
+    sel.value = CTX.empresaActivaId;
+  } else {
+    var o2 = document.createElement('option');
+    o2.value = 'demo'; o2.textContent = 'Demo (sin servidor)';
+    sel.appendChild(o2);
+    var w = document.getElementById('ps-emp-wrap'); if(w) w.style.display='none';
+  }
+}
+
+function psOnCambioEmpresa(){
+  var sel = document.getElementById('ps-emp-sel');
+  if(typeof PA !== 'undefined' && CTX && sel && sel.value){
+    PA.setEmpresaActiva(sel.value, function(err, ctx){
+      if(!err && ctx){ CTX = ctx; }
+      initApp();
+    });
+  } else {
+    initApp();
+  }
+}
+
+function psBoot(){
+  if(typeof PA !== 'undefined'){
+    PA.init({}, function(){
+      var arrancar = function(){
+        PA.loadContext(null, function(err, ctx){
+          if(!err && ctx){ CTX = ctx; }
+          psPoblarEmpresas();
+          initApp();
+        });
+      };
+      if(PA.haySesion && PA.haySesion()){ arrancar(); }
+      else if(PA.login){ PA.login('eduardo@doneduardo.com', function(){ arrancar(); }); }
+      else { arrancar(); }
+    });
+  } else {
+    var w = document.getElementById('ps-emp-wrap'); if(w) w.style.display='none';
+    initApp();
+  }
+}
+
 if(document.readyState==='loading'){
-  document.addEventListener('DOMContentLoaded', initApp);
+  document.addEventListener('DOMContentLoaded', psBoot);
 } else {
-  initApp();
+  psBoot();
 }
 
 </script>
