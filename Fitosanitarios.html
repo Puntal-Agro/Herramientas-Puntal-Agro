@@ -220,9 +220,12 @@ tr:hover td { background: var(--g50); }
 .req-filters select:focus, .req-filters input:focus { border-color: var(--g500); }
 .chk-label { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--gr600); cursor: pointer; }
 .chk-label input { width: auto; accent-color: var(--g700); cursor: pointer; }
-.prog-lote-row input[type=checkbox] { width: 16px !important; height: 16px !important; flex: 0 0 auto; display: inline-block !important; margin: 0 !important; padding: 0 !important; accent-color: var(--g700); cursor: pointer; -webkit-appearance: auto; appearance: auto; }
-.prog-lote-row strong { flex: 0 0 auto; }
-.prog-lote-row span { flex: 1 1 auto; }
+.lotes-pick-fi { display:flex; flex-wrap:wrap; gap:6px; padding:8px; border:1px solid var(--gr200); border-radius:8px; background:var(--white); min-height:40px; align-items:flex-start; }
+.lote-chk-fi { display:inline-flex; align-items:center; gap:6px; padding:5px 10px; border:1px solid var(--gr300); border-radius:7px; background:var(--gr50); font-size:12px; cursor:pointer; white-space:nowrap; }
+.lote-chk-fi:hover { border-color:var(--g500); }
+.lote-chk-fi.sel { border-color:var(--g600); background:#F0F4EC; }
+.lote-chk-fi input[type=checkbox] { width:15px !important; height:15px !important; flex:0 0 auto; display:inline-block !important; margin:0 !important; padding:0 !important; accent-color:var(--g700); cursor:pointer; -webkit-appearance:auto; appearance:auto; }
+.lote-chk-fi .lc-meta { color:var(--gr500); }
 .divider { border: none; border-top: 2px solid var(--g100); margin: 24px 0; }
 
 /* MODALS */
@@ -527,15 +530,15 @@ input::placeholder { color: var(--gr400); }
         </div>
       </div>
 
-      <!-- Selección múltiple de lotes -->
+      <!-- Selección múltiple de lotes (chips que envuelven, como insumos_ot) -->
       <div id="prog-lote-pick-wrap" style="margin-bottom:16px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <div style="margin-bottom:6px">
           <span style="font-weight:700;font-size:13px;color:var(--gr700)">Lotes a programar <span id="prog-lote-count" style="font-weight:500;color:var(--gr500);font-size:12px"></span></span>
-          <button type="button" class="btn btn-ghost btn-xs" id="prog-lote-all" onclick="toggleAllProgLotes()" style="display:none">Seleccionar todos</button>
         </div>
-        <div class="listas-card" id="prog-lote-pick" style="max-height:200px;overflow:auto;padding:8px">
-          <div style="padding:12px;text-align:center;color:var(--gr400);font-size:13px">Elegí cultivo para ver los lotes disponibles</div>
+        <div id="prog-lote-pick" class="lotes-pick-fi">
+          <div style="padding:8px;text-align:center;color:var(--gr400);font-size:13px;width:100%">Elegí cultivo para ver los lotes disponibles</div>
         </div>
+        <button type="button" class="btn btn-secondary btn-sm" id="prog-lote-all" onclick="toggleAllProgLotes()" style="display:none;margin-top:8px">Seleccionar todos</button>
       </div>
 
       <!-- Etapas -->
@@ -1936,14 +1939,14 @@ function renderProgLotePick() {
     btnAll.style.display = 'none';
     countEl.textContent = '';
     wrap.innerHTML = lo
-      ? '<label class="prog-lote-row" style="display:flex;align-items:center;gap:8px;padding:4px 2px;font-size:13px"><input type="checkbox" checked disabled> <strong>'+esc(lo.nombre)+'</strong> <span style="color:var(--gr500)">'+esc(fiNombreCampo(lo.campoId))+(lo.ambiente?' · '+esc(lo.ambiente):'')+' · '+fmt(lo.has)+' ha</span></label>'
-      : '<div style="padding:12px;color:var(--gr400);font-size:13px">Lote no encontrado</div>';
+      ? '<span class="lote-chk-fi sel"><input type="checkbox" checked disabled> <strong>'+esc(lo.nombre)+'</strong> <span class="lc-meta">'+esc(fiNombreCampo(lo.campoId))+(lo.ambiente?' · '+esc(lo.ambiente):'')+' · '+fmt(lo.has)+' ha</span></span>'
+      : '<div style="padding:8px;color:var(--gr400);font-size:13px;width:100%">Lote no encontrado</div>';
     return;
   }
 
   if (!tipoId || !camp) {
     btnAll.style.display = 'none'; countEl.textContent = '';
-    wrap.innerHTML = '<div style="padding:12px;text-align:center;color:var(--gr400);font-size:13px">'
+    wrap.innerHTML = '<div style="padding:8px;text-align:center;color:var(--gr400);font-size:13px;width:100%">'
       + (!camp ? 'Seleccioná una campaña' : 'Elegí cultivo para ver los lotes disponibles') + '</div>';
     return;
   }
@@ -1954,7 +1957,7 @@ function renderProgLotePick() {
 
   if (!lotes.length) {
     btnAll.style.display = 'none'; countEl.textContent = '';
-    wrap.innerHTML = '<div style="padding:12px;text-align:center;color:var(--gr400);font-size:13px">Ningún lote tiene este cultivo en la campaña '+esc(camp)+(fCampo||fAmb?' con esos filtros':'')+'</div>';
+    wrap.innerHTML = '<div style="padding:8px;text-align:center;color:var(--gr400);font-size:13px;width:100%">Ningún lote tiene este cultivo en la campaña '+esc(camp)+(fCampo||fAmb?' con esos filtros':'')+'</div>';
     return;
   }
 
@@ -1962,20 +1965,21 @@ function renderProgLotePick() {
   var nSel = lotes.filter(function(l){ return _progLotesSel[l.id]; }).length;
   countEl.textContent = '· ' + nSel + ' de ' + lotes.length + ' seleccionados';
   wrap.innerHTML = lotes.map(function(l){
-    var ck = _progLotesSel[l.id] ? ' checked' : '';
-    return '<label class="prog-lote-row" style="display:flex;align-items:center;gap:8px;padding:4px 2px;font-size:13px;cursor:pointer">'
-      + '<input type="checkbox"'+ck+' onchange="toggleProgLote(\''+l.id+'\',this.checked)"> '
+    var on = !!_progLotesSel[l.id];
+    return '<label class="lote-chk-fi'+(on?' sel':'')+'">'
+      + '<input type="checkbox"'+(on?' checked':'')+' onchange="toggleProgLote(\''+l.id+'\',this.checked)"> '
       + '<strong>'+esc(l.nombre)+'</strong> '
-      + '<span style="color:var(--gr500)">'+esc(l.campoNombre)+(l.ambiente?' · '+esc(l.ambiente):'')+' · '+fmt(l.has)+' ha</span>'
+      + '<span class="lc-meta">'+esc(l.campoNombre)+(l.ambiente?' · '+esc(l.ambiente):'')+' · '+fmt(l.has)+' ha</span>'
       + '</label>';
   }).join('');
+  // texto del botón según estado
+  var allSel = lotes.every(function(l){ return _progLotesSel[l.id]; });
+  btnAll.textContent = allSel ? 'Quitar todos' : 'Seleccionar todos';
 }
 
 function toggleProgLote(id, on){
   if (on) _progLotesSel[id] = 1; else delete _progLotesSel[id];
-  var lotes = fiLotesConCultivo(document.getElementById('prog-cultivo').value, document.getElementById('prog-campaña').value, document.getElementById('prog-f-campo').value, document.getElementById('prog-f-ambiente').value);
-  var nSel = lotes.filter(function(l){ return _progLotesSel[l.id]; }).length;
-  document.getElementById('prog-lote-count').textContent = '· ' + nSel + ' de ' + lotes.length + ' seleccionados';
+  renderProgLotePick();
 }
 
 function toggleAllProgLotes(){
