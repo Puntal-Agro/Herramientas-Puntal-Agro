@@ -46,7 +46,6 @@
     { id: 'tablero_uso_suelo',  nombre: 'Plan de Uso del Suelo' },
     { id: 'ProgramaSiembra',    nombre: 'Programa de Siembra' },
     { id: 'tablero_hacienda',   nombre: 'Tablero de Relaciones Ganaderas' },
-    { id: 'exist_prod_ganadera', nombre: 'Existencia y Producción Ganadera' },
     { id: 'tablero_labores',    nombre: 'Tarifa de Labores y Fletes' },
     { id: 'Fitosanitarios',     nombre: 'Requerimiento de Fitosanitarios' }
   ];
