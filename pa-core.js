@@ -29,9 +29,13 @@
   var LS_LOTES    = 'pa_lotes';         // lotes (por empresa) — se crean en Plan de Uso
   var LS_ACTIVIDADES = 'pa_actividades';// actividades por lote/campaña — se crean en Plan de Uso
   var LS_CAMPANIAS = 'pa_campanias';    // campañas (global Puntal) — etiqueta de gestión, sin fechas
+  var LS_NEGOCIOS = 'pa_negocios';      // negocios ganaderos (global Puntal)
+  var LS_CATHDA   = 'pa_cat_hda';       // categorías de hacienda (global Puntal)
+  var LS_TIPOMOVHDA = 'pa_tipomov_hda'; // tipos de movimiento de hacienda (global Puntal)
+  var LS_RODEOS   = 'pa_rodeos';        // rodeos / socios (por empresa)
   var LS_SESION   = 'pa_sesion';        // sesión activa { usuarioId, empresaActivaId }
   var LS_SEEDVER  = 'pa_seed_ver';      // versión del seed demo
-  var SEED_VER    = '14';               // subir este número al cambiar la estructura del seed
+  var SEED_VER    = '15';               // subir este número al cambiar la estructura del seed
 
   // Herramientas PROPIAS (asignable=true): id + nombre legible.
   // Deben coincidir con los data-tool del index y con §5.2 del modelo.
@@ -90,6 +94,10 @@
       localStorage.removeItem(LS_UNIDADES);
       localStorage.removeItem(LS_INSUMOS);
       localStorage.removeItem(LS_MODOSACC);
+      localStorage.removeItem(LS_NEGOCIOS);
+      localStorage.removeItem(LS_CATHDA);
+      localStorage.removeItem(LS_TIPOMOVHDA);
+      localStorage.removeItem(LS_RODEOS);
     } catch (e) {}
 
     var clientes = [
@@ -341,7 +349,63 @@
     lsSet(LS_MODOSACC, modosAcc);
     lsSet(LS_LOTES, lotes);
     lsSet(LS_ACTIVIDADES, actividades);
+    /* ---- Catálogos de hacienda (Existencia y Producción Ganadera) ---- */
+    // Negocios — global Puntal (sigla + descripción completa)
+    var negociosBase = [
+      ['GCP','Gan. Campo propia'], ['GCC','Gan. Campo capit.'],
+      ['CP','Cría propia'], ['CC','Cría capitalizada'],
+      ['IP','Invernada propia'], ['IC','Invernada capitalizada'],
+      ['FLP','Feed lot propio'], ['FLC','Feed lot capitalizado'],
+      ['CBP','Cabaña propia'], ['CBC','Cabaña capitalizada'],
+      ['H','Hotelería']
+    ];
+    var negocios = [];
+    for (var ng=0; ng<negociosBase.length; ng++){
+      negocios.push({ id: 'neg_'+ng, sigla: negociosBase[ng][0], nombre: negociosBase[ng][1], activo: true });
+    }
+    // Categorías de hacienda — global Puntal. sexoEV: 0=vaca cría, 1=macho, 2=hembra
+    var catHdaBase = [
+      ['Orejano',1], ['Ternero M',1], ['Ternera H',2],
+      ['Vaq. 1-2',2], ['Vaq. 2-3',2], ['Nov. 1-2',1], ['Nov. 2-3',1],
+      ['Toro 1-2',1], ['Toro 2-3',1], ['MEJ 1-2',1], ['MEJ 2-3',1],
+      ['Vaca Cría',0], ['Toro padre',1], ['Vaca inv.',2], ['Toro descarte',1],
+      ['Vaca Cría Ss. Prim.',2], ['Vaca Cría Ss. Inv.',2]
+    ];
+    var categoriasHda = [];
+    for (var ch=0; ch<catHdaBase.length; ch++){
+      categoriasHda.push({ id: 'cat_'+ch, nombre: catHdaBase[ch][0], sexoEV: catHdaBase[ch][1], orden: ch, activo: true });
+    }
+    // Tipos de movimiento de hacienda — global Puntal. efecto: 'E' entrada | 'S' salida | 'M' mutación
+    var tipoMovHdaBase = [
+      ['Nac','Nacimiento','E'], ['CCE','Cbio.Cat. Entrada','E'], ['TrE','Traslado Entrada','E'],
+      ['Cpra','Compra','E'], ['AIE','Ajuste Inv. Entrada','E'],
+      ['CCS','Cbio.Cat. Salida','S'], ['TrS','Traslado Salida','S'], ['Cons','Consumo','S'],
+      ['Vta','Venta','S'], ['Ces','Cesión','S'], ['AIS','Ajuste Inv. Salida','S'],
+      ['Mort','Mortandad','M']
+    ];
+    var tiposMovHda = [];
+    for (var tm=0; tm<tipoMovHdaBase.length; tm++){
+      tiposMovHda.push({ id: 'tmh_'+tm, sigla: tipoMovHdaBase[tm][0], nombre: tipoMovHdaBase[tm][1], efecto: tipoMovHdaBase[tm][2], activo: true });
+    }
+    // Rodeos / socios — POR EMPRESA. Se siembran en las empresas con actividad.
+    var rodeosBase = [
+      ['PPIO','Propio'], ['SOC1','Socio 1'], ['SOC2','Socio 2'],
+      ['SOC3','Socio 3'], ['SOC4','Socio 4'], ['SOC5','Socio 5']
+    ];
+    var rodeos = [];
+    var rdIdx = 0;
+    for (var rce=0; rce<empresasConCultivos.length; rce++){
+      for (var rb=0; rb<rodeosBase.length; rb++){
+        rodeos.push({ id: 'rod_'+rdIdx, empresaId: empresasConCultivos[rce], sigla: rodeosBase[rb][0], nombre: rodeosBase[rb][1], activo: true });
+        rdIdx++;
+      }
+    }
+
     lsSet(LS_CAMPANIAS, campanias);
+    lsSet(LS_NEGOCIOS, negocios);
+    lsSet(LS_CATHDA, categoriasHda);
+    lsSet(LS_TIPOMOVHDA, tiposMovHda);
+    lsSet(LS_RODEOS, rodeos);
     lsSet(LS_SEEDVER, SEED_VER);
   }
 
@@ -752,6 +816,66 @@
       lsSet(LS_UNIDADES, out);
     },
 
+    /* ---- ABM Negocios ganaderos (global Puntal) ---- */
+    listarNegocios: function () { return lsGet(LS_NEGOCIOS, []); },
+    guardarNegocio: function (n) {
+      var ns = lsGet(LS_NEGOCIOS, []);
+      if (!n.id) { n.id = uid('neg'); ns.push(n); }
+      else { var f=false; for(var i=0;i<ns.length;i++){ if(ns[i].id===n.id){ns[i]=n;f=true;break;} } if(!f) ns.push(n); }
+      lsSet(LS_NEGOCIOS, ns); return n;
+    },
+    borrarNegocio: function (id) {
+      var ns=lsGet(LS_NEGOCIOS, []), out=[];
+      for(var i=0;i<ns.length;i++){ if(ns[i].id!==id) out.push(ns[i]); }
+      lsSet(LS_NEGOCIOS, out);
+    },
+
+    /* ---- ABM Categorías de hacienda (global Puntal) ---- */
+    listarCategoriasHda: function () { return lsGet(LS_CATHDA, []); },
+    guardarCategoriaHda: function (c) {
+      var cs = lsGet(LS_CATHDA, []);
+      if (!c.id) { c.id = uid('cat'); cs.push(c); }
+      else { var f=false; for(var i=0;i<cs.length;i++){ if(cs[i].id===c.id){cs[i]=c;f=true;break;} } if(!f) cs.push(c); }
+      lsSet(LS_CATHDA, cs); return c;
+    },
+    borrarCategoriaHda: function (id) {
+      var cs=lsGet(LS_CATHDA, []), out=[];
+      for(var i=0;i<cs.length;i++){ if(cs[i].id!==id) out.push(cs[i]); }
+      lsSet(LS_CATHDA, out);
+    },
+
+    /* ---- ABM Tipos de movimiento de hacienda (global Puntal) ---- */
+    listarTiposMovHda: function () { return lsGet(LS_TIPOMOVHDA, []); },
+    guardarTipoMovHda: function (t) {
+      var ts = lsGet(LS_TIPOMOVHDA, []);
+      if (!t.id) { t.id = uid('tmh'); ts.push(t); }
+      else { var f=false; for(var i=0;i<ts.length;i++){ if(ts[i].id===t.id){ts[i]=t;f=true;break;} } if(!f) ts.push(t); }
+      lsSet(LS_TIPOMOVHDA, ts); return t;
+    },
+    borrarTipoMovHda: function (id) {
+      var ts=lsGet(LS_TIPOMOVHDA, []), out=[];
+      for(var i=0;i<ts.length;i++){ if(ts[i].id!==id) out.push(ts[i]); }
+      lsSet(LS_TIPOMOVHDA, out);
+    },
+
+    /* ---- Rodeos / socios (por empresa) ---- */
+    listarRodeos: function (empresaId) {
+      var rs = lsGet(LS_RODEOS, []), out = [];
+      for (var i=0;i<rs.length;i++){ if(rs[i].empresaId===empresaId) out.push(rs[i]); }
+      return out;
+    },
+    guardarRodeo: function (r) {
+      var rs = lsGet(LS_RODEOS, []);
+      if (!r.id) { r.id = uid('rod'); rs.push(r); }
+      else { var f=false; for(var i=0;i<rs.length;i++){ if(rs[i].id===r.id){rs[i]=r;f=true;break;} } if(!f) rs.push(r); }
+      lsSet(LS_RODEOS, rs); return r;
+    },
+    borrarRodeo: function (id) {
+      var rs=lsGet(LS_RODEOS, []), out=[];
+      for(var i=0;i<rs.length;i++){ if(rs[i].id!==id) out.push(rs[i]); }
+      lsSet(LS_RODEOS, out);
+    },
+
     /* ---- ABM Insumos (por empresa) ---- */
     listarInsumos: function (empresaId) {
       var is = lsGet(LS_INSUMOS, []), out = [];
@@ -885,6 +1009,10 @@
         localStorage.removeItem(LS_LOTES);
         localStorage.removeItem(LS_ACTIVIDADES);
         localStorage.removeItem(LS_CAMPANIAS);
+        localStorage.removeItem(LS_NEGOCIOS);
+        localStorage.removeItem(LS_CATHDA);
+        localStorage.removeItem(LS_TIPOMOVHDA);
+        localStorage.removeItem(LS_RODEOS);
       } catch (e) {}
       seedDemo();
     }
