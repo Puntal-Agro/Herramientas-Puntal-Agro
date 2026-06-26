@@ -944,8 +944,9 @@ function renderFormHost(){
     '<div class="fld"><label>Negocio <span class="req">*</span></label><select class="self" id="mNeg">'+optsNegocios()+'</select></div>'+
     '<div class="fld"><label>Rodeo <span class="req">*</span></label><select class="self" id="mRod">'+optsRodeos()+'</select></div>'+
     '<div class="fld"><label>Categoría <span class="req">*</span></label><select class="self" id="mCat">'+optsCategorias()+'</select></div>'+
-    '<div class="fld"><label>Cabezas <span class="req">*</span></label><input class="inp" id="mCab" oninput="recalcImporte()"></div>'+
-    '<div class="fld"><label>Kg totales</label><input class="inp" id="mKg" oninput="recalcKgCab();recalcImporte()"><div class="fhint" id="mKgCab"></div></div>';
+    '<div class="fld"><label>Cabezas <span class="req">*</span></label><input class="inp" id="mCab" oninput="onCabChange()"></div>'+
+    '<div class="fld"><label>Kg totales</label><input class="inp" id="mKg" oninput="onKgTotChange()"></div>'+
+    '<div class="fld"><label>Kg/cab</label><input class="inp" id="mKgCab" oninput="onKgCabChange()"></div>';
 
   if(regla.desbaste) campos += '<div class="fld"><label>Desbaste %</label><input class="inp" id="mDesb"></div>';
   if(regla.rend)     campos += '<div class="fld"><label>Rendimiento %</label><input class="inp" id="mRend"></div>';
@@ -964,19 +965,37 @@ function syncDestino(){
   var o=document.getElementById('oCab'), d=document.getElementById('dCab');
   if(o&&d) d.value=o.value;
 }
-function recalcKgCab(){
+/* Cálculo cruzado: cabezas (base) ↔ kg total ↔ kg/cab.
+   - Editás kg total → recalcula kg/cab.
+   - Editás kg/cab → recalcula kg total.
+   - Cambiás cabezas → mantiene kg/cab y recalcula kg total. */
+function onKgTotChange(){
   var cab=parseNum((document.getElementById('mCab')||{}).value);
   var kg=parseNum((document.getElementById('mKg')||{}).value);
-  var el=document.getElementById('mKgCab'); if(!el) return;
-  el.textContent = (cab&&kg)? ('kg/cab: '+fNum(kg/cab,1)) : '';
+  var elKgCab=document.getElementById('mKgCab');
+  if(elKgCab){ elKgCab.value=(cab&&kg!=null)?fNum(kg/cab,1):''; }
+  recalcImporte();
+}
+function onKgCabChange(){
+  var cab=parseNum((document.getElementById('mCab')||{}).value);
+  var kgcab=parseNum((document.getElementById('mKgCab')||{}).value);
+  var elKg=document.getElementById('mKg');
+  if(elKg){ elKg.value=(cab&&kgcab!=null)?fInt(cab*kgcab):''; }
+  recalcImporte();
+}
+function onCabChange(){
+  // mantiene kg/cab; recalcula kg total
+  var cab=parseNum((document.getElementById('mCab')||{}).value);
+  var kgcab=parseNum((document.getElementById('mKgCab')||{}).value);
+  var elKg=document.getElementById('mKg');
+  if(elKg && cab && kgcab!=null){ elKg.value=fInt(cab*kgcab); }
+  recalcImporte();
 }
 function recalcImporte(){
-  recalcKgCab();
   var imp=document.getElementById('mImporte'); if(!imp) return;
-  var cab=parseNum((document.getElementById('mCab')||{}).value);
   var kg=parseNum((document.getElementById('mKg')||{}).value);
   var pr=parseNum((document.getElementById('mPrecio')||{}).value);
-  imp.value = (cab&&kg&&pr)? fInt(kg*pr) : '';   // importe = kg totales × $/kg
+  imp.value = (kg&&pr)? fInt(kg*pr) : '';   // importe = kg totales × $/kg
 }
 
 function resetMovForm(){ renderFormHost(); }
