@@ -35,7 +35,7 @@
   var LS_RODEOS   = 'pa_rodeos';        // rodeos / socios (por empresa)
   var LS_SESION   = 'pa_sesion';        // sesión activa { usuarioId, empresaActivaId }
   var LS_SEEDVER  = 'pa_seed_ver';      // versión del seed demo
-  var SEED_VER    = '15';               // subir este número al cambiar la estructura del seed
+  var SEED_VER    = '16';               // subir este número al cambiar la estructura del seed
 
   // Herramientas PROPIAS (asignable=true): id + nombre legible.
   // Deben coincidir con los data-tool del index y con §5.2 del modelo.
@@ -47,7 +47,8 @@
     { id: 'ProgramaSiembra',    nombre: 'Programa de Siembra' },
     { id: 'tablero_hacienda',   nombre: 'Tablero de Relaciones Ganaderas' },
     { id: 'tablero_labores',    nombre: 'Tarifa de Labores y Fletes' },
-    { id: 'Fitosanitarios',     nombre: 'Requerimiento de Fitosanitarios' }
+    { id: 'Fitosanitarios',     nombre: 'Requerimiento de Fitosanitarios' },
+    { id: 'exist_prod_ganadera', nombre: 'Existencia y Producción Ganadera' }
   ];
   function idsHerramientasPropias() {
     var out = [];
@@ -130,7 +131,7 @@
     ];
     var permisos = [
       { usuarioId: 'usr_maria', empresaId: 'emp_albor_sa', campoIds: [],
-        herramientas: ['tablero_agro', 'tablero_insumos_ot', 'tablero_uso_suelo', 'Fitosanitarios'], nivel: 'administrar' },
+        herramientas: ['tablero_agro', 'tablero_insumos_ot', 'tablero_uso_suelo', 'Fitosanitarios', 'exist_prod_ganadera'], nivel: 'administrar' },
       { usuarioId: 'usr_maria', empresaId: 'emp_lospinos', campoIds: [],
         herramientas: ['tablero_insumos_ot', 'tablero_uso_suelo'], nivel: 'cargar' },
       { usuarioId: 'usr_jose', empresaId: 'emp_albor_sa', campoIds: ['campo_elpuntal'],
@@ -138,7 +139,7 @@
       { usuarioId: 'usr_ana', empresaId: 'emp_albor_sa', campoIds: [],
         herramientas: ['tablero_agro'], nivel: 'ver' },
       { usuarioId: 'usr_eduardo', empresaId: 'emp_doneduardo', campoIds: [],
-        herramientas: ['tablero_agro', 'tablero_insumos_ot', 'tablero_uso_suelo', 'Fitosanitarios'], nivel: 'administrar' }
+        herramientas: ['tablero_agro', 'tablero_insumos_ot', 'tablero_uso_suelo', 'Fitosanitarios', 'exist_prod_ganadera'], nivel: 'administrar' }
     ];
     var tiposProv = [
       { id: 'tp_transp', nombre: 'transportista' },
