@@ -236,6 +236,14 @@ tr.peso-arr td.kg{color:#9A6A1E}
 .pr-neg{color:var(--terra-d)}
 .m-tbl tr.prtot td{border-top:2px solid var(--border);font-weight:700;background:#FAF8F3}
 
+/* ── Indicadores ── */
+.in-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+.in-kpi{border:1px solid var(--border);border-radius:10px;padding:14px 16px;background:#fff}
+.in-kpi.hl{background:var(--verde-100)}
+.in-kpi .n{font-size:23px;font-weight:700;line-height:1;color:var(--verde-d)}
+.in-kpi .u{font-size:11px;font-weight:600;color:var(--muted);margin-left:3px}
+.in-kpi .l{font-size:11px;margin-top:6px;color:var(--muted);font-weight:500}
+
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--verde-d);color:#fff;padding:10px 18px;border-radius:9px;font-size:13px;font-weight:500;opacity:0;pointer-events:none;transition:opacity .25s;z-index:99}
 .toast.show{opacity:1}
 </style>
@@ -269,6 +277,7 @@ tr.peso-arr td.kg{color:#9A6A1E}
   <button class="tab"        data-tab="pesadas"     onclick="setTab('pesadas',this)">Pesadas</button>
   <button class="tab"        data-tab="produccion"  onclick="setTab('produccion',this)">Producción</button>
   <button class="tab"        data-tab="superficie"  onclick="setTab('superficie',this)">Superficie</button>
+  <button class="tab"        data-tab="indicadores" onclick="setTab('indicadores',this)">Indicadores</button>
   <button class="tab"        data-tab="maestros"    onclick="setTab('maestros',this)">Maestros</button>
 </div>
 
@@ -522,6 +531,40 @@ tr.peso-arr td.kg{color:#9A6A1E}
     </div>
   </div>
 
+  <!-- INDICADORES -->
+  <div class="page" id="page-indicadores">
+    <div class="ex-card">
+      <div class="ex-b">
+        <div class="fbar">
+          <label>Desde <span class="req">*</span></label>
+          <input type="date" id="inDesde" onchange="inModoFecha();renderIndicadores()">
+          <label>Hasta <span class="req">*</span></label>
+          <input type="date" id="inHasta" onchange="inModoFecha();renderIndicadores()">
+          <label>o trimestre</label>
+          <select id="inTrim" onchange="inModoTrim();renderIndicadores()"><option value="">— elegir —</option></select>
+          <select id="inNeg" onchange="renderIndicadores()"><option value="">Todos los negocios</option></select>
+        </div>
+        <div class="in-kpis" id="inKpis"></div>
+      </div>
+    </div>
+
+    <div class="tb-grid" style="margin-top:18px">
+      <div class="ex-card">
+        <div class="ex-h"><span class="ex-ttl">Stock ponderado del período</span></div>
+        <div class="ex-b">
+          <div class="pr-formula" id="inStock"></div>
+          <div class="cmp" style="margin-top:10px;font-style:italic">El stock ponderado promedia las existencias por los días que duró cada nivel en el período.</div>
+        </div>
+      </div>
+      <div class="ex-card">
+        <div class="ex-h"><span class="ex-ttl">Producción por hectárea</span></div>
+        <div class="ex-b">
+          <div class="pr-formula" id="inProdHa"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- MAESTROS -->
   <div class="page" id="page-maestros">
     <div class="m-stack">
@@ -675,6 +718,7 @@ function setTab(tab, btn){
   else if(tab==='pesadas' && typeof renderPesadasTab==='function') renderPesadasTab();
   else if(tab==='produccion' && typeof renderProduccionTab==='function') renderProduccionTab();
   else if(tab==='superficie' && typeof renderSuperficieTab==='function') renderSuperficieTab();
+  else if(tab==='indicadores' && typeof renderIndicadoresTab==='function') renderIndicadoresTab();
   else if(tab==='maestros' && typeof renderMaestros==='function') renderMaestros();
   else if(tab==='tablero' && typeof renderTablero==='function') renderTablero();
 }
@@ -2339,6 +2383,154 @@ function renderSuperficie(){
 }
 
 function renderSuperficieTab(){ renderSuperficie(); }
+
+/* ====================================================================
+   INDICADORES (Capa 1) — stock ponderado por tiempo, ADPV, carga, eficiencia
+   ==================================================================== */
+var _inModo='fecha';
+function inModoFecha(){ _inModo='fecha'; var s=document.getElementById('inTrim'); if(s) s.value=''; }
+function inModoTrim(){
+  var s=document.getElementById('inTrim'); if(!s||!s.value) return;
+  var pa=s.value.split('|');
+  var d=document.getElementById('inDesde'), h=document.getElementById('inHasta');
+  if(d) d.value=pa[0]; if(h) h.value=pa[1];
+}
+function poblarTrimInd(){
+  var sel=document.getElementById('inTrim'); if(!sel) return;
+  var ts=trimestresDisponibles();
+  var h='<option value="">— elegir —</option>';
+  for(var i=0;i<ts.length;i++){ h+='<option value="'+ts[i].desde+'|'+ts[i].hasta+'">'+esc(ts[i].label)+'</option>'; }
+  sel.innerHTML=h;
+}
+
+function diasEntre(desde, hasta){
+  var p1=desde.split('-'), p2=hasta.split('-');
+  var d1=Date.UTC(+p1[0],+p1[1]-1,+p1[2]), d2=Date.UTC(+p2[0],+p2[1]-1,+p2[2]);
+  return Math.round((d2-d1)/86400000)+1; // inclusivo
+}
+
+/* Stock ponderado por tiempo: promedio de cabezas (y kg) a lo largo de los días del período.
+   Recorre los movimientos por combinación; entre fechas el stock es constante y se pondera por días. */
+function stockPonderado(desde, hasta, filtroNeg){
+  var movs=movtosDeEmpresa(CTX.empresaActivaId);
+  var dias=diasEntre(desde, hasta);
+  // stock inicial (día anterior a desde) por combinación
+  var diaIni=fechaMenosUnDia(desde);
+  var acc=calcularStock(diaIni); // {key:{cab,kg}}
+  // movimientos del período ordenados por fecha
+  var enRango=[];
+  for(var i=0;i<movs.length;i++){ if(movs[i].fecha>=desde && movs[i].fecha<=hasta) enRango.push(movs[i]); }
+  enRango.sort(function(a,b){ return a.fecha<b.fecha?-1:(a.fecha>b.fecha?1:0); });
+  // cabeza-días por combinación
+  var stockCab={}, cabActual={};
+  for(var k in acc){ if(acc.hasOwnProperty(k)){ cabActual[k]=acc[k].cab; } }
+  // recorrer día por día sería caro; en vez: integrar por tramos entre eventos
+  // construir lista de fechas-evento (cada movimiento cambia el stock al día de su fecha)
+  var cabDias={}; // key -> Σ cab×días
+  function addTramo(fDesdeISO, fHastaISO){
+    var d=diasEntre(fDesdeISO, fHastaISO); // inclusivo
+    for(var key in cabActual){ if(cabActual.hasOwnProperty(key)){
+      if(!cabDias[key]) cabDias[key]=0;
+      cabDias[key]+= cabActual[key]*d;
+    } }
+  }
+  var cursor=desde, idx=0;
+  while(idx<enRango.length){
+    var m=enRango[idx];
+    if(m.fecha>cursor){
+      // tramo desde 'cursor' hasta el día anterior al movimiento
+      addTramo(cursor, fechaMenosUnDia(m.fecha));
+      cursor=m.fecha;
+    }
+    // aplicar todos los movimientos de esta fecha
+    while(idx<enRango.length && enRango[idx].fecha===cursor){
+      var mm=enRango[idx];
+      var key=mm.negocioId+'|'+mm.rodeoId+'|'+mm.categoriaId;
+      if(cabActual[key]===undefined) cabActual[key]=0;
+      var delta=(mm.efecto==='E')?(mm.cabezas||0):-(mm.cabezas||0);
+      cabActual[key]+=delta;
+      idx++;
+    }
+  }
+  // tramo final desde cursor hasta hasta
+  addTramo(cursor, hasta);
+
+  // promedio = cabDias / dias; filtrar negocio; armar totales
+  var totCab=0, totKg=0;
+  var stockFin=calcularStock(hasta);
+  for(var key2 in cabDias){ if(!cabDias.hasOwnProperty(key2)) continue;
+    var pa=key2.split('|');
+    if(filtroNeg && pa[0]!==filtroNeg) continue;
+    var promCab=cabDias[key2]/dias;
+    // kg/cab reponderado: usar el peso vigente al final del período (aprox.)
+    var kgCab=kgCabAfecha(pa[0],pa[1],pa[2], hasta, stockFin);
+    totCab+=promCab;
+    totKg+=promCab*kgCab;
+  }
+  return { cab:totCab, kg:totKg, dias:dias };
+}
+
+function renderIndicadores(){
+  if(typeof PA==='undefined' || !PA.demo || !CTX) return;
+  var desde=(document.getElementById('inDesde')||{}).value;
+  var hasta=(document.getElementById('inHasta')||{}).value;
+  var fNeg=(document.getElementById('inNeg')||{}).value||'';
+  var kpis=document.getElementById('inKpis');
+  var stEl=document.getElementById('inStock');
+  var phEl=document.getElementById('inProdHa');
+  if(!desde||!hasta){
+    if(kpis) kpis.innerHTML='<div class="m-empty" style="grid-column:1/-1">Elegí un período o trimestre para ver los indicadores.</div>';
+    if(stEl) stEl.innerHTML=''; if(phEl) phEl.innerHTML='';
+    return;
+  }
+  if(desde>hasta){ if(kpis) kpis.innerHTML='<div class="fwarn" style="grid-column:1/-1">El "desde" es posterior al "hasta".</div>'; return; }
+
+  var R=calcularProduccion(desde, hasta, fNeg);
+  var prod=R.tot.prod;
+  var sp=stockPonderado(desde, hasta, fNeg);
+  var dias=sp.dias;
+  // ADPV = producción / stock ponderado cab / días
+  var adpv=(sp.cab>0 && dias>0)? prod/sp.cab/dias : 0;
+  // Eficiencia = producción / stock ponderado kg × 100
+  var efi=(sp.kg>0)? prod/sp.kg*100 : 0;
+  // Superficie de la campaña activa
+  var camp=_campActiva || (PA.demo.campaniaActiva()?PA.demo.campaniaActiva().id:null);
+  var S=superficieGanadera(camp);
+  var cargaCab=(S.total>0)? sp.cab/S.total : 0;
+  var cargaKg=(S.total>0)? sp.kg/S.total : 0;
+
+  if(kpis){
+    kpis.innerHTML=
+      '<div class="in-kpi hl"><div class="n">'+fInt(prod)+'<span class="u">kg</span></div><div class="l">Producción de carne</div></div>'+
+      '<div class="in-kpi"><div class="n">'+fNum(adpv,3)+'<span class="u">kg/cab/día</span></div><div class="l">A.D.P.V.</div></div>'+
+      '<div class="in-kpi"><div class="n">'+fNum(efi,1)+'<span class="u">%</span></div><div class="l">Eficiencia del stock</div></div>'+
+      '<div class="in-kpi"><div class="n">'+fNum(cargaCab,2)+'<span class="u">cab/ha</span></div><div class="l">Carga (sup. total)</div></div>'+
+      '<div class="in-kpi"><div class="n">'+fInt(cargaKg)+'<span class="u">kg/ha</span></div><div class="l">Carga (sup. total)</div></div>';
+  }
+  if(stEl){
+    stEl.innerHTML=
+      '<div class="frow"><span>Stock ponderado (cabezas)</span><span>'+fNum(sp.cab,1)+' cab</span></div>'+
+      '<div class="frow"><span>Stock ponderado (kg)</span><span>'+fInt(sp.kg)+' kg</span></div>'+
+      '<div class="frow"><span>Días del período</span><span>'+dias+'</span></div>';
+  }
+  if(phEl){
+    if(S.total>0){
+      phEl.innerHTML=
+        '<div class="frow"><span>Sobre sup. total ('+fNum(S.total,1)+' ha)</span><span>'+fNum(prod/S.total,1)+' kg/ha</span></div>'+
+        '<div class="frow"><span>Sobre sup. efectiva ('+fNum(S.efectiva,1)+' ha)</span><span>'+(S.efectiva?fNum(prod/S.efectiva,1):'—')+' kg/ha</span></div>'+
+        '<div class="frow"><span>Carga sobre efectiva</span><span>'+(S.efectiva?fNum(sp.cab/S.efectiva,2):'—')+' cab/ha</span></div>';
+    } else {
+      phEl.innerHTML='<div class="cmp" style="font-style:italic">Sin superficie ganadera en Plan de Uso para la campaña '+esc(camp||'')+'.</div>';
+    }
+  }
+}
+
+function renderIndicadoresTab(){
+  if(typeof PA==='undefined' || !PA.demo || !CTX) return;
+  poblarTrimInd();
+  fillSelect('inNeg', PA.demo.listarNegocios()||[], 'id','sigla', true);
+  renderIndicadores();
+}
 
 /* ── INIT ── */
 function init(){
