@@ -214,6 +214,12 @@ main{max-width:1200px;margin:0 auto;padding:22px 20px}
 .peso-badge.sp{background:#EEF0F2;color:#6B7480;border:1px solid #DCE0E5}
 tr.peso-arr td.kg{color:#9A6A1E}
 
+.evo-chips{display:flex;flex-wrap:wrap;gap:7px}
+.evo-chip{font-size:12px;font-weight:500;padding:5px 11px;border-radius:8px;border:1.5px solid var(--border);background:#fff;color:var(--muted);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.evo-chip:hover{border-color:var(--verde);color:var(--verde)}
+.evo-chip.on{border-color:var(--verde);background:var(--verde-100);color:var(--verde-d);font-weight:600}
+.evo-chip .dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--verde-d);color:#fff;padding:10px 18px;border-radius:9px;font-size:13px;font-weight:500;opacity:0;pointer-events:none;transition:opacity .25s;z-index:99}
 .toast.show{opacity:1}
 </style>
@@ -295,7 +301,7 @@ tr.peso-arr td.kg{color:#9A6A1E}
         <div class="tipo-row" id="tipoRow"></div>
         <div id="formHost"></div>
         <div class="mv-actions">
-          <button class="btn btn-ghost" onclick="resetMovForm()">Limpiar</button>
+          <button class="btn btn-ghost" id="mvCancelBtn" onclick="resetMovForm()">Limpiar</button>
           <button class="btn btn-primary" onclick="guardarMovimiento()" id="mvSaveBtn">Registrar movimiento</button>
         </div>
       </div>
@@ -375,7 +381,7 @@ tr.peso-arr td.kg{color:#9A6A1E}
           <div class="fld"><label>Negocio <span class="req">*</span></label><select class="self" id="pNeg" onchange="pesSugerirExist()"></select></div>
           <div class="fld"><label>Rodeo <span class="req">*</span></label><select class="self" id="pRod" onchange="pesSugerirExist()"></select></div>
           <div class="fld"><label>Categoría <span class="req">*</span></label><select class="self" id="pCat" onchange="pesSugerirExist()"></select></div>
-          <div class="fld"><label>Existencia (cab)</label><input class="inp" id="pExist" oninput="pesRecalc()"><div class="fhint">sugerida del stock</div></div>
+          <div class="fld"><label>Existencia (cab)</label><input class="inp" id="pExist" readonly><div class="fhint">del stock (se corrige en Movimientos)</div></div>
           <div class="fld"><label>Cabezas pesadas <span class="req">*</span></label><input class="inp" id="pCabPes" oninput="pesRecalc()"></div>
           <div class="fld"><label>Kg totales pesados <span class="req">*</span></label><input class="inp" id="pKgPes" oninput="pesRecalc()"></div>
           <div class="fld"><label>% Pesado</label><input class="inp" id="pPct" readonly></div>
@@ -412,12 +418,17 @@ tr.peso-arr td.kg{color:#9A6A1E}
 
     <!-- Evolución de peso por categoría -->
     <div class="mv-card" style="margin-top:18px">
-      <div class="mv-h"><span class="mv-ttl">Evolución de peso</span>
-        <select id="evoCat" onchange="renderEvolucion()" style="margin-left:auto;font-family:var(--sans);font-size:12.5px;border:1px solid #D2CFC4;border-radius:7px;padding:6px 10px"></select>
-      </div>
+      <div class="mv-h"><span class="mv-ttl">Evolución de peso</span></div>
       <div class="mv-b">
-        <div class="chart-box" style="height:240px"><canvas id="chartEvo"></canvas></div>
-        <div id="evoEmpty" class="m-empty" style="display:none">Elegí una categoría con pesadas para ver su evolución de peso.</div>
+        <div class="fbar" style="margin-bottom:12px">
+          <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Período</label>
+          <input type="date" id="evoDesde" onchange="renderEvolucion()" title="Desde">
+          <input type="date" id="evoHasta" onchange="renderEvolucion()" title="Hasta">
+          <button class="btn-link" onclick="evoLimpiarPeriodo()">Todo el período</button>
+        </div>
+        <div id="evoChips" class="evo-chips"></div>
+        <div class="chart-box" style="height:260px;margin-top:12px"><canvas id="chartEvo"></canvas></div>
+        <div id="evoEmpty" class="m-empty" style="display:none">Elegí una o más categorías con pesadas para ver su evolución de peso.</div>
       </div>
     </div>
   </div>
@@ -1064,7 +1075,10 @@ function recalcImporte(){
 }
 
 function resetMovForm(){
-  if(_movEdit){ _movEdit=null; var sb=document.getElementById('mvSaveBtn'); if(sb) sb.textContent='Registrar movimiento'; }
+  if(_movEdit){ _movEdit=null;
+    var sb=document.getElementById('mvSaveBtn'); if(sb) sb.textContent='Registrar movimiento';
+    var cb=document.getElementById('mvCancelBtn'); if(cb) cb.textContent='Limpiar';
+  }
   renderFormHost();
 }
 
@@ -1133,6 +1147,7 @@ function guardarMovimiento(){
     lsSetJSON(LS_MOV_HDA, all2);
     _movEdit=null;
     var sb=document.getElementById('mvSaveBtn'); if(sb) sb.textContent='Registrar movimiento';
+    var cb=document.getElementById('mvCancelBtn'); if(cb) cb.textContent='Limpiar';
     resetMovForm(); renderMovtos(); toast('Movimiento actualizado');
     return;
   }
@@ -1167,6 +1182,7 @@ function editarMovimiento(id){
   if(typeof recalcImporte==='function') recalcImporte();
   set('mObs', m.obs||'');
   var sb=document.getElementById('mvSaveBtn'); if(sb) sb.textContent='Guardar cambios';
+  var cb=document.getElementById('mvCancelBtn'); if(cb) cb.textContent='Cancelar';
   // llevar el foco al form arriba
   var card=document.querySelector('#page-movimientos .mv-card'); if(card) card.scrollIntoView({behavior:'smooth',block:'start'});
   toast('Editando movimiento — modificá y guardá');
@@ -1740,7 +1756,7 @@ function guardarPesada(){
     obs:(document.getElementById('pObs')||{}).value||''
   };
   var all=lsGetJSON(LS_PESADAS); all.push(p); lsSetJSON(LS_PESADAS, all);
-  resetPesForm(); renderPesadas(); renderEvolucion();
+  resetPesForm(); renderPesadas(); poblarEvoCat(); renderEvolucion();
   toast('Pesada registrada');
 }
 
@@ -1749,7 +1765,7 @@ function borrarPesada(id){
   var all=lsGetJSON(LS_PESADAS), out=[];
   for(var i=0;i<all.length;i++){ if(all[i].id!==id) out.push(all[i]); }
   lsSetJSON(LS_PESADAS, out);
-  renderPesadas(); renderEvolucion();
+  renderPesadas(); poblarEvoCat(); renderEvolucion();
   toast('Pesada eliminada');
 }
 
@@ -1814,40 +1830,80 @@ function ultimaPesada(neg, rod, cat, hasta){
   return { kgCab: mejor.kgPesados/mejor.cabPesadas, fecha:mejor.fecha, trimestre:mejor.trimestre };
 }
 
-/* Evolución de peso de una categoría (gráfico) */
+/* Evolución de peso — multi-categoría con filtro de período */
 var _chartEvo=null;
+var _evoSel={};   // combos seleccionados {key:true}
+var EVO_COLORS=['#C8642D','#4A6533','#3A6B9B','#9B59B6','#D8A13A','#5C8A3F','#A8501F','#6B7480'];
+
 function poblarEvoCat(){
-  var sel=document.getElementById('evoCat'); if(!sel) return;
-  // categorías que tienen al menos una pesada
+  var cont=document.getElementById('evoChips'); if(!cont) return;
   var ps=pesadasDeEmpresa(CTX.empresaActivaId);
-  var combos={};
-  for(var i=0;i<ps.length;i++){ combos[ps[i].negocioId+'|'+ps[i].rodeoId+'|'+ps[i].categoriaId]=true; }
+  var combos=[];
+  var vistos={};
+  for(var i=0;i<ps.length;i++){
+    var k=ps[i].negocioId+'|'+ps[i].rodeoId+'|'+ps[i].categoriaId;
+    if(!vistos[k]){ vistos[k]=true; combos.push(k); }
+  }
+  if(!combos.length){ cont.innerHTML='<span class="cmp">Sin pesadas cargadas todavía.</span>'; return; }
+  // si no hay nada seleccionado, seleccionar la primera por defecto
+  var haySel=false; for(var s in _evoSel){ if(_evoSel[s]){ haySel=true; break; } }
+  if(!haySel && combos.length){ _evoSel[combos[0]]=true; }
   var h='';
-  for(var k in combos){ if(combos.hasOwnProperty(k)){ var pa=k.split('|');
-    h+='<option value="'+k+'">'+esc(nombreNegocio(pa[0])+' · '+nombreCategoria(pa[2])+' ('+nombreRodeo(pa[1])+')')+'</option>'; } }
-  sel.innerHTML=h||'<option value="">— sin pesadas —</option>';
+  for(var c=0;c<combos.length;c++){
+    var pa=combos[c].split('|');
+    var on=_evoSel[combos[c]]?' on':'';
+    var color=EVO_COLORS[c%EVO_COLORS.length];
+    h+='<span class="evo-chip'+on+'" onclick="toggleEvo(\''+combos[c]+'\')">'+
+       '<span class="dot" style="background:'+color+'"></span>'+
+       esc(nombreNegocio(pa[0])+' · '+nombreCategoria(pa[2])+' ('+nombreRodeo(pa[1])+')')+'</span>';
+  }
+  cont.innerHTML=h;
+}
+function toggleEvo(key){ _evoSel[key]=!_evoSel[key]; poblarEvoCat(); renderEvolucion(); }
+function evoLimpiarPeriodo(){
+  var d=document.getElementById('evoDesde'), h=document.getElementById('evoHasta');
+  if(d) d.value=''; if(h) h.value='';
+  renderEvolucion();
 }
 
 function renderEvolucion(){
-  var sel=document.getElementById('evoCat');
   var canvas=document.getElementById('chartEvo');
   var empty=document.getElementById('evoEmpty');
-  if(!sel||!canvas) return;
-  var key=sel.value;
+  if(!canvas) return;
+  var desde=(document.getElementById('evoDesde')||{}).value||'';
+  var hasta=(document.getElementById('evoHasta')||{}).value||'';
   var ps=pesadasDeEmpresa(CTX.empresaActivaId);
-  var serie=[];
-  if(key){
-    var pa=key.split('|');
-    for(var i=0;i<ps.length;i++){
-      var p=ps[i];
-      if(p.negocioId===pa[0]&&p.rodeoId===pa[1]&&p.categoriaId===pa[2]&&p.cabPesadas&&p.kgPesados){
-        serie.push({ fecha:p.fecha, kgCab:p.kgPesados/p.cabPesadas });
-      }
+
+  // armar combos seleccionados (en orden de los chips para que el color coincida)
+  var combos=[], vistos={};
+  for(var i=0;i<ps.length;i++){ var k=ps[i].negocioId+'|'+ps[i].rodeoId+'|'+ps[i].categoriaId; if(!vistos[k]){vistos[k]=true;combos.push(k);} }
+  var seleccionados=[];
+  for(var c=0;c<combos.length;c++){ if(_evoSel[combos[c]]) seleccionados.push({key:combos[c], color:EVO_COLORS[c%EVO_COLORS.length]}); }
+
+  // recolectar todas las fechas (etiquetas) de los seleccionados, filtradas por período
+  var fechasSet={};
+  var series=[];
+  for(var s=0;s<seleccionados.length;s++){
+    var pa=seleccionados[s].key.split('|');
+    var puntos=[];
+    for(var j=0;j<ps.length;j++){
+      var p=ps[j];
+      if(p.negocioId!==pa[0]||p.rodeoId!==pa[1]||p.categoriaId!==pa[2]) continue;
+      if(!p.cabPesadas||!p.kgPesados) continue;
+      if(desde && p.fecha<desde) continue;
+      if(hasta && p.fecha>hasta) continue;
+      puntos.push({ fecha:p.fecha, kgCab:p.kgPesados/p.cabPesadas });
+      fechasSet[p.fecha]=true;
     }
-    serie.sort(function(a,b){ return a.fecha<b.fecha?-1:1; });
+    puntos.sort(function(a,b){ return a.fecha<b.fecha?-1:1; });
+    series.push({ key:seleccionados[s].key, color:seleccionados[s].color,
+      label:nombreNegocio(pa[0])+'·'+nombreCategoria(pa[2]), puntos:puntos });
   }
-  if(typeof Chart==='undefined' || !serie.length){
-    if(empty){ empty.style.display='block'; }
+  var fechas=Object.keys(fechasSet).sort();
+
+  var hayDatos=false; for(var v=0;v<series.length;v++){ if(series[v].puntos.length){ hayDatos=true; break; } }
+  if(typeof Chart==='undefined' || !hayDatos){
+    if(empty) empty.style.display='block';
     canvas.style.display='none';
     if(_chartEvo){ _chartEvo.destroy(); _chartEvo=null; }
     return;
@@ -1855,18 +1911,25 @@ function renderEvolucion(){
   if(empty) empty.style.display='none';
   canvas.style.display='block';
   if(_chartEvo) _chartEvo.destroy();
+
+  // datasets alineados al eje de fechas común
+  var datasets=[];
+  for(var d2=0;d2<series.length;d2++){
+    var mapa={}; for(var q=0;q<series[d2].puntos.length;q++){ mapa[series[d2].puntos[q].fecha]=Math.round(series[d2].puntos[q].kgCab*10)/10; }
+    var data=[]; for(var f=0;f<fechas.length;f++){ data.push(mapa[fechas[f]]!=null?mapa[fechas[f]]:null); }
+    datasets.push({ label:series[d2].label, data:data, borderColor:series[d2].color,
+      backgroundColor:series[d2].color, borderWidth:2, tension:.25, pointRadius:4, spanGaps:true, fill:false });
+  }
   try{
     _chartEvo=new Chart(canvas.getContext('2d'),{
       type:'line',
-      data:{ labels:serie.map(function(s){return fmtFecha(s.fecha);}),
-             datasets:[{ label:'Kg/cab', data:serie.map(function(s){return Math.round(s.kgCab*10)/10;}),
-               borderColor:'#C8642D', backgroundColor:'rgba(200,100,45,.1)', borderWidth:2, tension:.25, pointRadius:4, fill:true }] },
+      data:{ labels:fechas.map(function(f){return fmtFecha(f);}), datasets:datasets },
       options:{ responsive:true, maintainAspectRatio:false,
-        plugins:{ legend:{display:false} },
+        plugins:{ legend:{ display:datasets.length>1, position:'top', labels:{font:{family:'DM Sans',size:11},padding:8} } },
         scales:{ y:{ ticks:{ font:{family:'DM Sans'} }, title:{display:true,text:'Kg/cab',font:{family:'DM Sans'}} },
                  x:{ ticks:{ font:{family:'DM Sans',size:11} } } } }
     });
-  }catch(e){ if(empty){ empty.style.display='block'; } }
+  }catch(e){ if(empty) empty.style.display='block'; }
 }
 
 function renderPesadasTab(){
