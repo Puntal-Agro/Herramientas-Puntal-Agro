@@ -488,26 +488,19 @@ tr.peso-arr td.kg{color:#9A6A1E}
             <thead><tr><th>Concepto</th><th class="num">Cabezas</th><th class="num">Kg/cab</th><th class="num">Kg totales</th></tr></thead>
             <tbody id="prDesglose"></tbody>
           </table>
-        </div>
-      </div>
-      <div class="ex-card">
-        <div class="ex-h"><span class="ex-ttl">Cómo se calcula</span></div>
-        <div class="ex-b">
-          <div class="pr-explica">
-            La <strong>producción de carne</strong> del período es el engorde real del rodeo: lo que pesa al final más lo que se vendió o salió, menos lo que había al inicio y lo que entró por compras o nacimientos.
-            <div style="margin-top:10px;color:var(--muted)">El detalle en kilos de cada componente está en el cuadro de la izquierda. Los indicadores por hectárea (kg/ha, carga) están en la pestaña <strong>Indicadores</strong>.</div>
+          <div class="pr-explica" style="margin-top:12px;font-size:12px;color:var(--muted)">
+            La producción es el engorde real: lo que pesa al final + lo que salió − lo que había + lo que entró. Los indicadores por hectárea están en <strong>Indicadores</strong>.
           </div>
         </div>
       </div>
-    </div>
-
-    <div class="ex-card" style="margin-top:18px">
-      <div class="ex-h"><span class="ex-ttl">Producción por categoría</span><span class="ex-corte" id="prCorte"></span></div>
-      <div class="ex-b" style="overflow-x:auto">
-        <table class="m-tbl">
-          <thead><tr><th>Negocio · Categoría</th><th class="num">Kg inicial</th><th class="num">+ Entradas</th><th class="num">− Salidas</th><th class="num">Kg final</th><th class="num">Producción</th></tr></thead>
-          <tbody id="prPorCat"></tbody>
-        </table>
+      <div class="ex-card">
+        <div class="ex-h"><span class="ex-ttl">Producción por categoría</span><span class="ex-corte" id="prCorte"></span></div>
+        <div class="ex-b" style="overflow-x:auto">
+          <table class="m-tbl">
+            <thead><tr><th>Negocio · Categoría</th><th class="num">Kg inicial</th><th class="num">+ Entradas</th><th class="num">− Salidas</th><th class="num">Kg final</th><th class="num">Producción</th></tr></thead>
+            <tbody id="prPorCat"></tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -2135,7 +2128,7 @@ function renderPesadasTab(){
    ==================================================================== */
 var _prModo='fecha';
 
-function prModoFecha(){ _prModo='fecha'; var s=document.getElementById('prTrim'); if(s) s.value=''; }
+function prModoFecha(){ _prModo='fecha'; var s=document.getElementById('prTrim'); if(s) s.value=''; sincronizarPeriodo('pr'); }
 function prModoTrim(){
   _prModo='trim';
   var s=document.getElementById('prTrim'); if(!s||!s.value) return;
@@ -2143,6 +2136,7 @@ function prModoTrim(){
   var pa=s.value.split('|');
   var d=document.getElementById('prDesde'), h=document.getElementById('prHasta');
   if(d) d.value=pa[0]; if(h) h.value=pa[1];
+  sincronizarPeriodo('pr');
 }
 
 function poblarTrimProd(){
@@ -2296,7 +2290,33 @@ function renderProduccionTab(){
   if(typeof PA==='undefined' || !PA.demo || !CTX) return;
   poblarTrimProd();
   fillSelect('prNeg', PA.demo.listarNegocios()||[], 'id','sigla', true);
+  aplicarPeriodoA('pr');
   renderProduccion();
+}
+
+/* ── Período compartido Producción ↔ Indicadores ── */
+var _perDesde=null, _perHasta=null;
+function ultimoMes(){
+  var hoy=new Date();
+  var hasta=hoy.toISOString().slice(0,10);
+  var d=new Date(Date.UTC(hoy.getFullYear(), hoy.getMonth(), hoy.getDate()));
+  d.setUTCMonth(d.getUTCMonth()-1);
+  return { desde:d.toISOString().slice(0,10), hasta:hasta };
+}
+function asegurarPeriodo(){
+  if(!_perDesde||!_perHasta){ var u=ultimoMes(); _perDesde=u.desde; _perHasta=u.hasta; }
+}
+/* aplica el período compartido a los inputs de un prefijo ('pr' o 'in') */
+function aplicarPeriodoA(pref){
+  asegurarPeriodo();
+  var d=document.getElementById(pref+'Desde'), h=document.getElementById(pref+'Hasta');
+  if(d) d.value=_perDesde; if(h) h.value=_perHasta;
+}
+/* lee el período de un prefijo, lo guarda en las globales, y refresca la otra solapa */
+function sincronizarPeriodo(pref){
+  var d=document.getElementById(pref+'Desde'), h=document.getElementById(pref+'Hasta');
+  if(d&&d.value) _perDesde=d.value;
+  if(h&&h.value) _perHasta=h.value;
 }
 
 /* ====================================================================
@@ -2392,12 +2412,13 @@ function renderSuperficieTab(){ renderSuperficie(); }
    INDICADORES (Capa 1) — stock ponderado por tiempo, ADPV, carga, eficiencia
    ==================================================================== */
 var _inModo='fecha';
-function inModoFecha(){ _inModo='fecha'; var s=document.getElementById('inTrim'); if(s) s.value=''; }
+function inModoFecha(){ _inModo='fecha'; var s=document.getElementById('inTrim'); if(s) s.value=''; sincronizarPeriodo('in'); }
 function inModoTrim(){
   var s=document.getElementById('inTrim'); if(!s||!s.value) return;
   var pa=s.value.split('|');
   var d=document.getElementById('inDesde'), h=document.getElementById('inHasta');
   if(d) d.value=pa[0]; if(h) h.value=pa[1];
+  sincronizarPeriodo('in');
 }
 function poblarTrimInd(){
   var sel=document.getElementById('inTrim'); if(!sel) return;
@@ -2533,6 +2554,7 @@ function renderIndicadoresTab(){
   if(typeof PA==='undefined' || !PA.demo || !CTX) return;
   poblarTrimInd();
   fillSelect('inNeg', PA.demo.listarNegocios()||[], 'id','sigla', true);
+  aplicarPeriodoA('in');
   renderIndicadores();
 }
 
