@@ -268,6 +268,7 @@ tr.peso-arr td.kg{color:#9A6A1E}
   <button class="tab"        data-tab="existencias" onclick="setTab('existencias',this)">Existencias</button>
   <button class="tab"        data-tab="pesadas"     onclick="setTab('pesadas',this)">Pesadas</button>
   <button class="tab"        data-tab="produccion"  onclick="setTab('produccion',this)">Producción</button>
+  <button class="tab"        data-tab="superficie"  onclick="setTab('superficie',this)">Superficie</button>
   <button class="tab"        data-tab="maestros"    onclick="setTab('maestros',this)">Maestros</button>
 </div>
 
@@ -478,9 +479,10 @@ tr.peso-arr td.kg{color:#9A6A1E}
         </div>
       </div>
       <div class="ex-card">
-        <div class="ex-h"><span class="ex-ttl">Cómo se calcula</span></div>
+        <div class="ex-h"><span class="ex-ttl">Cómo se calcula · Indicadores</span></div>
         <div class="ex-b">
           <div class="pr-formula" id="prFormula"></div>
+          <div id="prKgHa" style="margin-top:14px"></div>
         </div>
       </div>
     </div>
@@ -491,6 +493,30 @@ tr.peso-arr td.kg{color:#9A6A1E}
         <table class="m-tbl">
           <thead><tr><th>Negocio · Categoría</th><th class="num">Kg inicial</th><th class="num">+ Entradas</th><th class="num">− Salidas</th><th class="num">Kg final</th><th class="num">Producción</th></tr></thead>
           <tbody id="prPorCat"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUPERFICIE -->
+  <div class="page" id="page-superficie">
+    <div class="ex-card">
+      <div class="ex-b">
+        <div class="fwarn" style="margin-bottom:14px">La superficie viene del <strong>Plan de Uso del Suelo</strong>. Para modificarla, editá las actividades en esa herramienta. Acá se lee y se usa para los indicadores por hectárea.</div>
+        <div class="tb-kpis">
+          <div class="kpi"><div class="n" id="supTotal">0</div><div class="l">Sup. ganadera total (ha)</div></div>
+          <div class="kpi t"><div class="n" id="supEfectiva">0</div><div class="l">Sup. efectiva / neta (ha)</div></div>
+          <div class="kpi"><div class="n" id="supLotes">0</div><div class="l">Lotes con actividad ganadera</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ex-card" style="margin-top:18px">
+      <div class="ex-h"><span class="ex-ttl">Superficie ganadera por lote</span><span class="ex-corte" id="supCorte"></span></div>
+      <div class="ex-b" style="overflow-x:auto">
+        <table class="m-tbl">
+          <thead><tr><th>Lote</th><th>Campo</th><th>Amb.</th><th>Actividad</th><th class="num">Ha</th><th>2ª</th></tr></thead>
+          <tbody id="supBody"></tbody>
         </table>
       </div>
     </div>
@@ -648,6 +674,7 @@ function setTab(tab, btn){
   else if(tab==='movimientos' && typeof renderMovimientosTab==='function') renderMovimientosTab();
   else if(tab==='pesadas' && typeof renderPesadasTab==='function') renderPesadasTab();
   else if(tab==='produccion' && typeof renderProduccionTab==='function') renderProduccionTab();
+  else if(tab==='superficie' && typeof renderSuperficieTab==='function') renderSuperficieTab();
   else if(tab==='maestros' && typeof renderMaestros==='function') renderMaestros();
   else if(tab==='tablero' && typeof renderTablero==='function') renderTablero();
 }
@@ -2205,6 +2232,23 @@ function renderProduccion(){
       '<div class="frow res"><span>= Producción de carne</span><span>'+fInt(t.prod)+' kg</span></div>';
   }
 
+  // indicadores por hectárea (superficie de la campaña activa)
+  var kgha=document.getElementById('prKgHa');
+  if(kgha){
+    var camp=_campActiva || (PA.demo.campaniaActiva()?PA.demo.campaniaActiva().id:null);
+    var S=superficieGanadera(camp);
+    if(S.total>0){
+      kgha.innerHTML=
+        '<div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">Producción por hectárea (campaña '+esc(camp||'')+')</div>'+
+        '<div class="pr-formula">'+
+          '<div class="frow"><span>Kg/ha sobre sup. total ('+fNum(S.total,1)+' ha)</span><span>'+fNum(t.prod/S.total,1)+' kg/ha</span></div>'+
+          '<div class="frow"><span>Kg/ha sobre sup. efectiva ('+fNum(S.efectiva,1)+' ha)</span><span>'+(S.efectiva?fNum(t.prod/S.efectiva,1):'—')+' kg/ha</span></div>'+
+        '</div>';
+    } else {
+      kgha.innerHTML='<div class="cmp" style="font-style:italic">Sin superficie ganadera cargada en Plan de Uso para esta campaña; no se puede calcular kg/ha.</div>';
+    }
+  }
+
   // por categoría
   if(porCat){
     var negocios=PA.demo.listarNegocios()||[];
@@ -2232,6 +2276,69 @@ function renderProduccionTab(){
   fillSelect('prNeg', PA.demo.listarNegocios()||[], 'id','sigla', true);
   renderProduccion();
 }
+
+/* ====================================================================
+   SUPERFICIE GANADERA — leída de Plan de Uso (actividades GAN) vía pa-core
+   ==================================================================== */
+
+/* Calcula la superficie ganadera de una campaña. Devuelve {total, efectiva, filas[]} */
+function superficieGanadera(campaniaId){
+  var emp=CTX.empresaActivaId;
+  var tipos=PA.demo.listarTiposActividad(emp)||[];
+  var tMap={}; for(var i=0;i<tipos.length;i++) tMap[tipos[i].id]=tipos[i];
+  var lotes=PA.demo.listarLotes(emp)||[];
+  var lMap={}; for(var j=0;j<lotes.length;j++) lMap[lotes[j].id]=lotes[j];
+  var campos=PA.demo.listarCampos?(PA.demo.listarCampos(emp)||[]):[];
+  var cMap={}; for(var k=0;k<campos.length;k++) cMap[campos[k].id]=campos[k];
+
+  var acts=PA.demo.listarActividades(emp, campaniaId)||[];
+  var total=0, efectiva=0, filas=[], lotesGan={};
+  for(var a=0;a<acts.length;a++){
+    var act=acts[a];
+    var t=tMap[act.tipoActividadId];
+    if(!t || t.actividad!=='GAN') continue;   // solo actividades ganaderas
+    var lote=lMap[act.loteId];
+    total += act.ha||0;
+    if(!act.seg) efectiva += act.ha||0;        // efectiva: sin las de 2ª
+    lotesGan[act.loteId]=true;
+    filas.push({
+      lote: lote?lote.nombre:'?',
+      campo: (lote&&cMap[lote.campoId])?(cMap[lote.campoId].nombre||cMap[lote.campoId].sigla):(lote?lote.campoId:'?'),
+      amb: lote?(lote.ambiente||''):'',
+      sigla: act.sigla, ha: act.ha||0, seg: !!act.seg
+    });
+  }
+  filas.sort(function(x,y){ return x.lote<y.lote?-1:(x.lote>y.lote?1:0); });
+  var nLotes=0; for(var lk in lotesGan){ if(lotesGan.hasOwnProperty(lk)) nLotes++; }
+  return { total:total, efectiva:efectiva, filas:filas, nLotes:nLotes };
+}
+
+function renderSuperficie(){
+  if(typeof PA==='undefined' || !PA.demo || !CTX) return;
+  var camp=_campActiva || (PA.demo.campaniaActiva()?PA.demo.campaniaActiva().id:null);
+  var S=superficieGanadera(camp);
+  var setTxt=function(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; };
+  setTxt('supTotal', fNum(S.total,1));
+  setTxt('supEfectiva', fNum(S.efectiva,1));
+  setTxt('supLotes', S.nLotes);
+  var corte=document.getElementById('supCorte'); if(corte) corte.textContent='Campaña '+(camp||'—');
+
+  var tb=document.getElementById('supBody'); if(!tb) return;
+  var html='';
+  for(var i=0;i<S.filas.length;i++){
+    var f=S.filas[i];
+    html+='<tr><td class="cat">'+esc(f.lote)+'</td><td>'+esc(f.campo)+'</td>'+
+          '<td><span class="rod-badge">'+esc(f.amb)+'</span></td>'+
+          '<td>'+esc(f.sigla)+'</td>'+
+          '<td class="num">'+fNum(f.ha,1)+'</td>'+
+          '<td>'+(f.seg?'<span class="cmp">2ª</span>':'')+'</td></tr>';
+  }
+  if(!html) html='<tr><td colspan="6" class="m-empty">No hay actividades ganaderas cargadas en Plan de Uso para esta campaña.</td></tr>';
+  else html+='<tr class="prtot"><td colspan="4">TOTAL ('+S.nLotes+' lotes) — efectiva '+fNum(S.efectiva,1)+' ha</td><td class="num">'+fNum(S.total,1)+'</td><td></td></tr>';
+  tb.innerHTML=html;
+}
+
+function renderSuperficieTab(){ renderSuperficie(); }
 
 /* ── INIT ── */
 function init(){
