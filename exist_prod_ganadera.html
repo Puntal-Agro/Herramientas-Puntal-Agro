@@ -211,6 +211,7 @@ main{max-width:1200px;margin:0 auto;padding:22px 20px}
 
 .peso-badge{font-size:9.5px;font-weight:600;padding:1px 6px;border-radius:5px;margin-left:6px;white-space:nowrap}
 .peso-badge.arr{background:#FBEFD8;color:#9A6A1E;border:1px solid #EAD3A0}
+.peso-badge.fec{background:#EEF2EC;color:#5C7048;border:1px solid #D5E0CB;font-weight:500}
 .peso-badge.sp{background:#EEF0F2;color:#6B7480;border:1px solid #DCE0E5}
 tr.peso-arr td.kg{color:#9A6A1E}
 
@@ -1478,12 +1479,12 @@ function renderExistencias(){
     var kgCab, kgTot, pesoTag, pesoCls;
     if(pes){
       kgCab=pes.kgCab; kgTot=L.cab*kgCab;
-      if(pes.trimestre===trimestreDeFecha(hasta)){ pesoTag=''; pesoCls=''; }
-      else { pesoTag=' <span class="peso-badge arr" title="Peso arrastrado de '+(TRIM_LABEL[pes.trimestre]||pes.fecha)+'">⟳ '+(TRIM_LABEL[pes.trimestre]||'')+'</span>'; pesoCls=' peso-arr'; }
+      pesoTag=' <span class="peso-badge fec" title="Peso de la última pesada, del '+fmtFecha(pes.fecha)+'">'+fmtFecha(pes.fecha)+'</span>';
+      pesoCls='';
     } else {
       // sin pesada: fallback al kg de movimientos
       kgTot=L.kg; kgCab=(L.cab&&L.kg)?L.kg/L.cab:0;
-      pesoTag=' <span class="peso-badge sp" title="Sin pesada: peso de movimientos">s/pesar</span>'; pesoCls=' peso-sp';
+      pesoTag=' <span class="peso-badge sp" title="Sin pesada registrada: se usa el peso cargado en los movimientos">s/pesar</span>'; pesoCls=' peso-sp';
     }
     html+='<tr class="'+pesoCls+'"><td class="cat">'+esc(nombreCategoria(L.cat))+'</td>'+
           '<td><span class="rod-badge">'+esc(nombreRodeo(L.rod))+'</span></td>'+
