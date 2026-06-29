@@ -209,6 +209,11 @@ main{max-width:1200px;margin:0 auto;padding:22px 20px}
 .chart-box{position:relative;height:280px}
 @media(max-width:820px){.tb-kpis{grid-template-columns:1fr 1fr}.tb-grid{grid-template-columns:1fr}}
 
+.peso-badge{font-size:9.5px;font-weight:600;padding:1px 6px;border-radius:5px;margin-left:6px;white-space:nowrap}
+.peso-badge.arr{background:#FBEFD8;color:#9A6A1E;border:1px solid #EAD3A0}
+.peso-badge.sp{background:#EEF0F2;color:#6B7480;border:1px solid #DCE0E5}
+tr.peso-arr td.kg{color:#9A6A1E}
+
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--verde-d);color:#fff;padding:10px 18px;border-radius:9px;font-size:13px;font-weight:500;opacity:0;pointer-events:none;transition:opacity .25s;z-index:99}
 .toast.show{opacity:1}
 </style>
@@ -239,6 +244,7 @@ main{max-width:1200px;margin:0 auto;padding:22px 20px}
   <button class="tab active" data-tab="tablero"     onclick="setTab('tablero',this)">Tablero</button>
   <button class="tab"        data-tab="movimientos" onclick="setTab('movimientos',this)">Movimientos</button>
   <button class="tab"        data-tab="existencias" onclick="setTab('existencias',this)">Existencias</button>
+  <button class="tab"        data-tab="pesadas"     onclick="setTab('pesadas',this)">Pesadas</button>
   <button class="tab"        data-tab="maestros"    onclick="setTab('maestros',this)">Maestros</button>
 </div>
 
@@ -354,6 +360,64 @@ main{max-width:1200px;margin:0 auto;padding:22px 20px}
           <thead><tr><th>Categoría</th><th>Rodeo</th><th class="num">Cabezas</th><th class="num">Kg totales</th><th class="num">Kg/cab</th></tr></thead>
           <tbody id="exBody"></tbody>
         </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- PESADAS -->
+  <div class="page" id="page-pesadas">
+    <div class="mv-card">
+      <div class="mv-h"><span class="mv-ttl">Nueva pesada</span><span class="mv-tag mut" id="pesTag">Por muestra</span></div>
+      <div class="mv-b">
+        <div class="frm">
+          <div class="fld"><label>Fecha <span class="req">*</span></label><input class="inp" type="date" id="pFecha" onchange="pesTrimHint()"></div>
+          <div class="fld"><label>Trimestre</label><input class="inp" id="pTrim" readonly></div>
+          <div class="fld"><label>Negocio <span class="req">*</span></label><select class="self" id="pNeg" onchange="pesSugerirExist()"></select></div>
+          <div class="fld"><label>Rodeo <span class="req">*</span></label><select class="self" id="pRod" onchange="pesSugerirExist()"></select></div>
+          <div class="fld"><label>Categoría <span class="req">*</span></label><select class="self" id="pCat" onchange="pesSugerirExist()"></select></div>
+          <div class="fld"><label>Existencia (cab)</label><input class="inp" id="pExist" oninput="pesRecalc()"><div class="fhint">sugerida del stock</div></div>
+          <div class="fld"><label>Cabezas pesadas <span class="req">*</span></label><input class="inp" id="pCabPes" oninput="pesRecalc()"></div>
+          <div class="fld"><label>Kg totales pesados <span class="req">*</span></label><input class="inp" id="pKgPes" oninput="pesRecalc()"></div>
+          <div class="fld"><label>% Pesado</label><input class="inp" id="pPct" readonly></div>
+          <div class="fld"><label>Kg/cab</label><input class="inp" id="pKgCab" readonly><div class="fhint">peso real de la muestra</div></div>
+          <div class="fld full"><label>Observaciones</label><input class="inp" id="pObs" placeholder="Opcional"></div>
+        </div>
+        <div class="mv-actions">
+          <button class="btn btn-ghost" onclick="resetPesForm()">Limpiar</button>
+          <button class="btn btn-primary" onclick="guardarPesada()">Registrar pesada</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="mv-card" style="margin-top:18px">
+      <div class="mv-h"><span class="mv-ttl">Pesadas registradas</span><span class="mv-count" id="pesCount"></span></div>
+      <div class="mv-b">
+        <div class="fbar">
+          <input class="grow" id="pfSearch" placeholder="Buscar…" oninput="renderPesadas()">
+          <select id="pfNeg" onchange="renderPesadas()"><option value="">Todos los negocios</option></select>
+          <select id="pfCat" onchange="renderPesadas()"><option value="">Todas las categorías</option></select>
+          <select id="pfTrim" onchange="renderPesadas()"><option value="">Todos los trimestres</option></select>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="m-tbl">
+            <thead><tr>
+              <th>Fecha</th><th>Trim</th><th>Negocio-Categoría</th><th>Rodeo</th>
+              <th class="num">Exist.</th><th class="num">Pesadas</th><th class="num">% Pes.</th><th class="num">Kg/cab</th><th></th>
+            </tr></thead>
+            <tbody id="pesBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Evolución de peso por categoría -->
+    <div class="mv-card" style="margin-top:18px">
+      <div class="mv-h"><span class="mv-ttl">Evolución de peso</span>
+        <select id="evoCat" onchange="renderEvolucion()" style="margin-left:auto;font-family:var(--sans);font-size:12.5px;border:1px solid #D2CFC4;border-radius:7px;padding:6px 10px"></select>
+      </div>
+      <div class="mv-b">
+        <div class="chart-box" style="height:240px"><canvas id="chartEvo"></canvas></div>
+        <div id="evoEmpty" class="m-empty" style="display:none">Elegí una categoría con pesadas para ver su evolución de peso.</div>
       </div>
     </div>
   </div>
@@ -508,6 +572,7 @@ function setTab(tab, btn){
   // Repintar la pestaña recién mostrada con datos frescos
   if(tab==='existencias' && typeof renderExistenciasTab==='function') renderExistenciasTab();
   else if(tab==='movimientos' && typeof renderMovimientosTab==='function') renderMovimientosTab();
+  else if(tab==='pesadas' && typeof renderPesadasTab==='function') renderPesadasTab();
   else if(tab==='maestros' && typeof renderMaestros==='function') renderMaestros();
   else if(tab==='tablero' && typeof renderTablero==='function') renderTablero();
 }
@@ -998,7 +1063,10 @@ function recalcImporte(){
   imp.value = (kg&&pr)? fInt(kg*pr) : '';   // importe = kg totales × $/kg
 }
 
-function resetMovForm(){ renderFormHost(); }
+function resetMovForm(){
+  if(_movEdit){ _movEdit=null; var sb=document.getElementById('mvSaveBtn'); if(sb) sb.textContent='Registrar movimiento'; }
+  renderFormHost();
+}
 
 /* ── Guardar movimiento ── */
 function guardarMovimiento(){
@@ -1058,10 +1126,50 @@ function guardarMovimiento(){
   mov.obs=(document.getElementById('mObs')||{}).value||'';
 
   var all2=lsGetJSON(LS_MOV_HDA);
+  if(_movEdit){
+    // actualizar el existente conservando su id
+    mov.id=_movEdit;
+    for(var ei=0;ei<all2.length;ei++){ if(all2[ei].id===_movEdit){ all2[ei]=mov; break; } }
+    lsSetJSON(LS_MOV_HDA, all2);
+    _movEdit=null;
+    var sb=document.getElementById('mvSaveBtn'); if(sb) sb.textContent='Registrar movimiento';
+    resetMovForm(); renderMovtos(); toast('Movimiento actualizado');
+    return;
+  }
   mov.id='mov_'+Date.now()+'_'+Math.floor(Math.random()*1000);
   all2.push(mov);
   lsSetJSON(LS_MOV_HDA, all2);
   resetMovForm(); renderMovtos(); toast('Movimiento registrado');
+}
+
+var _movEdit=null;  // id del movimiento en edición, o null
+function editarMovimiento(id){
+  var all=lsGetJSON(LS_MOV_HDA), m=null;
+  for(var i=0;i<all.length;i++){ if(all[i].id===id){ m=all[i]; break; } }
+  if(!m){ toast('No se encontró el movimiento'); return; }
+  if(m.ccLink){ toast('Los cambios de categoría se editan borrando y recargando'); return; }
+  _movEdit=id;
+  // seleccionar el tipo y renderizar el form correspondiente
+  _mvTipoSel=m.tipoMovId;
+  renderTipoChips(); renderFormHost();
+  // precargar campos comunes
+  var set=function(elid,val){ var e=document.getElementById(elid); if(e!=null&&val!=null) e.value=val; };
+  set('mFecha', m.fecha);
+  if(document.getElementById('mCampania') && m.campaniaId) document.getElementById('mCampania').value=m.campaniaId;
+  set('mNeg', m.negocioId); set('mRod', m.rodeoId); set('mCat', m.categoriaId);
+  set('mCab', m.cabezas!=null?fInt(m.cabezas):'');
+  set('mKg', m.kg!=null?fInt(m.kg):'');
+  if(document.getElementById('mKgCab') && m.cabezas && m.kg) document.getElementById('mKgCab').value=fNum(m.kg/m.cabezas,1);
+  if(m.terceroId && document.getElementById('mTercero')) document.getElementById('mTercero').value=m.terceroId;
+  if(m.desbastePct!=null) set('mDesb', m.desbastePct);
+  if(m.rendimientoPct!=null) set('mRend', m.rendimientoPct);
+  if(m.precioKg!=null) set('mPrecio', fInt(m.precioKg));
+  if(typeof recalcImporte==='function') recalcImporte();
+  set('mObs', m.obs||'');
+  var sb=document.getElementById('mvSaveBtn'); if(sb) sb.textContent='Guardar cambios';
+  // llevar el foco al form arriba
+  var card=document.querySelector('#page-movimientos .mv-card'); if(card) card.scrollIntoView({behavior:'smooth',block:'start'});
+  toast('Editando movimiento — modificá y guardá');
 }
 
 function borrarMovimiento(id){
@@ -1167,6 +1275,7 @@ function renderMovtos(){
     if(q && texto.indexOf(q)<0) continue;
 
     var delId = esCCrow ? ('cc:'+m2.ccLink) : m2.id;
+    var editBtn = esCCrow ? '' : '<button class="ic-btn" title="Editar" onclick="editarMovimiento(\''+m2.id+'\')">✎</button>';
     html+='<tr>'+
       '<td>'+fmtFecha(m2.fecha)+'</td>'+
       '<td><span class="pill '+ef+'">'+esc(nombreTipo)+'</span></td>'+
@@ -1176,7 +1285,7 @@ function renderMovtos(){
       '<td class="num kg">'+(m2.kg?fInt(m2.kg):'—')+'</td>'+
       '<td><span class="cmp">'+esc(nombreCampania(m2.campaniaId))+'</span></td>'+
       '<td class="cmp">'+esc(detalle)+'</td>'+
-      '<td><button class="ic-btn del" title="Eliminar" onclick="borrarMovimiento(\''+delId+'\')">🗑</button></td>'+
+      '<td><div class="row-act">'+editBtn+'<button class="ic-btn del" title="Eliminar" onclick="borrarMovimiento(\''+delId+'\')">🗑</button></div></td>'+
     '</tr>';
   }
   if(!html) html='<tr><td colspan="9" class="m-empty">No hay movimientos que coincidan. Cargá el primero con el formulario de arriba.</td></tr>';
@@ -1211,27 +1320,27 @@ function ejercicioInicioMes(){ return 7; }  // julio. A futuro: leer de config d
 function trimestresDisponibles(){
   var hoy=new Date();
   var inicioMes=ejercicioInicioMes();
-  // año de inicio del ejercicio que contiene hoy
   var y = hoy.getMonth()+1 >= inicioMes ? hoy.getFullYear() : hoy.getFullYear()-1;
   var defs=[
     {sig:'JAS',m0:0}, {sig:'OND',m0:3}, {sig:'EFM',m0:6}, {sig:'AMJ',m0:9}
   ];
+  var lbl={JAS:'Jul-Sep',OND:'Oct-Dic',EFM:'Ene-Mar',AMJ:'Abr-Jun'};
   var out=[];
-  // ejercicio actual y el anterior
   for(var e=0;e<2;e++){
     var yy=y-e;
     var etiqEj=(String(yy).slice(2))+'-'+(String(yy+1).slice(2));
     for(var i=0;i<defs.length;i++){
-      // mes calendario de inicio del trimestre
-      var mesIni=((inicioMes-1)+defs[i].m0)%12;       // 0-based
+      var mesIni=((inicioMes-1)+defs[i].m0)%12;
       var anioIni=yy + Math.floor(((inicioMes-1)+defs[i].m0)/12);
       var mesFin=(mesIni+2)%12;
       var anioFin=anioIni + (mesIni+2>=12?1:0);
       var desde=anioIni+'-'+pad2(mesIni+1)+'-01';
       var hasta=anioFin+'-'+pad2(mesFin+1)+'-'+pad2(ultimoDia(anioFin,mesFin+1));
-      out.push({ id:defs[i].sig+'_'+etiqEj, label:defs[i].sig+' '+etiqEj, desde:desde, hasta:hasta });
+      out.push({ id:defs[i].sig+'_'+etiqEj, label:lbl[defs[i].sig]+' '+etiqEj, desde:desde, hasta:hasta });
     }
   }
+  // ordenar cronológicamente: más reciente arriba (por fecha hasta, descendente)
+  out.sort(function(a,b){ return a.hasta<b.hasta?1:(a.hasta>b.hasta?-1:0); });
   return out;
 }
 function pad2(n){ return n<10?('0'+n):(''+n); }
@@ -1348,12 +1457,24 @@ function renderExistencias(){
       var negObj=null; for(var z=0;z<negocios.length;z++){ if(negocios[z].id===L.neg){negObj=negocios[z];break;} }
       html+='<tr class="grp"><td colspan="5">'+esc(negObj?(negObj.sigla+' — '+negObj.nombre):'?')+'</td></tr>';
     }
-    html+='<tr><td class="cat">'+esc(nombreCategoria(L.cat))+'</td>'+
+    // Reponderación: kg/cab desde la última pesada de la categoría a la fecha de corte
+    var pes=ultimaPesada(L.neg, L.rod, L.cat, hasta);
+    var kgCab, kgTot, pesoTag, pesoCls;
+    if(pes){
+      kgCab=pes.kgCab; kgTot=L.cab*kgCab;
+      if(pes.trimestre===trimestreDeFecha(hasta)){ pesoTag=''; pesoCls=''; }
+      else { pesoTag=' <span class="peso-badge arr" title="Peso arrastrado de '+(TRIM_LABEL[pes.trimestre]||pes.fecha)+'">⟳ '+(TRIM_LABEL[pes.trimestre]||'')+'</span>'; pesoCls=' peso-arr'; }
+    } else {
+      // sin pesada: fallback al kg de movimientos
+      kgTot=L.kg; kgCab=(L.cab&&L.kg)?L.kg/L.cab:0;
+      pesoTag=' <span class="peso-badge sp" title="Sin pesada: peso de movimientos">s/pesar</span>'; pesoCls=' peso-sp';
+    }
+    html+='<tr class="'+pesoCls+'"><td class="cat">'+esc(nombreCategoria(L.cat))+'</td>'+
           '<td><span class="rod-badge">'+esc(nombreRodeo(L.rod))+'</span></td>'+
           '<td class="num">'+fInt(L.cab)+'</td>'+
-          '<td class="num kg">'+(L.kg?fInt(L.kg):'—')+'</td>'+
-          '<td class="num">'+(L.cab&&L.kg?fNum(L.kg/L.cab,1):'—')+'</td></tr>';
-    subCab+=L.cab; subKg+=L.kg; totCab+=L.cab; totKg+=L.kg;
+          '<td class="num kg">'+(kgTot?fInt(kgTot):'—')+'</td>'+
+          '<td class="num">'+(kgCab?fNum(kgCab,1):'—')+pesoTag+'</td></tr>';
+    subCab+=L.cab; subKg+=kgTot; totCab+=L.cab; totKg+=kgTot;
   }
   cerrarSub();
   if(!html){
@@ -1527,6 +1648,238 @@ function generarAjustes(){
   cerrarConciliacion();
   renderExistenciasTab();
   toast(nuevos.length+' ajuste(s) generado(s)');
+}
+
+/* ====================================================================
+   PESADAS — medición de peso por muestra. Reponderan Existencias.
+   ==================================================================== */
+var LS_PESADAS = 'pa_hac_pesadas';
+
+function pesadasDeEmpresa(empId){
+  var all=lsGetJSON(LS_PESADAS), out=[];
+  for(var i=0;i<all.length;i++){ if(all[i].empresaId===empId) out.push(all[i]); }
+  return out;
+}
+
+/* Trimestre calendario desde una fecha ISO: EFM/AMJ/JAS/OND */
+function trimestreDeFecha(iso){
+  if(!iso) return '';
+  var m=parseInt(iso.split('-')[1],10);
+  if(m>=1&&m<=3) return 'EFM';
+  if(m>=4&&m<=6) return 'AMJ';
+  if(m>=7&&m<=9) return 'JAS';
+  return 'OND';
+}
+var TRIM_LABEL={EFM:'Ene-Mar',AMJ:'Abr-Jun',JAS:'Jul-Sep',OND:'Oct-Dic'};
+
+function pesTrimHint(){
+  var f=(document.getElementById('pFecha')||{}).value;
+  var t=trimestreDeFecha(f);
+  var el=document.getElementById('pTrim'); if(el) el.value=t?TRIM_LABEL[t]:'';
+}
+
+/* Poblar selectores del form de pesada */
+function fillSelect(id, items, valKey, txtKey, keepFirst){
+  var sel=document.getElementById(id); if(!sel) return;
+  var first=(keepFirst&&sel.options[0])?sel.options[0].outerHTML:'';
+  var h=first;
+  for(var i=0;i<items.length;i++){ h+='<option value="'+items[i][valKey]+'">'+esc(items[i][txtKey])+'</option>'; }
+  sel.innerHTML=h;
+}
+
+function pesSugerirExist(){
+  // sugiere existencia de la combinación elegida, a la fecha de la pesada
+  var neg=(document.getElementById('pNeg')||{}).value;
+  var rod=(document.getElementById('pRod')||{}).value;
+  var cat=(document.getElementById('pCat')||{}).value;
+  var fecha=(document.getElementById('pFecha')||{}).value||hoyISO();
+  if(!neg||!rod||!cat) return;
+  var acc=calcularStock(fecha);
+  var key=neg+'|'+rod+'|'+cat;
+  var cab=acc[key]?Math.round(acc[key].cab):0;
+  var el=document.getElementById('pExist'); if(el) el.value=cab||'';
+  pesRecalc();
+}
+
+function pesRecalc(){
+  var exist=parseNum((document.getElementById('pExist')||{}).value);
+  var cabPes=parseNum((document.getElementById('pCabPes')||{}).value);
+  var kgPes=parseNum((document.getElementById('pKgPes')||{}).value);
+  var elPct=document.getElementById('pPct'), elKgCab=document.getElementById('pKgCab');
+  if(elPct) elPct.value=(exist&&cabPes!=null)?fNum(cabPes/exist*100,1)+'%':'';
+  if(elKgCab) elKgCab.value=(cabPes&&kgPes!=null)?fNum(kgPes/cabPes,1):'';
+}
+
+function resetPesForm(){
+  var f=document.getElementById('pFecha'); if(f) f.value=hoyISO();
+  pesTrimHint();
+  var ids=['pCabPes','pKgPes','pPct','pKgCab','pObs','pExist'];
+  for(var i=0;i<ids.length;i++){ var e=document.getElementById(ids[i]); if(e) e.value=''; }
+  pesSugerirExist();
+}
+
+function guardarPesada(){
+  var fecha=(document.getElementById('pFecha')||{}).value;
+  if(!fecha){ toast('Falta la fecha'); return; }
+  var neg=(document.getElementById('pNeg')||{}).value;
+  var rod=(document.getElementById('pRod')||{}).value;
+  var cat=(document.getElementById('pCat')||{}).value;
+  var cabPes=parseNum((document.getElementById('pCabPes')||{}).value);
+  var kgPes=parseNum((document.getElementById('pKgPes')||{}).value);
+  if(!neg||!rod||!cat){ toast('Elegí negocio, rodeo y categoría'); return; }
+  if(!cabPes||cabPes<=0){ toast('Cargá las cabezas pesadas'); return; }
+  if(!kgPes||kgPes<=0){ toast('Cargá los kg totales pesados'); return; }
+  var exist=parseNum((document.getElementById('pExist')||{}).value);
+  var p={
+    id:'pes_'+Date.now()+'_'+Math.floor(Math.random()*1000),
+    empresaId:CTX.empresaActivaId, fecha:fecha, trimestre:trimestreDeFecha(fecha),
+    campaniaId:(_campActiva||null),
+    negocioId:neg, rodeoId:rod, categoriaId:cat,
+    existenciaCab:(exist!=null?Math.round(exist):null),
+    cabPesadas:Math.round(cabPes), kgPesados:Math.round(kgPes),
+    obs:(document.getElementById('pObs')||{}).value||''
+  };
+  var all=lsGetJSON(LS_PESADAS); all.push(p); lsSetJSON(LS_PESADAS, all);
+  resetPesForm(); renderPesadas(); renderEvolucion();
+  toast('Pesada registrada');
+}
+
+function borrarPesada(id){
+  if(!confirm('¿Eliminar esta pesada?')) return;
+  var all=lsGetJSON(LS_PESADAS), out=[];
+  for(var i=0;i<all.length;i++){ if(all[i].id!==id) out.push(all[i]); }
+  lsSetJSON(LS_PESADAS, out);
+  renderPesadas(); renderEvolucion();
+  toast('Pesada eliminada');
+}
+
+function poblarFiltrosPes(){
+  fillSelect('pfNeg', PA.demo.listarNegocios()||[], 'id','sigla', true);
+  fillSelect('pfCat', PA.demo.listarCategoriasHda()||[], 'id','nombre', true);
+}
+
+function renderPesadas(){
+  var tb=document.getElementById('pesBody'); if(!tb) return;
+  var ps=pesadasDeEmpresa(CTX.empresaActivaId);
+  var q=((document.getElementById('pfSearch')||{}).value||'').toLowerCase();
+  var fN=(document.getElementById('pfNeg')||{}).value||'';
+  var fC=(document.getElementById('pfCat')||{}).value||'';
+  var fT=(document.getElementById('pfTrim')||{}).value||'';
+  var rows=[];
+  for(var i=0;i<ps.length;i++){
+    var p=ps[i];
+    if(fN&&p.negocioId!==fN) continue;
+    if(fC&&p.categoriaId!==fC) continue;
+    if(fT&&p.trimestre!==fT) continue;
+    rows.push(p);
+  }
+  rows.sort(function(a,b){ return a.fecha<b.fecha?1:(a.fecha>b.fecha?-1:0); });
+  var html='';
+  for(var j=0;j<rows.length;j++){
+    var p2=rows[j];
+    var nc=nombreNegocio(p2.negocioId)+' · '+nombreCategoria(p2.categoriaId);
+    var pct=(p2.existenciaCab&&p2.cabPesadas)?fNum(p2.cabPesadas/p2.existenciaCab*100,1)+'%':'—';
+    var kgcab=(p2.cabPesadas&&p2.kgPesados)?fNum(p2.kgPesados/p2.cabPesadas,1):'—';
+    var texto=(nc+' '+nombreRodeo(p2.rodeoId)).toLowerCase();
+    if(q && texto.indexOf(q)<0) continue;
+    html+='<tr>'+
+      '<td>'+fmtFecha(p2.fecha)+'</td>'+
+      '<td><span class="cmp">'+(TRIM_LABEL[p2.trimestre]||'')+'</span></td>'+
+      '<td class="nc">'+esc(nc)+'</td>'+
+      '<td>'+esc(nombreRodeo(p2.rodeoId))+'</td>'+
+      '<td class="num">'+(p2.existenciaCab?fInt(p2.existenciaCab):'—')+'</td>'+
+      '<td class="num">'+fInt(p2.cabPesadas)+'</td>'+
+      '<td class="num">'+pct+'</td>'+
+      '<td class="num">'+kgcab+'</td>'+
+      '<td><button class="ic-btn del" title="Eliminar" onclick="borrarPesada(\''+p2.id+'\')">🗑</button></td>'+
+    '</tr>';
+  }
+  if(!html) html='<tr><td colspan="9" class="m-empty">No hay pesadas registradas. Cargá la primera con el formulario de arriba.</td></tr>';
+  tb.innerHTML=html;
+  var cnt=document.getElementById('pesCount'); if(cnt) cnt.textContent=rows.length+' pesada'+(rows.length===1?'':'s');
+}
+
+/* Última pesada (kg/cab) de una categoría a una fecha de corte. Devuelve {kgCab, fecha, trimestre} o null */
+function ultimaPesada(neg, rod, cat, hasta){
+  var ps=pesadasDeEmpresa(CTX.empresaActivaId);
+  var mejor=null;
+  for(var i=0;i<ps.length;i++){
+    var p=ps[i];
+    if(p.negocioId!==neg||p.rodeoId!==rod||p.categoriaId!==cat) continue;
+    if(p.fecha>hasta) continue;
+    if(!p.cabPesadas||!p.kgPesados) continue;
+    if(!mejor || p.fecha>mejor.fecha) mejor=p;
+  }
+  if(!mejor) return null;
+  return { kgCab: mejor.kgPesados/mejor.cabPesadas, fecha:mejor.fecha, trimestre:mejor.trimestre };
+}
+
+/* Evolución de peso de una categoría (gráfico) */
+var _chartEvo=null;
+function poblarEvoCat(){
+  var sel=document.getElementById('evoCat'); if(!sel) return;
+  // categorías que tienen al menos una pesada
+  var ps=pesadasDeEmpresa(CTX.empresaActivaId);
+  var combos={};
+  for(var i=0;i<ps.length;i++){ combos[ps[i].negocioId+'|'+ps[i].rodeoId+'|'+ps[i].categoriaId]=true; }
+  var h='';
+  for(var k in combos){ if(combos.hasOwnProperty(k)){ var pa=k.split('|');
+    h+='<option value="'+k+'">'+esc(nombreNegocio(pa[0])+' · '+nombreCategoria(pa[2])+' ('+nombreRodeo(pa[1])+')')+'</option>'; } }
+  sel.innerHTML=h||'<option value="">— sin pesadas —</option>';
+}
+
+function renderEvolucion(){
+  var sel=document.getElementById('evoCat');
+  var canvas=document.getElementById('chartEvo');
+  var empty=document.getElementById('evoEmpty');
+  if(!sel||!canvas) return;
+  var key=sel.value;
+  var ps=pesadasDeEmpresa(CTX.empresaActivaId);
+  var serie=[];
+  if(key){
+    var pa=key.split('|');
+    for(var i=0;i<ps.length;i++){
+      var p=ps[i];
+      if(p.negocioId===pa[0]&&p.rodeoId===pa[1]&&p.categoriaId===pa[2]&&p.cabPesadas&&p.kgPesados){
+        serie.push({ fecha:p.fecha, kgCab:p.kgPesados/p.cabPesadas });
+      }
+    }
+    serie.sort(function(a,b){ return a.fecha<b.fecha?-1:1; });
+  }
+  if(typeof Chart==='undefined' || !serie.length){
+    if(empty){ empty.style.display='block'; }
+    canvas.style.display='none';
+    if(_chartEvo){ _chartEvo.destroy(); _chartEvo=null; }
+    return;
+  }
+  if(empty) empty.style.display='none';
+  canvas.style.display='block';
+  if(_chartEvo) _chartEvo.destroy();
+  try{
+    _chartEvo=new Chart(canvas.getContext('2d'),{
+      type:'line',
+      data:{ labels:serie.map(function(s){return fmtFecha(s.fecha);}),
+             datasets:[{ label:'Kg/cab', data:serie.map(function(s){return Math.round(s.kgCab*10)/10;}),
+               borderColor:'#C8642D', backgroundColor:'rgba(200,100,45,.1)', borderWidth:2, tension:.25, pointRadius:4, fill:true }] },
+      options:{ responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{display:false} },
+        scales:{ y:{ ticks:{ font:{family:'DM Sans'} }, title:{display:true,text:'Kg/cab',font:{family:'DM Sans'}} },
+                 x:{ ticks:{ font:{family:'DM Sans',size:11} } } } }
+    });
+  }catch(e){ if(empty){ empty.style.display='block'; } }
+}
+
+function renderPesadasTab(){
+  if(typeof PA==='undefined' || !PA.demo || !CTX) return;
+  var f=document.getElementById('pFecha'); if(f && !f.value){ f.value=hoyISO(); pesTrimHint(); }
+  fillSelect('pNeg', PA.demo.listarNegocios()||[], 'id','sigla', false);
+  fillSelect('pRod', PA.demo.listarRodeos(CTX.empresaActivaId)||[], 'id','sigla', false);
+  fillSelect('pCat', PA.demo.listarCategoriasHda()||[], 'id','nombre', false);
+  poblarFiltrosPes();
+  pesSugerirExist();
+  renderPesadas();
+  poblarEvoCat();
+  renderEvolucion();
 }
 
 /* ── INIT ── */
