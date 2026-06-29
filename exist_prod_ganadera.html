@@ -221,6 +221,21 @@ tr.peso-arr td.kg{color:#9A6A1E}
 .evo-chip.on{border-color:var(--verde);background:var(--verde-100);color:var(--verde-d);font-weight:600}
 .evo-chip .dot{width:9px;height:9px;border-radius:50%;display:inline-block}
 
+/* ── Producción de carne ── */
+.pr-hero{display:flex;flex-wrap:wrap;gap:14px;align-items:stretch}
+.pr-kpi{flex:1;min-width:150px;border:1px solid var(--border);border-radius:10px;padding:16px 18px;background:var(--verde-100)}
+.pr-kpi.big{background:var(--verde);color:#fff;flex:1.4}
+.pr-kpi .n{font-size:26px;font-weight:700;line-height:1}
+.pr-kpi.big .n{font-size:32px}
+.pr-kpi .l{font-size:11.5px;margin-top:6px;font-weight:500;opacity:.85}
+.pr-kpi.big .l{opacity:.9}
+.pr-formula{font-size:13px;line-height:1.9;color:var(--text)}
+.pr-formula .frow{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #F0EDE4}
+.pr-formula .frow.res{border-top:2px solid var(--border);border-bottom:none;font-weight:700;color:var(--verde-d);margin-top:4px;padding-top:8px}
+.pr-formula .op{color:var(--muted);font-weight:600;margin-right:6px}
+.pr-neg{color:var(--terra-d)}
+.m-tbl tr.prtot td{border-top:2px solid var(--border);font-weight:700;background:#FAF8F3}
+
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--verde-d);color:#fff;padding:10px 18px;border-radius:9px;font-size:13px;font-weight:500;opacity:0;pointer-events:none;transition:opacity .25s;z-index:99}
 .toast.show{opacity:1}
 </style>
@@ -252,6 +267,7 @@ tr.peso-arr td.kg{color:#9A6A1E}
   <button class="tab"        data-tab="movimientos" onclick="setTab('movimientos',this)">Movimientos</button>
   <button class="tab"        data-tab="existencias" onclick="setTab('existencias',this)">Existencias</button>
   <button class="tab"        data-tab="pesadas"     onclick="setTab('pesadas',this)">Pesadas</button>
+  <button class="tab"        data-tab="produccion"  onclick="setTab('produccion',this)">Producción</button>
   <button class="tab"        data-tab="maestros"    onclick="setTab('maestros',this)">Maestros</button>
 </div>
 
@@ -434,6 +450,52 @@ tr.peso-arr td.kg{color:#9A6A1E}
     </div>
   </div>
 
+  <!-- PRODUCCIÓN DE CARNE -->
+  <div class="page" id="page-produccion">
+    <div class="ex-card">
+      <div class="ex-b">
+        <div class="fbar">
+          <label>Desde <span class="req">*</span></label>
+          <input type="date" id="prDesde" onchange="prModoFecha();renderProduccion()">
+          <label>Hasta <span class="req">*</span></label>
+          <input type="date" id="prHasta" onchange="prModoFecha();renderProduccion()">
+          <label>o trimestre</label>
+          <select id="prTrim" onchange="prModoTrim();renderProduccion()"><option value="">— elegir —</option></select>
+          <select id="prNeg" onchange="renderProduccion()"><option value="">Todos los negocios</option></select>
+        </div>
+        <div class="pr-hero" id="prHero"></div>
+      </div>
+    </div>
+
+    <div class="tb-grid" style="margin-top:18px">
+      <div class="ex-card">
+        <div class="ex-h"><span class="ex-ttl">Desglose del período</span></div>
+        <div class="ex-b" style="overflow-x:auto">
+          <table class="m-tbl">
+            <thead><tr><th>Concepto</th><th class="num">Cabezas</th><th class="num">Kg/cab</th><th class="num">Kg totales</th></tr></thead>
+            <tbody id="prDesglose"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="ex-card">
+        <div class="ex-h"><span class="ex-ttl">Cómo se calcula</span></div>
+        <div class="ex-b">
+          <div class="pr-formula" id="prFormula"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ex-card" style="margin-top:18px">
+      <div class="ex-h"><span class="ex-ttl">Producción por categoría</span><span class="ex-corte" id="prCorte"></span></div>
+      <div class="ex-b" style="overflow-x:auto">
+        <table class="m-tbl">
+          <thead><tr><th>Negocio · Categoría</th><th class="num">Kg inicial</th><th class="num">+ Entradas</th><th class="num">− Salidas</th><th class="num">Kg final</th><th class="num">Producción</th></tr></thead>
+          <tbody id="prPorCat"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
   <!-- MAESTROS -->
   <div class="page" id="page-maestros">
     <div class="m-stack">
@@ -585,6 +647,7 @@ function setTab(tab, btn){
   if(tab==='existencias' && typeof renderExistenciasTab==='function') renderExistenciasTab();
   else if(tab==='movimientos' && typeof renderMovimientosTab==='function') renderMovimientosTab();
   else if(tab==='pesadas' && typeof renderPesadasTab==='function') renderPesadasTab();
+  else if(tab==='produccion' && typeof renderProduccionTab==='function') renderProduccionTab();
   else if(tab==='maestros' && typeof renderMaestros==='function') renderMaestros();
   else if(tab==='tablero' && typeof renderTablero==='function') renderTablero();
 }
@@ -1987,6 +2050,187 @@ function renderPesadasTab(){
   renderPesadas();
   poblarEvoCat();
   renderEvolucion();
+}
+
+/* ====================================================================
+   PRODUCCIÓN DE CARNE — por período libre (trimestres como atajo)
+   Producción = (kg final + kg salidas) − (kg inicial + kg entradas)
+   ==================================================================== */
+var _prModo='fecha';
+
+function prModoFecha(){ _prModo='fecha'; var s=document.getElementById('prTrim'); if(s) s.value=''; }
+function prModoTrim(){
+  _prModo='trim';
+  var s=document.getElementById('prTrim'); if(!s||!s.value) return;
+  // el value del option trae "desde|hasta"
+  var pa=s.value.split('|');
+  var d=document.getElementById('prDesde'), h=document.getElementById('prHasta');
+  if(d) d.value=pa[0]; if(h) h.value=pa[1];
+}
+
+function poblarTrimProd(){
+  var sel=document.getElementById('prTrim'); if(!sel) return;
+  var ts=trimestresDisponibles();
+  var h='<option value="">— elegir —</option>';
+  for(var i=0;i<ts.length;i++){ h+='<option value="'+ts[i].desde+'|'+ts[i].hasta+'">'+esc(ts[i].label)+'</option>'; }
+  sel.innerHTML=h;
+}
+
+/* kg/cab a una fecha: última pesada; si no hay, peso de movimientos (kg acumulado / cab) */
+function kgCabAfecha(neg, rod, cat, fecha, stockAcc){
+  var pes=ultimaPesada(neg, rod, cat, fecha);
+  if(pes) return pes.kgCab;
+  // fallback: peso de movimientos del stock a esa fecha
+  var key=neg+'|'+rod+'|'+cat;
+  var a=stockAcc[key];
+  if(a && a.cab>0) return a.kg/a.cab;
+  return 0;
+}
+
+/* Suma de movimientos del período por combinación, separando entradas y salidas (con su kg propio) */
+function movimientosPeriodo(desde, hasta){
+  var movs=movtosDeEmpresa(CTX.empresaActivaId);
+  var ent={}, sal={};  // key -> {cab, kg}
+  for(var i=0;i<movs.length;i++){
+    var m=movs[i];
+    if(m.fecha<desde || m.fecha>hasta) continue;
+    var key=m.negocioId+'|'+m.rodeoId+'|'+m.categoriaId;
+    var destino = (m.efecto==='E') ? ent : sal;  // E suma a entradas; S y M a salidas
+    if(!destino[key]) destino[key]={cab:0, kg:0};
+    destino[key].cab += (m.cabezas||0);
+    destino[key].kg  += (m.kg||0);
+  }
+  return { ent:ent, sal:sal };
+}
+
+/* Calcula la producción por combinación y el total para [desde, hasta] */
+function calcularProduccion(desde, hasta, filtroNeg){
+  // día anterior a 'desde' para el stock inicial
+  var diaIni=fechaMenosUnDia(desde);
+  var stockIni=calcularStock(diaIni);
+  var stockFin=calcularStock(hasta);
+  var mp=movimientosPeriodo(desde, hasta);
+
+  // universo de combinaciones: las que tienen stock inicial, final o movimientos en el período
+  var keys={};
+  function addKeys(o){ for(var k in o){ if(o.hasOwnProperty(k)) keys[k]=true; } }
+  addKeys(stockIni); addKeys(stockFin); addKeys(mp.ent); addKeys(mp.sal);
+
+  var filas=[], tot={kgIni:0,kgEnt:0,kgSal:0,kgFin:0,prod:0};
+  for(var key in keys){
+    if(!keys.hasOwnProperty(key)) continue;
+    var pa=key.split('|');
+    if(filtroNeg && pa[0]!==filtroNeg) continue;
+    var cabIni=stockIni[key]?stockIni[key].cab:0;
+    var cabFin=stockFin[key]?stockFin[key].cab:0;
+    var entK=mp.ent[key]||{cab:0,kg:0};
+    var salK=mp.sal[key]||{cab:0,kg:0};
+    // si no hubo nada en esta combinación, saltar
+    if(Math.round(cabIni)===0 && Math.round(cabFin)===0 && !entK.cab && !salK.cab) continue;
+
+    var kgCabIni=kgCabAfecha(pa[0],pa[1],pa[2], diaIni, stockIni);
+    var kgCabFin=kgCabAfecha(pa[0],pa[1],pa[2], hasta, stockFin);
+    var kgIni=cabIni*kgCabIni;
+    var kgFin=cabFin*kgCabFin;
+    var kgEnt=entK.kg;   // peso propio de los movimientos de entrada
+    var kgSal=salK.kg;   // peso propio de los movimientos de salida
+    var prod=(kgFin+kgSal)-(kgIni+kgEnt);
+
+    filas.push({ neg:pa[0], rod:pa[1], cat:pa[2],
+      cabIni:cabIni, cabFin:cabFin, kgCabIni:kgCabIni, kgCabFin:kgCabFin,
+      kgIni:kgIni, kgEnt:kgEnt, kgSal:kgSal, kgFin:kgFin, prod:prod });
+    tot.kgIni+=kgIni; tot.kgEnt+=kgEnt; tot.kgSal+=kgSal; tot.kgFin+=kgFin; tot.prod+=prod;
+  }
+  // total de cabezas inicial/final (para el desglose)
+  tot.cabIni=0; tot.cabFin=0;
+  for(var f=0;f<filas.length;f++){ tot.cabIni+=filas[f].cabIni; tot.cabFin+=filas[f].cabFin; }
+  return { filas:filas, tot:tot, diaIni:diaIni };
+}
+
+function fechaMenosUnDia(iso){
+  var p=iso.split('-'); var d=new Date(Date.UTC(parseInt(p[0],10),parseInt(p[1],10)-1,parseInt(p[2],10)));
+  d.setUTCDate(d.getUTCDate()-1);
+  return d.toISOString().slice(0,10);
+}
+
+function renderProduccion(){
+  if(typeof PA==='undefined' || !PA.demo || !CTX) return;
+  var desde=(document.getElementById('prDesde')||{}).value;
+  var hasta=(document.getElementById('prHasta')||{}).value;
+  var fNeg=(document.getElementById('prNeg')||{}).value||'';
+  var hero=document.getElementById('prHero');
+  var desg=document.getElementById('prDesglose');
+  var form=document.getElementById('prFormula');
+  var porCat=document.getElementById('prPorCat');
+  var corte=document.getElementById('prCorte');
+
+  if(!desde||!hasta){
+    if(hero) hero.innerHTML='<div class="m-empty" style="width:100%">Elegí un período (desde y hasta) o un trimestre para calcular la producción de carne.</div>';
+    if(desg) desg.innerHTML=''; if(form) form.innerHTML=''; if(porCat) porCat.innerHTML='';
+    return;
+  }
+  if(desde>hasta){
+    if(hero) hero.innerHTML='<div class="fwarn" style="width:100%">La fecha "desde" es posterior a "hasta".</div>';
+    return;
+  }
+
+  var R=calcularProduccion(desde, hasta, fNeg);
+  var t=R.tot;
+  if(corte) corte.textContent=fmtFecha(desde)+' → '+fmtFecha(hasta);
+
+  // hero
+  if(hero){
+    hero.innerHTML=
+      '<div class="pr-kpi big"><div class="n">'+fInt(t.prod)+'</div><div class="l">Kg de carne producidos en el período</div></div>'+
+      '<div class="pr-kpi"><div class="n">'+fInt(t.kgIni)+'</div><div class="l">Kg al inicio ('+fInt(t.cabIni)+' cab)</div></div>'+
+      '<div class="pr-kpi"><div class="n">'+fInt(t.kgFin)+'</div><div class="l">Kg al final ('+fInt(t.cabFin)+' cab)</div></div>';
+  }
+
+  // desglose
+  if(desg){
+    desg.innerHTML=
+      '<tr><td>Existencia inicial</td><td class="num">'+fInt(t.cabIni)+'</td><td class="num">'+(t.cabIni?fNum(t.kgIni/t.cabIni,1):'—')+'</td><td class="num">'+fInt(t.kgIni)+'</td></tr>'+
+      '<tr><td>+ Entradas (nac., compras, aj.)</td><td class="num">—</td><td class="num">—</td><td class="num">'+fInt(t.kgEnt)+'</td></tr>'+
+      '<tr><td>− Salidas (ventas, cons., mort.)</td><td class="num">—</td><td class="num">—</td><td class="num">'+fInt(t.kgSal)+'</td></tr>'+
+      '<tr><td>Existencia final</td><td class="num">'+fInt(t.cabFin)+'</td><td class="num">'+(t.cabFin?fNum(t.kgFin/t.cabFin,1):'—')+'</td><td class="num">'+fInt(t.kgFin)+'</td></tr>';
+  }
+
+  // fórmula explicada
+  if(form){
+    form.innerHTML=
+      '<div class="frow"><span><span class="op">+</span>Kg final</span><span>'+fInt(t.kgFin)+'</span></div>'+
+      '<div class="frow"><span><span class="op">+</span>Kg salidas</span><span>'+fInt(t.kgSal)+'</span></div>'+
+      '<div class="frow"><span><span class="op pr-neg">−</span>Kg inicial</span><span class="pr-neg">'+fInt(t.kgIni)+'</span></div>'+
+      '<div class="frow"><span><span class="op pr-neg">−</span>Kg entradas</span><span class="pr-neg">'+fInt(t.kgEnt)+'</span></div>'+
+      '<div class="frow res"><span>= Producción de carne</span><span>'+fInt(t.prod)+' kg</span></div>';
+  }
+
+  // por categoría
+  if(porCat){
+    var negocios=PA.demo.listarNegocios()||[];
+    var oN={}; for(var n=0;n<negocios.length;n++) oN[negocios[n].id]=n;
+    R.filas.sort(function(a,b){ return (oN[a.neg]-oN[b.neg]) || (b.prod-a.prod); });
+    var h='';
+    for(var i=0;i<R.filas.length;i++){
+      var f=R.filas[i];
+      h+='<tr><td class="cat">'+esc(nombreNegocio(f.neg)+' · '+nombreCategoria(f.cat))+'</td>'+
+         '<td class="num">'+fInt(f.kgIni)+'</td>'+
+         '<td class="num">'+fInt(f.kgEnt)+'</td>'+
+         '<td class="num">'+fInt(f.kgSal)+'</td>'+
+         '<td class="num">'+fInt(f.kgFin)+'</td>'+
+         '<td class="num" style="font-weight:600;color:'+(f.prod>=0?'var(--verde-d)':'var(--terra-d)')+'">'+fInt(f.prod)+'</td></tr>';
+    }
+    if(!h) h='<tr><td colspan="6" class="m-empty">Sin datos en el período elegido.</td></tr>';
+    else h+='<tr class="prtot"><td>TOTAL</td><td class="num">'+fInt(t.kgIni)+'</td><td class="num">'+fInt(t.kgEnt)+'</td><td class="num">'+fInt(t.kgSal)+'</td><td class="num">'+fInt(t.kgFin)+'</td><td class="num">'+fInt(t.prod)+'</td></tr>';
+    porCat.innerHTML=h;
+  }
+}
+
+function renderProduccionTab(){
+  if(typeof PA==='undefined' || !PA.demo || !CTX) return;
+  poblarTrimProd();
+  fillSelect('prNeg', PA.demo.listarNegocios()||[], 'id','sigla', true);
+  renderProduccion();
 }
 
 /* ── INIT ── */
