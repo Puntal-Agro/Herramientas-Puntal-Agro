@@ -373,7 +373,7 @@ tr.peso-arr td.kg{color:#9A6A1E}
   <!-- PESADAS -->
   <div class="page" id="page-pesadas">
     <div class="mv-card">
-      <div class="mv-h"><span class="mv-ttl">Nueva pesada</span><span class="mv-tag mut" id="pesTag">Por muestra</span></div>
+      <div class="mv-h"><span class="mv-ttl">Nueva pesada</span></div>
       <div class="mv-b">
         <div class="frm">
           <div class="fld"><label>Fecha <span class="req">*</span></label><input class="inp" type="date" id="pFecha" onchange="pesTrimHint()"></div>
@@ -389,8 +389,8 @@ tr.peso-arr td.kg{color:#9A6A1E}
           <div class="fld full"><label>Observaciones</label><input class="inp" id="pObs" placeholder="Opcional"></div>
         </div>
         <div class="mv-actions">
-          <button class="btn btn-ghost" onclick="resetPesForm()">Limpiar</button>
-          <button class="btn btn-primary" onclick="guardarPesada()">Registrar pesada</button>
+          <button class="btn btn-ghost" id="pesCancelBtn" onclick="resetPesForm()">Limpiar</button>
+          <button class="btn btn-primary" id="pesSaveBtn" onclick="guardarPesada()">Registrar pesada</button>
         </div>
       </div>
     </div>
@@ -1726,7 +1726,12 @@ function pesRecalc(){
   if(elKgCab) elKgCab.value=(cabPes&&kgPes!=null)?fNum(kgPes/cabPes,1):'';
 }
 
+var _pesEdit=null;  // id de pesada en edición, o null
 function resetPesForm(){
+  if(_pesEdit){ _pesEdit=null;
+    var sb=document.getElementById('pesSaveBtn'); if(sb) sb.textContent='Registrar pesada';
+    var cb=document.getElementById('pesCancelBtn'); if(cb) cb.textContent='Limpiar';
+  }
   var f=document.getElementById('pFecha'); if(f) f.value=hoyISO();
   pesTrimHint();
   var ids=['pCabPes','pKgPes','pPct','pKgCab','pObs','pExist'];
@@ -1746,6 +1751,27 @@ function guardarPesada(){
   if(!cabPes||cabPes<=0){ toast('Cargá las cabezas pesadas'); return; }
   if(!kgPes||kgPes<=0){ toast('Cargá los kg totales pesados'); return; }
   var exist=parseNum((document.getElementById('pExist')||{}).value);
+  var all=lsGetJSON(LS_PESADAS);
+  if(_pesEdit){
+    // actualizar conservando id
+    for(var ei=0;ei<all.length;ei++){
+      if(all[ei].id===_pesEdit){
+        all[ei].fecha=fecha; all[ei].trimestre=trimestreDeFecha(fecha);
+        all[ei].negocioId=neg; all[ei].rodeoId=rod; all[ei].categoriaId=cat;
+        all[ei].existenciaCab=(exist!=null?Math.round(exist):null);
+        all[ei].cabPesadas=Math.round(cabPes); all[ei].kgPesados=Math.round(kgPes);
+        all[ei].obs=(document.getElementById('pObs')||{}).value||'';
+        break;
+      }
+    }
+    lsSetJSON(LS_PESADAS, all);
+    _pesEdit=null;
+    var sb=document.getElementById('pesSaveBtn'); if(sb) sb.textContent='Registrar pesada';
+    var cb=document.getElementById('pesCancelBtn'); if(cb) cb.textContent='Limpiar';
+    resetPesForm(); renderPesadas(); poblarEvoCat(); renderEvolucion();
+    toast('Pesada actualizada');
+    return;
+  }
   var p={
     id:'pes_'+Date.now()+'_'+Math.floor(Math.random()*1000),
     empresaId:CTX.empresaActivaId, fecha:fecha, trimestre:trimestreDeFecha(fecha),
@@ -1755,9 +1781,26 @@ function guardarPesada(){
     cabPesadas:Math.round(cabPes), kgPesados:Math.round(kgPes),
     obs:(document.getElementById('pObs')||{}).value||''
   };
-  var all=lsGetJSON(LS_PESADAS); all.push(p); lsSetJSON(LS_PESADAS, all);
+  all.push(p); lsSetJSON(LS_PESADAS, all);
   resetPesForm(); renderPesadas(); poblarEvoCat(); renderEvolucion();
   toast('Pesada registrada');
+}
+
+function editarPesada(id){
+  var all=lsGetJSON(LS_PESADAS), p=null;
+  for(var i=0;i<all.length;i++){ if(all[i].id===id){ p=all[i]; break; } }
+  if(!p){ toast('No se encontró la pesada'); return; }
+  _pesEdit=id;
+  var set=function(elid,val){ var e=document.getElementById(elid); if(e!=null&&val!=null) e.value=val; };
+  set('pFecha', p.fecha); pesTrimHint();
+  set('pNeg', p.negocioId); set('pRod', p.rodeoId); set('pCat', p.categoriaId);
+  set('pCabPes', p.cabPesadas); set('pKgPes', p.kgPesados);
+  pesSugerirExist();  // recalcula existencia sugerida y % / kg/cab
+  set('pObs', p.obs||'');
+  var sb=document.getElementById('pesSaveBtn'); if(sb) sb.textContent='Guardar cambios';
+  var cb=document.getElementById('pesCancelBtn'); if(cb) cb.textContent='Cancelar';
+  var card=document.querySelector('#page-pesadas .mv-card'); if(card) card.scrollIntoView({behavior:'smooth',block:'start'});
+  toast('Editando pesada — modificá y guardá');
 }
 
 function borrarPesada(id){
@@ -1807,7 +1850,7 @@ function renderPesadas(){
       '<td class="num">'+fInt(p2.cabPesadas)+'</td>'+
       '<td class="num">'+pct+'</td>'+
       '<td class="num">'+kgcab+'</td>'+
-      '<td><button class="ic-btn del" title="Eliminar" onclick="borrarPesada(\''+p2.id+'\')">🗑</button></td>'+
+      '<td><div class="row-act"><button class="ic-btn" title="Editar" onclick="editarPesada(\''+p2.id+'\')">✎</button><button class="ic-btn del" title="Eliminar" onclick="borrarPesada(\''+p2.id+'\')">🗑</button></div></td>'+
     '</tr>';
   }
   if(!html) html='<tr><td colspan="9" class="m-empty">No hay pesadas registradas. Cargá la primera con el formulario de arriba.</td></tr>';
