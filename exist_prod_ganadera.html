@@ -209,7 +209,9 @@ main{max-width:1200px;margin:0 auto;padding:22px 20px}
 .chart-box{position:relative;height:280px}
 @media(max-width:820px){.tb-kpis{grid-template-columns:1fr 1fr}.tb-grid{grid-template-columns:1fr}}
 
-.peso-badge{font-size:9.5px;font-weight:600;padding:1px 6px;border-radius:5px;margin-left:6px;white-space:nowrap}
+tr.sup-excl{opacity:.45}
+tr.sup-excl td.cat{text-decoration:line-through}
+.peso-badge{font-size:9.5px;font-weight:600;padding:1px 6px;border-radius:5px;white-space:nowrap}
 .peso-badge.arr{background:#FBEFD8;color:#9A6A1E;border:1px solid #EAD3A0}
 .peso-badge.fec{background:#EEF2EC;color:#5C7048;border:1px solid #D5E0CB;font-weight:500}
 .peso-badge.sp{background:#EEF0F2;color:#6B7480;border:1px solid #DCE0E5}
@@ -229,6 +231,7 @@ tr.peso-arr td.kg{color:#9A6A1E}
 .pr-kpi.big .n{font-size:32px}
 .pr-kpi .l{font-size:11.5px;margin-top:6px;font-weight:500;opacity:.85}
 .pr-kpi.big .l{opacity:.9}
+.pr-explica{font-size:13px;line-height:1.7;color:var(--text)}
 .pr-formula{font-size:13px;line-height:1.9;color:var(--text)}
 .pr-formula .frow{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #F0EDE4}
 .pr-formula .frow.res{border-top:2px solid var(--border);border-bottom:none;font-weight:700;color:var(--verde-d);margin-top:4px;padding-top:8px}
@@ -390,7 +393,7 @@ tr.peso-arr td.kg{color:#9A6A1E}
       <div class="ex-h"><span class="ex-ttl">Existencias por combinación</span><span class="ex-corte" id="exCorte"></span><button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="abrirConciliacion()">Conciliar stock</button></div>
       <div class="ex-b" style="overflow-x:auto">
         <table class="m-tbl" id="exTbl">
-          <thead><tr><th>Categoría</th><th>Rodeo</th><th class="num">Cabezas</th><th class="num">Kg totales</th><th class="num">Kg/cab</th></tr></thead>
+          <thead><tr><th>Categoría</th><th>Rodeo</th><th class="num">Cabezas</th><th class="num">Kg totales</th><th class="num">Kg/cab</th><th>Peso de</th></tr></thead>
           <tbody id="exBody"></tbody>
         </table>
       </div>
@@ -488,10 +491,12 @@ tr.peso-arr td.kg{color:#9A6A1E}
         </div>
       </div>
       <div class="ex-card">
-        <div class="ex-h"><span class="ex-ttl">Cómo se calcula · Indicadores</span></div>
+        <div class="ex-h"><span class="ex-ttl">Cómo se calcula</span></div>
         <div class="ex-b">
-          <div class="pr-formula" id="prFormula"></div>
-          <div id="prKgHa" style="margin-top:14px"></div>
+          <div class="pr-explica">
+            La <strong>producción de carne</strong> del período es el engorde real del rodeo: lo que pesa al final más lo que se vendió o salió, menos lo que había al inicio y lo que entró por compras o nacimientos.
+            <div style="margin-top:10px;color:var(--muted)">El detalle en kilos de cada componente está en el cuadro de la izquierda. Los indicadores por hectárea (kg/ha, carga) están en la pestaña <strong>Indicadores</strong>.</div>
+          </div>
         </div>
       </div>
     </div>
@@ -524,7 +529,7 @@ tr.peso-arr td.kg{color:#9A6A1E}
       <div class="ex-h"><span class="ex-ttl">Superficie ganadera por lote</span><span class="ex-corte" id="supCorte"></span></div>
       <div class="ex-b" style="overflow-x:auto">
         <table class="m-tbl">
-          <thead><tr><th>Lote</th><th>Campo</th><th>Amb.</th><th>Actividad</th><th class="num">Ha</th><th>2ª</th></tr></thead>
+          <thead><tr><th title="Incluir en el cálculo">✓</th><th>Lote</th><th>Campo</th><th>Amb.</th><th>Actividad</th><th class="num">Ha</th><th>2ª</th></tr></thead>
           <tbody id="supBody"></tbody>
         </table>
       </div>
@@ -1597,7 +1602,7 @@ function renderExistencias(){
     if(negActual!==null){
       html+='<tr class="tot"><td colspan="2">Subtotal '+esc(nombreNegocio(negActual))+'</td>'+
             '<td class="num">'+fInt(subCab)+'</td><td class="num">'+fInt(subKg)+'</td>'+
-            '<td class="num">'+(subCab?fNum(subKg/subCab,1):'—')+'</td></tr>';
+            '<td class="num">'+(subCab?fNum(subKg/subCab,1):'—')+'</td><td></td></tr>';
     }
   }
   for(var i2=0;i2<lineas.length;i2++){
@@ -1606,33 +1611,34 @@ function renderExistencias(){
       cerrarSub();
       negActual=L.neg; subCab=0; subKg=0;
       var negObj=null; for(var z=0;z<negocios.length;z++){ if(negocios[z].id===L.neg){negObj=negocios[z];break;} }
-      html+='<tr class="grp"><td colspan="5">'+esc(negObj?(negObj.sigla+' — '+negObj.nombre):'?')+'</td></tr>';
+      html+='<tr class="grp"><td colspan="6">'+esc(negObj?(negObj.sigla+' — '+negObj.nombre):'?')+'</td></tr>';
     }
     // Reponderación: kg/cab desde la última pesada de la categoría a la fecha de corte
     var pes=ultimaPesada(L.neg, L.rod, L.cat, hasta);
-    var kgCab, kgTot, pesoTag, pesoCls;
+    var kgCab, kgTot, pesoCol, pesoCls;
     if(pes){
       kgCab=pes.kgCab; kgTot=L.cab*kgCab;
-      pesoTag=' <span class="peso-badge fec" title="Peso de la última pesada, del '+fmtFecha(pes.fecha)+'">'+fmtFecha(pes.fecha)+'</span>';
+      pesoCol='<span class="peso-badge fec" title="Peso de la última pesada, del '+fmtFecha(pes.fecha)+'">'+fmtFecha(pes.fecha)+'</span>';
       pesoCls='';
     } else {
       // sin pesada: fallback al kg de movimientos
       kgTot=L.kg; kgCab=(L.cab&&L.kg)?L.kg/L.cab:0;
-      pesoTag=' <span class="peso-badge sp" title="Sin pesada registrada: se usa el peso cargado en los movimientos">s/pesar</span>'; pesoCls=' peso-sp';
+      pesoCol='<span class="peso-badge sp" title="Sin pesada registrada: se usa el peso cargado en los movimientos">s/pesar</span>'; pesoCls=' peso-sp';
     }
     html+='<tr class="'+pesoCls+'"><td class="cat">'+esc(nombreCategoria(L.cat))+'</td>'+
           '<td><span class="rod-badge">'+esc(nombreRodeo(L.rod))+'</span></td>'+
           '<td class="num">'+fInt(L.cab)+'</td>'+
           '<td class="num kg">'+(kgTot?fInt(kgTot):'—')+'</td>'+
-          '<td class="num">'+(kgCab?fNum(kgCab,1):'—')+pesoTag+'</td></tr>';
+          '<td class="num">'+(kgCab?fNum(kgCab,1):'—')+'</td>'+
+          '<td>'+pesoCol+'</td></tr>';
     subCab+=L.cab; subKg+=kgTot; totCab+=L.cab; totKg+=kgTot;
   }
   cerrarSub();
   if(!html){
-    html='<tr><td colspan="5" class="m-empty">No hay existencias al corte elegido. Cargá movimientos en la pestaña Movimientos.</td></tr>';
+    html='<tr><td colspan="6" class="m-empty">No hay existencias al corte elegido. Cargá movimientos en la pestaña Movimientos.</td></tr>';
   } else {
     html+='<tr class="tot"><td colspan="2">TOTAL</td><td class="num">'+fInt(totCab)+'</td>'+
-          '<td class="num">'+fInt(totKg)+'</td><td class="num">'+(totCab?fNum(totKg/totCab,1):'—')+'</td></tr>';
+          '<td class="num">'+fInt(totKg)+'</td><td class="num">'+(totCab?fNum(totKg/totCab,1):'—')+'</td><td></td></tr>';
   }
   body.innerHTML=html;
 
@@ -2231,13 +2237,12 @@ function renderProduccion(){
   var fNeg=(document.getElementById('prNeg')||{}).value||'';
   var hero=document.getElementById('prHero');
   var desg=document.getElementById('prDesglose');
-  var form=document.getElementById('prFormula');
   var porCat=document.getElementById('prPorCat');
   var corte=document.getElementById('prCorte');
 
   if(!desde||!hasta){
     if(hero) hero.innerHTML='<div class="m-empty" style="width:100%">Elegí un período (desde y hasta) o un trimestre para calcular la producción de carne.</div>';
-    if(desg) desg.innerHTML=''; if(form) form.innerHTML=''; if(porCat) porCat.innerHTML='';
+    if(desg) desg.innerHTML=''; if(porCat) porCat.innerHTML='';
     return;
   }
   if(desde>hasta){
@@ -2264,33 +2269,6 @@ function renderProduccion(){
       '<tr><td>+ Entradas (nac., compras, aj.)</td><td class="num">—</td><td class="num">—</td><td class="num">'+fInt(t.kgEnt)+'</td></tr>'+
       '<tr><td>− Salidas (ventas, cons., mort.)</td><td class="num">—</td><td class="num">—</td><td class="num">'+fInt(t.kgSal)+'</td></tr>'+
       '<tr><td>Existencia final</td><td class="num">'+fInt(t.cabFin)+'</td><td class="num">'+(t.cabFin?fNum(t.kgFin/t.cabFin,1):'—')+'</td><td class="num">'+fInt(t.kgFin)+'</td></tr>';
-  }
-
-  // fórmula explicada
-  if(form){
-    form.innerHTML=
-      '<div class="frow"><span><span class="op">+</span>Kg final</span><span>'+fInt(t.kgFin)+'</span></div>'+
-      '<div class="frow"><span><span class="op">+</span>Kg salidas</span><span>'+fInt(t.kgSal)+'</span></div>'+
-      '<div class="frow"><span><span class="op pr-neg">−</span>Kg inicial</span><span class="pr-neg">'+fInt(t.kgIni)+'</span></div>'+
-      '<div class="frow"><span><span class="op pr-neg">−</span>Kg entradas</span><span class="pr-neg">'+fInt(t.kgEnt)+'</span></div>'+
-      '<div class="frow res"><span>= Producción de carne</span><span>'+fInt(t.prod)+' kg</span></div>';
-  }
-
-  // indicadores por hectárea (superficie de la campaña activa)
-  var kgha=document.getElementById('prKgHa');
-  if(kgha){
-    var camp=_campActiva || (PA.demo.campaniaActiva()?PA.demo.campaniaActiva().id:null);
-    var S=superficieGanadera(camp);
-    if(S.total>0){
-      kgha.innerHTML=
-        '<div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">Producción por hectárea (campaña '+esc(camp||'')+')</div>'+
-        '<div class="pr-formula">'+
-          '<div class="frow"><span>Kg/ha sobre sup. total ('+fNum(S.total,1)+' ha)</span><span>'+fNum(t.prod/S.total,1)+' kg/ha</span></div>'+
-          '<div class="frow"><span>Kg/ha sobre sup. efectiva ('+fNum(S.efectiva,1)+' ha)</span><span>'+(S.efectiva?fNum(t.prod/S.efectiva,1):'—')+' kg/ha</span></div>'+
-        '</div>';
-    } else {
-      kgha.innerHTML='<div class="cmp" style="font-style:italic">Sin superficie ganadera cargada en Plan de Uso para esta campaña; no se puede calcular kg/ha.</div>';
-    }
   }
 
   // por categoría
@@ -2324,10 +2302,29 @@ function renderProduccionTab(){
 /* ====================================================================
    SUPERFICIE GANADERA — leída de Plan de Uso (actividades GAN) vía pa-core
    ==================================================================== */
+var LS_SUP_EXCL = 'pa_hac_sup_excl';  // exclusiones de lotes por campaña: {campaniaId: {loteId:true}}
+
+function lotesExcluidos(campaniaId){
+  var all=lsGetJSON(LS_SUP_EXCL);
+  if(all && !(all instanceof Array) && all[campaniaId]) return all[campaniaId];
+  return {};
+}
+function toggleLoteExcl(campaniaId, loteId){
+  var all=lsGetJSON(LS_SUP_EXCL);
+  if(!all || all instanceof Array) all={};
+  if(!all[campaniaId]) all[campaniaId]={};
+  if(all[campaniaId][loteId]) delete all[campaniaId][loteId];
+  else all[campaniaId][loteId]=true;
+  lsSetJSON(LS_SUP_EXCL, all);
+  renderSuperficie();
+  // refrescar indicadores y producción si están visibles (usan la misma superficie)
+  if(typeof renderIndicadores==='function') renderIndicadores();
+}
 
 /* Calcula la superficie ganadera de una campaña. Devuelve {total, efectiva, filas[]} */
 function superficieGanadera(campaniaId){
   var emp=CTX.empresaActivaId;
+  var excl=lotesExcluidos(campaniaId);
   var tipos=PA.demo.listarTiposActividad(emp)||[];
   var tMap={}; for(var i=0;i<tipos.length;i++) tMap[tipos[i].id]=tipos[i];
   var lotes=PA.demo.listarLotes(emp)||[];
@@ -2341,15 +2338,19 @@ function superficieGanadera(campaniaId){
     var act=acts[a];
     var t=tMap[act.tipoActividadId];
     if(!t || t.actividad!=='GAN') continue;   // solo actividades ganaderas
+    var excluido = !!excl[act.loteId];
     var lote=lMap[act.loteId];
-    total += act.ha||0;
-    if(!act.seg) efectiva += act.ha||0;        // efectiva: sin las de 2ª
-    lotesGan[act.loteId]=true;
+    if(!excluido){
+      total += act.ha||0;
+      if(!act.seg) efectiva += act.ha||0;      // efectiva: sin las de 2ª
+      lotesGan[act.loteId]=true;
+    }
     filas.push({
+      loteId: act.loteId,
       lote: lote?lote.nombre:'?',
       campo: (lote&&cMap[lote.campoId])?(cMap[lote.campoId].nombre||cMap[lote.campoId].sigla):(lote?lote.campoId:'?'),
       amb: lote?(lote.ambiente||''):'',
-      sigla: act.sigla, ha: act.ha||0, seg: !!act.seg
+      sigla: act.sigla, ha: act.ha||0, seg: !!act.seg, excluido: excluido
     });
   }
   filas.sort(function(x,y){ return x.lote<y.lote?-1:(x.lote>y.lote?1:0); });
@@ -2371,14 +2372,17 @@ function renderSuperficie(){
   var html='';
   for(var i=0;i<S.filas.length;i++){
     var f=S.filas[i];
-    html+='<tr><td class="cat">'+esc(f.lote)+'</td><td>'+esc(f.campo)+'</td>'+
+    var chk=f.excluido?'':'checked';
+    html+='<tr class="'+(f.excluido?'sup-excl':'')+'">'+
+          '<td><input type="checkbox" '+chk+' onchange="toggleLoteExcl(\''+camp+'\',\''+f.loteId+'\')" title="Incluir/excluir este lote del cálculo"></td>'+
+          '<td class="cat">'+esc(f.lote)+'</td><td>'+esc(f.campo)+'</td>'+
           '<td><span class="rod-badge">'+esc(f.amb)+'</span></td>'+
           '<td>'+esc(f.sigla)+'</td>'+
           '<td class="num">'+fNum(f.ha,1)+'</td>'+
           '<td>'+(f.seg?'<span class="cmp">2ª</span>':'')+'</td></tr>';
   }
-  if(!html) html='<tr><td colspan="6" class="m-empty">No hay actividades ganaderas cargadas en Plan de Uso para esta campaña.</td></tr>';
-  else html+='<tr class="prtot"><td colspan="4">TOTAL ('+S.nLotes+' lotes) — efectiva '+fNum(S.efectiva,1)+' ha</td><td class="num">'+fNum(S.total,1)+'</td><td></td></tr>';
+  if(!html) html='<tr><td colspan="7" class="m-empty">No hay actividades ganaderas cargadas en Plan de Uso para esta campaña.</td></tr>';
+  else html+='<tr class="prtot"><td></td><td colspan="4">TOTAL incluido ('+S.nLotes+' lotes) — efectiva '+fNum(S.efectiva,1)+' ha</td><td class="num">'+fNum(S.total,1)+'</td><td></td></tr>';
   tb.innerHTML=html;
 }
 
@@ -2501,11 +2505,11 @@ function renderIndicadores(){
 
   if(kpis){
     kpis.innerHTML=
-      '<div class="in-kpi hl"><div class="n">'+fInt(prod)+'<span class="u">kg</span></div><div class="l">Producción de carne</div></div>'+
-      '<div class="in-kpi"><div class="n">'+fNum(adpv,3)+'<span class="u">kg/cab/día</span></div><div class="l">A.D.P.V.</div></div>'+
-      '<div class="in-kpi"><div class="n">'+fNum(efi,1)+'<span class="u">%</span></div><div class="l">Eficiencia del stock</div></div>'+
-      '<div class="in-kpi"><div class="n">'+fNum(cargaCab,2)+'<span class="u">cab/ha</span></div><div class="l">Carga (sup. total)</div></div>'+
-      '<div class="in-kpi"><div class="n">'+fInt(cargaKg)+'<span class="u">kg/ha</span></div><div class="l">Carga (sup. total)</div></div>';
+      '<div class="in-kpi hl" title="Carne producida en el período: lo que pesa al final + lo que salió − lo que había + lo que entró"><div class="n">'+fInt(prod)+'<span class="u">kg</span></div><div class="l">Producción de carne</div></div>'+
+      '<div class="in-kpi" title="Aumento Diario de Peso Vivo: cuánto engorda cada animal por día en promedio (producción ÷ cabezas ÷ días)"><div class="n">'+fNum(adpv,3)+'<span class="u">kg/cab/día</span></div><div class="l">A.D.P.V.</div></div>'+
+      '<div class="in-kpi" title="Cuánta carne se produjo en relación al stock que se sostuvo (producción ÷ stock ponderado en kg)"><div class="n">'+fNum(efi,1)+'<span class="u">%</span></div><div class="l">Eficiencia del stock</div></div>'+
+      '<div class="in-kpi" title="Cabezas por hectárea: presión del rodeo sobre el campo (stock ponderado ÷ superficie total)"><div class="n">'+fNum(cargaCab,2)+'<span class="u">cab/ha</span></div><div class="l">Carga (sup. total)</div></div>'+
+      '<div class="in-kpi" title="Kilos de animal por hectárea: carga expresada en peso (stock ponderado kg ÷ superficie total)"><div class="n">'+fInt(cargaKg)+'<span class="u">kg/ha</span></div><div class="l">Carga (sup. total)</div></div>';
   }
   if(stEl){
     stEl.innerHTML=
