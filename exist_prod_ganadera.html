@@ -87,6 +87,9 @@ main{max-width:1200px;margin:0 auto;padding:22px 20px}
 .ic-btn{border:1px solid var(--border);background:#fff;border-radius:7px;width:30px;height:30px;cursor:pointer;font-size:14px;color:var(--muted);display:inline-flex;align-items:center;justify-content:center}
 .ic-btn:hover{border-color:var(--verde);color:var(--verde)}
 .ic-btn.del:hover{border-color:#C0392B;color:#C0392B}
+.rac-chip{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;background:var(--bg-soft,#F1EFE8);color:var(--muted);margin:2px 3px 2px 0;font-variant-numeric:tabular-nums}
+.mv-hint{font-size:12px;color:var(--muted);font-style:italic}
+.supl-elab{color:var(--terra-d,#9c4a1d)}
 .efecto{font-size:11px;font-weight:600;padding:2px 8px;border-radius:6px}
 .ef-E{background:#E6F0E0;color:#3A6B2E}.ef-S{background:#F7E4DC;color:#A8501F}.ef-M{background:#EDEAE2;color:#7A6A55}
 .sexo .dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;vertical-align:middle}
@@ -308,6 +311,7 @@ tr.peso-arr td.kg{color:#9A6A1E}
   <button class="tab"        data-tab="produccion"  onclick="setTab('produccion',this)">Producción</button>
   <button class="tab"        data-tab="superficie"  onclick="setTab('superficie',this)">Superficie</button>
   <button class="tab"        data-tab="indicadores" onclick="setTab('indicadores',this)">Indicadores</button>
+  <button class="tab"        data-tab="suplementacion" onclick="setTab('suplementacion',this)">Suplementación</button>
   <button class="tab"        data-tab="maestros"    onclick="setTab('maestros',this)">Maestros</button>
 </div>
 
@@ -511,6 +515,7 @@ tr.peso-arr td.kg{color:#9A6A1E}
           <label>o trimestre</label>
           <select id="prTrim" onchange="prModoTrim();renderProduccion()"><option value="">— elegir —</option></select>
           <select id="prNeg" onchange="renderProduccion()"><option value="">Todos los negocios</option></select>
+          <select id="prCat" onchange="renderProduccion()"><option value="">Todas las categorías</option></select>
           <button class="exp-btn" onclick="abrirExportPDF('produccion')" title="Exportar a PDF">⬇ PDF</button>
         </div>
         <div class="pr-hero" id="prHero"></div>
@@ -614,6 +619,87 @@ tr.peso-arr td.kg{color:#9A6A1E}
     </div>
   </div>
 
+  <!-- SUPLEMENTACIÓN -->
+  <div class="page" id="page-suplementacion">
+
+    <!-- Nuevo movimiento de suplemento -->
+    <div class="mv-card">
+      <div class="mv-h mv-h-toggle" onclick="toggleFormSupl()">
+        <span class="mv-ttl">Nuevo movimiento</span>
+        <span class="mv-tag" id="smvTag">Entrada</span>
+        <span class="mv-toggle-txt" id="smvChevron">Colapsar ▾</span>
+      </div>
+      <div class="mv-b" id="smvFormBody">
+        <div class="fbar" style="flex-wrap:wrap">
+          <div class="fld"><label style="font-size:11px;color:var(--muted)">Fecha</label><br><input id="smvFecha" type="date"></div>
+          <div class="fld"><label style="font-size:11px;color:var(--muted)">Campaña</label><br><select id="smvCampania"></select></div>
+          <div class="fld"><label style="font-size:11px;color:var(--muted)">Item</label><br><select id="smvItem" onchange="onSuplItemChange()" style="min-width:180px"></select></div>
+          <div class="fld"><label style="font-size:11px;color:var(--muted)">Concepto</label><br><select id="smvConcepto" onchange="onSuplConceptoChange()"></select></div>
+          <div class="fld"><label style="font-size:11px;color:var(--muted)">Cantidad (Un TC)</label><br><input id="smvCant" type="text" placeholder="0" style="text-align:right;max-width:110px"></div>
+          <div class="fld grow"><label style="font-size:11px;color:var(--muted)">Destino / obs.</label><br><input id="smvObs" type="text" placeholder="opcional"></div>
+        </div>
+        <div id="smvHint" class="mv-hint" style="margin-top:8px"></div>
+        <div class="mv-actions">
+          <button class="btn btn-ghost" id="smvCancelBtn" onclick="resetSuplForm()">Limpiar</button>
+          <button class="btn btn-primary" onclick="guardarSuplMov()" id="smvSaveBtn">Registrar movimiento</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detalle de movimientos -->
+    <div class="mv-card" style="margin-top:18px">
+      <div class="mv-h"><span class="mv-ttl">Detalle de movimientos</span><span class="mv-count" id="smvCount"></span></div>
+      <div class="mv-b">
+        <div class="fbar">
+          <select id="sfItem" onchange="renderSuplDetalle()"><option value="">Todos los items</option></select>
+          <select id="sfConcepto" onchange="renderSuplDetalle()"><option value="">Todos los conceptos</option></select>
+          <select id="sfCampania" onchange="renderSuplDetalle()"><option value="">Todas las campañas</option></select>
+          <input id="sfDesde" type="date" onchange="renderSuplDetalle()" title="Desde">
+          <input id="sfHasta" type="date" onchange="renderSuplDetalle()" title="Hasta">
+          <button class="btn btn-ghost btn-sm" onclick="limpiarFiltrosSuplDetalle()">Limpiar filtros</button>
+        </div>
+        <table class="m-tbl" id="smvTabla">
+          <thead><tr>
+            <th style="width:90px">Fecha</th><th>Item</th><th>Concepto</th>
+            <th style="width:50px">E/S</th>
+            <th style="width:100px;text-align:right">Cant. TC</th>
+            <th style="width:100px;text-align:right">Un MS</th>
+            <th style="width:110px;text-align:right">Costo</th>
+            <th style="width:80px;text-align:right">Acciones</th>
+          </tr></thead>
+          <tbody id="smvBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Stock por suplemento / ración -->
+    <div class="mv-card" style="margin-top:18px">
+      <div class="mv-h"><span class="mv-ttl">Stock por suplemento / ración</span></div>
+      <div class="mv-b">
+        <div class="fbar">
+          <select id="ssItem" onchange="renderSuplStock()"><option value="">Todos los items</option></select>
+          <select id="ssCampania" onchange="renderSuplStock()"><option value="">Todas las campañas</option></select>
+          <input id="ssHasta" type="date" onchange="renderSuplStock()" title="A fecha">
+          <button class="btn btn-ghost btn-sm" onclick="limpiarFiltrosSuplStock()">Limpiar filtros</button>
+        </div>
+        <table class="m-tbl">
+          <thead><tr>
+            <th>Item</th><th style="width:90px">Tipo</th>
+            <th style="width:90px;text-align:right">Inicial</th>
+            <th style="width:90px;text-align:right">Entradas</th>
+            <th style="width:90px;text-align:right">Salidas</th>
+            <th style="width:100px;text-align:right">Existencia</th>
+            <th style="width:90px;text-align:right">MS</th>
+            <th style="width:110px;text-align:right">Valor</th>
+          </tr></thead>
+          <tbody id="ssBody"></tbody>
+        </table>
+        <div class="mv-hint" style="margin-top:8px">El % MS de cada item determina los Un MS. Las existencias negativas (consumo mayor al stock) se resaltan en terracota.</div>
+      </div>
+    </div>
+
+  </div>
+
   <!-- MAESTROS -->
   <div class="page" id="page-maestros">
     <div class="m-stack">
@@ -683,6 +769,74 @@ tr.peso-arr td.kg{color:#9A6A1E}
           <table class="m-tbl">
             <thead><tr><th>Categoría</th><th style="width:140px">Sexo EV</th><th>Categoría</th><th style="width:140px">Sexo EV</th></tr></thead>
             <tbody id="categoriasBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Suplementos (editable) -->
+      <div class="m-card">
+        <div class="m-h">
+          <div>
+            <div class="ttl">Suplementos <span class="badge badge-edit">Editable</span></div>
+            <div class="sub">Insumos individuales. El costo se carga acá. El % MS se deriva del % H°.</div>
+          </div>
+          <button class="btn btn-primary" id="suplAddBtn" onclick="toggleSuplForm()">+ Nuevo suplemento</button>
+        </div>
+        <div class="m-b">
+          <div class="add-row" id="suplForm" style="flex-wrap:wrap;gap:8px">
+            <div class="fld f-nom"><label>Nombre</label><input type="text" id="suplNombre" maxlength="40" placeholder="Maíz"></div>
+            <div class="fld" style="max-width:90px"><label>Unidad</label>
+              <select id="suplUnidad"><option value="kg">kg</option><option value="tn">tn</option><option value="rollo">rollo</option></select></div>
+            <div class="fld" style="max-width:90px"><label>% H°</label><input type="text" id="suplHum" placeholder="14,5" style="text-align:right"></div>
+            <div class="fld" style="max-width:110px"><label>Costo / un</label><input type="text" id="suplCosto" placeholder="180,00" style="text-align:right"></div>
+            <div class="fld" style="max-width:110px"><label>Exist. inicial</label><input type="text" id="suplExIni" placeholder="0" style="text-align:right"></div>
+            <button class="btn btn-primary btn-sm" onclick="guardarSupl()">Guardar</button>
+            <button class="btn btn-ghost btn-sm" onclick="cancelSuplForm()">Cancelar</button>
+          </div>
+          <table class="m-tbl">
+            <thead><tr>
+              <th>Nombre</th><th style="width:60px">Un</th>
+              <th style="width:80px;text-align:right">% H°</th><th style="width:80px;text-align:right">% MS</th>
+              <th style="width:100px;text-align:right">Costo/un</th><th style="width:100px;text-align:right">Ex. inicial</th>
+              <th style="width:90px;text-align:right">Acciones</th>
+            </tr></thead>
+            <tbody id="suplBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Raciones (editable) -->
+      <div class="m-card">
+        <div class="m-h">
+          <div>
+            <div class="ttl">Raciones <span class="badge badge-edit">Editable</span></div>
+            <div class="sub">Recetas que combinan suplementos. El % H° y el costo se calculan ponderando los ingredientes.</div>
+          </div>
+          <button class="btn btn-primary" id="racAddBtn" onclick="toggleRacForm()">+ Nueva ración</button>
+        </div>
+        <div class="m-b">
+          <div class="add-row" id="racForm" style="flex-direction:column;align-items:stretch;gap:10px">
+            <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap">
+              <div class="fld f-nom"><label>Nombre ración</label><input type="text" id="racNombre" maxlength="40" placeholder="Ración 1"></div>
+              <div class="fld" style="max-width:110px"><label>Exist. inicial</label><input type="text" id="racExIni" placeholder="0" style="text-align:right"></div>
+            </div>
+            <div style="border-top:0.5px solid var(--border,#D3D1C7);padding-top:8px">
+              <div style="font-size:11px;color:#888780;margin-bottom:6px">Ingredientes <span id="racSumaPct" style="margin-left:8px"></span></div>
+              <div id="racIngHost"></div>
+              <button class="btn btn-ghost btn-sm" onclick="addRacIngFila()" style="margin-top:6px">+ ingrediente</button>
+            </div>
+            <div>
+              <button class="btn btn-primary btn-sm" onclick="guardarRac()">Guardar</button>
+              <button class="btn btn-ghost btn-sm" onclick="cancelRacForm()">Cancelar</button>
+            </div>
+          </div>
+          <table class="m-tbl">
+            <thead><tr>
+              <th style="width:140px">Ración</th><th>Composición</th>
+              <th style="width:90px;text-align:right">% H° calc.</th><th style="width:100px;text-align:right">Costo/un calc.</th>
+              <th style="width:100px;text-align:right">Ex. inicial</th><th style="width:90px;text-align:right">Acciones</th>
+            </tr></thead>
+            <tbody id="racBody"></tbody>
           </table>
         </div>
       </div>
@@ -781,6 +935,7 @@ function setTab(tab, btn){
   else if(tab==='produccion' && typeof renderProduccionTab==='function') renderProduccionTab();
   else if(tab==='superficie' && typeof renderSuperficieTab==='function') renderSuperficieTab();
   else if(tab==='indicadores' && typeof renderIndicadoresTab==='function') renderIndicadoresTab();
+  else if(tab==='suplementacion' && typeof renderSuplementacionTab==='function') renderSuplementacionTab();
   else if(tab==='maestros' && typeof renderMaestros==='function') renderMaestros();
   else if(tab==='tablero' && typeof renderTablero==='function') renderTablero();
 }
@@ -1006,6 +1161,8 @@ function renderMaestros(){
   if(typeof PA==='undefined' || !PA.demo || !CTX) return;
   renderRodeos();
   renderCatalogosRO();
+  renderSuplCatalogo();
+  renderRacCatalogo();
 }
 
 /* ── Rodeos (editable, por empresa) ── */
@@ -2438,6 +2595,7 @@ function renderProduccion(){
   var desde=(document.getElementById('prDesde')||{}).value;
   var hasta=(document.getElementById('prHasta')||{}).value;
   var fNeg=(document.getElementById('prNeg')||{}).value||'';
+  var fCat=(document.getElementById('prCat')||{}).value||'';
   var hero=document.getElementById('prHero');
   var desg=document.getElementById('prDesglose');
   var porCat=document.getElementById('prPorCat');
@@ -2460,7 +2618,7 @@ function renderProduccion(){
     return;
   }
 
-  var R=calcularProduccion(desde, hasta, fNeg);
+  var R=calcularProduccion(desde, hasta, fNeg, fCat);
   var t=R.tot;
   if(corte) corte.textContent=fmtFecha(desde)+' → '+fmtFecha(hasta);
 
@@ -2506,6 +2664,7 @@ function renderProduccionTab(){
   if(typeof PA==='undefined' || !PA.demo || !CTX) return;
   poblarTrimProd();
   fillSelect('prNeg', PA.demo.listarNegocios()||[], 'id','sigla', true);
+  fillSelect('prCat', PA.demo.listarCategoriasHda()||[], 'id','nombre', true);
   aplicarPeriodoA('pr');
   renderProduccion();
 }
@@ -2539,6 +2698,671 @@ function sincronizarPeriodo(pref){
    SUPERFICIE GANADERA — leída de Plan de Uso (actividades GAN) vía pa-core
    ==================================================================== */
 var LS_SUP_EXCL = 'pa_hac_sup_excl';  // exclusiones de lotes por campaña: {campaniaId: {loteId:true}}
+
+/* ── Suplementación ──────────────────────────────────────────────
+   Catálogos locales de este módulo (después migran a Maestros central).
+   LS_SUPL_ITEMS : suplementos individuales
+     {id, empresaId, nombre, unidad, humedad (0..1), costo, exIni}
+   LS_SUPL_RAC   : raciones (recetas que combinan suplementos)
+     {id, empresaId, nombre, exIni, ingredientes:[{supId, pct}]}
+     humedad y costo de la ración se DERIVAN ponderando ingredientes.
+   LS_SUPL_MOV   : movimientos (modelo plano con vínculo, igual que hacienda)
+     {id, empresaId, fecha, campaniaId, itemId, itemTipo:'sup'|'rac',
+      concepto, efecto:'E'|'S', cant (Un TC), elabLink, obs}
+   %MS, costo del movimiento, etc. se derivan del item, NO se guardan. */
+var LS_SUPL_ITEMS = 'pa_hac_supl_items';
+var LS_SUPL_RAC   = 'pa_hac_supl_rac';
+var LS_SUPL_MOV   = 'pa_hac_supl_mov';
+
+/* Conceptos de movimiento de suplemento (de la planilla Don Eduardo).
+   efecto define el signo sobre el stock. */
+var SUPL_CONCEPTOS = [
+  { sigla:'Cpra',     nombre:'Compra',            efecto:'E' },
+  { sigla:'PropProd', nombre:'Producción propia', efecto:'E' },
+  { sigla:'AltaInv',  nombre:'Alta inventario',   efecto:'E' },
+  { sigla:'Vta',      nombre:'Venta',             efecto:'S' },
+  { sigla:'ElabRac',  nombre:'Elaboración ración',efecto:'S' },
+  { sigla:'Alim',     nombre:'Alimentación',      efecto:'S' },
+  { sigla:'BajaInv',  nombre:'Baja inventario',   efecto:'S' }
+];
+function suplConcepto(sigla){
+  for(var i=0;i<SUPL_CONCEPTOS.length;i++){ if(SUPL_CONCEPTOS[i].sigla===sigla) return SUPL_CONCEPTOS[i]; }
+  return null;
+}
+
+/* ── Lecturas filtradas por empresa activa ── */
+function suplItems(){
+  var all=lsGetJSON(LS_SUPL_ITEMS), out=[];
+  for(var i=0;i<all.length;i++){ if(all[i].empresaId===CTX.empresaActivaId) out.push(all[i]); }
+  return out;
+}
+function suplRaciones(){
+  var all=lsGetJSON(LS_SUPL_RAC), out=[];
+  for(var i=0;i<all.length;i++){ if(all[i].empresaId===CTX.empresaActivaId) out.push(all[i]); }
+  return out;
+}
+function suplMovs(){
+  var all=lsGetJSON(LS_SUPL_MOV), out=[];
+  for(var i=0;i<all.length;i++){ if(all[i].empresaId===CTX.empresaActivaId) out.push(all[i]); }
+  return out;
+}
+function suplItemById(id){
+  var a=suplItems(); for(var i=0;i<a.length;i++){ if(a[i].id===id) return a[i]; } return null;
+}
+function suplRacById(id){
+  var a=suplRaciones(); for(var i=0;i<a.length;i++){ if(a[i].id===id) return a[i]; } return null;
+}
+
+/* ── Derivados de una ración (humedad y costo ponderados) ──
+   Recorre ingredientes, pondera humedad y costo de cada suplemento por su %.
+   Si los % no suman 100 igual pondera por la suma real (robusto). */
+function suplRacDerivados(rac){
+  var hum=0, costo=0, sumaPct=0, ok=true;
+  if(!rac || !rac.ingredientes){ return {humedad:0, costo:0, sumaPct:0, completa:false}; }
+  for(var i=0;i<rac.ingredientes.length;i++){
+    var ing=rac.ingredientes[i];
+    var sup=suplItemById(ing.supId);
+    var p=parseNum(ing.pct)||0;
+    sumaPct+=p;
+    if(!sup){ ok=false; continue; }
+    hum   += (sup.humedad||0) * p/100;
+    costo += (sup.costo||0)   * p/100;
+  }
+  return { humedad:hum, costo:costo, sumaPct:sumaPct, completa:ok };
+}
+
+/* Humedad y costo de cualquier item (suplemento o ración) */
+function suplItemDatos(itemId, itemTipo){
+  if(itemTipo==='rac'){
+    var r=suplRacById(itemId); if(!r) return null;
+    var d=suplRacDerivados(r);
+    return { nombre:r.nombre, unidad:'kg', humedad:d.humedad, costo:d.costo, tipo:'rac' };
+  } else {
+    var s=suplItemById(itemId); if(!s) return null;
+    return { nombre:s.nombre, unidad:s.unidad||'kg', humedad:s.humedad||0, costo:s.costo||0, tipo:'sup' };
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   MAESTROS DE SUPLEMENTACIÓN — Suplementos y Raciones
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── Suplementos ── */
+var _suplEdit=null;
+
+function renderSuplCatalogo(){
+  var tb=document.getElementById('suplBody'); if(!tb) return;
+  var items=suplItems();
+  items.sort(function(a,b){ return (a.nombre||'').localeCompare(b.nombre||''); });
+  if(!items.length){ tb.innerHTML='<tr><td colspan="7" style="color:#888780;font-style:italic">Sin suplementos cargados.</td></tr>'; return; }
+  var h='';
+  for(var i=0;i<items.length;i++){
+    var s=items[i];
+    var humPct=(s.humedad||0)*100;
+    var msPct=100-humPct;
+    h+='<tr>'+
+      '<td>'+esc(s.nombre)+'</td>'+
+      '<td>'+esc(s.unidad||'kg')+'</td>'+
+      '<td style="text-align:right">'+fNum(humPct,1)+'</td>'+
+      '<td style="text-align:right">'+fNum(msPct,1)+'</td>'+
+      '<td style="text-align:right">'+(s.costo!=null?fNum(s.costo,2):'')+'</td>'+
+      '<td style="text-align:right">'+fInt(s.exIni||0)+'</td>'+
+      '<td><div class="row-act">'+
+        '<button class="ic-btn" title="Editar" onclick="editSupl(\''+s.id+'\')">✎</button>'+
+        '<button class="ic-btn del" title="Eliminar" onclick="borrarSuplUI(\''+s.id+'\')">🗑</button>'+
+      '</div></td></tr>';
+  }
+  tb.innerHTML=h;
+}
+
+function toggleSuplForm(){
+  var f=document.getElementById('suplForm');
+  if(f.classList.contains('show')){ cancelSuplForm(); }
+  else { _suplEdit=null; limpiarSuplForm(); f.classList.add('show'); document.getElementById('suplNombre').focus(); }
+}
+function limpiarSuplForm(){
+  document.getElementById('suplNombre').value='';
+  document.getElementById('suplUnidad').value='kg';
+  document.getElementById('suplHum').value='';
+  document.getElementById('suplCosto').value='';
+  document.getElementById('suplExIni').value='';
+}
+function cancelSuplForm(){
+  _suplEdit=null;
+  document.getElementById('suplForm').classList.remove('show');
+  limpiarSuplForm();
+}
+function editSupl(id){
+  var s=suplItemById(id); if(!s) return;
+  _suplEdit=id;
+  document.getElementById('suplNombre').value=s.nombre||'';
+  document.getElementById('suplUnidad').value=s.unidad||'kg';
+  document.getElementById('suplHum').value=s.humedad!=null?fNum((s.humedad*100),1):'';
+  document.getElementById('suplCosto').value=s.costo!=null?fNum(s.costo,2):'';
+  document.getElementById('suplExIni').value=s.exIni!=null?fInt(s.exIni):'';
+  document.getElementById('suplForm').classList.add('show');
+  document.getElementById('suplNombre').focus();
+}
+function guardarSupl(){
+  var nombre=(document.getElementById('suplNombre').value||'').trim();
+  if(!nombre){ toast('Falta el nombre del suplemento'); return; }
+  var humPct=parseNum(document.getElementById('suplHum').value);
+  if(humPct==null) humPct=0;
+  if(humPct<0 || humPct>100){ toast('El % H° debe estar entre 0 y 100'); return; }
+  var costo=parseNum(document.getElementById('suplCosto').value);
+  var exIni=parseNum(document.getElementById('suplExIni').value);
+  var all=lsGetJSON(LS_SUPL_ITEMS);
+  // chequeo de nombre duplicado dentro de la empresa
+  for(var i=0;i<all.length;i++){
+    if(all[i].empresaId===CTX.empresaActivaId && (all[i].nombre||'').toLowerCase()===nombre.toLowerCase() && all[i].id!==_suplEdit){
+      toast('Ya existe un suplemento llamado '+nombre); return;
+    }
+  }
+  var obj={ empresaId:CTX.empresaActivaId, nombre:nombre,
+            unidad:document.getElementById('suplUnidad').value||'kg',
+            humedad:humPct/100, costo:(costo==null?0:costo), exIni:(exIni==null?0:exIni) };
+  if(_suplEdit){
+    obj.id=_suplEdit;
+    for(var j=0;j<all.length;j++){ if(all[j].id===_suplEdit){ all[j]=obj; break; } }
+    toast('Suplemento actualizado');
+  } else {
+    obj.id='sup_'+Date.now()+'_'+Math.floor(Math.random()*1000);
+    all.push(obj);
+    toast('Suplemento agregado');
+  }
+  lsSetJSON(LS_SUPL_ITEMS, all);
+  cancelSuplForm(); renderSuplCatalogo(); renderRacCatalogo();
+}
+function borrarSuplUI(id){
+  var s=suplItemById(id); if(!s) return;
+  // no permitir borrar si está usado en una ración o en un movimiento
+  var racs=suplRaciones();
+  for(var i=0;i<racs.length;i++){
+    for(var k=0;k<(racs[i].ingredientes||[]).length;k++){
+      if(racs[i].ingredientes[k].supId===id){ toast('No se puede borrar: lo usa la ración "'+racs[i].nombre+'"'); return; }
+    }
+  }
+  var movs=suplMovs();
+  for(var m=0;m<movs.length;m++){ if(movs[m].itemTipo==='sup' && movs[m].itemId===id){ toast('No se puede borrar: tiene movimientos registrados'); return; } }
+  if(!confirm('¿Borrar el suplemento "'+s.nombre+'"?')) return;
+  var all=lsGetJSON(LS_SUPL_ITEMS), out=[];
+  for(var j=0;j<all.length;j++){ if(all[j].id!==id) out.push(all[j]); }
+  lsSetJSON(LS_SUPL_ITEMS, out);
+  renderSuplCatalogo(); toast('Suplemento borrado');
+}
+
+/* ── Raciones ── */
+var _racEdit=null;
+var _racIngs=[];  // filas de ingredientes en edición: [{supId, pct}]
+
+function renderRacCatalogo(){
+  var tb=document.getElementById('racBody'); if(!tb) return;
+  var racs=suplRaciones();
+  racs.sort(function(a,b){ return (a.nombre||'').localeCompare(b.nombre||''); });
+  if(!racs.length){ tb.innerHTML='<tr><td colspan="6" style="color:#888780;font-style:italic">Sin raciones cargadas.</td></tr>'; return; }
+  var h='';
+  for(var i=0;i<racs.length;i++){
+    var r=racs[i];
+    var d=suplRacDerivados(r);
+    var chips='';
+    for(var k=0;k<(r.ingredientes||[]).length;k++){
+      var ing=r.ingredientes[k];
+      var sup=suplItemById(ing.supId);
+      chips+='<span class="rac-chip">'+esc(sup?sup.nombre:'?')+' '+fNum(parseNum(ing.pct)||0,0)+'%</span>';
+    }
+    var sumaWarn = (Math.round(d.sumaPct)!==100) ? ' <span style="color:#C8642D;font-size:11px">(suma '+fNum(d.sumaPct,0)+'%)</span>' : '';
+    h+='<tr>'+
+      '<td>'+esc(r.nombre)+'</td>'+
+      '<td>'+chips+sumaWarn+'</td>'+
+      '<td style="text-align:right">'+fNum(d.humedad*100,1)+'</td>'+
+      '<td style="text-align:right">'+fNum(d.costo,2)+'</td>'+
+      '<td style="text-align:right">'+fInt(r.exIni||0)+'</td>'+
+      '<td><div class="row-act">'+
+        '<button class="ic-btn" title="Editar" onclick="editRac(\''+r.id+'\')">✎</button>'+
+        '<button class="ic-btn del" title="Eliminar" onclick="borrarRacUI(\''+r.id+'\')">🗑</button>'+
+      '</div></td></tr>';
+  }
+  tb.innerHTML=h;
+}
+
+/* Pinta las filas de ingredientes del form según _racIngs */
+function renderRacIngForm(){
+  var host=document.getElementById('racIngHost'); if(!host) return;
+  var items=suplItems();
+  items.sort(function(a,b){ return (a.nombre||'').localeCompare(b.nombre||''); });
+  if(!items.length){
+    host.innerHTML='<div class="fwarn">No hay suplementos cargados. Cargá al menos uno arriba para armar una ración.</div>';
+    document.getElementById('racSumaPct').innerHTML='';
+    return;
+  }
+  if(!_racIngs.length) _racIngs.push({supId:items[0].id, pct:''});
+  var h='', suma=0;
+  for(var i=0;i<_racIngs.length;i++){
+    var opt='';
+    for(var j=0;j<items.length;j++){
+      opt+='<option value="'+items[j].id+'"'+(items[j].id===_racIngs[i].supId?' selected':'')+'>'+esc(items[j].nombre)+'</option>';
+    }
+    suma+=parseNum(_racIngs[i].pct)||0;
+    h+='<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">'+
+         '<select onchange="setRacIngSup('+i+',this.value)" style="max-width:160px">'+opt+'</select>'+
+         '<input type="text" value="'+(_racIngs[i].pct==null?'':_racIngs[i].pct)+'" oninput="setRacIngPct('+i+',this.value)" placeholder="%" style="max-width:70px;text-align:right">'+
+         '<span style="font-size:11px;color:#888780">%</span>'+
+         '<button class="ic-btn del" title="Quitar" onclick="delRacIngFila('+i+')">🗑</button>'+
+       '</div>';
+  }
+  host.innerHTML=h;
+  var sp=document.getElementById('racSumaPct');
+  var col=(Math.round(suma)===100)?'#4A6533':'#C8642D';
+  sp.innerHTML='<span style="color:'+col+';font-weight:500">Suma: '+fNum(suma,0)+'%</span>';
+}
+function addRacIngFila(){
+  var items=suplItems();
+  if(!items.length){ toast('Primero cargá suplementos'); return; }
+  _racIngs.push({supId:items[0].id, pct:''});
+  renderRacIngForm();
+}
+function delRacIngFila(i){ _racIngs.splice(i,1); renderRacIngForm(); }
+function setRacIngSup(i,v){ if(_racIngs[i]) _racIngs[i].supId=v; }
+function setRacIngPct(i,v){ if(_racIngs[i]){ _racIngs[i].pct=v; var s=0; for(var k=0;k<_racIngs.length;k++)s+=parseNum(_racIngs[k].pct)||0; var sp=document.getElementById('racSumaPct'); if(sp){ var col=(Math.round(s)===100)?'#4A6533':'#C8642D'; sp.innerHTML='<span style="color:'+col+';font-weight:500">Suma: '+fNum(s,0)+'%</span>'; } } }
+
+function toggleRacForm(){
+  var f=document.getElementById('racForm');
+  if(f.classList.contains('show')){ cancelRacForm(); }
+  else { _racEdit=null; _racIngs=[]; document.getElementById('racNombre').value=''; document.getElementById('racExIni').value=''; f.classList.add('show'); renderRacIngForm(); document.getElementById('racNombre').focus(); }
+}
+function cancelRacForm(){
+  _racEdit=null; _racIngs=[];
+  document.getElementById('racForm').classList.remove('show');
+  document.getElementById('racNombre').value='';
+  document.getElementById('racExIni').value='';
+}
+function editRac(id){
+  var r=suplRacById(id); if(!r) return;
+  _racEdit=id; _racIngs=[];
+  for(var i=0;i<(r.ingredientes||[]).length;i++){ _racIngs.push({supId:r.ingredientes[i].supId, pct:String(r.ingredientes[i].pct)}); }
+  document.getElementById('racNombre').value=r.nombre||'';
+  document.getElementById('racExIni').value=r.exIni!=null?fInt(r.exIni):'';
+  document.getElementById('racForm').classList.add('show');
+  renderRacIngForm();
+  document.getElementById('racNombre').focus();
+}
+function guardarRac(){
+  var nombre=(document.getElementById('racNombre').value||'').trim();
+  if(!nombre){ toast('Falta el nombre de la ración'); return; }
+  var ings=[];
+  for(var i=0;i<_racIngs.length;i++){
+    var p=parseNum(_racIngs[i].pct);
+    if(_racIngs[i].supId && p!=null && p>0){ ings.push({supId:_racIngs[i].supId, pct:p}); }
+  }
+  if(!ings.length){ toast('Cargá al menos un ingrediente con %'); return; }
+  var exIni=parseNum(document.getElementById('racExIni').value);
+  var all=lsGetJSON(LS_SUPL_RAC);
+  for(var k=0;k<all.length;k++){
+    if(all[k].empresaId===CTX.empresaActivaId && (all[k].nombre||'').toLowerCase()===nombre.toLowerCase() && all[k].id!==_racEdit){
+      toast('Ya existe una ración llamada '+nombre); return;
+    }
+  }
+  var obj={ empresaId:CTX.empresaActivaId, nombre:nombre, exIni:(exIni==null?0:exIni), ingredientes:ings };
+  if(_racEdit){
+    obj.id=_racEdit;
+    for(var j=0;j<all.length;j++){ if(all[j].id===_racEdit){ all[j]=obj; break; } }
+    toast('Ración actualizada');
+  } else {
+    obj.id='rac_'+Date.now()+'_'+Math.floor(Math.random()*1000);
+    all.push(obj);
+    toast('Ración agregada');
+  }
+  lsSetJSON(LS_SUPL_RAC, all);
+  cancelRacForm(); renderRacCatalogo();
+}
+function borrarRacUI(id){
+  var r=suplRacById(id); if(!r) return;
+  var movs=suplMovs();
+  for(var m=0;m<movs.length;m++){ if(movs[m].itemTipo==='rac' && movs[m].itemId===id){ toast('No se puede borrar: tiene movimientos registrados'); return; } }
+  if(!confirm('¿Borrar la ración "'+r.nombre+'"?')) return;
+  var all=lsGetJSON(LS_SUPL_RAC), out=[];
+  for(var j=0;j<all.length;j++){ if(all[j].id!==id) out.push(all[j]); }
+  lsSetJSON(LS_SUPL_RAC, out);
+  renderRacCatalogo(); toast('Ración borrada');
+}
+
+/* ════════════════════════════════════════════════════════════════
+   SOLAPA SUPLEMENTACIÓN — movimientos, detalle y stock
+   ════════════════════════════════════════════════════════════════ */
+
+var _suplMovEdit=null;  // id del movimiento simple en edición
+
+/* Opciones de items (suplementos + raciones) para un <select> */
+function suplItemOptions(includeBlank){
+  var h = includeBlank ? '<option value="">Elegí un item…</option>' : '';
+  var sups=suplItems(); sups.sort(function(a,b){ return (a.nombre||'').localeCompare(b.nombre||''); });
+  var racs=suplRaciones(); racs.sort(function(a,b){ return (a.nombre||'').localeCompare(b.nombre||''); });
+  if(sups.length){
+    h+='<optgroup label="Suplementos">';
+    for(var i=0;i<sups.length;i++){ h+='<option value="sup:'+sups[i].id+'">'+esc(sups[i].nombre)+'</option>'; }
+    h+='</optgroup>';
+  }
+  if(racs.length){
+    h+='<optgroup label="Raciones">';
+    for(var j=0;j<racs.length;j++){ h+='<option value="rac:'+racs[j].id+'">'+esc(racs[j].nombre)+'</option>'; }
+    h+='</optgroup>';
+  }
+  return h;
+}
+/* parsea "sup:xxx" / "rac:xxx" → {tipo, id} */
+function parseItemVal(v){
+  if(!v) return null;
+  var p=v.split(':'); if(p.length!==2) return null;
+  return { tipo:p[0], id:p[1] };
+}
+
+function renderSuplementacionTab(){
+  if(typeof PA==='undefined' || !PA.demo || !CTX) return;
+  // poblar selects del form
+  var elItem=document.getElementById('smvItem');
+  if(elItem) elItem.innerHTML=suplItemOptions(true);
+  var elCon=document.getElementById('smvConcepto');
+  if(elCon){
+    var hc='';
+    for(var i=0;i<SUPL_CONCEPTOS.length;i++){ hc+='<option value="'+SUPL_CONCEPTOS[i].sigla+'">'+esc(SUPL_CONCEPTOS[i].nombre)+(SUPL_CONCEPTOS[i].efecto==='E'?' (E)':' (S)')+'</option>'; }
+    elCon.innerHTML=hc;
+  }
+  // campañas en form + filtros
+  var camps=PA.demo.listarCampanias()||[];
+  var setCampSel=function(id, keepBlank){
+    var sel=document.getElementById(id); if(!sel) return;
+    var h = keepBlank ? '<option value="">'+(id==='smvCampania'?'Sin campaña':'Todas las campañas')+'</option>' : '';
+    for(var i=0;i<camps.length;i++){ h+='<option value="'+camps[i].id+'">'+esc(camps[i].nombre)+'</option>'; }
+    sel.innerHTML=h;
+  };
+  setCampSel('smvCampania', true);
+  setCampSel('sfCampania', true);
+  setCampSel('ssCampania', true);
+  // default campaña activa en el form
+  var fc=document.getElementById('smvCampania');
+  if(fc && _campActiva){ fc.value=_campActiva; }
+  // default fecha hoy si está vacío
+  var ff=document.getElementById('smvFecha');
+  if(ff && !ff.value){ ff.value=new Date().toISOString().slice(0,10); }
+  // filtros de item (detalle y stock)
+  var fItem=document.getElementById('sfItem'); if(fItem) fItem.innerHTML='<option value="">Todos los items</option>'+suplItemOptions(false);
+  var sItem=document.getElementById('ssItem'); if(sItem) sItem.innerHTML='<option value="">Todos los items</option>'+suplItemOptions(false);
+
+  onSuplItemChange();
+  onSuplConceptoChange();
+  renderSuplDetalle();
+  renderSuplStock();
+}
+
+/* Actualiza el hint del form según item + concepto elegidos */
+function onSuplItemChange(){ actualizarSuplHint(); }
+function onSuplConceptoChange(){
+  var con=(document.getElementById('smvConcepto')||{}).value;
+  var c=suplConcepto(con);
+  var tag=document.getElementById('smvTag');
+  if(tag && c){ tag.textContent=(c.efecto==='E'?'Entrada':'Salida'); tag.className='mv-tag'+(c.efecto==='S'?' sal':''); }
+  actualizarSuplHint();
+}
+function actualizarSuplHint(){
+  var hint=document.getElementById('smvHint'); if(!hint) return;
+  var iv=parseItemVal((document.getElementById('smvItem')||{}).value);
+  var con=(document.getElementById('smvConcepto')||{}).value;
+  if(!iv){ hint.innerHTML=''; return; }
+  // Elaboración de ración: explicar el desglose automático
+  if(con==='ElabRac'){
+    if(iv.tipo!=='rac'){ hint.innerHTML='<span class="supl-elab">⚠ "Elaboración ración" requiere elegir una <b>ración</b> como item.</span>'; return; }
+    var rac=suplRacById(iv.id);
+    if(rac){
+      var partes=[];
+      for(var k=0;k<(rac.ingredientes||[]).length;k++){
+        var sup=suplItemById(rac.ingredientes[k].supId);
+        partes.push(esc(sup?sup.nombre:'?')+' '+fNum(parseNum(rac.ingredientes[k].pct)||0,0)+'%');
+      }
+      hint.innerHTML='<span class="supl-elab">Al registrar: <b>entra</b> la cantidad indicada de '+esc(rac.nombre)+' y <b>salen</b> automáticamente sus ingredientes ('+partes.join(' · ')+') según los kg × %.</span>';
+    }
+    return;
+  }
+  // resto: mostrar datos derivados del item
+  var d=suplItemDatos(iv.id, iv.tipo);
+  if(d){
+    var ms=100-(d.humedad*100);
+    hint.innerHTML='Item: <b>'+esc(d.nombre)+'</b> · % H° '+fNum(d.humedad*100,1)+' · % MS '+fNum(ms,1)+' · costo/un '+fNum(d.costo,2);
+  } else { hint.innerHTML=''; }
+}
+
+function toggleFormSupl(){
+  var b=document.getElementById('smvFormBody'), ch=document.getElementById('smvChevron');
+  if(!b) return;
+  if(b.style.display==='none'){ b.style.display=''; if(ch) ch.textContent='Colapsar ▾'; }
+  else { b.style.display='none'; if(ch) ch.textContent='Expandir ▸'; }
+}
+
+function resetSuplForm(){
+  _suplMovEdit=null;
+  var f=document.getElementById('smvFecha'); if(f) f.value=new Date().toISOString().slice(0,10);
+  var it=document.getElementById('smvItem'); if(it) it.value='';
+  var ca=document.getElementById('smvCant'); if(ca) ca.value='';
+  var ob=document.getElementById('smvObs'); if(ob) ob.value='';
+  var sb=document.getElementById('smvSaveBtn'); if(sb) sb.textContent='Registrar movimiento';
+  var cb=document.getElementById('smvCancelBtn'); if(cb) cb.textContent='Limpiar';
+  onSuplItemChange();
+}
+
+function guardarSuplMov(){
+  var fecha=(document.getElementById('smvFecha')||{}).value;
+  if(!fecha){ toast('Falta la fecha'); return; }
+  var campaniaId=(document.getElementById('smvCampania')||{}).value||'';
+  var iv=parseItemVal((document.getElementById('smvItem')||{}).value);
+  if(!iv){ toast('Elegí un item'); return; }
+  var con=(document.getElementById('smvConcepto')||{}).value;
+  var c=suplConcepto(con); if(!c){ toast('Elegí un concepto'); return; }
+  var cant=parseNum((document.getElementById('smvCant')||{}).value);
+  if(cant==null || cant<=0){ toast('Cargá una cantidad mayor a cero'); return; }
+  var obs=(document.getElementById('smvObs')||{}).value||'';
+
+  var all=lsGetJSON(LS_SUPL_MOV);
+
+  // ── Elaboración de ración: genera N registros vinculados por elabLink ──
+  if(con==='ElabRac'){
+    if(iv.tipo!=='rac'){ toast('Para elaborar una ración, el item debe ser una ración'); return; }
+    if(_suplMovEdit){ toast('La elaboración no se edita; borrá el bloque y registrá de nuevo'); return; }
+    var rac=suplRacById(iv.id); if(!rac){ toast('Ración inexistente'); return; }
+    if(!rac.ingredientes || !rac.ingredientes.length){ toast('La ración no tiene ingredientes'); return; }
+    var link='el_'+Date.now()+'_'+Math.floor(Math.random()*1000);
+    var base=Date.now();
+    // Entrada de la ración elaborada
+    all.push({ id:'smov_'+base+'_r', empresaId:CTX.empresaActivaId, fecha:fecha, campaniaId:campaniaId,
+      itemId:iv.id, itemTipo:'rac', concepto:'ElabRac', efecto:'E', cant:cant, elabLink:link, obs:obs });
+    // Salidas de cada ingrediente = cant × %
+    for(var k=0;k<rac.ingredientes.length;k++){
+      var ing=rac.ingredientes[k];
+      var pct=parseNum(ing.pct)||0;
+      var cs=cant*pct/100;
+      all.push({ id:'smov_'+(base+k+1)+'_i'+k, empresaId:CTX.empresaActivaId, fecha:fecha, campaniaId:campaniaId,
+        itemId:ing.supId, itemTipo:'sup', concepto:'ElabRac', efecto:'S', cant:cs, elabLink:link, obs:'Ingrediente de '+rac.nombre });
+    }
+    lsSetJSON(LS_SUPL_MOV, all);
+    resetSuplForm(); renderSuplDetalle(); renderSuplStock();
+    toast('Ración elaborada: 1 entrada + '+rac.ingredientes.length+' salidas');
+    return;
+  }
+
+  // ── Movimiento simple (1 item) ──
+  var mov={ empresaId:CTX.empresaActivaId, fecha:fecha, campaniaId:campaniaId,
+            itemId:iv.id, itemTipo:iv.tipo, concepto:con, efecto:c.efecto, cant:cant, obs:obs };
+  if(_suplMovEdit){
+    mov.id=_suplMovEdit;
+    for(var e=0;e<all.length;e++){ if(all[e].id===_suplMovEdit){ if(all[e].elabLink) mov.elabLink=all[e].elabLink; all[e]=mov; break; } }
+    lsSetJSON(LS_SUPL_MOV, all);
+    resetSuplForm(); renderSuplDetalle(); renderSuplStock();
+    toast('Movimiento actualizado');
+    return;
+  }
+  mov.id='smov_'+Date.now()+'_'+Math.floor(Math.random()*1000);
+  all.push(mov);
+  lsSetJSON(LS_SUPL_MOV, all);
+  resetSuplForm(); renderSuplDetalle(); renderSuplStock();
+  toast('Movimiento registrado');
+}
+
+function editarSuplMov(id){
+  var movs=suplMovs(), m=null;
+  for(var i=0;i<movs.length;i++){ if(movs[i].id===id){ m=movs[i]; break; } }
+  if(!m) return;
+  if(m.elabLink){ toast('Los movimientos de elaboración no se editan; borrá el bloque y registrá de nuevo'); return; }
+  _suplMovEdit=id;
+  var b=document.getElementById('smvFormBody'); if(b && b.style.display==='none'){ toggleFormSupl(); }
+  document.getElementById('smvFecha').value=m.fecha||'';
+  document.getElementById('smvCampania').value=m.campaniaId||'';
+  document.getElementById('smvItem').value=m.itemTipo+':'+m.itemId;
+  document.getElementById('smvConcepto').value=m.concepto;
+  document.getElementById('smvCant').value=fNum(m.cant,0);
+  document.getElementById('smvObs').value=m.obs||'';
+  onSuplConceptoChange();
+  var sb=document.getElementById('smvSaveBtn'); if(sb) sb.textContent='Guardar cambios';
+  var cb=document.getElementById('smvCancelBtn'); if(cb) cb.textContent='Cancelar';
+  try{ document.getElementById('page-suplementacion').scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){}
+}
+
+function borrarSuplMov(id){
+  var movs=suplMovs(), m=null;
+  for(var i=0;i<movs.length;i++){ if(movs[i].id===id){ m=movs[i]; break; } }
+  if(!m) return;
+  var all=lsGetJSON(LS_SUPL_MOV), out=[];
+  if(m.elabLink){
+    // borrar el bloque entero de elaboración
+    var n=0;
+    for(var j=0;j<all.length;j++){ if(all[j].elabLink===m.elabLink){ n++; } }
+    if(!confirm('Esto es una elaboración de ración ('+n+' renglones vinculados). ¿Borrar todo el bloque?')) return;
+    for(var k=0;k<all.length;k++){ if(all[k].elabLink!==m.elabLink) out.push(all[k]); }
+    toast('Elaboración borrada ('+n+' renglones)');
+  } else {
+    if(!confirm('¿Borrar este movimiento?')) return;
+    for(var l=0;l<all.length;l++){ if(all[l].id!==id) out.push(all[l]); }
+    toast('Movimiento borrado');
+  }
+  lsSetJSON(LS_SUPL_MOV, out);
+  renderSuplDetalle(); renderSuplStock();
+}
+
+/* ── Detalle de movimientos ── */
+function limpiarFiltrosSuplDetalle(){
+  ['sfItem','sfConcepto','sfCampania'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
+  ['sfDesde','sfHasta'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
+  renderSuplDetalle();
+}
+function renderSuplDetalle(){
+  var tb=document.getElementById('smvBody'); if(!tb) return;
+  var movs=suplMovs();
+  var fItem=(document.getElementById('sfItem')||{}).value||'';
+  var fCon=(document.getElementById('sfConcepto')||{}).value||'';
+  var fCamp=(document.getElementById('sfCampania')||{}).value||'';
+  var fD=(document.getElementById('sfDesde')||{}).value||'';
+  var fH=(document.getElementById('sfHasta')||{}).value||'';
+  var ivF=parseItemVal(fItem);
+
+  var rows=[];
+  for(var i=0;i<movs.length;i++){
+    var m=movs[i];
+    if(ivF && !(m.itemTipo===ivF.tipo && m.itemId===ivF.id)) continue;
+    if(fCon && m.concepto!==fCon) continue;
+    if(fCamp && m.campaniaId!==fCamp) continue;
+    if(fD && m.fecha<fD) continue;
+    if(fH && m.fecha>fH) continue;
+    rows.push(m);
+  }
+  rows.sort(function(a,b){ if(a.fecha!==b.fecha) return a.fecha<b.fecha?1:-1; return (a.elabLink||'')<(b.elabLink||'')?1:-1; });
+
+  var cnt=document.getElementById('smvCount'); if(cnt) cnt.textContent=rows.length?('· '+rows.length+' movimiento'+(rows.length===1?'':'s')):'';
+  if(!rows.length){ tb.innerHTML='<tr><td colspan="8" style="color:#888780;font-style:italic">Sin movimientos para los filtros elegidos.</td></tr>'; return; }
+
+  var h='';
+  for(var r=0;r<rows.length;r++){
+    var mv=rows[r];
+    var d=suplItemDatos(mv.itemId, mv.itemTipo);
+    var nombre=d?d.nombre:'(item borrado)';
+    var hum=d?d.humedad:0, costo=d?d.costo:0;
+    var ms=mv.cant*(1-hum);
+    var imp=mv.cant*costo;
+    var con=suplConcepto(mv.concepto);
+    var conNom=con?con.nombre:mv.concepto;
+    var esElab=!!mv.elabLink;
+    var tipoTag=(mv.efecto==='E')?'<span style="color:#3B6D11;font-weight:600">E</span>':'<span style="color:#C8642D;font-weight:600">S</span>';
+    h+='<tr'+(esElab?' style="background:rgba(200,100,45,0.05)"':'')+'>'+
+      '<td>'+fmtFecha(mv.fecha)+'</td>'+
+      '<td>'+esc(nombre)+(mv.itemTipo==='rac'?' <span class="rac-chip">ración</span>':'')+'</td>'+
+      '<td>'+esc(conNom)+(esElab?' <span class="supl-elab" title="Parte de una elaboración">⛓</span>':'')+'</td>'+
+      '<td>'+tipoTag+'</td>'+
+      '<td style="text-align:right">'+fInt(mv.cant)+'</td>'+
+      '<td style="text-align:right">'+fInt(ms)+'</td>'+
+      '<td style="text-align:right">'+fNum(imp,0)+'</td>'+
+      '<td><div class="row-act">'+
+        (esElab?'' :'<button class="ic-btn" title="Editar" onclick="editarSuplMov(\''+mv.id+'\')">✎</button>')+
+        '<button class="ic-btn del" title="'+(esElab?'Borrar elaboración completa':'Eliminar')+'" onclick="borrarSuplMov(\''+mv.id+'\')">🗑</button>'+
+      '</div></td></tr>';
+  }
+  tb.innerHTML=h;
+}
+
+/* ── Stock por item ── */
+function limpiarFiltrosSuplStock(){
+  ['ssItem','ssCampania'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
+  var h=document.getElementById('ssHasta'); if(h) h.value='';
+  renderSuplStock();
+}
+function renderSuplStock(){
+  var tb=document.getElementById('ssBody'); if(!tb) return;
+  var fItem=(document.getElementById('ssItem')||{}).value||'';
+  var fCamp=(document.getElementById('ssCampania')||{}).value||'';
+  var fH=(document.getElementById('ssHasta')||{}).value||'';
+  var ivF=parseItemVal(fItem);
+
+  // armar lista de items a mostrar (suplementos + raciones)
+  var lista=[];
+  var sups=suplItems();
+  for(var i=0;i<sups.length;i++){ lista.push({tipo:'sup', id:sups[i].id, nombre:sups[i].nombre, exIni:sups[i].exIni||0}); }
+  var racs=suplRaciones();
+  for(var j=0;j<racs.length;j++){ lista.push({tipo:'rac', id:racs[j].id, nombre:racs[j].nombre, exIni:racs[j].exIni||0}); }
+  lista.sort(function(a,b){ if(a.tipo!==b.tipo) return a.tipo<b.tipo?-1:1; return (a.nombre||'').localeCompare(b.nombre||''); });
+
+  if(ivF){ var f=[]; for(var z=0;z<lista.length;z++){ if(lista[z].tipo===ivF.tipo && lista[z].id===ivF.id) f.push(lista[z]); } lista=f; }
+
+  if(!lista.length){ tb.innerHTML='<tr><td colspan="8" style="color:#888780;font-style:italic">No hay items cargados. Agregalos en Maestros.</td></tr>'; return; }
+
+  var movs=suplMovs();
+  var h='';
+  for(var k=0;k<lista.length;k++){
+    var it=lista[k];
+    var d=suplItemDatos(it.id, it.tipo);
+    var hum=d?d.humedad:0, costo=d?d.costo:0;
+    var ent=0, sal=0;
+    for(var m=0;m<movs.length;m++){
+      var mv=movs[m];
+      if(mv.itemTipo!==it.tipo || mv.itemId!==it.id) continue;
+      if(fCamp && mv.campaniaId!==fCamp) continue;
+      if(fH && mv.fecha>fH) continue;
+      if(mv.efecto==='E') ent+=mv.cant; else sal+=mv.cant;
+    }
+    // existencia inicial: solo se cuenta si no hay filtro de campaña (es global del item)
+    var ini = fCamp ? 0 : (it.exIni||0);
+    var exist=ini+ent-sal;
+    var ms=exist*(1-hum);
+    var val=exist*costo;
+    var neg=exist<0;
+    var negStyle=neg?' style="color:#C8642D;font-weight:600"':' style="font-weight:600"';
+    h+='<tr>'+
+      '<td>'+esc(it.nombre)+'</td>'+
+      '<td>'+(it.tipo==='rac'?'Ración':'Suplemento')+'</td>'+
+      '<td style="text-align:right">'+fInt(ini)+'</td>'+
+      '<td style="text-align:right">'+fInt(ent)+'</td>'+
+      '<td style="text-align:right">'+fInt(sal)+'</td>'+
+      '<td style="text-align:right"'+negStyle+'>'+fInt(exist)+'</td>'+
+      '<td style="text-align:right"'+(neg?' style="color:#C8642D"':'')+'>'+fInt(ms)+'</td>'+
+      '<td style="text-align:right"'+(neg?' style="color:#C8642D"':'')+'>'+fNum(val,0)+'</td>'+
+      '</tr>';
+  }
+  tb.innerHTML=h;
+}
 
 function lotesExcluidos(campaniaId){
   var all=lsGetJSON(LS_SUP_EXCL);
