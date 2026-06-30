@@ -638,6 +638,11 @@ tr.peso-arr td.kg{color:#9A6A1E}
           <div class="fld"><label style="font-size:11px;color:var(--muted)">Cantidad (Un TC)</label><br><input id="smvCant" type="text" placeholder="0" style="text-align:right;max-width:110px"></div>
           <div class="fld grow"><label style="font-size:11px;color:var(--muted)">Destino / obs.</label><br><input id="smvObs" type="text" placeholder="opcional"></div>
         </div>
+        <div class="fbar" id="smvDestRow" style="flex-wrap:wrap;display:none">
+          <div class="fld"><label style="font-size:11px;color:var(--muted)">Negocio destino</label><br><select id="smvDestNeg"><option value="">— (opcional)</option></select></div>
+          <div class="fld"><label style="font-size:11px;color:var(--muted)">Rodeo destino</label><br><select id="smvDestRod"><option value="">— (opcional)</option></select></div>
+          <div class="fld"><label style="font-size:11px;color:var(--muted)">Categoría destino</label><br><select id="smvDestCat"><option value="">— (opcional)</option></select></div>
+        </div>
         <div id="smvHint" class="mv-hint" style="margin-top:8px"></div>
         <div class="mv-actions">
           <button class="btn btn-ghost" id="smvCancelBtn" onclick="resetSuplForm()">Limpiar</button>
@@ -657,6 +662,12 @@ tr.peso-arr td.kg{color:#9A6A1E}
           <input id="sfDesde" type="date" onchange="renderSuplDetalle()" title="Desde">
           <input id="sfHasta" type="date" onchange="renderSuplDetalle()" title="Hasta">
           <button class="btn btn-ghost btn-sm" onclick="limpiarFiltrosSuplDetalle()">Limpiar filtros</button>
+        </div>
+        <div class="fbar" style="margin-top:6px">
+          <span style="font-size:11px;color:var(--muted);align-self:center">Destino (alimentación):</span>
+          <select id="sfDestNeg" onchange="renderSuplDetalle()"><option value="">Todos los negocios</option></select>
+          <select id="sfDestRod" onchange="renderSuplDetalle()"><option value="">Todos los rodeos</option></select>
+          <select id="sfDestCat" onchange="renderSuplDetalle()"><option value="">Todas las categorías</option></select>
         </div>
         <table class="m-tbl" id="smvTabla">
           <thead><tr>
@@ -1026,6 +1037,8 @@ function switchCampania(id){
   // 4. Pesadas: período del gráfico de evolución
   var evD=document.getElementById('evoDesde'), evH=document.getElementById('evoHasta');
   if(evD) evD.value=ini; if(evH) evH.value=corte;
+  // 5. Suplementación: campaña del form de nuevo movimiento sigue al header
+  var sc=document.getElementById('smvCampania'); if(sc) sc.value=id;
 
   // repintar la pestaña activa
   var tabAct=document.querySelector('.tab.active');
@@ -1036,6 +1049,7 @@ function switchCampania(id){
   else if(t==='indicadores' && typeof renderIndicadoresTab==='function') renderIndicadoresTab();
   else if(t==='movimientos' && typeof renderMovtos==='function'){ poblarFiltrosMov(); renderMovtos(); }
   else if(t==='pesadas' && typeof renderPesadasTab==='function') renderPesadasTab();
+  else if(t==='suplementacion' && typeof renderSuplementacionTab==='function') renderSuplementacionTab();
 
   var nom=id;
   var camps=PA.demo.listarCampanias()||[];
@@ -3078,15 +3092,23 @@ function renderSuplementacionTab(){
   setCampSel('smvCampania', true);
   setCampSel('sfCampania', true);
   setCampSel('ssCampania', true);
-  // default campaña activa en el form
+  // default: la campaña del form sigue a la activa del header (salvo edición en curso)
   var fc=document.getElementById('smvCampania');
-  if(fc && _campActiva){ fc.value=_campActiva; }
+  if(fc && _campActiva && !_suplMovEdit){ fc.value=_campActiva; }
   // default fecha hoy si está vacío
   var ff=document.getElementById('smvFecha');
   if(ff && !ff.value){ ff.value=new Date().toISOString().slice(0,10); }
   // filtros de item (detalle y stock)
   var fItem=document.getElementById('sfItem'); if(fItem) fItem.innerHTML='<option value="">Todos los items</option>'+suplItemOptions(false);
   var sItem=document.getElementById('ssItem'); if(sItem) sItem.innerHTML='<option value="">Todos los items</option>'+suplItemOptions(false);
+  // selects de destino del form (negocio/rodeo/categoría)
+  var dN=document.getElementById('smvDestNeg'); if(dN) dN.innerHTML='<option value="">— (opcional)</option>'+optsNegocios();
+  var dR=document.getElementById('smvDestRod'); if(dR) dR.innerHTML='<option value="">— (opcional)</option>'+optsRodeos();
+  var dC=document.getElementById('smvDestCat'); if(dC) dC.innerHTML='<option value="">— (opcional)</option>'+optsCategorias();
+  // filtros de destino del detalle
+  var fdN=document.getElementById('sfDestNeg'); if(fdN) fdN.innerHTML='<option value="">Todos los negocios</option>'+optsNegocios();
+  var fdR=document.getElementById('sfDestRod'); if(fdR) fdR.innerHTML='<option value="">Todos los rodeos</option>'+optsRodeos();
+  var fdC=document.getElementById('sfDestCat'); if(fdC) fdC.innerHTML='<option value="">Todas las categorías</option>'+optsCategorias();
 
   onSuplItemChange();
   onSuplConceptoChange();
@@ -3101,6 +3123,9 @@ function onSuplConceptoChange(){
   var c=suplConcepto(con);
   var tag=document.getElementById('smvTag');
   if(tag && c){ tag.textContent=(c.efecto==='E'?'Entrada':'Salida'); tag.className='mv-tag'+(c.efecto==='S'?' sal':''); }
+  // fila de destino (negocio/rodeo/categoría) solo para Alimentación
+  var dr=document.getElementById('smvDestRow');
+  if(dr) dr.style.display=(con==='Alim')?'':'none';
   actualizarSuplHint();
 }
 function actualizarSuplHint(){
@@ -3143,6 +3168,9 @@ function resetSuplForm(){
   var it=document.getElementById('smvItem'); if(it) it.value='';
   var ca=document.getElementById('smvCant'); if(ca) ca.value='';
   var ob=document.getElementById('smvObs'); if(ob) ob.value='';
+  var dN=document.getElementById('smvDestNeg'); if(dN) dN.value='';
+  var dR=document.getElementById('smvDestRod'); if(dR) dR.value='';
+  var dC=document.getElementById('smvDestCat'); if(dC) dC.value='';
   var sb=document.getElementById('smvSaveBtn'); if(sb) sb.textContent='Registrar movimiento';
   var cb=document.getElementById('smvCancelBtn'); if(cb) cb.textContent='Limpiar';
   onSuplItemChange();
@@ -3190,6 +3218,12 @@ function guardarSuplMov(){
   // ── Movimiento simple (1 item) ──
   var mov={ empresaId:CTX.empresaActivaId, fecha:fecha, campaniaId:campaniaId,
             itemId:iv.id, itemTipo:iv.tipo, concepto:con, efecto:c.efecto, cant:cant, obs:obs };
+  // destino opcional, solo en Alimentación
+  if(con==='Alim'){
+    mov.destNegocioId=(document.getElementById('smvDestNeg')||{}).value||'';
+    mov.destRodeoId=(document.getElementById('smvDestRod')||{}).value||'';
+    mov.destCategoriaId=(document.getElementById('smvDestCat')||{}).value||'';
+  }
   if(_suplMovEdit){
     mov.id=_suplMovEdit;
     for(var e=0;e<all.length;e++){ if(all[e].id===_suplMovEdit){ if(all[e].elabLink) mov.elabLink=all[e].elabLink; all[e]=mov; break; } }
@@ -3219,6 +3253,12 @@ function editarSuplMov(id){
   document.getElementById('smvCant').value=fNum(m.cant,0);
   document.getElementById('smvObs').value=m.obs||'';
   onSuplConceptoChange();
+  // restaurar destino si es Alimentación
+  if(m.concepto==='Alim'){
+    var dN=document.getElementById('smvDestNeg'); if(dN) dN.value=m.destNegocioId||'';
+    var dR=document.getElementById('smvDestRod'); if(dR) dR.value=m.destRodeoId||'';
+    var dC=document.getElementById('smvDestCat'); if(dC) dC.value=m.destCategoriaId||'';
+  }
   var sb=document.getElementById('smvSaveBtn'); if(sb) sb.textContent='Guardar cambios';
   var cb=document.getElementById('smvCancelBtn'); if(cb) cb.textContent='Cancelar';
   try{ document.getElementById('page-suplementacion').scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){}
@@ -3247,7 +3287,7 @@ function borrarSuplMov(id){
 
 /* ── Detalle de movimientos ── */
 function limpiarFiltrosSuplDetalle(){
-  ['sfItem','sfConcepto','sfCampania'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
+  ['sfItem','sfConcepto','sfCampania','sfDestNeg','sfDestRod','sfDestCat'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
   ['sfDesde','sfHasta'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
   renderSuplDetalle();
 }
@@ -3259,6 +3299,9 @@ function renderSuplDetalle(){
   var fCamp=(document.getElementById('sfCampania')||{}).value||'';
   var fD=(document.getElementById('sfDesde')||{}).value||'';
   var fH=(document.getElementById('sfHasta')||{}).value||'';
+  var fdN=(document.getElementById('sfDestNeg')||{}).value||'';
+  var fdR=(document.getElementById('sfDestRod')||{}).value||'';
+  var fdC=(document.getElementById('sfDestCat')||{}).value||'';
   var ivF=parseItemVal(fItem);
 
   var rows=[];
@@ -3269,6 +3312,9 @@ function renderSuplDetalle(){
     if(fCamp && m.campaniaId!==fCamp) continue;
     if(fD && m.fecha<fD) continue;
     if(fH && m.fecha>fH) continue;
+    if(fdN && m.destNegocioId!==fdN) continue;
+    if(fdR && m.destRodeoId!==fdR) continue;
+    if(fdC && m.destCategoriaId!==fdC) continue;
     rows.push(m);
   }
   rows.sort(function(a,b){ if(a.fecha!==b.fecha) return a.fecha<b.fecha?1:-1; return (a.elabLink||'')<(b.elabLink||'')?1:-1; });
@@ -3287,11 +3333,19 @@ function renderSuplDetalle(){
     var con=suplConcepto(mv.concepto);
     var conNom=con?con.nombre:mv.concepto;
     var esElab=!!mv.elabLink;
+    var destTxt='';
+    if(mv.concepto==='Alim' && (mv.destNegocioId||mv.destRodeoId||mv.destCategoriaId)){
+      var pz=[];
+      if(mv.destNegocioId) pz.push(nombreNegocio(mv.destNegocioId));
+      if(mv.destRodeoId) pz.push(nombreRodeo(mv.destRodeoId));
+      if(mv.destCategoriaId) pz.push(nombreCategoria(mv.destCategoriaId));
+      destTxt=' <span class="rac-chip">→ '+esc(pz.join(' · '))+'</span>';
+    }
     var tipoTag=(mv.efecto==='E')?'<span style="color:#3B6D11;font-weight:600">E</span>':'<span style="color:#C8642D;font-weight:600">S</span>';
     h+='<tr'+(esElab?' style="background:rgba(200,100,45,0.05)"':'')+'>'+
       '<td>'+fmtFecha(mv.fecha)+'</td>'+
       '<td>'+esc(nombre)+(mv.itemTipo==='rac'?' <span class="rac-chip">ración</span>':'')+'</td>'+
-      '<td>'+esc(conNom)+(esElab?' <span class="supl-elab" title="Parte de una elaboración">⛓</span>':'')+'</td>'+
+      '<td>'+esc(conNom)+(esElab?' <span class="supl-elab" title="Parte de una elaboración">⛓</span>':'')+destTxt+'</td>'+
       '<td>'+tipoTag+'</td>'+
       '<td style="text-align:right">'+fInt(mv.cant)+'</td>'+
       '<td style="text-align:right">'+fInt(ms)+'</td>'+
