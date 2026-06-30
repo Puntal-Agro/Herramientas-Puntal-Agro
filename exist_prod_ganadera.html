@@ -3941,5 +3941,82 @@ function arrancarUI(){
 
 document.addEventListener('DOMContentLoaded', init);
 </script>
+<!-- ════ BLOQUE DE PRUEBA — datos de ejemplo del Excel 24-25. Borrar para producción. ════ -->
+<script>
+(function(){
+  function seedDemo(){
+    if(typeof PA==='undefined' || !PA.demo){ return setTimeout(seedDemo,200); }
+    if(!window.CTX){ return setTimeout(seedDemo,200); }
+
+    // Parche: el pa-core de este entorno no trae catálogos ganaderos. Solo para la copia de prueba.
+    if(typeof PA.demo.listarNegocios!=='function'){
+      PA.demo.listarNegocios=function(){ return [{id:'n_inv',sigla:'INV',nombre:'Invernada'},{id:'n_cria',sigla:'CRIA',nombre:'Cría'}]; };
+    }
+    if(typeof PA.demo.listarRodeos!=='function'){
+      PA.demo.listarRodeos=function(){ return [{id:'r_gral',sigla:'GRAL',nombre:'Rodeo general'}]; };
+    }
+    if(typeof PA.demo.listarCategoriasHda!=='function'){
+      PA.demo.listarCategoriasHda=function(){ return [{id:'cat_nov',nombre:'Novillos'},{id:'cat_vaca',nombre:'Vacas'},{id:'cat_ternero',nombre:'Terneros'}]; };
+    }
+    if(typeof PA.demo.listarTiposMovHda!=='function'){
+      PA.demo.listarTiposMovHda=function(){ return []; };
+    }
+
+    var emp=CTX.empresaActivaId;
+    var camp2425='24-25';
+
+    // ── Suplementos (16, con %H° del Excel; costo 0 porque el Excel no lo trae) ──
+    var sups=[
+      ['Trigo',0.14],['Cebada',0.14],['Maíz',0.145],['Soja',0.135],['Girasol',0.11],
+      ['Sorgo',0.13],['Silo Maíz PE',0.70],['Silo Maíz GH',0.30],['Silo Sorgo PE',0.70],
+      ['Silo Sorgo GH',0.25],['Núcleo DTT precoz',0.10],['Ración DTT precoz',0.10],
+      ['Pellet Soja',0.14],['Pellet Girasol',0.14],['Semilla algodón',0.12],['Rollo',0.10]
+    ];
+    var itemsArr=[], idByName={};
+    for(var i=0;i<sups.length;i++){
+      var id='sup_seed_'+i;
+      idByName[sups[i][0]]=id;
+      itemsArr.push({id:id, empresaId:emp, nombre:sups[i][0], unidad:'kg', humedad:sups[i][1], costo:0, exIni:0});
+    }
+    localStorage.setItem('pa_hac_supl_items', JSON.stringify(itemsArr));
+
+    // ── Ración 1 = Maíz 60 + Cebada 20 + Rollo 10 + Núcleo 10 ──
+    // (el Excel usa "Núcleo"; acá mapeo a "Núcleo DTT precoz" que es el único núcleo del listado)
+    var rac1={ id:'rac_seed_1', empresaId:emp, nombre:'Ración 1', exIni:0,
+      ingredientes:[
+        {supId:idByName['Maíz'], pct:60},
+        {supId:idByName['Cebada'], pct:20},
+        {supId:idByName['Rollo'], pct:10},
+        {supId:idByName['Núcleo DTT precoz'], pct:10}
+      ]};
+    localStorage.setItem('pa_hac_supl_rac', JSON.stringify([rac1]));
+
+    // ── 11 movimientos de Alimentación (salidas) del Excel 24-25 ──
+    var M=[
+      ['2024-09-30','Maíz',330973],['2024-09-30','Rollo',56000],['2024-09-30','Silo Maíz PE',1221200],
+      ['2024-12-31','Maíz',192012],['2024-12-31','Rollo',41500],['2024-12-31','Silo Maíz PE',114325],
+      ['2025-03-31','Rollo',10000],['2025-03-31','Silo Maíz PE',30000],
+      ['2025-06-30','Maíz',174360],['2025-06-30','Rollo',89000],['2025-06-30','Silo Maíz PE',350000]
+    ];
+    var movs=[];
+    for(var k=0;k<M.length;k++){
+      movs.push({ id:'smov_seed_'+k, empresaId:emp, fecha:M[k][0], campaniaId:camp2425,
+        itemId:idByName[M[k][1]], itemTipo:'sup', concepto:'Alim', efecto:'S', cant:M[k][2], obs:'(dato de ejemplo Excel 24-25)' });
+    }
+    localStorage.setItem('pa_hac_supl_mov', JSON.stringify(movs));
+
+    // poner la campaña activa en 24-25 para ver los movimientos, y refrescar
+    if(typeof switchCampania==='function'){ try{ switchCampania('24-25'); }catch(e){} }
+    var sk=document.getElementById('campSel'); // por si el selector tiene otro id, ignorar si falla
+    if(typeof setTab==='function'){ setTab('suplementacion', document.querySelector('.tab[data-tab="suplementacion"]')); }
+    if(typeof renderMaestros==='function') renderMaestros();
+    if(typeof renderSuplementacionTab==='function') renderSuplementacionTab();
+    console.log('[SEED] Datos de ejemplo cargados: '+itemsArr.length+' suplementos, 1 ración, '+movs.length+' movimientos.');
+  }
+  if(document.readyState==='complete' || document.readyState==='interactive'){ setTimeout(seedDemo, 800); }
+  else { document.addEventListener('DOMContentLoaded', function(){ setTimeout(seedDemo, 800); }); }
+})();
+</script>
+
 </body>
 </html>
