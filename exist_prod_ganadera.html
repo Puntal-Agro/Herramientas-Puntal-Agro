@@ -63,6 +63,12 @@ main{max-width:1200px;margin:0 auto;padding:22px 20px}
 
 /* ── Maestros ── */
 .m-stack{display:flex;flex-direction:column;gap:18px}
+.msec-nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}
+.msec-pill{font-size:12.5px;font-weight:600;padding:7px 14px;border-radius:9px;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer;white-space:nowrap}
+.msec-pill:hover{border-color:var(--verde);color:var(--verde)}
+.msec-pill.on{background:var(--verde);color:#fff;border-color:var(--verde)}
+.msec{display:none}
+.msec.on{display:block}
 .m-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
 .m-h{padding:15px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .m-h .ttl{font-size:15px;font-weight:600;color:var(--verde);display:flex;align-items:center;gap:9px}
@@ -89,6 +95,17 @@ main{max-width:1200px;margin:0 auto;padding:22px 20px}
 .ic-btn.del:hover{border-color:#C0392B;color:#C0392B}
 .rac-chip{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;background:var(--bg-soft,#F1EFE8);color:var(--muted);margin:2px 3px 2px 0;font-variant-numeric:tabular-nums}
 .mv-hint{font-size:12px;color:var(--muted);font-style:italic}
+.ms-dd{position:relative;display:inline-block}
+.ms-btn{font-size:13px;padding:7px 12px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;display:inline-flex;align-items:center;gap:8px;min-width:150px;justify-content:space-between}
+.ms-btn:hover{border-color:var(--verde)}
+.ms-caret{color:var(--muted);font-size:10px}
+.ms-panel{display:none;position:absolute;top:calc(100% + 4px);left:0;z-index:50;background:var(--card);border:1px solid var(--border);border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,0.12);min-width:230px;max-height:280px;overflow:auto;padding:6px}
+.ms-panel.open{display:block}
+.ms-panel .ms-opt{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:13px}
+.ms-panel .ms-opt:hover{background:var(--bg-soft,#F1EFE8)}
+.ms-panel .ms-grp{font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding:8px 8px 3px;font-weight:600}
+.ms-panel .ms-tools{display:flex;justify-content:space-between;border-top:1px solid var(--border);margin-top:4px;padding-top:6px}
+.ms-panel .ms-tools button{font-size:11.5px;background:none;border:none;color:var(--verde);cursor:pointer;font-weight:600;padding:3px 6px}
 .supl-elab{color:var(--terra-d,#9c4a1d)}
 .efecto{font-size:11px;font-weight:600;padding:2px 8px;border-radius:6px}
 .ef-E{background:#E6F0E0;color:#3A6B2E}.ef-S{background:#F7E4DC;color:#A8501F}.ef-M{background:#EDEAE2;color:#7A6A55}
@@ -656,7 +673,10 @@ tr.peso-arr td.kg{color:#9A6A1E}
       <div class="mv-h"><span class="mv-ttl">Detalle de movimientos</span><span class="mv-count" id="smvCount"></span></div>
       <div class="mv-b">
         <div class="fbar">
-          <select id="sfItem" onchange="renderSuplDetalle()"><option value="">Todos los items</option></select>
+          <div class="ms-dd" id="sfItemDD">
+            <button type="button" class="ms-btn" onclick="toggleMSDropdown('sfItem')"><span id="sfItemLabel">Todos los items</span> <span class="ms-caret">▾</span></button>
+            <div class="ms-panel" id="sfItemPanel"></div>
+          </div>
           <select id="sfConcepto" onchange="renderSuplDetalle()"><option value="">Todos los conceptos</option></select>
           <select id="sfCampania" onchange="renderSuplDetalle()"><option value="">Todas las campañas</option></select>
           <input id="sfDesde" type="date" onchange="renderSuplDetalle()" title="Desde">
@@ -688,9 +708,15 @@ tr.peso-arr td.kg{color:#9A6A1E}
       <div class="mv-h"><span class="mv-ttl">Stock por suplemento / ración</span></div>
       <div class="mv-b">
         <div class="fbar">
-          <select id="ssItem" onchange="renderSuplStock()"><option value="">Todos los items</option></select>
+          <div class="ms-dd" id="ssItemDD">
+            <button type="button" class="ms-btn" onclick="toggleMSDropdown('ssItem')"><span id="ssItemLabel">Todos los items</span> <span class="ms-caret">▾</span></button>
+            <div class="ms-panel" id="ssItemPanel"></div>
+          </div>
           <select id="ssCampania" onchange="renderSuplStock()"><option value="">Todas las campañas</option></select>
           <input id="ssHasta" type="date" onchange="renderSuplStock()" title="A fecha">
+          <label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);cursor:pointer">
+            <input type="checkbox" id="ssOcultarCero" onchange="renderSuplStock()"> Ocultar los que están en cero
+          </label>
           <button class="btn btn-ghost btn-sm" onclick="limpiarFiltrosSuplStock()">Limpiar filtros</button>
         </div>
         <table class="m-tbl">
@@ -715,7 +741,18 @@ tr.peso-arr td.kg{color:#9A6A1E}
   <div class="page" id="page-maestros">
     <div class="m-stack">
 
+      <div class="msec-nav">
+        <button class="msec-pill on" data-msec="rodeos" onclick="setMSec('rodeos',this)">Rodeos</button>
+        <button class="msec-pill" data-msec="negocios" onclick="setMSec('negocios',this)">Negocios</button>
+        <button class="msec-pill" data-msec="tiposmov" onclick="setMSec('tiposmov',this)">Tipos de movimiento</button>
+        <button class="msec-pill" data-msec="categorias" onclick="setMSec('categorias',this)">Categorías</button>
+        <button class="msec-pill" data-msec="suplementos" onclick="setMSec('suplementos',this)">Suplementos</button>
+        <button class="msec-pill" data-msec="raciones" onclick="setMSec('raciones',this)">Raciones</button>
+        <button class="msec-pill" data-msec="lugares" onclick="setMSec('lugares',this)">Origen / Destino</button>
+      </div>
+
       <!-- Rodeos (editable) -->
+      <div class="msec on" id="msec-rodeos">
       <div class="m-card">
         <div class="m-h">
           <div>
@@ -737,9 +774,10 @@ tr.peso-arr td.kg{color:#9A6A1E}
           </table>
         </div>
       </div>
+      </div>
 
-      <!-- Negocios + Tipos de movimiento (read-only, lado a lado) -->
-      <div class="cols-2">
+      <!-- Negocios (read-only) -->
+      <div class="msec" id="msec-negocios">
         <div class="m-card">
           <div class="m-h"><div>
             <div class="ttl">Negocios <span class="badge badge-ro">Solo lectura</span></div>
@@ -753,7 +791,10 @@ tr.peso-arr td.kg{color:#9A6A1E}
             </table>
           </div>
         </div>
+      </div>
 
+      <!-- Tipos de movimiento (read-only) -->
+      <div class="msec" id="msec-tiposmov">
         <div class="m-card">
           <div class="m-h"><div>
             <div class="ttl">Tipos de movimiento <span class="badge badge-ro">Solo lectura</span></div>
@@ -769,7 +810,8 @@ tr.peso-arr td.kg{color:#9A6A1E}
         </div>
       </div>
 
-      <!-- Categorías (read-only, ancho completo) -->
+      <!-- Categorías (read-only) -->
+      <div class="msec" id="msec-categorias">
       <div class="m-card">
         <div class="m-h"><div>
           <div class="ttl">Categorías de hacienda <span class="badge badge-ro">Solo lectura</span></div>
@@ -783,8 +825,10 @@ tr.peso-arr td.kg{color:#9A6A1E}
           </table>
         </div>
       </div>
+      </div>
 
       <!-- Suplementos (editable) -->
+      <div class="msec" id="msec-suplementos">
       <div class="m-card">
         <div class="m-h">
           <div>
@@ -815,8 +859,10 @@ tr.peso-arr td.kg{color:#9A6A1E}
           </table>
         </div>
       </div>
+      </div>
 
       <!-- Raciones (editable) -->
+      <div class="msec" id="msec-raciones">
       <div class="m-card">
         <div class="m-h">
           <div>
@@ -849,6 +895,31 @@ tr.peso-arr td.kg{color:#9A6A1E}
             </tr></thead>
             <tbody id="racBody"></tbody>
           </table>
+        </div>
+      </div>
+      </div>
+
+      <!-- Origen / Destino (editable) -->
+      <div class="msec" id="msec-lugares">
+        <div class="m-card">
+          <div class="m-h">
+            <div>
+              <div class="ttl">Origen / Destino <span class="badge badge-edit">Editable</span></div>
+              <div class="sub">Lugares para los movimientos de hacienda: campos propios, mercados, feed lots, etc.</div>
+            </div>
+            <button class="btn btn-primary" id="lugarAddBtn" onclick="toggleLugarForm()">+ Nuevo lugar</button>
+          </div>
+          <div class="m-b">
+            <div class="add-row" id="lugarForm">
+              <div class="fld f-nom"><label>Nombre</label><input type="text" id="lugarNombre" maxlength="60" placeholder="EL MARTILLO"></div>
+              <button class="btn btn-primary btn-sm" onclick="guardarLugar()">Guardar</button>
+              <button class="btn btn-ghost btn-sm" onclick="cancelLugarForm()">Cancelar</button>
+            </div>
+            <table class="m-tbl">
+              <thead><tr><th>Nombre</th><th style="width:90px;text-align:right">Acciones</th></tr></thead>
+              <tbody id="lugarBody"></tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -1173,10 +1244,24 @@ function sexoEVLabel(s){
 
 function renderMaestros(){
   if(typeof PA==='undefined' || !PA.demo || !CTX) return;
+  seedLugaresSiVacio();
   renderRodeos();
   renderCatalogosRO();
   renderSuplCatalogo();
   renderRacCatalogo();
+  renderLugares();
+}
+
+/* Navegación por secciones (pills) de la solapa Maestros */
+function setMSec(sec, btn){
+  var secs=document.querySelectorAll('#page-maestros .msec');
+  for(var i=0;i<secs.length;i++) secs[i].classList.remove('on');
+  var target=document.getElementById('msec-'+sec);
+  if(target) target.classList.add('on');
+  var pills=document.querySelectorAll('#page-maestros .msec-pill');
+  for(var j=0;j<pills.length;j++) pills[j].classList.remove('on');
+  if(btn) btn.classList.add('on');
+  else { var b=document.querySelector('#page-maestros .msec-pill[data-msec="'+sec+'"]'); if(b) b.classList.add('on'); }
 }
 
 /* ── Rodeos (editable, por empresa) ── */
@@ -1442,6 +1527,15 @@ function renderFormHost(){
     '<div class="fld"><label>Categoría <span class="req">*</span></label><select class="self" id="mCat">'+optsCategorias()+'</select></div>'+
     '<div class="fld"><label>Cabezas <span class="req">*</span></label><input class="inp" id="mCab" oninput="onCabChange()"></div>';
 
+  // Lugar de Origen/Destino (según el tipo: TrE/Cpra=Origen, TrS/Vta=Destino)
+  var rLug=reglaLugar(t.sigla);
+  if(rLug){
+    var hayLug=lugaresList().length;
+    campos += '<div class="fld"><label>'+rLug.label+'</label><select class="self" id="mLugar"><option value="">— (opcional)</option>'+optsLugares()+'</select>';
+    if(!hayLug) campos += '<div class="fhint">No hay lugares cargados. Se cargan en Maestros → Origen / Destino.</div>';
+    campos += '</div>';
+  }
+
   if(regla.od){
     // Compra y Venta: origen + destino + desbaste calculado
     campos +=
@@ -1609,6 +1703,10 @@ function guardarMovimiento(){
     mov.precioKg=parseNum((document.getElementById('mPrecio')||{}).value);
     mov.importe=(mov.kg&&mov.precioKg)?mov.kg*mov.precioKg:null;
   }
+  // lugar de origen/destino (opcional, según tipo)
+  if(reglaLugar(t.sigla)){
+    mov.lugarId=(document.getElementById('mLugar')||{}).value||'';
+  }
   mov.obs=(document.getElementById('mObs')||{}).value||'';
 
   var all2=lsGetJSON(LS_MOV_HDA);
@@ -1655,6 +1753,7 @@ function editarMovimiento(id){
   if(m.terceroId && document.getElementById('mTercero')) document.getElementById('mTercero').value=m.terceroId;
   if(m.precioKg!=null) set('mPrecio', fInt(m.precioKg));
   if(typeof recalcImporte==='function') recalcImporte();
+  if(m.lugarId && document.getElementById('mLugar')) document.getElementById('mLugar').value=m.lugarId;
   set('mObs', m.obs||'');
   if(typeof toggleFormMov==='function') toggleFormMov('expandir');
   var sb=document.getElementById('mvSaveBtn'); if(sb) sb.textContent='Guardar cambios';
@@ -1769,6 +1868,14 @@ function renderMovtos(){
     var detalle='—';
     if(m2.terceroId){ detalle=nombreTercero(m2.terceroId); if(m2.precioKg) detalle+=' · $'+fInt(m2.precioKg)+'/kg'; }
     else if(esCCrow){ detalle='recategorización'; }
+    // lugar de origen/destino (si lo tiene)
+    if(m2.lugarId){
+      var sigLug=siglaTipo(m2.tipoMovId);
+      var rl=sigLug?reglaLugar(sigLug.sigla):null;
+      var flecha=(rl&&rl.label==='Origen')?'← ':'→ ';
+      var lugTxt=flecha+nombreLugar(m2.lugarId);
+      detalle=(detalle==='—')?lugTxt:(detalle+' · '+lugTxt);
+    }
     var texto=(nc+' '+nombreTipo+' '+nombreRodeo(m2.rodeoId)+' '+detalle).toLowerCase();
     if(q && texto.indexOf(q)<0) continue;
 
@@ -2728,6 +2835,47 @@ var LS_SUPL_ITEMS = 'pa_hac_supl_items';
 var LS_SUPL_RAC   = 'pa_hac_supl_rac';
 var LS_SUPL_MOV   = 'pa_hac_supl_mov';
 
+/* ── Lugares de Origen/Destino (catálogo local de este módulo) ──
+   LS_LUGARES: [{id, empresaId, nombre}]
+   Usado en movimientos de hacienda (Traslado, Compra, Venta). */
+var LS_LUGARES = 'pa_hac_lugares';
+var LUGARES_SEED = ['EL MARTILLO','LA MERCEDES','EL CARMEN','LA RECOMPENSA','LR-LM','MERCADO L','LR FEED LOT','LA PROV. DE USTARIZ','LART. & ORIMÍ','AGROFOURCA','DURRIEU'];
+
+function lugaresList(){
+  var all=lsGetJSON(LS_LUGARES), out=[];
+  for(var i=0;i<all.length;i++){ if(all[i].empresaId===CTX.empresaActivaId) out.push(all[i]); }
+  return out;
+}
+function lugarById(id){
+  var a=lugaresList(); for(var i=0;i<a.length;i++){ if(a[i].id===id) return a[i]; } return null;
+}
+function nombreLugar(id){ var l=lugarById(id); return l?l.nombre:''; }
+/* Precarga la primera vez (si la empresa no tiene ningún lugar cargado) */
+function seedLugaresSiVacio(){
+  if(!CTX) return;
+  if(lugaresList().length) return;
+  var all=lsGetJSON(LS_LUGARES);
+  for(var i=0;i<LUGARES_SEED.length;i++){
+    all.push({ id:'lug_'+Date.now()+'_'+i, empresaId:CTX.empresaActivaId, nombre:LUGARES_SEED[i] });
+  }
+  lsSetJSON(LS_LUGARES, all);
+}
+/* Regla: qué lugar lleva cada tipo de movimiento de hacienda.
+   Devuelve null (sin lugar) o {label:'Origen'|'Destino'}. */
+function reglaLugar(sigla){
+  if(sigla==='TrS') return {label:'Destino'};
+  if(sigla==='TrE') return {label:'Origen'};
+  if(sigla==='Cpra') return {label:'Origen'};
+  if(sigla==='Vta')  return {label:'Destino'};
+  return null;
+}
+function optsLugares(){
+  var ls=lugaresList(), h='';
+  ls.sort(function(a,b){ return (a.nombre||'').localeCompare(b.nombre||''); });
+  for(var i=0;i<ls.length;i++) h+='<option value="'+ls[i].id+'">'+esc(ls[i].nombre)+'</option>';
+  return h;
+}
+
 /* Conceptos de movimiento de suplemento (de la planilla Don Eduardo).
    efecto define el signo sobre el stock. */
 var SUPL_CONCEPTOS = [
@@ -3040,6 +3188,75 @@ function borrarRacUI(id){
   renderRacCatalogo(); toast('Ración borrada');
 }
 
+/* ── Origen / Destino (lugares) ── */
+var _lugarEdit=null;
+function renderLugares(){
+  var tb=document.getElementById('lugarBody'); if(!tb) return;
+  var ls=lugaresList();
+  ls.sort(function(a,b){ return (a.nombre||'').localeCompare(b.nombre||''); });
+  if(!ls.length){ tb.innerHTML='<tr><td colspan="2" style="color:#888780;font-style:italic">Sin lugares cargados.</td></tr>'; return; }
+  var h='';
+  for(var i=0;i<ls.length;i++){
+    var l=ls[i];
+    h+='<tr><td>'+esc(l.nombre)+'</td>'+
+      '<td><div class="row-act">'+
+        '<button class="ic-btn" title="Editar" onclick="editLugar(\''+l.id+'\')">✎</button>'+
+        '<button class="ic-btn del" title="Eliminar" onclick="borrarLugarUI(\''+l.id+'\')">🗑</button>'+
+      '</div></td></tr>';
+  }
+  tb.innerHTML=h;
+}
+function toggleLugarForm(){
+  var f=document.getElementById('lugarForm');
+  if(f.classList.contains('show')){ cancelLugarForm(); }
+  else { _lugarEdit=null; document.getElementById('lugarNombre').value=''; f.classList.add('show'); document.getElementById('lugarNombre').focus(); }
+}
+function cancelLugarForm(){
+  _lugarEdit=null;
+  document.getElementById('lugarForm').classList.remove('show');
+  document.getElementById('lugarNombre').value='';
+}
+function editLugar(id){
+  var l=lugarById(id); if(!l) return;
+  _lugarEdit=id;
+  document.getElementById('lugarNombre').value=l.nombre||'';
+  document.getElementById('lugarForm').classList.add('show');
+  document.getElementById('lugarNombre').focus();
+}
+function guardarLugar(){
+  var nombre=(document.getElementById('lugarNombre').value||'').trim();
+  if(!nombre){ toast('Falta el nombre del lugar'); return; }
+  var all=lsGetJSON(LS_LUGARES);
+  for(var i=0;i<all.length;i++){
+    if(all[i].empresaId===CTX.empresaActivaId && (all[i].nombre||'').toLowerCase()===nombre.toLowerCase() && all[i].id!==_lugarEdit){
+      toast('Ya existe un lugar llamado '+nombre); return;
+    }
+  }
+  var obj={ empresaId:CTX.empresaActivaId, nombre:nombre };
+  if(_lugarEdit){
+    obj.id=_lugarEdit;
+    for(var j=0;j<all.length;j++){ if(all[j].id===_lugarEdit){ all[j]=obj; break; } }
+    toast('Lugar actualizado');
+  } else {
+    obj.id='lug_'+Date.now()+'_'+Math.floor(Math.random()*1000);
+    all.push(obj);
+    toast('Lugar agregado');
+  }
+  lsSetJSON(LS_LUGARES, all);
+  cancelLugarForm(); renderLugares();
+}
+function borrarLugarUI(id){
+  var l=lugarById(id); if(!l) return;
+  // no permitir borrar si está usado en algún movimiento de hacienda
+  var movs=lsGetJSON(LS_MOV_HDA);
+  for(var i=0;i<movs.length;i++){ if(movs[i].lugarId===id){ toast('No se puede borrar: lo usa un movimiento de hacienda'); return; } }
+  if(!confirm('¿Borrar el lugar "'+l.nombre+'"?')) return;
+  var all=lsGetJSON(LS_LUGARES), out=[];
+  for(var j=0;j<all.length;j++){ if(all[j].id!==id) out.push(all[j]); }
+  lsSetJSON(LS_LUGARES, out);
+  renderLugares(); toast('Lugar borrado');
+}
+
 /* ════════════════════════════════════════════════════════════════
    SOLAPA SUPLEMENTACIÓN — movimientos, detalle y stock
    ════════════════════════════════════════════════════════════════ */
@@ -3099,8 +3316,9 @@ function renderSuplementacionTab(){
   var ff=document.getElementById('smvFecha');
   if(ff && !ff.value){ ff.value=new Date().toISOString().slice(0,10); }
   // filtros de item (detalle y stock)
-  var fItem=document.getElementById('sfItem'); if(fItem) fItem.innerHTML='<option value="">Todos los items</option>'+suplItemOptions(false);
-  var sItem=document.getElementById('ssItem'); if(sItem) sItem.innerHTML='<option value="">Todos los items</option>'+suplItemOptions(false);
+  // filtros de item multi-select (detalle y stock)
+  construirMSPanel('sfItem', renderSuplDetalle);
+  construirMSPanel('ssItem', renderSuplStock);
   // selects de destino del form (negocio/rodeo/categoría)
   var dN=document.getElementById('smvDestNeg'); if(dN) dN.innerHTML='<option value="">— (opcional)</option>'+optsNegocios();
   var dR=document.getElementById('smvDestRod'); if(dR) dR.innerHTML='<option value="">— (opcional)</option>'+optsRodeos();
@@ -3286,15 +3504,96 @@ function borrarSuplMov(id){
 }
 
 /* ── Detalle de movimientos ── */
+/* ── Filtro multi-select de items (dropdown con checkboxes) ──
+   Estado: arrays de "tipo:id" seleccionados. Vacío = todos. */
+var _msSel={ sfItem:[], ssItem:[] };
+var _msCb={};  // callback de re-render por filtro
+
+function construirMSPanel(key, onChange){
+  _msCb[key]=onChange;
+  var panel=document.getElementById(key+'Panel'); if(!panel) return;
+  var sups=suplItems(); sups.sort(function(a,b){ return (a.nombre||'').localeCompare(b.nombre||''); });
+  var racs=suplRaciones(); racs.sort(function(a,b){ return (a.nombre||'').localeCompare(b.nombre||''); });
+  // limpiar selección de items que ya no existen
+  var validos={};
+  for(var a=0;a<sups.length;a++) validos['sup:'+sups[a].id]=true;
+  for(var bb=0;bb<racs.length;bb++) validos['rac:'+racs[bb].id]=true;
+  _msSel[key]=(_msSel[key]||[]).filter(function(v){ return validos[v]; });
+  var sel=_msSel[key];
+  var h='';
+  if(sups.length){
+    h+='<div class="ms-grp">Suplementos</div>';
+    for(var i=0;i<sups.length;i++){
+      var v='sup:'+sups[i].id, ck=sel.indexOf(v)>=0?' checked':'';
+      h+='<label class="ms-opt"><input type="checkbox" value="'+v+'" onchange="onMSToggle(\''+key+'\',this)"'+ck+'> '+esc(sups[i].nombre)+'</label>';
+    }
+  }
+  if(racs.length){
+    h+='<div class="ms-grp">Raciones</div>';
+    for(var j=0;j<racs.length;j++){
+      var vr='rac:'+racs[j].id, ckr=sel.indexOf(vr)>=0?' checked':'';
+      h+='<label class="ms-opt"><input type="checkbox" value="'+vr+'" onchange="onMSToggle(\''+key+'\',this)"'+ckr+'> '+esc(racs[j].nombre)+' <span class="rac-chip">ración</span></label>';
+    }
+  }
+  if(!sups.length && !racs.length){ h+='<div class="ms-grp">No hay items cargados</div>'; }
+  h+='<div class="ms-tools"><button type="button" onclick="msSelTodos(\''+key+'\')">Todos</button><button type="button" onclick="msSelNinguno(\''+key+'\')">Limpiar</button></div>';
+  panel.innerHTML=h;
+  actualizarMSLabel(key);
+}
+function onMSToggle(key, cb){
+  var arr=_msSel[key]||[];
+  if(cb.checked){ if(arr.indexOf(cb.value)<0) arr.push(cb.value); }
+  else { var k=arr.indexOf(cb.value); if(k>=0) arr.splice(k,1); }
+  _msSel[key]=arr;
+  actualizarMSLabel(key);
+  if(_msCb[key]) _msCb[key]();
+}
+function msSelTodos(key){
+  var cbs=document.querySelectorAll('#'+key+'Panel input[type=checkbox]');
+  _msSel[key]=[];
+  for(var i=0;i<cbs.length;i++){ cbs[i].checked=false; }  // "todos" = sin filtro (vacío)
+  actualizarMSLabel(key);
+  if(_msCb[key]) _msCb[key]();
+}
+function msSelNinguno(key){ msSelTodos(key); }  // limpiar = igual que todos (sin filtro)
+function actualizarMSLabel(key){
+  var lab=document.getElementById(key+'Label'); if(!lab) return;
+  var arr=_msSel[key]||[];
+  if(!arr.length){ lab.textContent='Todos los items'; return; }
+  if(arr.length===1){
+    var iv=parseItemVal(arr[0]); var d=iv?suplItemDatos(iv.id,iv.tipo):null;
+    lab.textContent=d?d.nombre:'1 item'; return;
+  }
+  lab.textContent=arr.length+' items';
+}
+function toggleMSDropdown(key){
+  var panel=document.getElementById(key+'Panel'); if(!panel) return;
+  var abierto=panel.classList.contains('open');
+  // cerrar todos los paneles primero
+  var todos=document.querySelectorAll('.ms-panel'); for(var i=0;i<todos.length;i++) todos[i].classList.remove('open');
+  if(!abierto) panel.classList.add('open');
+}
+/* cerrar dropdowns al clickear fuera */
+document.addEventListener('click', function(ev){
+  var dd=ev.target.closest ? ev.target.closest('.ms-dd') : null;
+  if(!dd){ var todos=document.querySelectorAll('.ms-panel'); for(var i=0;i<todos.length;i++) todos[i].classList.remove('open'); }
+});
+/* ¿el movimiento matchea la selección multi del filtro? (vacío = todos) */
+function msMatch(key, itemTipo, itemId){
+  var arr=_msSel[key]||[];
+  if(!arr.length) return true;
+  return arr.indexOf(itemTipo+':'+itemId)>=0;
+}
+
 function limpiarFiltrosSuplDetalle(){
-  ['sfItem','sfConcepto','sfCampania','sfDestNeg','sfDestRod','sfDestCat'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
+  ['sfConcepto','sfCampania','sfDestNeg','sfDestRod','sfDestCat'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
   ['sfDesde','sfHasta'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
+  _msSel.sfItem=[]; construirMSPanel('sfItem', renderSuplDetalle);
   renderSuplDetalle();
 }
 function renderSuplDetalle(){
   var tb=document.getElementById('smvBody'); if(!tb) return;
   var movs=suplMovs();
-  var fItem=(document.getElementById('sfItem')||{}).value||'';
   var fCon=(document.getElementById('sfConcepto')||{}).value||'';
   var fCamp=(document.getElementById('sfCampania')||{}).value||'';
   var fD=(document.getElementById('sfDesde')||{}).value||'';
@@ -3302,12 +3601,11 @@ function renderSuplDetalle(){
   var fdN=(document.getElementById('sfDestNeg')||{}).value||'';
   var fdR=(document.getElementById('sfDestRod')||{}).value||'';
   var fdC=(document.getElementById('sfDestCat')||{}).value||'';
-  var ivF=parseItemVal(fItem);
 
   var rows=[];
   for(var i=0;i<movs.length;i++){
     var m=movs[i];
-    if(ivF && !(m.itemTipo===ivF.tipo && m.itemId===ivF.id)) continue;
+    if(!msMatch('sfItem', m.itemTipo, m.itemId)) continue;
     if(fCon && m.concepto!==fCon) continue;
     if(fCamp && m.campaniaId!==fCamp) continue;
     if(fD && m.fecha<fD) continue;
@@ -3360,16 +3658,16 @@ function renderSuplDetalle(){
 
 /* ── Stock por item ── */
 function limpiarFiltrosSuplStock(){
-  ['ssItem','ssCampania'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
+  var c=document.getElementById('ssCampania'); if(c) c.value='';
   var h=document.getElementById('ssHasta'); if(h) h.value='';
+  var oc=document.getElementById('ssOcultarCero'); if(oc) oc.checked=false;
+  _msSel.ssItem=[]; construirMSPanel('ssItem', renderSuplStock);
   renderSuplStock();
 }
 function renderSuplStock(){
   var tb=document.getElementById('ssBody'); if(!tb) return;
-  var fItem=(document.getElementById('ssItem')||{}).value||'';
   var fCamp=(document.getElementById('ssCampania')||{}).value||'';
   var fH=(document.getElementById('ssHasta')||{}).value||'';
-  var ivF=parseItemVal(fItem);
 
   // armar lista de items a mostrar (suplementos + raciones)
   var lista=[];
@@ -3379,12 +3677,14 @@ function renderSuplStock(){
   for(var j=0;j<racs.length;j++){ lista.push({tipo:'rac', id:racs[j].id, nombre:racs[j].nombre, exIni:racs[j].exIni||0}); }
   lista.sort(function(a,b){ if(a.tipo!==b.tipo) return a.tipo<b.tipo?-1:1; return (a.nombre||'').localeCompare(b.nombre||''); });
 
-  if(ivF){ var f=[]; for(var z=0;z<lista.length;z++){ if(lista[z].tipo===ivF.tipo && lista[z].id===ivF.id) f.push(lista[z]); } lista=f; }
+  // filtro multi-select (vacío = todos)
+  var f=[]; for(var z=0;z<lista.length;z++){ if(msMatch('ssItem', lista[z].tipo, lista[z].id)) f.push(lista[z]); } lista=f;
 
   if(!lista.length){ tb.innerHTML='<tr><td colspan="8" style="color:#888780;font-style:italic">No hay items cargados. Agregalos en Maestros.</td></tr>'; return; }
 
   var movs=suplMovs();
-  var h='';
+  var ocultarCero=!!(document.getElementById('ssOcultarCero')||{}).checked;
+  var h='', mostradas=0;
   for(var k=0;k<lista.length;k++){
     var it=lista[k];
     var d=suplItemDatos(it.id, it.tipo);
@@ -3400,6 +3700,8 @@ function renderSuplStock(){
     // existencia inicial: solo se cuenta si no hay filtro de campaña (es global del item)
     var ini = fCamp ? 0 : (it.exIni||0);
     var exist=ini+ent-sal;
+    if(ocultarCero && exist===0) continue;
+    mostradas++;
     var ms=exist*(1-hum);
     var val=exist*costo;
     var neg=exist<0;
@@ -3415,6 +3717,7 @@ function renderSuplStock(){
       '<td style="text-align:right"'+(neg?' style="color:#C8642D"':'')+'>'+fNum(val,0)+'</td>'+
       '</tr>';
   }
+  if(!mostradas){ tb.innerHTML='<tr><td colspan="8" style="color:#888780;font-style:italic">'+(ocultarCero?'Todos los items filtrados están en cero.':'Sin items para los filtros elegidos.')+'</td></tr>'; return; }
   tb.innerHTML=h;
 }
 
@@ -3941,82 +4244,5 @@ function arrancarUI(){
 
 document.addEventListener('DOMContentLoaded', init);
 </script>
-<!-- ════ BLOQUE DE PRUEBA — datos de ejemplo del Excel 24-25. Borrar para producción. ════ -->
-<script>
-(function(){
-  function seedDemo(){
-    if(typeof PA==='undefined' || !PA.demo){ return setTimeout(seedDemo,200); }
-    if(!window.CTX){ return setTimeout(seedDemo,200); }
-
-    // Parche: el pa-core de este entorno no trae catálogos ganaderos. Solo para la copia de prueba.
-    if(typeof PA.demo.listarNegocios!=='function'){
-      PA.demo.listarNegocios=function(){ return [{id:'n_inv',sigla:'INV',nombre:'Invernada'},{id:'n_cria',sigla:'CRIA',nombre:'Cría'}]; };
-    }
-    if(typeof PA.demo.listarRodeos!=='function'){
-      PA.demo.listarRodeos=function(){ return [{id:'r_gral',sigla:'GRAL',nombre:'Rodeo general'}]; };
-    }
-    if(typeof PA.demo.listarCategoriasHda!=='function'){
-      PA.demo.listarCategoriasHda=function(){ return [{id:'cat_nov',nombre:'Novillos'},{id:'cat_vaca',nombre:'Vacas'},{id:'cat_ternero',nombre:'Terneros'}]; };
-    }
-    if(typeof PA.demo.listarTiposMovHda!=='function'){
-      PA.demo.listarTiposMovHda=function(){ return []; };
-    }
-
-    var emp=CTX.empresaActivaId;
-    var camp2425='24-25';
-
-    // ── Suplementos (16, con %H° del Excel; costo 0 porque el Excel no lo trae) ──
-    var sups=[
-      ['Trigo',0.14],['Cebada',0.14],['Maíz',0.145],['Soja',0.135],['Girasol',0.11],
-      ['Sorgo',0.13],['Silo Maíz PE',0.70],['Silo Maíz GH',0.30],['Silo Sorgo PE',0.70],
-      ['Silo Sorgo GH',0.25],['Núcleo DTT precoz',0.10],['Ración DTT precoz',0.10],
-      ['Pellet Soja',0.14],['Pellet Girasol',0.14],['Semilla algodón',0.12],['Rollo',0.10]
-    ];
-    var itemsArr=[], idByName={};
-    for(var i=0;i<sups.length;i++){
-      var id='sup_seed_'+i;
-      idByName[sups[i][0]]=id;
-      itemsArr.push({id:id, empresaId:emp, nombre:sups[i][0], unidad:'kg', humedad:sups[i][1], costo:0, exIni:0});
-    }
-    localStorage.setItem('pa_hac_supl_items', JSON.stringify(itemsArr));
-
-    // ── Ración 1 = Maíz 60 + Cebada 20 + Rollo 10 + Núcleo 10 ──
-    // (el Excel usa "Núcleo"; acá mapeo a "Núcleo DTT precoz" que es el único núcleo del listado)
-    var rac1={ id:'rac_seed_1', empresaId:emp, nombre:'Ración 1', exIni:0,
-      ingredientes:[
-        {supId:idByName['Maíz'], pct:60},
-        {supId:idByName['Cebada'], pct:20},
-        {supId:idByName['Rollo'], pct:10},
-        {supId:idByName['Núcleo DTT precoz'], pct:10}
-      ]};
-    localStorage.setItem('pa_hac_supl_rac', JSON.stringify([rac1]));
-
-    // ── 11 movimientos de Alimentación (salidas) del Excel 24-25 ──
-    var M=[
-      ['2024-09-30','Maíz',330973],['2024-09-30','Rollo',56000],['2024-09-30','Silo Maíz PE',1221200],
-      ['2024-12-31','Maíz',192012],['2024-12-31','Rollo',41500],['2024-12-31','Silo Maíz PE',114325],
-      ['2025-03-31','Rollo',10000],['2025-03-31','Silo Maíz PE',30000],
-      ['2025-06-30','Maíz',174360],['2025-06-30','Rollo',89000],['2025-06-30','Silo Maíz PE',350000]
-    ];
-    var movs=[];
-    for(var k=0;k<M.length;k++){
-      movs.push({ id:'smov_seed_'+k, empresaId:emp, fecha:M[k][0], campaniaId:camp2425,
-        itemId:idByName[M[k][1]], itemTipo:'sup', concepto:'Alim', efecto:'S', cant:M[k][2], obs:'(dato de ejemplo Excel 24-25)' });
-    }
-    localStorage.setItem('pa_hac_supl_mov', JSON.stringify(movs));
-
-    // poner la campaña activa en 24-25 para ver los movimientos, y refrescar
-    if(typeof switchCampania==='function'){ try{ switchCampania('24-25'); }catch(e){} }
-    var sk=document.getElementById('campSel'); // por si el selector tiene otro id, ignorar si falla
-    if(typeof setTab==='function'){ setTab('suplementacion', document.querySelector('.tab[data-tab="suplementacion"]')); }
-    if(typeof renderMaestros==='function') renderMaestros();
-    if(typeof renderSuplementacionTab==='function') renderSuplementacionTab();
-    console.log('[SEED] Datos de ejemplo cargados: '+itemsArr.length+' suplementos, 1 ración, '+movs.length+' movimientos.');
-  }
-  if(document.readyState==='complete' || document.readyState==='interactive'){ setTimeout(seedDemo, 800); }
-  else { document.addEventListener('DOMContentLoaded', function(){ setTimeout(seedDemo, 800); }); }
-})();
-</script>
-
 </body>
 </html>
