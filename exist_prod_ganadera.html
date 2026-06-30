@@ -579,6 +579,17 @@ tr.peso-arr td.kg{color:#9A6A1E}
         </div>
       </div>
     </div>
+
+    <div class="ex-card" style="margin-top:18px">
+      <div class="ex-h"><span class="ex-ttl">Equivalente Vaca (EV) por categoría</span><span class="ex-corte" id="inEvCorte"></span></div>
+      <div class="ex-b" style="overflow-x:auto">
+        <table class="m-tbl">
+          <thead><tr><th>Negocio · Categoría</th><th class="num">Cab prom.</th><th class="num">Peso</th><th class="num">ADPV</th><th class="num">EV/cab</th><th class="num">EV</th></tr></thead>
+          <tbody id="inEvBody"></tbody>
+        </table>
+        <div class="cmp" style="margin-top:10px;font-style:italic">El EV se calcula por categoría según su peso y ADPV (fórmula con coeficientes por sexo). EV/ha = EV total ÷ superficie.</div>
+      </div>
+    </div>
   </div>
 
   <!-- MAESTROS -->
@@ -2530,6 +2541,71 @@ function stockPonderado(desde, hasta, filtroNeg){
   return { cab:totCab, kg:totKg, dias:dias };
 }
 
+/* EV (equivalente vaca) por categoría y total, para el período.
+   Fórmula de regresión del Excel según sexoEV (peso y ADPV de cada categoría). */
+function coefEV(sexoEV){
+  // sexoEV 0 → usa fórmula de sexo 1 por defecto
+  if(sexoEV===2) return {a:0.3421, b:0.0010608, c:0.019813, d:0.00099244};
+  return {a:0.3352, b:0.00107038, c:0.1054, d:0.00099244};
+}
+function evCabDia(peso, adpv, sexoEV){
+  var k=coefEV(sexoEV);
+  return k.a + k.b*peso + k.c*adpv + k.d*peso*adpv;
+}
+
+/* Calcula EV por combinación y total para [desde,hasta] */
+function calcularEV(desde, hasta, filtroNeg){
+  var emp=CTX.empresaActivaId;
+  var cats=PA.demo.listarCategoriasHda()||[];
+  var sexoMap={}; for(var i=0;i<cats.length;i++) sexoMap[cats[i].id]=(cats[i].sexoEV||0);
+  var dias=diasEntre(desde, hasta);
+  var diaIni=fechaMenosUnDia(desde);
+  var movs=movtosDeEmpresa(emp);
+  var acc=calcularStock(diaIni);
+  var enRango=[];
+  for(var r=0;r<movs.length;r++){ if(movs[r].fecha>=desde && movs[r].fecha<=hasta) enRango.push(movs[r]); }
+  enRango.sort(function(a,b){ return a.fecha<b.fecha?-1:1; });
+  var cabActual={}; for(var k in acc){ if(acc.hasOwnProperty(k)) cabActual[k]=acc[k].cab; }
+  var cabDias={};
+  function addTramo(f1,f2){ var dd=diasEntre(f1,f2);
+    for(var key in cabActual){ if(cabActual.hasOwnProperty(key)){ if(!cabDias[key]) cabDias[key]=0; cabDias[key]+=cabActual[key]*dd; } } }
+  var cursor=desde, idx=0;
+  while(idx<enRango.length){
+    var m=enRango[idx];
+    if(m.fecha>cursor){ addTramo(cursor, fechaMenosUnDia(m.fecha)); cursor=m.fecha; }
+    while(idx<enRango.length && enRango[idx].fecha===cursor){
+      var mm=enRango[idx]; var key2=mm.negocioId+'|'+mm.rodeoId+'|'+mm.categoriaId;
+      if(cabActual[key2]===undefined) cabActual[key2]=0;
+      cabActual[key2]+= (mm.efecto==='E')?(mm.cabezas||0):-(mm.cabezas||0);
+      idx++;
+    }
+  }
+  addTramo(cursor, hasta);
+
+  var Rprod=calcularProduccion(desde, hasta, filtroNeg);
+  var prodPorKey={};
+  for(var f=0;f<Rprod.filas.length;f++){ var fl=Rprod.filas[f]; prodPorKey[fl.neg+'|'+fl.rod+'|'+fl.cat]={prod:fl.prod}; }
+
+  var stockFin=calcularStock(hasta);
+  var filas=[], evTotal=0;
+  for(var key3 in cabDias){ if(!cabDias.hasOwnProperty(key3)) continue;
+    var pa=key3.split('|');
+    if(filtroNeg && pa[0]!==filtroNeg) continue;
+    var promCab=cabDias[key3]/dias;
+    if(promCab<0.5) continue;
+    var peso=kgCabAfecha(pa[0],pa[1],pa[2], hasta, stockFin);
+    var pk=prodPorKey[key3]||{prod:0};
+    var adpv=(promCab>0&&dias>0)? pk.prod/promCab/dias : 0;
+    var sexo=sexoMap[pa[2]]||0;
+    var evDia=evCabDia(peso, adpv, sexo);
+    var ev=evDia*promCab;  // EV de stock = EV/cab × cabezas promedio
+    filas.push({ neg:pa[0], rod:pa[1], cat:pa[2], cab:promCab, peso:peso, adpv:adpv, sexo:sexo, evDia:evDia, ev:ev });
+    evTotal+=ev;
+  }
+  filas.sort(function(a,b){ return b.ev-a.ev; });
+  return { filas:filas, evTotal:evTotal, dias:dias };
+}
+
 function renderIndicadores(){
   if(typeof PA==='undefined' || !PA.demo || !CTX) return;
   var desde=(document.getElementById('inDesde')||{}).value;
@@ -2558,6 +2634,10 @@ function renderIndicadores(){
   var S=superficieGanadera(camp);
   var cargaCab=(S.total>0)? sp.cab/S.total : 0;
   var cargaKg=(S.total>0)? sp.kg/S.total : 0;
+  // EV (equivalente vaca)
+  var EV=calcularEV(desde, hasta, fNeg);
+  var evHaTotal=(S.total>0)? EV.evTotal/S.total : 0;
+  var evHaEfec=(S.efectiva>0)? EV.evTotal/S.efectiva : 0;
 
   if(kpis){
     kpis.innerHTML=
@@ -2565,7 +2645,9 @@ function renderIndicadores(){
       '<div class="in-kpi" title="Aumento Diario de Peso Vivo: cuánto engorda cada animal por día en promedio (producción ÷ cabezas ÷ días)"><div class="n">'+fNum(adpv,3)+'<span class="u">kg/cab/día</span></div><div class="l">A.D.P.V.</div></div>'+
       '<div class="in-kpi" title="Cuánta carne se produjo en relación al stock que se sostuvo (producción ÷ stock ponderado en kg)"><div class="n">'+fNum(efi,1)+'<span class="u">%</span></div><div class="l">Eficiencia del stock</div></div>'+
       '<div class="in-kpi" title="Cabezas por hectárea: presión del rodeo sobre el campo (stock ponderado ÷ superficie total)"><div class="n">'+fNum(cargaCab,2)+'<span class="u">cab/ha</span></div><div class="l">Carga (sup. total)</div></div>'+
-      '<div class="in-kpi" title="Kilos de animal por hectárea: carga expresada en peso (stock ponderado kg ÷ superficie total)"><div class="n">'+fInt(cargaKg)+'<span class="u">kg/ha</span></div><div class="l">Carga (sup. total)</div></div>';
+      '<div class="in-kpi" title="Kilos de animal por hectárea: carga expresada en peso (stock ponderado kg ÷ superficie total)"><div class="n">'+fInt(cargaKg)+'<span class="u">kg/ha</span></div><div class="l">Carga (sup. total)</div></div>'+
+      '<div class="in-kpi" title="Equivalente Vaca: stock expresado en unidades vaca, según peso y ADPV de cada categoría"><div class="n">'+fNum(EV.evTotal,1)+'<span class="u">EV</span></div><div class="l">Equivalente vaca</div></div>'+
+      '<div class="in-kpi" title="Carga animal real: EV por hectárea (EV total ÷ superficie total)"><div class="n">'+(S.total?fNum(evHaTotal,2):'—')+'<span class="u">EV/ha</span></div><div class="l">Carga EV (sup. total)</div></div>';
   }
   if(stEl){
     stEl.innerHTML=
@@ -2578,10 +2660,29 @@ function renderIndicadores(){
       phEl.innerHTML=
         '<div class="frow"><span>Sobre sup. total ('+fNum(S.total,1)+' ha)</span><span>'+fNum(prod/S.total,1)+' kg/ha</span></div>'+
         '<div class="frow"><span>Sobre sup. efectiva ('+fNum(S.efectiva,1)+' ha)</span><span>'+(S.efectiva?fNum(prod/S.efectiva,1):'—')+' kg/ha</span></div>'+
-        '<div class="frow"><span>Carga sobre efectiva</span><span>'+(S.efectiva?fNum(sp.cab/S.efectiva,2):'—')+' cab/ha</span></div>';
+        '<div class="frow"><span>Carga EV sobre efectiva</span><span>'+(S.efectiva?fNum(evHaEfec,2):'—')+' EV/ha</span></div>';
     } else {
       phEl.innerHTML='<div class="cmp" style="font-style:italic">Sin superficie ganadera en Plan de Uso para la campaña '+esc(camp||'')+'.</div>';
     }
+  }
+  // desglose EV por categoría
+  var evBody=document.getElementById('inEvBody');
+  var evCorte=document.getElementById('inEvCorte');
+  if(evCorte) evCorte.textContent='Total: '+fNum(EV.evTotal,1)+' EV';
+  if(evBody){
+    var h='';
+    for(var e=0;e<EV.filas.length;e++){
+      var ef=EV.filas[e];
+      h+='<tr><td class="cat">'+esc(nombreNegocio(ef.neg)+' · '+nombreCategoria(ef.cat))+'</td>'+
+         '<td class="num">'+fNum(ef.cab,1)+'</td>'+
+         '<td class="num">'+fNum(ef.peso,0)+'</td>'+
+         '<td class="num">'+fNum(ef.adpv,3)+'</td>'+
+         '<td class="num">'+fNum(ef.evDia,3)+'</td>'+
+         '<td class="num" style="font-weight:600;color:var(--verde-d)">'+fNum(ef.ev,1)+'</td></tr>';
+    }
+    if(!h) h='<tr><td colspan="6" class="m-empty">Sin datos para calcular EV en el período.</td></tr>';
+    else h+='<tr class="prtot"><td colspan="5">TOTAL</td><td class="num">'+fNum(EV.evTotal,1)+'</td></tr>';
+    evBody.innerHTML=h;
   }
 }
 
@@ -2722,11 +2823,15 @@ function seccionPDF(doc, tipo, y, W){
     var efi=(sp.kg>0)?prod/sp.kg*100:0;
     var S=superficieGanadera(camp);
     var cargaCab=(S.total>0)?sp.cab/S.total:0;
+    var EVp=calcularEV(d2,h2,'');
+    var evHa=(S.total>0)?EVp.evTotal/S.total:0;
     var body2=[
       ['Producción de carne', fInt(prod)+' kg'],
       ['A.D.P.V.', fNum(adpv,3)+' kg/cab/día'],
       ['Eficiencia del stock', fNum(efi,1)+' %'],
       ['Stock ponderado', fNum(sp.cab,1)+' cab · '+fInt(sp.kg)+' kg'],
+      ['Equivalente vaca (EV)', fNum(EVp.evTotal,1)+' EV'],
+      ['Carga EV/ha (sup. total)', S.total?fNum(evHa,2)+' EV/ha':'—'],
       ['Carga (sup. total '+fNum(S.total,1)+' ha)', S.total?fNum(cargaCab,2)+' cab/ha':'—'],
       ['Producción/ha (total)', S.total?fNum(prod/S.total,1)+' kg/ha':'—'],
       ['Producción/ha (efectiva '+fNum(S.efectiva,1)+' ha)', S.efectiva?fNum(prod/S.efectiva,1)+' kg/ha':'—']
