@@ -7,6 +7,9 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="pa-core.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{
   --bg:#F4F1EA; --card:#fff; --border:#E0DCCF; --text:#2A2A2A; --muted:#8A8475;
@@ -247,6 +250,18 @@ tr.peso-arr td.kg{color:#9A6A1E}
 .in-kpi .u{font-size:11px;font-weight:600;color:var(--muted);margin-left:3px}
 .in-kpi .l{font-size:11px;margin-top:6px;color:var(--muted);font-weight:500}
 
+.exp-modal{position:fixed;inset:0;background:rgba(40,45,38,.45);display:flex;align-items:center;justify-content:center;z-index:120}
+.exp-box{background:#fff;border-radius:14px;padding:26px 28px;max-width:380px;width:90%;position:relative;box-shadow:0 12px 40px rgba(0,0,0,.2)}
+.exp-ttl{font-size:17px;font-weight:700;color:var(--verde-d)}
+.exp-txt{font-size:13px;color:var(--muted);margin-top:6px;margin-bottom:18px}
+.exp-btns{display:flex;gap:10px}
+.exp-btns .btn{flex:1}
+.exp-nota{font-size:11px;color:var(--muted);margin-top:12px;font-style:italic}
+.exp-x{position:absolute;top:14px;right:16px;background:none;border:none;font-size:16px;color:var(--muted);cursor:pointer}
+
+.exp-btn{display:inline-flex;align-items:center;gap:6px;font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--verde-d);background:var(--verde-100);border:1px solid var(--verde);border-radius:8px;padding:7px 14px;cursor:pointer;margin-left:auto}
+.exp-btn:hover{background:var(--verde);color:#fff}
+
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--verde-d);color:#fff;padding:10px 18px;border-radius:9px;font-size:13px;font-weight:500;opacity:0;pointer-events:none;transition:opacity .25s;z-index:99}
 .toast.show{opacity:1}
 </style>
@@ -339,11 +354,12 @@ tr.peso-arr td.kg{color:#9A6A1E}
 
     <!-- Tabla 1x1 -->
     <div class="mv-card" style="margin-top:18px">
-      <div class="mv-h"><span class="mv-ttl">Movimientos registrados</span><span class="mv-count" id="mvCount"></span></div>
+      <div class="mv-h"><span class="mv-ttl">Movimientos registrados</span><span class="mv-count" id="mvCount"></span><button class="exp-btn" onclick="exportarMovimientosExcel()" title="Exportar a Excel">⬇ Excel</button></div>
       <div class="mv-b">
         <div class="fbar">
           <input class="grow" id="fSearch" placeholder="Buscar…" oninput="renderMovtos()">
           <select id="fTipo" onchange="renderMovtos()"><option value="">Todos los tipos</option></select>
+          <select id="fEfecto" onchange="renderMovtos()"><option value="">Entradas y salidas</option><option value="E">Solo entradas (E)</option><option value="S">Solo salidas (S)</option><option value="M">Solo movimientos (M)</option></select>
           <select id="fNegocio" onchange="renderMovtos()"><option value="">Todos los negocios</option></select>
           <select id="fCategoria" onchange="renderMovtos()"><option value="">Todas las categorías</option></select>
           <select id="fRodeo" onchange="renderMovtos()"><option value="">Todos los rodeos</option></select>
@@ -390,7 +406,7 @@ tr.peso-arr td.kg{color:#9A6A1E}
     </div>
 
     <div class="ex-card" style="margin-top:18px">
-      <div class="ex-h"><span class="ex-ttl">Existencias por combinación</span><span class="ex-corte" id="exCorte"></span><button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="abrirConciliacion()">Conciliar stock</button></div>
+      <div class="ex-h"><span class="ex-ttl">Existencias por combinación</span><span class="ex-corte" id="exCorte"></span><button class="exp-btn" style="margin-left:auto" onclick="abrirExportPDF('existencias')" title="Exportar a PDF">⬇ PDF</button><button class="btn btn-primary btn-sm" onclick="abrirConciliacion()">Conciliar stock</button></div>
       <div class="ex-b" style="overflow-x:auto">
         <table class="m-tbl" id="exTbl">
           <thead><tr><th>Categoría</th><th>Rodeo</th><th class="num">Cabezas</th><th class="num">Kg totales</th><th class="num">Kg/cab</th><th>Peso de</th></tr></thead>
@@ -475,6 +491,7 @@ tr.peso-arr td.kg{color:#9A6A1E}
           <label>o trimestre</label>
           <select id="prTrim" onchange="prModoTrim();renderProduccion()"><option value="">— elegir —</option></select>
           <select id="prNeg" onchange="renderProduccion()"><option value="">Todos los negocios</option></select>
+          <button class="exp-btn" onclick="abrirExportPDF('produccion')" title="Exportar a PDF">⬇ PDF</button>
         </div>
         <div class="pr-hero" id="prHero"></div>
       </div>
@@ -482,7 +499,7 @@ tr.peso-arr td.kg{color:#9A6A1E}
 
     <div class="tb-grid" style="margin-top:18px">
       <div class="ex-card">
-        <div class="ex-h"><span class="ex-ttl">Desglose del período</span></div>
+        <div class="ex-h"><span class="ex-ttl">Desglose del período</span><span class="ex-corte" id="prCorteDesg"></span></div>
         <div class="ex-b" style="overflow-x:auto">
           <table class="m-tbl">
             <thead><tr><th>Concepto</th><th class="num">Cabezas</th><th class="num">Kg/cab</th><th class="num">Kg totales</th></tr></thead>
@@ -541,6 +558,7 @@ tr.peso-arr td.kg{color:#9A6A1E}
           <label>o trimestre</label>
           <select id="inTrim" onchange="inModoTrim();renderIndicadores()"><option value="">— elegir —</option></select>
           <select id="inNeg" onchange="renderIndicadores()"><option value="">Todos los negocios</option></select>
+          <button class="exp-btn" onclick="abrirExportPDF('indicadores')" title="Exportar a PDF">⬇ PDF</button>
         </div>
         <div class="in-kpis" id="inKpis"></div>
       </div>
@@ -678,6 +696,19 @@ tr.peso-arr td.kg{color:#9A6A1E}
 </div>
 
 <div class="toast" id="toast"></div>
+
+<div class="exp-modal" id="expModal" style="display:none">
+  <div class="exp-box">
+    <div class="exp-ttl">Exportar a PDF</div>
+    <div class="exp-txt">¿Qué querés incluir en el informe?</div>
+    <div class="exp-btns">
+      <button class="btn btn-ghost" onclick="generarPDF('actual')">Solo esta pestaña</button>
+      <button class="btn btn-primary" onclick="generarPDF('completo')">Informe completo</button>
+    </div>
+    <div class="exp-nota">El informe completo incluye Existencias, Producción e Indicadores.</div>
+    <button class="exp-x" onclick="cerrarExportPDF()">✕</button>
+  </div>
+</div>
 
 <script>
 'use strict';
@@ -1366,6 +1397,7 @@ function renderMovtos(){
   // filtros
   var q=(document.getElementById('fSearch')||{}).value||''; q=q.toLowerCase();
   var fT=(document.getElementById('fTipo')||{}).value||'';
+  var fEf=(document.getElementById('fEfecto')||{}).value||'';
   var fN=(document.getElementById('fNegocio')||{}).value||'';
   var fC=(document.getElementById('fCategoria')||{}).value||'';
   var fR=(document.getElementById('fRodeo')||{}).value||'';
@@ -1377,6 +1409,7 @@ function renderMovtos(){
   for(var i=0;i<movs.length;i++){
     var m=movs[i];
     if(fT && m.tipoMovId!==fT) continue;
+    if(fEf && m.efecto!==fEf) continue;
     if(fN && m.negocioId!==fN && m.negocioDestId!==fN) continue;
     if(fC && m.categoriaId!==fC && m.categoriaDestId!==fC) continue;
     if(fR && m.rodeoId!==fR && m.rodeoDestId!==fR) continue;
@@ -2233,6 +2266,8 @@ function renderProduccion(){
   var desg=document.getElementById('prDesglose');
   var porCat=document.getElementById('prPorCat');
   var corte=document.getElementById('prCorte');
+  var corteDesg=document.getElementById('prCorteDesg');
+  if(corteDesg) corteDesg.textContent=fmtFecha(desde)+' → '+fmtFecha(hasta);
 
   if(!desde||!hasta){
     if(hero) hero.innerHTML='<div class="m-empty" style="width:100%">Elegí un período (desde y hasta) o un trimestre para calcular la producción de carne.</div>';
@@ -2556,6 +2591,151 @@ function renderIndicadoresTab(){
   fillSelect('inNeg', PA.demo.listarNegocios()||[], 'id','sigla', true);
   aplicarPeriodoA('in');
   renderIndicadores();
+}
+
+/* ====================================================================
+   EXPORTACIÓN — Movimientos a Excel; Producción/Indicadores/Existencias a PDF
+   ==================================================================== */
+
+/* Excel de movimientos (respeta filtros aplicados de la tabla) */
+function exportarMovimientosExcel(){
+  if(typeof XLSX==='undefined'){ toast('No se pudo cargar el exportador de Excel'); return; }
+  var movs=movtosDeEmpresa(CTX.empresaActivaId);
+  // aplicar los mismos filtros que la tabla
+  var fT=(document.getElementById('fTipo')||{}).value||'';
+  var fEf=(document.getElementById('fEfecto')||{}).value||'';
+  var fN=(document.getElementById('fNegocio')||{}).value||'';
+  var fC=(document.getElementById('fCategoria')||{}).value||'';
+  var fR=(document.getElementById('fRodeo')||{}).value||'';
+  var fK=(document.getElementById('fCampania')||{}).value||'';
+  var fD=(document.getElementById('fDesde')||{}).value||'';
+  var fH=(document.getElementById('fHasta')||{}).value||'';
+  var data=[['Fecha','Tipo','Efecto','Negocio','Categoría','Rodeo','Cabezas','Kg','Kg/cab','Campaña','Tercero','Obs']];
+  movs.sort(function(a,b){ return a.fecha<b.fecha?-1:1; });
+  for(var i=0;i<movs.length;i++){
+    var m=movs[i];
+    if(fT && m.tipoMovId!==fT) continue;
+    if(fEf && m.efecto!==fEf) continue;
+    if(fN && m.negocioId!==fN && m.negocioDestId!==fN) continue;
+    if(fC && m.categoriaId!==fC && m.categoriaDestId!==fC) continue;
+    if(fR && m.rodeoId!==fR && m.rodeoDestId!==fR) continue;
+    if(fK && m.campaniaId!==fK) continue;
+    if(fD && m.fecha<fD) continue;
+    if(fH && m.fecha>fH) continue;
+    data.push([
+      m.fecha, nombreTipo(m.tipoMovId), m.efecto||'',
+      nombreNegocio(m.negocioId), nombreCategoria(m.categoriaId), nombreRodeo(m.rodeoId),
+      m.cabezas||0, m.kg||0, (m.cabezas&&m.kg)?Math.round(m.kg/m.cabezas*10)/10:'',
+      nombreCampania(m.campaniaId), m.terceroId?nombreTercero(m.terceroId):'', m.obs||''
+    ]);
+  }
+  if(data.length<2){ toast('No hay movimientos para exportar'); return; }
+  var wb=XLSX.utils.book_new();
+  var ws=XLSX.utils.aoa_to_sheet(data);
+  ws['!cols']=[{wch:11},{wch:16},{wch:7},{wch:14},{wch:16},{wch:10},{wch:9},{wch:10},{wch:8},{wch:9},{wch:16},{wch:20}];
+  XLSX.utils.book_append_sheet(wb, ws, 'Movimientos');
+  XLSX.writeFile(wb, 'movimientos_hacienda_'+hoyISO()+'.xlsx');
+  toast('Excel generado');
+}
+
+function nombreTipo(id){
+  var ts=PA.demo.listarTiposMovHda?PA.demo.listarTiposMovHda():[];
+  for(var i=0;i<ts.length;i++){ if(ts[i].id===id) return ts[i].nombre; }
+  return id||'';
+}
+
+/* Modal de alcance para exportaciones PDF */
+function abrirExportPDF(origen){
+  // origen: 'produccion'|'indicadores'|'existencias' — la pestaña actual
+  var modal=document.getElementById('expModal');
+  if(modal){ modal.dataset.origen=origen; modal.style.display='flex'; }
+}
+function cerrarExportPDF(){ var m=document.getElementById('expModal'); if(m) m.style.display='none'; }
+
+function generarPDF(alcance){
+  cerrarExportPDF();
+  if(typeof window.jspdf==='undefined'){ toast('No se pudo cargar el exportador de PDF'); return; }
+  var origen=(document.getElementById('expModal')||{}).dataset?document.getElementById('expModal').dataset.origen:'';
+  var jsPDF=window.jspdf.jsPDF;
+  var doc=new jsPDF({unit:'pt',format:'a4'});
+  var W=doc.internal.pageSize.getWidth();
+  var y=44;
+
+  // encabezado Puntal Agro
+  doc.setFontSize(16); doc.setTextColor(74,101,51);
+  doc.text('Puntal Agro — Informe Ganadero', 40, y); y+=18;
+  doc.setFontSize(10); doc.setTextColor(120,120,120);
+  doc.text(nombreEmpresa(CTX.empresaActivaId)+'  ·  Generado '+fmtFecha(hoyISO()), 40, y); y+=24;
+  doc.setTextColor(40,40,40);
+
+  var secciones = (alcance==='completo') ? ['existencias','produccion','indicadores'] : [origen];
+  for(var s=0;s<secciones.length;s++){
+    y=seccionPDF(doc, secciones[s], y, W);
+    if(y>740 && s<secciones.length-1){ doc.addPage(); y=44; }
+  }
+  doc.save('informe_ganadero_'+hoyISO()+'.pdf');
+  toast('PDF generado');
+}
+
+/* dibuja una sección en el PDF y devuelve la nueva y */
+function seccionPDF(doc, tipo, y, W){
+  var camp=_campActiva || (PA.demo.campaniaActiva()?PA.demo.campaniaActiva().id:null);
+  doc.setFontSize(13); doc.setTextColor(74,101,51);
+
+  if(tipo==='existencias'){
+    var hasta=fechaCorte();
+    doc.text('Existencias al '+fmtFecha(hasta), 40, y); y+=8;
+    var acc=calcularStock(hasta);
+    var body=[];
+    for(var key in acc){ if(!acc.hasOwnProperty(key)) continue;
+      var pa=key.split('|'); if(Math.round(acc[key].cab)===0) continue;
+      var pes=ultimaPesada(pa[0],pa[1],pa[2],hasta);
+      var kgCab=pes?pes.kgCab:(acc[key].cab?acc[key].kg/acc[key].cab:0);
+      body.push([nombreNegocio(pa[0]), nombreCategoria(pa[2]), nombreRodeo(pa[1]), fInt(acc[key].cab), fInt(acc[key].cab*kgCab), fNum(kgCab,1)]);
+    }
+    doc.autoTable({ startY:y+6, head:[['Negocio','Categoría','Rodeo','Cabezas','Kg','Kg/cab']], body:body,
+      styles:{fontSize:8}, headStyles:{fillColor:[74,101,51]}, margin:{left:40,right:40} });
+    return doc.lastAutoTable.finalY+24;
+  }
+
+  if(tipo==='produccion'){
+    var d=_perDesde, h=_perHasta;
+    if(!d||!h){ var u=ultimoMes(); d=u.desde; h=u.hasta; }
+    doc.text('Producción de carne · '+fmtFecha(d)+' a '+fmtFecha(h), 40, y); y+=8;
+    var R=calcularProduccion(d, h, '');
+    var t=R.tot;
+    doc.autoTable({ startY:y+6,
+      head:[['Concepto','Kg']],
+      body:[['Existencia inicial',fInt(t.kgIni)],['+ Entradas',fInt(t.kgEnt)],['− Salidas',fInt(t.kgSal)],['Existencia final',fInt(t.kgFin)],['Producción de carne',fInt(t.prod)]],
+      styles:{fontSize:9}, headStyles:{fillColor:[74,101,51]}, margin:{left:40,right:40},
+      didParseCell:function(data){ if(data.row.index===4){ data.cell.styles.fontStyle='bold'; data.cell.styles.fillColor=[238,242,236]; } } });
+    return doc.lastAutoTable.finalY+24;
+  }
+
+  if(tipo==='indicadores'){
+    var d2=_perDesde, h2=_perHasta;
+    if(!d2||!h2){ var u2=ultimoMes(); d2=u2.desde; h2=u2.hasta; }
+    doc.text('Indicadores · '+fmtFecha(d2)+' a '+fmtFecha(h2), 40, y); y+=8;
+    var Rp=calcularProduccion(d2,h2,''); var prod=Rp.tot.prod;
+    var sp=stockPonderado(d2,h2,''); var dias=sp.dias;
+    var adpv=(sp.cab>0&&dias>0)?prod/sp.cab/dias:0;
+    var efi=(sp.kg>0)?prod/sp.kg*100:0;
+    var S=superficieGanadera(camp);
+    var cargaCab=(S.total>0)?sp.cab/S.total:0;
+    var body2=[
+      ['Producción de carne', fInt(prod)+' kg'],
+      ['A.D.P.V.', fNum(adpv,3)+' kg/cab/día'],
+      ['Eficiencia del stock', fNum(efi,1)+' %'],
+      ['Stock ponderado', fNum(sp.cab,1)+' cab · '+fInt(sp.kg)+' kg'],
+      ['Carga (sup. total '+fNum(S.total,1)+' ha)', S.total?fNum(cargaCab,2)+' cab/ha':'—'],
+      ['Producción/ha (total)', S.total?fNum(prod/S.total,1)+' kg/ha':'—'],
+      ['Producción/ha (efectiva '+fNum(S.efectiva,1)+' ha)', S.efectiva?fNum(prod/S.efectiva,1)+' kg/ha':'—']
+    ];
+    doc.autoTable({ startY:y+6, head:[['Indicador','Valor']], body:body2,
+      styles:{fontSize:9}, headStyles:{fillColor:[74,101,51]}, margin:{left:40,right:40} });
+    return doc.lastAutoTable.finalY+24;
+  }
+  return y;
 }
 
 /* ── INIT ── */
