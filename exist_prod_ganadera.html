@@ -110,6 +110,8 @@ main{max-width:1200px;margin:0 auto;padding:22px 20px}
 .ms-panel .ms-tools button{font-size:11.5px;background:none;border:none;color:var(--verde);cursor:pointer;font-weight:600;padding:3px 6px}
 .supl-elab{color:var(--terra-d,#9c4a1d)}
 .alerta-ej{display:inline-block;font-size:11.5px;font-weight:600;color:#9c4a1d;background:var(--terra-100,#F7E4DC);padding:2px 9px;border-radius:10px;margin-left:8px;cursor:help}
+.alerta-cierre{background:var(--terra-100,#F7E4DC);border:1.5px solid var(--terra,#C8642D);color:#7a3a17;border-radius:10px;padding:12px 16px;margin:12px 0;font-size:13px;line-height:1.5}
+.alerta-cierre strong{color:#9c4a1d}
 .efecto{font-size:11px;font-weight:600;padding:2px 8px;border-radius:6px}
 .ef-E{background:#E6F0E0;color:#3A6B2E}.ef-S{background:#F7E4DC;color:#A8501F}.ef-M{background:#EDEAE2;color:#7A6A55}
 .sexo .dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;vertical-align:middle}
@@ -548,6 +550,7 @@ tr.peso-arr td.kg{color:#9A6A1E}
           <select id="prCat" onchange="renderProduccion()"><option value="">Todas las categorías</option></select>
           <button class="exp-btn" onclick="abrirExportPDF('produccion')" title="Exportar a PDF">⬇ PDF</button>
         </div>
+        <div id="prAlertaPesada"></div>
         <div class="pr-hero" id="prHero"></div>
       </div>
     </div>
@@ -581,12 +584,18 @@ tr.peso-arr td.kg{color:#9A6A1E}
   <div class="page" id="page-superficie">
     <div class="ex-card">
       <div class="ex-b">
-        <div class="fwarn" style="margin-bottom:14px">La superficie viene del <strong>Plan de Uso del Suelo</strong>. Para modificarla, editá las actividades en esa herramienta. Acá se lee y se usa para los indicadores por hectárea.</div>
+        <div class="fwarn" style="margin-bottom:14px">La superficie se lee del <strong>Plan de Uso del Suelo</strong> y se usa para los indicadores por hectárea. Si no tenés todos los lotes cargados ahí, podés <strong>ingresarla manualmente</strong> abajo (por campaña).</div>
         <div class="tb-kpis">
           <div class="kpi"><div class="n" id="supTotal">0</div><div class="l">Sup. ganadera total (ha)</div></div>
           <div class="kpi t"><div class="n" id="supEfectiva">0</div><div class="l">Sup. efectiva / neta (ha)</div></div>
           <div class="kpi"><div class="n" id="supLotes">0</div><div class="l">Lotes con actividad ganadera</div></div>
         </div>
+        <div class="fbar" style="margin-top:14px;align-items:flex-end">
+          <div class="fld"><label>Sup. total manual (ha)</label><input class="inp" id="supTotalEdit" placeholder="(auto)" oninput="onSupManual()"></div>
+          <div class="fld"><label>Sup. efectiva manual (ha)</label><input class="inp" id="supEfecEdit" placeholder="(auto)" oninput="onSupManual()"></div>
+          <button class="btn btn-ghost btn-sm" onclick="limpiarSupManual()" title="Volver a la superficie del Plan de Uso">Usar Plan de Uso</button>
+        </div>
+        <div id="supOrigen" style="margin-top:8px;font-size:12px"></div>
       </div>
     </div>
 
@@ -617,6 +626,7 @@ tr.peso-arr td.kg{color:#9A6A1E}
           <select id="inCat" onchange="renderIndicadores()"><option value="">Todas las categorías</option></select>
           <button class="exp-btn" onclick="abrirExportPDF('indicadores')" title="Exportar a PDF">⬇ PDF</button>
         </div>
+        <div id="inAlertaPesada"></div>
         <div class="in-kpis" id="inKpis"></div>
       </div>
     </div>
@@ -2593,6 +2603,57 @@ function renderPesadas(){
 }
 
 /* Última pesada (kg/cab) de una categoría a una fecha de corte. Devuelve {kgCab, fecha, trimestre} o null */
+/* Categorías que tienen stock (>0 cab) a la fecha de corte pero NO tienen
+   una pesada con fecha exacta = fechaCorte. Devuelve array de nombres. */
+function categoriasSinPesadaCierre(fechaCorte){
+  if(!fechaCorte) return [];
+  var acc=calcularStock(fechaCorte);                 // ya filtra por campaña activa
+  var ps=pesadasDeEmpresa(CTX.empresaActivaId)||[];
+  // set de "neg|rod|cat" que tienen pesada exacta en la fecha de corte
+  var conPesada={};
+  for(var i=0;i<ps.length;i++){
+    var p=ps[i];
+    if(p.fecha!==fechaCorte) continue;
+    if(!p.cabPesadas||!p.kgPesados) continue;
+    conPesada[p.negocioId+'|'+p.rodeoId+'|'+p.categoriaId]=true;
+  }
+  // categorías con stock sin pesada en el cierre (dedup por nombre de categoría)
+  var faltan={}, orden=[];
+  for(var key in acc){ if(!acc.hasOwnProperty(key)) continue;
+    var a=acc[key];
+    if(a.cab<=0) continue;
+    if(conPesada[key]) continue;
+    var nom=nombreCategoria(a.cat);
+    if(!faltan[nom]){ faltan[nom]=true; orden.push(nom); }
+  }
+  return orden;
+}
+
+/* Peso (kg/cab) interpolado linealmente entre la pesada anterior y la siguiente a 'fecha'.
+   - Si hay pesada anterior y posterior: interpola lineal por días.
+   - Si solo hay anterior: usa esa (peso vigente).
+   - Si solo hay posterior o ninguna: devuelve null (el caller usa el fallback de movimientos). */
+function pesoInterpolado(neg, rod, cat, fecha){
+  var ps=pesadasDeEmpresa(CTX.empresaActivaId);
+  var ant=null, post=null;
+  for(var i=0;i<ps.length;i++){
+    var p=ps[i];
+    if(p.negocioId!==neg||p.rodeoId!==rod||p.categoriaId!==cat) continue;
+    if(!p.cabPesadas||!p.kgPesados) continue;
+    var kgc=p.kgPesados/p.cabPesadas;
+    if(p.fecha<=fecha){ if(!ant || p.fecha>ant.fecha) ant={fecha:p.fecha, kgCab:kgc}; }
+    else { if(!post || p.fecha<post.fecha) post={fecha:p.fecha, kgCab:kgc}; }
+  }
+  if(ant && post){
+    var dTot=diasEntre(ant.fecha, post.fecha);
+    if(dTot<=0) return ant.kgCab;
+    var dTrans=diasEntre(ant.fecha, fecha);
+    return ant.kgCab + (post.kgCab-ant.kgCab)*(dTrans/dTot);
+  }
+  if(ant) return ant.kgCab;   // solo anterior: peso vigente
+  return null;                 // sin anterior: opción A → caller usa fallback de movimientos
+}
+
 function ultimaPesada(neg, rod, cat, hasta){
   var ps=pesadasDeEmpresa(CTX.empresaActivaId);
   var mejor=null;
@@ -2846,6 +2907,15 @@ function fechaMenosUnDia(iso){
   return d.toISOString().slice(0,10);
 }
 
+/* Fecha del punto medio entre dos fechas ISO (para evaluar el peso promedio de un tramo) */
+function fechaMedia(isoA, isoB){
+  var pa=isoA.split('-'), pb=isoB.split('-');
+  var da=Date.UTC(parseInt(pa[0],10),parseInt(pa[1],10)-1,parseInt(pa[2],10));
+  var db=Date.UTC(parseInt(pb[0],10),parseInt(pb[1],10)-1,parseInt(pb[2],10));
+  var dm=new Date((da+db)/2);
+  return dm.toISOString().slice(0,10);
+}
+
 function renderProduccion(){
   if(typeof PA==='undefined' || !PA.demo || !CTX) return;
   var desde=(document.getElementById('prDesde')||{}).value;
@@ -2872,6 +2942,16 @@ function renderProduccion(){
   if(desde>hasta){
     if(hero) hero.innerHTML='<div class="fwarn" style="width:100%">La fecha "desde" es posterior a "hasta".</div>';
     return;
+  }
+
+  // Alerta: categorías con stock al cierre sin pesada en la fecha de corte
+  var prAl=document.getElementById('prAlertaPesada');
+  if(prAl){
+    var falP=categoriasSinPesadaCierre(hasta);
+    if(falP.length){
+      prAl.innerHTML='<div class="alerta-cierre">⚠ <strong>Atención:</strong> faltan pesadas de cierre al '+fmtFecha(hasta)+' para: <strong>'+falP.map(esc).join(', ')+'</strong>. '+
+        'Sin ellas, el peso final (kg y producción) de esas categorías es aproximado. Cargá las pesadas en la solapa Pesadas.</div>';
+    } else { prAl.innerHTML=''; }
   }
 
   var R=calcularProduccion(desde, hasta, fNeg, fCat);
@@ -2954,6 +3034,25 @@ function sincronizarPeriodo(pref){
    SUPERFICIE GANADERA — leída de Plan de Uso (actividades GAN) vía pa-core
    ==================================================================== */
 var LS_SUP_EXCL = 'pa_hac_sup_excl';  // exclusiones de lotes por campaña: {campaniaId: {loteId:true}}
+var LS_SUP_MANUAL = 'pa_hac_sup_manual';  // override manual de superficie por campaña: {campaniaId: {total:N, efectiva:N}}
+
+/* Devuelve el override manual de superficie para una campaña, o null si no hay */
+function supManual(camp){
+  var all=lsGetJSON(LS_SUP_MANUAL);
+  if(!all || all.constructor===Array) all={};
+  return (camp && all[camp]) ? all[camp] : null;
+}
+/* Guarda (o limpia) el override manual. Pasar null en un campo lo deja sin override. */
+function guardarSupManual(camp, total, efectiva){
+  if(!camp) return;
+  var all=lsGetJSON(LS_SUP_MANUAL);
+  if(!all || all.constructor===Array) all={};
+  var t=(total===''||total==null)?null:parseNum(total);
+  var e=(efectiva===''||efectiva==null)?null:parseNum(efectiva);
+  if(t==null && e==null){ delete all[camp]; }
+  else { all[camp]={total:t, efectiva:e}; }
+  lsSetJSON(LS_SUP_MANUAL, all);
+}
 
 /* ── Suplementación ──────────────────────────────────────────────
    Catálogos locales de este módulo (después migran a Maestros central).
@@ -4015,14 +4114,38 @@ function superficieGanadera(campaniaId){
   return { total:total, efectiva:efectiva, filas:filas, nLotes:nLotes };
 }
 
+/* Superficie a usar en indicadores: aplica el override manual si existe, si no la del Plan de Uso */
+function superficieUsar(camp){
+  var S=superficieGanadera(camp);
+  var man=supManual(camp);
+  return {
+    total:    (man && man.total!=null)    ? man.total    : S.total,
+    efectiva: (man && man.efectiva!=null) ? man.efectiva : S.efectiva,
+    nLotes:S.nLotes, filas:S.filas, manual:!!(man&&(man.total!=null||man.efectiva!=null))
+  };
+}
+
 function renderSuperficie(){
   if(typeof PA==='undefined' || !PA.demo || !CTX) return;
   var camp=_campActiva || (PA.demo.campaniaActiva()?PA.demo.campaniaActiva().id:null);
   var S=superficieGanadera(camp);
+  var man=supManual(camp);
+  // superficie efectiva a usar: override manual si existe, si no la del Plan de Uso
+  var totalUsar = (man && man.total!=null) ? man.total : S.total;
+  var efecUsar  = (man && man.efectiva!=null) ? man.efectiva : S.efectiva;
   var setTxt=function(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; };
-  setTxt('supTotal', fNum(S.total,1));
-  setTxt('supEfectiva', fNum(S.efectiva,1));
+  setTxt('supTotal', fNum(totalUsar,1));
+  setTxt('supEfectiva', fNum(efecUsar,1));
   setTxt('supLotes', S.nLotes);
+  // reflejar en los inputs editables y marcar el origen
+  var iT=document.getElementById('supTotalEdit'), iE=document.getElementById('supEfecEdit');
+  if(iT && document.activeElement!==iT) iT.value=(man&&man.total!=null)?man.total:'';
+  if(iE && document.activeElement!==iE) iE.value=(man&&man.efectiva!=null)?man.efectiva:'';
+  var org=document.getElementById('supOrigen');
+  if(org){
+    if(man && (man.total!=null||man.efectiva!=null)) org.innerHTML='<span class="alerta-ej">✎ Superficie ingresada manualmente</span> (Plan de Uso: '+fNum(S.total,1)+' ha total / '+fNum(S.efectiva,1)+' ha efectiva)';
+    else org.innerHTML='<span class="cmp">Superficie calculada desde Plan de Uso</span>';
+  }
   var corte=document.getElementById('supCorte'); if(corte) corte.textContent='Campaña '+(camp||'—');
 
   var tb=document.getElementById('supBody'); if(!tb) return;
@@ -4044,6 +4167,25 @@ function renderSuperficie(){
 }
 
 function renderSuperficieTab(){ renderSuperficie(); }
+
+/* Al editar los campos de superficie manual: guarda y re-renderiza superficie + indicadores */
+function onSupManual(){
+  var camp=_campActiva || (PA.demo.campaniaActiva()?PA.demo.campaniaActiva().id:null);
+  var t=(document.getElementById('supTotalEdit')||{}).value;
+  var e=(document.getElementById('supEfecEdit')||{}).value;
+  guardarSupManual(camp, t, e);
+  renderSuperficie();
+  if(typeof renderIndicadores==='function') renderIndicadores();
+}
+/* Limpia el override y vuelve a la superficie del Plan de Uso */
+function limpiarSupManual(){
+  var camp=_campActiva || (PA.demo.campaniaActiva()?PA.demo.campaniaActiva().id:null);
+  guardarSupManual(camp, null, null);
+  var iT=document.getElementById('supTotalEdit'), iE=document.getElementById('supEfecEdit');
+  if(iT) iT.value=''; if(iE) iE.value='';
+  renderSuperficie();
+  if(typeof renderIndicadores==='function') renderIndicadores();
+}
 
 /* ====================================================================
    INDICADORES (Capa 1) — stock ponderado por tiempo, ADPV, carga, eficiencia
@@ -4076,59 +4218,74 @@ function diasEntre(desde, hasta){
 function stockPonderado(desde, hasta, filtroNeg, filtroCat){
   var movs=movtosDeEmpresa(CTX.empresaActivaId);
   var dias=diasEntre(desde, hasta);
-  // stock inicial (día anterior a desde) por combinación
   var diaIni=fechaMenosUnDia(desde);
   var acc=calcularStock(diaIni); // {key:{cab,kg}}
-  // movimientos del período ordenados por fecha
-  var enRango=[];
-  for(var i=0;i<movs.length;i++){ if(movs[i].fecha>=desde && movs[i].fecha<=hasta) enRango.push(movs[i]); }
-  enRango.sort(function(a,b){ return a.fecha<b.fecha?-1:(a.fecha>b.fecha?1:0); });
-  // cabeza-días por combinación
-  var stockCab={}, cabActual={};
-  for(var k in acc){ if(acc.hasOwnProperty(k)){ cabActual[k]=acc[k].cab; } }
-  // recorrer día por día sería caro; en vez: integrar por tramos entre eventos
-  // construir lista de fechas-evento (cada movimiento cambia el stock al día de su fecha)
-  var cabDias={}; // key -> Σ cab×días
+  // eventos del período: movimientos (cambian cab y kg) y pesadas (reponderan kg/cab del stock)
+  var eventos=[];
+  for(var i=0;i<movs.length;i++){ if(movs[i].fecha>=desde && movs[i].fecha<=hasta) eventos.push({t:'mov', fecha:movs[i].fecha, m:movs[i]}); }
+  var pesArr=lsGetJSON(LS_PESADAS)||[];
+  var campP=_campActiva || (PA.demo.campaniaActiva()?PA.demo.campaniaActiva().id:null);
+  for(var p=0;p<pesArr.length;p++){
+    var pp=pesArr[p];
+    if(pp.empresaId!==CTX.empresaActivaId) continue;
+    if(pp.fecha<desde || pp.fecha>hasta) continue;
+    if(!pp.cabPesadas || !pp.kgPesados) continue;
+    eventos.push({t:'pes', fecha:pp.fecha, p:pp, kgCab:pp.kgPesados/pp.cabPesadas});
+  }
+  // ordenar por fecha; a igual fecha, movimientos antes que pesadas (la pesada refleja el stock ya movido)
+  eventos.sort(function(a,b){ if(a.fecha!==b.fecha) return a.fecha<b.fecha?-1:1; return (a.t==='mov'?0:1)-(b.t==='mov'?0:1); });
+  // cabeza-días y kg-días por combinación
+  var cabActual={}, kgMovActual={};  // kgMovActual = kg arrastrado por movimientos (fallback opción A)
+  for(var k in acc){ if(acc.hasOwnProperty(k)){ cabActual[k]=acc[k].cab; kgMovActual[k]=acc[k].kg; } }
+  var cabDias={}, kgDias={};
+  // addTramo: integra cab×días y kg×días; el kg usa peso interpolado si hay pesada, si no el de movimientos
   function addTramo(fDesdeISO, fHastaISO){
-    var d=diasEntre(fDesdeISO, fHastaISO); // inclusivo
+    var d=diasEntre(fDesdeISO, fHastaISO);
+    if(d<=0) return;
+    // punto medio del tramo para evaluar el peso interpolado (representa el promedio del tramo)
+    var fMed=fechaMedia(fDesdeISO, fHastaISO);
     for(var key in cabActual){ if(cabActual.hasOwnProperty(key)){
       if(!cabDias[key]) cabDias[key]=0;
+      if(!kgDias[key]) kgDias[key]=0;
       cabDias[key]+= cabActual[key]*d;
+      var pa=key.split('|');
+      var kgCabInt=pesoInterpolado(pa[0],pa[1],pa[2], fMed);
+      var kgTramo;
+      if(kgCabInt!=null){ kgTramo = cabActual[key]*kgCabInt; }         // peso interpolado de pesadas
+      else { kgTramo = kgMovActual[key]||0; }                          // opción A: fallback movimientos
+      kgDias[key]+= kgTramo*d;
     } }
   }
   var cursor=desde, idx=0;
-  while(idx<enRango.length){
-    var m=enRango[idx];
-    if(m.fecha>cursor){
-      // tramo desde 'cursor' hasta el día anterior al movimiento
-      addTramo(cursor, fechaMenosUnDia(m.fecha));
-      cursor=m.fecha;
+  while(idx<eventos.length){
+    var ev=eventos[idx];
+    if(ev.fecha>cursor){
+      addTramo(cursor, fechaMenosUnDia(ev.fecha));
+      cursor=ev.fecha;
     }
-    // aplicar todos los movimientos de esta fecha
-    while(idx<enRango.length && enRango[idx].fecha===cursor){
-      var mm=enRango[idx];
-      var key=mm.negocioId+'|'+mm.rodeoId+'|'+mm.categoriaId;
-      if(cabActual[key]===undefined) cabActual[key]=0;
-      var delta=(mm.efecto==='E')?(mm.cabezas||0):-(mm.cabezas||0);
-      cabActual[key]+=delta;
+    while(idx<eventos.length && eventos[idx].fecha===cursor){
+      var e=eventos[idx];
+      if(e.t==='mov'){
+        var mm=e.m;
+        var key2=mm.negocioId+'|'+mm.rodeoId+'|'+mm.categoriaId;
+        if(cabActual[key2]===undefined){ cabActual[key2]=0; kgMovActual[key2]=0; }
+        var signo=(mm.efecto==='E')?1:-1;
+        cabActual[key2]+= signo*(mm.cabezas||0);
+        kgMovActual[key2] += signo*(mm.kg||0);
+      }
+      // las pesadas ya no se aplican como salto: pesoInterpolado las lee directo del catálogo
       idx++;
     }
   }
-  // tramo final desde cursor hasta hasta
   addTramo(cursor, hasta);
 
-  // promedio = cabDias / dias; filtrar negocio; armar totales
   var totCab=0, totKg=0;
-  var stockFin=calcularStock(hasta);
-  for(var key2 in cabDias){ if(!cabDias.hasOwnProperty(key2)) continue;
-    var pa=key2.split('|');
-    if(filtroNeg && pa[0]!==filtroNeg) continue;
-    if(filtroCat && pa[2]!==filtroCat) continue;
-    var promCab=cabDias[key2]/dias;
-    // kg/cab reponderado: usar el peso vigente al final del período (aprox.)
-    var kgCab=kgCabAfecha(pa[0],pa[1],pa[2], hasta, stockFin);
-    totCab+=promCab;
-    totKg+=promCab*kgCab;
+  for(var key3 in cabDias){ if(!cabDias.hasOwnProperty(key3)) continue;
+    var pa3=key3.split('|');
+    if(filtroNeg && pa3[0]!==filtroNeg) continue;
+    if(filtroCat && pa3[2]!==filtroCat) continue;
+    totCab+= cabDias[key3]/dias;
+    totKg += kgDias[key3]/dias;
   }
   return { cab:totCab, kg:totKg, dias:dias };
 }
@@ -4220,6 +4377,16 @@ function renderIndicadores(){
   }
   if(desde>hasta){ if(kpis) kpis.innerHTML='<div class="fwarn" style="grid-column:1/-1">El "desde" es posterior al "hasta".</div>'; return; }
 
+  // Alerta: categorías con stock al cierre sin pesada en la fecha de corte
+  var alEl=document.getElementById('inAlertaPesada');
+  if(alEl){
+    var faltan=categoriasSinPesadaCierre(hasta);
+    if(faltan.length){
+      alEl.innerHTML='<div class="alerta-cierre">⚠ <strong>Atención:</strong> faltan pesadas de cierre al '+fmtFecha(hasta)+' para: <strong>'+faltan.map(esc).join(', ')+'</strong>. '+
+        'Sin ellas, el peso del stock (kg/cab, eficiencia y kg/ha) es aproximado. Cargá las pesadas en la solapa Pesadas.</div>';
+    } else { alEl.innerHTML=''; }
+  }
+
   var R=calcularProduccion(desde, hasta, fNeg, fCat);
   var prod=R.tot.prod;
   var sp=stockPonderado(desde, hasta, fNeg, fCat);
@@ -4230,7 +4397,7 @@ function renderIndicadores(){
   var efi=(sp.kg>0)? prod/sp.kg*100 : 0;
   // Superficie de la campaña activa
   var camp=_campActiva || (PA.demo.campaniaActiva()?PA.demo.campaniaActiva().id:null);
-  var S=superficieGanadera(camp);
+  var S=superficieUsar(camp);
   var cargaCab=(S.total>0)? sp.cab/S.total : 0;
   var cargaKg=(S.total>0)? sp.kg/S.total : 0;
   // EV (equivalente vaca)
@@ -4421,7 +4588,7 @@ function seccionPDF(doc, tipo, y, W){
     var sp=stockPonderado(d2,h2,''); var dias=sp.dias;
     var adpv=(sp.cab>0&&dias>0)?prod/sp.cab/dias:0;
     var efi=(sp.kg>0)?prod/sp.kg*100:0;
-    var S=superficieGanadera(camp);
+    var S=superficieUsar(camp);
     var cargaCab=(S.total>0)?sp.cab/S.total:0;
     var EVp=calcularEV(d2,h2,'');
     var evHa=(S.total>0)?EVp.evTotal/S.total:0;
