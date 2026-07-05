@@ -343,6 +343,9 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
 .rep-tbl th.rep-campo-h{color:#4A6533;border-left:1px solid #D8DDE3}
 .rep-tbl th.rep-tot-h{color:#475569;background:#F4F5F7}
 .view-actions{display:flex;justify-content:flex-end;margin-bottom:10px}
+.hist-camp-h{text-align:center;font-size:13px;font-weight:700;color:var(--text);padding:8px 8px}
+.hist-camp-start{border-left:1.5px solid #C5CCD6}
+#view-historico thead th{vertical-align:middle}
 .btn-pdf{background:#4A6533;color:#fff;border-color:#4A6533}
 .btn-pdf:hover{background:#3B5128;border-color:#3B5128}
 .rep-tbl th.rep-sub{font-size:10px;padding:3px 8px}
@@ -560,7 +563,7 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
           <option value="campo">Campo</option>
           <option value="cultivo">Cultivo</option>
           <option value="ambiente">Ambiente</option>
-          <option value="uso">Uso</option>
+          <option value="uso" selected>Uso</option>
           <option value="tenencia">Tenencia</option>
         </select>
         <span class="filtro-lbl-inline">Detallar por:</span>
@@ -575,7 +578,7 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
         <span class="filtro-lbl-inline">En columnas:</span>
         <select class="filtro-select" id="repDimensionCol" onchange="renderReportes()">
           <option value="">— (ninguno, solo total)</option>
-          <option value="campo">Campo</option>
+          <option value="campo" selected>Campo</option>
           <option value="cultivo">Cultivo</option>
           <option value="ambiente">Ambiente</option>
           <option value="uso">Uso</option>
@@ -3500,15 +3503,15 @@ function renderHistorico(){
   var head1 = '<tr><th rowspan="2">'+nomFila+'</th>';
   for(var hc=0;hc<CAMPANIAS.length;hc++){
     var cAbre = campAbierta(CAMPANIAS[hc]);
-    var bg = CAMPANIAS[hc]===state.campania?' style="background:#F5F7FA"':'';
-    head1 += '<th'+(cAbre?' colspan="2"':' rowspan="2"')+' class="rep-col-start"'+bg+'>'+CAMPANIAS[hc]+'</th>';
+    var bg = CAMPANIAS[hc]===state.campania?' style="background:#EEF1F6"':'';
+    head1 += '<th'+(cAbre?' colspan="2"':' rowspan="2"')+' class="hist-camp-h hist-camp-start"'+bg+'>'+CAMPANIAS[hc]+'</th>';
   }
   head1 += '</tr>';
   var head2 = '<tr>';
   for(var hc2=0;hc2<CAMPANIAS.length;hc2++){
     if(campAbierta(CAMPANIAS[hc2])){
-      var bg2 = CAMPANIAS[hc2]===state.campania?' style="background:#F5F7FA"':'';
-      head2 += '<th class="rep-sub rep-col-start"'+bg2+'>Cult. 1</th><th class="rep-sub"'+bg2+'>Cult. 2</th>';
+      var bg2 = CAMPANIAS[hc2]===state.campania?' style="background:#EEF1F6"':'';
+      head2 += '<th class="rep-sub hist-camp-start"'+bg2+'>Cult. 1</th><th class="rep-sub"'+bg2+'>Cult. 2</th>';
     }
   }
   head2 += '</tr>';
@@ -3520,13 +3523,13 @@ function renderHistorico(){
     return v>0 ? f(v,0) : '<span style="color:var(--muted)">—</span>';
   }
   function celdasCampania(cell, camp){
-    var bg = camp===state.campania?' style="background:#F5F7FA"':'';
+    var bg = camp===state.campania?' style="background:#EEF1F6"':'';
     if(campAbierta(camp)){
       var v1 = cell.neta1>0 ? f(cell.neta1,0) : '<span style="color:var(--muted)">·</span>';
       var v2 = cell.neta2>0 ? f(cell.neta2,0) : '<span style="color:var(--muted)">·</span>';
-      return '<td class="rep-col-start"'+bg+'>'+v1+'</td><td'+bg+'>'+v2+'</td>';
+      return '<td class="hist-camp-start"'+bg+'>'+v1+'</td><td'+bg+'>'+v2+'</td>';
     }
-    return '<td class="rep-col-start"'+bg+'>'+celdaVal(cell)+'</td>';
+    return '<td class="hist-camp-start"'+bg+'>'+celdaVal(cell)+'</td>';
   }
   var html='';
   for(var r=0;r<ordenFilas.length;r++){
@@ -3577,9 +3580,9 @@ function renderHistorico(){
     var cf = CAMPANIAS[fc];
     var bgf = cf===state.campania?' style="background:#EAEFE4"':'';
     if(campAbierta(cf)){
-      foot += '<td class="rep-col-start"'+bgf+'>'+(sum1[cf]>0?f(sum1[cf],0):'·')+'</td><td'+bgf+'>'+(sum2[cf]>0?f(sum2[cf],0):'·')+'</td>';
+      foot += '<td class="hist-camp-start"'+bgf+'>'+(sum1[cf]>0?f(sum1[cf],0):'·')+'</td><td'+bgf+'>'+(sum2[cf]>0?f(sum2[cf],0):'·')+'</td>';
     } else {
-      foot += '<td class="rep-col-start"'+bgf+'>'+(sumMode[cf]>0?f(sumMode[cf],0):'—')+'</td>';
+      foot += '<td class="hist-camp-start"'+bgf+'>'+(sumMode[cf]>0?f(sumMode[cf],0):'—')+'</td>';
     }
   }
   foot += '</tr>';
