@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seed operativo · Insumos/OT · Don Eduardo</title>
+<style>
+  body{font-family:'DM Sans',system-ui,sans-serif;max-width:720px;margin:40px auto;padding:0 20px;color:#2b2b2b;font-variant-numeric:tabular-nums}
+  h1{color:#4A6533;font-size:20px}
+  .box{border:1px solid #e2e2e2;border-radius:10px;padding:16px 18px;margin:14px 0}
+  .ok{color:#4A6533;font-weight:600}
+  .warn{color:#C8642D}
+  button{font-family:inherit;font-size:14px;background:#4A6533;color:#fff;border:0;border-radius:8px;padding:10px 16px;cursor:pointer}
+  button.sec{background:#fff;color:#C8642D;border:1px solid #C8642D}
+  code{background:#f4f4f0;padding:1px 5px;border-radius:4px;font-size:13px}
+  ul{line-height:1.7}
+</style>
+</head>
+<body>
+<h1>Seed operativo — Tablero Insumos/OT</h1>
+<p>Carga datos operativos de prueba (depósitos, stock, movimientos y órdenes de trabajo) para la empresa <strong>Agroganadera Don Eduardo</strong> en el almacenamiento local del tablero.</p>
+<div class="box">
+  <strong>¿Qué hace?</strong>
+  <ul>
+    <li>Escribe el espacio operativo de <code>emp_doneduardo</code> en <code>puntalagro_insumos_v4</code>.</li>
+    <li>2 depósitos, stock inicial + compras + 1 traslado, y 14 OT (8 aplicadas / 6 pendientes) repartidas por cultivo y campaña.</li>
+    <li>No toca <code>emp_albor_sa</code> (queda vacío, para ver el tablero sin datos).</li>
+    <li>Es <strong>idempotente</strong>: podés reabrirlo; siempre deja el mismo estado (reemplaza, no acumula).</li>
+  </ul>
+  <p class="warn">Importante: corré esto en el <strong>mismo origen</strong> donde usás el tablero (mismo GitHub Pages, o mismo <code>file://</code>). El localStorage no se comparte entre orígenes distintos.</p>
+</div>
+<div class="box">
+  <button onclick="seedRun()">Cargar datos de prueba</button>
+  <button class="sec" onclick="seedClear()">Borrar SOLO datos de Don Eduardo</button>
+  <p id="msg" style="margin-top:12px"></p>
+</div>
+<script>
+var LS_ROOT='puntalagro_insumos_v4';
+var EMP_ID='emp_doneduardo';
+var EMP_NOMBRE='Agroganadera Don Eduardo';
+function uid(){ return 'id_'+Math.random().toString(36).slice(2,10)+Date.now().toString(36); }
+function baseStateEmpty(){
+  var campoDefId=uid();
+  var depDefId=uid();
+  return {
+    contexto:{empresa:'', campaña:''},
+    campanias:[{id:'24-25',nombre:'24-25',orden:1,activa:false},{id:'25-26',nombre:'25-26',orden:2,activa:true}],
+    campaniaActivaId:'25-26',
+    catInsumos:['Semillas','Curasemillas/Inoculantes','Herbicidas','Insecticidas','Fungicidas','Fertilizantes','Combustibles y lubricantes','Sanidad animal','Varios'],
+    insumos:[],
+    campos:[{id:campoDefId,nombre:'Campo principal',localidad:''}],
+    lotes:[],
+    depositos:[{id:depDefId,nombre:'Depósito principal',campoId:campoDefId}],
+    actividades:['Trigo','Avena','Centeno','Girasol','Maíz','Maíz tardío','Maíz 2ª','Soja 1ª','Soja 2ª','Sementera Trigo','Sementera Cebada','Sementera Avena','Sementera Maíz','Sementera Soja 1ª','Verdeo invierno','Verdeo verano','Verdeo Diferido','Implantación Praderas','Conservación Praderas','Promociones Rye grass','Silajes','Rollos/Fardos','Silo bolsa','Barbecho','Estructura','Sementera Maíz tardío','Sementera Vicia cosecha','Vicia cosecha'],
+    laboresLP:[
+      {nombre:'Siembra',tarifaDefault:0},{nombre:'Resiembra',tarifaDefault:0},{nombre:'Pulv. Terrestre',tarifaDefault:0},
+      {nombre:'Pulv. Aérea',tarifaDefault:0},{nombre:'Desmalezado',tarifaDefault:0},{nombre:'Corte-hilerado',tarifaDefault:0},
+      {nombre:'Enrrollado',tarifaDefault:0},{nombre:'Embolsado',tarifaDefault:0},{nombre:'Extracción bolsa',tarifaDefault:0},
+      {nombre:'Elaboración ración',tarifaDefault:0},{nombre:'Distribución ración',tarifaDefault:0},{nombre:'Mantenimiento parque',tarifaDefault:0},
+      {nombre:'Fertilización voleo',tarifaDefault:0},{nombre:'Medición GPS',tarifaDefault:0},{nombre:'Rolo',tarifaDefault:0},
+      {nombre:'Cosecha propia',tarifaDefault:0},{nombre:'Cosecha',tarifaDefault:0},{nombre:'Picado+Embolsado',tarifaDefault:0},
+      {nombre:'Monitoreo cultivos',tarifaDefault:0},{nombre:'Gerenciamiento Trigo',tarifaDefault:0},{nombre:'Gerenciamiento Soja',tarifaDefault:0},
+      {nombre:'Gerenciamiento Maíz',tarifaDefault:0},{nombre:'Gerenciamiento Soja 2a',tarifaDefault:0}
+    ],
+    laboresLC:[
+      {nombre:'Siembra'},{nombre:'Resiembra'},{nombre:'Pulv. Terrestre'},{nombre:'Pulv. Aérea'},{nombre:'Desmalezado'},
+      {nombre:'Corte-hilerado'},{nombre:'Enrrollado'},{nombre:'Embolsado'},{nombre:'Extracción bolsa'},{nombre:'Clasificación semillas'},
+      {nombre:'Elaboración ración'},{nombre:'Distribución ración'},{nombre:'Gerenciamiento'},{nombre:'Fertilización líquida'},
+      {nombre:'Siembra Altina'},{nombre:'Siembra aérea'},{nombre:'Labor Fardos'},{nombre:'Disco-Rastra-Rolo'},
+      {nombre:'Fertilización voleo'},{nombre:'Rolo triturador'},{nombre:'Cosecha contratada'},{nombre:'Cosecha'},{nombre:'Picado+Embolsado'}
+    ],
+    tiposMov:[
+      {nombre:'Stock inicial',signo:1,requiereDestino:true,requiereOrigen:false},
+      {nombre:'Compra',signo:1,requiereDestino:true,requiereOrigen:false},
+      {nombre:'Ingreso por prod. propia',signo:1,requiereDestino:true,requiereOrigen:false},
+      {nombre:'Ajuste inventario (+)',signo:1,requiereDestino:true,requiereOrigen:false},
+      {nombre:'Consumo',signo:-1,requiereOrigen:true,requiereDestino:false},
+      {nombre:'Consumo OT',signo:-1,requiereOrigen:true,requiereDestino:false},
+      {nombre:'Baja por aplicación OT',signo:-1,requiereOrigen:true,requiereDestino:false},
+      {nombre:'Traslado',signo:0,requiereOrigen:true,requiereDestino:true},
+      {nombre:'Devolución a depósito',signo:1,requiereOrigen:false,requiereDestino:true},
+      {nombre:'Baja por vencimiento',signo:-1,requiereOrigen:true,requiereDestino:false},
+      {nombre:'Baja por rotura envase',signo:-1,requiereOrigen:true,requiereDestino:false},
+      {nombre:'Ajuste inventario (-)',signo:-1,requiereOrigen:true,requiereDestino:false},
+      {nombre:'Venta',signo:-1,requiereOrigen:true,requiereDestino:false}
+    ],
+    movtos:[],
+    comprobantes:[],
+    proveedores:[],
+    contratistas:[],
+    ots:[],
+    nextOt:1,
+    tcUSD:1000,
+    tcMensual:{},
+    tcApertura:0,
+    tcCierre:0
+  };
+}
+
+var STATE_PATCH = {"depositos": [{"id": "dep_de_central", "nombre": "Depósito central", "campoId": "campo_ec"}, {"id": "dep_de_puntal", "nombre": "Galpón El Puntal", "campoId": "campo_em"}], "comprobantes": [{"id": "cmp_0001", "fecha": "2025-07-01", "tipo": "Stock inicial", "comp_tipo": "", "comp_nro": "", "proveedorId": "", "campaniaId": "25-26", "obs": "Existencia inicial (demo)", "refOt": "", "refOtNum": ""}, {"id": "cmp_0014", "fecha": "2025-08-10", "tipo": "Compra", "comp_tipo": "OC", "comp_nro": "0001-00012345", "proveedorId": "", "campaniaId": "25-26", "obs": "", "refOt": "", "refOtNum": ""}, {"id": "cmp_0017", "fecha": "2025-08-12", "tipo": "Traslado", "comp_tipo": "", "comp_nro": "", "proveedorId": "", "campaniaId": "25-26", "obs": "Reparto a galpón", "refOt": "", "refOtNum": ""}, {"id": "cmp_0021", "fecha": "2025-08-25", "tipo": "Consumo OT", "comp_tipo": "OT", "comp_nro": "#201", "proveedorId": "", "campaniaId": "25-26", "obs": "Aplicación OT #201", "refOt": "ot_0020", "refOtNum": 201}, {"id": "cmp_0027", "fecha": "2025-08-25", "tipo": "Consumo OT", "comp_tipo": "OT", "comp_nro": "#202", "proveedorId": "", "campaniaId": "25-26", "obs": "Aplicación OT #202", "refOt": "ot_0026", "refOtNum": 202}, {"id": "cmp_0035", "fecha": "2025-08-25", "tipo": "Consumo OT", "comp_tipo": "OT", "comp_nro": "#204", "proveedorId": "", "campaniaId": "25-26", "obs": "Aplicación OT #204", "refOt": "ot_0034", "refOtNum": 204}, {"id": "cmp_0040", "fecha": "2025-08-25", "tipo": "Consumo OT", "comp_tipo": "OT", "comp_nro": "#205", "proveedorId": "", "campaniaId": "25-26", "obs": "Aplicación OT #205", "refOt": "ot_0039", "refOtNum": 205}, {"id": "cmp_0047", "fecha": "2025-08-25", "tipo": "Consumo OT", "comp_tipo": "OT", "comp_nro": "#207", "proveedorId": "", "campaniaId": "25-26", "obs": "Aplicación OT #207", "refOt": "ot_0046", "refOtNum": 207}, {"id": "cmp_0054", "fecha": "2026-09-15", "tipo": "Consumo OT", "comp_tipo": "OT", "comp_nro": "#209", "proveedorId": "", "campaniaId": "26-27", "obs": "Aplicación OT #209", "refOt": "ot_0053", "refOtNum": 209}, {"id": "cmp_0064", "fecha": "2024-09-20", "tipo": "Consumo OT", "comp_tipo": "OT", "comp_nro": "#212", "proveedorId": "", "campaniaId": "24-25", "obs": "Aplicación OT #212", "refOt": "ot_0063", "refOtNum": 212}, {"id": "cmp_0070", "fecha": "2024-09-20", "tipo": "Consumo OT", "comp_tipo": "OT", "comp_nro": "#213", "proveedorId": "", "campaniaId": "24-25", "obs": "Aplicación OT #213", "refOt": "ot_0069", "refOtNum": 213}], "movtos": [{"id": "mov_0002", "comprobanteId": "cmp_0001", "insumoId": "ins_de_000", "cant": 66.0, "origenId": "", "destinoId": "dep_de_central"}, {"id": "mov_0003", "comprobanteId": "cmp_0001", "insumoId": "ins_de_005", "cant": 52.5, "origenId": "", "destinoId": "dep_de_central"}, {"id": "mov_0004", "comprobanteId": "cmp_0001", "insumoId": "ins_de_013", "cant": 6847.5, "origenId": "", "destinoId": "dep_de_central"}, {"id": "mov_0005", "comprobanteId": "cmp_0001", "insumoId": "ins_de_023", "cant": 6840.0, "origenId": "", "destinoId": "dep_de_central"}, {"id": "mov_0006", "comprobanteId": "cmp_0001", "insumoId": "ins_de_030", "cant": 1.46, "origenId": "", "destinoId": "dep_de_central"}, {"id": "mov_0007", "comprobanteId": "cmp_0001", "insumoId": "ins_de_036", "cant": 1.14, "origenId": "", "destinoId": "dep_de_central"}, {"id": "mov_0008", "comprobanteId": "cmp_0001", "insumoId": "ins_de_037", "cant": 93.3, "origenId": "", "destinoId": "dep_de_central"}, {"id": "mov_0009", "comprobanteId": "cmp_0001", "insumoId": "ins_de_038", "cant": 210.75, "origenId": "", "destinoId": "dep_de_central"}, {"id": "mov_0010", "comprobanteId": "cmp_0001", "insumoId": "ins_de_039", "cant": 33.21, "origenId": "", "destinoId": "dep_de_central"}, {"id": "mov_0011", "comprobanteId": "cmp_0001", "insumoId": "ins_de_040", "cant": 884.4, "origenId": "", "destinoId": "dep_de_central"}, {"id": "mov_0012", "comprobanteId": "cmp_0001", "insumoId": "ins_de_079", "cant": 16.2, "origenId": "", "destinoId": "dep_de_central"}, {"id": "mov_0013", "comprobanteId": "cmp_0001", "insumoId": "ins_de_084", "cant": 24420.0, "origenId": "", "destinoId": "dep_de_central"}, {"id": "mov_0015", "comprobanteId": "cmp_0014", "insumoId": "ins_de_040", "cant": 500, "origenId": "", "destinoId": "dep_de_central"}, {"id": "mov_0016", "comprobanteId": "cmp_0014", "insumoId": "ins_de_084", "cant": 500, "origenId": "", "destinoId": "dep_de_central"}, {"id": "mov_0018", "comprobanteId": "cmp_0017", "insumoId": "ins_de_040", "cant": 100, "origenId": "dep_de_central", "destinoId": "dep_de_puntal"}, {"id": "mov_0022", "comprobanteId": "cmp_0021", "insumoId": "ins_de_013", "cant": 1925, "origenId": "dep_de_central", "destinoId": "", "refDest": "dst_0019"}, {"id": "mov_0023", "comprobanteId": "cmp_0021", "insumoId": "ins_de_079", "cant": 3.5, "origenId": "dep_de_central", "destinoId": "", "refDest": "dst_0019"}, {"id": "mov_0024", "comprobanteId": "cmp_0021", "insumoId": "ins_de_040", "cant": 70.0, "origenId": "dep_de_central", "destinoId": "", "refDest": "dst_0019"}, {"id": "mov_0028", "comprobanteId": "cmp_0027", "insumoId": "ins_de_013", "cant": 2640, "origenId": "dep_de_central", "destinoId": "", "refDest": "dst_0025"}, {"id": "mov_0029", "comprobanteId": "cmp_0027", "insumoId": "ins_de_040", "cant": 110.0, "origenId": "dep_de_central", "destinoId": "", "refDest": "dst_0025"}, {"id": "mov_0030", "comprobanteId": "cmp_0027", "insumoId": "ins_de_039", "cant": 5.28, "origenId": "dep_de_central", "destinoId": "", "refDest": "dst_0025"}, {"id": "mov_0036", "comprobanteId": "cmp_0035", "insumoId": "ins_de_023", "cant": 4560, "origenId": "dep_de_central", "destinoId": "", "refDest": "dst_0033"}, {"id": "mov_0037", "comprobanteId": "cmp_0035", "insumoId": "ins_de_079", "cant": 3.8, "origenId": "dep_de_central", "destinoId": "", "refDest": "dst_0033"}, {"id": "mov_0041", "comprobanteId": "cmp_0040", "insumoId": "ins_de_036", "cant": 0.304, "origenId": "dep_de_central", "destinoId": "", "refDest": "dst_0038"}, {"id": "mov_0042", "comprobanteId": "cmp_0040", "insumoId": "ins_de_039", "cant": 5.7, "origenId": "dep_de_central", "destinoId": "", "refDest": "dst_0038"}, {"id": "mov_0048", "comprobanteId": "cmp_0047", "insumoId": "ins_de_030", "cant": 0.977, "origenId": "dep_de_central", "destinoId": "", "refDest": "dst_0045"}, {"id": "mov_0049", "comprobanteId": "cmp_0047", "insumoId": "ins_de_040", "cant": 83.6, "origenId": "dep_de_central", "destinoId": "", "refDest": "dst_0045"}, {"id": "mov_0055", "comprobanteId": "cmp_0054", "insumoId": "ins_de_005", "cant": 35, "origenId": "dep_de_central", "destinoId": "", "refDest": "dst_0052"}, {"id": "mov_0056", "comprobanteId": "cmp_0054", "insumoId": "ins_de_079", "cant": 3.5, "origenId": "dep_de_central", "destinoId": "", "refDest": "dst_0052"}, {"id": "mov_0057", "comprobanteId": "cmp_0054", "insumoId": "ins_de_040", "cant": 70.0, "origenId": "dep_de_central", "destinoId": "", "refDest": "dst_0052"}, {"id": "mov_0065", "comprobanteId": "cmp_0064", "insumoId": "ins_de_000", "cant": 44, "origenId": "dep_de_central", "destinoId": "", "refDest": "dst_0062"}, {"id": "mov_0066", "comprobanteId": "cmp_0064", "insumoId": "ins_de_084", "cant": 9680, "origenId": "dep_de_central", "destinoId": "", "refDest": "dst_0062"}, {"id": "mov_0067", "comprobanteId": "cmp_0064", "insumoId": "ins_de_038", "cant": 88.0, "origenId": "dep_de_central", "destinoId": "", "refDest": "dst_0062"}, {"id": "mov_0071", "comprobanteId": "cmp_0070", "insumoId": "ins_de_040", "cant": 110.0, "origenId": "dep_de_central", "destinoId": "", "refDest": "dst_0068"}, {"id": "mov_0072", "comprobanteId": "cmp_0070", "insumoId": "ins_de_039", "cant": 6.6, "origenId": "dep_de_central", "destinoId": "", "refDest": "dst_0068"}], "ots": [{"id": "ot_0020", "num": 201, "fecha": "2025-08-20", "campaniaId": "25-26", "laborTipo": "", "contratistaId": "", "obs": "", "estado": "Aplicada", "plantilla": [{"insumoId": "ins_de_013", "dosis": 55}, {"insumoId": "ins_de_079", "dosis": 0.1}, {"insumoId": "ins_de_040", "dosis": 2.0}], "destinos": [{"id": "dst_0019", "campoId": "campo_ec", "loteId": "lot_doneduardo_0", "cultivo": "Soja 1ª", "subact": "", "ha": 35, "fechaAplicReal": "2025-08-25", "estadoLote": "Aplicado", "lineas": [{"insumoId": "ins_de_013", "dosis": 55, "entregada": 1925, "usado": 1925, "devStock": 0, "devBaja": 0, "deposito": "Depósito central"}, {"insumoId": "ins_de_079", "dosis": 0.1, "entregada": 3.5, "usado": 3.5, "devStock": 0, "devBaja": 0, "deposito": "Depósito central"}, {"insumoId": "ins_de_040", "dosis": 2.0, "entregada": 70.0, "usado": 70.0, "devStock": 0, "devBaja": 0, "deposito": "Depósito central"}]}], "aplicaciones": []}, {"id": "ot_0026", "num": 202, "fecha": "2025-08-20", "campaniaId": "25-26", "laborTipo": "", "contratistaId": "", "obs": "", "estado": "Aplicada", "plantilla": [{"insumoId": "ins_de_013", "dosis": 60}, {"insumoId": "ins_de_040", "dosis": 2.5}, {"insumoId": "ins_de_039", "dosis": 0.12}], "destinos": [{"id": "dst_0025", "campoId": "campo_em", "loteId": "lot_doneduardo_3", "cultivo": "Soja 1ª", "subact": "", "ha": 44, "fechaAplicReal": "2025-08-25", "estadoLote": "Aplicado", "lineas": [{"insumoId": "ins_de_013", "dosis": 60, "entregada": 2640, "usado": 2640, "devStock": 0, "devBaja": 0, "deposito": "Depósito central"}, {"insumoId": "ins_de_040", "dosis": 2.5, "entregada": 110.0, "usado": 110.0, "devStock": 0, "devBaja": 0, "deposito": "Depósito central"}, {"insumoId": "ins_de_039", "dosis": 0.12, "entregada": 5.28, "usado": 5.28, "devStock": 0, "devBaja": 0, "deposito": "Depósito central"}]}], "aplicaciones": []}, {"id": "ot_0032", "num": 203, "fecha": "2025-08-20", "campaniaId": "25-26", "laborTipo": "", "contratistaId": "", "obs": "", "estado": "Pendiente", "plantilla": [{"insumoId": "ins_de_036", "dosis": 0.007}, {"insumoId": "ins_de_037", "dosis": 0.8}], "destinos": [{"id": "dst_0031", "campoId": "campo_ec", "loteId": "lot_doneduardo_0", "cultivo": "Soja 1ª", "subact": "", "ha": 35, "fechaAplicReal": "", "estadoLote": "Pendiente", "lineas": [{"insumoId": "ins_de_036", "dosis": 0.007, "entregada": 0, "usado": 0, "devStock": 0, "devBaja": 0, "deposito": ""}, {"insumoId": "ins_de_037", "dosis": 0.8, "entregada": 0, "usado": 0, "devStock": 0, "devBaja": 0, "deposito": ""}]}], "aplicaciones": []}, {"id": "ot_0034", "num": 204, "fecha": "2025-08-20", "campaniaId": "25-26", "laborTipo": "", "contratistaId": "", "obs": "", "estado": "Aplicada", "plantilla": [{"insumoId": "ins_de_023", "dosis": 120}, {"insumoId": "ins_de_079", "dosis": 0.1}], "destinos": [{"id": "dst_0033", "campoId": "campo_em", "loteId": "lot_doneduardo_4", "cultivo": "Trigo", "subact": "", "ha": 38, "fechaAplicReal": "2025-08-25", "estadoLote": "Aplicado", "lineas": [{"insumoId": "ins_de_023", "dosis": 120, "entregada": 4560, "usado": 4560, "devStock": 0, "devBaja": 0, "deposito": "Depósito central"}, {"insumoId": "ins_de_079", "dosis": 0.1, "entregada": 3.8, "usado": 3.8, "devStock": 0, "devBaja": 0, "deposito": "Depósito central"}]}], "aplicaciones": []}, {"id": "ot_0039", "num": 205, "fecha": "2025-08-20", "campaniaId": "25-26", "laborTipo": "", "contratistaId": "", "obs": "", "estado": "Aplicada", "plantilla": [{"insumoId": "ins_de_036", "dosis": 0.008}, {"insumoId": "ins_de_039", "dosis": 0.15}], "destinos": [{"id": "dst_0038", "campoId": "campo_em", "loteId": "lot_doneduardo_4", "cultivo": "Trigo", "subact": "", "ha": 38, "fechaAplicReal": "2025-08-25", "estadoLote": "Aplicado", "lineas": [{"insumoId": "ins_de_036", "dosis": 0.008, "entregada": 0.304, "usado": 0.304, "devStock": 0, "devBaja": 0, "deposito": "Depósito central"}, {"insumoId": "ins_de_039", "dosis": 0.15, "entregada": 5.7, "usado": 5.7, "devStock": 0, "devBaja": 0, "deposito": "Depósito central"}]}], "aplicaciones": []}, {"id": "ot_0044", "num": 206, "fecha": "2025-08-20", "campaniaId": "25-26", "laborTipo": "", "contratistaId": "", "obs": "", "estado": "Pendiente", "plantilla": [{"insumoId": "ins_de_040", "dosis": 2.0}], "destinos": [{"id": "dst_0043", "campoId": "campo_em", "loteId": "lot_doneduardo_4", "cultivo": "Trigo", "subact": "", "ha": 38, "fechaAplicReal": "", "estadoLote": "Pendiente", "lineas": [{"insumoId": "ins_de_040", "dosis": 2.0, "entregada": 0, "usado": 0, "devStock": 0, "devBaja": 0, "deposito": ""}]}], "aplicaciones": []}, {"id": "ot_0046", "num": 207, "fecha": "2025-08-20", "campaniaId": "25-26", "laborTipo": "", "contratistaId": "", "obs": "", "estado": "Aplicada", "plantilla": [{"insumoId": "ins_de_030", "dosis": 0.0257}, {"insumoId": "ins_de_040", "dosis": 2.2}], "destinos": [{"id": "dst_0045", "campoId": "campo_em", "loteId": "lot_doneduardo_4", "cultivo": "Soja 2ª", "subact": "", "ha": 38, "fechaAplicReal": "2025-08-25", "estadoLote": "Aplicado", "lineas": [{"insumoId": "ins_de_030", "dosis": 0.0257, "entregada": 0.977, "usado": 0.977, "devStock": 0, "devBaja": 0, "deposito": "Depósito central"}, {"insumoId": "ins_de_040", "dosis": 2.2, "entregada": 83.6, "usado": 83.6, "devStock": 0, "devBaja": 0, "deposito": "Depósito central"}]}], "aplicaciones": []}, {"id": "ot_0051", "num": 208, "fecha": "2025-08-20", "campaniaId": "25-26", "laborTipo": "", "contratistaId": "", "obs": "", "estado": "Pendiente", "plantilla": [{"insumoId": "ins_de_037", "dosis": 0.9}, {"insumoId": "ins_de_039", "dosis": 0.12}], "destinos": [{"id": "dst_0050", "campoId": "campo_em", "loteId": "lot_doneduardo_4", "cultivo": "Soja 2ª", "subact": "", "ha": 38, "fechaAplicReal": "", "estadoLote": "Pendiente", "lineas": [{"insumoId": "ins_de_037", "dosis": 0.9, "entregada": 0, "usado": 0, "devStock": 0, "devBaja": 0, "deposito": ""}, {"insumoId": "ins_de_039", "dosis": 0.12, "entregada": 0, "usado": 0, "devStock": 0, "devBaja": 0, "deposito": ""}]}], "aplicaciones": []}, {"id": "ot_0053", "num": 209, "fecha": "2026-09-10", "campaniaId": "26-27", "laborTipo": "", "contratistaId": "", "obs": "", "estado": "Aplicada", "plantilla": [{"insumoId": "ins_de_005", "dosis": 1}, {"insumoId": "ins_de_079", "dosis": 0.1}, {"insumoId": "ins_de_040", "dosis": 2.0}], "destinos": [{"id": "dst_0052", "campoId": "campo_ec", "loteId": "lot_doneduardo_0", "cultivo": "Girasol", "subact": "", "ha": 35, "fechaAplicReal": "2026-09-15", "estadoLote": "Aplicado", "lineas": [{"insumoId": "ins_de_005", "dosis": 1, "entregada": 35, "usado": 35, "devStock": 0, "devBaja": 0, "deposito": "Depósito central"}, {"insumoId": "ins_de_079", "dosis": 0.1, "entregada": 3.5, "usado": 3.5, "devStock": 0, "devBaja": 0, "deposito": "Depósito central"}, {"insumoId": "ins_de_040", "dosis": 2.0, "entregada": 70.0, "usado": 70.0, "devStock": 0, "devBaja": 0, "deposito": "Depósito central"}]}], "aplicaciones": []}, {"id": "ot_0059", "num": 210, "fecha": "2026-09-10", "campaniaId": "26-27", "laborTipo": "", "contratistaId": "", "obs": "", "estado": "Pendiente", "plantilla": [{"insumoId": "ins_de_038", "dosis": 1.5}, {"insumoId": "ins_de_040", "dosis": 2.0}], "destinos": [{"id": "dst_0058", "campoId": "campo_ec", "loteId": "lot_doneduardo_0", "cultivo": "Girasol", "subact": "", "ha": 35, "fechaAplicReal": "", "estadoLote": "Pendiente", "lineas": [{"insumoId": "ins_de_038", "dosis": 1.5, "entregada": 0, "usado": 0, "devStock": 0, "devBaja": 0, "deposito": ""}, {"insumoId": "ins_de_040", "dosis": 2.0, "entregada": 0, "usado": 0, "devStock": 0, "devBaja": 0, "deposito": ""}]}], "aplicaciones": []}, {"id": "ot_0061", "num": 211, "fecha": "2026-09-10", "campaniaId": "26-27", "laborTipo": "", "contratistaId": "", "obs": "", "estado": "Pendiente", "plantilla": [{"insumoId": "ins_de_036", "dosis": 0.006}], "destinos": [{"id": "dst_0060", "campoId": "campo_ec", "loteId": "lot_doneduardo_0", "cultivo": "Girasol", "subact": "", "ha": 35, "fechaAplicReal": "", "estadoLote": "Pendiente", "lineas": [{"insumoId": "ins_de_036", "dosis": 0.006, "entregada": 0, "usado": 0, "devStock": 0, "devBaja": 0, "deposito": ""}]}], "aplicaciones": []}, {"id": "ot_0063", "num": 212, "fecha": "2024-09-15", "campaniaId": "24-25", "laborTipo": "", "contratistaId": "", "obs": "", "estado": "Aplicada", "plantilla": [{"insumoId": "ins_de_000", "dosis": 1}, {"insumoId": "ins_de_084", "dosis": 220}, {"insumoId": "ins_de_038", "dosis": 2.0}], "destinos": [{"id": "dst_0062", "campoId": "campo_em", "loteId": "lot_doneduardo_3", "cultivo": "Maíz", "subact": "", "ha": 44, "fechaAplicReal": "2024-09-20", "estadoLote": "Aplicado", "lineas": [{"insumoId": "ins_de_000", "dosis": 1, "entregada": 44, "usado": 44, "devStock": 0, "devBaja": 0, "deposito": "Depósito central"}, {"insumoId": "ins_de_084", "dosis": 220, "entregada": 9680, "usado": 9680, "devStock": 0, "devBaja": 0, "deposito": "Depósito central"}, {"insumoId": "ins_de_038", "dosis": 2.0, "entregada": 88.0, "usado": 88.0, "devStock": 0, "devBaja": 0, "deposito": "Depósito central"}]}], "aplicaciones": []}, {"id": "ot_0069", "num": 213, "fecha": "2024-09-15", "campaniaId": "24-25", "laborTipo": "", "contratistaId": "", "obs": "", "estado": "Aplicada", "plantilla": [{"insumoId": "ins_de_040", "dosis": 2.5}, {"insumoId": "ins_de_039", "dosis": 0.15}], "destinos": [{"id": "dst_0068", "campoId": "campo_em", "loteId": "lot_doneduardo_3", "cultivo": "Maíz", "subact": "", "ha": 44, "fechaAplicReal": "2024-09-20", "estadoLote": "Aplicado", "lineas": [{"insumoId": "ins_de_040", "dosis": 2.5, "entregada": 110.0, "usado": 110.0, "devStock": 0, "devBaja": 0, "deposito": "Depósito central"}, {"insumoId": "ins_de_039", "dosis": 0.15, "entregada": 6.6, "usado": 6.6, "devStock": 0, "devBaja": 0, "deposito": "Depósito central"}]}], "aplicaciones": []}, {"id": "ot_0074", "num": 214, "fecha": "2024-09-15", "campaniaId": "24-25", "laborTipo": "", "contratistaId": "", "obs": "", "estado": "Pendiente", "plantilla": [{"insumoId": "ins_de_084", "dosis": 150}], "destinos": [{"id": "dst_0073", "campoId": "campo_em", "loteId": "lot_doneduardo_3", "cultivo": "Maíz", "subact": "", "ha": 44, "fechaAplicReal": "", "estadoLote": "Pendiente", "lineas": [{"insumoId": "ins_de_084", "dosis": 150, "entregada": 0, "usado": 0, "devStock": 0, "devBaja": 0, "deposito": ""}]}], "aplicaciones": []}], "nextOt": 215};
+
+function buildState(){
+  var st = baseStateEmpty();
+  // Contexto empresa
+  st.contexto = { empresa: EMP_NOMBRE, campaña: '25-26' };
+  // Aplicar patch operativo (reemplaza colecciones enteras)
+  st.depositos    = STATE_PATCH.depositos;
+  st.comprobantes = STATE_PATCH.comprobantes;
+  st.movtos       = STATE_PATCH.movtos;
+  st.ots          = STATE_PATCH.ots;
+  st.nextOt       = STATE_PATCH.nextOt;
+  // Insumos/lotes/campos/actividades se INYECTAN desde pa-core al abrir el tablero
+  // (inyectarCatalogosDesdePA). Acá los dejamos vacíos: el tablero los completa.
+  st.insumos = [];
+  st.lotes = [];
+  st.campos = [];
+  return st;
+}
+
+function loadRoot(){
+  var root={espacios:{}, activoId:null};
+  try{ var raw=localStorage.getItem(LS_ROOT); if(raw){ root=JSON.parse(raw); } }catch(e){}
+  if(!root || !root.espacios){ root={espacios:{}, activoId:null}; }
+  return root;
+}
+
+function seedRun(){
+  var root=loadRoot();
+  root.espacios[EMP_ID] = { nombre: EMP_NOMBRE, state: buildState() };
+  root.activoId = EMP_ID;
+  try{
+    localStorage.setItem(LS_ROOT, JSON.stringify(root));
+    var st=root.espacios[EMP_ID].state;
+    document.getElementById('msg').innerHTML =
+      '<span class="ok">✔ Datos cargados.</span> '+st.ots.length+' OT, '+
+      st.movtos.length+' movimientos, '+st.comprobantes.length+' comprobantes, '+
+      st.depositos.length+' depósitos.<br>Abrí el tablero (misma URL/origen) y elegí la empresa <strong>'+EMP_NOMBRE+'</strong>.';
+  }catch(e){
+    document.getElementById('msg').innerHTML='<span class="warn">No se pudo escribir: '+e+'</span>';
+  }
+}
+
+function seedClear(){
+  var root=loadRoot();
+  if(root.espacios && root.espacios[EMP_ID]){
+    delete root.espacios[EMP_ID];
+    if(root.activoId===EMP_ID) root.activoId = Object.keys(root.espacios)[0]||null;
+    localStorage.setItem(LS_ROOT, JSON.stringify(root));
+    document.getElementById('msg').innerHTML='<span class="ok">✔ Datos de Don Eduardo borrados.</span> El resto quedó intacto.';
+  } else {
+    document.getElementById('msg').innerHTML='No había datos de Don Eduardo para borrar.';
+  }
+}
+</script>
+</body>
+</html>
