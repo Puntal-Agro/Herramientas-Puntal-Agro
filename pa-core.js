@@ -29,13 +29,9 @@
   var LS_LOTES    = 'pa_lotes';         // lotes (por empresa) — se crean en Plan de Uso
   var LS_ACTIVIDADES = 'pa_actividades';// actividades por lote/campaña — se crean en Plan de Uso
   var LS_CAMPANIAS = 'pa_campanias';    // campañas (global Puntal) — etiqueta de gestión, sin fechas
-  var LS_NEGOCIOS = 'pa_negocios';      // negocios ganaderos (global Puntal)
-  var LS_CATHDA   = 'pa_cat_hda';       // categorías de hacienda (global Puntal)
-  var LS_TIPOMOVHDA = 'pa_tipomov_hda'; // tipos de movimiento de hacienda (global Puntal)
-  var LS_RODEOS   = 'pa_rodeos';        // rodeos / socios (por empresa)
   var LS_SESION   = 'pa_sesion';        // sesión activa { usuarioId, empresaActivaId }
   var LS_SEEDVER  = 'pa_seed_ver';      // versión del seed demo
-  var SEED_VER    = '16';               // subir este número al cambiar la estructura del seed
+  var SEED_VER    = '15';               // subir este número al cambiar la estructura del seed
 
   // Herramientas PROPIAS (asignable=true): id + nombre legible.
   // Deben coincidir con los data-tool del index y con §5.2 del modelo.
@@ -47,8 +43,7 @@
     { id: 'ProgramaSiembra',    nombre: 'Programa de Siembra' },
     { id: 'tablero_hacienda',   nombre: 'Tablero de Relaciones Ganaderas' },
     { id: 'tablero_labores',    nombre: 'Tarifa de Labores y Fletes' },
-    { id: 'Fitosanitarios',     nombre: 'Requerimiento de Fitosanitarios' },
-    { id: 'exist_prod_ganadera', nombre: 'Existencia y Producción Ganadera' }
+    { id: 'Fitosanitarios',     nombre: 'Requerimiento de Fitosanitarios' }
   ];
   function idsHerramientasPropias() {
     var out = [];
@@ -94,10 +89,6 @@
       localStorage.removeItem(LS_UNIDADES);
       localStorage.removeItem(LS_INSUMOS);
       localStorage.removeItem(LS_MODOSACC);
-      localStorage.removeItem(LS_NEGOCIOS);
-      localStorage.removeItem(LS_CATHDA);
-      localStorage.removeItem(LS_TIPOMOVHDA);
-      localStorage.removeItem(LS_RODEOS);
     } catch (e) {}
 
     var clientes = [
@@ -131,7 +122,7 @@
     ];
     var permisos = [
       { usuarioId: 'usr_maria', empresaId: 'emp_albor_sa', campoIds: [],
-        herramientas: ['tablero_agro', 'tablero_insumos_ot', 'tablero_uso_suelo', 'Fitosanitarios', 'exist_prod_ganadera'], nivel: 'administrar' },
+        herramientas: ['tablero_agro', 'tablero_insumos_ot', 'tablero_uso_suelo', 'Fitosanitarios'], nivel: 'administrar' },
       { usuarioId: 'usr_maria', empresaId: 'emp_lospinos', campoIds: [],
         herramientas: ['tablero_insumos_ot', 'tablero_uso_suelo'], nivel: 'cargar' },
       { usuarioId: 'usr_jose', empresaId: 'emp_albor_sa', campoIds: ['campo_elpuntal'],
@@ -139,7 +130,7 @@
       { usuarioId: 'usr_ana', empresaId: 'emp_albor_sa', campoIds: [],
         herramientas: ['tablero_agro'], nivel: 'ver' },
       { usuarioId: 'usr_eduardo', empresaId: 'emp_doneduardo', campoIds: [],
-        herramientas: ['tablero_agro', 'tablero_insumos_ot', 'tablero_uso_suelo', 'Fitosanitarios', 'exist_prod_ganadera'], nivel: 'administrar' }
+        herramientas: ['tablero_agro', 'tablero_insumos_ot', 'tablero_uso_suelo', 'Fitosanitarios'], nivel: 'administrar' }
     ];
     var tiposProv = [
       { id: 'tp_transp', nombre: 'transportista' },
@@ -180,7 +171,8 @@
 
     var unidadesBase = [
       ['kg','Kilogramo'], ['g','Gramo'], ['tn','Tonelada'], ['l','Litro'], ['ml','Mililitro'],
-      ['cm³','Centímetro cúbico'], ['bolsa','Bolsa'], ['caja','Caja'], ['u','Unidad'], ['dosis','Dosis']
+      ['cm³','Centímetro cúbico'], ['bolsa','Bolsa'], ['caja','Caja'], ['u','Unidad'], ['dosis','Dosis'],
+      ['pack','Pack'], ['sobre','Sobre']
     ];
     var unidades = [];
     for (var ui=0; ui<unidadesBase.length; ui++){
@@ -288,6 +280,193 @@
         modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null }
     ];
 
+    var insumosDE = [
+      { id: 'ins_de_000', empresaId: 'emp_doneduardo', activo: true, nombre: 'Maíz DK 72-72TRE', tipo: 'Semillas', unidadId: 'uni_6',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_001', empresaId: 'emp_doneduardo', activo: true, nombre: 'Maíz DK 69-62 RIB', tipo: 'Semillas', unidadId: 'uni_6',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_002', empresaId: 'emp_doneduardo', activo: true, nombre: 'Maíz DK 72-20 Pro4', tipo: 'Semillas', unidadId: 'uni_6',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_003', empresaId: 'emp_doneduardo', activo: true, nombre: 'Maíz DK 72-20 Pro4 RIB', tipo: 'Semillas', unidadId: 'uni_6',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_004', empresaId: 'emp_doneduardo', activo: true, nombre: 'Maíz DK 72-72 TRE SPC', tipo: 'Semillas', unidadId: 'uni_6',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_005', empresaId: 'emp_doneduardo', activo: true, nombre: 'Girasol P 102 CL', tipo: 'Semillas', unidadId: 'uni_6',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_006', empresaId: 'emp_doneduardo', activo: true, nombre: 'Girasol NK 3969 CL', tipo: 'Semillas', unidadId: 'uni_6',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_007', empresaId: 'emp_doneduardo', activo: true, nombre: 'Agropiro Extremo', tipo: 'Semillas', unidadId: 'uni_0',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_008', empresaId: 'emp_doneduardo', activo: true, nombre: 'Lotus tenuis Nahuel', tipo: 'Semillas', unidadId: 'uni_0',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_009', empresaId: 'emp_doneduardo', activo: true, nombre: 'Trébol blanco Centinela', tipo: 'Semillas', unidadId: 'uni_0',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_010', empresaId: 'emp_doneduardo', activo: true, nombre: 'Festuca Gentos Malma', tipo: 'Semillas', unidadId: 'uni_0',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_011', empresaId: 'emp_doneduardo', activo: true, nombre: 'Alfalfa Gentos Nobel 720', tipo: 'Semillas', unidadId: 'uni_0',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_012', empresaId: 'emp_doneduardo', activo: true, nombre: 'Soja Nidera 4634 E-STS', tipo: 'Semillas', unidadId: 'uni_0',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_013', empresaId: 'emp_doneduardo', activo: true, nombre: 'Soja DM 46I20 ppia.', tipo: 'Semillas', unidadId: 'uni_0',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_014', empresaId: 'emp_doneduardo', activo: true, nombre: 'Maíz HH propio', tipo: 'Semillas', unidadId: 'uni_0',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_015', empresaId: 'emp_doneduardo', activo: true, nombre: 'Festuca Aurora', tipo: 'Semillas', unidadId: 'uni_0',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_016', empresaId: 'emp_doneduardo', activo: true, nombre: 'Trebol Blanco Alina', tipo: 'Semillas', unidadId: 'uni_0',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_017', empresaId: 'emp_doneduardo', activo: true, nombre: 'Pasto Ovillo', tipo: 'Semillas', unidadId: 'uni_0',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_018', empresaId: 'emp_doneduardo', activo: true, nombre: 'Alfalfa Don Enrique', tipo: 'Semillas', unidadId: 'uni_0',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_019', empresaId: 'emp_doneduardo', activo: true, nombre: 'Avena Prod pp', tipo: 'Semillas', unidadId: 'uni_0',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_020', empresaId: 'emp_doneduardo', activo: true, nombre: 'Festuca mediterranea med 100', tipo: 'Semillas', unidadId: 'uni_0',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_021', empresaId: 'emp_doneduardo', activo: true, nombre: 'Trigo DM Casuarina', tipo: 'Semillas', unidadId: 'uni_0',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_022', empresaId: 'emp_doneduardo', activo: true, nombre: 'Avena Elena Inta', tipo: 'Semillas', unidadId: 'uni_0',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_023', empresaId: 'emp_doneduardo', activo: true, nombre: 'Trigo DM Catalpa ppio.', tipo: 'Semillas', unidadId: 'uni_0',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_024', empresaId: 'emp_doneduardo', activo: true, nombre: 'Trigo DM Pehuén ppio.', tipo: 'Semillas', unidadId: 'uni_0',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_025', empresaId: 'emp_doneduardo', activo: true, nombre: 'Maíz DK 72-72 RR2 SPC', tipo: 'Semillas', unidadId: 'uni_6',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_026', empresaId: 'emp_doneduardo', activo: true, nombre: 'Maiz DK 73-03 TRE SPC', tipo: 'Semillas', unidadId: 'uni_6',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_027', empresaId: 'emp_doneduardo', activo: true, nombre: 'Maíz DK 69-62 TRE SPR', tipo: 'Semillas', unidadId: 'uni_6',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_028', empresaId: 'emp_doneduardo', activo: true, nombre: 'Maíz DK 73-03 RR2 SPR', tipo: 'Semillas', unidadId: 'uni_6',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_029', empresaId: 'emp_doneduardo', activo: true, nombre: 'Rizopack 203 HC P/ 3000 KG', tipo: 'Curasemillas/Inoculantes', unidadId: 'uni_10',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_030', empresaId: 'emp_doneduardo', activo: true, nombre: 'Rizopack 102 RFC P/3000 KG', tipo: 'Curasemillas/Inoculantes', unidadId: 'uni_10',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_031', empresaId: 'emp_doneduardo', activo: true, nombre: 'Bemix - p-silo x 400 gr', tipo: 'Curasemillas/Inoculantes', unidadId: 'uni_11',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_032', empresaId: 'emp_doneduardo', activo: true, nombre: 'Compinche SX', tipo: 'Curasemillas/Inoculantes', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_033', empresaId: 'emp_doneduardo', activo: true, nombre: 'PUCARA', tipo: 'Curasemillas/Inoculantes', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_034', empresaId: 'emp_doneduardo', activo: true, nombre: 'Ritiram Carb Plus', tipo: 'Curasemillas/Inoculantes', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_035', empresaId: 'emp_doneduardo', activo: true, nombre: 'Nutrimins', tipo: 'Curasemillas/Inoculantes', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_036', empresaId: 'emp_doneduardo', activo: true, nombre: 'Metsulfuron 60%', tipo: 'Herbicidas', unidadId: 'uni_0',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_037', empresaId: 'emp_doneduardo', activo: true, nombre: '2,4D advance', tipo: 'Herbicidas', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_038', empresaId: 'emp_doneduardo', activo: true, nombre: 'Atrazina 90', tipo: 'Herbicidas', unidadId: 'uni_0',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_039', empresaId: 'emp_doneduardo', activo: true, nombre: 'Dicamba', tipo: 'Herbicidas', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_040', empresaId: 'emp_doneduardo', activo: true, nombre: 'Glifo Controlmax', tipo: 'Herbicidas', unidadId: 'uni_0',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_041', empresaId: 'emp_doneduardo', activo: true, nombre: 'Fomesafen', tipo: 'Herbicidas', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_042', empresaId: 'emp_doneduardo', activo: true, nombre: 'Paraquat', tipo: 'Herbicidas', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_043', empresaId: 'emp_doneduardo', activo: true, nombre: 'Picloram', tipo: 'Herbicidas', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_044', empresaId: 'emp_doneduardo', activo: true, nombre: 'Heat', tipo: 'Herbicidas', unidadId: 'uni_0',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_045', empresaId: 'emp_doneduardo', activo: true, nombre: 'Cletodim', tipo: 'Herbicidas', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_046', empresaId: 'emp_doneduardo', activo: true, nombre: 'Finesse', tipo: 'Herbicidas', unidadId: 'uni_0',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_047', empresaId: 'emp_doneduardo', activo: true, nombre: 'Sulfentrazone', tipo: 'Herbicidas', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_048', empresaId: 'emp_doneduardo', activo: true, nombre: 'Mulan (Flumetsulam 12%)', tipo: 'Herbicidas', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_049', empresaId: 'emp_doneduardo', activo: true, nombre: '2,4 Db', tipo: 'Herbicidas', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_050', empresaId: 'emp_doneduardo', activo: true, nombre: 'Clorimurón', tipo: 'Herbicidas', unidadId: 'uni_0',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_051', empresaId: 'emp_doneduardo', activo: true, nombre: 'Fluorocloridona', tipo: 'Herbicidas', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_052', empresaId: 'emp_doneduardo', activo: true, nombre: 'Benazolin', tipo: 'Herbicidas', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_053', empresaId: 'emp_doneduardo', activo: true, nombre: 'Katrin', tipo: 'Herbicidas', unidadId: 'uni_7',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_054', empresaId: 'emp_doneduardo', activo: true, nombre: 'Adengo', tipo: 'Herbicidas', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_055', empresaId: 'emp_doneduardo', activo: true, nombre: 'Diflufenican', tipo: 'Herbicidas', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_056', empresaId: 'emp_doneduardo', activo: true, nombre: 'Fluroxipir 48%', tipo: 'Herbicidas', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_057', empresaId: 'emp_doneduardo', activo: true, nombre: 'Lontrel (Clopyralid 47,5%)', tipo: 'Herbicidas', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_058', empresaId: 'emp_doneduardo', activo: true, nombre: 'Pastar Gold', tipo: 'Herbicidas', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_059', empresaId: 'emp_doneduardo', activo: true, nombre: 'Brucia', tipo: 'Herbicidas', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_060', empresaId: 'emp_doneduardo', activo: true, nombre: 'Flumioxacin 48%', tipo: 'Herbicidas', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_061', empresaId: 'emp_doneduardo', activo: true, nombre: 'Axial plus', tipo: 'Herbicidas', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_062', empresaId: 'emp_doneduardo', activo: true, nombre: 'S-metolacloro', tipo: 'Herbicidas', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_063', empresaId: 'emp_doneduardo', activo: true, nombre: 'Ligate', tipo: 'Herbicidas', unidadId: 'uni_0',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_064', empresaId: 'emp_doneduardo', activo: true, nombre: 'Pacto', tipo: 'Herbicidas', unidadId: 'uni_0',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_065', empresaId: 'emp_doneduardo', activo: true, nombre: '2,4 D ENLIST', tipo: 'Herbicidas', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_066', empresaId: 'emp_doneduardo', activo: true, nombre: 'Glifo power max 68% (bolsa de 15 kg)', tipo: 'Herbicidas', unidadId: 'uni_0',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_067', empresaId: 'emp_doneduardo', activo: true, nombre: 'Belt', tipo: 'Insecticidas', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_068', empresaId: 'emp_doneduardo', activo: true, nombre: 'Solomon', tipo: 'Insecticidas', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_069', empresaId: 'emp_doneduardo', activo: true, nombre: 'Lambdacialotrina 25%', tipo: 'Insecticidas', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_070', empresaId: 'emp_doneduardo', activo: true, nombre: 'K-obiol', tipo: 'Insecticidas', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_071', empresaId: 'emp_doneduardo', activo: true, nombre: 'Standak (Fipronil)', tipo: 'Insecticidas', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_072', empresaId: 'emp_doneduardo', activo: true, nombre: 'Abamectina 1.8 x20lts', tipo: 'Insecticidas', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_073', empresaId: 'emp_doneduardo', activo: true, nombre: 'Bifentrín 10%', tipo: 'Insecticidas', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_074', empresaId: 'emp_doneduardo', activo: true, nombre: 'Virantra', tipo: 'Insecticidas', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_075', empresaId: 'emp_doneduardo', activo: true, nombre: 'Cripton', tipo: 'Fungicidas', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_076', empresaId: 'emp_doneduardo', activo: true, nombre: 'Azoxistrobima', tipo: 'Fungicidas', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_077', empresaId: 'emp_doneduardo', activo: true, nombre: 'Cripton Xpro', tipo: 'Fungicidas', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_078', empresaId: 'emp_doneduardo', activo: true, nombre: 'Break thru MSO MAX', tipo: 'Coadyuvantes/Correctores', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_079', empresaId: 'emp_doneduardo', activo: true, nombre: 'Corrector Trop CS', tipo: 'Coadyuvantes/Correctores', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_080', empresaId: 'emp_doneduardo', activo: true, nombre: 'Silwet (siliconado)', tipo: 'Coadyuvantes/Correctores', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_081', empresaId: 'emp_doneduardo', activo: true, nombre: 'Dash MSO MAX', tipo: 'Coadyuvantes/Correctores', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_082', empresaId: 'emp_doneduardo', activo: true, nombre: 'Monoamonico Granel', tipo: 'Fertilizantes', unidadId: 'uni_0',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_083', empresaId: 'emp_doneduardo', activo: true, nombre: 'Urea a Granel', tipo: 'Fertilizantes', unidadId: 'uni_0',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_084', empresaId: 'emp_doneduardo', activo: true, nombre: 'Urea S 40-0-0-5', tipo: 'Fertilizantes', unidadId: 'uni_0',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_085', empresaId: 'emp_doneduardo', activo: true, nombre: 'Silo bolsa 9 pies x 75 reforzada', tipo: 'Otros Insumos', unidadId: 'uni_6',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_086', empresaId: 'emp_doneduardo', activo: true, nombre: 'Silo bolsa 9 pies x 60 reforzada', tipo: 'Otros Insumos', unidadId: 'uni_6',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_087', empresaId: 'emp_doneduardo', activo: true, nombre: 'Silo bolsa 9 pies x 75 liviana', tipo: 'Otros Insumos', unidadId: 'uni_6',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_088', empresaId: 'emp_doneduardo', activo: true, nombre: 'Gas oil tractores', tipo: 'Otros Insumos', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_089', empresaId: 'emp_doneduardo', activo: true, nombre: 'Gas oil camionetas', tipo: 'Otros Insumos', unidadId: 'uni_3',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_090', empresaId: 'emp_doneduardo', activo: true, nombre: 'Concentrado engorde (base Urea)', tipo: 'Otros Insumos', unidadId: 'uni_0',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null },
+      { id: 'ins_de_091', empresaId: 'emp_doneduardo', activo: true, nombre: 'Concentrado engorde (limitador con rollo)', tipo: 'Otros Insumos', unidadId: 'uni_0',
+        modoAccionId: null, bandaTox: '', eiq: null, concentracion: null, concUnidad: '', nutrientes: null }
+    ];
+
     // ── LOTES y ACTIVIDADES (subset de prueba de Don Eduardo) ──────────────
     // Dato compartido: el LOTE (físico, §2.4) y la ACTIVIDAD (lote+cultivo+campaña, §3.5)
     // se CREAN en Plan de Uso del Suelo y los LEEN los tableros operativos (Insumos/OT, etc.).
@@ -345,67 +524,11 @@
     lsSet(LS_TIPOACT, tiposAct);
     lsSet(LS_ESPECIES, especies);
     lsSet(LS_UNIDADES, unidades);
-    lsSet(LS_INSUMOS, insumos);
+    lsSet(LS_INSUMOS, insumos.concat(insumosDE));
     lsSet(LS_MODOSACC, modosAcc);
     lsSet(LS_LOTES, lotes);
     lsSet(LS_ACTIVIDADES, actividades);
-    /* ---- Catálogos de hacienda (Existencia y Producción Ganadera) ---- */
-    // Negocios — global Puntal (sigla + descripción completa)
-    var negociosBase = [
-      ['GCP','Gan. Campo propia'], ['GCC','Gan. Campo capit.'],
-      ['CP','Cría propia'], ['CC','Cría capitalizada'],
-      ['IP','Invernada propia'], ['IC','Invernada capitalizada'],
-      ['FLP','Feed lot propio'], ['FLC','Feed lot capitalizado'],
-      ['CBP','Cabaña propia'], ['CBC','Cabaña capitalizada'],
-      ['H','Hotelería']
-    ];
-    var negocios = [];
-    for (var ng=0; ng<negociosBase.length; ng++){
-      negocios.push({ id: 'neg_'+ng, sigla: negociosBase[ng][0], nombre: negociosBase[ng][1], activo: true });
-    }
-    // Categorías de hacienda — global Puntal. sexoEV: 0=vaca cría, 1=macho, 2=hembra
-    var catHdaBase = [
-      ['Orejano',1], ['Ternero M',1], ['Ternera H',2],
-      ['Vaq. 1-2',2], ['Vaq. 2-3',2], ['Nov. 1-2',1], ['Nov. 2-3',1],
-      ['Toro 1-2',1], ['Toro 2-3',1], ['MEJ 1-2',1], ['MEJ 2-3',1],
-      ['Vaca Cría',0], ['Toro padre',1], ['Vaca inv.',2], ['Toro descarte',1],
-      ['Vaca Cría Ss. Prim.',2], ['Vaca Cría Ss. Inv.',2]
-    ];
-    var categoriasHda = [];
-    for (var ch=0; ch<catHdaBase.length; ch++){
-      categoriasHda.push({ id: 'cat_'+ch, nombre: catHdaBase[ch][0], sexoEV: catHdaBase[ch][1], orden: ch, activo: true });
-    }
-    // Tipos de movimiento de hacienda — global Puntal. efecto: 'E' entrada | 'S' salida | 'M' mutación
-    var tipoMovHdaBase = [
-      ['Nac','Nacimiento','E'], ['CCE','Cbio.Cat. Entrada','E'], ['TrE','Traslado Entrada','E'],
-      ['Cpra','Compra','E'], ['AIE','Ajuste Inv. Entrada','E'],
-      ['CCS','Cbio.Cat. Salida','S'], ['TrS','Traslado Salida','S'], ['Cons','Consumo','S'],
-      ['Vta','Venta','S'], ['Ces','Cesión','S'], ['AIS','Ajuste Inv. Salida','S'],
-      ['Mort','Mortandad','M']
-    ];
-    var tiposMovHda = [];
-    for (var tm=0; tm<tipoMovHdaBase.length; tm++){
-      tiposMovHda.push({ id: 'tmh_'+tm, sigla: tipoMovHdaBase[tm][0], nombre: tipoMovHdaBase[tm][1], efecto: tipoMovHdaBase[tm][2], activo: true });
-    }
-    // Rodeos / socios — POR EMPRESA. Se siembran en las empresas con actividad.
-    var rodeosBase = [
-      ['PPIO','Propio'], ['SOC1','Socio 1'], ['SOC2','Socio 2'],
-      ['SOC3','Socio 3'], ['SOC4','Socio 4'], ['SOC5','Socio 5']
-    ];
-    var rodeos = [];
-    var rdIdx = 0;
-    for (var rce=0; rce<empresasConCultivos.length; rce++){
-      for (var rb=0; rb<rodeosBase.length; rb++){
-        rodeos.push({ id: 'rod_'+rdIdx, empresaId: empresasConCultivos[rce], sigla: rodeosBase[rb][0], nombre: rodeosBase[rb][1], activo: true });
-        rdIdx++;
-      }
-    }
-
     lsSet(LS_CAMPANIAS, campanias);
-    lsSet(LS_NEGOCIOS, negocios);
-    lsSet(LS_CATHDA, categoriasHda);
-    lsSet(LS_TIPOMOVHDA, tiposMovHda);
-    lsSet(LS_RODEOS, rodeos);
     lsSet(LS_SEEDVER, SEED_VER);
   }
 
@@ -816,66 +939,6 @@
       lsSet(LS_UNIDADES, out);
     },
 
-    /* ---- ABM Negocios ganaderos (global Puntal) ---- */
-    listarNegocios: function () { return lsGet(LS_NEGOCIOS, []); },
-    guardarNegocio: function (n) {
-      var ns = lsGet(LS_NEGOCIOS, []);
-      if (!n.id) { n.id = uid('neg'); ns.push(n); }
-      else { var f=false; for(var i=0;i<ns.length;i++){ if(ns[i].id===n.id){ns[i]=n;f=true;break;} } if(!f) ns.push(n); }
-      lsSet(LS_NEGOCIOS, ns); return n;
-    },
-    borrarNegocio: function (id) {
-      var ns=lsGet(LS_NEGOCIOS, []), out=[];
-      for(var i=0;i<ns.length;i++){ if(ns[i].id!==id) out.push(ns[i]); }
-      lsSet(LS_NEGOCIOS, out);
-    },
-
-    /* ---- ABM Categorías de hacienda (global Puntal) ---- */
-    listarCategoriasHda: function () { return lsGet(LS_CATHDA, []); },
-    guardarCategoriaHda: function (c) {
-      var cs = lsGet(LS_CATHDA, []);
-      if (!c.id) { c.id = uid('cat'); cs.push(c); }
-      else { var f=false; for(var i=0;i<cs.length;i++){ if(cs[i].id===c.id){cs[i]=c;f=true;break;} } if(!f) cs.push(c); }
-      lsSet(LS_CATHDA, cs); return c;
-    },
-    borrarCategoriaHda: function (id) {
-      var cs=lsGet(LS_CATHDA, []), out=[];
-      for(var i=0;i<cs.length;i++){ if(cs[i].id!==id) out.push(cs[i]); }
-      lsSet(LS_CATHDA, out);
-    },
-
-    /* ---- ABM Tipos de movimiento de hacienda (global Puntal) ---- */
-    listarTiposMovHda: function () { return lsGet(LS_TIPOMOVHDA, []); },
-    guardarTipoMovHda: function (t) {
-      var ts = lsGet(LS_TIPOMOVHDA, []);
-      if (!t.id) { t.id = uid('tmh'); ts.push(t); }
-      else { var f=false; for(var i=0;i<ts.length;i++){ if(ts[i].id===t.id){ts[i]=t;f=true;break;} } if(!f) ts.push(t); }
-      lsSet(LS_TIPOMOVHDA, ts); return t;
-    },
-    borrarTipoMovHda: function (id) {
-      var ts=lsGet(LS_TIPOMOVHDA, []), out=[];
-      for(var i=0;i<ts.length;i++){ if(ts[i].id!==id) out.push(ts[i]); }
-      lsSet(LS_TIPOMOVHDA, out);
-    },
-
-    /* ---- Rodeos / socios (por empresa) ---- */
-    listarRodeos: function (empresaId) {
-      var rs = lsGet(LS_RODEOS, []), out = [];
-      for (var i=0;i<rs.length;i++){ if(rs[i].empresaId===empresaId) out.push(rs[i]); }
-      return out;
-    },
-    guardarRodeo: function (r) {
-      var rs = lsGet(LS_RODEOS, []);
-      if (!r.id) { r.id = uid('rod'); rs.push(r); }
-      else { var f=false; for(var i=0;i<rs.length;i++){ if(rs[i].id===r.id){rs[i]=r;f=true;break;} } if(!f) rs.push(r); }
-      lsSet(LS_RODEOS, rs); return r;
-    },
-    borrarRodeo: function (id) {
-      var rs=lsGet(LS_RODEOS, []), out=[];
-      for(var i=0;i<rs.length;i++){ if(rs[i].id!==id) out.push(rs[i]); }
-      lsSet(LS_RODEOS, out);
-    },
-
     /* ---- ABM Insumos (por empresa) ---- */
     listarInsumos: function (empresaId) {
       var is = lsGet(LS_INSUMOS, []), out = [];
@@ -1009,10 +1072,6 @@
         localStorage.removeItem(LS_LOTES);
         localStorage.removeItem(LS_ACTIVIDADES);
         localStorage.removeItem(LS_CAMPANIAS);
-        localStorage.removeItem(LS_NEGOCIOS);
-        localStorage.removeItem(LS_CATHDA);
-        localStorage.removeItem(LS_TIPOMOVHDA);
-        localStorage.removeItem(LS_RODEOS);
       } catch (e) {}
       seedDemo();
     }
