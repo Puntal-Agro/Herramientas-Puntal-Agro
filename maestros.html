@@ -33,6 +33,11 @@ main{padding:16px 24px 28px;display:grid;grid-template-columns:210px 1fr;gap:16p
 .filtros{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
 .chip-f{font-size:11px;font-weight:600;border:1px solid var(--border);background:var(--card);color:var(--muted);border-radius:16px;padding:4px 11px;cursor:pointer}
 .chip-f.on{background:#EEF3E8;border-color:var(--olive);color:#3A5128}
+.filtros-ter{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.filtros-ter .buscador{flex:1;min-width:200px;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px}
+.filtros-ter .buscador:focus{outline:none;border-color:var(--olive)}
+.filtros-ter .filtro-sel{border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px;background:var(--card);color:var(--text)}
+.filtros-ter .filtro-sel:focus{outline:none;border-color:var(--olive)}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
 th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)}
@@ -44,7 +49,7 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted
 .banda-chip.on.b-na{background:#7A8899}
 .banda-chip.on.b-ia{background:#C0392B}
 .banda-chip.on.b-ib{background:#E74C3C}
-.banda-chip.on.b-ii{background:#E67E22}
+.banda-chip.on.b-ii{background:#F1C40F;color:#5A4A00}
 .banda-chip.on.b-iii{background:#2980B9}
 .banda-chip.on.b-iv{background:#27AE60}
 .bdg-banda{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;color:#fff}
@@ -79,6 +84,28 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted
 .tipos .opts input{width:auto}
 .modal-actions{display:flex;gap:8px;margin-top:18px;align-items:center}
 .msg{font-size:11px;color:var(--terra)}
+.pa-fila{display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:nowrap}
+.pa-fila select.pa-sel{flex:1 1 auto;min-width:160px;border:1px solid var(--border);border-radius:8px;padding:7px 8px;font-family:var(--sans);font-size:12.5px}
+.pa-fila input.pa-conc{flex:0 0 64px;width:64px;border:1px solid var(--border);border-radius:8px;padding:7px 8px;font-family:var(--sans);font-size:12.5px;font-variant-numeric:tabular-nums}
+.pa-fila select.pa-uni{flex:0 0 62px;width:62px;border:1px solid var(--border);border-radius:8px;padding:7px 6px;font-family:var(--sans);font-size:12.5px}
+.pa-fila input.pa-dens{flex:0 0 60px;width:60px;border:1px solid var(--border);border-radius:8px;padding:7px 8px;font-family:var(--sans);font-size:12.5px;font-variant-numeric:tabular-nums}
+.pa-fila .pa-aporte{flex:0 0 74px;width:74px;font-size:11.5px;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
+.pa-fila .pa-del{flex:0 0 auto;border:none;background:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;padding:2px 6px}
+.pa-fila .pa-del:hover{color:var(--terra)}
+.pa-dens-wrap{display:flex;align-items:center;gap:3px}
+.pa-dens-wrap.off{opacity:.4}
+tr.sec-head td{background:#EEF3E8;color:#3A5128;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.04em;padding:6px 10px;border-top:1px solid var(--border)}
+tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-transform:none}
+.modal-ins .bloque-sec{border-top:1px solid var(--border);margin-top:20px;padding-top:16px}
+.modal-ins .bloque-sec-title{font-size:11px;font-weight:700;color:var(--olive);text-transform:uppercase;letter-spacing:.04em;margin-bottom:12px}
+.pa-fila select.pa-sel{padding:8px 9px;font-size:13px}
+.pa-fila input.pa-conc,.pa-fila input.pa-dens{padding:8px;font-size:13px}
+.pa-fila select.pa-uni{padding:8px 6px;font-size:13px}
+.ord-cell{display:inline-flex;align-items:center;gap:8px}
+.ord-arrows{display:inline-flex;flex-direction:column;gap:1px}
+.ord-btn{border:1px solid var(--border);background:var(--card);color:var(--olive);cursor:pointer;font-size:8px;line-height:1;padding:2px 4px;border-radius:4px;width:20px}
+.ord-btn:hover:not(:disabled){background:#EEF3E8;border-color:var(--olive)}
+.ord-btn:disabled{opacity:.3;cursor:default}
 @media (max-width:820px){main{grid-template-columns:1fr}}
 </style>
 </head>
@@ -106,9 +133,12 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted
     <div class="nav-item" data-cat="choferes" onclick="seleccionarCat('choferes')">Choferes</div>
     <div class="nav-item" data-cat="insumos" onclick="seleccionarCat('insumos')">Insumos</div>
     <div class="nav-item" data-cat="modosacc" onclick="seleccionarCat('modosacc')">Modos de acción</div>
+    <div class="nav-item" data-cat="formul" onclick="seleccionarCat('formul')">Formulaciones</div>
+    <div class="nav-item" data-cat="ppioactivo" onclick="seleccionarCat('ppioactivo')">Principios activos</div>
     <div class="nav-item" data-cat="depositos" onclick="seleccionarCat('depositos')">Depósitos / Acopios</div>
     <div class="nav-item" data-cat="labores" onclick="seleccionarCat('labores')">Labores</div>
-    <div class="nav-item" data-cat="cultivos" onclick="seleccionarCat('cultivos')">Cultivos / Usos</div>
+    <div class="nav-item" data-cat="cultivos" onclick="seleccionarCat('cultivos')">Cultivos</div>
+    <div class="nav-item" data-cat="usos" onclick="seleccionarCat('usos')">Usos</div>
     <div class="nav-item" data-cat="especies" onclick="seleccionarCat('especies')">Especies / Granos</div>
     <div class="nav-item" data-cat="unidades" onclick="seleccionarCat('unidades')">Unidades</div>
   </div>
@@ -120,15 +150,16 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted
         <h2>Proveedores y Clientes</h2>
         <button class="btn" onclick="abrirModal()">+ Nuevo</button>
       </div>
-      <div class="filtros" id="filtros">
-        <span class="chip-f on" data-f="" onclick="setFiltro('')">Todos</span>
-        <span class="chip-f" data-f="proveedor" onclick="setFiltro('proveedor')">Proveedores</span>
-        <span class="chip-f" data-f="cliente" onclick="setFiltro('cliente')">Clientes</span>
-        <span class="chip-f" data-f="transportista" onclick="setFiltro('transportista')">Transportistas</span>
-        <span class="chip-f" data-f="contratista" onclick="setFiltro('contratista')">Contratistas</span>
+      <div class="filtros-ter" id="filtros">
+        <input id="ter-buscar" class="buscador" placeholder="Buscar por nombre o CUIT…" oninput="render()">
+        <select id="ter-tipo" class="filtro-sel" onchange="render()">
+          <option value="">Todos los tipos</option>
+          <option value="proveedor">Proveedores</option>
+          <option value="cliente">Clientes</option>
+        </select>
       </div>
       <table id="tbl">
-        <thead><tr><th>Nombre</th><th>CUIT</th><th>Roles</th><th>Contacto</th><th></th></tr></thead>
+        <thead><tr><th>Nombre</th><th>CUIT</th><th>Tipo</th><th>Contacto</th><th></th></tr></thead>
         <tbody></tbody>
       </table>
       <div class="empty" id="empty" style="display:none">No hay terceros cargados para esta empresa con ese filtro.</div>
@@ -154,7 +185,7 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted
         <h2>Depósitos / Acopios</h2>
         <button class="btn" onclick="abrirModalDep()">+ Nuevo</button>
       </div>
-      <p style="font-size:12.5px;color:var(--muted);margin-bottom:12px;line-height:1.5">Lugar físico de stock. Puede estar en un campo o ser un depósito general de la empresa.</p>
+      <p style="font-size:12.5px;color:var(--muted);margin-bottom:12px;line-height:1.5">Lugar físico de stock que puede estar en un campo o ser un depósito general de la empresa o ser un depósito de terceros fuera de la empresa.</p>
       <table id="tbl-dep">
         <thead><tr><th>Nombre</th><th>Ubicación</th><th>Tipo</th><th></th></tr></thead>
         <tbody></tbody>
@@ -168,26 +199,37 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted
         <h2>Labores</h2>
         <button class="btn" onclick="abrirModalLab()">+ Nuevo</button>
       </div>
-      <p style="font-size:12.5px;color:var(--muted);margin-bottom:12px;line-height:1.5">Tareas que se ejecutan en los lotes. El precio de referencia es orientativo y se puede ajustar al usar la labor. Lista global de Puntal; propia o contratada se define al emitir la orden.</p>
       <table id="tbl-lab">
-        <thead><tr><th>Nombre</th><th>Precio ref.</th><th></th></tr></thead>
+        <thead><tr><th>Nombre</th><th>Unidad</th><th></th></tr></thead>
         <tbody></tbody>
       </table>
       <div class="empty" id="empty-lab" style="display:none">No hay labores cargadas. Agregá una con "+ Nuevo".</div>
     </div>
 
-    <!-- VISTA CULTIVOS / USOS -->
+    <!-- VISTA CULTIVOS -->
     <div id="vista-cultivos" style="display:none">
       <div class="panel-head">
-        <h2>Cultivos / Usos del suelo</h2>
+        <h2>Cultivos</h2>
         <button class="btn" onclick="abrirModalCul()">+ Nuevo</button>
       </div>
-      <p style="font-size:12.5px;color:var(--muted);margin-bottom:12px;line-height:1.5">Lista de actividades posibles para asignar a los lotes (cultivos y usos como barbecho o estructura).</p>
       <table id="tbl-cul">
-        <thead><tr><th>Nombre</th><th>Sigla</th><th>Actividad</th><th>Especie</th><th></th></tr></thead>
+        <thead><tr><th>Nombre</th><th>Sigla</th><th>Uso</th><th>Especie</th><th></th></tr></thead>
         <tbody></tbody>
       </table>
-      <div class="empty" id="empty-cul" style="display:none">No hay cultivos/usos cargados. Agregá uno con "+ Nuevo".</div>
+      <div class="empty" id="empty-cul" style="display:none">No hay cultivos cargados. Agregá uno con "+ Nuevo".</div>
+    </div>
+
+    <!-- VISTA USOS (catálogo global Puntal) -->
+    <div id="vista-usos" style="display:none">
+      <div class="panel-head">
+        <h2>Usos</h2>
+        <button class="btn" onclick="abrirModalUso()">+ Nuevo</button>
+      </div>
+      <table id="tbl-uso">
+        <thead><tr><th>Código</th><th>Nombre</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="empty" id="empty-uso" style="display:none">No hay usos cargados. Agregá uno con "+ Nuevo".</div>
     </div>
 
     <!-- VISTA ESPECIES / GRANOS -->
@@ -196,7 +238,6 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted
         <h2>Especies / Granos</h2>
         <button class="btn" onclick="abrirModalEsp()">+ Nuevo</button>
       </div>
-      <p style="font-size:12.5px;color:var(--muted);margin-bottom:12px;line-height:1.5">Especie base del grano. Varios cultivos pueden compartir especie (Soja 1ª y Soja 2ª → Soja) y un acopio se organiza por especie. Lista global de Puntal.</p>
       <table id="tbl-esp">
         <thead><tr><th>Nombre</th><th>Sigla</th><th></th></tr></thead>
         <tbody></tbody>
@@ -210,7 +251,6 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted
         <h2>Unidades de medida</h2>
         <button class="btn" onclick="abrirModalUni()">+ Nuevo</button>
       </div>
-      <p style="font-size:12.5px;color:var(--muted);margin-bottom:12px;line-height:1.5">Unidades para insumos, stock y dosis. Lista global de Puntal.</p>
       <table id="tbl-uni">
         <thead><tr><th>Sigla</th><th>Nombre</th><th></th></tr></thead>
         <tbody></tbody>
@@ -224,9 +264,14 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted
         <h2>Insumos</h2>
         <button class="btn" onclick="abrirModalIns()">+ Nuevo</button>
       </div>
-      <p style="font-size:12.5px;color:var(--muted);margin-bottom:12px;line-height:1.5">Padrón de insumos de la empresa. Los fitosanitarios llevan modo de acción, banda toxicológica, EIQ y concentración; los fertilizantes, su composición NPKS.</p>
+      <div class="filtros-ter" id="filtros-ins">
+        <input id="ins-buscar" class="buscador" placeholder="Buscar por nombre…" oninput="renderInsumos()">
+        <select id="ins-cat" class="filtro-sel" onchange="renderInsumos()">
+          <option value="">Todas las categorías</option>
+        </select>
+      </div>
       <table id="tbl-ins">
-        <thead><tr><th>Nombre</th><th>Tipo</th><th>Unidad</th><th>Datos técnicos</th><th></th></tr></thead>
+        <thead><tr><th>Nombre</th><th>Subcat.</th><th>Unidad</th><th>Datos técnicos</th><th></th></tr></thead>
         <tbody></tbody>
       </table>
       <div class="empty" id="empty-ins" style="display:none">No hay insumos cargados. Agregá uno con "+ Nuevo".</div>
@@ -238,7 +283,6 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted
         <h2>Modos de acción</h2>
         <button class="btn" onclick="abrirModalMoa()">+ Nuevo</button>
       </div>
-      <p style="font-size:12.5px;color:var(--muted);margin-bottom:12px;line-height:1.5">Clasificación de modos de acción de fitosanitarios: HRAC (herbicidas), IRAC (insecticidas) y FRAC (fungicidas). Lista global de Puntal.</p>
       <div style="display:flex;gap:6px;margin-bottom:12px">
         <span class="chip-f on" data-mf="" onclick="setFiltroMoa('')">Todos</span>
         <span class="chip-f" data-mf="HRAC" onclick="setFiltroMoa('HRAC')">HRAC</span>
@@ -250,6 +294,38 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted
         <tbody></tbody>
       </table>
       <div class="empty" id="empty-moa" style="display:none">No hay modos de acción para este filtro.</div>
+    </div>
+
+    <!-- VISTA FORMULACIONES (catálogo global Puntal) -->
+    <div id="vista-formul" style="display:none">
+      <div class="panel-head">
+        <h2>Formulaciones</h2>
+        <button class="btn" onclick="abrirModalFormul()">+ Nuevo</button>
+      </div>
+      <p style="font-size:12.5px;color:var(--muted);margin-bottom:12px;line-height:1.5">Tipos de formulación de fitosanitarios (código internacional CropLife/FAO) con su orden de mezclado en tanque. El orden es una guía general; leé siempre el marbete de cada producto.</p>
+      <table id="tbl-formul">
+        <thead><tr><th>Orden de mezclado</th><th>Código</th><th>Descripción</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="empty" id="empty-formul" style="display:none">No hay formulaciones cargadas. Agregá una con "+ Nuevo".</div>
+    </div>
+
+    <!-- VISTA PRINCIPIOS ACTIVOS (catálogo global Puntal) -->
+    <div id="vista-ppioactivo" style="display:none">
+      <div class="panel-head">
+        <h2>Principios activos</h2>
+        <button class="btn" onclick="abrirModalPA()">+ Nuevo</button>
+      </div>
+      <p style="font-size:12.5px;color:var(--muted);margin-bottom:12px;line-height:1.5">Base de principios activos con su EIQ (Cornell). Los insumos fitosanitarios eligen de esta lista. EIQ "N/D" = sin valor Cornell publicado (feromonas, biológicos, coadyuvantes): suman 0 al EIQ del producto.</p>
+      <div class="filtros-ter">
+        <input id="pa-buscar" class="buscador" placeholder="Buscar por nombre…" oninput="renderPA()">
+        <select id="pa-uso" class="filtro-sel" onchange="renderPA()"><option value="">Todos los usos</option></select>
+      </div>
+      <table id="tbl-pa">
+        <thead><tr><th>Principio activo</th><th>EIQ</th><th>Uso</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="empty" id="empty-pa" style="display:none">No hay principios activos para este filtro.</div>
     </div>
   </div>
 </main>
@@ -336,7 +412,17 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted
     <h3 id="modal-lab-title">Nueva labor</h3>
     <div class="grid2">
       <div class="fld full"><label>Nombre</label><input id="l-nombre"></div>
-      <div class="fld"><label>Precio de referencia $ <span class="opt">(opcional)</span></label><input id="l-precio" type="number"></div>
+      <div class="fld"><label>Unidad <span class="opt">(opcional)</span></label>
+        <select id="l-unidad" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px">
+          <option value="">— sin especificar —</option>
+          <option value="ha">Hectárea (ha)</option>
+          <option value="h">Hora (h)</option>
+          <option value="un">Unidad (un)</option>
+          <option value="kg">Kilogramo (kg)</option>
+          <option value="tn">Tonelada (tn)</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
     </div>
     <div class="modal-actions">
       <button class="btn" onclick="guardarLab()">Guardar</button>
@@ -350,16 +436,12 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted
 <!-- Modal CULTIVO -->
 <div class="overlay" id="overlay-cul">
   <div class="modal">
-    <h3 id="modal-cul-title">Nuevo cultivo / uso</h3>
+    <h3 id="modal-cul-title">Nuevo cultivo</h3>
     <div class="grid2">
       <div class="fld full"><label>Nombre</label><input id="cu-nombre"></div>
       <div class="fld"><label>Sigla <span class="opt">(opcional)</span></label><input id="cu-sigla"></div>
-      <div class="fld"><label>Actividad <span class="opt">(opcional)</span></label>
-        <select id="cu-activ" onchange="toggleEspecieCul()" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px">
-          <option value="">— sin clasificar —</option>
-          <option value="AGR">Agrícola</option>
-          <option value="GAN">Ganadera</option>
-        </select>
+      <div class="fld"><label>Uso <span class="opt">(opcional)</span></label>
+        <select id="cu-activ" onchange="toggleEspecieCul()" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px"></select>
       </div>
       <div class="fld full" id="fld-cu-especie" style="display:none"><label>Especie / Grano</label>
         <select id="cu-especie" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px"></select>
@@ -370,6 +452,23 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted
       <button class="btn-out" onclick="cerrarModalCul()">Cancelar</button>
       <button class="btn-out del" id="btn-del-cul" style="display:none" onclick="eliminarCul()">Eliminar</button>
       <span class="msg" id="msg-cul"></span>
+    </div>
+  </div>
+</div>
+
+<!-- Modal USO -->
+<div class="overlay" id="overlay-uso">
+  <div class="modal">
+    <h3 id="modal-uso-title">Nuevo uso</h3>
+    <div class="grid2">
+      <div class="fld"><label>Código</label><input id="uso-codigo" placeholder="Ej: AGR"></div>
+      <div class="fld"><label>Nombre</label><input id="uso-label"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="guardarUsoUI()">Guardar</button>
+      <button class="btn-out" onclick="cerrarModalUso()">Cancelar</button>
+      <button class="btn-out del" id="btn-del-uso" style="display:none" onclick="eliminarUsoUI()">Eliminar</button>
+      <span class="msg" id="msg-uso"></span>
     </div>
   </div>
 </div>
@@ -432,47 +531,91 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted
   </div>
 </div>
 
+<!-- Modal FORMULACIÓN -->
+<div class="overlay" id="overlay-formul">
+  <div class="modal">
+    <h3 id="modal-formul-title">Nueva formulación</h3>
+    <div class="grid2">
+      <div class="fld"><label>Código <span class="opt">(CropLife/FAO, opcional)</span></label><input id="fm-codigo" placeholder="Ej: WP, SC, EC"></div>
+      <div class="fld"><label>Orden de mezclado</label><input id="fm-orden" type="number" step="1" min="0"></div>
+      <div class="fld full"><label>Descripción</label><input id="fm-desc"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="guardarFormulUI()">Guardar</button>
+      <button class="btn-out" onclick="cerrarModalFormul()">Cancelar</button>
+      <button class="btn-out del" id="btn-del-formul" style="display:none" onclick="eliminarFormulUI()">Eliminar</button>
+      <span class="msg" id="msg-formul"></span>
+    </div>
+  </div>
+</div>
+
+<!-- Modal PRINCIPIO ACTIVO -->
+<div class="overlay" id="overlay-pa">
+  <div class="modal">
+    <h3 id="modal-pa-title">Nuevo principio activo</h3>
+    <div class="grid2">
+      <div class="fld full"><label>Nombre</label><input id="pa-nombre"></div>
+      <div class="fld"><label>EIQ <span class="opt">(vacío = N/D)</span></label><input id="pa-eiq" type="number" step="0.01"></div>
+      <div class="fld"><label>Uso <span class="opt">(opcional)</span></label><input id="pa-usotxt" placeholder="Ej: Herbicida"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="guardarPAUI()">Guardar</button>
+      <button class="btn-out" onclick="cerrarModalPA()">Cancelar</button>
+      <button class="btn-out del" id="btn-del-pa" style="display:none" onclick="eliminarPAUI()">Eliminar</button>
+      <span class="msg" id="msg-pa"></span>
+    </div>
+  </div>
+</div>
+
 <!-- Modal INSUMO -->
 <div class="overlay" id="overlay-ins">
-  <div class="modal" style="max-width:560px">
+  <div class="modal modal-ins" style="max-width:680px">
     <h3 id="modal-ins-title">Nuevo insumo</h3>
     <div class="grid2">
       <div class="fld full"><label>Nombre</label><input id="i-nombre"></div>
-      <div class="fld"><label>Tipo</label>
-        <select id="i-tipo" onchange="toggleBloqueIns()" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px">
-          <option value="Semillas">Semillas</option>
-          <option value="Curasemillas/Inoculantes">Curasemillas/Inoculantes</option>
-          <option value="Herbicidas">Herbicidas</option>
-          <option value="Insecticidas">Insecticidas</option>
-          <option value="Fungicidas">Fungicidas</option>
-          <option value="Coadyuvantes/Correctores">Coadyuvantes/Correctores</option>
-          <option value="Fertilizantes">Fertilizantes</option>
-          <option value="Otros Insumos">Otros Insumos</option>
-        </select>
+      <div class="fld"><label>Categoría de insumo</label>
+        <select id="i-tipo" onchange="toggleBloqueIns()" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px"></select>
       </div>
       <div class="fld"><label>Unidad</label>
         <select id="i-unidad" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px"></select>
       </div>
+      <div class="fld full" id="fld-i-subcat" style="display:none"><label>Subcategoría</label>
+        <select id="i-subcat" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px"></select>
+      </div>
     </div>
 
     <!-- Bloque FITOSANITARIO -->
-    <div id="bloque-fito" style="display:none;border-top:1px solid var(--border);margin-top:14px;padding-top:12px">
-      <div style="font-size:11px;font-weight:700;color:var(--olive);text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px">Datos del fitosanitario</div>
+    <div id="bloque-fito" class="bloque-sec" style="display:none">
+      <div class="bloque-sec-title">Datos del fitosanitario</div>
       <div class="grid2">
         <div class="fld full"><label>Modo de acción <span class="opt" id="i-modo-sistema">—</span></label>
           <select id="i-modo" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px"></select>
         </div>
-        <div class="fld"><label>EIQ <span class="opt">(opcional)</span></label><input id="i-eiq" type="number" step="0.01"></div>
-        <div class="fld"><label>Concentración</label>
-          <div style="display:flex;gap:6px">
-            <input id="i-conc" type="number" step="0.01" style="flex:1">
-            <select id="i-concuni" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px;width:90px">
-              <option value="">—</option><option value="g/l">g/l</option><option value="g/kg">g/kg</option><option value="%">%</option><option value="ppm">ppm</option>
-            </select>
-          </div>
+        <div class="fld full"><label>Formulación <span class="opt">(orden de mezclado)</span></label>
+          <select id="i-formul" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px"></select>
         </div>
       </div>
-      <div class="fld full" style="margin-top:8px"><label>Banda toxicológica</label>
+
+      <!-- Principios activos -->
+      <div style="margin-top:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <label style="font-size:11px;font-weight:600;color:var(--muted)">Principios activos y concentración</label>
+          <button type="button" class="btn-sm" onclick="agregarFilaPA()">+ Activo</button>
+        </div>
+        <div style="font-size:10.5px;color:var(--muted);margin-bottom:8px;line-height:1.4">Por cada activo: concentración + unidad (%, g/l o g/kg; densidad solo si es g/l). La última columna muestra cuánto aporta ese activo al EIQ del producto.</div>
+        <div id="pa-filas"></div>
+        <div id="eiq-box" style="margin-top:12px;padding:11px 12px;background:var(--bg);border-radius:8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <div style="font-size:12px;color:var(--muted)">EIQ del producto:</div>
+          <div id="eiq-calc" style="font-weight:700;font-size:15px;font-family:var(--sans);font-variant-numeric:tabular-nums">—</div>
+          <div style="flex:1"></div>
+          <label style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px">
+            <input type="checkbox" id="eiq-manual-chk" style="width:auto" onchange="toggleEiqOverride()"> Fijar a mano
+          </label>
+          <input id="eiq-override" type="number" step="0.01" style="width:90px;border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-family:var(--sans);font-size:13px" disabled>
+        </div>
+      </div>
+
+      <div class="fld full" style="margin-top:16px"><label>Banda toxicológica</label>
         <div class="banda-row" id="i-banda-row">
           <span class="banda-chip b-na on" data-b="" onclick="setBanda('')">Sin especificar</span>
           <span class="banda-chip b-ia" data-b="Ia" onclick="setBanda('Ia')">Clase Ia</span>
@@ -485,8 +628,8 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted
     </div>
 
     <!-- Bloque FERTILIZANTE -->
-    <div id="bloque-ferti" style="display:none;border-top:1px solid var(--border);margin-top:14px;padding-top:12px">
-      <div style="font-size:11px;font-weight:700;color:var(--olive);text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px">Composición (NPKS, % p/p)</div>
+    <div id="bloque-ferti" class="bloque-sec" style="display:none">
+      <div class="bloque-sec-title">Composición (NPKS, % p/p)</div>
       <div class="grid2">
         <div class="fld"><label>N <span class="opt">(Nitrógeno)</span></label><input id="i-n" type="number" step="0.1"></div>
         <div class="fld"><label>P <span class="opt">(Fósforo)</span></label><input id="i-p" type="number" step="0.1"></div>
@@ -510,15 +653,144 @@ var empresaId = null;
 var filtro = '';
 var editId = null;
 
-function cambiarEmpresa(id){ empresaId = id; render(); }
-function setFiltro(f){
-  filtro = f;
-  var chips = document.querySelectorAll('.chip-f');
-  for (var i=0;i<chips.length;i++){ chips[i].className = 'chip-f' + (chips[i].getAttribute('data-f')===f?' on':''); }
-  render();
+/* ====== FALLBACK LOCAL (Etapa 2) ======================================
+   Catálogos que aún no expone pa-core. Cuando Mariana publique
+   PA.demo.listarUsos / listarCategoriasInsumo, estas ramas se apagan solas.
+   El catálogo USOS es global (sin empresaId). Persistencia local propia. */
+var LS_USOS_LOCAL = 'pa_usos_local_v1';
+var USOS_SEED = [
+  { id:'uso_agr', codigo:'AGR', label:'Agricultura', activo:true },
+  { id:'uso_gan', codigo:'GAN', label:'Ganadería', activo:true },
+  { id:'uso_dob', codigo:'DOB', label:'Doble propósito', activo:true }
+];
+// Categorías de insumo: código estable + label (P7). Fito = HERB/INSE/FUNG.
+var CATEGORIAS_INSUMO = [
+  { codigo:'SEM',  label:'Semillas' },
+  { codigo:'CURA', label:'Curasemillas e Inoculantes' },
+  { codigo:'HERB', label:'Herbicidas' },
+  { codigo:'INSE', label:'Insecticidas' },
+  { codigo:'FUNG', label:'Fungicidas' },
+  { codigo:'COAD', label:'Coadyuvantes y Correctores' },
+  { codigo:'FERT', label:'Fertilizantes' },
+  { codigo:'OTRO', label:'Otros Insumos' }
+];
+var SUBCAT_COAD = ['Coadyuvante','Corrector','Estabilizador'];
+function labelCategoria(cod){ for(var i=0;i<CATEGORIAS_INSUMO.length;i++){ if(CATEGORIAS_INSUMO[i].codigo===cod) return CATEGORIAS_INSUMO[i].label; } return cod||'—'; }
+
+function lsUsosGet(){ try{ var v=JSON.parse(localStorage.getItem(LS_USOS_LOCAL)); if(v&&v.length) return v; }catch(e){} return USOS_SEED.slice(); }
+function lsUsosSet(a){ try{ localStorage.setItem(LS_USOS_LOCAL, JSON.stringify(a)); }catch(e){} }
+function listarUsos(){
+  if (PA.demo && typeof PA.demo.listarUsos==='function') return PA.demo.listarUsos();
+  return lsUsosGet();
+}
+function guardarUso(u){
+  if (PA.demo && typeof PA.demo.guardarUso==='function') return PA.demo.guardarUso(u);
+  var a=lsUsosGet(); if(!u.id){ u.id='uso_'+Date.now(); a.push(u); } else { var f=false; for(var i=0;i<a.length;i++){ if(a[i].id===u.id){a[i]=u;f=true;break;} } if(!f)a.push(u); } lsUsosSet(a); return u;
+}
+function borrarUso(id){
+  if (PA.demo && typeof PA.demo.borrarUso==='function') return PA.demo.borrarUso(id);
+  var a=lsUsosGet(), out=[]; for(var i=0;i<a.length;i++){ if(a[i].id!==id) out.push(a[i]); } lsUsosSet(out);
+}
+function labelUso(cod){ var l=listarUsos(); for(var i=0;i<l.length;i++){ if(l[i].codigo===cod) return l[i].label; } return cod||'—'; }
+
+/* --- Catálogo FORMULACIÓN (global Puntal, editable) — orden de mezclado en tanque.
+   Seed alineado al estándar CropLife/FAO. codigo internacional (puede ser '' para
+   etapas de mezcla que no son una formulación física). Aplica solo a fitosanitarios. */
+var LS_FORMUL_LOCAL = 'pa_formulaciones_local_v1';
+var FORMUL_SEED = [
+  { id:'f_agua',  codigo:'',   descripcion:'Agua (media carga, corrección dureza/pH)', orden:1,  activo:true },
+  { id:'f_coad',  codigo:'',   descripcion:'Coadyuvantes / correctores / secuestrantes', orden:2,  activo:true },
+  { id:'f_anti',  codigo:'',   descripcion:'Antiespumante', orden:3,  activo:true },
+  { id:'f_wp',    codigo:'WP', descripcion:'Polvos mojables', orden:4,  activo:true },
+  { id:'f_wg',    codigo:'WG', descripcion:'Gránulos dispersables', orden:5,  activo:true },
+  { id:'f_sg',    codigo:'SG', descripcion:'Gránulos solubles', orden:6,  activo:true },
+  { id:'f_od',    codigo:'OD', descripcion:'Dispersiones oleosas', orden:7,  activo:true },
+  { id:'f_sc',    codigo:'SC', descripcion:'Suspensiones concentradas', orden:8,  activo:true },
+  { id:'f_cs',    codigo:'CS', descripcion:'Suspensiones de encapsulados (microcápsulas)', orden:9,  activo:true },
+  { id:'f_se',    codigo:'SE', descripcion:'Suspo-emulsiones', orden:10, activo:true },
+  { id:'f_ew',    codigo:'EW', descripcion:'Emulsiones de aceite en agua', orden:11, activo:true },
+  { id:'f_ec',    codigo:'EC', descripcion:'Concentrados emulsionables', orden:12, activo:true },
+  { id:'f_sl',    codigo:'SL', descripcion:'Concentrados / líquidos solubles', orden:13, activo:true },
+  { id:'f_acei',  codigo:'',   descripcion:'Aceites / surfactantes / adyuvantes finales', orden:14, activo:true },
+  { id:'f_foli',  codigo:'',   descripcion:'Micronutrientes / fertilizantes foliares', orden:15, activo:true }
+];
+function lsFormulGet(){ try{ var v=JSON.parse(localStorage.getItem(LS_FORMUL_LOCAL)); if(v&&v.length) return v; }catch(e){} return FORMUL_SEED.slice(); }
+function lsFormulSet(a){ try{ localStorage.setItem(LS_FORMUL_LOCAL, JSON.stringify(a)); }catch(e){} }
+function listarFormulaciones(){
+  var l;
+  if (PA.demo && typeof PA.demo.listarFormulaciones==='function') l=PA.demo.listarFormulaciones();
+  else l=lsFormulGet();
+  return l.slice().sort(function(a,b){ return (a.orden||0)-(b.orden||0); });
+}
+function guardarFormulacion(f){
+  if (PA.demo && typeof PA.demo.guardarFormulacion==='function') return PA.demo.guardarFormulacion(f);
+  var a=lsFormulGet(); if(!f.id){ f.id='f_'+Date.now(); a.push(f); } else { var hit=false; for(var i=0;i<a.length;i++){ if(a[i].id===f.id){a[i]=f;hit=true;break;} } if(!hit)a.push(f); } lsFormulSet(a); return f;
+}
+function borrarFormulacion(id){
+  if (PA.demo && typeof PA.demo.borrarFormulacion==='function') return PA.demo.borrarFormulacion(id);
+  var a=lsFormulGet(), out=[]; for(var i=0;i<a.length;i++){ if(a[i].id!==id) out.push(a[i]); } lsFormulSet(out);
+}
+function nombreFormulacion(id){ if(!id) return null; var l=listarFormulaciones(); for(var i=0;i<l.length;i++){ if(l[i].id===id){ return (l[i].codigo?l[i].codigo+' — ':'')+l[i].descripcion; } } return null; }
+
+/* --- Catálogo PRINCIPIOS ACTIVOS (global Puntal). Seed: 152 de la base EIQ Referencia
+   (CropLife/SENASA + EIQ Cornell). eiq:null = N/D (feromonas, biológicos, coadyuvantes:
+   suman 0 al total). Editable: alta manual y corrección. Fallback local hasta pa-core. */
+var LS_PA_LOCAL = 'pa_principios_activos_local_v1';
+var PA_ACTIVOS_SEED = [{"id": "pa_0", "nombre": "(E,E)8,10-DODECADIENOL", "eiq": null, "uso": "Feromona (control de plagas)", "activo": true}, {"id": "pa_1", "nombre": "(E,Z)7,9-DODECADIENIL ACETATO", "eiq": null, "uso": "Feromona (control de plagas)", "activo": true}, {"id": "pa_2", "nombre": "(Z)/(E)-8-DODECENIL ACETATO", "eiq": null, "uso": "Feromona (control de plagas)", "activo": true}, {"id": "pa_3", "nombre": "2,4 D", "eiq": 19.27, "uso": "Herbicida", "activo": true}, {"id": "pa_4", "nombre": "2,4-DB", "eiq": 19.27, "uso": "Herbicida", "activo": true}, {"id": "pa_5", "nombre": "ABAMECTINA", "eiq": 35.65, "uso": "Insecticida/Acaricida", "activo": true}, {"id": "pa_6", "nombre": "ACEFATO", "eiq": 18.45, "uso": "Insecticida", "activo": true}, {"id": "pa_7", "nombre": "ACEITE DE SOJA", "eiq": 5.0, "uso": "Coadyuvante", "activo": true}, {"id": "pa_8", "nombre": "ACEITE MINERAL", "eiq": 5.0, "uso": "Coadyuvante", "activo": true}, {"id": "pa_9", "nombre": "ACETAMIPRID", "eiq": 24.83, "uso": "Insecticida", "activo": true}, {"id": "pa_10", "nombre": "ACETOCLOR", "eiq": 22.0, "uso": "Herbicida", "activo": true}, {"id": "pa_11", "nombre": "ACIDO FOSFORICO", "eiq": null, "uso": "Coadyuvante", "activo": true}, {"id": "pa_12", "nombre": "ACIDO GIBERELICO", "eiq": 5.0, "uso": "Regulador de crecimiento", "activo": true}, {"id": "pa_13", "nombre": "AFIDOPYROPEN", "eiq": 18.0, "uso": "Insecticida", "activo": true}, {"id": "pa_14", "nombre": "ALCOHOL GRASO ETOXILADO", "eiq": null, "uso": "Coadyuvante", "activo": true}, {"id": "pa_15", "nombre": "ALCOHOL LAURICO ETOXILADO", "eiq": null, "uso": "Coadyuvante", "activo": true}, {"id": "pa_16", "nombre": "ALCOHOL LINEAL ETOXILADO", "eiq": null, "uso": "Coadyuvante", "activo": true}, {"id": "pa_17", "nombre": "ALCOHOLES GRASOS", "eiq": null, "uso": "Coadyuvante", "activo": true}, {"id": "pa_18", "nombre": "ALFACIPERMETRINA/ALFAMETRINA", "eiq": 36.71, "uso": "Insecticida", "activo": true}, {"id": "pa_19", "nombre": "ALQUIL ARIL POLIGLICOL ETER", "eiq": null, "uso": "Coadyuvante", "activo": true}, {"id": "pa_20", "nombre": "AMETRINA", "eiq": 22.0, "uso": "Herbicida", "activo": true}, {"id": "pa_21", "nombre": "ATRAZINA", "eiq": 22.71, "uso": "Herbicida", "activo": true}, {"id": "pa_22", "nombre": "AZOXISTROBINA", "eiq": 27.33, "uso": "Fungicida", "activo": true}, {"id": "pa_23", "nombre": "AZUFRE", "eiq": 33.0, "uso": "Fungicida/Acaricida", "activo": true}, {"id": "pa_24", "nombre": "BACILLUS AMYLOLIQUEFACIENS", "eiq": null, "uso": "Fungicida biológico", "activo": true}, {"id": "pa_25", "nombre": "BACILLUS THURINGIENSIS", "eiq": null, "uso": "Insecticida biológico", "activo": true}, {"id": "pa_26", "nombre": "BACILLUS THURINGIENSIS var AIZAWAI", "eiq": null, "uso": "Insecticida biológico", "activo": true}, {"id": "pa_27", "nombre": "BENAZOLIN ETIL", "eiq": 20.0, "uso": "Herbicida", "activo": true}, {"id": "pa_28", "nombre": "BENZOATO DE EMAMECTINA", "eiq": 30.5, "uso": "Insecticida", "activo": true}, {"id": "pa_29", "nombre": "BENZOVINDIFLUPIR", "eiq": 22.0, "uso": "Fungicida", "activo": true}, {"id": "pa_30", "nombre": "BICICLOPIRONA", "eiq": 20.0, "uso": "Herbicida", "activo": true}, {"id": "pa_31", "nombre": "BIFENTRIN", "eiq": 44.43, "uso": "Insecticida", "activo": true}, {"id": "pa_32", "nombre": "BOSCALID", "eiq": 19.43, "uso": "Fungicida", "activo": true}, {"id": "pa_33", "nombre": "BROMOXINIL", "eiq": 21.93, "uso": "Herbicida", "activo": true}, {"id": "pa_34", "nombre": "Bacillus Velezensis", "eiq": null, "uso": "Fungicida biológico", "activo": true}, {"id": "pa_35", "nombre": "CAPTAN", "eiq": 33.0, "uso": "Fungicida", "activo": true}, {"id": "pa_36", "nombre": "CARBARIL", "eiq": 22.83, "uso": "Insecticida", "activo": true}, {"id": "pa_37", "nombre": "CARBENDAZIM", "eiq": 33.0, "uso": "Fungicida", "activo": true}, {"id": "pa_38", "nombre": "CARBONATO BASICO DE COBRE", "eiq": 33.67, "uso": "Fungicida", "activo": true}, {"id": "pa_39", "nombre": "CARFENTRAZONE ETIL", "eiq": 19.83, "uso": "Herbicida", "activo": true}, {"id": "pa_40", "nombre": "CIPERMETRINA", "eiq": 36.71, "uso": "Insecticida", "activo": true}, {"id": "pa_41", "nombre": "CIPROCONAZOLE", "eiq": 21.67, "uso": "Fungicida", "activo": true}, {"id": "pa_42", "nombre": "CLETODIM", "eiq": 18.93, "uso": "Herbicida", "activo": true}, {"id": "pa_43", "nombre": "CLOMAZONE", "eiq": 23.13, "uso": "Herbicida", "activo": true}, {"id": "pa_44", "nombre": "CLOPYRALID", "eiq": 19.5, "uso": "Herbicida", "activo": true}, {"id": "pa_45", "nombre": "CLOQUINTOCET MEXIL", "eiq": 15.0, "uso": "Protector (safener)", "activo": true}, {"id": "pa_46", "nombre": "CLORANTRANILIPROLE", "eiq": 27.5, "uso": "Insecticida", "activo": true}, {"id": "pa_47", "nombre": "CLORFENAPIR", "eiq": 36.27, "uso": "Insecticida/Acaricida", "activo": true}, {"id": "pa_48", "nombre": "CLORIMURON ETIL", "eiq": 24.0, "uso": "Herbicida", "activo": true}, {"id": "pa_49", "nombre": "CLOROTALONIL", "eiq": 33.0, "uso": "Fungicida", "activo": true}, {"id": "pa_50", "nombre": "DELTAMETRINA", "eiq": 27.13, "uso": "Insecticida", "activo": true}, {"id": "pa_51", "nombre": "DICAMBA", "eiq": 25.43, "uso": "Herbicida", "activo": true}, {"id": "pa_52", "nombre": "DICLOSULAM", "eiq": 17.83, "uso": "Herbicida", "activo": true}, {"id": "pa_53", "nombre": "DIFENOCONAZOLE", "eiq": 22.83, "uso": "Fungicida", "activo": true}, {"id": "pa_54", "nombre": "DIFLUFENICAN", "eiq": 19.83, "uso": "Herbicida", "activo": true}, {"id": "pa_55", "nombre": "DIMETOATO", "eiq": 32.71, "uso": "Insecticida", "activo": true}, {"id": "pa_56", "nombre": "DIMETOMORF", "eiq": 21.83, "uso": "Fungicida", "activo": true}, {"id": "pa_57", "nombre": "DINOTEFURAN", "eiq": 26.5, "uso": "Insecticida", "activo": true}, {"id": "pa_58", "nombre": "DIQUAT", "eiq": 33.93, "uso": "Herbicida", "activo": true}, {"id": "pa_59", "nombre": "DIQUAT DIBROMURO", "eiq": 33.93, "uso": "Herbicida", "activo": true}, {"id": "pa_60", "nombre": "DIURON", "eiq": 24.66, "uso": "Herbicida", "activo": true}, {"id": "pa_61", "nombre": "DODECIL BENCEN SULFONICO", "eiq": null, "uso": "Coadyuvante", "activo": true}, {"id": "pa_62", "nombre": "EPOXICONAZOLE", "eiq": 35.45, "uso": "Fungicida", "activo": true}, {"id": "pa_63", "nombre": "ESTERES METILICOS DE ACIDOS GRASOS DE ACEITE DE SOJA", "eiq": null, "uso": "Coadyuvante", "activo": true}, {"id": "pa_64", "nombre": "ESTERES METILICOS DE ACIDOS GRASOS DE ACEITE VEGETAL", "eiq": null, "uso": "Coadyuvante", "activo": true}, {"id": "pa_65", "nombre": "ETEFON", "eiq": 26.13, "uso": "Regulador de crecimiento", "activo": true}, {"id": "pa_66", "nombre": "FENOXAPROP-P ETIL", "eiq": 19.83, "uso": "Herbicida", "activo": true}, {"id": "pa_67", "nombre": "FIPRONIL", "eiq": 35.83, "uso": "Insecticida", "activo": true}, {"id": "pa_68", "nombre": "FLUAZINAM", "eiq": 21.13, "uso": "Fungicida", "activo": true}, {"id": "pa_69", "nombre": "FLUDIOXONIL", "eiq": 20.13, "uso": "Fungicida", "activo": true}, {"id": "pa_70", "nombre": "FLUMETSULAM", "eiq": 19.0, "uso": "Herbicida", "activo": true}, {"id": "pa_71", "nombre": "FLUMIOXAZIN", "eiq": 17.66, "uso": "Herbicida", "activo": true}, {"id": "pa_72", "nombre": "FLUROCLORIDONA", "eiq": 22.0, "uso": "Herbicida", "activo": true}, {"id": "pa_73", "nombre": "FLUROXIPIR MEPTIL", "eiq": 21.0, "uso": "Herbicida", "activo": true}, {"id": "pa_74", "nombre": "FLUTRIAFOL", "eiq": 22.0, "uso": "Fungicida", "activo": true}, {"id": "pa_75", "nombre": "FLUXAPIROXAD", "eiq": 28.0, "uso": "Fungicida", "activo": true}, {"id": "pa_76", "nombre": "FOMESAFEN", "eiq": 19.0, "uso": "Herbicida", "activo": true}, {"id": "pa_77", "nombre": "FOSFURO DE ALUMINIO", "eiq": 30.0, "uso": "Fumigante/Insecticida", "activo": true}, {"id": "pa_78", "nombre": "GLIFOSATO", "eiq": 15.33, "uso": "Herbicida", "activo": true}, {"id": "pa_79", "nombre": "GLUFOSINATO DE AMONIO", "eiq": 19.92, "uso": "Herbicida", "activo": true}, {"id": "pa_80", "nombre": "HALAUXIFEN METIL", "eiq": 19.0, "uso": "Herbicida", "activo": true}, {"id": "pa_81", "nombre": "HALOXIFOP-P METIL", "eiq": 19.5, "uso": "Herbicida", "activo": true}, {"id": "pa_82", "nombre": "HEPTAMETILTRISILOXANO", "eiq": null, "uso": "Coadyuvante", "activo": true}, {"id": "pa_83", "nombre": "HIDROXIDO DE COBRE", "eiq": 33.67, "uso": "Fungicida", "activo": true}, {"id": "pa_84", "nombre": "IMAZALIL", "eiq": 24.0, "uso": "Fungicida", "activo": true}, {"id": "pa_85", "nombre": "IMAZAPIC", "eiq": 19.83, "uso": "Herbicida", "activo": true}, {"id": "pa_86", "nombre": "IMAZAPIR", "eiq": 19.87, "uso": "Herbicida", "activo": true}, {"id": "pa_87", "nombre": "IMAZETAPIR", "eiq": 19.0, "uso": "Herbicida", "activo": true}, {"id": "pa_88", "nombre": "IMIDACLOPRID", "eiq": 36.71, "uso": "Insecticida", "activo": true}, {"id": "pa_89", "nombre": "IPRODIONE", "eiq": 30.5, "uso": "Fungicida", "activo": true}, {"id": "pa_90", "nombre": "ISOXABEN", "eiq": 21.0, "uso": "Herbicida", "activo": true}, {"id": "pa_91", "nombre": "ISOXAFLUTOLE", "eiq": 22.5, "uso": "Herbicida", "activo": true}, {"id": "pa_92", "nombre": "LAMBDA-CIALOTRINA", "eiq": 44.45, "uso": "Insecticida", "activo": true}, {"id": "pa_93", "nombre": "LECITINA DE SOJA", "eiq": 10.0, "uso": "Coadyuvante", "activo": true}, {"id": "pa_94", "nombre": "LUFENURON", "eiq": 22.93, "uso": "Insecticida", "activo": true}, {"id": "pa_95", "nombre": "M.C.P.A.", "eiq": 19.5, "uso": "Herbicida", "activo": true}, {"id": "pa_96", "nombre": "M.S.M.A.", "eiq": 23.0, "uso": "Herbicida", "activo": true}, {"id": "pa_97", "nombre": "MANCOZEB", "eiq": 32.87, "uso": "Fungicida", "activo": true}, {"id": "pa_98", "nombre": "MESOTRIONE", "eiq": 19.5, "uso": "Herbicida", "activo": true}, {"id": "pa_99", "nombre": "METALAXIL", "eiq": 22.13, "uso": "Fungicida", "activo": true}, {"id": "pa_100", "nombre": "METALAXIL -M", "eiq": 22.13, "uso": "Fungicida", "activo": true}, {"id": "pa_101", "nombre": "METALDEHIDO", "eiq": 22.0, "uso": "Molusquicida", "activo": true}, {"id": "pa_102", "nombre": "METIL CICLOPROPENO", "eiq": 10.0, "uso": "Regulador de crecimiento", "activo": true}, {"id": "pa_103", "nombre": "METIL TIOFANATO", "eiq": 35.0, "uso": "Fungicida", "activo": true}, {"id": "pa_104", "nombre": "METOLACLORO", "eiq": 21.61, "uso": "Herbicida", "activo": true}, {"id": "pa_105", "nombre": "METOMIL", "eiq": 36.5, "uso": "Insecticida", "activo": true}, {"id": "pa_106", "nombre": "METOXIFENOCIDE", "eiq": 22.93, "uso": "Insecticida", "activo": true}, {"id": "pa_107", "nombre": "METRIBUZIN", "eiq": 28.0, "uso": "Herbicida", "activo": true}, {"id": "pa_108", "nombre": "METSULFURON METIL", "eiq": 21.0, "uso": "Herbicida", "activo": true}, {"id": "pa_109", "nombre": "MICLOBUTANIL", "eiq": 22.0, "uso": "Fungicida", "activo": true}, {"id": "pa_110", "nombre": "NICOSULFURON", "eiq": 19.83, "uso": "Herbicida", "activo": true}, {"id": "pa_111", "nombre": "NONIL FENOL ETOXILADO", "eiq": null, "uso": "Coadyuvante", "activo": true}, {"id": "pa_112", "nombre": "NOVALURON", "eiq": 22.0, "uso": "Insecticida", "activo": true}, {"id": "pa_113", "nombre": "OXICLORURO DE COBRE", "eiq": 33.67, "uso": "Fungicida", "activo": true}, {"id": "pa_114", "nombre": "OXIDO CUPROSO", "eiq": 33.67, "uso": "Fungicida", "activo": true}, {"id": "pa_115", "nombre": "OXIFLUORFEN", "eiq": 27.43, "uso": "Herbicida", "activo": true}, {"id": "pa_116", "nombre": "PARAQUAT DICLORURO", "eiq": 38.07, "uso": "Herbicida", "activo": true}, {"id": "pa_117", "nombre": "PENDIMETALIN", "eiq": 23.0, "uso": "Herbicida", "activo": true}, {"id": "pa_118", "nombre": "PICLORAM", "eiq": 19.83, "uso": "Herbicida", "activo": true}, {"id": "pa_119", "nombre": "PICOXISTROBIN", "eiq": 27.0, "uso": "Fungicida", "activo": true}, {"id": "pa_120", "nombre": "PIDIFLUMETOFEN", "eiq": 22.0, "uso": "Fungicida", "activo": true}, {"id": "pa_121", "nombre": "PINOXADEN", "eiq": 19.83, "uso": "Herbicida", "activo": true}, {"id": "pa_122", "nombre": "PIRACLOSTROBIN", "eiq": 31.5, "uso": "Fungicida", "activo": true}, {"id": "pa_123", "nombre": "PIRIMETANIL", "eiq": 19.43, "uso": "Fungicida", "activo": true}, {"id": "pa_124", "nombre": "PIRIMIFOS METIL", "eiq": 33.83, "uso": "Insecticida", "activo": true}, {"id": "pa_125", "nombre": "PIRIPROXIFEN", "eiq": 26.93, "uso": "Insecticida (regulador)", "activo": true}, {"id": "pa_126", "nombre": "PIROXASULFONE", "eiq": 18.5, "uso": "Herbicida", "activo": true}, {"id": "pa_127", "nombre": "PROFENOFOS", "eiq": 41.5, "uso": "Insecticida", "activo": true}, {"id": "pa_128", "nombre": "PROHEXADIONE DE CALCIO", "eiq": 15.0, "uso": "Regulador de crecimiento", "activo": true}, {"id": "pa_129", "nombre": "PROMETRINA", "eiq": 22.0, "uso": "Herbicida", "activo": true}, {"id": "pa_130", "nombre": "PROPICONAZOLE", "eiq": 21.93, "uso": "Fungicida", "activo": true}, {"id": "pa_131", "nombre": "PROTIOCONAZOLE", "eiq": 22.0, "uso": "Fungicida", "activo": true}, {"id": "pa_132", "nombre": "QUIZALOFOP-P ETIL", "eiq": 20.83, "uso": "Herbicida", "activo": true}, {"id": "pa_133", "nombre": "S-METOLACLORO", "eiq": 21.61, "uso": "Herbicida", "activo": true}, {"id": "pa_134", "nombre": "SAFLUFENACIL", "eiq": 19.83, "uso": "Herbicida", "activo": true}, {"id": "pa_135", "nombre": "SEDAXANE", "eiq": 19.0, "uso": "Fungicida", "activo": true}, {"id": "pa_136", "nombre": "SPINOSAD", "eiq": 26.0, "uso": "Insecticida", "activo": true}, {"id": "pa_137", "nombre": "SULFATO DE AMONIO", "eiq": 10.0, "uso": "Coadyuvante", "activo": true}, {"id": "pa_138", "nombre": "SULFATO DE COBRE PENTAHIDRATADO", "eiq": 33.67, "uso": "Fungicida", "activo": true}, {"id": "pa_139", "nombre": "SULFENTRAZONE", "eiq": 23.5, "uso": "Herbicida", "activo": true}, {"id": "pa_140", "nombre": "T.C.M.T.B.", "eiq": 30.0, "uso": "Fungicida", "activo": true}, {"id": "pa_141", "nombre": "TEBUCONAZOLE", "eiq": 25.33, "uso": "Fungicida", "activo": true}, {"id": "pa_142", "nombre": "TERBUTILAZINA", "eiq": 23.0, "uso": "Herbicida", "activo": true}, {"id": "pa_143", "nombre": "TIABENDAZOL", "eiq": 23.5, "uso": "Fungicida", "activo": true}, {"id": "pa_144", "nombre": "TIAMETOXAM", "eiq": 33.7, "uso": "Insecticida", "activo": true}, {"id": "pa_145", "nombre": "TIENCARBAZONE METIL", "eiq": 18.0, "uso": "Herbicida", "activo": true}, {"id": "pa_146", "nombre": "TIODICARB", "eiq": 33.93, "uso": "Insecticida", "activo": true}, {"id": "pa_147", "nombre": "TIRAM", "eiq": 35.93, "uso": "Fungicida", "activo": true}, {"id": "pa_148", "nombre": "TOPRAMEZONE", "eiq": 19.0, "uso": "Herbicida", "activo": true}, {"id": "pa_149", "nombre": "TRICHODERMA AFROHARZIANUM cepa Th2R199", "eiq": null, "uso": "Fungicida biológico", "activo": true}, {"id": "pa_150", "nombre": "TRICHODERMA HARZIANUM", "eiq": null, "uso": "Fungicida biológico", "activo": true}, {"id": "pa_151", "nombre": "TRIFLOXISTROBIN", "eiq": 27.0, "uso": "Fungicida", "activo": true}];
+function lsPaGet(){ try{ var v=JSON.parse(localStorage.getItem(LS_PA_LOCAL)); if(v&&v.length) return v; }catch(e){} return PA_ACTIVOS_SEED.slice(); }
+function lsPaSet(a){ try{ localStorage.setItem(LS_PA_LOCAL, JSON.stringify(a)); }catch(e){} }
+function listarPrincipiosActivos(){
+  if (PA.demo && typeof PA.demo.listarPrincipiosActivos==='function') return PA.demo.listarPrincipiosActivos();
+  return lsPaGet();
+}
+function guardarPrincipioActivo(p){
+  if (PA.demo && typeof PA.demo.guardarPrincipioActivo==='function') return PA.demo.guardarPrincipioActivo(p);
+  var a=lsPaGet(); if(!p.id){ p.id='pa_'+Date.now(); a.push(p); } else { var f=false; for(var i=0;i<a.length;i++){ if(a[i].id===p.id){a[i]=p;f=true;break;} } if(!f)a.push(p); } lsPaSet(a); return p;
+}
+function borrarPrincipioActivo(id){
+  if (PA.demo && typeof PA.demo.borrarPrincipioActivo==='function') return PA.demo.borrarPrincipioActivo(id);
+  var a=lsPaGet(), out=[]; for(var i=0;i<a.length;i++){ if(a[i].id!==id) out.push(a[i]); } lsPaSet(out);
+}
+function paById(id){ if(!id) return null; var l=listarPrincipiosActivos(); for(var i=0;i<l.length;i++){ if(l[i].id===id) return l[i]; } return null; }
+function nombrePA(id){ var p=paById(id); return p?p.nombre:null; }
+/* Convierte concentración a fracción p/p. dens=densidad g/ml (default 1) sólo para g/l. */
+function concAFraccion(valor, unidad, densidad){
+  if(valor==null||valor===''||isNaN(valor)) return 0;
+  var v=Number(valor);
+  if(unidad==='%') return v/100;
+  if(unidad==='g/kg') return v/1000;
+  if(unidad==='g/l'){ var d=(densidad&&!isNaN(densidad)&&Number(densidad)>0)?Number(densidad):1; return v/(1000*d); }
+  return 0;
+}
+/* EIQ aporte de un activo = eiq_activo * fracción. Si eiq null (N/D) -> 0. */
+function eiqAporte(fila){
+  var p=paById(fila.paId); if(!p||p.eiq==null) return 0;
+  return p.eiq * concAFraccion(fila.concentracion, fila.concUnidad, fila.densidad);
+}
+function eiqTotalCalculado(activos){
+  var t=0; if(!activos) return 0; for(var i=0;i<activos.length;i++){ t+=eiqAporte(activos[i]); } return Math.round(t*10000)/10000;
+}
+/* ====================================================================== */
+
+function cambiarEmpresa(id){ empresaId = id; poblarFiltroTipos(); render(); }
+function poblarFiltroTipos(){
+  var sel=document.getElementById('ter-tipo'); if(!sel) return;
+  var actual=sel.value;
+  sel.innerHTML='<option value="">Todos los tipos</option>'+
+    '<option value="cliente">Clientes</option>'+
+    '<option value="proveedor">Proveedores</option>';
+  var tipos=PA.demo.listarTiposProveedor();
+  if(tipos.length){
+    var grp=document.createElement('optgroup'); grp.label='Tipo de proveedor';
+    for(var i=0;i<tipos.length;i++){
+      var o=document.createElement('option'); o.value='tp:'+tipos[i].nombre; o.textContent=tipos[i].nombre; grp.appendChild(o);
+    }
+    sel.appendChild(grp);
+  }
+  sel.value=actual;
 }
 function seleccionarCat(c){
-  var vistas = ['terceros','choferes','depositos','labores','cultivos','especies','unidades','insumos','modosacc'];
+  var vistas = ['terceros','choferes','depositos','labores','cultivos','usos','especies','unidades','insumos','modosacc','formul','ppioactivo'];
   for (var i=0;i<vistas.length;i++){
     document.getElementById('vista-'+vistas[i]).style.display = (c===vistas[i])?'':'none';
   }
@@ -530,10 +802,13 @@ function seleccionarCat(c){
   else if (c==='depositos') renderDepositos();
   else if (c==='labores') renderLabores();
   else if (c==='cultivos') renderCultivos();
+  else if (c==='usos') renderUsos();
   else if (c==='especies') renderEspecies();
   else if (c==='unidades') renderUnidades();
   else if (c==='insumos') renderInsumos();
   else if (c==='modosacc') renderModosAcc();
+  else if (c==='formul') renderFormul();
+  else if (c==='ppioactivo') renderPA();
   else render();
 }
 
@@ -590,64 +865,104 @@ function eliminarDep(){ if(editDep&&confirm('¿Eliminar este depósito?')){PA.de
 
 /* ---- LABORES (global) ---- */
 var editLab=null;
+var UNIDADES_LABOR = { 'ha':'Hectárea (ha)', 'h':'Hora (h)', 'un':'Unidad (un)', 'kg':'Kilogramo (kg)', 'tn':'Tonelada (tn)', 'otro':'Otro' };
+function labelUnidadLabor(u){ return UNIDADES_LABOR[u] || (u||'—'); }
 function fmtPrecio(v){ if(!v) return '<span style="color:var(--muted)">—</span>'; return '$'+Number(v).toLocaleString('es-AR'); }
 function renderLabores(){
   var lista=PA.demo.listarLabores();
   var tb=document.querySelector('#tbl-lab tbody'); tb.innerHTML='';
   for(var i=0;i<lista.length;i++){(function(l){
+    var uni = l.unidadLabor ? labelUnidadLabor(l.unidadLabor) : '<span style="color:var(--muted)">—</span>';
     var tr=document.createElement('tr');
-    tr.innerHTML='<td><strong>'+l.nombre+'</strong></td><td>'+fmtPrecio(l.precioRef)+'</td>'+
+    tr.innerHTML='<td><strong>'+l.nombre+'</strong></td><td>'+uni+'</td>'+
       '<td style="text-align:right"><button class="btn-sm" onclick="editarLab(\''+l.id+'\')">Editar</button></td>';
     tb.appendChild(tr);
   })(lista[i]);}
   document.getElementById('empty-lab').style.display=lista.length?'none':'block';
   document.getElementById('tbl-lab').style.display=lista.length?'':'none';
 }
-function abrirModalLab(){ editLab=null; document.getElementById('modal-lab-title').textContent='Nueva labor'; document.getElementById('l-nombre').value=''; document.getElementById('l-precio').value=''; document.getElementById('btn-del-lab').style.display='none'; document.getElementById('msg-lab').textContent=''; document.getElementById('overlay-lab').className='overlay open'; }
-function editarLab(id){ var l=PA.demo.listarLabores(); var x=null; for(var i=0;i<l.length;i++){if(l[i].id===id){x=l[i];break;}} if(!x)return; editLab=id; document.getElementById('modal-lab-title').textContent='Editar labor'; document.getElementById('l-nombre').value=x.nombre||''; document.getElementById('l-precio').value=x.precioRef||''; document.getElementById('btn-del-lab').style.display=''; document.getElementById('msg-lab').textContent=''; document.getElementById('overlay-lab').className='overlay open'; }
+var precioRefLabEdit=0;
+function abrirModalLab(){ editLab=null; precioRefLabEdit=0; document.getElementById('modal-lab-title').textContent='Nueva labor'; document.getElementById('l-nombre').value=''; document.getElementById('l-unidad').value=''; document.getElementById('btn-del-lab').style.display='none'; document.getElementById('msg-lab').textContent=''; document.getElementById('overlay-lab').className='overlay open'; }
+function editarLab(id){ var l=PA.demo.listarLabores(); var x=null; for(var i=0;i<l.length;i++){if(l[i].id===id){x=l[i];break;}} if(!x)return; editLab=id; precioRefLabEdit=x.precioRef||0; document.getElementById('modal-lab-title').textContent='Editar labor'; document.getElementById('l-nombre').value=x.nombre||''; document.getElementById('l-unidad').value=x.unidadLabor||''; document.getElementById('btn-del-lab').style.display=''; document.getElementById('msg-lab').textContent=''; document.getElementById('overlay-lab').className='overlay open'; }
 function cerrarModalLab(){ document.getElementById('overlay-lab').className='overlay'; }
-function guardarLab(){ var n=document.getElementById('l-nombre').value.trim(); if(!n){document.getElementById('msg-lab').textContent='Falta el nombre.';return;} PA.demo.guardarLabor({id:editLab||undefined,nombre:n,precioRef:Number(document.getElementById('l-precio').value)||0,activo:true}); cerrarModalLab(); renderLabores(); }
+function guardarLab(){ var n=document.getElementById('l-nombre').value.trim(); if(!n){document.getElementById('msg-lab').textContent='Falta el nombre.';return;} PA.demo.guardarLabor({id:editLab||undefined,nombre:n,unidadLabor:document.getElementById('l-unidad').value||null,precioRef:precioRefLabEdit,activo:true}); cerrarModalLab(); renderLabores(); }
 function eliminarLab(){ if(editLab&&confirm('¿Eliminar esta labor?')){PA.demo.borrarLabor(editLab);cerrarModalLab();renderLabores();} }
 
-/* ---- CULTIVOS / USOS ---- */
+/* ---- CULTIVOS ---- */
 var editCul=null;
+// Usos que requieren especie (P8): Agricultura y Doble propósito.
+var USOS_CON_ESPECIE = ['AGR','DOB'];
+function usoRequiereEspecie(cod){ for(var i=0;i<USOS_CON_ESPECIE.length;i++){ if(USOS_CON_ESPECIE[i]===cod) return true; } return false; }
 function nombreEspecie(id){ if(!id) return null; var l=PA.demo.listarEspecies(); for(var i=0;i<l.length;i++){ if(l[i].id===id) return l[i].nombre; } return null; }
 function poblarSelectEspecie(selId, valor){
   var sel=document.getElementById(selId); sel.innerHTML='<option value="">— elegí especie —</option>';
   var l=PA.demo.listarEspecies();
   for(var i=0;i<l.length;i++){ var o=document.createElement('option'); o.value=l[i].id; o.textContent=l[i].nombre; if(l[i].id===valor) o.selected=true; sel.appendChild(o); }
 }
+function poblarSelectUso(valor){
+  var sel=document.getElementById('cu-activ'); sel.innerHTML='<option value="">— sin clasificar —</option>';
+  var l=listarUsos();
+  for(var i=0;i<l.length;i++){ var o=document.createElement('option'); o.value=l[i].codigo; o.textContent=l[i].label; if(l[i].codigo===valor) o.selected=true; sel.appendChild(o); }
+}
 function toggleEspecieCul(){
   var act=document.getElementById('cu-activ').value;
-  document.getElementById('fld-cu-especie').style.display = (act==='AGR') ? '' : 'none';
+  document.getElementById('fld-cu-especie').style.display = usoRequiereEspecie(act) ? '' : 'none';
 }
 function renderCultivos(){
   var lista=PA.demo.listarTiposActividad(empresaId);
   var tb=document.querySelector('#tbl-cul tbody'); tb.innerHTML='';
   for(var i=0;i<lista.length;i++){(function(c){
-    var act = c.actividad==='AGR' ? '<span class="rol-bdg rb-prov">Agrícola</span>' : (c.actividad==='GAN' ? '<span class="rol-bdg rb-cli">Ganadera</span>' : '<span style="color:var(--muted)">—</span>');
+    var uso = c.actividad ? '<span class="rol-bdg rb-tipo">'+labelUso(c.actividad)+'</span>' : '<span style="color:var(--muted)">—</span>';
     var esp = nombreEspecie(c.especieId) || '<span style="color:var(--muted)">—</span>';
     var tr=document.createElement('tr');
-    tr.innerHTML='<td><strong>'+c.nombre+'</strong></td><td>'+(c.sigla||'—')+'</td><td>'+act+'</td><td>'+esp+'</td>'+
+    tr.innerHTML='<td><strong>'+c.nombre+'</strong></td><td>'+(c.sigla||'—')+'</td><td>'+uso+'</td><td>'+esp+'</td>'+
       '<td style="text-align:right"><button class="btn-sm" onclick="editarCul(\''+c.id+'\')">Editar</button></td>';
     tb.appendChild(tr);
   })(lista[i]);}
   document.getElementById('empty-cul').style.display=lista.length?'none':'block';
   document.getElementById('tbl-cul').style.display=lista.length?'':'none';
 }
-function abrirModalCul(){ editCul=null; document.getElementById('modal-cul-title').textContent='Nuevo cultivo / uso'; document.getElementById('cu-nombre').value=''; document.getElementById('cu-sigla').value=''; document.getElementById('cu-activ').value=''; poblarSelectEspecie('cu-especie',''); toggleEspecieCul(); document.getElementById('btn-del-cul').style.display='none'; document.getElementById('msg-cul').textContent=''; document.getElementById('overlay-cul').className='overlay open'; }
-function editarCul(id){ var l=PA.demo.listarTiposActividad(empresaId); var x=null; for(var i=0;i<l.length;i++){if(l[i].id===id){x=l[i];break;}} if(!x)return; editCul=id; document.getElementById('modal-cul-title').textContent='Editar cultivo / uso'; document.getElementById('cu-nombre').value=x.nombre||''; document.getElementById('cu-sigla').value=x.sigla||''; document.getElementById('cu-activ').value=x.actividad||''; poblarSelectEspecie('cu-especie',x.especieId||''); toggleEspecieCul(); document.getElementById('btn-del-cul').style.display=''; document.getElementById('msg-cul').textContent=''; document.getElementById('overlay-cul').className='overlay open'; }
+function abrirModalCul(){ editCul=null; document.getElementById('modal-cul-title').textContent='Nuevo cultivo'; document.getElementById('cu-nombre').value=''; document.getElementById('cu-sigla').value=''; poblarSelectUso(''); poblarSelectEspecie('cu-especie',''); toggleEspecieCul(); document.getElementById('btn-del-cul').style.display='none'; document.getElementById('msg-cul').textContent=''; document.getElementById('overlay-cul').className='overlay open'; }
+function editarCul(id){ var l=PA.demo.listarTiposActividad(empresaId); var x=null; for(var i=0;i<l.length;i++){if(l[i].id===id){x=l[i];break;}} if(!x)return; editCul=id; document.getElementById('modal-cul-title').textContent='Editar cultivo'; document.getElementById('cu-nombre').value=x.nombre||''; document.getElementById('cu-sigla').value=x.sigla||''; poblarSelectUso(x.actividad||''); poblarSelectEspecie('cu-especie',x.especieId||''); toggleEspecieCul(); document.getElementById('btn-del-cul').style.display=''; document.getElementById('msg-cul').textContent=''; document.getElementById('overlay-cul').className='overlay open'; }
 function cerrarModalCul(){ document.getElementById('overlay-cul').className='overlay'; }
 function guardarCul(){
   var n=document.getElementById('cu-nombre').value.trim();
   if(!n){document.getElementById('msg-cul').textContent='Falta el nombre.';return;}
   var act=document.getElementById('cu-activ').value;
-  var espId = (act==='AGR') ? document.getElementById('cu-especie').value : null;
-  if(act==='AGR' && !espId){document.getElementById('msg-cul').textContent='Elegí la especie del cultivo agrícola.';return;}
+  var espId = usoRequiereEspecie(act) ? document.getElementById('cu-especie').value : null;
+  if(usoRequiereEspecie(act) && !espId){document.getElementById('msg-cul').textContent='Elegí la especie del cultivo.';return;}
   PA.demo.guardarTipoActividad({id:editCul||undefined,empresaId:empresaId,nombre:n,sigla:document.getElementById('cu-sigla').value.trim(),actividad:act,especieId:espId,activo:true});
   cerrarModalCul(); renderCultivos();
 }
-function eliminarCul(){ if(editCul&&confirm('¿Eliminar este cultivo/uso?')){PA.demo.borrarTipoActividad(editCul);cerrarModalCul();renderCultivos();} }
+function eliminarCul(){ if(editCul&&confirm('¿Eliminar este cultivo?')){PA.demo.borrarTipoActividad(editCul);cerrarModalCul();renderCultivos();} }
+
+/* ---- USOS (catálogo global Puntal — fallback local hasta pa-core) ---- */
+var editUso=null;
+function renderUsos(){
+  var lista=listarUsos();
+  var tb=document.querySelector('#tbl-uso tbody'); tb.innerHTML='';
+  for(var i=0;i<lista.length;i++){(function(u){
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td><span class="rol-bdg rb-tipo">'+(u.codigo||'—')+'</span></td><td><strong>'+u.label+'</strong></td>'+
+      '<td style="text-align:right"><button class="btn-sm" onclick="editarUso(\''+u.id+'\')">Editar</button></td>';
+    tb.appendChild(tr);
+  })(lista[i]);}
+  document.getElementById('empty-uso').style.display=lista.length?'none':'block';
+  document.getElementById('tbl-uso').style.display=lista.length?'':'none';
+}
+function abrirModalUso(){ editUso=null; document.getElementById('modal-uso-title').textContent='Nuevo uso'; document.getElementById('uso-codigo').value=''; document.getElementById('uso-label').value=''; document.getElementById('uso-codigo').disabled=false; document.getElementById('btn-del-uso').style.display='none'; document.getElementById('msg-uso').textContent=''; document.getElementById('overlay-uso').className='overlay open'; }
+function editarUso(id){ var l=listarUsos(); var x=null; for(var i=0;i<l.length;i++){if(l[i].id===id){x=l[i];break;}} if(!x)return; editUso=id; document.getElementById('modal-uso-title').textContent='Editar uso'; document.getElementById('uso-codigo').value=x.codigo||''; document.getElementById('uso-label').value=x.label||''; document.getElementById('uso-codigo').disabled=true; document.getElementById('btn-del-uso').style.display=''; document.getElementById('msg-uso').textContent=''; document.getElementById('overlay-uso').className='overlay open'; }
+function cerrarModalUso(){ document.getElementById('overlay-uso').className='overlay'; }
+function guardarUsoUI(){
+  var cod=document.getElementById('uso-codigo').value.trim().toUpperCase();
+  var lab=document.getElementById('uso-label').value.trim();
+  if(!cod){document.getElementById('msg-uso').textContent='Falta el código.';return;}
+  if(!lab){document.getElementById('msg-uso').textContent='Falta el nombre.';return;}
+  if(!editUso){ var ex=listarUsos(); for(var i=0;i<ex.length;i++){ if(ex[i].codigo===cod){document.getElementById('msg-uso').textContent='Ya existe un uso con ese código.';return;} } }
+  guardarUso({id:editUso||undefined,codigo:cod,label:lab,activo:true});
+  cerrarModalUso(); renderUsos();
+}
+function eliminarUsoUI(){ if(editUso&&confirm('¿Eliminar este uso?')){borrarUso(editUso);cerrarModalUso();renderUsos();} }
 
 /* ---- ESPECIES / GRANOS (global) ---- */
 var editEsp=null;
@@ -691,9 +1006,38 @@ function eliminarUni(){ if(editUni&&confirm('¿Eliminar esta unidad?')){PA.demo.
 
 /* ---- INSUMOS (por empresa) ---- */
 var editIns=null, bandaSel='';
-var TIPOS_FITO = ['Herbicidas','Insecticidas','Fungicidas'];
-function esFito(t){ for(var i=0;i<TIPOS_FITO.length;i++){ if(TIPOS_FITO[i]===t) return true; } return false; }
-function sistemaDeTipo(t){ if(t==='Herbicidas') return 'HRAC'; if(t==='Insecticidas') return 'IRAC'; if(t==='Fungicidas') return 'FRAC'; return null; }
+var CODS_FITO = ['HERB','INSE','FUNG'];
+// Mapea cualquier valor legacy de 'tipo' (singular/plural/con barra) al código estable.
+function codCategoria(t){
+  if(!t) return 'SEM';
+  // si ya es un código conocido, devolverlo
+  for(var i=0;i<CATEGORIAS_INSUMO.length;i++){ if(CATEGORIAS_INSUMO[i].codigo===t) return t; }
+  var s=String(t).toLowerCase();
+  if(s.indexOf('curasem')>=0||s.indexOf('inocul')>=0) return 'CURA';
+  if(s.indexOf('herbic')>=0) return 'HERB';
+  if(s.indexOf('insectic')>=0) return 'INSE';
+  if(s.indexOf('fungic')>=0) return 'FUNG';
+  if(s.indexOf('coadyuv')>=0||s.indexOf('correct')>=0) return 'COAD';
+  if(s.indexOf('fertiliz')>=0) return 'FERT';
+  if(s.indexOf('semilla')>=0) return 'SEM';
+  if(s.indexOf('otro')>=0) return 'OTRO';
+  return 'OTRO';
+}
+function esFito(cod){ cod=codCategoria(cod); for(var i=0;i<CODS_FITO.length;i++){ if(CODS_FITO[i]===cod) return true; } return false; }
+function sistemaDeTipo(cod){ cod=codCategoria(cod); if(cod==='HERB') return 'HRAC'; if(cod==='INSE') return 'IRAC'; if(cod==='FUNG') return 'FRAC'; return null; }
+function poblarSelectCategoria(valorCod){
+  var sel=document.getElementById('i-tipo'); sel.innerHTML='';
+  for(var i=0;i<CATEGORIAS_INSUMO.length;i++){ var c=CATEGORIAS_INSUMO[i]; var o=document.createElement('option'); o.value=c.codigo; o.textContent=c.label; if(c.codigo===valorCod) o.selected=true; sel.appendChild(o); }
+}
+function toggleSubcat(){
+  var cod=document.getElementById('i-tipo').value;
+  var fld=document.getElementById('fld-i-subcat');
+  if(cod==='COAD'){ fld.style.display=''; } else { fld.style.display='none'; }
+}
+function poblarSubcat(valor){
+  var sel=document.getElementById('i-subcat'); sel.innerHTML='<option value="">— elegí —</option>';
+  for(var i=0;i<SUBCAT_COAD.length;i++){ var o=document.createElement('option'); o.value=SUBCAT_COAD[i]; o.textContent=SUBCAT_COAD[i]; if(SUBCAT_COAD[i]===valor) o.selected=true; sel.appendChild(o); }
+}
 function nombreModoAcc(id){ if(!id) return null; var l=PA.demo.listarModosAccion(); for(var i=0;i<l.length;i++){ if(l[i].id===id) return l[i].sistema+' '+l[i].codigo; } return null; }
 function poblarSelectModo(sistema, valor){
   var sel=document.getElementById('i-modo'); sel.innerHTML='<option value="">— Sin especificar —</option>';
@@ -703,32 +1047,83 @@ function poblarSelectModo(sistema, valor){
   for(var i=0;i<l.length;i++){ var o=document.createElement('option'); o.value=l[i].id; o.textContent=l[i].codigo+' — '+l[i].descripcion; if(l[i].id===valor) o.selected=true; sel.appendChild(o); }
 }
 function nombreUnidad(id){ if(!id) return '—'; var l=PA.demo.listarUnidades(); for(var i=0;i<l.length;i++){ if(l[i].id===id) return l[i].sigla; } return '—'; }
-function bandaBadge(b){ if(!b) return ''; var col={'Ia':'#C0392B','Ib':'#E74C3C','II':'#E67E22','III':'#2980B9','IV':'#27AE60'}[b]||'#7A8899'; return '<span class="bdg-banda" style="background:'+col+'">'+b+'</span>'; }
+function bandaBadge(b){ if(!b) return ''; var col={'Ia':'#C0392B','Ib':'#E74C3C','II':'#F1C40F','III':'#2980B9','IV':'#27AE60'}[b]||'#7A8899'; var txt=(b==='II')?'#5A4A00':'#fff'; return '<span class="bdg-banda" style="background:'+col+';color:'+txt+'">'+b+'</span>'; }
 function tecnicoResumen(x){
   if(esFito(x.tipo)){
     var p=[];
     var ma=nombreModoAcc(x.modoAccionId); if(ma) p.push(ma);
-    if(x.concentracion) p.push(x.concentracion+(x.concUnidad||''));
+    var fm=nombreFormulacion(x.formulacionId); if(fm) p.push(fm);
+    // activos
+    if(x.activos && x.activos.length){
+      var nombres=[];
+      for(var a=0;a<x.activos.length;a++){ var nm=nombrePA(x.activos[a].paId); if(nm) nombres.push(nm); }
+      if(nombres.length) p.push(nombres.join(' + '));
+    }
     if(x.bandaTox) p.push(bandaBadge(x.bandaTox));
-    if(x.eiq!=null && x.eiq!=='') p.push('EIQ '+x.eiq);
+    var eiqEf = (x.eiqOverride!=null) ? x.eiqOverride : (x.eiqTotal!=null ? x.eiqTotal : (x.eiq!=null?x.eiq:null));
+    if(eiqEf!=null && eiqEf!=='') p.push('EIQ '+(Math.round(eiqEf*100)/100)+(x.eiqOverride!=null?'*':''));
     return p.length?p.join(' · '):'<span style="color:var(--muted)">—</span>';
   }
-  if(x.tipo==='Fertilizantes' && x.nutrientes){
+  if(codCategoria(x.tipo)==='FERT' && x.nutrientes){
     var n=x.nutrientes; return 'N '+(n.n||0)+'% · P '+(n.p||0)+'% · K '+(n.k||0)+'% · S '+(n.s||0)+'%';
   }
   return '<span style="color:var(--muted)">—</span>';
 }
+function poblarFiltroCatIns(lista){
+  var sel=document.getElementById('ins-cat'); if(!sel) return;
+  var actual=sel.value;
+  var vistas={}, orden=[];
+  for(var i=0;i<lista.length;i++){ var cod=codCategoria(lista[i].tipo); if(!vistas[cod]){vistas[cod]=true; orden.push(cod);} }
+  // ordenar por el orden canónico del catálogo
+  orden.sort(function(a,b){
+    function idx(c){ for(var k=0;k<CATEGORIAS_INSUMO.length;k++){ if(CATEGORIAS_INSUMO[k].codigo===c) return k; } return 99; }
+    return idx(a)-idx(b);
+  });
+  sel.innerHTML='<option value="">Todas las categorías</option>';
+  for(var j=0;j<orden.length;j++){ var o=document.createElement('option'); o.value=orden[j]; o.textContent=labelCategoria(orden[j]); sel.appendChild(o); }
+  sel.value=actual;
+}
 function renderInsumos(){
-  var lista=PA.demo.listarInsumos(empresaId);
+  var todos=PA.demo.listarInsumos(empresaId);
+  poblarFiltroCatIns(todos);
+  var busEl=document.getElementById('ins-buscar'), catEl=document.getElementById('ins-cat');
+  var texto=busEl?busEl.value.trim().toLowerCase():'';
+  var cat=catEl?catEl.value:'';
+  var lista=[];
+  for(var k=0;k<todos.length;k++){
+    var x=todos[k];
+    if(cat && codCategoria(x.tipo)!==cat) continue;
+    if(texto && (x.nombre||'').toLowerCase().indexOf(texto)<0) continue;
+    lista.push(x);
+  }
+  // agrupar por categoría en orden canónico
+  var grupos={};
+  for(var g=0;g<lista.length;g++){ var c=codCategoria(lista[g].tipo); (grupos[c]||(grupos[c]=[])).push(lista[g]); }
   var tb=document.querySelector('#tbl-ins tbody'); tb.innerHTML='';
-  for(var i=0;i<lista.length;i++){(function(x){
-    var tr=document.createElement('tr');
-    tr.innerHTML='<td><strong>'+x.nombre+'</strong></td><td><span class="rol-bdg rb-tipo">'+x.tipo+'</span></td><td>'+nombreUnidad(x.unidadId)+'</td><td>'+tecnicoResumen(x)+'</td>'+
-      '<td style="text-align:right"><button class="btn-sm" onclick="editarIns(\''+x.id+'\')">Editar</button></td>';
-    tb.appendChild(tr);
-  })(lista[i]);}
+  for(var ci=0; ci<CATEGORIAS_INSUMO.length; ci++){
+    var cod=CATEGORIAS_INSUMO[ci].codigo;
+    var arr=grupos[cod]; if(!arr || !arr.length) continue;
+    arr.sort(function(a,b){ return (a.nombre||'')<(b.nombre||'')?-1:((a.nombre||'')>(b.nombre||'')?1:0); });
+    // fila-encabezado de sección
+    var trH=document.createElement('tr'); trH.className='sec-head';
+    trH.innerHTML='<td colspan="5">'+labelCategoria(cod)+' <span class="sec-count">('+arr.length+')</span></td>';
+    tb.appendChild(trH);
+    for(var i=0;i<arr.length;i++){(function(x){
+      var sub = (codCategoria(x.tipo)==='COAD' && x.subcategoria) ? '<span class="rol-bdg rb-tipo">'+x.subcategoria+'</span>' : '<span style="color:var(--muted)">—</span>';
+      var tr=document.createElement('tr');
+      tr.innerHTML='<td><strong>'+x.nombre+'</strong></td><td>'+sub+'</td><td>'+nombreUnidad(x.unidadId)+'</td><td>'+tecnicoResumen(x)+'</td>'+
+        '<td style="text-align:right"><button class="btn-sm" onclick="editarIns(\''+x.id+'\')">Editar</button></td>';
+      tb.appendChild(tr);
+    })(arr[i]);}
+  }
   document.getElementById('empty-ins').style.display=lista.length?'none':'block';
   document.getElementById('tbl-ins').style.display=lista.length?'':'none';
+}
+function poblarSelectFormul(valor){
+  var sel=document.getElementById('i-formul'); if(!sel) return;
+  sel.innerHTML='<option value="">— Sin especificar —</option>';
+  var l=listarFormulaciones();
+  for(var i=0;i<l.length;i++){ var o=document.createElement('option'); o.value=l[i].id; o.textContent=(l[i].codigo?l[i].codigo+' — ':'')+l[i].descripcion; if(l[i].id===valor) o.selected=true; sel.appendChild(o); }
 }
 function poblarSelectUnidad(valor){
   var sel=document.getElementById('i-unidad'); sel.innerHTML='';
@@ -736,14 +1131,20 @@ function poblarSelectUnidad(valor){
   for(var i=0;i<l.length;i++){ var o=document.createElement('option'); o.value=l[i].id; o.textContent=l[i].sigla+' — '+l[i].nombre; if(l[i].id===valor) o.selected=true; sel.appendChild(o); }
 }
 function toggleBloqueIns(){
-  var t=document.getElementById('i-tipo').value;
-  var fito=esFito(t);
+  var cod=document.getElementById('i-tipo').value;
+  var fito=esFito(cod);
   document.getElementById('bloque-fito').style.display = fito ? '' : 'none';
-  document.getElementById('bloque-ferti').style.display = (t==='Fertilizantes') ? '' : 'none';
+  document.getElementById('bloque-ferti').style.display = (cod==='FERT') ? '' : 'none';
+  toggleSubcat();
   if(fito){
-    var sis=sistemaDeTipo(t);
+    var sis=sistemaDeTipo(cod);
     var actual=document.getElementById('i-modo').value;
     poblarSelectModo(sis, actual);
+    var fActual=document.getElementById('i-formul').value;
+    poblarSelectFormul(fActual);
+    // primera fila de activo lista si no hay ninguna
+    if(!filasPA.length){ filasPA.push({ paId:'', concentracion:'', concUnidad:'%', densidad:'' }); }
+    renderFilasPA();
   }
 }
 function setBanda(b){
@@ -751,45 +1152,113 @@ function setBanda(b){
   var chips=document.querySelectorAll('#i-banda-row .banda-chip');
   for(var i=0;i<chips.length;i++){ chips[i].className='banda-chip b-'+(chips[i].getAttribute('data-b')||'na').toLowerCase()+(chips[i].getAttribute('data-b')===b?' on':''); }
 }
+/* ---- Bloque de principios activos dentro del insumo ---- */
+var filasPA = [];  // estado: [{paId, concentracion, concUnidad, densidad}]
+function agregarFilaPA(fila){
+  filasPA.push(fila || { paId:'', concentracion:'', concUnidad:'%', densidad:'' });
+  renderFilasPA();
+}
+function quitarFilaPA(idx){ filasPA.splice(idx,1); renderFilasPA(); }
+function optsPAHtml(sel){
+  var l=listarPrincipiosActivos().slice().sort(function(a,b){ return a.nombre<b.nombre?-1:(a.nombre>b.nombre?1:0); });
+  var h='<option value="">— elegí principio activo —</option>';
+  for(var i=0;i<l.length;i++){
+    var eiqTxt = (l[i].eiq==null?'N/D':l[i].eiq);
+    h+='<option value="'+l[i].id+'"'+(l[i].id===sel?' selected':'')+'>'+l[i].nombre+' (EIQ '+eiqTxt+')</option>';
+  }
+  return h;
+}
+function renderFilasPA(){
+  var cont=document.getElementById('pa-filas'); if(!cont) return;
+  cont.innerHTML='';
+  for(var i=0;i<filasPA.length;i++){(function(idx){
+    var f=filasPA[idx];
+    var row=document.createElement('div'); row.className='pa-fila';
+    var esGL = f.concUnidad==='g/l';
+    var ap=eiqAporte(f);
+    row.innerHTML=
+      '<select class="pa-sel" onchange="filasPA['+idx+'].paId=this.value;recalcEIQ()">'+optsPAHtml(f.paId)+'</select>'+
+      '<input class="pa-conc" type="number" step="0.01" placeholder="conc." value="'+(f.concentracion!=null?f.concentracion:'')+'" oninput="filasPA['+idx+'].concentracion=this.value;recalcEIQ()">'+
+      '<select class="pa-uni" onchange="filasPA['+idx+'].concUnidad=this.value;renderFilasPA()">'+
+        '<option value="%"'+(f.concUnidad==='%'?' selected':'')+'>%</option>'+
+        '<option value="g/l"'+(f.concUnidad==='g/l'?' selected':'')+'>g/l</option>'+
+        '<option value="g/kg"'+(f.concUnidad==='g/kg'?' selected':'')+'>g/kg</option>'+
+      '</select>'+
+      '<span class="pa-dens-wrap'+(esGL?'':' off')+'"><input class="pa-dens" type="number" step="0.01" placeholder="dens." title="densidad g/ml (solo g/l)" value="'+(f.densidad!=null?f.densidad:'')+'" '+(esGL?'':'disabled')+' oninput="filasPA['+idx+'].densidad=this.value;recalcEIQ()"></span>'+
+      '<span class="pa-aporte" title="Aporte de este activo al EIQ del producto">'+(ap?('EIQ +'+(Math.round(ap*100)/100)):'—')+'</span>'+
+      '<button type="button" class="pa-del" title="quitar" onclick="quitarFilaPA('+idx+')">×</button>';
+    cont.appendChild(row);
+  })(i);}
+  recalcEIQ();
+}
+function recalcEIQ(){
+  var total=eiqTotalCalculado(filasPA);
+  var box=document.getElementById('eiq-calc');
+  if(box) box.textContent = filasPA.length ? String(Math.round(total*10000)/10000) : '—';
+}
+function toggleEiqOverride(){
+  var chk=document.getElementById('eiq-manual-chk').checked;
+  var inp=document.getElementById('eiq-override');
+  inp.disabled=!chk;
+  if(chk && inp.value===''){ var t=eiqTotalCalculado(filasPA); inp.value=Math.round(t*10000)/10000; }
+}
+
 function abrirModalIns(){
   editIns=null; document.getElementById('modal-ins-title').textContent='Nuevo insumo';
-  document.getElementById('i-nombre').value=''; document.getElementById('i-tipo').value='Semillas';
-  poblarSelectUnidad(''); document.getElementById('i-eiq').value='';
-  document.getElementById('i-conc').value=''; document.getElementById('i-concuni').value='';
+  document.getElementById('i-nombre').value=''; poblarSelectCategoria('SEM');
+  poblarSubcat(''); poblarSelectFormul('');
+  poblarSelectUnidad('');
+  filasPA=[]; renderFilasPA();
+  document.getElementById('eiq-manual-chk').checked=false; document.getElementById('eiq-override').value=''; document.getElementById('eiq-override').disabled=true;
   document.getElementById('i-n').value=''; document.getElementById('i-p').value=''; document.getElementById('i-k').value=''; document.getElementById('i-s').value='';
   setBanda(''); toggleBloqueIns();
   document.getElementById('btn-del-ins').style.display='none'; document.getElementById('msg-ins').textContent='';
   document.getElementById('overlay-ins').className='overlay open';
+  setTimeout(function(){ try{ document.getElementById('i-nombre').focus(); }catch(e){} }, 30);
 }
 function editarIns(id){
   var l=PA.demo.listarInsumos(empresaId); var x=null; for(var i=0;i<l.length;i++){if(l[i].id===id){x=l[i];break;}} if(!x)return;
   editIns=id; document.getElementById('modal-ins-title').textContent='Editar insumo';
-  document.getElementById('i-nombre').value=x.nombre||''; document.getElementById('i-tipo').value=x.tipo||'Semillas';
+  var cod=codCategoria(x.tipo);
+  document.getElementById('i-nombre').value=x.nombre||''; poblarSelectCategoria(cod);
+  poblarSubcat(x.subcategoria||''); poblarSelectFormul(x.formulacionId||'');
   poblarSelectUnidad(x.unidadId||'');
-  poblarSelectModo(sistemaDeTipo(x.tipo), x.modoAccionId||'');
-  document.getElementById('i-eiq').value=(x.eiq!=null?x.eiq:'');
-  document.getElementById('i-conc').value=(x.concentracion!=null?x.concentracion:''); document.getElementById('i-concuni').value=x.concUnidad||'';
+  poblarSelectModo(sistemaDeTipo(cod), x.modoAccionId||'');
+  // cargar activos existentes
+  filasPA = (x.activos && x.activos.length) ? x.activos.map(function(a){ return { paId:a.paId||'', concentracion:(a.concentracion!=null?a.concentracion:''), concUnidad:a.concUnidad||'%', densidad:(a.densidad!=null?a.densidad:'') }; }) : [];
+  renderFilasPA();
+  // override: si el insumo tenía eiq manual (o el legacy 'eiq' suelto), respetarlo
+  var ovr = (x.eiqOverride!=null) ? x.eiqOverride : (x.eiq!=null ? x.eiq : null);
+  if(ovr!=null){ document.getElementById('eiq-manual-chk').checked=true; document.getElementById('eiq-override').disabled=false; document.getElementById('eiq-override').value=ovr; }
+  else { document.getElementById('eiq-manual-chk').checked=false; document.getElementById('eiq-override').value=''; document.getElementById('eiq-override').disabled=true; }
   var n=x.nutrientes||{}; document.getElementById('i-n').value=(n.n!=null?n.n:''); document.getElementById('i-p').value=(n.p!=null?n.p:''); document.getElementById('i-k').value=(n.k!=null?n.k:''); document.getElementById('i-s').value=(n.s!=null?n.s:'');
   setBanda(x.bandaTox||''); toggleBloqueIns();
   document.getElementById('btn-del-ins').style.display=''; document.getElementById('msg-ins').textContent='';
   document.getElementById('overlay-ins').className='overlay open';
 }
 function cerrarModalIns(){ document.getElementById('overlay-ins').className='overlay'; }
-function numOrNull(id){ var v=document.getElementById(id).value; return v===''?null:Number(v); }
 function guardarIns(){
   var n=document.getElementById('i-nombre').value.trim();
   if(!n){document.getElementById('msg-ins').textContent='Falta el nombre.';return;}
-  var t=document.getElementById('i-tipo').value;
-  var obj={ id:editIns||undefined, empresaId:empresaId, activo:true, nombre:n, tipo:t,
+  var cod=document.getElementById('i-tipo').value;
+  var sub = (cod==='COAD') ? (document.getElementById('i-subcat').value||null) : null;
+  var obj={ id:editIns||undefined, empresaId:empresaId, activo:true, nombre:n, tipo:cod, subcategoria:sub,
     unidadId:document.getElementById('i-unidad').value||null,
-    modoAccionId:null, bandaTox:'', eiq:null, concentracion:null, concUnidad:'', nutrientes:null };
-  if(esFito(t)){
+    modoAccionId:null, formulacionId:null, bandaTox:'', activos:[], eiqTotal:null, eiqOverride:null, eiq:null, nutrientes:null };
+  if(esFito(cod)){
     obj.modoAccionId=document.getElementById('i-modo').value||null;
+    obj.formulacionId=document.getElementById('i-formul').value||null;
     obj.bandaTox=bandaSel;
-    obj.eiq=numOrNull('i-eiq');
-    obj.concentracion=numOrNull('i-conc');
-    obj.concUnidad=document.getElementById('i-concuni').value;
-  } else if(t==='Fertilizantes'){
+    // activos: sólo filas con paId elegido
+    var acts=[];
+    for(var i=0;i<filasPA.length;i++){ var f=filasPA[i]; if(f.paId){ acts.push({ paId:f.paId, concentracion:(f.concentracion===''||f.concentracion==null?null:Number(f.concentracion)), concUnidad:f.concUnidad||'%', densidad:(f.densidad===''||f.densidad==null?null:Number(f.densidad)) }); } }
+    obj.activos=acts;
+    obj.eiqTotal=eiqTotalCalculado(acts);
+    var chk=document.getElementById('eiq-manual-chk').checked;
+    var ovrVal=document.getElementById('eiq-override').value;
+    obj.eiqOverride = (chk && ovrVal!=='') ? Number(ovrVal) : null;
+    obj.eiq = (obj.eiqOverride!=null) ? obj.eiqOverride : obj.eiqTotal; // compat: 'eiq' = efectivo
+  } else if(cod==='FERT'){
     obj.nutrientes={ n:Number(document.getElementById('i-n').value)||0, p:Number(document.getElementById('i-p').value)||0, k:Number(document.getElementById('i-k').value)||0, s:Number(document.getElementById('i-s').value)||0 };
   }
   PA.demo.guardarInsumo(obj); cerrarModalIns(); renderInsumos();
@@ -822,6 +1291,98 @@ function editarMoa(id){ var l=PA.demo.listarModosAccion(); var x=null; for(var i
 function cerrarModalMoa(){ document.getElementById('overlay-moa').className='overlay'; }
 function guardarMoa(){ var c=document.getElementById('m-codigo').value.trim(); var d=document.getElementById('m-desc').value.trim(); if(!c){document.getElementById('msg-moa').textContent='Falta el código.';return;} if(!d){document.getElementById('msg-moa').textContent='Falta la descripción.';return;} PA.demo.guardarModoAccion({id:editMoa||undefined,sistema:document.getElementById('m-sistema').value,codigo:c,descripcion:d,activo:true}); cerrarModalMoa(); renderModosAcc(); }
 function eliminarMoa(){ if(editMoa&&confirm('¿Eliminar este modo de acción?')){PA.demo.borrarModoAccion(editMoa);cerrarModalMoa();renderModosAcc();} }
+
+/* ---- FORMULACIONES (global Puntal — fallback local hasta pa-core) ---- */
+var editFormul=null;
+function renderFormul(){
+  var lista=listarFormulaciones();  // ya viene ordenada por orden
+  var tb=document.querySelector('#tbl-formul tbody'); tb.innerHTML='';
+  for(var i=0;i<lista.length;i++){(function(f, idx){
+    var cod=f.codigo?'<span class="rol-bdg rb-tipo">'+f.codigo+'</span>':'<span style="color:var(--muted)">—</span>';
+    var arribaDis = idx===0 ? ' disabled' : '';
+    var abajoDis = idx===lista.length-1 ? ' disabled' : '';
+    var flechas='<span class="ord-arrows">'+
+      '<button class="ord-btn" title="Subir"'+arribaDis+' onclick="moverFormul('+idx+',-1)">▲</button>'+
+      '<button class="ord-btn" title="Bajar"'+abajoDis+' onclick="moverFormul('+idx+',1)">▼</button></span>';
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td><span class="ord-cell">'+flechas+'<strong>'+(f.orden!=null?f.orden:'—')+'</strong></span></td><td>'+cod+'</td><td>'+f.descripcion+'</td>'+
+      '<td style="text-align:right"><button class="btn-sm" onclick="editarFormul(\''+f.id+'\')">Editar</button></td>';
+    tb.appendChild(tr);
+  })(lista[i], i);}
+  document.getElementById('empty-formul').style.display=lista.length?'none':'block';
+  document.getElementById('tbl-formul').style.display=lista.length?'':'none';
+}
+function moverFormul(idx, dir){
+  var lista=listarFormulaciones();  // ordenada
+  var j=idx+dir;
+  if(j<0 || j>=lista.length) return;
+  // swap posiciones en el array visual
+  var tmp=lista[idx]; lista[idx]=lista[j]; lista[j]=tmp;
+  // renumerar 1..N y persistir cada uno
+  for(var k=0;k<lista.length;k++){ lista[k].orden=k+1; guardarFormulacion(lista[k]); }
+  renderFormul();
+}
+function abrirModalFormul(){ editFormul=null; document.getElementById('modal-formul-title').textContent='Nueva formulación'; document.getElementById('fm-codigo').value=''; document.getElementById('fm-orden').value=''; document.getElementById('fm-desc').value=''; document.getElementById('btn-del-formul').style.display='none'; document.getElementById('msg-formul').textContent=''; document.getElementById('overlay-formul').className='overlay open'; }
+function editarFormul(id){ var l=listarFormulaciones(); var x=null; for(var i=0;i<l.length;i++){if(l[i].id===id){x=l[i];break;}} if(!x)return; editFormul=id; document.getElementById('modal-formul-title').textContent='Editar formulación'; document.getElementById('fm-codigo').value=x.codigo||''; document.getElementById('fm-orden').value=(x.orden!=null?x.orden:''); document.getElementById('fm-desc').value=x.descripcion||''; document.getElementById('btn-del-formul').style.display=''; document.getElementById('msg-formul').textContent=''; document.getElementById('overlay-formul').className='overlay open'; }
+function cerrarModalFormul(){ document.getElementById('overlay-formul').className='overlay'; }
+function guardarFormulUI(){
+  var desc=document.getElementById('fm-desc').value.trim();
+  if(!desc){document.getElementById('msg-formul').textContent='Falta la descripción.';return;}
+  var ordVal=document.getElementById('fm-orden').value;
+  guardarFormulacion({id:editFormul||undefined, codigo:document.getElementById('fm-codigo').value.trim().toUpperCase(), descripcion:desc, orden:(ordVal===''?0:Number(ordVal)), activo:true});
+  cerrarModalFormul(); renderFormul();
+}
+function eliminarFormulUI(){ if(editFormul&&confirm('¿Eliminar esta formulación?')){borrarFormulacion(editFormul);cerrarModalFormul();renderFormul();} }
+
+/* ---- PRINCIPIOS ACTIVOS (global Puntal — fallback local hasta pa-core) ---- */
+var editPA=null;
+function poblarFiltroUsoPA(){
+  var sel=document.getElementById('pa-uso'); if(!sel) return;
+  var actual=sel.value;
+  var l=listarPrincipiosActivos(); var usos={}, orden=[];
+  for(var i=0;i<l.length;i++){ var u=l[i].uso||''; if(u && !usos[u]){usos[u]=true; orden.push(u);} }
+  orden.sort();
+  sel.innerHTML='<option value="">Todos los usos</option>';
+  for(var j=0;j<orden.length;j++){ var o=document.createElement('option'); o.value=orden[j]; o.textContent=orden[j]; sel.appendChild(o); }
+  sel.value=actual;
+}
+function renderPA(){
+  var todos=listarPrincipiosActivos();
+  poblarFiltroUsoPA();
+  var busEl=document.getElementById('pa-buscar'), usoEl=document.getElementById('pa-uso');
+  var texto=busEl?busEl.value.trim().toLowerCase():'';
+  var uso=usoEl?usoEl.value:'';
+  var lista=[];
+  for(var k=0;k<todos.length;k++){ var x=todos[k];
+    if(uso && (x.uso||'')!==uso) continue;
+    if(texto && (x.nombre||'').toLowerCase().indexOf(texto)<0) continue;
+    lista.push(x);
+  }
+  lista.sort(function(a,b){ return a.nombre<b.nombre?-1:(a.nombre>b.nombre?1:0); });
+  var tb=document.querySelector('#tbl-pa tbody'); tb.innerHTML='';
+  for(var i=0;i<lista.length;i++){(function(p){
+    var eiqTxt = (p.eiq==null) ? '<span style="color:var(--muted)">N/D</span>' : '<strong style="font-variant-numeric:tabular-nums">'+p.eiq+'</strong>';
+    var uso = p.uso ? '<span class="rol-bdg rb-tipo">'+p.uso+'</span>' : '<span style="color:var(--muted)">—</span>';
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td>'+p.nombre+'</td><td>'+eiqTxt+'</td><td>'+uso+'</td>'+
+      '<td style="text-align:right"><button class="btn-sm" onclick="editarPA(\''+p.id+'\')">Editar</button></td>';
+    tb.appendChild(tr);
+  })(lista[i]);}
+  document.getElementById('empty-pa').style.display=lista.length?'none':'block';
+  document.getElementById('tbl-pa').style.display=lista.length?'':'none';
+}
+function abrirModalPA(){ editPA=null; document.getElementById('modal-pa-title').textContent='Nuevo principio activo'; document.getElementById('pa-nombre').value=''; document.getElementById('pa-eiq').value=''; document.getElementById('pa-usotxt').value=''; document.getElementById('btn-del-pa').style.display='none'; document.getElementById('msg-pa').textContent=''; document.getElementById('overlay-pa').className='overlay open'; }
+function editarPA(id){ var p=paById(id); if(!p)return; editPA=id; document.getElementById('modal-pa-title').textContent='Editar principio activo'; document.getElementById('pa-nombre').value=p.nombre||''; document.getElementById('pa-eiq').value=(p.eiq!=null?p.eiq:''); document.getElementById('pa-usotxt').value=p.uso||''; document.getElementById('btn-del-pa').style.display=''; document.getElementById('msg-pa').textContent=''; document.getElementById('overlay-pa').className='overlay open'; }
+function cerrarModalPA(){ document.getElementById('overlay-pa').className='overlay'; }
+function guardarPAUI(){
+  var nom=document.getElementById('pa-nombre').value.trim();
+  if(!nom){document.getElementById('msg-pa').textContent='Falta el nombre.';return;}
+  var eiqV=document.getElementById('pa-eiq').value;
+  guardarPrincipioActivo({ id:editPA||undefined, nombre:nom, eiq:(eiqV===''?null:Number(eiqV)), uso:document.getElementById('pa-usotxt').value.trim(), activo:true });
+  cerrarModalPA(); renderPA();
+}
+function eliminarPAUI(){ if(editPA&&confirm('¿Eliminar este principio activo?')){borrarPrincipioActivo(editPA);cerrarModalPA();renderPA();} }
+
 
 /* ---- CHOFERES ---- */
 var editChofer = null;
@@ -929,7 +1490,20 @@ function rolesBadges(t){
 }
 
 function render(){
-  var lista = PA.demo.listarTerceros(empresaId, filtro || null);
+  var selEl=document.getElementById('ter-tipo');
+  var busEl=document.getElementById('ter-buscar');
+  var selVal = selEl ? selEl.value : '';
+  var texto = busEl ? busEl.value.trim().toLowerCase() : '';
+  var filtroRol = null;
+  if(selVal==='proveedor' || selVal==='cliente') filtroRol=selVal;
+  else if(selVal.indexOf('tp:')===0) filtroRol=selVal.slice(3);
+  var lista = PA.demo.listarTerceros(empresaId, filtroRol);
+  if(texto){
+    lista = lista.filter(function(t){
+      var n=(t.nombre||'').toLowerCase(), c=(t.cuit||'').toLowerCase();
+      return n.indexOf(texto)>=0 || c.indexOf(texto)>=0;
+    });
+  }
   var tb = document.querySelector('#tbl tbody');
   tb.innerHTML = '';
   for (var i=0;i<lista.length;i++){
@@ -1045,6 +1619,7 @@ PA.init({ modo:'demo' }, function(){
       sel.appendChild(o);
     }
     empresaId = ctx.empresaActivaId;
+    poblarFiltroTipos();
     render();
   });
 });
