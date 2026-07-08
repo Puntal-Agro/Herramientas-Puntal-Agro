@@ -96,6 +96,11 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted
 .pa-dens-wrap.off{opacity:.4}
 tr.sec-head td{background:#EEF3E8;color:#3A5128;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.04em;padding:6px 10px;border-top:1px solid var(--border)}
 tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-transform:none}
+/* Botones de ícono por fila (lápiz editar / tacho eliminar) — homogéneo con tablero_uso_suelo */
+.row-actions{white-space:nowrap;text-align:right}
+.btn-icon{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer;font-size:13px;font-family:var(--sans);margin-left:4px;transition:all .12s;vertical-align:middle;font-variant-emoji:text}
+.btn-icon:hover{border-color:#4A6533;color:#4A6533;background:#F5F7FA}
+.btn-icon-del:hover{border-color:#FCA5A5;color:#B91C1C;background:#FEF2F2}
 .modal-ins .bloque-sec{border-top:1px solid var(--border);margin-top:20px;padding-top:16px}
 .modal-ins .bloque-sec-title{font-size:11px;font-weight:700;color:var(--olive);text-transform:uppercase;letter-spacing:.04em;margin-bottom:12px}
 .pa-fila select.pa-sel{padding:8px 9px;font-size:13px}
@@ -833,7 +838,7 @@ function renderDepositos(){
     }
     var tr=document.createElement('tr');
     tr.innerHTML='<td><strong>'+d.nombre+'</strong></td><td>'+nombreCampo(d.campoId)+'</td><td>'+tipo+'</td>'+
-      '<td style="text-align:right"><button class="btn-sm" onclick="editarDep(\''+d.id+'\')">Editar</button></td>';
+      '<td class="row-actions"><button class="btn-icon" title="Editar" onclick="editarDep(\''+d.id+'\')">✎︎</button><button class="btn-icon btn-icon-del" title="Eliminar" onclick="eliminarDep(\''+d.id+'\')">×</button></td>';
     tb.appendChild(tr);
   })(lista[i]);}
   document.getElementById('empty-dep').style.display=lista.length?'none':'block';
@@ -861,7 +866,7 @@ function guardarDep(){
   PA.demo.guardarDeposito({id:editDep||undefined,empresaId:empresaId,campoId:document.getElementById('d-campo').value||null,nombre:n,clase:clase,especieId:espId,activo:true});
   cerrarModalDep(); renderDepositos();
 }
-function eliminarDep(){ if(editDep&&confirm('¿Eliminar este depósito?')){PA.demo.borrarDeposito(editDep);cerrarModalDep();renderDepositos();} }
+function eliminarDep(id){ var t=id||editDep; if(!t) return; if(confirm('¿Eliminar este depósito?')){ PA.demo.borrarDeposito(t); if(!id){cerrarModalDep();} renderDepositos(); } }
 
 /* ---- LABORES (global) ---- */
 var editLab=null;
@@ -875,7 +880,7 @@ function renderLabores(){
     var uni = l.unidadLabor ? labelUnidadLabor(l.unidadLabor) : '<span style="color:var(--muted)">—</span>';
     var tr=document.createElement('tr');
     tr.innerHTML='<td><strong>'+l.nombre+'</strong></td><td>'+uni+'</td>'+
-      '<td style="text-align:right"><button class="btn-sm" onclick="editarLab(\''+l.id+'\')">Editar</button></td>';
+      '<td class="row-actions"><button class="btn-icon" title="Editar" onclick="editarLab(\''+l.id+'\')">✎︎</button><button class="btn-icon btn-icon-del" title="Eliminar" onclick="eliminarLab(\''+l.id+'\')">×</button></td>';
     tb.appendChild(tr);
   })(lista[i]);}
   document.getElementById('empty-lab').style.display=lista.length?'none':'block';
@@ -886,7 +891,7 @@ function abrirModalLab(){ editLab=null; precioRefLabEdit=0; document.getElementB
 function editarLab(id){ var l=PA.demo.listarLabores(); var x=null; for(var i=0;i<l.length;i++){if(l[i].id===id){x=l[i];break;}} if(!x)return; editLab=id; precioRefLabEdit=x.precioRef||0; document.getElementById('modal-lab-title').textContent='Editar labor'; document.getElementById('l-nombre').value=x.nombre||''; document.getElementById('l-unidad').value=x.unidadLabor||''; document.getElementById('btn-del-lab').style.display=''; document.getElementById('msg-lab').textContent=''; document.getElementById('overlay-lab').className='overlay open'; }
 function cerrarModalLab(){ document.getElementById('overlay-lab').className='overlay'; }
 function guardarLab(){ var n=document.getElementById('l-nombre').value.trim(); if(!n){document.getElementById('msg-lab').textContent='Falta el nombre.';return;} PA.demo.guardarLabor({id:editLab||undefined,nombre:n,unidadLabor:document.getElementById('l-unidad').value||null,precioRef:precioRefLabEdit,activo:true}); cerrarModalLab(); renderLabores(); }
-function eliminarLab(){ if(editLab&&confirm('¿Eliminar esta labor?')){PA.demo.borrarLabor(editLab);cerrarModalLab();renderLabores();} }
+function eliminarLab(id){ var t=id||editLab; if(!t) return; if(confirm('¿Eliminar esta labor?')){ PA.demo.borrarLabor(t); if(!id){cerrarModalLab();} renderLabores(); } }
 
 /* ---- CULTIVOS ---- */
 var editCul=null;
@@ -916,7 +921,7 @@ function renderCultivos(){
     var esp = nombreEspecie(c.especieId) || '<span style="color:var(--muted)">—</span>';
     var tr=document.createElement('tr');
     tr.innerHTML='<td><strong>'+c.nombre+'</strong></td><td>'+(c.sigla||'—')+'</td><td>'+uso+'</td><td>'+esp+'</td>'+
-      '<td style="text-align:right"><button class="btn-sm" onclick="editarCul(\''+c.id+'\')">Editar</button></td>';
+      '<td class="row-actions"><button class="btn-icon" title="Editar" onclick="editarCul(\''+c.id+'\')">✎︎</button><button class="btn-icon btn-icon-del" title="Eliminar" onclick="eliminarCul(\''+c.id+'\')">×</button></td>';
     tb.appendChild(tr);
   })(lista[i]);}
   document.getElementById('empty-cul').style.display=lista.length?'none':'block';
@@ -934,7 +939,7 @@ function guardarCul(){
   PA.demo.guardarTipoActividad({id:editCul||undefined,empresaId:empresaId,nombre:n,sigla:document.getElementById('cu-sigla').value.trim(),actividad:act,especieId:espId,activo:true});
   cerrarModalCul(); renderCultivos();
 }
-function eliminarCul(){ if(editCul&&confirm('¿Eliminar este cultivo?')){PA.demo.borrarTipoActividad(editCul);cerrarModalCul();renderCultivos();} }
+function eliminarCul(id){ var t=id||editCul; if(!t) return; if(confirm('¿Eliminar este cultivo?')){ PA.demo.borrarTipoActividad(t); if(!id){cerrarModalCul();} renderCultivos(); } }
 
 /* ---- USOS (catálogo global Puntal — fallback local hasta pa-core) ---- */
 var editUso=null;
@@ -944,7 +949,7 @@ function renderUsos(){
   for(var i=0;i<lista.length;i++){(function(u){
     var tr=document.createElement('tr');
     tr.innerHTML='<td><span class="rol-bdg rb-tipo">'+(u.codigo||'—')+'</span></td><td><strong>'+u.label+'</strong></td>'+
-      '<td style="text-align:right"><button class="btn-sm" onclick="editarUso(\''+u.id+'\')">Editar</button></td>';
+      '<td class="row-actions"><button class="btn-icon" title="Editar" onclick="editarUso(\''+u.id+'\')">✎︎</button><button class="btn-icon btn-icon-del" title="Eliminar" onclick="eliminarUsoUI(\''+u.id+'\')">×</button></td>';
     tb.appendChild(tr);
   })(lista[i]);}
   document.getElementById('empty-uso').style.display=lista.length?'none':'block';
@@ -962,7 +967,7 @@ function guardarUsoUI(){
   guardarUso({id:editUso||undefined,codigo:cod,label:lab,activo:true});
   cerrarModalUso(); renderUsos();
 }
-function eliminarUsoUI(){ if(editUso&&confirm('¿Eliminar este uso?')){borrarUso(editUso);cerrarModalUso();renderUsos();} }
+function eliminarUsoUI(id){ var t=id||editUso; if(!t) return; if(confirm('¿Eliminar este uso?')){ borrarUso(t); if(!id){cerrarModalUso();} renderUsos(); } }
 
 /* ---- ESPECIES / GRANOS (global) ---- */
 var editEsp=null;
@@ -972,7 +977,7 @@ function renderEspecies(){
   for(var i=0;i<lista.length;i++){(function(e){
     var tr=document.createElement('tr');
     tr.innerHTML='<td><strong>'+e.nombre+'</strong></td><td>'+(e.sigla||'—')+'</td>'+
-      '<td style="text-align:right"><button class="btn-sm" onclick="editarEsp(\''+e.id+'\')">Editar</button></td>';
+      '<td class="row-actions"><button class="btn-icon" title="Editar" onclick="editarEsp(\''+e.id+'\')">✎︎</button><button class="btn-icon btn-icon-del" title="Eliminar" onclick="eliminarEsp(\''+e.id+'\')">×</button></td>';
     tb.appendChild(tr);
   })(lista[i]);}
   document.getElementById('empty-esp').style.display=lista.length?'none':'block';
@@ -982,7 +987,7 @@ function abrirModalEsp(){ editEsp=null; document.getElementById('modal-esp-title
 function editarEsp(id){ var l=PA.demo.listarEspecies(); var x=null; for(var i=0;i<l.length;i++){if(l[i].id===id){x=l[i];break;}} if(!x)return; editEsp=id; document.getElementById('modal-esp-title').textContent='Editar especie'; document.getElementById('e-nombre').value=x.nombre||''; document.getElementById('e-sigla').value=x.sigla||''; document.getElementById('btn-del-esp').style.display=''; document.getElementById('msg-esp').textContent=''; document.getElementById('overlay-esp').className='overlay open'; }
 function cerrarModalEsp(){ document.getElementById('overlay-esp').className='overlay'; }
 function guardarEsp(){ var n=document.getElementById('e-nombre').value.trim(); if(!n){document.getElementById('msg-esp').textContent='Falta el nombre.';return;} PA.demo.guardarEspecie({id:editEsp||undefined,nombre:n,sigla:document.getElementById('e-sigla').value.trim(),activo:true}); cerrarModalEsp(); renderEspecies(); }
-function eliminarEsp(){ if(editEsp&&confirm('¿Eliminar esta especie?')){PA.demo.borrarEspecie(editEsp);cerrarModalEsp();renderEspecies();} }
+function eliminarEsp(id){ var t=id||editEsp; if(!t) return; if(confirm('¿Eliminar esta especie?')){ PA.demo.borrarEspecie(t); if(!id){cerrarModalEsp();} renderEspecies(); } }
 
 /* ---- UNIDADES (global) ---- */
 var editUni=null;
@@ -992,7 +997,7 @@ function renderUnidades(){
   for(var i=0;i<lista.length;i++){(function(u){
     var tr=document.createElement('tr');
     tr.innerHTML='<td><strong>'+u.sigla+'</strong></td><td>'+(u.nombre||'—')+'</td>'+
-      '<td style="text-align:right"><button class="btn-sm" onclick="editarUni(\''+u.id+'\')">Editar</button></td>';
+      '<td class="row-actions"><button class="btn-icon" title="Editar" onclick="editarUni(\''+u.id+'\')">✎︎</button><button class="btn-icon btn-icon-del" title="Eliminar" onclick="eliminarUni(\''+u.id+'\')">×</button></td>';
     tb.appendChild(tr);
   })(lista[i]);}
   document.getElementById('empty-uni').style.display=lista.length?'none':'block';
@@ -1002,7 +1007,7 @@ function abrirModalUni(){ editUni=null; document.getElementById('modal-uni-title
 function editarUni(id){ var l=PA.demo.listarUnidades(); var x=null; for(var i=0;i<l.length;i++){if(l[i].id===id){x=l[i];break;}} if(!x)return; editUni=id; document.getElementById('modal-uni-title').textContent='Editar unidad'; document.getElementById('u-sigla').value=x.sigla||''; document.getElementById('u-nombre').value=x.nombre||''; document.getElementById('btn-del-uni').style.display=''; document.getElementById('msg-uni').textContent=''; document.getElementById('overlay-uni').className='overlay open'; }
 function cerrarModalUni(){ document.getElementById('overlay-uni').className='overlay'; }
 function guardarUni(){ var s=document.getElementById('u-sigla').value.trim(); if(!s){document.getElementById('msg-uni').textContent='Falta la sigla.';return;} PA.demo.guardarUnidad({id:editUni||undefined,sigla:s,nombre:document.getElementById('u-nombre').value.trim(),activo:true}); cerrarModalUni(); renderUnidades(); }
-function eliminarUni(){ if(editUni&&confirm('¿Eliminar esta unidad?')){PA.demo.borrarUnidad(editUni);cerrarModalUni();renderUnidades();} }
+function eliminarUni(id){ var t=id||editUni; if(!t) return; if(confirm('¿Eliminar esta unidad?')){ PA.demo.borrarUnidad(t); if(!id){cerrarModalUni();} renderUnidades(); } }
 
 /* ---- INSUMOS (por empresa) ---- */
 var editIns=null, bandaSel='';
@@ -1112,7 +1117,7 @@ function renderInsumos(){
       var sub = (codCategoria(x.tipo)==='COAD' && x.subcategoria) ? '<span class="rol-bdg rb-tipo">'+x.subcategoria+'</span>' : '<span style="color:var(--muted)">—</span>';
       var tr=document.createElement('tr');
       tr.innerHTML='<td><strong>'+x.nombre+'</strong></td><td>'+sub+'</td><td>'+nombreUnidad(x.unidadId)+'</td><td>'+tecnicoResumen(x)+'</td>'+
-        '<td style="text-align:right"><button class="btn-sm" onclick="editarIns(\''+x.id+'\')">Editar</button></td>';
+        '<td class="row-actions"><button class="btn-icon" title="Editar" onclick="editarIns(\''+x.id+'\')">✎︎</button><button class="btn-icon btn-icon-del" title="Eliminar" onclick="eliminarIns(\''+x.id+'\')">×</button></td>';
       tb.appendChild(tr);
     })(arr[i]);}
   }
@@ -1263,7 +1268,7 @@ function guardarIns(){
   }
   PA.demo.guardarInsumo(obj); cerrarModalIns(); renderInsumos();
 }
-function eliminarIns(){ if(editIns&&confirm('¿Eliminar este insumo?')){PA.demo.borrarInsumo(editIns);cerrarModalIns();renderInsumos();} }
+function eliminarIns(id){ var t=id||editIns; if(!t) return; if(confirm('¿Eliminar este insumo?')){ PA.demo.borrarInsumo(t); if(!id){cerrarModalIns();} renderInsumos(); } }
 
 /* ---- MODOS DE ACCIÓN (global) ---- */
 var editMoa=null, filtroMoa='';
@@ -1280,7 +1285,7 @@ function renderModosAcc(){
   for(var i=0;i<lista.length;i++){(function(m){
     var tr=document.createElement('tr');
     tr.innerHTML='<td>'+sisBadge(m.sistema)+'</td><td><strong>'+m.codigo+'</strong></td><td>'+m.descripcion+'</td>'+
-      '<td style="text-align:right"><button class="btn-sm" onclick="editarMoa(\''+m.id+'\')">Editar</button></td>';
+      '<td class="row-actions"><button class="btn-icon" title="Editar" onclick="editarMoa(\''+m.id+'\')">✎︎</button><button class="btn-icon btn-icon-del" title="Eliminar" onclick="eliminarMoa(\''+m.id+'\')">×</button></td>';
     tb.appendChild(tr);
   })(lista[i]);}
   document.getElementById('empty-moa').style.display=lista.length?'none':'block';
@@ -1290,7 +1295,7 @@ function abrirModalMoa(){ editMoa=null; document.getElementById('modal-moa-title
 function editarMoa(id){ var l=PA.demo.listarModosAccion(); var x=null; for(var i=0;i<l.length;i++){if(l[i].id===id){x=l[i];break;}} if(!x)return; editMoa=id; document.getElementById('modal-moa-title').textContent='Editar modo de acción'; document.getElementById('m-sistema').value=x.sistema||'HRAC'; document.getElementById('m-codigo').value=x.codigo||''; document.getElementById('m-desc').value=x.descripcion||''; document.getElementById('btn-del-moa').style.display=''; document.getElementById('msg-moa').textContent=''; document.getElementById('overlay-moa').className='overlay open'; }
 function cerrarModalMoa(){ document.getElementById('overlay-moa').className='overlay'; }
 function guardarMoa(){ var c=document.getElementById('m-codigo').value.trim(); var d=document.getElementById('m-desc').value.trim(); if(!c){document.getElementById('msg-moa').textContent='Falta el código.';return;} if(!d){document.getElementById('msg-moa').textContent='Falta la descripción.';return;} PA.demo.guardarModoAccion({id:editMoa||undefined,sistema:document.getElementById('m-sistema').value,codigo:c,descripcion:d,activo:true}); cerrarModalMoa(); renderModosAcc(); }
-function eliminarMoa(){ if(editMoa&&confirm('¿Eliminar este modo de acción?')){PA.demo.borrarModoAccion(editMoa);cerrarModalMoa();renderModosAcc();} }
+function eliminarMoa(id){ var t=id||editMoa; if(!t) return; if(confirm('¿Eliminar este modo de acción?')){ PA.demo.borrarModoAccion(t); if(!id){cerrarModalMoa();} renderModosAcc(); } }
 
 /* ---- FORMULACIONES (global Puntal — fallback local hasta pa-core) ---- */
 var editFormul=null;
@@ -1306,7 +1311,7 @@ function renderFormul(){
       '<button class="ord-btn" title="Bajar"'+abajoDis+' onclick="moverFormul('+idx+',1)">▼</button></span>';
     var tr=document.createElement('tr');
     tr.innerHTML='<td><span class="ord-cell">'+flechas+'<strong>'+(f.orden!=null?f.orden:'—')+'</strong></span></td><td>'+cod+'</td><td>'+f.descripcion+'</td>'+
-      '<td style="text-align:right"><button class="btn-sm" onclick="editarFormul(\''+f.id+'\')">Editar</button></td>';
+      '<td class="row-actions"><button class="btn-icon" title="Editar" onclick="editarFormul(\''+f.id+'\')">✎︎</button><button class="btn-icon btn-icon-del" title="Eliminar" onclick="eliminarFormulUI(\''+f.id+'\')">×</button></td>';
     tb.appendChild(tr);
   })(lista[i], i);}
   document.getElementById('empty-formul').style.display=lista.length?'none':'block';
@@ -1332,7 +1337,7 @@ function guardarFormulUI(){
   guardarFormulacion({id:editFormul||undefined, codigo:document.getElementById('fm-codigo').value.trim().toUpperCase(), descripcion:desc, orden:(ordVal===''?0:Number(ordVal)), activo:true});
   cerrarModalFormul(); renderFormul();
 }
-function eliminarFormulUI(){ if(editFormul&&confirm('¿Eliminar esta formulación?')){borrarFormulacion(editFormul);cerrarModalFormul();renderFormul();} }
+function eliminarFormulUI(id){ var t=id||editFormul; if(!t) return; if(confirm('¿Eliminar esta formulación?')){ borrarFormulacion(t); if(!id){cerrarModalFormul();} renderFormul(); } }
 
 /* ---- PRINCIPIOS ACTIVOS (global Puntal — fallback local hasta pa-core) ---- */
 var editPA=null;
@@ -1365,7 +1370,7 @@ function renderPA(){
     var uso = p.uso ? '<span class="rol-bdg rb-tipo">'+p.uso+'</span>' : '<span style="color:var(--muted)">—</span>';
     var tr=document.createElement('tr');
     tr.innerHTML='<td>'+p.nombre+'</td><td>'+eiqTxt+'</td><td>'+uso+'</td>'+
-      '<td style="text-align:right"><button class="btn-sm" onclick="editarPA(\''+p.id+'\')">Editar</button></td>';
+      '<td class="row-actions"><button class="btn-icon" title="Editar" onclick="editarPA(\''+p.id+'\')">✎︎</button><button class="btn-icon btn-icon-del" title="Eliminar" onclick="eliminarPAUI(\''+p.id+'\')">×</button></td>';
     tb.appendChild(tr);
   })(lista[i]);}
   document.getElementById('empty-pa').style.display=lista.length?'none':'block';
@@ -1381,7 +1386,7 @@ function guardarPAUI(){
   guardarPrincipioActivo({ id:editPA||undefined, nombre:nom, eiq:(eiqV===''?null:Number(eiqV)), uso:document.getElementById('pa-usotxt').value.trim(), activo:true });
   cerrarModalPA(); renderPA();
 }
-function eliminarPAUI(){ if(editPA&&confirm('¿Eliminar este principio activo?')){borrarPrincipioActivo(editPA);cerrarModalPA();renderPA();} }
+function eliminarPAUI(id){ var t=id||editPA; if(!t) return; if(confirm('¿Eliminar este principio activo?')){ borrarPrincipioActivo(t); if(!id){cerrarModalPA();} renderPA(); } }
 
 
 /* ---- CHOFERES ---- */
@@ -1405,7 +1410,7 @@ function renderChoferes(){
       var tr=document.createElement('tr');
       tr.innerHTML='<td><strong>'+c.nombre+'</strong></td><td>'+(c.dni||'—')+'</td><td>'+(c.licencia||'—')+'</td>'+
         '<td>'+nombreTercero(c.terceroId)+'</td>'+
-        '<td style="text-align:right"><button class="btn-sm" onclick="editarChofer(\''+c.id+'\')">Editar</button></td>';
+        '<td class="row-actions"><button class="btn-icon" title="Editar" onclick="editarChofer(\''+c.id+'\')">✎︎</button><button class="btn-icon btn-icon-del" title="Eliminar" onclick="eliminarChofer(\''+c.id+'\')">×</button></td>';
       tb.appendChild(tr);
     })(lista[i]);
   }
@@ -1476,8 +1481,9 @@ function guardarChofer(){
   cerrarModalChofer(); renderChoferes();
 }
 
-function eliminarChofer(){
-  if(editChofer && confirm('¿Eliminar este chofer?')){ PA.demo.borrarChofer(editChofer); cerrarModalChofer(); renderChoferes(); }
+function eliminarChofer(id){
+  var t=id||editChofer; if(!t) return;
+  if(confirm('¿Eliminar este chofer?')){ PA.demo.borrarChofer(t); if(!id){cerrarModalChofer();} renderChoferes(); }
 }
 
 function rolesBadges(t){
@@ -1512,7 +1518,7 @@ function render(){
       var contacto = [t.telefono, t.email].filter(function(x){return x;}).join(' · ') || '—';
       tr.innerHTML = '<td><strong>'+t.nombre+'</strong></td><td>'+(t.cuit||'—')+'</td>'+
         '<td>'+rolesBadges(t)+'</td><td>'+contacto+'</td>'+
-        '<td style="text-align:right"><button class="btn-sm" onclick="editar(\''+t.id+'\')">Editar</button></td>';
+        '<td class="row-actions"><button class="btn-icon" title="Editar" onclick="editar(\''+t.id+'\')">✎︎</button><button class="btn-icon btn-icon-del" title="Eliminar" onclick="eliminar(\''+t.id+'\')">×</button></td>';
       tb.appendChild(tr);
     })(lista[i]);
   }
@@ -1600,9 +1606,10 @@ function guardar(){
   cerrarModal(); render();
 }
 
-function eliminar(){
-  if(editId && confirm('¿Eliminar este tercero? (también sus choferes asociados)')){
-    PA.demo.borrarTercero(editId); cerrarModal(); render();
+function eliminar(id){
+  var t=id||editId; if(!t) return;
+  if(confirm('¿Eliminar este tercero? (también sus choferes asociados)')){
+    PA.demo.borrarTercero(t); if(!id){cerrarModal();} render();
   }
 }
 
