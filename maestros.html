@@ -141,6 +141,7 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
     <div class="nav-item sel" data-cat="terceros" onclick="seleccionarCat('terceros')">Proveedores y Clientes</div>
     <div class="nav-item" data-cat="choferes" onclick="seleccionarCat('choferes')">Choferes</div>
     <div class="nav-item" data-cat="insumos" onclick="seleccionarCat('insumos')">Insumos</div>
+    <div class="nav-item" data-cat="categorias" onclick="seleccionarCat('categorias')">Categorías de insumo</div>
     <div class="nav-item" data-cat="modosacc" onclick="seleccionarCat('modosacc')">Modos de acción</div>
     <div class="nav-item" data-cat="formul" onclick="seleccionarCat('formul')">Formulaciones</div>
     <div class="nav-item" data-cat="ppioactivo" onclick="seleccionarCat('ppioactivo')">Principios activos</div>
@@ -226,6 +227,20 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
         <tbody></tbody>
       </table>
       <div class="empty" id="empty-cul" style="display:none">No hay cultivos cargados. Agregá uno con "+ Nuevo".</div>
+    </div>
+
+    <!-- VISTA CATEGORÍAS DE INSUMO (catálogo global Puntal, ABM con candados) -->
+    <div id="vista-categorias" style="display:none">
+      <div class="panel-head">
+        <h2>Categorías de insumo</h2>
+        <button class="btn" onclick="abrirModalCateg()">+ Nueva</button>
+      </div>
+      <div class="help-row" style="margin-bottom:12px">Catálogo global de Puntal. Las categorías de fábrica no se pueden borrar y las que son fitosanitarias (activan principios activos y EIQ) tienen el código fijo. Podés renombrar cualquiera y agregar categorías nuevas (nacen como no fitosanitarias).</div>
+      <table id="tbl-categ">
+        <thead><tr><th>Código</th><th>Nombre</th><th>Tipo</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="empty" id="empty-categ" style="display:none">No hay categorías cargadas.</div>
     </div>
 
     <!-- VISTA USOS (catálogo global Puntal) -->
@@ -466,6 +481,28 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
 </div>
 
 <!-- Modal USO -->
+<div class="overlay" id="overlay-categ">
+  <div class="modal">
+    <h3 id="modal-categ-title">Nueva categoría</h3>
+    <div class="grid2">
+      <div class="fld"><label>Código</label><input id="categ-codigo" placeholder="(se genera solo)" disabled></div>
+      <div class="fld"><label>Nombre</label><input id="categ-label" placeholder="Ej: Balanceados"></div>
+    </div>
+    <div class="fld full" id="fld-categ-fito" style="display:none">
+      <label style="display:flex;align-items:center;gap:8px;cursor:default"><input type="checkbox" id="categ-fito" disabled style="width:auto"> Fitosanitaria (activa principios activos / EIQ)</label>
+    </div>
+    <div class="fld full" id="fld-categ-subcat">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="categ-subcat" style="width:auto"> Usa subcategoría</label>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="guardarCategUI()">Guardar</button>
+      <button class="btn-out" onclick="cerrarModalCateg()">Cancelar</button>
+      <button class="btn-out del" id="btn-del-categ" style="display:none" onclick="eliminarCategUI()">Eliminar</button>
+      <span class="msg" id="msg-categ"></span>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="overlay-uso">
   <div class="modal">
     <h3 id="modal-uso-title">Nuevo uso</h3>
@@ -677,18 +714,58 @@ var USOS_SEED = [
   { id:'uso_gan', codigo:'GAN', label:'Ganadería', activo:true },
   { id:'uso_dob', codigo:'DOB', label:'Doble propósito', activo:true }
 ];
-// Categorías de insumo: código estable + label (P7). Fito = HERB/INSE/FUNG.
-var CATEGORIAS_INSUMO = [
-  { codigo:'SEM',  label:'Semillas' },
-  { codigo:'CURA', label:'Curasemillas e Inoculantes' },
-  { codigo:'HERB', label:'Herbicidas' },
-  { codigo:'INSE', label:'Insecticidas' },
-  { codigo:'FUNG', label:'Fungicidas' },
-  { codigo:'COAD', label:'Coadyuvantes y Correctores' },
-  { codigo:'FERT', label:'Fertilizantes' },
-  { codigo:'OTRO', label:'Otros Insumos' }
+/* --- Catálogo CATEGORÍAS DE INSUMO (global Puntal, ABM con candados) ---
+   Cada categoría: { codigo, label, base, fito, subcat }.
+   - base:true  -> categoría de fábrica (no se borra; código fijo).
+   - fito:true  -> dispara principios activos / EIQ / formulación / sistema HRAC-IRAC-FRAC.
+   - subcat:true-> dispara el selector de subcategoría (hoy solo Coadyuvantes/Correctores).
+   Las categorías nuevas nacen neutras (base:false, fito:false, subcat:false) y código slug.
+   Fuente de verdad única: esFito()/subcat leen estos flags, no una lista dura. */
+var LS_CATEGS_LOCAL = 'pa_categorias_local_v1';
+var CATEGORIAS_SEED = [
+  { codigo:'SEM',  label:'Semillas',                    base:true, fito:false, subcat:false },
+  { codigo:'CURA', label:'Curasemillas e Inoculantes',  base:true, fito:false, subcat:false },
+  { codigo:'HERB', label:'Herbicidas',                  base:true, fito:true,  subcat:false },
+  { codigo:'INSE', label:'Insecticidas',                base:true, fito:true,  subcat:false },
+  { codigo:'FUNG', label:'Fungicidas',                  base:true, fito:true,  subcat:false },
+  { codigo:'COAD', label:'Coadyuvantes y Correctores',  base:true, fito:false, subcat:true  },
+  { codigo:'FERT', label:'Fertilizantes',               base:true, fito:false, subcat:false },
+  { codigo:'OTRO', label:'Otros Insumos',               base:true, fito:false, subcat:false }
 ];
 var SUBCAT_COAD = ['Coadyuvante','Corrector','Estabilizador'];
+
+function lsCategsGet(){ try{ var v=JSON.parse(localStorage.getItem(LS_CATEGS_LOCAL)); if(v&&v.length) return v; }catch(e){} return CATEGORIAS_SEED.slice(); }
+function lsCategsSet(a){ try{ localStorage.setItem(LS_CATEGS_LOCAL, JSON.stringify(a)); }catch(e){} }
+function listarCategorias(){
+  if (PA.demo && typeof PA.demo.listarCategorias==='function') return PA.demo.listarCategorias();
+  return lsCategsGet();
+}
+function guardarCategoria(c){
+  if (PA.demo && typeof PA.demo.guardarCategoria==='function') return PA.demo.guardarCategoria(c);
+  var a=lsCategsGet(), f=false;
+  for(var i=0;i<a.length;i++){ if(a[i].codigo===c.codigo){ a[i]=c; f=true; break; } }
+  if(!f) a.push(c);
+  lsCategsSet(a); sincronizarCategorias(); return c;
+}
+function borrarCategoria(cod){
+  if (PA.demo && typeof PA.demo.borrarCategoria==='function') return PA.demo.borrarCategoria(cod);
+  var a=lsCategsGet(), out=[]; for(var i=0;i<a.length;i++){ if(a[i].codigo!==cod) out.push(a[i]); }
+  lsCategsSet(out); sincronizarCategorias();
+}
+// Genera un código slug a partir del nombre, único contra el catálogo actual.
+function slugCategoria(label){
+  var base=String(label||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,12);
+  if(!base) base='CAT';
+  var a=lsCategsGet(), cod=base, n=2;
+  var existe=function(c){ for(var i=0;i<a.length;i++){ if(a[i].codigo===c) return true; } return false; };
+  while(existe(cod)){ cod=base+n; n++; }
+  return cod;
+}
+// Busca la categoría por código (o null).
+function categoriaPorCod(cod){ var a=listarCategorias(); for(var i=0;i<a.length;i++){ if(a[i].codigo===cod) return a[i]; } return null; }
+// Espejo array (compatibilidad con el resto del código que itera CATEGORIAS_INSUMO).
+var CATEGORIAS_INSUMO = CATEGORIAS_SEED.slice();
+function sincronizarCategorias(){ CATEGORIAS_INSUMO = listarCategorias(); }
 function labelCategoria(cod){ for(var i=0;i<CATEGORIAS_INSUMO.length;i++){ if(CATEGORIAS_INSUMO[i].codigo===cod) return CATEGORIAS_INSUMO[i].label; } return cod||'—'; }
 
 function lsUsosGet(){ try{ var v=JSON.parse(localStorage.getItem(LS_USOS_LOCAL)); if(v&&v.length) return v; }catch(e){} return USOS_SEED.slice(); }
@@ -804,7 +881,7 @@ function poblarFiltroTipos(){
   sel.value=actual;
 }
 function seleccionarCat(c){
-  var vistas = ['terceros','choferes','depositos','labores','cultivos','usos','especies','unidades','insumos','modosacc','formul','ppioactivo'];
+  var vistas = ['terceros','choferes','depositos','labores','cultivos','usos','especies','unidades','insumos','categorias','modosacc','formul','ppioactivo'];
   for (var i=0;i<vistas.length;i++){
     document.getElementById('vista-'+vistas[i]).style.display = (c===vistas[i])?'':'none';
   }
@@ -820,6 +897,7 @@ function seleccionarCat(c){
   else if (c==='especies') renderEspecies();
   else if (c==='unidades') renderUnidades();
   else if (c==='insumos') renderInsumos();
+  else if (c==='categorias') renderCategs();
   else if (c==='modosacc') renderModosAcc();
   else if (c==='formul') renderFormul();
   else if (c==='ppioactivo') renderPA();
@@ -978,6 +1056,95 @@ function guardarUsoUI(){
 }
 function eliminarUsoUI(id){ var t=id||editUso; if(!t) return; if(confirm('¿Eliminar este uso?')){ borrarUso(t); if(!id){cerrarModalUso();} renderUsos(); } }
 
+/* ---- CATEGORÍAS DE INSUMO (catálogo global, ABM con candados) ---- */
+var editCateg=null;
+// Cuenta insumos (de TODAS las empresas) que usan una categoría; sirve para el candado de borrado.
+function categoriaEnUso(cod){
+  var is=[]; try{ is=JSON.parse(localStorage.getItem('pa_insumos'))||[]; }catch(e){ is=[]; }
+  var n=0; for(var i=0;i<is.length;i++){ if(codCategoria(is[i].tipo)===cod) n++; }
+  return n;
+}
+function renderCategs(){
+  var lista=listarCategorias();
+  var tb=document.querySelector('#tbl-categ tbody'); tb.innerHTML='';
+  for(var i=0;i<lista.length;i++){(function(c){
+    var tags='';
+    if(c.fito)   tags+='<span class="rol-bdg rb-tipo">Fito</span> ';
+    if(c.subcat) tags+='<span class="rol-bdg rb-tipo">Subcat.</span> ';
+    if(c.base)   tags+='<span class="rol-bdg" style="background:var(--bg);color:var(--muted)">Base</span>';
+    if(!tags) tags='<span style="color:var(--muted)">—</span>';
+    var puedeBorrar = !c.base; // las de fábrica no se borran
+    var btnDel = puedeBorrar
+      ? '<button class="btn-icon btn-icon-del" title="Eliminar" onclick="eliminarCategUI(\''+c.codigo+'\')">×</button>'
+      : '<button class="btn-icon" title="Categoría de fábrica: no se puede eliminar" disabled style="opacity:.35;cursor:default">×</button>';
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td><span class="rol-bdg rb-tipo">'+c.codigo+'</span></td><td><strong>'+c.label+'</strong></td><td>'+tags+'</td>'+
+      '<td class="row-actions"><button class="btn-icon" title="Editar" onclick="editarCateg(\''+c.codigo+'\')">✎︎</button>'+btnDel+'</td>';
+    tb.appendChild(tr);
+  })(lista[i]);}
+  document.getElementById('empty-categ').style.display=lista.length?'none':'block';
+  document.getElementById('tbl-categ').style.display=lista.length?'':'none';
+}
+function abrirModalCateg(){
+  editCateg=null;
+  document.getElementById('modal-categ-title').textContent='Nueva categoría';
+  document.getElementById('categ-codigo').value='';
+  document.getElementById('categ-label').value='';
+  document.getElementById('categ-fito').checked=false;
+  document.getElementById('categ-subcat').checked=false;
+  document.getElementById('categ-subcat').disabled=false;
+  document.getElementById('fld-categ-fito').style.display='none'; // fito solo se muestra en base fito (informativo)
+  document.getElementById('fld-categ-subcat').style.display='';
+  document.getElementById('btn-del-categ').style.display='none';
+  document.getElementById('msg-categ').textContent='';
+  document.getElementById('overlay-categ').className='overlay open';
+}
+function editarCateg(cod){
+  var c=categoriaPorCod(cod); if(!c) return;
+  editCateg=cod;
+  document.getElementById('modal-categ-title').textContent='Editar categoría';
+  document.getElementById('categ-codigo').value=c.codigo;
+  document.getElementById('categ-label').value=c.label||'';
+  // fito: informativo, no editable (define la lógica de EIQ)
+  document.getElementById('categ-fito').checked=!!c.fito;
+  document.getElementById('fld-categ-fito').style.display = c.fito ? '' : 'none';
+  // subcat: editable solo en categorías NO base (las base mantienen su config de fábrica)
+  document.getElementById('categ-subcat').checked=!!c.subcat;
+  document.getElementById('categ-subcat').disabled = !!c.base;
+  document.getElementById('fld-categ-subcat').style.display = (c.base && !c.subcat) ? 'none' : '';
+  // borrar: solo NO base
+  document.getElementById('btn-del-categ').style.display = c.base ? 'none' : '';
+  document.getElementById('msg-categ').textContent='';
+  document.getElementById('overlay-categ').className='overlay open';
+}
+function cerrarModalCateg(){ document.getElementById('overlay-categ').className='overlay'; }
+function guardarCategUI(){
+  var lab=document.getElementById('categ-label').value.trim();
+  var msg=document.getElementById('msg-categ');
+  if(!lab){ msg.textContent='Falta el nombre.'; return; }
+  if(!editCateg){
+    // alta: código autogenerado, siempre neutra salvo el checkbox de subcategoría
+    var cod=slugCategoria(lab);
+    var sub=document.getElementById('categ-subcat').checked;
+    guardarCategoria({ codigo:cod, label:lab, base:false, fito:false, subcat:!!sub });
+  } else {
+    var c=categoriaPorCod(editCateg); if(!c){ msg.textContent='No se encontró la categoría.'; return; }
+    var nuevoSub = c.base ? c.subcat : document.getElementById('categ-subcat').checked;
+    // código, base y fito NO cambian nunca (candado)
+    guardarCategoria({ codigo:c.codigo, label:lab, base:c.base, fito:c.fito, subcat:!!nuevoSub });
+  }
+  cerrarModalCateg(); renderCategs();
+  if(document.getElementById('i-tipo')) poblarSelectCategoria(document.getElementById('i-tipo').value);
+}
+function eliminarCategUI(cod){
+  var t=cod||editCateg; if(!t) return;
+  var c=categoriaPorCod(t);
+  if(c && c.base){ alert('Esta categoría es de fábrica y no se puede eliminar.'); return; }
+  var enUso=categoriaEnUso(t);
+  if(enUso>0){ alert('No se puede eliminar: hay '+enUso+' insumo(s) usando esta categoría. Reasignalos antes de borrarla.'); return; }
+  if(confirm('¿Eliminar esta categoría?')){ borrarCategoria(t); if(!cod){cerrarModalCateg();} renderCategs(); }
+}
+
 /* ---- ESPECIES / GRANOS (global) ---- */
 var editEsp=null;
 function renderEspecies(){
@@ -1020,7 +1187,6 @@ function eliminarUni(id){ var t=id||editUni; if(!t) return; if(confirm('¿Elimin
 
 /* ---- INSUMOS (por empresa) ---- */
 var editIns=null, bandaSel='';
-var CODS_FITO = ['HERB','INSE','FUNG'];
 // Mapea cualquier valor legacy de 'tipo' (singular/plural/con barra) al código estable.
 function codCategoria(t){
   if(!t) return 'SEM';
@@ -1037,7 +1203,7 @@ function codCategoria(t){
   if(s.indexOf('otro')>=0) return 'OTRO';
   return 'OTRO';
 }
-function esFito(cod){ cod=codCategoria(cod); for(var i=0;i<CODS_FITO.length;i++){ if(CODS_FITO[i]===cod) return true; } return false; }
+function esFito(cod){ cod=codCategoria(cod); var c=categoriaPorCod(cod); return !!(c && c.fito); }
 function sistemaDeTipo(cod){ cod=codCategoria(cod); if(cod==='HERB') return 'HRAC'; if(cod==='INSE') return 'IRAC'; if(cod==='FUNG') return 'FRAC'; return null; }
 function poblarSelectCategoria(valorCod){
   var sel=document.getElementById('i-tipo'); sel.innerHTML='';
@@ -1046,7 +1212,8 @@ function poblarSelectCategoria(valorCod){
 function toggleSubcat(){
   var cod=document.getElementById('i-tipo').value;
   var fld=document.getElementById('fld-i-subcat');
-  if(cod==='COAD'){ fld.style.display=''; } else { fld.style.display='none'; }
+  var c=categoriaPorCod(cod);
+  if(c && c.subcat){ fld.style.display=''; } else { fld.style.display='none'; }
 }
 function poblarSubcat(valor){
   var sel=document.getElementById('i-subcat'); sel.innerHTML='<option value="">— elegí —</option>';
@@ -1123,7 +1290,8 @@ function renderInsumos(){
     trH.innerHTML='<td colspan="5">'+labelCategoria(cod)+' <span class="sec-count">('+arr.length+')</span></td>';
     tb.appendChild(trH);
     for(var i=0;i<arr.length;i++){(function(x){
-      var sub = (codCategoria(x.tipo)==='COAD' && x.subcategoria) ? '<span class="rol-bdg rb-tipo">'+x.subcategoria+'</span>' : '<span style="color:var(--muted)">—</span>';
+      var catX = categoriaPorCod(codCategoria(x.tipo));
+      var sub = (catX && catX.subcat && x.subcategoria) ? '<span class="rol-bdg rb-tipo">'+x.subcategoria+'</span>' : '<span style="color:var(--muted)">—</span>';
       var tr=document.createElement('tr');
       tr.innerHTML='<td><strong>'+x.nombre+'</strong></td><td>'+sub+'</td><td>'+nombreUnidad(x.unidadId)+'</td><td>'+tecnicoResumen(x)+'</td>'+
         '<td class="row-actions"><button class="btn-icon" title="Editar" onclick="editarIns(\''+x.id+'\')">✎︎</button><button class="btn-icon btn-icon-del" title="Eliminar" onclick="eliminarIns(\''+x.id+'\')">×</button></td>';
@@ -1255,7 +1423,8 @@ function guardarIns(){
   var n=document.getElementById('i-nombre').value.trim();
   if(!n){document.getElementById('msg-ins').textContent='Falta el nombre.';return;}
   var cod=document.getElementById('i-tipo').value;
-  var sub = (cod==='COAD') ? (document.getElementById('i-subcat').value||null) : null;
+  var catSel = categoriaPorCod(cod);
+  var sub = (catSel && catSel.subcat) ? (document.getElementById('i-subcat').value||null) : null;
   var obj={ id:editIns||undefined, empresaId:empresaId, activo:true, nombre:n, tipo:cod, subcategoria:sub,
     unidadId:document.getElementById('i-unidad').value||null,
     modoAccionId:null, formulacionId:null, bandaTox:'', activos:[], eiqTotal:null, eiqOverride:null, eiq:null, nutrientes:null };
@@ -1635,6 +1804,7 @@ PA.init({ modo:'demo' }, function(){
       sel.appendChild(o);
     }
     empresaId = ctx.empresaActivaId;
+    sincronizarCategorias();
     poblarFiltroTipos();
     render();
   });
