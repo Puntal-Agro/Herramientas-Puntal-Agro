@@ -85,8 +85,10 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted
 .tipos .opts input{width:auto}
 .modal-actions{display:flex;gap:8px;margin-top:18px;align-items:center}
 .msg{font-size:11px;color:var(--terra)}
-.pa-fila{display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:nowrap}
-.pa-fila select.pa-sel{flex:1 1 auto;min-width:160px;border:1px solid var(--border);border-radius:8px;padding:7px 8px;font-family:var(--sans);font-size:12.5px}
+.pa-fila{display:flex;gap:6px;align-items:center;margin-bottom:8px;flex-wrap:wrap;padding-bottom:8px;border-bottom:1px dashed var(--border)}
+.pa-fila:last-child{border-bottom:none}
+.pa-fila select.pa-sel{flex:1 1 160px;min-width:150px;border:1px solid var(--border);border-radius:8px;padding:7px 8px;font-family:var(--sans);font-size:12.5px}
+.pa-fila select.pa-modo{flex:1 1 150px;min-width:140px;border:1px solid var(--border);border-radius:8px;padding:7px 8px;font-family:var(--sans);font-size:12.5px;color:var(--text)}
 .pa-fila input.pa-conc{flex:0 0 64px;width:64px;border:1px solid var(--border);border-radius:8px;padding:7px 8px;font-family:var(--sans);font-size:12.5px;font-variant-numeric:tabular-nums}
 .pa-fila select.pa-uni{flex:0 0 62px;width:62px;border:1px solid var(--border);border-radius:8px;padding:7px 6px;font-family:var(--sans);font-size:12.5px}
 .pa-fila input.pa-dens{flex:0 0 60px;width:60px;border:1px solid var(--border);border-radius:8px;padding:7px 8px;font-family:var(--sans);font-size:12.5px;font-variant-numeric:tabular-nums}
@@ -102,6 +104,14 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
 .btn-icon{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer;font-size:13px;font-family:var(--sans);margin-left:4px;transition:all .12s;vertical-align:middle;font-variant-emoji:text}
 .btn-icon:hover{border-color:#4A6533;color:#4A6533;background:#F5F7FA}
 .btn-icon-del:hover{border-color:#FCA5A5;color:#B91C1C;background:#FEF2F2}
+/* Íconos de acción unificados con plan de uso (lápiz verde / cruz terracota más grande) */
+.btn-act-edit,.btn-act-del,.btn-act-add{width:26px;height:26px;border-radius:6px;border:1.5px solid #D8DDE3;background:#fff;cursor:pointer;font-size:14px;font-family:var(--sans);transition:all .12s;opacity:1;display:inline-flex;align-items:center;justify-content:center;line-height:1;margin-left:4px;vertical-align:middle}
+.btn-act-edit{color:#4A6533}
+.btn-act-del{color:#C8642D;font-size:18px}
+.btn-act-edit:hover{background:#F0F4EC;border-color:#4A6533}
+.btn-act-del:hover{background:#FBEEE7;border-color:#C8642D}
+.btn-act-del[disabled]{opacity:.35;cursor:default;color:var(--muted)}
+.btn-act-del[disabled]:hover{background:#fff;border-color:#D8DDE3}
 .modal-ins .bloque-sec{border-top:1px solid var(--border);margin-top:20px;padding-top:16px}
 .modal-ins .bloque-sec-title{font-size:11px;font-weight:700;color:var(--olive);text-transform:uppercase;letter-spacing:.04em;margin-bottom:12px}
 .pa-fila select.pa-sel{padding:8px 9px;font-size:13px}
@@ -147,7 +157,7 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
     <div class="nav-item" data-cat="ppioactivo" onclick="seleccionarCat('ppioactivo')">Principios activos</div>
     <div class="nav-item" data-cat="depositos" onclick="seleccionarCat('depositos')">Depósitos / Acopios</div>
     <div class="nav-item" data-cat="labores" onclick="seleccionarCat('labores')">Labores</div>
-    <div class="nav-item" data-cat="cultivos" onclick="seleccionarCat('cultivos')">Cultivos</div>
+    <div class="nav-item" data-cat="cultivos" onclick="seleccionarCat('cultivos')">Cultivos/UN</div>
     <div class="nav-item" data-cat="usos" onclick="seleccionarCat('usos')">Usos</div>
     <div class="nav-item" data-cat="especies" onclick="seleccionarCat('especies')">Especies / Granos</div>
     <div class="nav-item" data-cat="unidades" onclick="seleccionarCat('unidades')">Unidades</div>
@@ -219,14 +229,14 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
     <!-- VISTA CULTIVOS -->
     <div id="vista-cultivos" style="display:none">
       <div class="panel-head">
-        <h2>Cultivos</h2>
+        <h2>Cultivos/Unidades de Negocio</h2>
         <button class="btn" onclick="abrirModalCul()">+ Nuevo</button>
       </div>
       <table id="tbl-cul">
-        <thead><tr><th>Nombre</th><th>Sigla</th><th>Uso</th><th>Especie</th><th></th></tr></thead>
+        <thead><tr><th>Nombre</th><th>Sigla</th><th>Tipo</th><th>Uso</th><th>Especie</th><th>Gramínea</th><th>2ª</th><th></th></tr></thead>
         <tbody></tbody>
       </table>
-      <div class="empty" id="empty-cul" style="display:none">No hay cultivos cargados. Agregá uno con "+ Nuevo".</div>
+      <div class="empty" id="empty-cul" style="display:none">No hay cultivos/UN cargados. Agregá uno con "+ Nuevo".</div>
     </div>
 
     <!-- VISTA CATEGORÍAS DE INSUMO (catálogo global Puntal, ABM con candados) -->
@@ -235,7 +245,7 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
         <h2>Categorías de insumo</h2>
         <button class="btn" onclick="abrirModalCateg()">+ Nueva</button>
       </div>
-      <div class="help-row" style="margin-bottom:12px">Catálogo global de Puntal. Las categorías de fábrica no se pueden borrar y las que son fitosanitarias (activan principios activos y EIQ) tienen el código fijo. Podés renombrar cualquiera y agregar categorías nuevas (nacen como no fitosanitarias).</div>
+      <div class="help-row" style="margin-bottom:12px">Catálogo global de Puntal. Las categorías predeterminadas no se borran; las fitosanitarias tienen código fijo. Podés renombrar cualquiera y agregar nuevas (nacen no fitosanitarias).</div>
       <table id="tbl-categ">
         <thead><tr><th>Código</th><th>Nombre</th><th>Tipo</th><th></th></tr></thead>
         <tbody></tbody>
@@ -464,11 +474,31 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
     <div class="grid2">
       <div class="fld full"><label>Nombre</label><input id="cu-nombre"></div>
       <div class="fld"><label>Sigla <span class="opt">(opcional)</span></label><input id="cu-sigla"></div>
+      <div class="fld"><label>¿Es cultivo?</label>
+        <select id="cu-escult" onchange="toggleEsCultivo()" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px">
+          <option value="">— elegí —</option>
+          <option value="1">Sí</option>
+          <option value="0">No</option>
+        </select>
+        <span class="opt" style="display:block;margin-top:4px;line-height:1.4">Cultivo: trigo, soja, pastura, verdeo. UN (unidad de negocio): estructura, maquinaria, comercial.</span>
+      </div>
+    </div>
+    <div class="grid2" id="bloque-cul-campos" style="display:none">
       <div class="fld"><label>Uso <span class="opt">(opcional)</span></label>
         <select id="cu-activ" onchange="toggleEspecieCul()" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px"></select>
       </div>
       <div class="fld full" id="fld-cu-especie" style="display:none"><label>Especie / Grano</label>
         <select id="cu-especie" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px"></select>
+      </div>
+      <div class="fld"><label>¿Es gramínea?</label>
+        <select id="cu-gram" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px">
+          <option value="">— elegí —</option>
+          <option value="1">Sí</option>
+          <option value="0">No</option>
+        </select>
+      </div>
+      <div class="fld" style="justify-content:flex-end">
+        <label class="chk" style="margin-bottom:8px"><input type="checkbox" id="cu-def2"> 2ª por defecto</label>
       </div>
     </div>
     <div class="modal-actions">
@@ -634,9 +664,6 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
     <div id="bloque-fito" class="bloque-sec" style="display:none">
       <div class="bloque-sec-title">Datos del fitosanitario</div>
       <div class="grid2">
-        <div class="fld full"><label>Modo de acción <span class="opt" id="i-modo-sistema">—</span></label>
-          <select id="i-modo" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px"></select>
-        </div>
         <div class="fld full"><label>Formulación <span class="opt">(orden de mezclado)</span></label>
           <select id="i-formul" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px"></select>
         </div>
@@ -695,7 +722,7 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
 
 <footer>
   <span>Puntal Agro · Maestros</span>
-  <span>BUILD 3 · v2026-07-09 09:47</span>
+  <span>BUILD 8 · v2026-07-14 10:09</span>
 </footer>
 
 <script src="pa-core.js"></script>
@@ -740,6 +767,45 @@ function listarCategorias(){
   if (PA.demo && typeof PA.demo.listarCategorias==='function') return PA.demo.listarCategorias();
   return lsCategsGet();
 }
+/* ============================================================
+   HELPERS DE VALIDACIÓN (ver reglas_validacion_maestros.md)
+   Reutilizables por todos los guardarX(). Espejo del backend.
+   ============================================================ */
+// Normaliza para comparar unicidad: trim + minúsculas.
+function vNorm(s){ return String(s==null?'':s).trim().toLowerCase(); }
+// Trim simple de texto.
+function vTrim(s){ return String(s==null?'':s).trim(); }
+// Sigla/código: mayúsculas, sin espacios internos, recortado a max.
+function vSigla(s, max){ var t=String(s==null?'':s).trim().toUpperCase().replace(/\s+/g,''); if(max) t=t.slice(0,max); return t; }
+// Código A-Z0-9 (limpia inválidos).
+function vCodAlnum(s, max){ var t=String(s==null?'':s).trim().toUpperCase().replace(/[^A-Z0-9]/g,''); if(max) t=t.slice(0,max); return t; }
+// ¿Texto obligatorio presente? devuelve el mensaje de error o '' si OK.
+function vReq(val, etiqueta){ return vTrim(val)==='' ? ('Falta '+etiqueta+'.') : ''; }
+// Largo máximo. Devuelve mensaje o ''.
+function vMax(val, max, etiqueta){ return vTrim(val).length>max ? (etiqueta+': máximo '+max+' caracteres.') : ''; }
+// Unicidad en una lista. cmpVal = valor a comparar; getVal = fn que extrae el valor de cada item;
+// idActual = id en edición a ignorar. Devuelve true si ya existe (duplicado).
+function vDuplicado(lista, cmpVal, getVal, idActual){
+  var n=vNorm(cmpVal); if(n==='') return false;
+  for(var i=0;i<lista.length;i++){ var it=lista[i]; if(idActual && it.id===idActual) continue; if(vNorm(getVal(it))===n) return true; }
+  return false;
+}
+// Número: parsea y valida rango. Vacío => {ok:true, val:null}. Fuera de rango => {ok:false, msg}.
+// opts: {min, max, minExcl:true si estricto >, entero:true, etiqueta}
+function vNum(raw, opts){
+  opts=opts||{}; var s=String(raw==null?'':raw).trim();
+  if(s===''){ return {ok:true, val:null}; }
+  var x=Number(s);
+  if(isNaN(x)) return {ok:false, msg:(opts.etiqueta||'Valor')+' inválido.'};
+  if(opts.entero && Math.floor(x)!==x) return {ok:false, msg:(opts.etiqueta||'Valor')+' debe ser entero.'};
+  if(opts.minExcl!=null && x<=opts.minExcl) return {ok:false, msg:(opts.etiqueta||'Valor')+' debe ser mayor a '+opts.minExcl+'.'};
+  if(opts.min!=null && x<opts.min) return {ok:false, msg:(opts.etiqueta||'Valor')+' no puede ser menor a '+opts.min+'.'};
+  if(opts.max!=null && x>opts.max) return {ok:false, msg:(opts.etiqueta||'Valor')+' no puede ser mayor a '+opts.max+'.'};
+  return {ok:true, val:x};
+}
+// Muestra mensaje de error en el .msg del modal indicado.
+function vErr(msgId, texto){ var el=document.getElementById(msgId); if(el) el.textContent=texto; }
+
 function guardarCategoria(c){
   if (PA.demo && typeof PA.demo.guardarCategoria==='function') return PA.demo.guardarCategoria(c);
   var a=lsCategsGet(), f=false;
@@ -925,7 +991,7 @@ function renderDepositos(){
     }
     var tr=document.createElement('tr');
     tr.innerHTML='<td><strong>'+d.nombre+'</strong></td><td>'+nombreCampo(d.campoId)+'</td><td>'+tipo+'</td>'+
-      '<td class="row-actions"><button class="btn-icon" title="Editar" onclick="editarDep(\''+d.id+'\')">✎︎</button><button class="btn-icon btn-icon-del" title="Eliminar" onclick="eliminarDep(\''+d.id+'\')">×</button></td>';
+      '<td class="row-actions"><button class="btn-act-edit" title="Editar" onclick="editarDep(\''+d.id+'\')">✎</button><button class="btn-act-del" title="Eliminar" onclick="eliminarDep(\''+d.id+'\')">×</button></td>';
     tb.appendChild(tr);
   })(lista[i]);}
   document.getElementById('empty-dep').style.display=lista.length?'none':'block';
@@ -945,11 +1011,14 @@ function abrirModalDep(){ editDep=null; document.getElementById('modal-dep-title
 function editarDep(id){ var l=PA.demo.listarDepositos(empresaId); var d=null; for(var i=0;i<l.length;i++){if(l[i].id===id){d=l[i];break;}} if(!d)return; editDep=id; document.getElementById('modal-dep-title').textContent='Editar depósito'; document.getElementById('d-nombre').value=d.nombre||''; cargarSelectCampos(d.campoId); document.getElementById('d-clase').value=d.clase||'insumos'; poblarSelectEspecie('d-especie',d.especieId||''); toggleClaseDep(); document.getElementById('btn-del-dep').style.display=''; document.getElementById('msg-dep').textContent=''; document.getElementById('overlay-dep').className='overlay open'; }
 function cerrarModalDep(){ document.getElementById('overlay-dep').className='overlay'; }
 function guardarDep(){
-  var n=document.getElementById('d-nombre').value.trim();
-  if(!n){document.getElementById('msg-dep').textContent='Falta el nombre.';return;}
+  var n=vTrim(document.getElementById('d-nombre').value);
+  var e=vReq(n,'el nombre'); if(e){ vErr('msg-dep',e); return; }
+  e=vMax(n,80,'Nombre'); if(e){ vErr('msg-dep',e); return; }
+  if(vDuplicado(PA.demo.listarDepositos(empresaId), n, function(it){return it.nombre;}, editDep)){ vErr('msg-dep','Ya existe un depósito con ese nombre en esta empresa.'); return; }
   var clase=document.getElementById('d-clase').value;
+  if(!clase){ vErr('msg-dep','Elegí la clase de depósito.'); return; }
   var espId = (clase==='granos') ? document.getElementById('d-especie').value : null;
-  if(clase==='granos' && !espId){document.getElementById('msg-dep').textContent='Elegí la especie del acopio.';return;}
+  if(clase==='granos' && !espId){ vErr('msg-dep','Elegí la especie del acopio.'); return; }
   PA.demo.guardarDeposito({id:editDep||undefined,empresaId:empresaId,campoId:document.getElementById('d-campo').value||null,nombre:n,clase:clase,especieId:espId,activo:true});
   cerrarModalDep(); renderDepositos();
 }
@@ -967,7 +1036,7 @@ function renderLabores(){
     var uni = l.unidadLabor ? labelUnidadLabor(l.unidadLabor) : '<span style="color:var(--muted)">—</span>';
     var tr=document.createElement('tr');
     tr.innerHTML='<td><strong>'+l.nombre+'</strong></td><td>'+uni+'</td>'+
-      '<td class="row-actions"><button class="btn-icon" title="Editar" onclick="editarLab(\''+l.id+'\')">✎︎</button><button class="btn-icon btn-icon-del" title="Eliminar" onclick="eliminarLab(\''+l.id+'\')">×</button></td>';
+      '<td class="row-actions"><button class="btn-act-edit" title="Editar" onclick="editarLab(\''+l.id+'\')">✎</button><button class="btn-act-del" title="Eliminar" onclick="eliminarLab(\''+l.id+'\')">×</button></td>';
     tb.appendChild(tr);
   })(lista[i]);}
   document.getElementById('empty-lab').style.display=lista.length?'none':'block';
@@ -977,7 +1046,13 @@ var precioRefLabEdit=0;
 function abrirModalLab(){ editLab=null; precioRefLabEdit=0; document.getElementById('modal-lab-title').textContent='Nueva labor'; document.getElementById('l-nombre').value=''; document.getElementById('l-unidad').value=''; document.getElementById('btn-del-lab').style.display='none'; document.getElementById('msg-lab').textContent=''; document.getElementById('overlay-lab').className='overlay open'; }
 function editarLab(id){ var l=PA.demo.listarLabores(); var x=null; for(var i=0;i<l.length;i++){if(l[i].id===id){x=l[i];break;}} if(!x)return; editLab=id; precioRefLabEdit=x.precioRef||0; document.getElementById('modal-lab-title').textContent='Editar labor'; document.getElementById('l-nombre').value=x.nombre||''; document.getElementById('l-unidad').value=x.unidadLabor||''; document.getElementById('btn-del-lab').style.display=''; document.getElementById('msg-lab').textContent=''; document.getElementById('overlay-lab').className='overlay open'; }
 function cerrarModalLab(){ document.getElementById('overlay-lab').className='overlay'; }
-function guardarLab(){ var n=document.getElementById('l-nombre').value.trim(); if(!n){document.getElementById('msg-lab').textContent='Falta el nombre.';return;} PA.demo.guardarLabor({id:editLab||undefined,nombre:n,unidadLabor:document.getElementById('l-unidad').value||null,precioRef:precioRefLabEdit,activo:true}); cerrarModalLab(); renderLabores(); }
+function guardarLab(){
+  var n=vTrim(document.getElementById('l-nombre').value);
+  var e=vReq(n,'el nombre'); if(e){ vErr('msg-lab',e); return; }
+  e=vMax(n,80,'Nombre'); if(e){ vErr('msg-lab',e); return; }
+  if(vDuplicado(PA.demo.listarLabores(), n, function(it){return it.nombre;}, editLab)){ vErr('msg-lab','Ya existe una labor con ese nombre.'); return; }
+  PA.demo.guardarLabor({id:editLab||undefined,nombre:n,unidadLabor:document.getElementById('l-unidad').value||null,precioRef:precioRefLabEdit,activo:true}); cerrarModalLab(); renderLabores();
+}
 function eliminarLab(id){ var t=id||editLab; if(!t) return; if(confirm('¿Eliminar esta labor?')){ PA.demo.borrarLabor(t); if(!id){cerrarModalLab();} renderLabores(); } }
 
 /* ---- CULTIVOS ---- */
@@ -1000,30 +1075,72 @@ function toggleEspecieCul(){
   var act=document.getElementById('cu-activ').value;
   document.getElementById('fld-cu-especie').style.display = usoRequiereEspecie(act) ? '' : 'none';
 }
+// Muestra/oculta los campos de cultivo (uso, especie, gramínea, 2ª) según ¿Es cultivo?
+function toggleEsCultivo(){
+  var es = document.getElementById('cu-escult').value; // '', '1', '0'
+  document.getElementById('bloque-cul-campos').style.display = (es==='1') ? '' : 'none';
+}
 function renderCultivos(){
   var lista=PA.demo.listarTiposActividad(empresaId);
   var tb=document.querySelector('#tbl-cul tbody'); tb.innerHTML='';
   for(var i=0;i<lista.length;i++){(function(c){
-    var uso = c.actividad ? '<span class="rol-bdg rb-tipo">'+labelUso(c.actividad)+'</span>' : '<span style="color:var(--muted)">—</span>';
-    var esp = nombreEspecie(c.especieId) || '<span style="color:var(--muted)">—</span>';
+    var esCult = (c.esCultivo!==false); // viejos sin flag = cultivo
+    var tipoBdg = esCult
+      ? '<span class="rol-bdg rb-tipo">Cultivo</span>'
+      : '<span class="rol-bdg" style="background:#EDE4DB;color:#8A5A32">UN</span>';
+    var uso, esp, gram, def2;
+    if(esCult){
+      uso = c.actividad ? '<span class="rol-bdg rb-tipo">'+labelUso(c.actividad)+'</span>' : '<span style="color:var(--muted)">—</span>';
+      esp = nombreEspecie(c.especieId) || '<span style="color:var(--muted)">—</span>';
+      gram = (c.graminea==null)
+        ? '<span style="color:var(--terra);font-weight:600" title="Editá el cultivo para clasificarlo">⚠ sin clasificar</span>'
+        : (c.graminea ? 'Sí' : '<span style="color:var(--muted)">No</span>');
+      def2 = c.default2da ? 'Sí' : '<span style="color:var(--muted)">—</span>';
+    } else {
+      // UN no-cultivo: uso/especie/gramínea/2ª no aplican
+      var na='<span style="color:var(--muted)">n/a</span>';
+      uso=na; esp=na; gram=na; def2=na;
+    }
     var tr=document.createElement('tr');
-    tr.innerHTML='<td><strong>'+c.nombre+'</strong></td><td>'+(c.sigla||'—')+'</td><td>'+uso+'</td><td>'+esp+'</td>'+
-      '<td class="row-actions"><button class="btn-icon" title="Editar" onclick="editarCul(\''+c.id+'\')">✎︎</button><button class="btn-icon btn-icon-del" title="Eliminar" onclick="eliminarCul(\''+c.id+'\')">×</button></td>';
+    tr.innerHTML='<td><strong>'+c.nombre+'</strong></td><td>'+(c.sigla||'—')+'</td><td>'+tipoBdg+'</td><td>'+uso+'</td><td>'+esp+'</td><td>'+gram+'</td><td>'+def2+'</td>'+
+      '<td class="row-actions"><button class="btn-act-edit" title="Editar" onclick="editarCul(\''+c.id+'\')">✎</button><button class="btn-act-del" title="Eliminar" onclick="eliminarCul(\''+c.id+'\')">×</button></td>';
     tb.appendChild(tr);
   })(lista[i]);}
   document.getElementById('empty-cul').style.display=lista.length?'none':'block';
   document.getElementById('tbl-cul').style.display=lista.length?'':'none';
 }
-function abrirModalCul(){ editCul=null; document.getElementById('modal-cul-title').textContent='Nuevo cultivo'; document.getElementById('cu-nombre').value=''; document.getElementById('cu-sigla').value=''; poblarSelectUso(''); poblarSelectEspecie('cu-especie',''); toggleEspecieCul(); document.getElementById('btn-del-cul').style.display='none'; document.getElementById('msg-cul').textContent=''; document.getElementById('overlay-cul').className='overlay open'; }
-function editarCul(id){ var l=PA.demo.listarTiposActividad(empresaId); var x=null; for(var i=0;i<l.length;i++){if(l[i].id===id){x=l[i];break;}} if(!x)return; editCul=id; document.getElementById('modal-cul-title').textContent='Editar cultivo'; document.getElementById('cu-nombre').value=x.nombre||''; document.getElementById('cu-sigla').value=x.sigla||''; poblarSelectUso(x.actividad||''); poblarSelectEspecie('cu-especie',x.especieId||''); toggleEspecieCul(); document.getElementById('btn-del-cul').style.display=''; document.getElementById('msg-cul').textContent=''; document.getElementById('overlay-cul').className='overlay open'; }
+function abrirModalCul(){ editCul=null; document.getElementById('modal-cul-title').textContent='Nuevo cultivo / UN'; document.getElementById('cu-nombre').value=''; document.getElementById('cu-sigla').value=''; document.getElementById('cu-escult').value=''; poblarSelectUso(''); poblarSelectEspecie('cu-especie',''); toggleEspecieCul(); toggleEsCultivo(); document.getElementById('cu-gram').value=''; document.getElementById('cu-def2').checked=false; document.getElementById('btn-del-cul').style.display='none'; document.getElementById('msg-cul').textContent=''; document.getElementById('overlay-cul').className='overlay open'; }
+function editarCul(id){ var l=PA.demo.listarTiposActividad(empresaId); var x=null; for(var i=0;i<l.length;i++){if(l[i].id===id){x=l[i];break;}} if(!x)return; editCul=id; document.getElementById('modal-cul-title').textContent='Editar cultivo / UN'; document.getElementById('cu-nombre').value=x.nombre||''; document.getElementById('cu-sigla').value=x.sigla||''; document.getElementById('cu-escult').value=(x.esCultivo===false?'0':'1'); poblarSelectUso(x.actividad||''); poblarSelectEspecie('cu-especie',x.especieId||''); toggleEspecieCul(); toggleEsCultivo(); document.getElementById('cu-gram').value=(x.graminea==null?'':(x.graminea?'1':'0')); document.getElementById('cu-def2').checked=!!x.default2da; document.getElementById('btn-del-cul').style.display=''; document.getElementById('msg-cul').textContent=''; document.getElementById('overlay-cul').className='overlay open'; }
 function cerrarModalCul(){ document.getElementById('overlay-cul').className='overlay'; }
 function guardarCul(){
-  var n=document.getElementById('cu-nombre').value.trim();
-  if(!n){document.getElementById('msg-cul').textContent='Falta el nombre.';return;}
-  var act=document.getElementById('cu-activ').value;
-  var espId = usoRequiereEspecie(act) ? document.getElementById('cu-especie').value : null;
-  if(usoRequiereEspecie(act) && !espId){document.getElementById('msg-cul').textContent='Elegí la especie del cultivo.';return;}
-  PA.demo.guardarTipoActividad({id:editCul||undefined,empresaId:empresaId,nombre:n,sigla:document.getElementById('cu-sigla').value.trim(),actividad:act,especieId:espId,activo:true});
+  var n=vTrim(document.getElementById('cu-nombre').value);
+  var e=vReq(n,'el nombre'); if(e){ vErr('msg-cul',e); return; }
+  e=vMax(n,80,'Nombre'); if(e){ vErr('msg-cul',e); return; }
+  var lista=PA.demo.listarTiposActividad(empresaId);
+  if(vDuplicado(lista, n, function(it){return it.nombre;}, editCul)){ vErr('msg-cul','Ya existe un cultivo/UN con ese nombre en esta empresa.'); return; }
+  // ¿Es cultivo? obligatorio, sin default.
+  var escVal=document.getElementById('cu-escult').value;
+  if(escVal===''){ vErr('msg-cul','Indicá si es un cultivo.'); return; }
+  var esCultivo=(escVal==='1');
+  var sig=vSigla(document.getElementById('cu-sigla').value, 8);
+  // Sigla: única por empresa → AVISO (no bloquea). La clave real es el id.
+  if(sig && vDuplicado(lista, sig, function(it){return it.sigla;}, editCul)){
+    if(!confirm('Ya existe otro cultivo/UN con la sigla "'+sig+'" en esta empresa. ¿Guardar igual?')){ return; }
+  }
+  var act=null, espId=null, graminea=null, def2=false;
+  if(esCultivo){
+    // Cultivo: uso/especie/gramínea/2ª aplican.
+    act=document.getElementById('cu-activ').value;
+    espId = usoRequiereEspecie(act) ? document.getElementById('cu-especie').value : null;
+    if(usoRequiereEspecie(act) && !espId){ vErr('msg-cul','Elegí la especie del cultivo.'); return; }
+    var gramVal=document.getElementById('cu-gram').value;
+    if(gramVal===''){ vErr('msg-cul','Indicá si el cultivo es gramínea.'); return; }
+    graminea=(gramVal==='1');
+    def2=document.getElementById('cu-def2').checked;
+  }
+  // HANDOFF Mariana: esCultivo, graminea y default2da son campos del cultivo en pa-core (ver handoff_maestros_pacore.md).
+  // Si esCultivo=false, graminea/especie/uso/default2da van null/false (es una UN no agrícola: estructura, maquinaria, etc.).
+  PA.demo.guardarTipoActividad({id:editCul||undefined,empresaId:empresaId,nombre:n,sigla:sig,esCultivo:esCultivo,actividad:act,especieId:espId,graminea:graminea,default2da:def2,activo:true});
   cerrarModalCul(); renderCultivos();
 }
 function eliminarCul(id){ var t=id||editCul; if(!t) return; if(confirm('¿Eliminar este cultivo?')){ PA.demo.borrarTipoActividad(t); if(!id){cerrarModalCul();} renderCultivos(); } }
@@ -1036,7 +1153,7 @@ function renderUsos(){
   for(var i=0;i<lista.length;i++){(function(u){
     var tr=document.createElement('tr');
     tr.innerHTML='<td><span class="rol-bdg rb-tipo">'+(u.codigo||'—')+'</span></td><td><strong>'+u.label+'</strong></td>'+
-      '<td class="row-actions"><button class="btn-icon" title="Editar" onclick="editarUso(\''+u.id+'\')">✎︎</button><button class="btn-icon btn-icon-del" title="Eliminar" onclick="eliminarUsoUI(\''+u.id+'\')">×</button></td>';
+      '<td class="row-actions"><button class="btn-act-edit" title="Editar" onclick="editarUso(\''+u.id+'\')">✎</button><button class="btn-act-del" title="Eliminar" onclick="eliminarUsoUI(\''+u.id+'\')">×</button></td>';
     tb.appendChild(tr);
   })(lista[i]);}
   document.getElementById('empty-uso').style.display=lista.length?'none':'block';
@@ -1046,11 +1163,16 @@ function abrirModalUso(){ editUso=null; document.getElementById('modal-uso-title
 function editarUso(id){ var l=listarUsos(); var x=null; for(var i=0;i<l.length;i++){if(l[i].id===id){x=l[i];break;}} if(!x)return; editUso=id; document.getElementById('modal-uso-title').textContent='Editar uso'; document.getElementById('uso-codigo').value=x.codigo||''; document.getElementById('uso-label').value=x.label||''; document.getElementById('uso-codigo').disabled=true; document.getElementById('btn-del-uso').style.display=''; document.getElementById('msg-uso').textContent=''; document.getElementById('overlay-uso').className='overlay open'; }
 function cerrarModalUso(){ document.getElementById('overlay-uso').className='overlay'; }
 function guardarUsoUI(){
-  var cod=document.getElementById('uso-codigo').value.trim().toUpperCase();
-  var lab=document.getElementById('uso-label').value.trim();
-  if(!cod){document.getElementById('msg-uso').textContent='Falta el código.';return;}
-  if(!lab){document.getElementById('msg-uso').textContent='Falta el nombre.';return;}
-  if(!editUso){ var ex=listarUsos(); for(var i=0;i<ex.length;i++){ if(ex[i].codigo===cod){document.getElementById('msg-uso').textContent='Ya existe un uso con ese código.';return;} } }
+  var codRaw=document.getElementById('uso-codigo').value;
+  var cod=vCodAlnum(codRaw, 12);  // limpia lo que no sea A-Z0-9
+  // Si la limpieza cambió lo que escribió el usuario, reflejarlo en el input.
+  if(cod!==vTrim(codRaw).toUpperCase()){ document.getElementById('uso-codigo').value=cod; }
+  var lab=vTrim(document.getElementById('uso-label').value);
+  var e=vReq(cod,'el código'); if(e){ vErr('msg-uso',e); return; }
+  e=vReq(lab,'el nombre'); if(e){ vErr('msg-uso',e); return; }
+  e=vMax(lab,60,'Nombre'); if(e){ vErr('msg-uso',e); return; }
+  // Único global (el código no se puede editar en edición, pero validamos igual en alta).
+  if(!editUso && vDuplicado(listarUsos(), cod, function(it){return it.codigo;}, null)){ vErr('msg-uso','Ya existe un uso con ese código.'); return; }
   guardarUso({id:editUso||undefined,codigo:cod,label:lab,activo:true});
   cerrarModalUso(); renderUsos();
 }
@@ -1075,11 +1197,11 @@ function renderCategs(){
     if(!tags) tags='<span style="color:var(--muted)">—</span>';
     var puedeBorrar = !c.base; // las de fábrica no se borran
     var btnDel = puedeBorrar
-      ? '<button class="btn-icon btn-icon-del" title="Eliminar" onclick="eliminarCategUI(\''+c.codigo+'\')">×</button>'
-      : '<button class="btn-icon" title="Categoría de fábrica: no se puede eliminar" disabled style="opacity:.35;cursor:default">×</button>';
+      ? '<button class="btn-act-del" title="Eliminar" onclick="eliminarCategUI(\''+c.codigo+'\')">×</button>'
+      : '<button class="btn-act-del" title="Categoría predeterminada: no se puede eliminar" disabled>×</button>';
     var tr=document.createElement('tr');
     tr.innerHTML='<td><span class="rol-bdg rb-tipo">'+c.codigo+'</span></td><td><strong>'+c.label+'</strong></td><td>'+tags+'</td>'+
-      '<td class="row-actions"><button class="btn-icon" title="Editar" onclick="editarCateg(\''+c.codigo+'\')">✎︎</button>'+btnDel+'</td>';
+      '<td class="row-actions"><button class="btn-act-edit" title="Editar" onclick="editarCateg(\''+c.codigo+'\')">✎</button>'+btnDel+'</td>';
     tb.appendChild(tr);
   })(lista[i]);}
   document.getElementById('empty-categ').style.display=lista.length?'none':'block';
@@ -1119,9 +1241,14 @@ function editarCateg(cod){
 }
 function cerrarModalCateg(){ document.getElementById('overlay-categ').className='overlay'; }
 function guardarCategUI(){
-  var lab=document.getElementById('categ-label').value.trim();
+  var lab=vTrim(document.getElementById('categ-label').value);
   var msg=document.getElementById('msg-categ');
   if(!lab){ msg.textContent='Falta el nombre.'; return; }
+  var eM=vMax(lab,60,'Nombre'); if(eM){ msg.textContent=eM; return; }
+  // Label único global (ignora la propia categoría al editar; la clave de categoría es 'codigo').
+  var dupLabel=false, listaC=listarCategorias(), labN=vNorm(lab);
+  for(var ci=0; ci<listaC.length; ci++){ if(editCateg && listaC[ci].codigo===editCateg) continue; if(vNorm(listaC[ci].label)===labN){ dupLabel=true; break; } }
+  if(dupLabel){ msg.textContent='Ya existe una categoría con ese nombre.'; return; }
   if(!editCateg){
     // alta: código autogenerado, siempre neutra salvo el checkbox de subcategoría
     var cod=slugCategoria(lab);
@@ -1139,7 +1266,7 @@ function guardarCategUI(){
 function eliminarCategUI(cod){
   var t=cod||editCateg; if(!t) return;
   var c=categoriaPorCod(t);
-  if(c && c.base){ alert('Esta categoría es de fábrica y no se puede eliminar.'); return; }
+  if(c && c.base){ alert('Esta categoría es predeterminada y no se puede eliminar.'); return; }
   var enUso=categoriaEnUso(t);
   if(enUso>0){ alert('No se puede eliminar: hay '+enUso+' insumo(s) usando esta categoría. Reasignalos antes de borrarla.'); return; }
   if(confirm('¿Eliminar esta categoría?')){ borrarCategoria(t); if(!cod){cerrarModalCateg();} renderCategs(); }
@@ -1153,7 +1280,7 @@ function renderEspecies(){
   for(var i=0;i<lista.length;i++){(function(e){
     var tr=document.createElement('tr');
     tr.innerHTML='<td><strong>'+e.nombre+'</strong></td><td>'+(e.sigla||'—')+'</td>'+
-      '<td class="row-actions"><button class="btn-icon" title="Editar" onclick="editarEsp(\''+e.id+'\')">✎︎</button><button class="btn-icon btn-icon-del" title="Eliminar" onclick="eliminarEsp(\''+e.id+'\')">×</button></td>';
+      '<td class="row-actions"><button class="btn-act-edit" title="Editar" onclick="editarEsp(\''+e.id+'\')">✎</button><button class="btn-act-del" title="Eliminar" onclick="eliminarEsp(\''+e.id+'\')">×</button></td>';
     tb.appendChild(tr);
   })(lista[i]);}
   document.getElementById('empty-esp').style.display=lista.length?'none':'block';
@@ -1162,7 +1289,16 @@ function renderEspecies(){
 function abrirModalEsp(){ editEsp=null; document.getElementById('modal-esp-title').textContent='Nueva especie'; document.getElementById('e-nombre').value=''; document.getElementById('e-sigla').value=''; document.getElementById('btn-del-esp').style.display='none'; document.getElementById('msg-esp').textContent=''; document.getElementById('overlay-esp').className='overlay open'; }
 function editarEsp(id){ var l=PA.demo.listarEspecies(); var x=null; for(var i=0;i<l.length;i++){if(l[i].id===id){x=l[i];break;}} if(!x)return; editEsp=id; document.getElementById('modal-esp-title').textContent='Editar especie'; document.getElementById('e-nombre').value=x.nombre||''; document.getElementById('e-sigla').value=x.sigla||''; document.getElementById('btn-del-esp').style.display=''; document.getElementById('msg-esp').textContent=''; document.getElementById('overlay-esp').className='overlay open'; }
 function cerrarModalEsp(){ document.getElementById('overlay-esp').className='overlay'; }
-function guardarEsp(){ var n=document.getElementById('e-nombre').value.trim(); if(!n){document.getElementById('msg-esp').textContent='Falta el nombre.';return;} PA.demo.guardarEspecie({id:editEsp||undefined,nombre:n,sigla:document.getElementById('e-sigla').value.trim(),activo:true}); cerrarModalEsp(); renderEspecies(); }
+function guardarEsp(){
+  var n=vTrim(document.getElementById('e-nombre').value);
+  var e=vReq(n,'el nombre'); if(e){ vErr('msg-esp',e); return; }
+  e=vMax(n,80,'Nombre'); if(e){ vErr('msg-esp',e); return; }
+  var sig=vSigla(document.getElementById('e-sigla').value, 8);
+  var lista=PA.demo.listarEspecies();
+  if(vDuplicado(lista, n, function(it){return it.nombre;}, editEsp)){ vErr('msg-esp','Ya existe una especie con ese nombre.'); return; }
+  if(sig && vDuplicado(lista, sig, function(it){return it.sigla;}, editEsp)){ vErr('msg-esp','Ya existe una especie con esa sigla.'); return; }
+  PA.demo.guardarEspecie({id:editEsp||undefined,nombre:n,sigla:sig,activo:true}); cerrarModalEsp(); renderEspecies();
+}
 function eliminarEsp(id){ var t=id||editEsp; if(!t) return; if(confirm('¿Eliminar esta especie?')){ PA.demo.borrarEspecie(t); if(!id){cerrarModalEsp();} renderEspecies(); } }
 
 /* ---- UNIDADES (global) ---- */
@@ -1173,7 +1309,7 @@ function renderUnidades(){
   for(var i=0;i<lista.length;i++){(function(u){
     var tr=document.createElement('tr');
     tr.innerHTML='<td><strong>'+u.sigla+'</strong></td><td>'+(u.nombre||'—')+'</td>'+
-      '<td class="row-actions"><button class="btn-icon" title="Editar" onclick="editarUni(\''+u.id+'\')">✎︎</button><button class="btn-icon btn-icon-del" title="Eliminar" onclick="eliminarUni(\''+u.id+'\')">×</button></td>';
+      '<td class="row-actions"><button class="btn-act-edit" title="Editar" onclick="editarUni(\''+u.id+'\')">✎</button><button class="btn-act-del" title="Eliminar" onclick="eliminarUni(\''+u.id+'\')">×</button></td>';
     tb.appendChild(tr);
   })(lista[i]);}
   document.getElementById('empty-uni').style.display=lista.length?'none':'block';
@@ -1182,7 +1318,14 @@ function renderUnidades(){
 function abrirModalUni(){ editUni=null; document.getElementById('modal-uni-title').textContent='Nueva unidad'; document.getElementById('u-sigla').value=''; document.getElementById('u-nombre').value=''; document.getElementById('btn-del-uni').style.display='none'; document.getElementById('msg-uni').textContent=''; document.getElementById('overlay-uni').className='overlay open'; }
 function editarUni(id){ var l=PA.demo.listarUnidades(); var x=null; for(var i=0;i<l.length;i++){if(l[i].id===id){x=l[i];break;}} if(!x)return; editUni=id; document.getElementById('modal-uni-title').textContent='Editar unidad'; document.getElementById('u-sigla').value=x.sigla||''; document.getElementById('u-nombre').value=x.nombre||''; document.getElementById('btn-del-uni').style.display=''; document.getElementById('msg-uni').textContent=''; document.getElementById('overlay-uni').className='overlay open'; }
 function cerrarModalUni(){ document.getElementById('overlay-uni').className='overlay'; }
-function guardarUni(){ var s=document.getElementById('u-sigla').value.trim(); if(!s){document.getElementById('msg-uni').textContent='Falta la sigla.';return;} PA.demo.guardarUnidad({id:editUni||undefined,sigla:s,nombre:document.getElementById('u-nombre').value.trim(),activo:true}); cerrarModalUni(); renderUnidades(); }
+function guardarUni(){
+  var s=vSigla(document.getElementById('u-sigla').value, 10);
+  var e=vReq(s,'la sigla'); if(e){ vErr('msg-uni',e); return; }
+  var nom=vTrim(document.getElementById('u-nombre').value);
+  e=vMax(nom,60,'Nombre'); if(e){ vErr('msg-uni',e); return; }
+  if(vDuplicado(PA.demo.listarUnidades(), s, function(it){return it.sigla;}, editUni)){ vErr('msg-uni','Ya existe una unidad con esa sigla.'); return; }
+  PA.demo.guardarUnidad({id:editUni||undefined,sigla:s,nombre:nom,activo:true}); cerrarModalUni(); renderUnidades();
+}
 function eliminarUni(id){ var t=id||editUni; if(!t) return; if(confirm('¿Eliminar esta unidad?')){ PA.demo.borrarUnidad(t); if(!id){cerrarModalUni();} renderUnidades(); } }
 
 /* ---- INSUMOS (por empresa) ---- */
@@ -1220,25 +1363,24 @@ function poblarSubcat(valor){
   for(var i=0;i<SUBCAT_COAD.length;i++){ var o=document.createElement('option'); o.value=SUBCAT_COAD[i]; o.textContent=SUBCAT_COAD[i]; if(SUBCAT_COAD[i]===valor) o.selected=true; sel.appendChild(o); }
 }
 function nombreModoAcc(id){ if(!id) return null; var l=PA.demo.listarModosAccion(); for(var i=0;i<l.length;i++){ if(l[i].id===id) return l[i].sistema+' '+l[i].codigo; } return null; }
-function poblarSelectModo(sistema, valor){
-  var sel=document.getElementById('i-modo'); sel.innerHTML='<option value="">— Sin especificar —</option>';
-  var lbl=document.getElementById('i-modo-sistema'); lbl.textContent = sistema ? '('+sistema+')' : '—';
-  if(!sistema) return;
-  var l=PA.demo.listarModosAccion(sistema);
-  for(var i=0;i<l.length;i++){ var o=document.createElement('option'); o.value=l[i].id; o.textContent=l[i].codigo+' — '+l[i].descripcion; if(l[i].id===valor) o.selected=true; sel.appendChild(o); }
-}
 function nombreUnidad(id){ if(!id) return '—'; var l=PA.demo.listarUnidades(); for(var i=0;i<l.length;i++){ if(l[i].id===id) return l[i].sigla; } return '—'; }
 function bandaBadge(b){ if(!b) return ''; var col={'Ia':'#C0392B','Ib':'#E74C3C','II':'#F1C40F','III':'#2980B9','IV':'#27AE60'}[b]||'#7A8899'; var txt=(b==='II')?'#5A4A00':'#fff'; return '<span class="bdg-banda" style="background:'+col+';color:'+txt+'">'+b+'</span>'; }
 function tecnicoResumen(x){
   if(esFito(x.tipo)){
     var p=[];
-    var ma=nombreModoAcc(x.modoAccionId); if(ma) p.push(ma);
     var fm=nombreFormulacion(x.formulacionId); if(fm) p.push(fm);
-    // activos
+    // activos, cada uno con su modo de acción entre paréntesis si lo tiene
     if(x.activos && x.activos.length){
       var nombres=[];
-      for(var a=0;a<x.activos.length;a++){ var nm=nombrePA(x.activos[a].paId); if(nm) nombres.push(nm); }
+      for(var a=0;a<x.activos.length;a++){
+        var nm=nombrePA(x.activos[a].paId); if(!nm) continue;
+        var mm=nombreModoAcc(x.activos[a].modoAccionId);
+        nombres.push(mm ? (nm+' ['+mm+']') : nm);
+      }
       if(nombres.length) p.push(nombres.join(' + '));
+    } else {
+      // compat: insumo viejo con modo a nivel producto y sin activos
+      var maOld=nombreModoAcc(x.modoAccionId); if(maOld) p.push(maOld);
     }
     if(x.bandaTox) p.push(bandaBadge(x.bandaTox));
     var eiqEf = (x.eiqOverride!=null) ? x.eiqOverride : (x.eiqTotal!=null ? x.eiqTotal : (x.eiq!=null?x.eiq:null));
@@ -1294,7 +1436,7 @@ function renderInsumos(){
       var sub = (catX && catX.subcat && x.subcategoria) ? '<span class="rol-bdg rb-tipo">'+x.subcategoria+'</span>' : '<span style="color:var(--muted)">—</span>';
       var tr=document.createElement('tr');
       tr.innerHTML='<td><strong>'+x.nombre+'</strong></td><td>'+sub+'</td><td>'+nombreUnidad(x.unidadId)+'</td><td>'+tecnicoResumen(x)+'</td>'+
-        '<td class="row-actions"><button class="btn-icon" title="Editar" onclick="editarIns(\''+x.id+'\')">✎︎</button><button class="btn-icon btn-icon-del" title="Eliminar" onclick="eliminarIns(\''+x.id+'\')">×</button></td>';
+        '<td class="row-actions"><button class="btn-act-edit" title="Editar" onclick="editarIns(\''+x.id+'\')">✎</button><button class="btn-act-del" title="Eliminar" onclick="eliminarIns(\''+x.id+'\')">×</button></td>';
       tb.appendChild(tr);
     })(arr[i]);}
   }
@@ -1319,14 +1461,11 @@ function toggleBloqueIns(){
   document.getElementById('bloque-ferti').style.display = (cod==='FERT') ? '' : 'none';
   toggleSubcat();
   if(fito){
-    var sis=sistemaDeTipo(cod);
-    var actual=document.getElementById('i-modo').value;
-    poblarSelectModo(sis, actual);
     var fActual=document.getElementById('i-formul').value;
     poblarSelectFormul(fActual);
     // primera fila de activo lista si no hay ninguna
-    if(!filasPA.length){ filasPA.push({ paId:'', concentracion:'', concUnidad:'%', densidad:'' }); }
-    renderFilasPA();
+    if(!filasPA.length){ filasPA.push({ paId:'', concentracion:'', concUnidad:'%', densidad:'', modoAccionId:'' }); }
+    renderFilasPA(); // repuebla los selects de modo con el sistema de la categoría actual
   }
 }
 function setBanda(b){
@@ -1335,10 +1474,20 @@ function setBanda(b){
   for(var i=0;i<chips.length;i++){ chips[i].className='banda-chip b-'+(chips[i].getAttribute('data-b')||'na').toLowerCase()+(chips[i].getAttribute('data-b')===b?' on':''); }
 }
 /* ---- Bloque de principios activos dentro del insumo ---- */
-var filasPA = [];  // estado: [{paId, concentracion, concUnidad, densidad}]
+var filasPA = [];  // estado: [{paId, concentracion, concUnidad, densidad, modoAccionId}]
 function agregarFilaPA(fila){
-  filasPA.push(fila || { paId:'', concentracion:'', concUnidad:'%', densidad:'' });
+  filasPA.push(fila || { paId:'', concentracion:'', concUnidad:'%', densidad:'', modoAccionId:'' });
   renderFilasPA();
+}
+// Opciones de modo de acción para el sistema derivado de la categoría del insumo (HRAC/IRAC/FRAC).
+function optsModoHtml(sel){
+  var cod=document.getElementById('i-tipo').value;
+  var sistema=sistemaDeTipo(cod);
+  var h='<option value="">— modo de acción —</option>';
+  if(!sistema) return h;
+  var l=PA.demo.listarModosAccion(sistema);
+  for(var i=0;i<l.length;i++){ h+='<option value="'+l[i].id+'"'+(l[i].id===sel?' selected':'')+'>'+l[i].codigo+' — '+l[i].descripcion+'</option>'; }
+  return h;
 }
 function quitarFilaPA(idx){ filasPA.splice(idx,1); renderFilasPA(); }
 function optsPAHtml(sel){
@@ -1355,22 +1504,31 @@ function renderFilasPA(){
   cont.innerHTML='';
   for(var i=0;i<filasPA.length;i++){(function(idx){
     var f=filasPA[idx];
-    var row=document.createElement('div'); row.className='pa-fila';
+    var row=document.createElement('div'); row.className='pa-fila'; row.setAttribute('data-fila',idx);
     var esGL = f.concUnidad==='g/l';
     var ap=eiqAporte(f);
     row.innerHTML=
-      '<select class="pa-sel" onchange="filasPA['+idx+'].paId=this.value;recalcEIQ()">'+optsPAHtml(f.paId)+'</select>'+
-      '<input class="pa-conc" type="number" step="0.01" placeholder="conc." value="'+(f.concentracion!=null?f.concentracion:'')+'" oninput="filasPA['+idx+'].concentracion=this.value;recalcEIQ()">'+
+      '<select class="pa-sel" onchange="filasPA['+idx+'].paId=this.value;refrescarEIQ('+idx+')">'+optsPAHtml(f.paId)+'</select>'+
+      '<select class="pa-modo" title="Modo de acción de este principio activo" onchange="filasPA['+idx+'].modoAccionId=this.value">'+optsModoHtml(f.modoAccionId)+'</select>'+
+      '<input class="pa-conc" type="number" step="0.01" placeholder="conc." value="'+(f.concentracion!=null?f.concentracion:'')+'" oninput="filasPA['+idx+'].concentracion=this.value;refrescarEIQ('+idx+')">'+
       '<select class="pa-uni" onchange="filasPA['+idx+'].concUnidad=this.value;renderFilasPA()">'+
         '<option value="%"'+(f.concUnidad==='%'?' selected':'')+'>%</option>'+
         '<option value="g/l"'+(f.concUnidad==='g/l'?' selected':'')+'>g/l</option>'+
         '<option value="g/kg"'+(f.concUnidad==='g/kg'?' selected':'')+'>g/kg</option>'+
       '</select>'+
-      '<span class="pa-dens-wrap'+(esGL?'':' off')+'"><input class="pa-dens" type="number" step="0.01" placeholder="dens." title="densidad g/ml (solo g/l)" value="'+(f.densidad!=null?f.densidad:'')+'" '+(esGL?'':'disabled')+' oninput="filasPA['+idx+'].densidad=this.value;recalcEIQ()"></span>'+
+      '<span class="pa-dens-wrap'+(esGL?'':' off')+'"><input class="pa-dens" type="number" step="0.01" placeholder="dens." title="densidad g/ml (solo g/l)" value="'+(f.densidad!=null?f.densidad:'')+'" '+(esGL?'':'disabled')+' oninput="filasPA['+idx+'].densidad=this.value;refrescarEIQ('+idx+')"></span>'+
       '<span class="pa-aporte" title="Aporte de este activo al EIQ del producto">'+(ap?('EIQ +'+(Math.round(ap*100)/100)):'—')+'</span>'+
       '<button type="button" class="pa-del" title="quitar" onclick="quitarFilaPA('+idx+')">×</button>';
     cont.appendChild(row);
   })(i);}
+  recalcEIQ();
+}
+// Refresco en vivo: actualiza el aporte de la fila editada y el total, sin redibujar los inputs (no pierde el foco).
+function refrescarEIQ(idx){
+  if(idx!=null){
+    var row=document.querySelector('#pa-filas .pa-fila[data-fila="'+idx+'"]');
+    if(row){ var span=row.querySelector('.pa-aporte'); if(span){ var ap=eiqAporte(filasPA[idx]); span.textContent = ap?('EIQ +'+(Math.round(ap*100)/100)):'—'; } }
+  }
   recalcEIQ();
 }
 function recalcEIQ(){
@@ -1405,9 +1563,13 @@ function editarIns(id){
   document.getElementById('i-nombre').value=x.nombre||''; poblarSelectCategoria(cod);
   poblarSubcat(x.subcategoria||''); poblarSelectFormul(x.formulacionId||'');
   poblarSelectUnidad(x.unidadId||'');
-  poblarSelectModo(sistemaDeTipo(cod), x.modoAccionId||'');
-  // cargar activos existentes
-  filasPA = (x.activos && x.activos.length) ? x.activos.map(function(a){ return { paId:a.paId||'', concentracion:(a.concentracion!=null?a.concentracion:''), concUnidad:a.concUnidad||'%', densidad:(a.densidad!=null?a.densidad:'') }; }) : [];
+  // cargar activos existentes; cada activo lleva su propio modoAccionId
+  filasPA = (x.activos && x.activos.length) ? x.activos.map(function(a){ return { paId:a.paId||'', concentracion:(a.concentracion!=null?a.concentracion:''), concUnidad:a.concUnidad||'%', densidad:(a.densidad!=null?a.densidad:''), modoAccionId:(a.modoAccionId||'') }; }) : [];
+  // Migración: insumo viejo con modo a nivel producto y sin modo en las filas → precargar en la primera fila.
+  if(x.modoAccionId && filasPA.length){
+    var algunModo=false; for(var mi=0;mi<filasPA.length;mi++){ if(filasPA[mi].modoAccionId){ algunModo=true; break; } }
+    if(!algunModo){ filasPA[0].modoAccionId = x.modoAccionId; }
+  }
   renderFilasPA();
   // override: si el insumo tenía eiq manual (o el legacy 'eiq' suelto), respetarlo
   var ovr = (x.eiqOverride!=null) ? x.eiqOverride : (x.eiq!=null ? x.eiq : null);
@@ -1420,29 +1582,59 @@ function editarIns(id){
 }
 function cerrarModalIns(){ document.getElementById('overlay-ins').className='overlay'; }
 function guardarIns(){
-  var n=document.getElementById('i-nombre').value.trim();
-  if(!n){document.getElementById('msg-ins').textContent='Falta el nombre.';return;}
+  var n=vTrim(document.getElementById('i-nombre').value);
+  // Nombre: obligatorio, máx 120, único por empresa.
+  var e=vReq(n,'el nombre'); if(e){ vErr('msg-ins',e); return; }
+  e=vMax(n,120,'Nombre'); if(e){ vErr('msg-ins',e); return; }
+  if(vDuplicado(PA.demo.listarInsumos(empresaId), n, function(it){return it.nombre;}, editIns)){ vErr('msg-ins','Ya existe un insumo con ese nombre en esta empresa.'); return; }
   var cod=document.getElementById('i-tipo').value;
+  // Categoría obligatoria.
+  if(!cod){ vErr('msg-ins','Elegí una categoría.'); return; }
   var catSel = categoriaPorCod(cod);
+  // Unidad obligatoria.
+  var unidadId=document.getElementById('i-unidad').value||null;
+  if(!unidadId){ vErr('msg-ins','Elegí la unidad del insumo.'); return; }
+  // Subcategoría obligatoria si la categoría la usa.
   var sub = (catSel && catSel.subcat) ? (document.getElementById('i-subcat').value||null) : null;
+  if(catSel && catSel.subcat && !sub){ vErr('msg-ins','Elegí la subcategoría.'); return; }
   var obj={ id:editIns||undefined, empresaId:empresaId, activo:true, nombre:n, tipo:cod, subcategoria:sub,
-    unidadId:document.getElementById('i-unidad').value||null,
+    unidadId:unidadId,
     modoAccionId:null, formulacionId:null, bandaTox:'', activos:[], eiqTotal:null, eiqOverride:null, eiq:null, nutrientes:null };
   if(esFito(cod)){
-    obj.modoAccionId=document.getElementById('i-modo').value||null;
+    obj.modoAccionId=null; // deprecado: el modo vive en cada activo (HANDOFF Mariana)
     obj.formulacionId=document.getElementById('i-formul').value||null;
     obj.bandaTox=bandaSel;
-    // activos: sólo filas con paId elegido
+    // Validar cada fila con activo elegido: concentración >0 (y <=100 si %), densidad >0.
     var acts=[];
-    for(var i=0;i<filasPA.length;i++){ var f=filasPA[i]; if(f.paId){ acts.push({ paId:f.paId, concentracion:(f.concentracion===''||f.concentracion==null?null:Number(f.concentracion)), concUnidad:f.concUnidad||'%', densidad:(f.densidad===''||f.densidad==null?null:Number(f.densidad)) }); } }
+    for(var i=0;i<filasPA.length;i++){ var f=filasPA[i];
+      if(!f.paId) continue;
+      var uni=f.concUnidad||'%';
+      var rc=vNum(f.concentracion,{minExcl:0, max:(uni==='%'?100:null), etiqueta:'Concentración'});
+      if(!rc.ok){ vErr('msg-ins',rc.msg+(uni==='%'?' (%)':'')); return; }
+      var rd=vNum(f.densidad,{minExcl:0, etiqueta:'Densidad'});
+      if(!rd.ok){ vErr('msg-ins',rd.msg); return; }
+      acts.push({ paId:f.paId, concentracion:rc.val, concUnidad:uni, densidad:rd.val, modoAccionId:(f.modoAccionId||null) });
+    }
+    // Fito sin activos: AVISA (confirm) pero deja guardar si el usuario acepta.
+    if(!acts.length){ if(!confirm('Este fitosanitario no tiene ningún principio activo cargado. ¿Guardar igual?')){ return; } }
     obj.activos=acts;
     obj.eiqTotal=eiqTotalCalculado(acts);
     var chk=document.getElementById('eiq-manual-chk').checked;
-    var ovrVal=document.getElementById('eiq-override').value;
-    obj.eiqOverride = (chk && ovrVal!=='') ? Number(ovrVal) : null;
-    obj.eiq = (obj.eiqOverride!=null) ? obj.eiqOverride : obj.eiqTotal; // compat: 'eiq' = efectivo
+    // EIQ manual: si está tildado, >= 0.
+    if(chk){ var ro=vNum(document.getElementById('eiq-override').value,{min:0, etiqueta:'EIQ'}); if(!ro.ok){ vErr('msg-ins',ro.msg); return; } obj.eiqOverride=ro.val; }
+    else { obj.eiqOverride=null; }
+    obj.eiq = (obj.eiqOverride!=null) ? obj.eiqOverride : obj.eiqTotal;
   } else if(cod==='FERT'){
-    obj.nutrientes={ n:Number(document.getElementById('i-n').value)||0, p:Number(document.getElementById('i-p').value)||0, k:Number(document.getElementById('i-k').value)||0, s:Number(document.getElementById('i-s').value)||0 };
+    // NPKS: cada uno 0–100, suma <= 100.
+    var etq={n:'N',p:'P',k:'K',s:'S'}, nut={}, suma=0;
+    var ids={n:'i-n',p:'i-p',k:'i-k',s:'i-s'};
+    for(var kk in ids){ if(!ids.hasOwnProperty(kk)) continue;
+      var rn=vNum(document.getElementById(ids[kk]).value,{min:0,max:100,etiqueta:etq[kk]});
+      if(!rn.ok){ vErr('msg-ins',rn.msg); return; }
+      nut[kk]=(rn.val==null?0:rn.val); suma+=nut[kk];
+    }
+    if(suma>100){ vErr('msg-ins','La suma N+P+K+S no puede superar 100% (actual: '+(Math.round(suma*100)/100)+'%).'); return; }
+    obj.nutrientes=nut;
   }
   PA.demo.guardarInsumo(obj); cerrarModalIns(); renderInsumos();
 }
@@ -1463,7 +1655,7 @@ function renderModosAcc(){
   for(var i=0;i<lista.length;i++){(function(m){
     var tr=document.createElement('tr');
     tr.innerHTML='<td>'+sisBadge(m.sistema)+'</td><td><strong>'+m.codigo+'</strong></td><td>'+m.descripcion+'</td>'+
-      '<td class="row-actions"><button class="btn-icon" title="Editar" onclick="editarMoa(\''+m.id+'\')">✎︎</button><button class="btn-icon btn-icon-del" title="Eliminar" onclick="eliminarMoa(\''+m.id+'\')">×</button></td>';
+      '<td class="row-actions"><button class="btn-act-edit" title="Editar" onclick="editarMoa(\''+m.id+'\')">✎</button><button class="btn-act-del" title="Eliminar" onclick="eliminarMoa(\''+m.id+'\')">×</button></td>';
     tb.appendChild(tr);
   })(lista[i]);}
   document.getElementById('empty-moa').style.display=lista.length?'none':'block';
@@ -1472,7 +1664,19 @@ function renderModosAcc(){
 function abrirModalMoa(){ editMoa=null; document.getElementById('modal-moa-title').textContent='Nuevo modo de acción'; document.getElementById('m-sistema').value=filtroMoa||'HRAC'; document.getElementById('m-codigo').value=''; document.getElementById('m-desc').value=''; document.getElementById('btn-del-moa').style.display='none'; document.getElementById('msg-moa').textContent=''; document.getElementById('overlay-moa').className='overlay open'; }
 function editarMoa(id){ var l=PA.demo.listarModosAccion(); var x=null; for(var i=0;i<l.length;i++){if(l[i].id===id){x=l[i];break;}} if(!x)return; editMoa=id; document.getElementById('modal-moa-title').textContent='Editar modo de acción'; document.getElementById('m-sistema').value=x.sistema||'HRAC'; document.getElementById('m-codigo').value=x.codigo||''; document.getElementById('m-desc').value=x.descripcion||''; document.getElementById('btn-del-moa').style.display=''; document.getElementById('msg-moa').textContent=''; document.getElementById('overlay-moa').className='overlay open'; }
 function cerrarModalMoa(){ document.getElementById('overlay-moa').className='overlay'; }
-function guardarMoa(){ var c=document.getElementById('m-codigo').value.trim(); var d=document.getElementById('m-desc').value.trim(); if(!c){document.getElementById('msg-moa').textContent='Falta el código.';return;} if(!d){document.getElementById('msg-moa').textContent='Falta la descripción.';return;} PA.demo.guardarModoAccion({id:editMoa||undefined,sistema:document.getElementById('m-sistema').value,codigo:c,descripcion:d,activo:true}); cerrarModalMoa(); renderModosAcc(); }
+function guardarMoa(){
+  var sis=document.getElementById('m-sistema').value;
+  if(!sis){ vErr('msg-moa','Elegí el sistema.'); return; }
+  var c=vSigla(document.getElementById('m-codigo').value, 12);
+  var d=vTrim(document.getElementById('m-desc').value);
+  var e=vReq(c,'el código'); if(e){ vErr('msg-moa',e); return; }
+  e=vReq(d,'la descripción'); if(e){ vErr('msg-moa',e); return; }
+  e=vMax(d,120,'Descripción'); if(e){ vErr('msg-moa',e); return; }
+  // Único dentro del sistema.
+  var mismos=PA.demo.listarModosAccion(sis);
+  if(vDuplicado(mismos, c, function(it){return it.codigo;}, editMoa)){ vErr('msg-moa','Ya existe ese código en '+sis+'.'); return; }
+  PA.demo.guardarModoAccion({id:editMoa||undefined,sistema:sis,codigo:c,descripcion:d,activo:true}); cerrarModalMoa(); renderModosAcc();
+}
 function eliminarMoa(id){ var t=id||editMoa; if(!t) return; if(confirm('¿Eliminar este modo de acción?')){ PA.demo.borrarModoAccion(t); if(!id){cerrarModalMoa();} renderModosAcc(); } }
 
 /* ---- FORMULACIONES (global Puntal — fallback local hasta pa-core) ---- */
@@ -1489,7 +1693,7 @@ function renderFormul(){
       '<button class="ord-btn" title="Bajar"'+abajoDis+' onclick="moverFormul('+idx+',1)">▼</button></span>';
     var tr=document.createElement('tr');
     tr.innerHTML='<td><span class="ord-cell">'+flechas+'<strong>'+(f.orden!=null?f.orden:'—')+'</strong></span></td><td>'+cod+'</td><td>'+f.descripcion+'</td>'+
-      '<td class="row-actions"><button class="btn-icon" title="Editar" onclick="editarFormul(\''+f.id+'\')">✎︎</button><button class="btn-icon btn-icon-del" title="Eliminar" onclick="eliminarFormulUI(\''+f.id+'\')">×</button></td>';
+      '<td class="row-actions"><button class="btn-act-edit" title="Editar" onclick="editarFormul(\''+f.id+'\')">✎</button><button class="btn-act-del" title="Eliminar" onclick="eliminarFormulUI(\''+f.id+'\')">×</button></td>';
     tb.appendChild(tr);
   })(lista[i], i);}
   document.getElementById('empty-formul').style.display=lista.length?'none':'block';
@@ -1509,10 +1713,16 @@ function abrirModalFormul(){ editFormul=null; document.getElementById('modal-for
 function editarFormul(id){ var l=listarFormulaciones(); var x=null; for(var i=0;i<l.length;i++){if(l[i].id===id){x=l[i];break;}} if(!x)return; editFormul=id; document.getElementById('modal-formul-title').textContent='Editar formulación'; document.getElementById('fm-codigo').value=x.codigo||''; document.getElementById('fm-orden').value=(x.orden!=null?x.orden:''); document.getElementById('fm-desc').value=x.descripcion||''; document.getElementById('btn-del-formul').style.display=''; document.getElementById('msg-formul').textContent=''; document.getElementById('overlay-formul').className='overlay open'; }
 function cerrarModalFormul(){ document.getElementById('overlay-formul').className='overlay'; }
 function guardarFormulUI(){
-  var desc=document.getElementById('fm-desc').value.trim();
-  if(!desc){document.getElementById('msg-formul').textContent='Falta la descripción.';return;}
-  var ordVal=document.getElementById('fm-orden').value;
-  guardarFormulacion({id:editFormul||undefined, codigo:document.getElementById('fm-codigo').value.trim().toUpperCase(), descripcion:desc, orden:(ordVal===''?0:Number(ordVal)), activo:true});
+  var desc=vTrim(document.getElementById('fm-desc').value);
+  var e=vReq(desc,'la descripción'); if(e){ vErr('msg-formul',e); return; }
+  e=vMax(desc,120,'Descripción'); if(e){ vErr('msg-formul',e); return; }
+  var cod=vSigla(document.getElementById('fm-codigo').value, 12);
+  // Código opcional; si se carga, único global (algunas formulaciones base no tienen código).
+  if(cod && vDuplicado(listarFormulaciones(), cod, function(it){return it.codigo;}, editFormul)){ vErr('msg-formul','Ya existe una formulación con ese código.'); return; }
+  // Orden: entero >= 0 (vacío => 0).
+  var ro=vNum(document.getElementById('fm-orden').value,{min:0, entero:true, etiqueta:'Orden'});
+  if(!ro.ok){ vErr('msg-formul',ro.msg); return; }
+  guardarFormulacion({id:editFormul||undefined, codigo:cod, descripcion:desc, orden:(ro.val==null?0:ro.val), activo:true});
   cerrarModalFormul(); renderFormul();
 }
 function eliminarFormulUI(id){ var t=id||editFormul; if(!t) return; if(confirm('¿Eliminar esta formulación?')){ borrarFormulacion(t); if(!id){cerrarModalFormul();} renderFormul(); } }
@@ -1548,7 +1758,7 @@ function renderPA(){
     var uso = p.uso ? '<span class="rol-bdg rb-tipo">'+p.uso+'</span>' : '<span style="color:var(--muted)">—</span>';
     var tr=document.createElement('tr');
     tr.innerHTML='<td>'+p.nombre+'</td><td>'+eiqTxt+'</td><td>'+uso+'</td>'+
-      '<td class="row-actions"><button class="btn-icon" title="Editar" onclick="editarPA(\''+p.id+'\')">✎︎</button><button class="btn-icon btn-icon-del" title="Eliminar" onclick="eliminarPAUI(\''+p.id+'\')">×</button></td>';
+      '<td class="row-actions"><button class="btn-act-edit" title="Editar" onclick="editarPA(\''+p.id+'\')">✎</button><button class="btn-act-del" title="Eliminar" onclick="eliminarPAUI(\''+p.id+'\')">×</button></td>';
     tb.appendChild(tr);
   })(lista[i]);}
   document.getElementById('empty-pa').style.display=lista.length?'none':'block';
@@ -1558,10 +1768,15 @@ function abrirModalPA(){ editPA=null; document.getElementById('modal-pa-title').
 function editarPA(id){ var p=paById(id); if(!p)return; editPA=id; document.getElementById('modal-pa-title').textContent='Editar principio activo'; document.getElementById('pa-nombre').value=p.nombre||''; document.getElementById('pa-eiq').value=(p.eiq!=null?p.eiq:''); document.getElementById('pa-usotxt').value=p.uso||''; document.getElementById('btn-del-pa').style.display=''; document.getElementById('msg-pa').textContent=''; document.getElementById('overlay-pa').className='overlay open'; }
 function cerrarModalPA(){ document.getElementById('overlay-pa').className='overlay'; }
 function guardarPAUI(){
-  var nom=document.getElementById('pa-nombre').value.trim();
-  if(!nom){document.getElementById('msg-pa').textContent='Falta el nombre.';return;}
-  var eiqV=document.getElementById('pa-eiq').value;
-  guardarPrincipioActivo({ id:editPA||undefined, nombre:nom, eiq:(eiqV===''?null:Number(eiqV)), uso:document.getElementById('pa-usotxt').value.trim(), activo:true });
+  var nom=vTrim(document.getElementById('pa-nombre').value);
+  var e=vReq(nom,'el nombre'); if(e){ vErr('msg-pa',e); return; }
+  e=vMax(nom,120,'Nombre'); if(e){ vErr('msg-pa',e); return; }
+  if(vDuplicado(listarPrincipiosActivos(), nom, function(it){return it.nombre;}, editPA)){ vErr('msg-pa','Ya existe un principio activo con ese nombre.'); return; }
+  var reiq=vNum(document.getElementById('pa-eiq').value,{min:0, etiqueta:'EIQ'});
+  if(!reiq.ok){ vErr('msg-pa',reiq.msg); return; }
+  var uso=vTrim(document.getElementById('pa-usotxt').value);
+  e=vMax(uso,200,'Uso'); if(e){ vErr('msg-pa',e); return; }
+  guardarPrincipioActivo({ id:editPA||undefined, nombre:nom, eiq:reiq.val, uso:uso, activo:true });
   cerrarModalPA(); renderPA();
 }
 function eliminarPAUI(id){ var t=id||editPA; if(!t) return; if(confirm('¿Eliminar este principio activo?')){ borrarPrincipioActivo(t); if(!id){cerrarModalPA();} renderPA(); } }
@@ -1588,7 +1803,7 @@ function renderChoferes(){
       var tr=document.createElement('tr');
       tr.innerHTML='<td><strong>'+c.nombre+'</strong></td><td>'+(c.dni||'—')+'</td><td>'+(c.licencia||'—')+'</td>'+
         '<td>'+nombreTercero(c.terceroId)+'</td>'+
-        '<td class="row-actions"><button class="btn-icon" title="Editar" onclick="editarChofer(\''+c.id+'\')">✎︎</button><button class="btn-icon btn-icon-del" title="Eliminar" onclick="eliminarChofer(\''+c.id+'\')">×</button></td>';
+        '<td class="row-actions"><button class="btn-act-edit" title="Editar" onclick="editarChofer(\''+c.id+'\')">✎</button><button class="btn-act-del" title="Eliminar" onclick="eliminarChofer(\''+c.id+'\')">×</button></td>';
       tb.appendChild(tr);
     })(lista[i]);
   }
@@ -1647,14 +1862,18 @@ function editarChofer(id){
 function cerrarModalChofer(){ document.getElementById('overlay-chofer').className='overlay'; }
 
 function guardarChofer(){
-  var nombre=document.getElementById('c-nombre').value.trim();
-  if(!nombre){ document.getElementById('msg-chofer').textContent='Falta el nombre.'; return; }
+  var nombre=vTrim(document.getElementById('c-nombre').value);
+  var e=vReq(nombre,'el nombre'); if(e){ vErr('msg-chofer',e); return; }
+  e=vMax(nombre,120,'Nombre'); if(e){ vErr('msg-chofer',e); return; }
   var terceroId=document.getElementById('c-tercero').value;
-  if(!terceroId){ document.getElementById('msg-chofer').textContent='Elegí el transportista.'; return; }
+  if(!terceroId){ vErr('msg-chofer','Elegí el transportista.'); return; }
+  var dni=vTrim(document.getElementById('c-dni').value);
+  // DNI: opcional; si se carga, 7-8 dígitos → AVISO (no bloquea).
+  if(dni){ var soloDig=dni.replace(/\D/g,''); if(soloDig.length<7 || soloDig.length>8){ if(!confirm('El DNI "'+dni+'" no parece válido (se esperan 7 u 8 dígitos). ¿Guardar igual?')){ return; } } }
   PA.demo.guardarChofer({
     id: editChofer||undefined, empresaId: empresaId, terceroId: terceroId,
-    nombre: nombre, dni: document.getElementById('c-dni').value.trim(),
-    licencia: document.getElementById('c-lic').value.trim(), activo: true
+    nombre: nombre, dni: dni,
+    licencia: vTrim(document.getElementById('c-lic').value), activo: true
   });
   cerrarModalChofer(); renderChoferes();
 }
@@ -1696,7 +1915,7 @@ function render(){
       var contacto = [t.telefono, t.email].filter(function(x){return x;}).join(' · ') || '—';
       tr.innerHTML = '<td><strong>'+t.nombre+'</strong></td><td>'+(t.cuit||'—')+'</td>'+
         '<td>'+rolesBadges(t)+'</td><td>'+contacto+'</td>'+
-        '<td class="row-actions"><button class="btn-icon" title="Editar" onclick="editar(\''+t.id+'\')">✎︎</button><button class="btn-icon btn-icon-del" title="Eliminar" onclick="eliminar(\''+t.id+'\')">×</button></td>';
+        '<td class="row-actions"><button class="btn-act-edit" title="Editar" onclick="editar(\''+t.id+'\')">✎</button><button class="btn-act-del" title="Eliminar" onclick="eliminar(\''+t.id+'\')">×</button></td>';
       tb.appendChild(tr);
     })(lista[i]);
   }
@@ -1763,11 +1982,15 @@ function editar(id){
 function cerrarModal(){ document.getElementById('overlay').className='overlay'; }
 
 function guardar(){
-  var nombre = document.getElementById('t-nombre').value.trim();
-  if(!nombre){ document.getElementById('msg').textContent='Falta el nombre.'; return; }
+  var nombre = vTrim(document.getElementById('t-nombre').value);
+  var e=vReq(nombre,'el nombre'); if(e){ vErr('msg',e); return; }
+  e=vMax(nombre,120,'Nombre'); if(e){ vErr('msg',e); return; }
+  // Nombre único por empresa.
+  if(vDuplicado(PA.demo.listarTerceros(empresaId,null), nombre, function(it){return it.nombre;}, editId)){ vErr('msg','Ya existe un tercero con ese nombre en esta empresa.'); return; }
   var esProv = document.getElementById('t-prov').checked;
   var esCli = document.getElementById('t-cli').checked;
-  if(!esProv && !esCli){ document.getElementById('msg').textContent='Marcá al menos un rol (proveedor o cliente).'; return; }
+  // Sin rol: AVISA (confirm) pero deja guardar.
+  if(!esProv && !esCli){ if(!confirm('Este tercero no tiene rol de proveedor ni cliente. ¿Guardar igual?')){ return; } }
   var tipos = [];
   if(esProv){
     var cbs = document.querySelectorAll('#t-tipos-opts input:checked');
@@ -1775,10 +1998,10 @@ function guardar(){
   }
   PA.demo.guardarTercero({
     id: editId || undefined, empresaId: empresaId, nombre: nombre,
-    cuit: document.getElementById('t-cuit').value.trim(),
-    telefono: document.getElementById('t-tel').value.trim(),
-    email: document.getElementById('t-email').value.trim(),
-    direccion: document.getElementById('t-dir').value.trim(),
+    cuit: vTrim(document.getElementById('t-cuit').value),
+    telefono: vTrim(document.getElementById('t-tel').value),
+    email: vTrim(document.getElementById('t-email').value),
+    direccion: vTrim(document.getElementById('t-dir').value),
     esProveedor: esProv, esCliente: esCli, tiposProveedor: tipos, activo: true
   });
   cerrarModal(); render();
