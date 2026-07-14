@@ -369,11 +369,11 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
   <div class="modal">
     <h3 id="modal-title">Nuevo tercero</h3>
     <div class="grid2">
-      <div class="fld full"><label>Nombre / Razón social</label><input id="t-nombre"></div>
-      <div class="fld"><label>CUIT <span class="opt">(opcional)</span></label><input id="t-cuit"></div>
-      <div class="fld"><label>Teléfono <span class="opt">(opcional)</span></label><input id="t-tel"></div>
-      <div class="fld"><label>Email <span class="opt">(opcional)</span></label><input id="t-email"></div>
-      <div class="fld"><label>Dirección <span class="opt">(opcional)</span></label><input id="t-dir"></div>
+      <div class="fld full"><label>Nombre / Razón social</label><input id="t-nombre" maxlength="120"></div>
+      <div class="fld"><label>CUIT <span class="opt">(opcional)</span></label><input id="t-cuit" inputmode="numeric" maxlength="13"></div>
+      <div class="fld"><label>Teléfono <span class="opt">(opcional)</span></label><input id="t-tel" inputmode="tel" maxlength="40"></div>
+      <div class="fld"><label>Email <span class="opt">(opcional)</span></label><input id="t-email" inputmode="email" maxlength="180"></div>
+      <div class="fld"><label>Dirección <span class="opt">(opcional)</span></label><input id="t-dir" maxlength="200"></div>
       <div class="sep">Roles</div>
       <div class="fld full"><label class="chk"><input type="checkbox" id="t-prov" onchange="toggleTipos()"> Es proveedor (le provee algo a la empresa)</label></div>
       <div class="tipos" id="t-tipos">
@@ -396,9 +396,9 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
   <div class="modal">
     <h3 id="modal-chofer-title">Nuevo chofer</h3>
     <div class="grid2">
-      <div class="fld full"><label>Nombre</label><input id="c-nombre"></div>
-      <div class="fld"><label>DNI <span class="opt">(opcional)</span></label><input id="c-dni"></div>
-      <div class="fld"><label>Licencia <span class="opt">(opcional)</span></label><input id="c-lic"></div>
+      <div class="fld full"><label>Nombre</label><input id="c-nombre" maxlength="120"></div>
+      <div class="fld"><label>DNI <span class="opt">(opcional)</span></label><input id="c-dni" inputmode="numeric" maxlength="10"></div>
+      <div class="fld"><label>Licencia <span class="opt">(opcional)</span></label><input id="c-lic" maxlength="40"></div>
       <div class="fld full"><label>Transportista</label>
         <select id="c-tercero" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px"></select>
       </div>
@@ -417,7 +417,7 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
   <div class="modal">
     <h3 id="modal-dep-title">Nuevo depósito</h3>
     <div class="grid2">
-      <div class="fld full"><label>Nombre</label><input id="d-nombre"></div>
+      <div class="fld full"><label>Nombre</label><input id="d-nombre" maxlength="80"></div>
       <div class="fld full"><label>Campo <span class="opt">(opcional — vacío = depósito general de la empresa)</span></label>
         <select id="d-campo" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px"></select>
       </div>
@@ -445,7 +445,7 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
   <div class="modal">
     <h3 id="modal-lab-title">Nueva labor</h3>
     <div class="grid2">
-      <div class="fld full"><label>Nombre</label><input id="l-nombre"></div>
+      <div class="fld full"><label>Nombre</label><input id="l-nombre" maxlength="80"></div>
       <div class="fld"><label>Unidad <span class="opt">(opcional)</span></label>
         <select id="l-unidad" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px">
           <option value="">— sin especificar —</option>
@@ -472,8 +472,8 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
   <div class="modal">
     <h3 id="modal-cul-title">Nuevo cultivo</h3>
     <div class="grid2">
-      <div class="fld full"><label>Nombre</label><input id="cu-nombre"></div>
-      <div class="fld"><label>Sigla <span class="opt">(opcional)</span></label><input id="cu-sigla"></div>
+      <div class="fld full"><label>Nombre</label><input id="cu-nombre" maxlength="80"></div>
+      <div class="fld"><label>Sigla <span class="opt">(opcional)</span></label><input id="cu-sigla" maxlength="8"></div>
       <div class="fld"><label>¿Es cultivo?</label>
         <select id="cu-escult" onchange="toggleEsCultivo()" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px">
           <option value="">— elegí —</option>
@@ -515,8 +515,8 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
   <div class="modal">
     <h3 id="modal-categ-title">Nueva categoría</h3>
     <div class="grid2">
-      <div class="fld"><label>Código</label><input id="categ-codigo" placeholder="(se genera solo)" disabled></div>
-      <div class="fld"><label>Nombre</label><input id="categ-label" placeholder="Ej: Balanceados"></div>
+      <div class="fld"><label>Código</label><input id="categ-codigo" maxlength="12" placeholder="(se genera solo)" disabled></div>
+      <div class="fld"><label>Nombre</label><input id="categ-label" maxlength="60" placeholder="Ej: Balanceados"></div>
     </div>
     <div class="fld full" id="fld-categ-fito" style="display:none">
       <label style="display:flex;align-items:center;gap:8px;cursor:default"><input type="checkbox" id="categ-fito" disabled style="width:auto"> Fitosanitaria (activa principios activos / EIQ)</label>
@@ -537,8 +537,8 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
   <div class="modal">
     <h3 id="modal-uso-title">Nuevo uso</h3>
     <div class="grid2">
-      <div class="fld"><label>Código</label><input id="uso-codigo" placeholder="Ej: AGR"></div>
-      <div class="fld"><label>Nombre</label><input id="uso-label"></div>
+      <div class="fld"><label>Código</label><input id="uso-codigo" maxlength="12" placeholder="Ej: AGR"></div>
+      <div class="fld"><label>Nombre</label><input id="uso-label" maxlength="60"></div>
     </div>
     <div class="modal-actions">
       <button class="btn" onclick="guardarUsoUI()">Guardar</button>
@@ -554,8 +554,8 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
   <div class="modal">
     <h3 id="modal-esp-title">Nueva especie</h3>
     <div class="grid2">
-      <div class="fld full"><label>Nombre</label><input id="e-nombre"></div>
-      <div class="fld"><label>Sigla <span class="opt">(opcional)</span></label><input id="e-sigla"></div>
+      <div class="fld full"><label>Nombre</label><input id="e-nombre" maxlength="80"></div>
+      <div class="fld"><label>Sigla <span class="opt">(opcional)</span></label><input id="e-sigla" maxlength="8"></div>
     </div>
     <div class="modal-actions">
       <button class="btn" onclick="guardarEsp()">Guardar</button>
@@ -571,8 +571,8 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
   <div class="modal">
     <h3 id="modal-uni-title">Nueva unidad</h3>
     <div class="grid2">
-      <div class="fld"><label>Sigla</label><input id="u-sigla"></div>
-      <div class="fld"><label>Nombre</label><input id="u-nombre"></div>
+      <div class="fld"><label>Sigla</label><input id="u-sigla" maxlength="10"></div>
+      <div class="fld"><label>Nombre</label><input id="u-nombre" maxlength="60"></div>
     </div>
     <div class="modal-actions">
       <button class="btn" onclick="guardarUni()">Guardar</button>
@@ -595,8 +595,8 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
           <option value="FRAC">FRAC (fungicidas)</option>
         </select>
       </div>
-      <div class="fld"><label>Código</label><input id="m-codigo" placeholder="Ej: EPSPS, 3, A"></div>
-      <div class="fld full"><label>Descripción</label><input id="m-desc"></div>
+      <div class="fld"><label>Código</label><input id="m-codigo" maxlength="12" placeholder="Ej: EPSPS, 3, A"></div>
+      <div class="fld full"><label>Descripción</label><input id="m-desc" maxlength="120"></div>
     </div>
     <div class="modal-actions">
       <button class="btn" onclick="guardarMoa()">Guardar</button>
@@ -612,9 +612,9 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
   <div class="modal">
     <h3 id="modal-formul-title">Nueva formulación</h3>
     <div class="grid2">
-      <div class="fld"><label>Código <span class="opt">(CropLife/FAO, opcional)</span></label><input id="fm-codigo" placeholder="Ej: WP, SC, EC"></div>
-      <div class="fld"><label>Orden de mezclado</label><input id="fm-orden" type="number" step="1" min="0"></div>
-      <div class="fld full"><label>Descripción</label><input id="fm-desc"></div>
+      <div class="fld"><label>Código <span class="opt">(CropLife/FAO, opcional)</span></label><input id="fm-codigo" maxlength="12" placeholder="Ej: WP, SC, EC"></div>
+      <div class="fld"><label>Orden de mezclado</label><input id="fm-orden" type="number" step="1" min="0" max="99" inputmode="numeric"></div>
+      <div class="fld full"><label>Descripción</label><input id="fm-desc" maxlength="120"></div>
     </div>
     <div class="modal-actions">
       <button class="btn" onclick="guardarFormulUI()">Guardar</button>
@@ -630,9 +630,9 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
   <div class="modal">
     <h3 id="modal-pa-title">Nuevo principio activo</h3>
     <div class="grid2">
-      <div class="fld full"><label>Nombre</label><input id="pa-nombre"></div>
-      <div class="fld"><label>EIQ <span class="opt">(vacío = N/D)</span></label><input id="pa-eiq" type="number" step="0.01"></div>
-      <div class="fld"><label>Uso <span class="opt">(opcional)</span></label><input id="pa-usotxt" placeholder="Ej: Herbicida"></div>
+      <div class="fld full"><label>Nombre</label><input id="pa-nombre" maxlength="120"></div>
+      <div class="fld"><label>EIQ <span class="opt">(vacío = N/D)</span></label><input id="pa-eiq" type="number" step="0.01" min="0" max="1000" inputmode="decimal"></div>
+      <div class="fld"><label>Uso <span class="opt">(opcional)</span></label><input id="pa-usotxt" maxlength="200" placeholder="Ej: Herbicida"></div>
     </div>
     <div class="modal-actions">
       <button class="btn" onclick="guardarPAUI()">Guardar</button>
@@ -648,7 +648,7 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
   <div class="modal modal-ins" style="max-width:680px">
     <h3 id="modal-ins-title">Nuevo insumo</h3>
     <div class="grid2">
-      <div class="fld full"><label>Nombre</label><input id="i-nombre"></div>
+      <div class="fld full"><label>Nombre</label><input id="i-nombre" maxlength="120"></div>
       <div class="fld"><label>Categoría de insumo</label>
         <select id="i-tipo" onchange="toggleBloqueIns()" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px"></select>
       </div>
@@ -684,7 +684,7 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
           <label style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px">
             <input type="checkbox" id="eiq-manual-chk" style="width:auto" onchange="toggleEiqOverride()"> Fijar a mano
           </label>
-          <input id="eiq-override" type="number" step="0.01" style="width:90px;border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-family:var(--sans);font-size:13px" disabled>
+          <input id="eiq-override" type="number" step="0.01" min="0" max="1000" inputmode="decimal" style="width:90px;border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-family:var(--sans);font-size:13px" disabled>
         </div>
       </div>
 
@@ -704,10 +704,10 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
     <div id="bloque-ferti" class="bloque-sec" style="display:none">
       <div class="bloque-sec-title">Composición (NPKS, % p/p)</div>
       <div class="grid2">
-        <div class="fld"><label>N <span class="opt">(Nitrógeno)</span></label><input id="i-n" type="number" step="0.1"></div>
-        <div class="fld"><label>P <span class="opt">(Fósforo)</span></label><input id="i-p" type="number" step="0.1"></div>
-        <div class="fld"><label>K <span class="opt">(Potasio)</span></label><input id="i-k" type="number" step="0.1"></div>
-        <div class="fld"><label>S <span class="opt">(Azufre)</span></label><input id="i-s" type="number" step="0.1"></div>
+        <div class="fld"><label>N <span class="opt">(Nitrógeno)</span></label><input id="i-n" type="number" step="0.1" min="0" max="100" inputmode="decimal"></div>
+        <div class="fld"><label>P <span class="opt">(Fósforo)</span></label><input id="i-p" type="number" step="0.1" min="0" max="100" inputmode="decimal"></div>
+        <div class="fld"><label>K <span class="opt">(Potasio)</span></label><input id="i-k" type="number" step="0.1" min="0" max="100" inputmode="decimal"></div>
+        <div class="fld"><label>S <span class="opt">(Azufre)</span></label><input id="i-s" type="number" step="0.1" min="0" max="100" inputmode="decimal"></div>
       </div>
     </div>
 
@@ -722,7 +722,7 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
 
 <footer>
   <span>Puntal Agro · Maestros</span>
-  <span>BUILD 8 · v2026-07-14 10:09</span>
+  <span>BUILD 10 · v2026-07-14 20:05</span>
 </footer>
 
 <script src="pa-core.js"></script>
@@ -775,6 +775,43 @@ function listarCategorias(){
 function vNorm(s){ return String(s==null?'':s).trim().toLowerCase(); }
 // Trim simple de texto.
 function vTrim(s){ return String(s==null?'':s).trim(); }
+// Colapsa espacios múltiples y recorta: "Juan   Pérez " -> "Juan Pérez"
+function vEsp(s){ return String(s==null?'':s).replace(/\s+/g,' ').trim(); }
+// Normalización "oración": asegura 1ª letra en MAYÚSCULA; el resto se respeta tal cual lo escribió el usuario.
+// Para insumos, cultivos/UN, especies, labores, y labels/descripciones de catálogos.
+// Ej: "glifosato 480 SL" -> "Glifosato 480 SL" | "2,4-D amina" -> "2,4-D amina" | "RoundUp Full" -> "RoundUp Full"
+// Nota: "GLIFOSATO" queda "GLIFOSATO" (no se fuerza minúscula). La unicidad igual es case-insensitive.
+function vOracion(s){
+  var t=vEsp(s); if(!t) return '';
+  return t.charAt(0).toUpperCase()+t.slice(1);
+}
+// Normalización "nombre propio": mayúscula en cada palabra. Para terceros, choferes, depósitos.
+// Artículos (la/el/los/las) SÍ van en mayúscula: "Campo La Elena".
+// Preposiciones y conjunciones (de/del/y/e) van en minúscula: "Agro Servicios del Sur".
+var V_PARTICULAS = {'de':1,'del':1,'y':1,'e':1,'da':1,'do':1,'van':1,'von':1};
+function vNombreProp(s){
+  var t=vEsp(s); if(!t) return '';
+  var p=t.split(' '), out=[];
+  for(var i=0;i<p.length;i++){
+    var w=p[i], lw=w.toLowerCase();
+    // Partículas en minúscula, salvo si es la primera palabra.
+    if(i>0 && V_PARTICULAS[lw]){ out.push(lw); continue; }
+    out.push(lw.charAt(0).toUpperCase()+lw.slice(1));
+  }
+  return out.join(' ');
+}
+// CUIT: deja solo dígitos. Valida 11 dígitos + dígito verificador (módulo 11).
+function vCuitDigitos(s){ return String(s==null?'':s).replace(/\D/g,''); }
+function vCuitValido(d){
+  if(!/^\d{11}$/.test(d)) return false;
+  var mult=[5,4,3,2,7,6,5,4,3,2], suma=0;
+  for(var i=0;i<10;i++){ suma += parseInt(d.charAt(i),10)*mult[i]; }
+  var resto=suma%11, dv=11-resto;
+  if(dv===11) dv=0; else if(dv===10) dv=9;
+  return dv===parseInt(d.charAt(10),10);
+}
+// Email: formato básico válido.
+function vEmailValido(s){ return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(s); }
 // Sigla/código: mayúsculas, sin espacios internos, recortado a max.
 function vSigla(s, max){ var t=String(s==null?'':s).trim().toUpperCase().replace(/\s+/g,''); if(max) t=t.slice(0,max); return t; }
 // Código A-Z0-9 (limpia inválidos).
@@ -1011,7 +1048,8 @@ function abrirModalDep(){ editDep=null; document.getElementById('modal-dep-title
 function editarDep(id){ var l=PA.demo.listarDepositos(empresaId); var d=null; for(var i=0;i<l.length;i++){if(l[i].id===id){d=l[i];break;}} if(!d)return; editDep=id; document.getElementById('modal-dep-title').textContent='Editar depósito'; document.getElementById('d-nombre').value=d.nombre||''; cargarSelectCampos(d.campoId); document.getElementById('d-clase').value=d.clase||'insumos'; poblarSelectEspecie('d-especie',d.especieId||''); toggleClaseDep(); document.getElementById('btn-del-dep').style.display=''; document.getElementById('msg-dep').textContent=''; document.getElementById('overlay-dep').className='overlay open'; }
 function cerrarModalDep(){ document.getElementById('overlay-dep').className='overlay'; }
 function guardarDep(){
-  var n=vTrim(document.getElementById('d-nombre').value);
+  // Nombre de depósito: mayúscula en cada palabra, salvo partículas ("Campo La Elena", "Silo del Norte").
+  var n=vNombreProp(document.getElementById('d-nombre').value);
   var e=vReq(n,'el nombre'); if(e){ vErr('msg-dep',e); return; }
   e=vMax(n,80,'Nombre'); if(e){ vErr('msg-dep',e); return; }
   if(vDuplicado(PA.demo.listarDepositos(empresaId), n, function(it){return it.nombre;}, editDep)){ vErr('msg-dep','Ya existe un depósito con ese nombre en esta empresa.'); return; }
@@ -1047,7 +1085,7 @@ function abrirModalLab(){ editLab=null; precioRefLabEdit=0; document.getElementB
 function editarLab(id){ var l=PA.demo.listarLabores(); var x=null; for(var i=0;i<l.length;i++){if(l[i].id===id){x=l[i];break;}} if(!x)return; editLab=id; precioRefLabEdit=x.precioRef||0; document.getElementById('modal-lab-title').textContent='Editar labor'; document.getElementById('l-nombre').value=x.nombre||''; document.getElementById('l-unidad').value=x.unidadLabor||''; document.getElementById('btn-del-lab').style.display=''; document.getElementById('msg-lab').textContent=''; document.getElementById('overlay-lab').className='overlay open'; }
 function cerrarModalLab(){ document.getElementById('overlay-lab').className='overlay'; }
 function guardarLab(){
-  var n=vTrim(document.getElementById('l-nombre').value);
+  var n=vOracion(document.getElementById('l-nombre').value);
   var e=vReq(n,'el nombre'); if(e){ vErr('msg-lab',e); return; }
   e=vMax(n,80,'Nombre'); if(e){ vErr('msg-lab',e); return; }
   if(vDuplicado(PA.demo.listarLabores(), n, function(it){return it.nombre;}, editLab)){ vErr('msg-lab','Ya existe una labor con ese nombre.'); return; }
@@ -1113,7 +1151,8 @@ function abrirModalCul(){ editCul=null; document.getElementById('modal-cul-title
 function editarCul(id){ var l=PA.demo.listarTiposActividad(empresaId); var x=null; for(var i=0;i<l.length;i++){if(l[i].id===id){x=l[i];break;}} if(!x)return; editCul=id; document.getElementById('modal-cul-title').textContent='Editar cultivo / UN'; document.getElementById('cu-nombre').value=x.nombre||''; document.getElementById('cu-sigla').value=x.sigla||''; document.getElementById('cu-escult').value=(x.esCultivo===false?'0':'1'); poblarSelectUso(x.actividad||''); poblarSelectEspecie('cu-especie',x.especieId||''); toggleEspecieCul(); toggleEsCultivo(); document.getElementById('cu-gram').value=(x.graminea==null?'':(x.graminea?'1':'0')); document.getElementById('cu-def2').checked=!!x.default2da; document.getElementById('btn-del-cul').style.display=''; document.getElementById('msg-cul').textContent=''; document.getElementById('overlay-cul').className='overlay open'; }
 function cerrarModalCul(){ document.getElementById('overlay-cul').className='overlay'; }
 function guardarCul(){
-  var n=vTrim(document.getElementById('cu-nombre').value);
+  // Nombre de cultivo/UN: 1ª letra mayúscula, resto minúscula ("Trigo", "Soja de segunda").
+  var n=vOracion(document.getElementById('cu-nombre').value);
   var e=vReq(n,'el nombre'); if(e){ vErr('msg-cul',e); return; }
   e=vMax(n,80,'Nombre'); if(e){ vErr('msg-cul',e); return; }
   var lista=PA.demo.listarTiposActividad(empresaId);
@@ -1167,7 +1206,7 @@ function guardarUsoUI(){
   var cod=vCodAlnum(codRaw, 12);  // limpia lo que no sea A-Z0-9
   // Si la limpieza cambió lo que escribió el usuario, reflejarlo en el input.
   if(cod!==vTrim(codRaw).toUpperCase()){ document.getElementById('uso-codigo').value=cod; }
-  var lab=vTrim(document.getElementById('uso-label').value);
+  var lab=vOracion(document.getElementById('uso-label').value);
   var e=vReq(cod,'el código'); if(e){ vErr('msg-uso',e); return; }
   e=vReq(lab,'el nombre'); if(e){ vErr('msg-uso',e); return; }
   e=vMax(lab,60,'Nombre'); if(e){ vErr('msg-uso',e); return; }
@@ -1241,7 +1280,7 @@ function editarCateg(cod){
 }
 function cerrarModalCateg(){ document.getElementById('overlay-categ').className='overlay'; }
 function guardarCategUI(){
-  var lab=vTrim(document.getElementById('categ-label').value);
+  var lab=vOracion(document.getElementById('categ-label').value);
   var msg=document.getElementById('msg-categ');
   if(!lab){ msg.textContent='Falta el nombre.'; return; }
   var eM=vMax(lab,60,'Nombre'); if(eM){ msg.textContent=eM; return; }
@@ -1290,7 +1329,7 @@ function abrirModalEsp(){ editEsp=null; document.getElementById('modal-esp-title
 function editarEsp(id){ var l=PA.demo.listarEspecies(); var x=null; for(var i=0;i<l.length;i++){if(l[i].id===id){x=l[i];break;}} if(!x)return; editEsp=id; document.getElementById('modal-esp-title').textContent='Editar especie'; document.getElementById('e-nombre').value=x.nombre||''; document.getElementById('e-sigla').value=x.sigla||''; document.getElementById('btn-del-esp').style.display=''; document.getElementById('msg-esp').textContent=''; document.getElementById('overlay-esp').className='overlay open'; }
 function cerrarModalEsp(){ document.getElementById('overlay-esp').className='overlay'; }
 function guardarEsp(){
-  var n=vTrim(document.getElementById('e-nombre').value);
+  var n=vOracion(document.getElementById('e-nombre').value);
   var e=vReq(n,'el nombre'); if(e){ vErr('msg-esp',e); return; }
   e=vMax(n,80,'Nombre'); if(e){ vErr('msg-esp',e); return; }
   var sig=vSigla(document.getElementById('e-sigla').value, 8);
@@ -1321,7 +1360,7 @@ function cerrarModalUni(){ document.getElementById('overlay-uni').className='ove
 function guardarUni(){
   var s=vSigla(document.getElementById('u-sigla').value, 10);
   var e=vReq(s,'la sigla'); if(e){ vErr('msg-uni',e); return; }
-  var nom=vTrim(document.getElementById('u-nombre').value);
+  var nom=vOracion(document.getElementById('u-nombre').value);
   e=vMax(nom,60,'Nombre'); if(e){ vErr('msg-uni',e); return; }
   if(vDuplicado(PA.demo.listarUnidades(), s, function(it){return it.sigla;}, editUni)){ vErr('msg-uni','Ya existe una unidad con esa sigla.'); return; }
   PA.demo.guardarUnidad({id:editUni||undefined,sigla:s,nombre:nom,activo:true}); cerrarModalUni(); renderUnidades();
@@ -1510,13 +1549,13 @@ function renderFilasPA(){
     row.innerHTML=
       '<select class="pa-sel" onchange="filasPA['+idx+'].paId=this.value;refrescarEIQ('+idx+')">'+optsPAHtml(f.paId)+'</select>'+
       '<select class="pa-modo" title="Modo de acción de este principio activo" onchange="filasPA['+idx+'].modoAccionId=this.value">'+optsModoHtml(f.modoAccionId)+'</select>'+
-      '<input class="pa-conc" type="number" step="0.01" placeholder="conc." value="'+(f.concentracion!=null?f.concentracion:'')+'" oninput="filasPA['+idx+'].concentracion=this.value;refrescarEIQ('+idx+')">'+
+      '<input class="pa-conc" type="number" step="0.01" min="0" inputmode="decimal" placeholder="conc." value="'+(f.concentracion!=null?f.concentracion:'')+'" oninput="filasPA['+idx+'].concentracion=this.value;refrescarEIQ('+idx+')">'+
       '<select class="pa-uni" onchange="filasPA['+idx+'].concUnidad=this.value;renderFilasPA()">'+
         '<option value="%"'+(f.concUnidad==='%'?' selected':'')+'>%</option>'+
         '<option value="g/l"'+(f.concUnidad==='g/l'?' selected':'')+'>g/l</option>'+
         '<option value="g/kg"'+(f.concUnidad==='g/kg'?' selected':'')+'>g/kg</option>'+
       '</select>'+
-      '<span class="pa-dens-wrap'+(esGL?'':' off')+'"><input class="pa-dens" type="number" step="0.01" placeholder="dens." title="densidad g/ml (solo g/l)" value="'+(f.densidad!=null?f.densidad:'')+'" '+(esGL?'':'disabled')+' oninput="filasPA['+idx+'].densidad=this.value;refrescarEIQ('+idx+')"></span>'+
+      '<span class="pa-dens-wrap'+(esGL?'':' off')+'"><input class="pa-dens" type="number" step="0.01" min="0" max="3" inputmode="decimal" placeholder="dens." title="densidad g/ml (solo g/l)" value="'+(f.densidad!=null?f.densidad:'')+'" '+(esGL?'':'disabled')+' oninput="filasPA['+idx+'].densidad=this.value;refrescarEIQ('+idx+')"></span>'+
       '<span class="pa-aporte" title="Aporte de este activo al EIQ del producto">'+(ap?('EIQ +'+(Math.round(ap*100)/100)):'—')+'</span>'+
       '<button type="button" class="pa-del" title="quitar" onclick="quitarFilaPA('+idx+')">×</button>';
     cont.appendChild(row);
@@ -1582,7 +1621,8 @@ function editarIns(id){
 }
 function cerrarModalIns(){ document.getElementById('overlay-ins').className='overlay'; }
 function guardarIns(){
-  var n=vTrim(document.getElementById('i-nombre').value);
+  // Nombre de insumo: 1ª letra mayúscula, resto minúscula ("GLIFOSATO" -> "Glifosato").
+  var n=vOracion(document.getElementById('i-nombre').value);
   // Nombre: obligatorio, máx 120, único por empresa.
   var e=vReq(n,'el nombre'); if(e){ vErr('msg-ins',e); return; }
   e=vMax(n,120,'Nombre'); if(e){ vErr('msg-ins',e); return; }
@@ -1611,8 +1651,8 @@ function guardarIns(){
       var uni=f.concUnidad||'%';
       var rc=vNum(f.concentracion,{minExcl:0, max:(uni==='%'?100:null), etiqueta:'Concentración'});
       if(!rc.ok){ vErr('msg-ins',rc.msg+(uni==='%'?' (%)':'')); return; }
-      var rd=vNum(f.densidad,{minExcl:0, etiqueta:'Densidad'});
-      if(!rd.ok){ vErr('msg-ins',rd.msg); return; }
+      var rd=vNum(f.densidad,{minExcl:0, max:3, etiqueta:'Densidad'});
+      if(!rd.ok){ vErr('msg-ins',rd.msg+' (g/ml)'); return; }
       acts.push({ paId:f.paId, concentracion:rc.val, concUnidad:uni, densidad:rd.val, modoAccionId:(f.modoAccionId||null) });
     }
     // Fito sin activos: AVISA (confirm) pero deja guardar si el usuario acepta.
@@ -1621,7 +1661,7 @@ function guardarIns(){
     obj.eiqTotal=eiqTotalCalculado(acts);
     var chk=document.getElementById('eiq-manual-chk').checked;
     // EIQ manual: si está tildado, >= 0.
-    if(chk){ var ro=vNum(document.getElementById('eiq-override').value,{min:0, etiqueta:'EIQ'}); if(!ro.ok){ vErr('msg-ins',ro.msg); return; } obj.eiqOverride=ro.val; }
+    if(chk){ var ro=vNum(document.getElementById('eiq-override').value,{min:0, max:1000, etiqueta:'EIQ'}); if(!ro.ok){ vErr('msg-ins',ro.msg); return; } obj.eiqOverride=ro.val; }
     else { obj.eiqOverride=null; }
     obj.eiq = (obj.eiqOverride!=null) ? obj.eiqOverride : obj.eiqTotal;
   } else if(cod==='FERT'){
@@ -1668,7 +1708,7 @@ function guardarMoa(){
   var sis=document.getElementById('m-sistema').value;
   if(!sis){ vErr('msg-moa','Elegí el sistema.'); return; }
   var c=vSigla(document.getElementById('m-codigo').value, 12);
-  var d=vTrim(document.getElementById('m-desc').value);
+  var d=vOracion(document.getElementById('m-desc').value);
   var e=vReq(c,'el código'); if(e){ vErr('msg-moa',e); return; }
   e=vReq(d,'la descripción'); if(e){ vErr('msg-moa',e); return; }
   e=vMax(d,120,'Descripción'); if(e){ vErr('msg-moa',e); return; }
@@ -1713,14 +1753,14 @@ function abrirModalFormul(){ editFormul=null; document.getElementById('modal-for
 function editarFormul(id){ var l=listarFormulaciones(); var x=null; for(var i=0;i<l.length;i++){if(l[i].id===id){x=l[i];break;}} if(!x)return; editFormul=id; document.getElementById('modal-formul-title').textContent='Editar formulación'; document.getElementById('fm-codigo').value=x.codigo||''; document.getElementById('fm-orden').value=(x.orden!=null?x.orden:''); document.getElementById('fm-desc').value=x.descripcion||''; document.getElementById('btn-del-formul').style.display=''; document.getElementById('msg-formul').textContent=''; document.getElementById('overlay-formul').className='overlay open'; }
 function cerrarModalFormul(){ document.getElementById('overlay-formul').className='overlay'; }
 function guardarFormulUI(){
-  var desc=vTrim(document.getElementById('fm-desc').value);
+  var desc=vOracion(document.getElementById('fm-desc').value);
   var e=vReq(desc,'la descripción'); if(e){ vErr('msg-formul',e); return; }
   e=vMax(desc,120,'Descripción'); if(e){ vErr('msg-formul',e); return; }
   var cod=vSigla(document.getElementById('fm-codigo').value, 12);
   // Código opcional; si se carga, único global (algunas formulaciones base no tienen código).
   if(cod && vDuplicado(listarFormulaciones(), cod, function(it){return it.codigo;}, editFormul)){ vErr('msg-formul','Ya existe una formulación con ese código.'); return; }
   // Orden: entero >= 0 (vacío => 0).
-  var ro=vNum(document.getElementById('fm-orden').value,{min:0, entero:true, etiqueta:'Orden'});
+  var ro=vNum(document.getElementById('fm-orden').value,{min:0, max:99, entero:true, etiqueta:'Orden'});
   if(!ro.ok){ vErr('msg-formul',ro.msg); return; }
   guardarFormulacion({id:editFormul||undefined, codigo:cod, descripcion:desc, orden:(ro.val==null?0:ro.val), activo:true});
   cerrarModalFormul(); renderFormul();
@@ -1768,13 +1808,13 @@ function abrirModalPA(){ editPA=null; document.getElementById('modal-pa-title').
 function editarPA(id){ var p=paById(id); if(!p)return; editPA=id; document.getElementById('modal-pa-title').textContent='Editar principio activo'; document.getElementById('pa-nombre').value=p.nombre||''; document.getElementById('pa-eiq').value=(p.eiq!=null?p.eiq:''); document.getElementById('pa-usotxt').value=p.uso||''; document.getElementById('btn-del-pa').style.display=''; document.getElementById('msg-pa').textContent=''; document.getElementById('overlay-pa').className='overlay open'; }
 function cerrarModalPA(){ document.getElementById('overlay-pa').className='overlay'; }
 function guardarPAUI(){
-  var nom=vTrim(document.getElementById('pa-nombre').value);
+  var nom=vOracion(document.getElementById('pa-nombre').value);
   var e=vReq(nom,'el nombre'); if(e){ vErr('msg-pa',e); return; }
   e=vMax(nom,120,'Nombre'); if(e){ vErr('msg-pa',e); return; }
   if(vDuplicado(listarPrincipiosActivos(), nom, function(it){return it.nombre;}, editPA)){ vErr('msg-pa','Ya existe un principio activo con ese nombre.'); return; }
-  var reiq=vNum(document.getElementById('pa-eiq').value,{min:0, etiqueta:'EIQ'});
+  var reiq=vNum(document.getElementById('pa-eiq').value,{min:0, max:1000, etiqueta:'EIQ'});
   if(!reiq.ok){ vErr('msg-pa',reiq.msg); return; }
-  var uso=vTrim(document.getElementById('pa-usotxt').value);
+  var uso=vEsp(document.getElementById('pa-usotxt').value); // texto libre: sólo colapso de espacios
   e=vMax(uso,200,'Uso'); if(e){ vErr('msg-pa',e); return; }
   guardarPrincipioActivo({ id:editPA||undefined, nombre:nom, eiq:reiq.val, uso:uso, activo:true });
   cerrarModalPA(); renderPA();
@@ -1862,7 +1902,8 @@ function editarChofer(id){
 function cerrarModalChofer(){ document.getElementById('overlay-chofer').className='overlay'; }
 
 function guardarChofer(){
-  var nombre=vTrim(document.getElementById('c-nombre').value);
+  // Nombre de chofer: mayúscula en cada palabra, salvo partículas ("Juan Pérez", "María de los Santos").
+  var nombre=vNombreProp(document.getElementById('c-nombre').value);
   var e=vReq(nombre,'el nombre'); if(e){ vErr('msg-chofer',e); return; }
   e=vMax(nombre,120,'Nombre'); if(e){ vErr('msg-chofer',e); return; }
   var terceroId=document.getElementById('c-tercero').value;
@@ -1873,7 +1914,7 @@ function guardarChofer(){
   PA.demo.guardarChofer({
     id: editChofer||undefined, empresaId: empresaId, terceroId: terceroId,
     nombre: nombre, dni: dni,
-    licencia: vTrim(document.getElementById('c-lic').value), activo: true
+    licencia: vEsp(document.getElementById('c-lic').value), activo: true
   });
   cerrarModalChofer(); renderChoferes();
 }
@@ -1982,11 +2023,24 @@ function editar(id){
 function cerrarModal(){ document.getElementById('overlay').className='overlay'; }
 
 function guardar(){
-  var nombre = vTrim(document.getElementById('t-nombre').value);
+  // Nombre de tercero: mayúscula en cada palabra, salvo partículas ("Agro Servicios del Sur").
+  var nombre = vNombreProp(document.getElementById('t-nombre').value);
   var e=vReq(nombre,'el nombre'); if(e){ vErr('msg',e); return; }
   e=vMax(nombre,120,'Nombre'); if(e){ vErr('msg',e); return; }
   // Nombre único por empresa.
   if(vDuplicado(PA.demo.listarTerceros(empresaId,null), nombre, function(it){return it.nombre;}, editId)){ vErr('msg','Ya existe un tercero con ese nombre en esta empresa.'); return; }
+  // CUIT: opcional. Si se carga, 11 dígitos + dígito verificador. Se guarda sólo con dígitos.
+  var cuit = vCuitDigitos(document.getElementById('t-cuit').value);
+  if(cuit){
+    if(cuit.length!==11){ vErr('msg','El CUIT debe tener 11 dígitos.'); return; }
+    if(!vCuitValido(cuit)){ vErr('msg','El CUIT no es válido (dígito verificador incorrecto).'); return; }
+  }
+  // Email: opcional. Si se carga, formato válido, minúsculas, máx 180.
+  var email = vEsp(document.getElementById('t-email').value).toLowerCase();
+  if(email){
+    if(email.length>180){ vErr('msg','El email no puede superar 180 caracteres.'); return; }
+    if(!vEmailValido(email)){ vErr('msg','El email no tiene un formato válido.'); return; }
+  }
   var esProv = document.getElementById('t-prov').checked;
   var esCli = document.getElementById('t-cli').checked;
   // Sin rol: AVISA (confirm) pero deja guardar.
@@ -1998,10 +2052,10 @@ function guardar(){
   }
   PA.demo.guardarTercero({
     id: editId || undefined, empresaId: empresaId, nombre: nombre,
-    cuit: vTrim(document.getElementById('t-cuit').value),
-    telefono: vTrim(document.getElementById('t-tel').value),
-    email: vTrim(document.getElementById('t-email').value),
-    direccion: vTrim(document.getElementById('t-dir').value),
+    cuit: cuit,
+    telefono: vEsp(document.getElementById('t-tel').value),
+    email: email,
+    direccion: vEsp(document.getElementById('t-dir').value),
     esProveedor: esProv, esCliente: esCli, tiposProveedor: tipos, activo: true
   });
   cerrarModal(); render();
