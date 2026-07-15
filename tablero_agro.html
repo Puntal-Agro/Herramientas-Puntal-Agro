@@ -40,8 +40,11 @@ header{background:var(--card);border-bottom:1px solid var(--border);padding:10px
 .pdf-status{font-size:11px;color:var(--muted);font-family:var(--sans);white-space:nowrap}
 .pdf-hide{display:none!important}
 /* Modo captura PDF: agranda identidad de marca y encabezado para lectura impresa.
+   min-height:0 anula el 100vh del body: dentro del iframe de captura, 100vh equivale
+   al alto del iframe y estiraría el body con cientos de píxeles en blanco.
    El JPEG del logo tiene 23% de margen blanco vertical: se compensa con un box de
    recorte + scale para que el isotipo ocupe el alto real asignado. */
+body.pdf-mode{min-height:0!important}
 body.pdf-mode header{padding:22px 24px 20px;border-bottom:2px solid #4A6533}
 body.pdf-mode .logo{gap:20px}
 body.pdf-mode .pdf-logo-box{height:110px;width:66px;overflow:hidden;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
@@ -1032,9 +1035,9 @@ function renderRel(){
 
 // ── Exportación a PDF ────────────────────────────────────────────────────────
 var PDF_BUSY=false;
-// Ancho de captura fijo: al ser menor que el viewport habitual, todo el contenido
-// se escala proporcionalmente más grande al ajustarse al ancho de la página A4.
-var PDF_CAPTURE_W=1280;
+// Ancho de captura: es el ancho mínimo que el layout necesita sin desbordarse.
+// Más angosto haría que las tarjetas se salgan; más ancho achicaría el contenido en la hoja.
+var PDF_CAPTURE_W=1376;
 
 function togglePdfMenu(ev){
   if(ev&&ev.stopPropagation)ev.stopPropagation();
@@ -1051,32 +1054,25 @@ function pdfSetStatus(txt){
   if(el)el.textContent=txt||'';
 }
 
-function pdfCaptureTargets(){
-  // Elementos que NO deben salir en la captura
-  return [document.getElementById('pdfWrap'),document.getElementById('pdfStatus')];
-}
-
-function pdfHideUI(hide){
-  var els=pdfCaptureTargets();
-  for(var i=0;i<els.length;i++){
-    if(!els[i])continue;
-    if(hide)els[i].classList.add('pdf-hide');
-    else els[i].classList.remove('pdf-hide');
-  }
-  // Botón "Restaurar precios"
-  var btns=document.querySelectorAll('button[onclick*="restorePrices"]');
-  for(var j=0;j<btns.length;j++){
-    if(hide)btns[j].classList.add('pdf-hide');
-    else btns[j].classList.remove('pdf-hide');
-  }
-  // Modo captura: agranda header e identidad de marca
-  if(hide)document.body.classList.add('pdf-mode');
-  else document.body.classList.remove('pdf-mode');
+// Prepara el documento CLONADO (dentro del iframe) para la captura.
+// Nunca toca la página visible: por eso no hay parpadeo.
+function pdfPrepararDoc(d,n,nombre){
+  // Ocultar controles que no deben salir impresos
+  var wrap=d.getElementById('pdfWrap'); if(wrap)wrap.classList.add('pdf-hide');
+  var st=d.getElementById('pdfStatus'); if(st)st.classList.add('pdf-hide');
+  var btns=d.querySelectorAll('button[onclick*="restorePrices"]');
+  for(var j=0;j<btns.length;j++)btns[j].classList.add('pdf-hide');
+  // Etiqueta de instancia en el header
+  var tag=d.getElementById('pdfInstTag');
+  if(tag)tag.textContent=nombre;
+  // Modo captura: agranda identidad de marca
+  d.body.classList.add('pdf-mode');
 }
 
 // Texto descriptivo de la instancia, sin el prefijo numérico del botón ("1 · Stock disponible" -> "Stock disponible")
-function pdfNombreInstancia(n){
-  var b=document.getElementById('instBtn'+n);
+function pdfNombreInstancia(n,d){
+  var doc_=d||document;
+  var b=doc_.getElementById('instBtn'+n);
   var t=b?b.textContent.replace(/^\s*\d+\s*[·.\-]\s*/,'').trim():'';
   return t||('Instancia '+n);
 }
@@ -1141,73 +1137,118 @@ function exportarPDF(modo){
 
   PDF_BUSY=true;
   document.getElementById('pdfBtn').disabled=true;
+  pdfSetStatus('Preparando…');
 
   var jsPDF=window.jspdf.jsPDF;
   var doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-  var instOriginal=instancia;
   var lista=(modo==='todo')?[1,2,3]:[instancia];
   var idx=0;
   var primera=true;
 
-  function etiquetaDe(n){
-    return 'Instancia '+n+': '+pdfNombreInstancia(n);
-  }
+  // Se captura sobre una copia aislada en un iframe fuera de pantalla.
+  // La página que ve el usuario no se modifica en ningún momento.
+  // IMPORTANTE: el HTML se clona ANTES de insertar el iframe, para que la copia no
+  // contenga al propio iframe de captura (que mediría 3000px y arrastraría páginas vacías).
+  var htmlClon='<!DOCTYPE html>'+document.documentElement.outerHTML;
 
-  function finalizar(){
-    // Restaurar instancia original
-    if(instancia!==instOriginal){
-      setInstancia(instOriginal,document.getElementById('instBtn'+instOriginal));
-    }
-    pdfHideUI(false);
-    var tag=document.getElementById('pdfInstTag');
-    if(tag)tag.textContent='';
+  var ifr=document.createElement('iframe');
+  ifr.setAttribute('aria-hidden','true');
+  ifr.className='pdf-capture-frame';
+  ifr.style.cssText='position:fixed;left:-10000px;top:0;width:'+PDF_CAPTURE_W+'px;height:3000px;border:0;visibility:hidden';
+  document.body.appendChild(ifr);
+
+  function limpiar(){
+    if(ifr&&ifr.parentNode)ifr.parentNode.removeChild(ifr);
     pdfSetStatus('');
     PDF_BUSY=false;
-    document.getElementById('pdfBtn').disabled=false;
-    doc.save(pdfFileName());
+    var btn=document.getElementById('pdfBtn');
+    if(btn)btn.disabled=false;
   }
 
-  function siguiente(){
-    if(idx>=lista.length){finalizar();return;}
+  function fallar(err){
+    limpiar();
+    if(window.console&&console.error)console.error(err);
+    alert('Error al generar el PDF: '+err);
+  }
+
+  function etiquetaDe(n,d){
+    return 'Instancia '+n+': '+pdfNombreInstancia(n,d);
+  }
+
+  function siguiente(d){
+    if(idx>=lista.length){
+      limpiar();
+      doc.save(pdfFileName());
+      return;
+    }
     var n=lista[idx];
     pdfSetStatus('Generando '+(idx+1)+'/'+lista.length+'…');
 
-    if(instancia!==n){
-      setInstancia(n,document.getElementById('instBtn'+n));
-    }
+    var w=ifr.contentWindow;
+    try{
+      if(w.instancia!==n)w.setInstancia(n,d.getElementById('instBtn'+n));
+    }catch(e){ fallar(e); return; }
 
-    // Esperar re-render de Chart.js antes de capturar
+    // Dar tiempo a que Chart.js dibuje al ancho del iframe
     setTimeout(function(){
-      var tag=document.getElementById('pdfInstTag');
-      if(tag)tag.textContent=pdfNombreInstancia(n);
-      pdfHideUI(true);
-      html2canvas(document.body,{
-        scale:3,
-        backgroundColor:'#ffffff',
-        useCORS:true,
-        scrollX:0,
-        scrollY:-window.scrollY,
-        windowWidth:PDF_CAPTURE_W
-      }).then(function(canvas){
-        pdfHideUI(false);
-        pdfAddCanvas(doc,canvas,etiquetaDe(n),primera);
-        primera=false;
-        idx++;
-        siguiente();
-      }).catch(function(err){
-        pdfHideUI(false);
-        var t=document.getElementById('pdfInstTag');
-        if(t)t.textContent='';
-        pdfSetStatus('');
-        PDF_BUSY=false;
-        document.getElementById('pdfBtn').disabled=false;
-        console.error(err);
-        alert('Error al generar el PDF: '+err);
-      });
-    },700);
+      try{
+        pdfPrepararDoc(d,n,pdfNombreInstancia(n,d));
+      }catch(e){ fallar(e); return; }
+
+      setTimeout(function(){
+        // El body usa min-height:100vh, así que dentro del iframe su alto no refleja
+        // el contenido. Se toma el bottom real del último elemento visible.
+        // Se ignoran los iframes: si quedara alguno de captura, mediría 3000px y
+        // arrastraría páginas en blanco.
+        var maxB=0,all=d.body.getElementsByTagName('*');
+        for(var k=0;k<all.length;k++){
+          var el=all[k];
+          if(el.tagName==='IFRAME')continue;
+          var rr=el.getBoundingClientRect();
+          if(rr.height>0&&rr.width>0&&rr.bottom>maxB)maxB=rr.bottom;
+        }
+        var altoReal=Math.ceil(maxB)+8; // pequeño colchón inferior
+        if(!(altoReal>0))altoReal=d.body.scrollHeight;
+
+        html2canvas(d.body,{
+          scale:3,
+          backgroundColor:'#ffffff',
+          useCORS:true,
+          scrollX:0,
+          scrollY:0,
+          windowWidth:PDF_CAPTURE_W,
+          width:PDF_CAPTURE_W,
+          height:altoReal
+        }).then(function(canvas){
+          pdfAddCanvas(doc,canvas,etiquetaDe(n,d),primera);
+          primera=false;
+          idx++;
+          siguiente(d);
+        }).catch(fallar);
+      },250);
+    },900);
   }
 
-  siguiente();
+  // Clonar la página actual dentro del iframe y esperar a que inicialice.
+  // El document.write del clon puede forzar un scroll en la página contenedora:
+  // se guarda y se restaura para que el usuario no note ningún salto.
+  var scrollPrev=window.pageYOffset||document.documentElement.scrollTop||0;
+  var scrollPrevX=window.pageXOffset||document.documentElement.scrollLeft||0;
+  try{
+    var d=ifr.contentDocument;
+    d.open(); d.write(htmlClon); d.close();
+  }catch(e){ fallar(e); return; }
+  window.scrollTo(scrollPrevX,scrollPrev);
+
+  setTimeout(function(){
+    window.scrollTo(scrollPrevX,scrollPrev);
+    var d=ifr.contentDocument;
+    if(!d||!d.body||typeof ifr.contentWindow.setInstancia!=='function'){
+      fallar('La copia para impresión no se inicializó correctamente.');
+      return;
+    }
+    siguiente(d);
+  },2600);
 }
 
 function renderAll(){
