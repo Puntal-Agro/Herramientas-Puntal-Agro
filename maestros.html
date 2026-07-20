@@ -150,6 +150,7 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
   <div class="nav">
     <div class="nav-item sel" data-cat="terceros" onclick="seleccionarCat('terceros')">Proveedores y Clientes</div>
     <div class="nav-item" data-cat="choferes" onclick="seleccionarCat('choferes')">Choferes</div>
+    <div class="nav-item" data-cat="socios" onclick="seleccionarCat('socios')">Socios</div>
     <div class="nav-item" data-cat="insumos" onclick="seleccionarCat('insumos')">Insumos</div>
     <div class="nav-item" data-cat="categorias" onclick="seleccionarCat('categorias')">Categorías de insumo</div>
     <div class="nav-item" data-cat="modosacc" onclick="seleccionarCat('modosacc')">Modos de acción</div>
@@ -197,6 +198,19 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
         <tbody></tbody>
       </table>
       <div class="empty" id="empty-chof" style="display:none"></div>
+    </div>
+
+    <!-- VISTA SOCIOS -->
+    <div id="vista-socios" style="display:none">
+      <div class="panel-head">
+        <h2>Socios</h2>
+        <button class="btn" onclick="abrirModalSocio()">+ Nuevo</button>
+      </div>
+      <table id="tbl-soc">
+        <thead><tr><th>Nombre</th><th>Observaciones</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="empty" id="empty-soc" style="display:none">No hay socios cargados. Agregá uno con "+ Nuevo".</div>
     </div>
 
     <!-- VISTA DEPÓSITOS -->
@@ -408,6 +422,23 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
       <button class="btn-out" onclick="cerrarModalChofer()">Cancelar</button>
       <button class="btn-out del" id="btn-del-chofer" style="display:none" onclick="eliminarChofer()">Eliminar</button>
       <span class="msg" id="msg-chofer"></span>
+    </div>
+  </div>
+</div>
+
+<!-- Modal alta/edición SOCIO -->
+<div class="overlay" id="overlay-socio">
+  <div class="modal">
+    <h3 id="modal-socio-title">Nuevo socio</h3>
+    <div class="grid2">
+      <div class="fld full"><label>Nombre</label><input id="s-nombre" maxlength="120"></div>
+      <div class="fld full"><label>Observaciones <span class="opt">(opcional)</span></label><input id="s-obs" maxlength="300"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="guardarSocio()">Guardar</button>
+      <button class="btn-out" onclick="cerrarModalSocio()">Cancelar</button>
+      <button class="btn-out del" id="btn-del-socio" style="display:none" onclick="eliminarSocio()">Eliminar</button>
+      <span class="msg" id="msg-socio"></span>
     </div>
   </div>
 </div>
@@ -984,7 +1015,7 @@ function poblarFiltroTipos(){
   sel.value=actual;
 }
 function seleccionarCat(c){
-  var vistas = ['terceros','choferes','depositos','labores','cultivos','usos','especies','unidades','insumos','categorias','modosacc','formul','ppioactivo'];
+  var vistas = ['terceros','choferes','socios','depositos','labores','cultivos','usos','especies','unidades','insumos','categorias','modosacc','formul','ppioactivo'];
   for (var i=0;i<vistas.length;i++){
     document.getElementById('vista-'+vistas[i]).style.display = (c===vistas[i])?'':'none';
   }
@@ -993,6 +1024,7 @@ function seleccionarCat(c){
     items[j].className = 'nav-item' + (items[j].getAttribute('data-cat')===c?' sel':'');
   }
   if (c==='choferes') renderChoferes();
+  else if (c==='socios') renderSocios();
   else if (c==='depositos') renderDepositos();
   else if (c==='labores') renderLabores();
   else if (c==='cultivos') renderCultivos();
@@ -1922,6 +1954,93 @@ function guardarChofer(){
 function eliminarChofer(id){
   var t=id||editChofer; if(!t) return;
   if(confirm('¿Eliminar este chofer?')){ PA.demo.borrarChofer(t); if(!id){cerrarModalChofer();} renderChoferes(); }
+}
+
+/* ---- SOCIOS ---- */
+// Entidad per-company (scoped por empresaId). pa-core todavía no la expone:
+// feature-detection sobre PA.demo.listarSocios/guardarSocio/borrarSocio; fallback a localStorage 'pa_socios'.
+var LS_SOCIOS_LOCAL = 'pa_socios';
+var editSocio = null;
+
+function socLsAll(){ try{ var v=JSON.parse(localStorage.getItem(LS_SOCIOS_LOCAL)); if(v&&v.length) return v; }catch(e){} return []; }
+function socLsSetAll(a){ try{ localStorage.setItem(LS_SOCIOS_LOCAL, JSON.stringify(a)); }catch(e){} }
+
+function listarSocios(emp){
+  if(PA && PA.demo && typeof PA.demo.listarSocios==='function'){ return PA.demo.listarSocios(emp)||[]; }
+  var out=[], a=socLsAll();
+  for(var i=0;i<a.length;i++){ if(a[i].empresaId===emp) out.push(a[i]); }
+  return out;
+}
+function persistirSocio(s){
+  if(PA && PA.demo && typeof PA.demo.guardarSocio==='function'){ return PA.demo.guardarSocio(s); }
+  var a=socLsAll();
+  if(!s.id){ s.id='soc_'+Date.now(); a.push(s); }
+  else { var f=false; for(var i=0;i<a.length;i++){ if(a[i].id===s.id){a[i]=s;f=true;break;} } if(!f)a.push(s); }
+  socLsSetAll(a); return s;
+}
+function borrarSocioDato(id){
+  if(PA && PA.demo && typeof PA.demo.borrarSocio==='function'){ return PA.demo.borrarSocio(id); }
+  var a=socLsAll(), out=[];
+  for(var i=0;i<a.length;i++){ if(a[i].id!==id) out.push(a[i]); }
+  socLsSetAll(out);
+}
+
+function renderSocios(){
+  var lista=listarSocios(empresaId);
+  var tb=document.querySelector('#tbl-soc tbody');
+  tb.innerHTML='';
+  for(var i=0;i<lista.length;i++){
+    (function(s){
+      var tr=document.createElement('tr');
+      tr.innerHTML='<td><strong>'+s.nombre+'</strong></td><td>'+(s.obs||'—')+'</td>'+
+        '<td class="row-actions"><button class="btn-act-edit" title="Editar" onclick="editarSocio(\''+s.id+'\')">✎</button><button class="btn-act-del" title="Eliminar" onclick="eliminarSocio(\''+s.id+'\')">×</button></td>';
+      tb.appendChild(tr);
+    })(lista[i]);
+  }
+  document.getElementById('tbl-soc').style.display = lista.length ? '' : 'none';
+  document.getElementById('empty-soc').style.display = lista.length ? 'none' : 'block';
+}
+
+function abrirModalSocio(){
+  editSocio=null;
+  document.getElementById('modal-socio-title').textContent='Nuevo socio';
+  document.getElementById('s-nombre').value='';
+  document.getElementById('s-obs').value='';
+  document.getElementById('btn-del-socio').style.display='none';
+  document.getElementById('msg-socio').textContent='';
+  document.getElementById('overlay-socio').className='overlay open';
+}
+
+function editarSocio(id){
+  var lista=listarSocios(empresaId);
+  var s=null; for(var i=0;i<lista.length;i++){ if(lista[i].id===id){s=lista[i];break;} }
+  if(!s) return;
+  editSocio=id;
+  document.getElementById('modal-socio-title').textContent='Editar socio';
+  document.getElementById('s-nombre').value=s.nombre||'';
+  document.getElementById('s-obs').value=s.obs||'';
+  document.getElementById('btn-del-socio').style.display='';
+  document.getElementById('msg-socio').textContent='';
+  document.getElementById('overlay-socio').className='overlay open';
+}
+
+function cerrarModalSocio(){ document.getElementById('overlay-socio').className='overlay'; }
+
+function guardarSocio(){
+  // Nombre de socio: mayúscula en cada palabra, salvo partículas (mismo criterio que terceros/choferes).
+  var nombre=vNombreProp(document.getElementById('s-nombre').value);
+  var e=vReq(nombre,'el nombre'); if(e){ vErr('msg-socio',e); return; }
+  e=vMax(nombre,120,'Nombre'); if(e){ vErr('msg-socio',e); return; }
+  if(vDuplicado(listarSocios(empresaId), nombre, function(it){return it.nombre;}, editSocio)){ vErr('msg-socio','Ya existe un socio con ese nombre en esta empresa.'); return; }
+  var obs=vEsp(document.getElementById('s-obs').value);
+  e=vMax(obs,300,'Observaciones'); if(e){ vErr('msg-socio',e); return; }
+  persistirSocio({ id: editSocio||undefined, empresaId: empresaId, nombre: nombre, obs: obs, activo: true });
+  cerrarModalSocio(); renderSocios();
+}
+
+function eliminarSocio(id){
+  var t=id||editSocio; if(!t) return;
+  if(confirm('¿Eliminar este socio?')){ borrarSocioDato(t); if(!id){cerrarModalSocio();} renderSocios(); }
 }
 
 function rolesBadges(t){
