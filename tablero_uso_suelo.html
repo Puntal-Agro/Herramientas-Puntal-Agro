@@ -84,6 +84,10 @@ main{padding:16px 24px;display:flex;flex-direction:column;gap:12px}
 .card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:14px}
 .chd{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px}
 .ct{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text)}
+/* Aclaración de filtros activos bajo el título de una tabla: qué está incluyendo
+   o excluyendo lo que se ve. Se oculta solo cuando no hay ningún filtro. */
+.ct-filtros{font-size:11px;color:#8A4B24;font-weight:500;letter-spacing:0;text-transform:none;margin-top:2px}
+.ct-wrap{display:flex;flex-direction:column;min-width:0}
 .ct-actions{display:flex;gap:6px;align-items:center}
 .ct-actions.rep-pivot{flex-wrap:wrap;row-gap:4px}
 .btn-sm{padding:4px 10px;border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--bg);color:var(--muted);font-family:var(--sans);transition:all .12s}
@@ -527,7 +531,7 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
 <div class="view active" id="view-plan">
   <div class="card">
     <div class="chd">
-      <span class="ct" id="tablaPlanTitulo">Plan de uso de suelo · Campaña 26-27</span>
+      <div class="ct-wrap"><span class="ct" id="tablaPlanTitulo">Plan de uso de suelo · Campaña 26-27</span><span class="ct-filtros" id="ctFiltrosPlan" style="display:none"></span></div>
       <div class="ct-actions">
         <button class="btn-sm" onclick="abrirConciliar()">⇄ Conciliar superficies</button>
         <button class="btn-sm" onclick="exportPlanXLSX()">↓ Excel</button>
@@ -566,7 +570,7 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
 <div class="view" id="view-padron">
   <div class="card">
     <div class="chd">
-      <span class="ct">Padrón de lotes · Maestro</span>
+      <div class="ct-wrap"><span class="ct">Padrón de lotes · Maestro</span><span class="ct-filtros" id="ctFiltrosPadron" style="display:none"></span></div>
       <div class="ct-actions">
         <button class="btn-sm primary btn-lg" onclick="addLote()">+ Agregar lote</button>
         <button class="btn-sm" onclick="exportPadronXLSX()">↓ Excel</button>
@@ -600,7 +604,7 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
   <div class="g2">
     <div class="card">
       <div class="chd">
-        <span class="ct">Composición de la superficie · Campaña activa</span>
+        <div class="ct-wrap"><span class="ct">Composición de la superficie · Campaña activa</span><span class="ct-filtros" id="ctFiltrosComp" style="display:none"></span></div>
         <div class="ct-actions">
           <span class="filtro-lbl-inline">Por:</span>
           <select class="filtro-select" id="repTortaDim" onchange="renderComposicion()">
@@ -635,7 +639,7 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
   <!-- SECCIÓN 2 (ahora abajo): Tabla dinámica -->
   <div class="card" style="margin-top:14px">
     <div class="chd">
-      <span class="ct" id="repMatrizTitulo">Distribución de superficie · Campaña activa</span>
+      <div class="ct-wrap"><span class="ct" id="repMatrizTitulo">Distribución de superficie · Campaña activa</span><span class="ct-filtros" id="ctFiltrosMatriz" style="display:none"></span></div>
       <div class="ct-actions">
         <span class="rep-config-resumen" id="repConfigResumen"></span>
         <button class="btn-sm primary btn-lg" onclick="abrirConfigTabla()"><span class="btn-cfg-ico">⚙</span> Configurar tabla</button>
@@ -690,7 +694,7 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
   <div class="view-actions"><button class="btn-sm btn-pdf" onclick="imprimirVista('historico')">⬇ Bajar PDF</button></div>
   <div class="card">
     <div class="chd">
-      <span class="ct">Matriz de rotación · evolución por campaña</span>
+      <div class="ct-wrap"><span class="ct">Matriz de rotación · evolución por campaña</span><span class="ct-filtros" id="ctFiltrosRot" style="display:none"></span></div>
       <div class="ct-actions">
         <span class="filtro-lbl-inline">Filas:</span>
         <select class="filtro-select" id="histDimFila" onchange="renderHistorico()">
@@ -720,7 +724,7 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
   </div>
   <div class="card">
     <div class="chd">
-      <span class="ct">Indicadores de rotación por campaña</span>
+      <div class="ct-wrap"><span class="ct">Indicadores de rotación por campaña</span><span class="ct-filtros" id="ctFiltrosIndic" style="display:none"></span></div>
       <div class="ct-actions">
         <span class="filtro-lbl-inline">Agrupar por:</span>
         <select class="filtro-select" id="indicDim" onchange="renderHistorico()">
@@ -728,7 +732,6 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
           <option value="ambiente">Ambiente</option>
           <option value="campo">Campo</option>
           <option value="uso">Uso</option>
-          <option value="cultivo">Cultivo</option>
           <option value="tenencia">Propiedad / Tenencia</option>
         </select>
       </div>
@@ -915,6 +918,24 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
   </div>
 </div>
 
+<!-- MODAL: Selección de CAMPAÑAS para exportar -->
+<div class="modal-bg" id="modalExportCamp">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-title">Exportar a Excel</div>
+    <div class="modal-sub" id="mecSub">Elegí qué campañas incluir. Todas van en una sola hoja, con una columna "Campaña".</div>
+    <div style="display:flex;gap:8px;margin:2px 0 8px">
+      <button class="btn-sm" onclick="mecTodas(true)">Todas</button>
+      <button class="btn-sm" onclick="mecTodas(false)">Ninguna</button>
+    </div>
+    <div id="mecLista" style="max-height:240px;overflow:auto;border:1px solid var(--border);border-radius:8px;padding:6px 10px"></div>
+    <div class="modal-warn" id="mecWarn"></div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeExportCampModal()">Cancelar</button>
+      <button class="modal-ok" onclick="confirmExportCamp()">Exportar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: Editar / Agregar LOTE -->
 <div class="modal-bg" id="modalLote">
   <div class="modal">
@@ -1029,7 +1050,7 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
 
 <footer>
   <span>Puntal Agro · Plan de Uso de Suelo</span>
-  <span id="fts">v2026-07-23 18:45 · BUILD 36</span>
+  <span id="fts">v2026-07-23 19:08 · BUILD 38</span>
 </footer>
 
 <script>
@@ -1689,6 +1710,41 @@ function lotTipoCampania(lote, camp){
   }
   if(agr===0 && gan===0) return null;
   return agr>=gan?'AGR':'GAN';
+}
+
+// Describe en texto los filtros activos, para aclarar en los títulos de tabla qué
+// está incluyendo o excluyendo lo que se ve. Devuelve '' si no hay filtro alguno
+// (tabla completa: no hace falta aclarar nada).
+// Nota: no incluye el filtro de campo, que ya se muestra en el pill de contexto,
+// ni la campaña, que va en el propio título de cada tabla.
+function resumenFiltros(){
+  var p = [];
+  if(state.search) p.push('lote contiene "'+state.search+'"');
+  if(state.estado === 'inactivos') p.push('solo lotes inactivos');
+  else if(state.estado === 'todos') p.push('activos e inactivos');
+  function lista(arr, fn, uno, varios){
+    if(!arr || !arr.length) return null;
+    if(arr.length <= 3) return (arr.length===1?uno:varios)+': '+arr.map(fn).join(', ');
+    return arr.length+' '+varios;
+  }
+  var x;
+  x = lista(state.fAmb, function(v){return v;}, 'ambiente', 'ambientes'); if(x) p.push(x);
+  x = lista(state.fTipo, function(v){return usoNombre(v);}, 'uso', 'usos'); if(x) p.push(x);
+  x = lista(state.fAnt, function(v){return v;}, 'antecesor', 'antecesores'); if(x) p.push(x);
+  x = lista(state.fCult, function(v){return v;}, 'cultivo', 'cultivos'); if(x) p.push(x);
+  x = lista(state.fTen, function(v){return v==='__none__'?'sin tenencia':tenenciaNombre(v);}, 'tenencia', 'tenencias'); if(x) p.push(x);
+  if(state.fSeg === '1') p.push('solo cultivos de 1ª');
+  else if(state.fSeg === '2') p.push('solo cultivos de 2ª');
+  if(state.soloFiltrado) p.push('solo la actividad filtrada');
+  return p.join(' · ');
+}
+// Pinta el resumen de filtros en un contenedor (id). Se oculta si no hay filtros.
+function pintarResumenFiltros(id){
+  var el = document.getElementById(id);
+  if(!el) return;
+  var t = resumenFiltros();
+  el.textContent = t ? ('Filtrado por ' + t) : '';
+  el.style.display = t ? '' : 'none';
 }
 
 function lotesFiltrados(){
@@ -2611,6 +2667,7 @@ function renderKpis(){
 // ────────────────────────────────────────────────────────────
 function renderPlan(){
   document.getElementById('tablaPlanTitulo').textContent = 'Plan de uso de suelo · Campaña ' + state.campania;
+  pintarResumenFiltros('ctFiltrosPlan');
   var prev = campAnterior(state.campania);
   var thAnt = document.getElementById('thAntCamp');
   if(thAnt) thAnt.textContent = prev || 'no hay';
@@ -3211,6 +3268,7 @@ function closeMasivo(){ var m=document.getElementById('modalMasivo'); if(m) m.cl
 // RENDER PADRÓN
 // ────────────────────────────────────────────────────────────
 function renderPadron(){
+  pintarResumenFiltros('ctFiltrosPadron');
   var lts = sortLotes(lotesFiltrados());
   // KPIs del Padrón, siempre sobre lo visible. Modelo de superficies (dos ecuaciones):
   //   Sup. total Campo = Sup. total Lotes + Estructura/Desperdicios
@@ -3607,6 +3665,8 @@ function actualizarConfigResumen(dim, dim2, dimCol, supMode){
 }
 
 function renderReportes(){
+  pintarResumenFiltros('ctFiltrosComp');
+  pintarResumenFiltros('ctFiltrosMatriz');
   var dim    = (document.getElementById('repDimension')||{}).value || 'campo';
   var dim2   = (document.getElementById('repDimension2')||{}).value || '';
   var dimCol = (document.getElementById('repDimensionCol')||{}).value || '';
@@ -4006,7 +4066,11 @@ function exportReporteMatriz(){
   var campos = m.campos, filas = m.filas, usarDetalle = m.usarDetalle;
   var esSup = m.esSupLote;
   var rows = [];
-  var head1 = usarDetalle ? [dimNomCap(dim), dimNomCap(dim2)] : [dimNomCap(dim)];
+  // Columna "Campaña" siempre presente (criterio común a todos los exports).
+  // La matriz es una tabla pivoteada de la campaña activa, no una lista de actividades:
+  // por eso no ofrece selección múltiple, pero sí deja constancia de a qué campaña
+  // corresponde lo exportado.
+  var head1 = usarDetalle ? ['Campaña', dimNomCap(dim), dimNomCap(dim2)] : ['Campaña', dimNomCap(dim)];
   if(esSup){
     for(var c=0;c<campos.length;c++){ head1.push(dimEtiquetaCorta(dimCol,campos[c])); }
     var supLbl = supMode==='total' ? 'Sup total' : 'Sup explotable';
@@ -4049,13 +4113,13 @@ function exportReporteMatriz(){
         var etiqD = etD.sig ? (etD.sig+' — '+etD.nom) : etD.nom;
         var cd=celdasArr(filas[kG].sub[kD]);
         var pctD = granTot1>0 ? Math.round(cd.t1/granTot1*1000)/10 : 0;
-        rows.push([etiqG, etiqD].concat(cd.arr).concat(colaResumen(cd.t1, cd.t2, pctD)));
+        rows.push([state.campania, etiqG, etiqD].concat(cd.arr).concat(colaResumen(cd.t1, cd.t2, pctD)));
       }
       var cg=celdasArr(filas[kG].tot);
-      rows.push(['Subtotal '+etiqG, ''].concat(cg.arr).concat(colaResumen(cg.t1, cg.t2, pctG)));
+      rows.push([state.campania, 'Subtotal '+etiqG, ''].concat(cg.arr).concat(colaResumen(cg.t1, cg.t2, pctG)));
     } else {
       var cs=celdasArr(filas[kG].tot);
-      rows.push([etiqG].concat(cs.arr).concat(colaResumen(cs.t1, cs.t2, pctG)));
+      rows.push([state.campania, etiqG].concat(cs.arr).concat(colaResumen(cs.t1, cs.t2, pctG)));
     }
   }
   var filasFn = usarDetalle ? dim+'_x_'+dim2 : dim;
@@ -4070,6 +4134,9 @@ function exportReporteComposicion(){
   var trs = tabla.querySelectorAll('tr');
   for(var i=0;i<trs.length;i++){
     var cells = trs[i].querySelectorAll('th,td'); var row=[];
+    // Columna "Campaña" al frente (criterio común a todos los exports). La primera
+    // fila es el encabezado de la tabla, así que lleva el rótulo en vez del valor.
+    row.push(i===0 ? 'Campaña' : state.campania);
     for(var j=0;j<cells.length;j++){ var t=cells[j].textContent.replace(/·/g,'').trim(); row.push(t); }
     rows.push(row);
   }
@@ -4137,6 +4204,8 @@ function drawTorta(id, labels, data, colors, shortLabels){
 // RENDER HISTÓRICO
 // ────────────────────────────────────────────────────────────
 function renderHistorico(){
+  pintarResumenFiltros('ctFiltrosRot');
+  pintarResumenFiltros('ctFiltrosIndic');
   var lts = lotesFiltrados();
 
   // ── Matriz de rotación flexible ──
@@ -4320,7 +4389,10 @@ function renderHistorico(){
   }
 
   // Encabezado común (Grupo + campañas)
-  var colGrupo = indicDim ? ({ambiente:'Ambiente', campo:'Campo', uso:'Uso', cultivo:'Cultivo', tenencia:'Propiedad'}[indicDim]||'Grupo') : 'Indicador';
+  // Nota: "Cultivo" no es una dimensión válida acá. Agrupados por cultivo, los dos
+  // indicadores se degeneran: intensificación de un cultivo contra sí mismo da 100%,
+  // y % gramíneas da 0 o 100 según la definición del cultivo. No mide rotación.
+  var colGrupo = indicDim ? ({ambiente:'Ambiente', campo:'Campo', uso:'Uso', tenencia:'Propiedad'}[indicDim]||'Grupo') : 'Indicador';
   function headHtml(){
     var h = '<tr><th class="rep-dim-h">'+colGrupo+'</th>';
     for(var ic=0;ic<CAMPANIAS.length;ic++) h += '<th class="rep-num'+(CAMPANIAS[ic]===state.campania?' rep-tot-h':'')+'">'+CAMPANIAS[ic]+'</th>';
@@ -4370,6 +4442,60 @@ function renderHistorico(){
 // ────────────────────────────────────────────────────────────
 // Devuelve las campañas que tienen al menos un lote con plan, desde la primera con datos.
 // Sirve para exports: omite campañas iniciales completamente vacías.
+// ────────────────────────────────────────────────────────────
+// EXPORT: selección de campañas
+// El export de Plan / Reportes / Histórico pregunta qué campañas incluir. Todas las
+// campañas elegidas salen en UNA sola hoja, con una columna "Campaña" que las
+// distingue (permite armar tablas dinámicas sobre el archivo).
+// El Padrón no participa: sus datos son del lote y no tienen dimensión campaña.
+// ────────────────────────────────────────────────────────────
+var exportCampCb = null;   // callback que recibe el array de campañas elegidas
+
+// Abre el modal. preSel: array de campañas pretildadas. cb: recibe las elegidas.
+function abrirExportCamp(preSel, cb, subtitulo){
+  exportCampCb = cb;
+  var sel = {};
+  for(var i=0;i<(preSel||[]).length;i++) sel[preSel[i]] = true;
+  var html = '';
+  for(var c=0;c<CAMPANIAS.length;c++){
+    var camp = CAMPANIAS[c];
+    var id = 'mecCb_'+camp.replace(/[^A-Za-z0-9]/g,'_');
+    html += '<label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:13px">'
+          + '<input type="checkbox" class="mec-cb" value="'+camp+'" id="'+id+'"'+(sel[camp]?' checked':'')+' style="accent-color:#4A6533;width:15px;height:15px;cursor:pointer">'
+          + '<span>'+camp+(camp===state.campania?' <span style="color:var(--muted);font-size:11px">(activa)</span>':'')+'</span>'
+          + '</label>';
+  }
+  document.getElementById('mecLista').innerHTML = html;
+  if(subtitulo) document.getElementById('mecSub').textContent = subtitulo;
+  document.getElementById('mecWarn').style.display = 'none';
+  document.getElementById('modalExportCamp').classList.add('on');
+}
+function closeExportCampModal(){
+  document.getElementById('modalExportCamp').classList.remove('on');
+  exportCampCb = null;
+}
+function mecTodas(on){
+  var cbs = document.querySelectorAll('#mecLista .mec-cb');
+  for(var i=0;i<cbs.length;i++) cbs[i].checked = !!on;
+}
+function mecSeleccionadas(){
+  var out = [], cbs = document.querySelectorAll('#mecLista .mec-cb');
+  for(var i=0;i<cbs.length;i++){ if(cbs[i].checked) out.push(cbs[i].value); }
+  return out;
+}
+function confirmExportCamp(){
+  var camps = mecSeleccionadas();
+  var warn = document.getElementById('mecWarn');
+  if(!camps.length){
+    warn.textContent = 'Elegí al menos una campaña.';
+    warn.style.display = 'block';
+    return;
+  }
+  var cb = exportCampCb;
+  closeExportCampModal();
+  if(cb) cb(camps);
+}
+
 function campaniasConDatos(lts){
   var conDatos = [];
   for(var i=0; i<CAMPANIAS.length; i++){
@@ -4384,55 +4510,78 @@ function campaniasConDatos(lts){
 }
 
 function exportPlanXLSX(){
+  // Pregunta qué campañas incluir; la activa viene pretildada (comportamiento previo).
+  abrirExportCamp([state.campania], exportPlanXLSXCamps,
+    'Elegí qué campañas incluir en el plan. Todas van en una sola hoja, con una columna "Campaña".');
+}
+function exportPlanXLSXCamps(camps){
   var lts = sortLotes(lotesFiltrados());
   // Una fila por ACTIVIDAD (lote+cultivo+campaña), repitiendo datos del lote.
   var headers = ['Campo','Lote','Ambiente','Descripción ambiente','Sup lote (ha)',
                  'Campaña','Cultivo/Uso','Sigla','Sup actividad (ha)','2ª','Sup física lote (ha)','Sup sembrada lote (ha)','% uso lote'];
   var rows = [];
-  for(var i=0;i<lts.length;i++){
-    var l = lts[i];
-    var acts = actsVisibles(l, state.campania);
-    var fis = supFisica(acts), semb = supSembrada(acts);
-    var pct = (l.s>0) ? Math.round(fis/l.s*1000)/10 : 0;
-    if(!acts.length){
-      rows.push([l.c||'', l.l, l.a||'', ambDesc(l.a||'')||'', l.s||0, state.campania, '', '', '', '', 0, 0, 0]);
-      continue;
-    }
-    for(var j=0;j<acts.length;j++){
-      var a = acts[j];
-      rows.push([l.c||'', l.l, l.a||'', ambDesc(l.a||'')||'', l.s||0,
-                 state.campania, cultName(a.c), a.c, a.ha!=null?a.ha:'', a.seg?'Sí':'', fis, semb, pct]);
+  for(var ci=0; ci<camps.length; ci++){
+    var camp = camps[ci];
+    for(var i=0;i<lts.length;i++){
+      var l = lts[i];
+      // Los filtros de actividad ("solo filtrado") solo recortan la campaña activa;
+      // para las demás se exporta la actividad completa del lote.
+      var acts = (camp === state.campania) ? actsVisibles(l, camp) : actsDe(l, camp);
+      var fis = supFisica(acts), semb = supSembrada(acts);
+      var pct = (l.s>0) ? Math.round(fis/l.s*1000)/10 : 0;
+      if(!acts.length){
+        rows.push([l.c||'', l.l, l.a||'', ambDesc(l.a||'')||'', l.s||0, camp, '', '', '', '', 0, 0, 0]);
+        continue;
+      }
+      for(var j=0;j<acts.length;j++){
+        var a = acts[j];
+        rows.push([l.c||'', l.l, l.a||'', ambDesc(l.a||'')||'', l.s||0,
+                   camp, cultName(a.c), a.c, a.ha!=null?a.ha:'', a.seg?'Sí':'', fis, semb, pct]);
+      }
     }
   }
-  // Fila TOTAL
-  var totFis=0, totSemb=0, totSupLote=0;
-  for(var i=0;i<lts.length;i++){
-    var ac = actsDe(lts[i], state.campania);
-    totFis += supFisica(ac); totSemb += supSembrada(ac); totSupLote += lts[i].s||0;
+  // Fila TOTAL por campaña (con varias campañas, un único total sería ambiguo)
+  for(var ct=0; ct<camps.length; ct++){
+    var cmp = camps[ct];
+    var totFis=0, totSemb=0, totSupLote=0;
+    for(var k=0;k<lts.length;k++){
+      var ac = actsDe(lts[k], cmp);
+      totFis += supFisica(ac); totSemb += supSembrada(ac); totSupLote += lts[k].s||0;
+    }
+    rows.push(['', 'TOTAL '+cmp, '', '', totSupLote, cmp, '', '', '', '', totFis, totSemb, totSupLote>0?Math.round(totFis/totSupLote*1000)/10:0]);
   }
-  rows.push(['', 'TOTAL', '', '', totSupLote, state.campania, '', '', '', '', totFis, totSemb, totSupLote>0?Math.round(totFis/totSupLote*1000)/10:0]);
-
-  downloadXLSX('Plan_uso_suelo_'+state.campania+'_'+campoSufijo()+'.xlsx', 'Plan '+state.campania, headers, rows);
+  var sufCamp = camps.length===1 ? camps[0] : (camps.length+'campanias');
+  var nomHoja = camps.length===1 ? ('Plan '+camps[0]) : ('Plan '+camps.length+' campañas');
+  downloadXLSX('Plan_uso_suelo_'+sufCamp+'_'+campoSufijo()+'.xlsx', nomHoja, headers, rows);
 }
 function exportPadronXLSX(){
   var lts = sortLotes(lotesFiltrados());
-  var headers = ['Campo','Lote','Ambiente','Sup (ha)','Campañas con plan'];
+  // El padrón es el maestro de lotes: sus datos no dependen de la campaña, por eso
+  // no ofrece selección múltiple. Igual lleva la columna "Campaña" con la campaña de
+  // contexto, para que el archivo sea consistente con el resto de los exports.
+  var headers = ['Campaña (contexto)','Campo','Lote','Ambiente','Sup (ha)','Campañas con plan'];
   var rows = [];
   for(var i=0;i<lts.length;i++){
     var l=lts[i];
     var nCamps = Object.keys(l.p).filter(function(k){return l.p[k] && l.p[k].length;}).length;
-    rows.push([l.c||'', l.l, l.a||'', l.s||0, nCamps+'/6']);
+    rows.push([state.campania, l.c||'', l.l, l.a||'', l.s||0, nCamps+'/6']);
   }
   // Fila TOTAL al pie
   var totSup = lts.reduce(function(a,b){return a+(b.s||0);},0);
-  rows.push(['', 'TOTAL', '', totSup, '']);
+  rows.push([state.campania, '', 'TOTAL', '', totSup, '']);
   downloadXLSX('Padron_lotes_'+campoSufijo()+'.xlsx', 'Padrón', headers, rows);
 }
 
 // Export del Histórico: matriz completa con todas las campañas (1ª/2ª por columna)
 function exportHistoricoXLSX(){
+  var conDatos = campaniasConDatos(sortLotes(lotesFiltrados()));
+  // Pretilda todas las campañas con datos: mantiene el comportamiento previo si el
+  // usuario acepta sin tocar nada, y permite acotar a un subconjunto.
+  abrirExportCamp(conDatos, exportHistoricoXLSXCamps,
+    'Elegí qué campañas incluir en el histórico. Todas van en una sola hoja, con una columna "Campaña".');
+}
+function exportHistoricoXLSXCamps(camps){
   var lts = sortLotes(lotesFiltrados());
-  var camps = campaniasConDatos(lts);
   // Una fila por ACTIVIDAD (lote+cultivo+campaña), repitiendo datos del lote.
   var headers = ['Campo','Lote','Ambiente','Descripción ambiente','Sup lote (ha)',
                  'Campaña','Cultivo/Uso','Sigla','Sup actividad (ha)','2ª'];
