@@ -33,7 +33,7 @@ header{background:var(--card);border-bottom:1px solid var(--border);padding:12px
 .nav-btn{padding:7px 18px;border-radius:20px;font-size:13px;font-weight:500;cursor:pointer;border:1.5px solid var(--border);background:var(--card);color:#475569;transition:all .12s;font-family:var(--sans)}
 .nav-btn:hover{border-color:#4A6533;color:#4A6533}
 .nav-btn.active{background:#4A6533;color:#fff;border-color:#4A6533}
-.nav-reset{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1.5px solid #FCA5A5;background:var(--card);color:#B91C1C;font-family:var(--sans);white-space:nowrap;flex:none}
+.nav-reset{padding:6px 12px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1.5px solid #FCA5A5;background:var(--card);color:#B91C1C;font-family:var(--sans);white-space:nowrap;flex:none}
 .nav-reset:hover{background:#FEF2F2}
 .subnav-bar{background:var(--bg);padding:6px 24px 4px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .subnav-btn{padding:5px 14px;border-radius:16px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--card);color:#475569;transition:all .12s;font-family:var(--sans)}
@@ -58,7 +58,7 @@ header{background:var(--card);border-bottom:1px solid var(--border);padding:12px
 .fbar-wrap{padding:8px 24px 4px}
 .fbar-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px}
 .fbar-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:10px;font-family:var(--sans)}
-.fbar{background:transparent;padding:0;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.fbar{background:transparent;padding:0;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .fl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:500}
 .filtro-lbl-inline{font-size:11px;color:var(--muted);margin-right:4px}
 .chk-solo-filtrado{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:#4A6533;background:rgba(74,101,51,.08);border:1.5px solid rgba(74,101,51,.25);border-radius:8px;padding:5px 10px;cursor:pointer;white-space:nowrap}
@@ -66,6 +66,14 @@ header{background:var(--card);border-bottom:1px solid var(--border);padding:12px
 .filtro-select{font-family:var(--sans);font-size:12px;font-weight:500;color:var(--text);background:var(--card);border:1.5px solid #CBD5E1;border-radius:8px;padding:6px 10px;cursor:pointer}
 .ms-dd-wrap{display:inline-flex;align-items:center;background:var(--card);border:1.5px solid #CBD5E1;border-radius:8px;padding:0 4px 0 10px}
 .ms-dd-wrap .filtro-select{border:none;padding:6px 6px}
+/* Filtros de selección única (Estado, Momento): el valor elegido se muestra en el
+   propio control, sin label lateral. Borde verde cuando difiere del default. */
+.ms-dd-wrap.sel-single{padding:0 2px 0 2px}
+.ms-dd-wrap.sel-single .filtro-select{padding:6px 6px 6px 8px;font-weight:500}
+.ms-dd-wrap.sel-single.active{border-color:#4A6533}
+.ms-dd-wrap.sel-single.active .filtro-select{color:#4A6533}
+/* Bloque de acciones de la barra de filtros: siempre al extremo derecho de su línea. */
+.fbar-actions{display:inline-flex;align-items:center;gap:8px;margin-left:auto;flex:none}
 .pills{display:flex;gap:5px;flex-wrap:wrap}
 .pill{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1.5px solid var(--border);background:var(--bg);color:var(--muted);transition:all .12s;font-family:var(--sans)}
 .pill.on-agr{background:#F0FDF4;color:#3B6D11;border-color:#86EFAC}
@@ -111,11 +119,11 @@ tbody td.td-act.act-start{border-left:2px solid #EADDD1}
 tbody tr.act-sub td.td-act{border-top:none}
 /* Bloque lote (izquierda) fusionado con rowspan: alinear arriba para lotes multi-cultivo */
 tbody td.td-lote{vertical-align:top}
-/* Zebra POR LOTE: la separación entre lotes es SOLO por color, sin líneas */
-tbody tr.lote-odd td{background:#F1EEE8}
-tbody tr.lote-odd:hover td{background:#EAE6DE}
-/* Sin líneas divisorias entre lotes: la alternancia de color marca el corte */
-tbody tr.lote-start td{border-top:none}
+/* Separación entre lotes: línea fina superior en la primera fila de cada lote.
+   Reemplaza el zebra por color (las subfilas de un lote multi-cultivo no llevan
+   línea, así el bloque del lote se lee como una unidad). */
+tbody tr.lote-start td{border-top:1px solid var(--border)}
+tbody tr.lote-start:first-child td{border-top:none}
 /* Columna de acciones a la derecha */
 .td-act-acc{text-align:right;white-space:nowrap}
 .act-acc{display:inline-flex;gap:4px;justify-content:flex-end}
@@ -166,7 +174,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
 .help-row{font-size:11px;color:var(--muted);background:#FFFBEB;border:1px solid #FCD34D;padding:6px 12px;border-radius:6px;margin-bottom:8px}
 .tot-row td{font-weight:600;background:#F5F7FA!important;border-top:2px solid var(--border)}
 .dimmed{opacity:.45}
-.search-box{font-family:var(--sans);font-size:12px;padding:4px 10px;border:1.5px solid #CBD5E1;border-radius:6px;background:var(--card);min-width:160px}
+.search-box{font-family:var(--sans);font-size:12px;padding:4px 10px;border:1.5px solid #CBD5E1;border-radius:6px;background:var(--card);min-width:130px;flex:0 1 150px}
 .search-box:focus{outline:none;border-color:#4A6533}
 .amb-pill{display:inline-block;padding:1px 5px;border-radius:8px;font-size:9px;font-weight:600;font-family:var(--mono);margin-right:3px}
 .amb-A1{background:#F0FDF4;color:#166534}
@@ -184,7 +192,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
 .filtro-grupo{display:flex;align-items:center;gap:6px}
 .filtro-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:500;white-space:nowrap}
 .ms-dd{position:relative;display:inline-block}
-.ms-trigger{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:1.5px solid #CBD5E1;background:var(--card);color:var(--text);font-family:var(--sans);min-width:130px;transition:border-color .12s}
+.ms-trigger{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:1.5px solid #CBD5E1;background:var(--card);color:var(--text);font-family:var(--sans);min-width:104px;transition:border-color .12s}
 .ms-trigger:hover{border-color:#4A6533}
 .ms-trigger.active{border-color:#4A6533;background:var(--card);color:#4A6533}
 .ms-trigger-count{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;background:#4A6533;color:#fff;border-radius:9px;font-size:10px;font-weight:600;font-family:var(--mono)}
@@ -211,7 +219,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
 .ms-foot{position:sticky;bottom:0;background:var(--card);border-top:1px solid var(--border);padding:6px;display:flex;justify-content:flex-end;margin-top:2px}
 .ms-done{padding:5px 16px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #4A6533;background:#4A6533;color:#fff;font-family:var(--sans)}
 .ms-done:hover{background:#3B5128;border-color:#3B5128}
-.btn-toggle{padding:7px 16px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #4A6533;background:#4A6533;color:#fff;font-family:var(--sans)}
+.btn-toggle{padding:7px 12px;white-space:nowrap;flex:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #4A6533;background:#4A6533;color:#fff;font-family:var(--sans)}
 .btn-toggle:hover{background:#3B5128;border-color:#3B5128}
 .btn-toggle.on{background:#3B5128;color:#fff;border-color:#3B5128}
 .chip-clear{font-size:11px;color:var(--muted);text-decoration:underline;cursor:pointer;background:none;border:none;padding:2px 4px;font-family:var(--sans)}
@@ -484,9 +492,9 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
     <div class="fbar-title">Filtros</div>
     <div class="fbar">
       <input type="text" id="searchLote" class="search-box" placeholder="Buscar lote..." oninput="renderAll()">
-      <div class="ms-dd-wrap" id="filtroEstado"><span class="filtro-lbl-inline">Estado:</span>
+      <div class="ms-dd-wrap sel-single" id="filtroEstado">
         <select class="filtro-select" id="selEstado" onchange="setEstadoSel(this.value)">
-          <option value="todos">Todos</option>
+          <option value="todos">Todos los estados</option>
           <option value="activos" selected>Solo activos</option>
           <option value="inactivos">Solo inactivos</option>
         </select>
@@ -496,15 +504,17 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
       <div class="ms-dd" id="msAntecesor"></div>
       <div class="ms-dd" id="msCult"></div>
       <div class="ms-dd" id="msNegocio"></div>
-      <div class="ms-dd-wrap" id="filtroSeg"><span class="filtro-lbl-inline">Momento:</span>
+      <div class="ms-dd-wrap sel-single" id="filtroSeg">
         <select class="filtro-select" id="selSeg" onchange="setSegSel(this.value)">
-          <option value="">Todos</option>
+          <option value="">Todos los momentos</option>
           <option value="1">Cultivos de 1ª</option>
           <option value="2">Cultivo de 2ª</option>
         </select>
       </div>
-      <button class="btn-toggle" id="btnHistGlobal" onclick="toggleHistGlobal()">▸ Mostrar historia</button>
-      <button class="nav-reset" id="btnLimpiarFiltros" onclick="clearFiltros()">↺ Limpiar filtros</button>
+      <div class="fbar-actions">
+        <button class="btn-toggle" id="btnHistGlobal" onclick="toggleHistGlobal()">▸ Historia</button>
+        <button class="nav-reset" id="btnLimpiarFiltros" onclick="clearFiltros()">↺ Limpiar</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1019,7 +1029,7 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
 
 <footer>
   <span>Puntal Agro · Plan de Uso de Suelo</span>
-  <span id="fts">v2026-07-21 16:16 · BUILD 31</span>
+  <span id="fts">v2026-07-23 18:45 · BUILD 36</span>
 </footer>
 
 <script>
@@ -2181,6 +2191,12 @@ function clearFiltros(){
   state.fCampo = [];
   state.soloFiltrado = false;
   var sg = document.getElementById('selSeg'); if(sg) sg.value = '';
+  // El botón "Limpiar" se muestra cuando hay búsqueda o estado != default,
+  // así que también deben resetearse para que el clic deje la barra realmente limpia.
+  var sb = document.getElementById('searchLote'); if(sb) sb.value = '';
+  state.search = '';
+  var se = document.getElementById('selEstado'); if(se) se.value = 'activos';
+  state.estado = 'activos';
   renderAll();
 }
 function setSegSel(v){
@@ -2259,6 +2275,36 @@ function setMaestrosTab(tab, btn){
 function setEstadoSel(value){
   state.estado = value;
   renderAll();
+}
+
+// Refresca el estado visual de la barra de filtros:
+//  - Estado y Momento (selección única) llevan borde verde cuando difieren del default.
+//  - "Limpiar" solo se muestra si hay al menos un filtro activo.
+// Se llama desde renderAll(), así que cubre tanto cambios manuales como clearFiltros().
+function hayFiltroActivoFbar(){
+  if(state.estado && state.estado !== 'activos') return true;
+  if(state.fSeg) return true;
+  if(state.search) return true;
+  var arrs = [state.fAmb, state.fAnt, state.fCult, state.fTen, state.fTipo, state.fCampo];
+  for(var i=0;i<arrs.length;i++){
+    if(arrs[i] && arrs[i].length) return true;
+  }
+  return false;
+}
+
+function refreshFbarEstado(){
+  var fe = document.getElementById('filtroEstado');
+  if(fe){
+    if(state.estado && state.estado !== 'activos') fe.classList.add('active');
+    else fe.classList.remove('active');
+  }
+  var fs = document.getElementById('filtroSeg');
+  if(fs){
+    if(state.fSeg) fs.classList.add('active');
+    else fs.classList.remove('active');
+  }
+  var btn = document.getElementById('btnLimpiarFiltros');
+  if(btn) btn.style.display = hayFiltroActivoFbar() ? '' : 'none';
 }
 
 function toggleHistGlobal(){
@@ -2466,36 +2512,44 @@ function openTipoLoteDd(triggerEl, loteName, currentVal){
 // ────────────────────────────────────────────────────────────
 function renderKpis(){
   var lts = lotesParaTotales();
-  var totSup = 0;          // superficie física total
   var totExpl = 0;         // superficie explotable total (solo lotes con dato)
   var hayExplParcial = false; // algún lote sin explotable cargada
   var netaTot = 0;         // superficie neta/planificada (sembrada 1ª+2ª) de la campaña
   var sup1a = 0;           // superficie de 1ª ocupación (para desperdicios de campaña)
-  var agrNeta = 0, ganNeta = 0; // neta por tipo de actividad
-  var lotesAgr = 0, lotesGan = 0;
+  var lotesConPlan = 0;    // lotes con al menos una actividad en la campaña
+  var explSinPlan = 0, lotesSinPlan = 0; // lotes sin ninguna actividad en la campaña
+  // Neta y cantidad de lotes POR USO (agrícola / ganadero / doble propósito / …).
+  // Se agrupa por id de uso del catálogo (listarUsos), no por una lista fija AGR/GAN:
+  // así un uso nuevo aparece solo, sin tocar código, y la suma de usos siempre
+  // reconstruye la neta (antes un cultivo que no fuera AGR ni GAN se perdía).
+  var netaPorUso = {}, lotesPorUso = {};
   for(var i=0;i<lts.length;i++){
     var l = lts[i];
-    totSup += l.s || 0;
     var e = loteExpl(l);
     if(e == null) hayExplParcial = true;
     else totExpl += e;
-    // Neta por actividad de la campaña (agrícola/ganadera se reparten la neta 1ª+2ª).
+    // Neta por actividad de la campaña.
     var acts = actsVisibles(l, state.campania);
-    var loteTieneAgr = false, loteTieneGan = false;
+    var usosDelLote = {};
     for(var a=0; a<acts.length; a++){
       var ha = acts[a].ha || 0;
       netaTot += ha;
       if(!acts[a].seg) sup1a += ha; // superficie de 1ª ocupación (no duplica la tierra)
-      var t = cultTipo(acts[a].c);
-      if(t==='AGR'){ agrNeta += ha; loteTieneAgr = true; }
-      else if(t==='GAN'){ ganNeta += ha; loteTieneGan = true; }
+      var u = usoDeCultivo(acts[a].c);
+      netaPorUso[u] = (netaPorUso[u] || 0) + ha;
+      usosDelLote[u] = true;
     }
-    if(loteTieneAgr) lotesAgr++;
-    if(loteTieneGan) lotesGan++;
+    for(var uk in usosDelLote){ lotesPorUso[uk] = (lotesPorUso[uk] || 0) + 1; }
+    // "Sin plan" cuenta solo lotes reales: un lote de desperdicio/estructura no se
+    // planifica nunca, así que su ausencia de actividad no es información.
+    if(acts.length) lotesConPlan++;
+    else if(!esLoteDesperdicio(l)){ lotesSinPlan++; explSinPlan += (e || 0); }
   }
   // Desperdicios de campaña = explotable − superficie de 1ª ocupación (tierra explotable
   // que no se ocupó ni una vez). Se mide contra la 1ª —no contra la neta 1ª+2ª— para que
   // nunca dé negativo: la 2ª ocupación reutiliza tierra ya ocupada, no consume tierra nueva.
+  // Nota: incluye la explotable de los lotes sin plan MÁS la fracción no sembrada de los
+  // lotes parcialmente planificados, por eso es ≥ "Sin plan" y no son el mismo número.
   var hayExpl = totExpl > 0;
   var despCampania = hayExpl ? Math.max(0, totExpl - sup1a) : null;
 
@@ -2503,14 +2557,51 @@ function renderKpis(){
     var tt = title ? ' title="'+title+'"' : '';
     return '<div class="kpi '+cls+'"'+tt+'><div class="kpi-lbl">'+lbl+'</div><div class="kpi-val">'+val+'</div><div class="kpi-sub">'+sub+'</div></div>';
   }
+  // Variante con color explícito (usos del catálogo): el color no está en el CSS,
+  // viene del catálogo de usos, así un uso nuevo se pinta sin tocar la hoja de estilos.
+  function kpiColor(color, lbl, val, sub, title){
+    var tt = title ? ' title="'+title+'"' : '';
+    return '<div class="kpi"'+tt+' style="border-left-color:'+color+'"><div class="kpi-lbl">'+lbl+'</div><div class="kpi-val" style="color:'+color+'">'+val+'</div><div class="kpi-sub">'+sub+'</div></div>';
+  }
   var camp = state.campania;
   var html = '';
-  html += kpi('', 'Sup. física total', fInt(totSup)+' ha', lts.length+' lotes');
-  html += kpi('kpi-expl', 'Sup. explotable total', hayExpl ? (fInt(totExpl)+' ha') : '—', hayExplParcial ? 'faltan lotes por cargar' : 'productiva');
-  html += kpi('kpi-amb', 'Sup. neta / planificada '+camp, fInt(netaTot)+' ha', hayExpl ? f(totExpl>0?netaTot/totExpl*100:0,0)+'% de explotable' : f(totSup>0?netaTot/totSup*100:0,0)+'% de física', 'Superficie sembrada total (1ª + 2ª ocupación) en la campaña');
-  html += kpi('kpi-agr', 'Sup. agrícola '+camp, fInt(agrNeta)+' ha', lotesAgr+' lotes · '+f(netaTot>0?agrNeta/netaTot*100:0,0)+'% de neta');
-  html += kpi('kpi-gan', 'Sup. ganadera '+camp, fInt(ganNeta)+' ha', lotesGan+' lotes · '+f(netaTot>0?ganNeta/netaTot*100:0,0)+'% de neta');
-  html += kpi('kpi-libre', 'Desperdicios de campaña '+camp, despCampania==null ? '—' : (fInt(despCampania)+' ha'), despCampania==null ? 'requiere explotable' : 'explotable − sup. de 1ª', 'Desperdicios de campaña = Superficie explotable − Superficie de 1ª ocupación. Es la tierra explotable que no se ocupó en la campaña. Se calcula sobre la 1ª (no la neta 1ª+2ª) para que nunca sea negativa: la 2ª reutiliza tierra ya ocupada.');
+  html += kpi('kpi-expl', 'Sup. explotable', hayExpl ? (fInt(totExpl)+' ha') : '—', hayExplParcial ? 'faltan lotes por cargar' : 'productiva', 'Superficie de los lotes efectivamente trabajable. Es la base sobre la que se planifica la campaña.');
+  html += kpi('kpi-amb', 'Sup. neta / planificada '+camp, fInt(netaTot)+' ha', lotesConPlan+(lotesConPlan===1?' lote · ':' lotes · ')+(hayExpl ? f(totExpl>0?netaTot/totExpl*100:0,0)+'% de explotable' : '—'), 'Superficie sembrada total (1ª + 2ª ocupación) en la campaña. Se descompone en los usos de abajo.');
+  // Una tarjeta por uso del catálogo, en el orden del catálogo. Solo se muestran los
+  // usos con superficie en la campaña (un uso sin planificar no ocupa lugar en la banda).
+  // El color sale del catálogo (usoColor), no de una clase CSS fija: así un uso nuevo
+  // se pinta solo con el color que se le definió en Maestros.
+  var usos = listarUsos();
+  for(var uid in usos){
+    var haU = netaPorUso[uid] || 0;
+    if(!haU) continue;
+    var nLo = lotesPorUso[uid] || 0;
+    var cU = usoColor(uid);
+    // El nombre sale tal cual del catálogo ("Agrícola", "Ganadero", "Doble propósito").
+    // No se le antepone "Sup." para no romper la concordancia de género con nombres
+    // masculinos del catálogo ("Sup. ganadero"): el KPI ya se lee como superficie.
+    html += kpiColor(cU, usoNombre(uid)+' '+camp,
+      fInt(haU)+' ha',
+      nLo+(nLo===1?' lote · ':' lotes · ')+f(netaTot>0?haU/netaTot*100:0,0)+'% de neta',
+      'Superficie de uso '+usoNombre(uid)+' en la campaña. La suma de todos los usos reconstruye la neta/planificada.');
+    delete netaPorUso[uid];
+  }
+  // Salvaguarda: superficie con un uso que no está en el catálogo (dato inconsistente).
+  // Se muestra en vez de silenciarse, para que la suma de usos siempre cierre contra la neta.
+  var haOtros = 0, hayOtros = false;
+  for(var rk in netaPorUso){ if(netaPorUso[rk]){ haOtros += netaPorUso[rk]; hayOtros = true; } }
+  if(hayOtros){
+    html += kpi('kpi-libre', 'Sup. sin uso definido '+camp, fInt(haOtros)+' ha',
+      f(netaTot>0?haOtros/netaTot*100:0,0)+'% de neta',
+      'Superficie cuyo cultivo tiene un uso que no figura en el catálogo de usos. Revisar la clasificación en Maestros.');
+  }
+  // "Sin plan": solo se muestra si efectivamente hay lotes sin planificar.
+  if(lotesSinPlan){
+    html += kpi('kpi-libre', 'Sup. sin plan '+camp, fInt(explSinPlan)+' ha',
+      lotesSinPlan+(lotesSinPlan===1?' lote sin actividad':' lotes sin actividad'),
+      'Superficie explotable de los lotes que no tienen ninguna actividad cargada en la campaña.');
+  }
+  html += kpi('kpi-libre', 'Desperdicios de campaña '+camp, despCampania==null ? '—' : (fInt(despCampania)+' ha'), despCampania==null ? 'requiere explotable' : 'explotable − sup. de 1ª', 'Desperdicios de campaña = Superficie explotable − Superficie de 1ª ocupación. Es la tierra explotable que no se ocupó en la campaña. Se calcula sobre la 1ª (no la neta 1ª+2ª) para que nunca sea negativa: la 2ª reutiliza tierra ya ocupada. Incluye los lotes sin plan más la fracción no sembrada de los lotes parcialmente planificados.');
 
   document.getElementById('kpisRow').innerHTML = html;
 }
@@ -2731,10 +2822,9 @@ function renderRows(lts, cls){
            + '<td class="td-act td-act-acc">'+acc+'</td>';
     }
 
-    // Zebra por lote: alterna el fondo por cada lote; marca el inicio con borde superior
-    var zebra = (i % 2 === 1) ? ' lote-odd' : '';
+    // Separación entre lotes por línea fina (clase lote-start en la primera subfila).
     var inactivo = !loteActivo(l);
-    var rowCls = cls + zebra + (inactivo ? ' dimmed' : '');
+    var rowCls = cls + (inactivo ? ' dimmed' : '');
 
     // Primera subfila: bloque lote (rowspan) + primer bloque actividad
     var firstAct = actsOrd.length ? actsOrd[0] : null;
@@ -3122,11 +3212,16 @@ function closeMasivo(){ var m=document.getElementById('modalMasivo'); if(m) m.cl
 // ────────────────────────────────────────────────────────────
 function renderPadron(){
   var lts = sortLotes(lotesFiltrados());
-  // KPIs del Padrón, siempre sobre lo visible:
-  //  - Total campo: suma de haTotales de los campos visibles (se registra al alta del campo).
-  //  - Total lotes: suma de superficies físicas de los lotes reales (sin estructura/desperdicio).
-  //  - Estructura/Desperdicios: Total campo − Total lotes.
-  //  - Explotable: suma de explotables cargadas.
+  // KPIs del Padrón, siempre sobre lo visible. Modelo de superficies (dos ecuaciones):
+  //   Sup. total Campo = Sup. total Lotes + Estructura/Desperdicios
+  //   Sup. total Lotes = Sup. explotable permanente + Sup. NO explotable
+  // - Total campo: perímetro del establecimiento; se registra al alta del campo (Administración).
+  // - Total lotes: suma de perímetros de los lotes reales (los marcados como desperdicio
+  //   NO son lotes: quedan fuera y su superficie cae dentro de Estructura por la resta).
+  // - Estructura/Desperdicios: lo que está fuera del alambrado de los lotes (caminos, casco,
+  //   callejones) más los lotes de desperdicio. Requiere Total campo cargado.
+  // - Explotable permanente: suma de explotables cargadas.
+  // - NO explotable: desperdicio permanente DENTRO de los lotes (bajos, montes, cabeceras).
   var camposVisibles = {};
   for(var i=0;i<lts.length;i++){ if(lts[i].c) camposVisibles[lts[i].c]=true; }
   var totalCampo = 0, hayTotalCampo = true;
@@ -3137,13 +3232,36 @@ function renderPadron(){
   var totalLotes = lts.reduce(function(a,b){return a + (esLoteDesperdicio(b)?0:(b.s||0));},0);
   var padTotExpl = lts.reduce(function(a,b){return a+(loteExpl(b)||0);},0);
   var padHayExpl = lts.some(function(l){return loteExpl(l)!=null;});
-  var estructDesp = hayTotalCampo ? Math.max(0, totalCampo - totalLotes)
-                                  : lts.reduce(function(a,b){return a + (esLoteDesperdicio(b)?(b.s||0):0);},0);
+  // Estructura = Total campo − Total lotes. Sin total de campo cargado no se puede
+  // calcular (no se estima: se muestra "—", coherente con la regla de no inventar datos).
+  var estructDesp = hayTotalCampo ? Math.max(0, totalCampo - totalLotes) : null;
+  // NO explotable = Σ(física − explotable) de los lotes reales con explotable cargada.
+  // Los lotes de desperdicio no entran (no son lotes; su superficie ya está en Estructura).
+  var noExpl = 0, hayNoExpl = false;
+  for(var k=0;k<lts.length;k++){
+    var lo = lts[k];
+    if(esLoteDesperdicio(lo)) continue;
+    var ex = loteExpl(lo);
+    if(ex == null) continue;          // explotable pendiente: no se asume 0
+    hayNoExpl = true;
+    noExpl += Math.max(0, (lo.s||0) - ex);
+  }
+  // Cantidad de lotes reales (mismo criterio que "Total lotes") y con explotable cargada.
+  var nLotes = 0, nLotesExpl = 0;
+  for(var j=0;j<lts.length;j++){
+    if(esLoteDesperdicio(lts[j])) continue;
+    nLotes++;
+    if(loteExpl(lts[j]) != null) nLotesExpl++;
+  }
+  var subExpl = nLotesExpl === nLotes
+    ? (nLotes + (nLotes===1?' lote':' lotes'))
+    : (nLotesExpl + ' de ' + nLotes + ' lotes cargados');
   document.getElementById('padronKpisRow').innerHTML =
-    '<div class="kpi kpi-agr" title="Superficie total del campo. Se registra al dar de alta el campo (módulo Administración)."><div class="kpi-lbl">Total campo</div><div class="kpi-val">'+(hayTotalCampo?fInt(totalCampo)+' ha':'—')+'</div><div class="kpi-sub">'+(hayTotalCampo?'según alta del campo':'sin cargar en Administración')+'</div></div>'
-    + '<div class="kpi kpi-expl"><div class="kpi-lbl">Total lotes</div><div class="kpi-val">'+fInt(totalLotes)+' ha</div><div class="kpi-sub">suma de lotes productivos</div></div>'
-    + '<div class="kpi kpi-libre" title="Estructura / Desperdicios = Total campo − Total lotes. Es la superficie del campo que no está en lotes productivos (caminos, casco, montes, bajos, etc.)."><div class="kpi-lbl">Estructura / Desperdicios</div><div class="kpi-val">'+fInt(estructDesp)+' ha</div><div class="kpi-sub">'+(hayTotalCampo?'total campo − lotes':'lotes de desperdicio')+'</div></div>'
-    + '<div class="kpi"><div class="kpi-lbl">Sup. explotable</div><div class="kpi-val">'+(padHayExpl?fInt(padTotExpl)+' ha':'—')+'</div><div class="kpi-sub">productiva</div></div>';
+    '<div class="kpi" title="Perímetro total del establecimiento. Se registra al dar de alta el campo (módulo Administración). Total campo = Total lotes + Estructura/Desperdicios."><div class="kpi-lbl">Sup. total campo</div><div class="kpi-val">'+(hayTotalCampo?fInt(totalCampo)+' ha':'—')+'</div><div class="kpi-sub">'+(hayTotalCampo?'según alta del campo':'sin cargar en Administración')+'</div></div>'
+    + '<div class="kpi" title="Suma de los perímetros de los lotes. Los lotes marcados como desperdicio/estructura no se cuentan como lotes."><div class="kpi-lbl">Sup. total lotes</div><div class="kpi-val">'+fInt(totalLotes)+' ha</div><div class="kpi-sub">'+fInt(nLotes)+(nLotes===1?' lote':' lotes')+'</div></div>'
+    + '<div class="kpi kpi-libre" title="Estructura / Desperdicios = Total campo − Total lotes. Es la superficie del establecimiento que queda fuera del alambrado de los lotes (caminos, casco, montes, callejones), más los lotes marcados como desperdicio."><div class="kpi-lbl">Sup. estructura / desperdicios</div><div class="kpi-val">'+(estructDesp==null?'—':fInt(estructDesp)+' ha')+'</div><div class="kpi-sub">'+(estructDesp==null?'requiere total del campo':'total campo − lotes')+'</div></div>'
+    + '<div class="kpi kpi-expl" title="Superficie de los lotes efectivamente trabajable, descontando las restricciones permanentes de cada lote."><div class="kpi-lbl">Sup. explotable permanente</div><div class="kpi-val">'+(padHayExpl?fInt(padTotExpl)+' ha':'—')+'</div><div class="kpi-sub">'+(padHayExpl?subExpl:'sin cargar')+'</div></div>'
+    + '<div class="kpi kpi-libre" title="Desperdicio permanente DENTRO de los lotes: bajos, montes, cabeceras. Se calcula como la suma de (sup. total − sup. explotable) de cada lote. Total lotes = Explotable permanente + NO explotable."><div class="kpi-lbl">Sup. NO explotable</div><div class="kpi-val">'+(hayNoExpl?fInt(noExpl)+' ha':'—')+'</div><div class="kpi-sub">'+(hayNoExpl?'dentro de los lotes':'requiere explotable')+'</div></div>';
   updateSortInds(['campo','lote','amb','sup','expl'], 'sp-');
   var html='';
   for(var i=0;i<lts.length;i++){
@@ -3182,6 +3300,28 @@ function buildAmbienteSelect(selectId, current){
   sel.innerHTML = html;
 }
 
+// Un lote de desperdicio/estructura nunca es explotable: el campo se fuerza a 0 y se
+// bloquea. Evita que se cargue explotable en un callejón o en el casco, que rompería
+// la ecuación Total lotes = Explotable + NO explotable.
+function aplicarBloqueoExpl(bloquear){
+  var inp = document.getElementById('mlExpl');
+  if(!inp) return;
+  if(bloquear){
+    inp.value = 0;
+    inp.readOnly = true;
+    inp.style.background = '#F1F5F9';
+    inp.style.color = 'var(--muted)';
+    inp.style.cursor = 'not-allowed';
+    inp.title = 'Un lote de desperdicio / estructura no tiene superficie explotable (siempre 0).';
+  } else {
+    inp.readOnly = false;
+    inp.style.background = '';
+    inp.style.color = '';
+    inp.style.cursor = '';
+    inp.title = '';
+  }
+}
+
 function openLoteModal(loteName, focoExpl){
   loteEditando = loteName || null;
   document.getElementById('modalLoteWarn').style.display = 'none';
@@ -3203,6 +3343,7 @@ function openLoteModal(loteName, focoExpl){
     document.getElementById('mlSup').value = (l.s!=null ? l.s : '');
     document.getElementById('mlExpl').value = (l.expl!=null && l.expl!=='') ? l.expl : '';
     document.getElementById('mlActivo').checked = loteActivo(l);
+    aplicarBloqueoExpl(esLoteDesperdicio(l));
   } else {
     document.getElementById('modalLoteTitle').textContent = 'Agregar lote';
     document.getElementById('mlNombre').value = '';
@@ -3211,7 +3352,11 @@ function openLoteModal(loteName, focoExpl){
     document.getElementById('mlSup').value = '';
     document.getElementById('mlExpl').value = '';
     document.getElementById('mlActivo').checked = true;
+    aplicarBloqueoExpl(false);
   }
+  // El bloqueo se reevalúa si cambia el ambiente (DESP ⇄ productivo) dentro del modal.
+  var selAmb = document.getElementById('mlAmbiente');
+  if(selAmb) selAmb.onchange = function(){ aplicarBloqueoExpl(this.value === 'DESP'); };
   document.getElementById('modalLote').classList.add('on');
   setTimeout(function(){
     // Cambio 22: si venimos a cargar la explotable, enfocar ese campo; si no, el nombre
@@ -3248,6 +3393,10 @@ function confirmLoteModal(){
   } else {
     expl = null; // queda pendiente de carga
   }
+  // Regla de negocio (no solo de UI): un lote de desperdicio/estructura nunca tiene
+  // explotable. Se fuerza a 0 aunque el input se haya salteado el bloqueo.
+  var ambSel = document.getElementById('mlAmbiente').value;
+  if(ambSel === 'DESP') expl = 0;
   if(loteEditando){
     var l = LOTES.find(function(x){return x.l===loteEditando;});
     if(l){
@@ -4513,6 +4662,7 @@ function renderAll(){
   
   buildFiltros();
   syncSoloFiltrado();
+  refreshFbarEstado();
   renderKpis();
   
   if(state.view === 'plan'){
