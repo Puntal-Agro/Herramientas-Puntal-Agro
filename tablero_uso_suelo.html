@@ -86,6 +86,8 @@ main{padding:16px 24px;display:flex;flex-direction:column;gap:12px}
 .ct{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text)}
 /* Aclaración de filtros activos bajo el título de una tabla: qué está incluyendo
    o excluyendo lo que se ve. Se oculta solo cuando no hay ningún filtro. */
+/* Fila de subtotal de grupo en la matriz de rotación (cuando hay 2º nivel de desglose) */
+tr.hist-subtot td{background:#F4F6F1;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
 .ct-filtros{font-size:11px;color:#8A4B24;font-weight:500;letter-spacing:0;text-transform:none;margin-top:2px}
 .ct-wrap{display:flex;flex-direction:column;min-width:0}
 .ct-actions{display:flex;gap:6px;align-items:center}
@@ -696,8 +698,14 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
     <div class="chd">
       <div class="ct-wrap"><span class="ct">Matriz de rotación · evolución por campaña</span><span class="ct-filtros" id="ctFiltrosRot" style="display:none"></span></div>
       <div class="ct-actions">
-        <span class="filtro-lbl-inline">Filas:</span>
-        <select class="filtro-select" id="histDimFila" onchange="renderHistorico()">
+        <span class="rep-config-resumen" id="histConfigResumen"></span>
+        <button class="btn-sm primary btn-lg" onclick="abrirConfigHist()"><span class="btn-cfg-ico">⚙</span> Configurar tabla</button>
+        <button class="btn-sm" onclick="exportHistoricoXLSX()">↓ Excel</button>
+      </div>
+      <!-- Selects ocultos: son la fuente de verdad de la config; el modal los lee y escribe.
+           Mismo patrón que la tabla dinámica de Reportes. -->
+      <div style="display:none">
+        <select id="histDimFila">
           <option value="lote">Lote</option>
           <option value="ambiente" selected>Ambiente</option>
           <option value="campo">Campo</option>
@@ -705,13 +713,20 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
           <option value="uso">Uso</option>
           <option value="tenencia">Propiedad / Tenencia</option>
         </select>
-        <span class="filtro-lbl-inline">Ver:</span>
-        <select class="filtro-select" id="histValor" onchange="renderHistorico()">
+        <select id="histDimFila2">
+          <option value="">— (sin desglose)</option>
+          <option value="lote">Lote</option>
+          <option value="ambiente">Ambiente</option>
+          <option value="campo">Campo</option>
+          <option value="cultivo">Cultivo</option>
+          <option value="uso">Uso</option>
+          <option value="tenencia">Propiedad / Tenencia</option>
+        </select>
+        <select id="histValor">
           <option value="neta">Sup. neta (ha)</option>
           <option value="explotable">Sup. explotable (ha)</option>
           <option value="total">Sup. total (ha)</option>
         </select>
-        <button class="btn-sm" onclick="exportHistoricoXLSX()">↓ Excel</button>
       </div>
     </div>
     <div class="scroll-y">
@@ -918,6 +933,46 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
   </div>
 </div>
 
+<!-- MODAL: Configurar matriz de rotación (mismo patrón que la tabla de Reportes) -->
+<div class="modal-bg" id="modalConfigHist">
+  <div class="modal">
+    <div class="modal-title">⚙ Configurar tabla</div>
+    <div class="modal-sub">Definí cómo se arma la matriz. Las columnas son siempre las campañas. No afecta a los filtros de arriba.</div>
+    <div class="cfg-row"><label>Filas — Agrupar por</label>
+      <select class="filtro-select" id="cfgHistDim">
+        <option value="lote">Lote</option>
+        <option value="ambiente">Ambiente</option>
+        <option value="campo">Campo</option>
+        <option value="cultivo">Cultivo</option>
+        <option value="uso">Uso</option>
+        <option value="tenencia">Propiedad / Tenencia</option>
+      </select>
+    </div>
+    <div class="cfg-row"><label>Filas — 2ª variable (detallar por)</label>
+      <select class="filtro-select" id="cfgHistDim2">
+        <option value="">— (sin desglose)</option>
+        <option value="lote">Lote</option>
+        <option value="ambiente">Ambiente</option>
+        <option value="campo">Campo</option>
+        <option value="cultivo">Cultivo</option>
+        <option value="uso">Uso</option>
+        <option value="tenencia">Propiedad / Tenencia</option>
+      </select>
+    </div>
+    <div class="cfg-row"><label>Superficie a mostrar</label>
+      <select class="filtro-select" id="cfgHistValor">
+        <option value="neta">Neta (1ª/2ª)</option>
+        <option value="explotable">Explotable</option>
+        <option value="total">Total</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-sm" onclick="closeConfigHist()">Cancelar</button>
+      <button class="btn-sm primary" onclick="aplicarConfigHist()">Aplicar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: Selección de CAMPAÑAS para exportar -->
 <div class="modal-bg" id="modalExportCamp">
   <div class="modal" style="max-width:420px">
@@ -1050,7 +1105,7 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
 
 <footer>
   <span>Puntal Agro · Plan de Uso de Suelo</span>
-  <span id="fts">v2026-07-23 19:08 · BUILD 38</span>
+  <span id="fts">v2026-07-24 09:55 · BUILD 40</span>
 </footer>
 
 <script>
@@ -2243,8 +2298,10 @@ function refreshMsTriggerByKey(stateKey){
 }
 
 function clearFiltros(){
+  // Limpia SOLO los filtros de la barra. El contexto del header —empresa, campo y
+  // campaña— no se toca: son selectores de contexto, no filtros, y resetearlos
+  // sacaría al usuario del recorte en el que está trabajando.
   state.fAmb = []; state.fAnt = []; state.fCult = []; state.fTen = []; state.fTipo = []; state.fSeg = '';
-  state.fCampo = [];
   state.soloFiltrado = false;
   var sg = document.getElementById('selSeg'); if(sg) sg.value = '';
   // El botón "Limpiar" se muestra cuando hay búsqueda o estado != default,
@@ -2341,7 +2398,8 @@ function hayFiltroActivoFbar(){
   if(state.estado && state.estado !== 'activos') return true;
   if(state.fSeg) return true;
   if(state.search) return true;
-  var arrs = [state.fAmb, state.fAnt, state.fCult, state.fTen, state.fTipo, state.fCampo];
+  // fCampo NO entra: el campo es contexto del header y "Limpiar" no lo resetea.
+  var arrs = [state.fAmb, state.fAnt, state.fCult, state.fTen, state.fTipo];
   for(var i=0;i<arrs.length;i++){
     if(arrs[i] && arrs[i].length) return true;
   }
@@ -3637,6 +3695,33 @@ function construirMatriz(dim, dim2, dimCol, supMode){
 // ── Config de tabla dinámica (modal) ─────────────────────────
 var DIM_LABEL = {campo:'Campo', cultivo:'Cultivo', ambiente:'Ambiente', uso:'Uso', tenencia:'Tenencia'};
 var SUP_LABEL = {neta:'Neta', explotable:'Explotable', total:'Total'};
+// La matriz de rotación ofrece además "lote" como dimensión de fila.
+var DIM_LABEL_HIST = {lote:'Lote', campo:'Campo', cultivo:'Cultivo', ambiente:'Ambiente', uso:'Uso', tenencia:'Tenencia'};
+
+// ── Configuración de la matriz de rotación (mismo patrón que la tabla de Reportes:
+// selects ocultos como fuente de verdad + modal que los lee/escribe + resumen compacto).
+function abrirConfigHist(){
+  document.getElementById('cfgHistDim').value   = (document.getElementById('histDimFila')||{}).value || 'ambiente';
+  document.getElementById('cfgHistDim2').value  = (document.getElementById('histDimFila2')||{}).value || '';
+  document.getElementById('cfgHistValor').value = (document.getElementById('histValor')||{}).value || 'neta';
+  document.getElementById('modalConfigHist').classList.add('on');
+}
+function closeConfigHist(){ document.getElementById('modalConfigHist').classList.remove('on'); }
+function aplicarConfigHist(){
+  document.getElementById('histDimFila').value  = document.getElementById('cfgHistDim').value;
+  document.getElementById('histDimFila2').value = document.getElementById('cfgHistDim2').value;
+  document.getElementById('histValor').value    = document.getElementById('cfgHistValor').value;
+  closeConfigHist();
+  renderHistorico();
+}
+// Resumen compacto, ej: "Campo › Uso × Campañas · Neta"
+function actualizarConfigResumenHist(dim, dim2, modoVal){
+  var filas = DIM_LABEL_HIST[dim] || dim;
+  if(dim2) filas += ' › ' + (DIM_LABEL_HIST[dim2] || dim2);
+  var txt = filas + ' × Campañas · ' + (SUP_LABEL[modoVal] || modoVal);
+  var el = document.getElementById('histConfigResumen');
+  if(el) el.textContent = txt;
+}
 function abrirConfigTabla(){
   // Cargar el modal con los valores actuales (de los selects ocultos)
   document.getElementById('cfgDim').value    = (document.getElementById('repDimension')||{}).value || 'uso';
@@ -4212,16 +4297,36 @@ function renderHistorico(){
   // Variable de fila (lote/ambiente/campo/cultivo/uso/tenencia) y valor por celda
   // (sup neta ha / sigla de cultivo / ambas). Columnas = campañas.
   var dimFila = (document.getElementById('histDimFila')||{}).value || 'ambiente';
+  var dimFila2 = (document.getElementById('histDimFila2')||{}).value || '';
+  // Si el 2º nivel repite el 1º no aporta desglose: se ignora.
+  if(dimFila2 === dimFila) dimFila2 = '';
   var modoVal = (document.getElementById('histValor')||{}).value || 'neta';
+  actualizarConfigResumenHist(dimFila, dimFila2, modoVal);
 
   // Acumular por clave de fila × campaña: neta (ha sembradas, separada en 1ª/2ª),
   // y total/explotable del lote (contados una sola vez por lote en cada celda).
+  // Con 2º nivel activo se acumula en dos mapas paralelos: el del grupo (subtotal)
+  // y el del subgrupo (detalle). El subtotal NO es la suma de los subgrupos en los
+  // modos total/explotable: un lote que cae en dos subgrupos se cuenta una vez en el
+  // grupo pero una vez en cada subgrupo, así que cada nivel se acumula por separado.
   var filasH = {};   // claveFila -> { camp -> { neta, neta1, neta2, total, expl, _lotes:{} } }
   var ordenFilas = []; // preserva orden de aparición
+  var subH = {};     // claveFila -> { claveSub -> { camp -> celda } }
+  var ordenSub = {}; // claveFila -> [claveSub...]
   var campHas2 = {};   // camp -> bool: ¿alguna 2ª en esa campaña? (para abrir la columna)
+  function celdasVacias(){
+    var o = {};
+    for(var z=0;z<CAMPANIAS.length;z++) o[CAMPANIAS[z]] = {neta:0, neta1:0, neta2:0, total:0, expl:0, _lotes:{}};
+    return o;
+  }
   function ensureFila(k){
-    if(!filasH[k]){ filasH[k] = {}; ordenFilas.push(k); for(var z=0;z<CAMPANIAS.length;z++) filasH[k][CAMPANIAS[z]] = {neta:0, neta1:0, neta2:0, total:0, expl:0, _lotes:{}}; }
+    if(!filasH[k]){ filasH[k] = celdasVacias(); ordenFilas.push(k); }
     return filasH[k];
+  }
+  function ensureSub(k, k2){
+    if(!subH[k]){ subH[k] = {}; ordenSub[k] = []; }
+    if(!subH[k][k2]){ subH[k][k2] = celdasVacias(); ordenSub[k].push(k2); }
+    return subH[k][k2];
   }
   for(var i=0;i<lts.length;i++){
     var l = lts[i];
@@ -4240,6 +4345,14 @@ function renderHistorico(){
         if(a.seg){ cell.neta2 += haA; campHas2[camp] = true; } else { cell.neta1 += haA; }
         // total/explotable del lote: una sola vez por lote en esta celda
         if(!cell._lotes[l.l]){ cell._lotes[l.l] = true; cell.total += loteTotal; cell.expl += loteExplV; }
+        // 2º nivel de desglose (mismo criterio de conteo, dentro del subgrupo)
+        if(dimFila2){
+          var kf2s = dimClave(dimFila2, l, a);
+          var sc = ensureSub(kf, kf2s)[camp];
+          sc.neta += haA;
+          if(a.seg) sc.neta2 += haA; else sc.neta1 += haA;
+          if(!sc._lotes[l.l]){ sc._lotes[l.l] = true; sc.total += loteTotal; sc.expl += loteExplV; }
+        }
       }
     }
   }
@@ -4258,9 +4371,11 @@ function renderHistorico(){
   }
 
   // Encabezado dinámico. En modo neta, las campañas con 2ª se abren en 1ª/2ª.
-  var nomFila = {lote:'Lote', ambiente:'Ambiente', campo:'Campo', cultivo:'Cultivo', uso:'Uso', tenencia:'Propiedad'}[dimFila] || 'Fila';
+  var nomDim = {lote:'Lote', ambiente:'Ambiente', campo:'Campo', cultivo:'Cultivo', uso:'Uso', tenencia:'Propiedad'};
+  var nomFila = nomDim[dimFila] || 'Fila';
+  var nomFila2 = dimFila2 ? (nomDim[dimFila2] || 'Detalle') : '';
   function campAbierta(camp){ return splitNeta && campHas2[camp]; }
-  var head1 = '<tr><th rowspan="2">'+nomFila+'</th>';
+  var head1 = '<tr><th rowspan="2">'+nomFila+'</th>' + (dimFila2 ? '<th rowspan="2">'+nomFila2+'</th>' : '');
   for(var hc=0;hc<CAMPANIAS.length;hc++){
     var cAbre = campAbierta(CAMPANIAS[hc]);
     var bg = CAMPANIAS[hc]===state.campania?' style="background:#EEF1F6"':'';
@@ -4291,27 +4406,56 @@ function renderHistorico(){
     }
     return '<td class="hist-camp-start"'+bg+'>'+celdaVal(cell)+'</td>';
   }
+  // Etiqueta de una clave según su dimensión (reutilizada por ambos niveles).
+  function etiquetaDe(dim, k){
+    var et = dimEtiqueta(dim, k);
+    if(dim==='ambiente'){
+      return '<span class="amb-pill" style="background:'+ambColor(k)+'20;color:'+ambColor(k)+'" title="'+(ambDesc(k)||'')+'">'+k+'</span> <span style="color:var(--muted);font-size:11px">'+(et.nom||'')+'</span>';
+    }
+    if(et.sig){
+      return '<strong>'+et.sig+'</strong>'+(et.nom?' <span style="color:var(--muted);font-size:11px">'+et.nom+'</span>':'');
+    }
+    return et.nom;
+  }
   var html='';
   for(var r=0;r<ordenFilas.length;r++){
     var kf2 = ordenFilas[r];
-    var et = dimEtiqueta(dimFila, kf2);
-    var etiqueta;
-    if(dimFila==='ambiente'){
-      etiqueta = '<span class="amb-pill" style="background:'+ambColor(kf2)+'20;color:'+ambColor(kf2)+'" title="'+(ambDesc(kf2)||'')+'">'+kf2+'</span> <span style="color:var(--muted);font-size:11px">'+(et.nom||'')+'</span>';
-    } else if(et.sig){
-      etiqueta = '<strong>'+et.sig+'</strong>'+(et.nom?' <span style="color:var(--muted);font-size:11px">'+et.nom+'</span>':'');
-    } else {
-      etiqueta = et.nom;
+    var etiqueta = etiquetaDe(dimFila, kf2);
+    if(!dimFila2){
+      html += '<tr><td class="tdname">'+etiqueta+'</td>';
+      for(var cc2=0;cc2<CAMPANIAS.length;cc2++){
+        var c2 = CAMPANIAS[cc2];
+        html += celdasCampania(filasH[kf2][c2], c2);
+      }
+      html += '</tr>';
+      continue;
     }
-    html += '<tr><td class="tdname">'+etiqueta+'</td>';
-    for(var cc2=0;cc2<CAMPANIAS.length;cc2++){
-      var c2 = CAMPANIAS[cc2];
-      html += celdasCampania(filasH[kf2][c2], c2);
+    // Con desglose: una fila por subgrupo y una fila de subtotal del grupo.
+    var subs = ordenSub[kf2] || [];
+    subs.sort(function(a,b){
+      var ta=0, tb=0;
+      for(var z=0;z<CAMPANIAS.length;z++){ ta+=subH[kf2][a][CAMPANIAS[z]].neta; tb+=subH[kf2][b][CAMPANIAS[z]].neta; }
+      return tb-ta;
+    });
+    for(var s=0;s<subs.length;s++){
+      var ks = subs[s];
+      // El nombre del grupo se escribe una sola vez (en la primera fila del bloque).
+      html += '<tr><td class="tdname">'+(s===0?etiqueta:'')+'</td><td class="tdname" style="padding-left:14px">'+etiquetaDe(dimFila2, ks)+'</td>';
+      for(var cs=0;cs<CAMPANIAS.length;cs++){
+        var ccs = CAMPANIAS[cs];
+        html += celdasCampania(subH[kf2][ks][ccs], ccs);
+      }
+      html += '</tr>';
+    }
+    html += '<tr class="hist-subtot"><td class="tdname" style="font-weight:600">Subtotal</td><td class="tdname" style="font-weight:600">'+etiqueta+'</td>';
+    for(var cst=0;cst<CAMPANIAS.length;cst++){
+      var cct = CAMPANIAS[cst];
+      html += celdasCampania(filasH[kf2][cct], cct);
     }
     html += '</tr>';
   }
   // colspan total de la tabla (para el "sin datos")
-  var totalCols = 1;
+  var totalCols = 1 + (dimFila2 ? 1 : 0);
   for(var tc=0;tc<CAMPANIAS.length;tc++) totalCols += campAbierta(CAMPANIAS[tc]) ? 2 : 1;
   document.getElementById('histBody').innerHTML = html || '<tr><td colspan="'+totalCols+'" style="text-align:center;color:var(--muted);padding:16px">Sin datos para los filtros actuales.</td></tr>';
 
@@ -4335,7 +4479,7 @@ function renderHistorico(){
       }
     }
   }
-  var foot = '<tr class="tot-row"><td class="tdname">'+modoLbl+'</td>';
+  var foot = '<tr class="tot-row"><td class="tdname">'+modoLbl+'</td>' + (dimFila2 ? '<td></td>' : '');
   for(var fc=0;fc<CAMPANIAS.length;fc++){
     var cf = CAMPANIAS[fc];
     var bgf = cf===state.campania?' style="background:#EAEFE4"':'';
