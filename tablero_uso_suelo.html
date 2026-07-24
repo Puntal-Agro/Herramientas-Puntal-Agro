@@ -27,6 +27,9 @@ header{background:var(--card);border-bottom:1px solid var(--border);padding:12px
 .hdr-btn{padding:7px 14px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;border:1.5px solid #CBD5E1;background:var(--card);color:#475569;font-family:var(--sans)}
 .hdr-btn.primary{background:#4A6533;color:#fff;border-color:#4A6533}
 .hdr-btn.primary:hover{background:#3B5128}
+/* Link "volver al menú": mismo look que los botones del header */
+.hdr-menu{display:inline-flex;align-items:center;text-decoration:none;line-height:1}
+.hdr-menu:hover{border-color:#4A6533;color:#4A6533}
 .nav-bar{background:var(--bg);padding:14px 24px 4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .sticky-top{position:sticky;top:0;z-index:40;background:var(--bg);box-shadow:0 2px 6px -4px rgba(0,0,0,.15)}
 .nav-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-right:4px}
@@ -464,6 +467,7 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
     <span class="espacio-lbl">Campaña:</span>
     <select class="ctx-sel" id="selCampania"></select>
     <span class="ctx-pill" id="ctxPill">Don Eduardo · 26-27</span>
+    <a class="hdr-btn hdr-menu" href="index.html">← Menú</a>
     <button class="hdr-btn primary" onclick="exportActual()">Exportar Excel</button>
   </div>
 </header>
@@ -891,7 +895,7 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
     <div class="modal-title">⚙ Configurar tabla</div>
     <div class="modal-sub">Definí cómo se arma la tabla. No afecta a los filtros de arriba.</div>
     <div class="cfg-row"><label>Filas — Agrupar por</label>
-      <select class="filtro-select" id="cfgDim">
+      <select class="filtro-select" id="cfgDim" onchange="sincronizarCfgDims('fila')">
         <option value="campo">Campo</option>
         <option value="cultivo">Cultivo</option>
         <option value="ambiente">Ambiente</option>
@@ -900,7 +904,7 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
       </select>
     </div>
     <div class="cfg-row"><label>Filas — 2ª variable (detallar por)</label>
-      <select class="filtro-select" id="cfgDim2">
+      <select class="filtro-select" id="cfgDim2" onchange="sincronizarCfgDims('desglose')">
         <option value="">— (sin desglose)</option>
         <option value="campo">Campo</option>
         <option value="cultivo">Cultivo</option>
@@ -910,7 +914,7 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
       </select>
     </div>
     <div class="cfg-row"><label>Columnas</label>
-      <select class="filtro-select" id="cfgDimCol">
+      <select class="filtro-select" id="cfgDimCol" onchange="sincronizarCfgDims('columna')">
         <option value="">— (ninguno, solo total)</option>
         <option value="campo">Campo</option>
         <option value="cultivo">Cultivo</option>
@@ -939,7 +943,7 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
     <div class="modal-title">⚙ Configurar tabla</div>
     <div class="modal-sub">Definí cómo se arma la matriz. Las columnas son siempre las campañas. No afecta a los filtros de arriba.</div>
     <div class="cfg-row"><label>Filas — Agrupar por</label>
-      <select class="filtro-select" id="cfgHistDim">
+      <select class="filtro-select" id="cfgHistDim" onchange="sincronizarCfgHistDims('fila')">
         <option value="lote">Lote</option>
         <option value="ambiente">Ambiente</option>
         <option value="campo">Campo</option>
@@ -949,7 +953,7 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
       </select>
     </div>
     <div class="cfg-row"><label>Filas — 2ª variable (detallar por)</label>
-      <select class="filtro-select" id="cfgHistDim2">
+      <select class="filtro-select" id="cfgHistDim2" onchange="sincronizarCfgHistDims('desglose')">
         <option value="">— (sin desglose)</option>
         <option value="lote">Lote</option>
         <option value="ambiente">Ambiente</option>
@@ -1105,7 +1109,7 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
 
 <footer>
   <span>Puntal Agro · Plan de Uso de Suelo</span>
-  <span id="fts">v2026-07-24 09:55 · BUILD 40</span>
+  <span id="fts">v2026-07-24 11:52 · BUILD 43</span>
 </footer>
 
 <script>
@@ -3700,10 +3704,44 @@ var DIM_LABEL_HIST = {lote:'Lote', campo:'Campo', cultivo:'Cultivo', ambiente:'A
 
 // ── Configuración de la matriz de rotación (mismo patrón que la tabla de Reportes:
 // selects ocultos como fuente de verdad + modal que los lee/escribe + resumen compacto).
+/* Rotación: filas y desglose no pueden ser la misma dimensión. Mismo criterio
+   que sincronizarCfgDims() de Reportes; acá son solo dos selectores porque las
+   columnas son siempre las campañas. */
+function sincronizarCfgHistDims(origen){
+  var sFila = document.getElementById('cfgHistDim');
+  var sDesg = document.getElementById('cfgHistDim2');
+  if(!sFila || !sDesg) return;
+
+  // Resolver la colisión moviendo el selector que NO se tocó.
+  if(sDesg.value && sDesg.value === sFila.value){
+    var mover = (origen === 'desglose') ? sFila : sDesg;
+    var fijo  = (origen === 'desglose') ? sDesg.value : sFila.value;
+    var opts = mover.options, puesto = false;
+    for(var i=0;i<opts.length;i++){
+      if(opts[i].value !== '' && opts[i].value !== fijo){ mover.value = opts[i].value; puesto = true; break; }
+    }
+    if(!puesto) mover.value = '';
+  }
+
+  // Deshabilitar en cada selector la dimensión tomada por el otro.
+  function pintar(sel, tomada){
+    var opts = sel.options;
+    for(var i=0;i<opts.length;i++){
+      var v = opts[i].value;
+      var bloq = (v !== '' && v !== sel.value && v === tomada);
+      opts[i].disabled = bloq;
+      opts[i].style.color = bloq ? '#B9C2CE' : '';
+    }
+  }
+  pintar(sFila, sDesg.value);
+  pintar(sDesg, sFila.value);
+}
+
 function abrirConfigHist(){
   document.getElementById('cfgHistDim').value   = (document.getElementById('histDimFila')||{}).value || 'ambiente';
   document.getElementById('cfgHistDim2').value  = (document.getElementById('histDimFila2')||{}).value || '';
   document.getElementById('cfgHistValor').value = (document.getElementById('histValor')||{}).value || 'neta';
+  sincronizarCfgHistDims('');
   document.getElementById('modalConfigHist').classList.add('on');
 }
 function closeConfigHist(){ document.getElementById('modalConfigHist').classList.remove('on'); }
@@ -3722,12 +3760,64 @@ function actualizarConfigResumenHist(dim, dim2, modoVal){
   var el = document.getElementById('histConfigResumen');
   if(el) el.textContent = txt;
 }
+/* --------------------------------------------------------------------------
+   Config de tabla: las tres dimensiones (filas, desglose, columnas) tienen que
+   ser distintas entre sí. Antes se dejaba elegir cualquier combinación y, si
+   filas coincidía con columnas, renderReportes() cambiaba la fila en silencio:
+   el selector quedaba mostrando una cosa y la tabla se armaba con otra.
+   Ahora se deshabilitan las opciones ya tomadas en los otros dos selectores.
+   -------------------------------------------------------------------------- */
+function sincronizarCfgDims(origen){
+  var sFila = document.getElementById('cfgDim');
+  var sDesg = document.getElementById('cfgDim2');
+  var sCol  = document.getElementById('cfgDimCol');
+  if(!sFila || !sDesg || !sCol) return;
+
+  // Si el cambio dejó una colisión, la resuelve el selector que NO se tocó.
+  function liberar(sel, tomadas){
+    if(!sel.value) return;                    // "" (sin desglose / sin columnas) siempre vale
+    if(tomadas.indexOf(sel.value) === -1) return;
+    var opts = sel.options;
+    for(var i=0;i<opts.length;i++){
+      var v = opts[i].value;
+      if(v === '' ) continue;
+      if(tomadas.indexOf(v) === -1){ sel.value = v; return; }
+    }
+    sel.value = '';                           // no quedaba ninguna libre
+  }
+  if(origen === 'fila'){
+    liberar(sDesg, [sFila.value]);
+    liberar(sCol,  [sFila.value, sDesg.value]);
+  } else if(origen === 'desglose'){
+    liberar(sFila, [sDesg.value]);
+    liberar(sCol,  [sFila.value, sDesg.value]);
+  } else if(origen === 'columna'){
+    liberar(sFila, [sCol.value]);
+    liberar(sDesg, [sFila.value, sCol.value]);
+  }
+
+  // Deshabilitar en cada selector lo que ya está tomado en los otros dos.
+  function pintar(sel, tomadas){
+    var opts = sel.options;
+    for(var i=0;i<opts.length;i++){
+      var v = opts[i].value;
+      var bloq = (v !== '' && v !== sel.value && tomadas.indexOf(v) !== -1);
+      opts[i].disabled = bloq;
+      opts[i].style.color = bloq ? '#B9C2CE' : '';
+    }
+  }
+  pintar(sFila, [sDesg.value, sCol.value]);
+  pintar(sDesg, [sFila.value, sCol.value]);
+  pintar(sCol,  [sFila.value, sDesg.value]);
+}
+
 function abrirConfigTabla(){
   // Cargar el modal con los valores actuales (de los selects ocultos)
   document.getElementById('cfgDim').value    = (document.getElementById('repDimension')||{}).value || 'uso';
   document.getElementById('cfgDim2').value   = (document.getElementById('repDimension2')||{}).value || '';
   document.getElementById('cfgDimCol').value = (document.getElementById('repDimensionCol')||{}).value || '';
   document.getElementById('cfgSup').value    = (document.getElementById('repSuperficie')||{}).value || 'neta';
+  sincronizarCfgDims('');
   document.getElementById('modalConfigTabla').classList.add('on');
 }
 function closeConfigTabla(){ document.getElementById('modalConfigTabla').classList.remove('on'); }
@@ -3756,12 +3846,17 @@ function renderReportes(){
   var dim2   = (document.getElementById('repDimension2')||{}).value || '';
   var dimCol = (document.getElementById('repDimensionCol')||{}).value || '';
   var supMode = (document.getElementById('repSuperficie')||{}).value || 'neta';
-  // Choque: si el agrupamiento de filas coincide con el de columnas, no tiene sentido.
-  // (No aplica cuando no hay dimensión de columnas.)
-  if(dimCol && dim === dimCol){
-    var alt = ['campo','cultivo','ambiente','uso','tenencia'];
-    for(var i=0;i<alt.length;i++){ if(alt[i]!==dimCol && alt[i]!==dim2){ dim = alt[i]; break; } }
+  // Red de seguridad: el modal ya impide elegir la misma dimensión dos veces,
+  // pero por si la config llega de otro lado (config vieja, llamada directa),
+  // se resuelven acá los choques fila↔columna y desglose↔columna/fila.
+  var ALT = ['campo','cultivo','ambiente','uso','tenencia'];
+  function primeraLibre(tomadas){
+    for(var i=0;i<ALT.length;i++){ if(tomadas.indexOf(ALT[i])===-1) return ALT[i]; }
+    return '';
   }
+  if(dim2 && dim2 === dim) dim2 = primeraLibre([dim, dimCol]);
+  if(dimCol && dim === dimCol) dim = primeraLibre([dimCol, dim2]);
+  if(dimCol && dim2 === dimCol) dim2 = primeraLibre([dim, dimCol]);
   renderMatrizReporte(dim, dim2, dimCol, supMode);
   actualizarConfigResumen(dim, dim2, dimCol, supMode);
   renderComposicion();
