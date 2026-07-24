@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Administración · Puntal Agro</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#F0F2F5;--card:#fff;--border:#E4E8EE;--text:#0F1923;--muted:#7A8899;--olive:#4A6533;--ochre:#A86A1F;--terra:#C8642D;--radius:12px;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;}
+:root{--bg:#F0F2F5;--card:#fff;--border:#E4E8EE;--text:#0F1923;--muted:#7A8899;--olive:#4A6533;--ochre:#A86A1F;--terra:#C8642D;--radius:12px;--mono:'DM Sans',sans-serif;--sans:'DM Sans',sans-serif;}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:15px;min-height:100vh;display:flex;flex-direction:column}
 header{background:var(--card);border-bottom:1px solid var(--border);padding:10px 24px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
@@ -58,6 +58,10 @@ main{padding:16px 24px 28px;display:grid;grid-template-columns:340px 1fr;gap:16p
 .msg{font-size:11px;color:var(--muted)}
 .note{font-size:11px;color:var(--muted);background:#FBF1E0;border:1px solid #EAD9B8;border-radius:8px;padding:9px 12px;line-height:1.5;margin:0 24px}
 @media (max-width:860px){main{grid-template-columns:1fr}}
+
+/* Números tabulares: alinea las columnas numéricas de las tablas.
+   Criterio unificado con maestros.html y tablero_uso_suelo.html. */
+table, .num, .cnt, input[type=number]{font-variant-numeric:tabular-nums}
 </style>
 </head>
 <body>
@@ -69,6 +73,7 @@ main{padding:16px 24px 28px;display:grid;grid-template-columns:340px 1fr;gap:16p
   </div>
   <div class="h-actions">
     <a class="lnk" href="index.html">← Menú</a>
+    <button class="lnk" onclick="salir()">Salir</button>
     <a class="lnk" href="usuarios.html">Usuarios</a>
     <button class="lnk" onclick="resetDemo()">Reiniciar demo</button>
   </div>
@@ -267,6 +272,66 @@ function buscar(arr,id){ for(var i=0;i<arr.length;i++){ if(arr[i].id===id) retur
 function val(id){ var el=document.getElementById(id); return el?el.value.trim():''; }
 function setMsg(t){ var m=document.getElementById('msg'); if(m) m.textContent=t; }
 
+/* ==========================================================================
+   VALIDADORES
+   Portados desde maestros.html para unificar criterio en todo el sistema.
+   El backend debe repetirlos server-side: esto es asistencia de carga, no
+   validación real.
+   ========================================================================== */
+
+// Deja solo los dígitos de un CUIT ("30-71000000-1" -> "30710000001").
+function vCuitDigitos(s){ return String(s==null?'':s).replace(/\D/g,''); }
+
+// CUIT con dígito verificador (módulo 11).
+function vCuitValido(d){
+  if(!/^\d{11}$/.test(d)) return false;
+  var mult=[5,4,3,2,7,6,5,4,3,2], suma=0;
+  for(var i=0;i<10;i++){ suma += parseInt(d.charAt(i),10)*mult[i]; }
+  var resto=suma%11, dv=11-resto;
+  if(dv===11) dv=0; else if(dv===10) dv=9;
+  return dv===parseInt(d.charAt(10),10);
+}
+
+// Email: formato básico válido.
+function vEmailValido(s){ return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(s); }
+
+// Normaliza para comparar (sin tildes, minúsculas, espacios colapsados).
+function vNorm(s){
+  return String(s==null?'':s).trim().toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ');
+}
+
+// ¿Ya existe otro registro con ese valor? idActual = el que se está editando.
+function vDuplicado(lista, cmpVal, getVal, idActual){
+  var n=vNorm(cmpVal); if(n==='') return false;
+  for(var i=0;i<lista.length;i++){
+    var it=lista[i];
+    if(idActual && it.id===idActual) continue;
+    if(vNorm(getVal(it))===n) return true;
+  }
+  return false;
+}
+
+/* Valida CUIT y email de un formulario. Devuelve el mensaje de error o ''.
+   Ambos campos son opcionales: si vienen vacíos, no se valida nada.
+
+   'cuitOriginal' permite NO revalidar un CUIT que ya estaba guardado y no se
+   tocó. Sin esto, un dato preexistente inválido (los CUIT del seed lo son)
+   bloquearía toda edición futura del registro: no se podría ni corregir el
+   nombre. El backend debe hacer lo mismo o sanear los datos en la migración. */
+function validarCuitEmail(cuitRaw, emailRaw, etiquetaCuit, cuitOriginal){
+  var cuit = vCuitDigitos(cuitRaw);
+  var sinCambios = (cuitOriginal != null && vCuitDigitos(cuitOriginal) === cuit);
+  if(cuitRaw && cuitRaw.trim() !== '' && !sinCambios){
+    if(cuit.length !== 11) return (etiquetaCuit||'CUIT')+': debe tener 11 dígitos.';
+    if(!vCuitValido(cuit))  return (etiquetaCuit||'CUIT')+': el dígito verificador no es correcto.';
+  }
+  if(emailRaw && emailRaw.trim() !== '' && !vEmailValido(emailRaw.trim())){
+    return 'El email no tiene un formato válido.';
+  }
+  return '';
+}
+
 /* ---------------- NUEVOS ---------------- */
 function nuevoCliente(){ sel={kind:'cliente',id:null}; renderTree(); renderForm(); }
 function nuevaEmpresa(clienteId){ sel={kind:'empresa',id:null,_nuevoEnCliente:true,_clienteId:clienteId}; renderForm(); }
@@ -282,6 +347,18 @@ function guardarCliente(){
     if (bloquea(puedeSobreCliente(sel.id), 'No tenés permiso sobre este cliente.')) return;
   }
   if(!val('c-nombre')){ setMsg('Falta el nombre.'); return; }
+  var cliOrig = (sel.id && !sel._nuevoEnCliente) ? buscar(PA.demo.listarClientes(), sel.id) : null;
+  var errCli = validarCuitEmail(val('c-cuit'), val('c-email'), 'CUIT del cliente', cliOrig?cliOrig.cuit:null);
+  if(errCli){ setMsg(errCli); return; }
+  // Nombre único entre clientes.
+  if(vDuplicado(PA.demo.listarClientes(), val('c-nombre'), function(it){return it.nombre;}, sel.id)){
+    setMsg('Ya existe un cliente con ese nombre.'); return;
+  }
+  // CUIT único (si se cargó).
+  if(vCuitDigitos(val('c-cuit')) && vDuplicado(PA.demo.listarClientes(), vCuitDigitos(val('c-cuit')),
+      function(it){return vCuitDigitos(it.cuit);}, sel.id)){
+    setMsg('Ya existe un cliente con ese CUIT.'); return;
+  }
   var existente = (sel.id&&!sel._nuevoEnCliente)?buscar(PA.demo.listarClientes(),sel.id):{};
   var c = {
     id: sel.id||undefined, nombre: val('c-nombre'), nombreContacto: val('c-contacto'),
@@ -308,6 +385,19 @@ function guardarEmpresa(clienteId){
     if(bloquea(puedeSobreEmpresa(sel.id), 'No tenés permiso sobre esta empresa.')) return;
   }
   if(!val('e-rs')){ setMsg('Falta la razón social.'); return; }
+  var empOrig = (sel.id && !sel._nuevoEnCliente) ? buscar(PA.demo.listarEmpresas(), sel.id) : null;
+  var errEmp = validarCuitEmail(val('e-cuit'), '', 'CUIT de la empresa', empOrig?empOrig.cuit:null);
+  if(errEmp){ setMsg(errEmp); return; }
+  var idEmp = sel._nuevoEnCliente ? null : sel.id;
+  // Razón social única entre empresas.
+  if(vDuplicado(PA.demo.listarEmpresas(), val('e-rs'), function(it){return it.razonSocial;}, idEmp)){
+    setMsg('Ya existe una empresa con esa razón social.'); return;
+  }
+  // CUIT único (si se cargó).
+  if(vCuitDigitos(val('e-cuit')) && vDuplicado(PA.demo.listarEmpresas(), vCuitDigitos(val('e-cuit')),
+      function(it){return vCuitDigitos(it.cuit);}, idEmp)){
+    setMsg('Ya existe una empresa con ese CUIT.'); return;
+  }
   var existente=(sel.id&&!sel._nuevoEnCliente)?buscar(PA.demo.listarEmpresas(),sel.id):{};
   var e={ id:sel._nuevoEnCliente?undefined:(sel.id||undefined), clienteId:clienteId,
     razonSocial:val('e-rs'), cuit:val('e-cuit'), condicionIVA:val('e-iva'), direccion:val('e-dir'),
@@ -340,6 +430,7 @@ function borrarCampo(){
 }
 
 function irAUsuarios(){ location.href='usuarios.html'; }
+function salir(){ PA.logout(); location.href='login.html'; }
 
 /* ==========================================================================
    PERMISOS DE ADMINISTRACIÓN

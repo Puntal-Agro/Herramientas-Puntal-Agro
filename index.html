@@ -6,7 +6,7 @@
 <title>Herramientas · Puntal Agro</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#F0F2F5;--card:#fff;--border:#E4E8EE;--text:#0F1923;--muted:#7A8899;--olive:#4A6533;--ochre:#A86A1F;--terra:#C8642D;--radius:12px;--mono:ui-monospace,SFMono-Regular,Menlo,monospace;--sans:'DM Sans',sans-serif;}
+:root{--bg:#F0F2F5;--card:#fff;--border:#E4E8EE;--text:#0F1923;--muted:#7A8899;--olive:#4A6533;--ochre:#A86A1F;--terra:#C8642D;--radius:12px;--mono:'DM Sans',sans-serif;--sans:'DM Sans',sans-serif;}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:15px;min-height:100vh;display:flex;flex-direction:column}
 .topbar{height:4px;background:var(--olive)}
@@ -55,6 +55,10 @@ main{padding:0;display:flex;flex-direction:column;flex:1}
 .tag-lab{background:#F8EDD9;color:#6E4612}.tag-fit{background:#EFF1E0;color:#4A5520}.tag-ext{background:#EEF0F3;color:#475569}
 footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--card);font-size:11px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
 @media (max-width:768px){.grid{grid-template-columns:1fr}.logo-title{font-size:18px}}
+
+/* Números tabulares: alinea las columnas numéricas de las tablas.
+   Criterio unificado con maestros.html y tablero_uso_suelo.html. */
+table, .num, .cnt, input[type=number]{font-variant-numeric:tabular-nums}
 </style>
 </head>
 <body>

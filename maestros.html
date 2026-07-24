@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Maestros · Puntal Agro</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#F0F2F5;--card:#fff;--border:#E4E8EE;--text:#0F1923;--muted:#7A8899;--olive:#4A6533;--ochre:#A86A1F;--terra:#C8642D;--radius:12px;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;}
+:root{--bg:#F0F2F5;--card:#fff;--border:#E4E8EE;--text:#0F1923;--muted:#7A8899;--olive:#4A6533;--ochre:#A86A1F;--terra:#C8642D;--radius:12px;--mono:'DM Sans',sans-serif;--sans:'DM Sans',sans-serif;}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:15px;min-height:100vh;display:flex;flex-direction:column}
 header{background:var(--card);border-bottom:1px solid var(--border);padding:10px 24px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
@@ -141,6 +141,7 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
     <span id="badge-permiso" class="badge-perm" style="display:none"></span>
     <select class="h-emp" id="hemp" onchange="cambiarEmpresa(this.value)"></select>
     <a class="lnk" href="index.html">← Menú</a>
+    <button class="lnk" onclick="salir()">Salir</button>
   </div>
 </header>
 
@@ -757,7 +758,7 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
 
 <footer>
   <span>Puntal Agro · Maestros</span>
-  <span>BUILD 11 · v2026-07-24 11:02</span>
+  <span>BUILD 12 · v2026-07-24 13:01</span>
 </footer>
 
 <script src="pa-core.js"></script>
@@ -2442,6 +2443,8 @@ function eliminar(id){
     PA.demo.borrarTercero(t); if(!id){cerrarModal();} render();
   }
 }
+
+function salir(){ PA.logout(); location.href='login.html'; }
 
 PA.init({ modo:'demo' }, function(){
   if (!PA.haySesion()) { location.href='login.html'; return; }
