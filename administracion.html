@@ -102,14 +102,29 @@ var expand = {};                          // nodos expandidos {id:true}
 var CTX = null;
 
 /* ---------------- ÁRBOL ---------------- */
+/* Clientes que el usuario puede ver: el admin de cliente solo el suyo. */
+function clientesVisibles(){
+  var todos = PA.demo.listarClientes();
+  if (!esAdminCliente()) return todos;
+  var mio = clienteDelUsuario(), out = [];
+  for (var i=0;i<todos.length;i++){ if (todos[i].id===mio) out.push(todos[i]); }
+  return out;
+}
+
+/* Deja abiertos todos los clientes visibles y todas sus empresas. */
+function expandirTodo(){
+  var cls = clientesVisibles();
+  for (var i=0;i<cls.length;i++){
+    expand[cls[i].id] = true;
+    var emps = PA.demo.empresasDeCliente(cls[i].id);
+    for (var j=0;j<emps.length;j++){ expand[emps[j].id] = true; }
+  }
+}
+
 function renderTree(){
   var cont = document.getElementById('tree');
   cont.innerHTML='';
-  var todos = PA.demo.listarClientes();
-  // admin_cliente solo ve su propio cliente
-  var clientes = (CTX && CTX.usuario.rol === 'admin_cliente')
-    ? (function(){ var out=[]; for(var i=0;i<todos.length;i++){ if(todos[i].id===CTX.usuario.clienteId) out.push(todos[i]); } return out; })()
-    : todos;
+  var clientes = clientesVisibles();
   for (var i=0;i<clientes.length;i++){
     (function(cli){
       var node=document.createElement('div'); node.className='node';
@@ -196,7 +211,7 @@ function formCliente(){
     '</div>'+
     '<div class="actions">'+
       '<button class="btn" onclick="guardarCliente()">Guardar</button>'+
-      (nuevo?'':'<button class="btn-out" onclick="borrarCliente()">Eliminar cliente</button>')+
+      ((nuevo||!puedeBorrarCliente())?'':'<button class="btn-out" onclick="borrarCliente()">Eliminar cliente</button>')+
       (nuevo?'':'<button class="btn-link" onclick="irAUsuarios()">Asignar usuario admin a este cliente →</button>')+
       '<span class="msg" id="msg"></span>'+
     '</div>';
@@ -259,6 +274,13 @@ function nuevoCampo(empresaId){ sel={kind:'campo',id:null,_nuevoEnEmpresa:true,_
 
 /* ---------------- GUARDAR / BORRAR ---------------- */
 function guardarCliente(){
+  // Alta: solo Puntal. Edición: Puntal o el admin de ese mismo cliente.
+  var esAlta = !sel.id;
+  if (esAlta){
+    if (bloquea(puedeCrearCliente(), 'Solo un administrador de Puntal Agro puede dar de alta clientes.')) return;
+  } else {
+    if (bloquea(puedeSobreCliente(sel.id), 'No tenés permiso sobre este cliente.')) return;
+  }
   if(!val('c-nombre')){ setMsg('Falta el nombre.'); return; }
   var existente = (sel.id&&!sel._nuevoEnCliente)?buscar(PA.demo.listarClientes(),sel.id):{};
   var c = {
@@ -273,9 +295,18 @@ function guardarCliente(){
   expand[saved.id]=true; sel={kind:'cliente',id:saved.id};
   renderTree(); renderForm(); setMsg('Guardado.');
 }
-function borrarCliente(){ if(confirm('¿Eliminar el cliente con todas sus empresas y campos?')){ PA.demo.borrarCliente(sel.id); sel={kind:null,id:null}; renderTree(); renderForm(); } }
+function borrarCliente(){
+  if(bloquea(puedeBorrarCliente(), 'Solo un administrador de Puntal Agro puede eliminar un cliente.')) return;
+  if(confirm('¿Eliminar el cliente con todas sus empresas y campos?')){ PA.demo.borrarCliente(sel.id); sel={kind:null,id:null}; renderTree(); renderForm(); }
+}
 
 function guardarEmpresa(clienteId){
+  // El cliente DESTINO tiene que estar en su alcance (evita colgar una empresa
+  // de un cliente ajeno), y si es edición, también el cliente ORIGEN.
+  if(bloquea(puedeSobreCliente(clienteId), 'No tenés permiso sobre ese cliente.')) return;
+  if(sel.id && !sel._nuevoEnCliente){
+    if(bloquea(puedeSobreEmpresa(sel.id), 'No tenés permiso sobre esta empresa.')) return;
+  }
   if(!val('e-rs')){ setMsg('Falta la razón social.'); return; }
   var existente=(sel.id&&!sel._nuevoEnCliente)?buscar(PA.demo.listarEmpresas(),sel.id):{};
   var e={ id:sel._nuevoEnCliente?undefined:(sel.id||undefined), clienteId:clienteId,
@@ -285,9 +316,16 @@ function guardarEmpresa(clienteId){
   expand[clienteId]=true; expand[saved.id]=true; sel={kind:'empresa',id:saved.id};
   renderTree(); renderForm(); setMsg('Guardado.');
 }
-function borrarEmpresa(){ if(confirm('¿Eliminar la empresa y sus campos?')){ PA.demo.borrarEmpresa(sel.id); sel={kind:null,id:null}; renderTree(); renderForm(); } }
+function borrarEmpresa(){
+  if(bloquea(puedeSobreEmpresa(sel.id), 'No tenés permiso sobre esta empresa.')) return;
+  if(confirm('¿Eliminar la empresa y sus campos?')){ PA.demo.borrarEmpresa(sel.id); sel={kind:null,id:null}; renderTree(); renderForm(); }
+}
 
 function guardarCampo(empresaId){
+  if(bloquea(puedeSobreEmpresa(empresaId), 'No tenés permiso sobre esa empresa.')) return;
+  if(sel.id && !sel._nuevoEnEmpresa){
+    if(bloquea(puedeSobreCampo(sel.id), 'No tenés permiso sobre este campo.')) return;
+  }
   if(!val('k-nombre')){ setMsg('Falta el nombre del campo.'); return; }
   var k={ id:sel._nuevoEnEmpresa?undefined:(sel.id||undefined), empresaId:empresaId,
     nombre:val('k-nombre'), localidad:val('k-loc'), partido:val('k-part'), provincia:val('k-prov'),
@@ -296,10 +334,72 @@ function guardarCampo(empresaId){
   expand[empresaId]=true; sel={kind:'campo',id:saved.id};
   renderTree(); renderForm(); setMsg('Guardado.');
 }
-function borrarCampo(){ if(confirm('¿Eliminar el campo?')){ PA.demo.borrarCampo(sel.id); sel={kind:null,id:null}; renderTree(); renderForm(); } }
+function borrarCampo(){
+  if(bloquea(puedeSobreCampo(sel.id), 'No tenés permiso sobre este campo.')) return;
+  if(confirm('¿Eliminar el campo?')){ PA.demo.borrarCampo(sel.id); sel={kind:null,id:null}; renderTree(); renderForm(); }
+}
 
 function irAUsuarios(){ location.href='usuarios.html'; }
-function resetDemo(){ if(confirm('¿Reiniciar todos los datos demo?')){ PA.demo.resetDemo(); expand={}; sel={kind:null,id:null}; renderTree(); renderForm(); } }
+
+/* ==========================================================================
+   PERMISOS DE ADMINISTRACIÓN
+   --------------------------------------------------------------------------
+   Reglas (modelo_datos_permisos.md §7.3 / §7.5):
+   - admin_general (Puntal): puede todo, sobre todos los clientes.
+   - admin_cliente: SOLO sobre su propio cliente. No crea ni borra clientes;
+     puede editar los datos de su cliente y el ABM de sus empresas y campos.
+   - usuario: no entra a esta pantalla (ya se redirige en el arranque).
+
+   NOTA: control de interfaz, no seguridad real. El bloqueo definitivo va en
+   el backend. Ver handoff_maestros_pacore.md.
+   ========================================================================== */
+
+/* pa-core expone el cliente del usuario como ctx.clienteId (raíz), pero varias
+   pantallas lo leen como ctx.usuario.clienteId. Este helper tolera ambas formas
+   para no depender de cuál termine quedando en pa-core.js (archivo de Mariana). */
+function clienteDelUsuario(){
+  if (!CTX) return null;
+  if (CTX.clienteId) return CTX.clienteId;
+  if (CTX.usuario && CTX.usuario.clienteId) return CTX.usuario.clienteId;
+  return null;
+}
+
+function esAdminPuntal(){ return !!(CTX && CTX.usuario && CTX.usuario.rol === 'admin_general'); }
+function esAdminCliente(){ return !!(CTX && CTX.usuario && CTX.usuario.rol === 'admin_cliente'); }
+
+/* ¿Puede tocar este cliente? El admin de cliente, solo el suyo. */
+function puedeSobreCliente(clienteId){
+  if (esAdminPuntal()) return true;
+  if (!esAdminCliente()) return false;
+  var mio = clienteDelUsuario();
+  return !!(mio && clienteId === mio);
+}
+
+/* ¿Puede tocar esta empresa? Se resuelve por el cliente al que pertenece. */
+function puedeSobreEmpresa(empresaId){
+  if (esAdminPuntal()) return true;
+  var e = buscar(PA.demo.listarEmpresas(), empresaId);
+  return e && e.clienteId ? puedeSobreCliente(e.clienteId) : false;
+}
+
+/* ¿Puede tocar este campo? Se resuelve subiendo campo -> empresa -> cliente. */
+function puedeSobreCampo(campoId){
+  if (esAdminPuntal()) return true;
+  var k = buscar(PA.demo.listarCampos(), campoId);
+  return k && k.empresaId ? puedeSobreEmpresa(k.empresaId) : false;
+}
+
+/* Solo Puntal da de alta o baja clientes (§7.3). */
+function puedeCrearCliente(){ return esAdminPuntal(); }
+function puedeBorrarCliente(){ return esAdminPuntal(); }
+
+/* Corta una escritura sin permiso. Devuelve true si hay que abortar. */
+function bloquea(cond, msg){
+  if (cond) return false;
+  alert(msg || 'No tenés permiso para realizar esta acción.');
+  return true;
+}
+function resetDemo(){ if(confirm('¿Reiniciar todos los datos demo?')){ PA.demo.resetDemo(); expand={}; expandirTodo(); sel={kind:null,id:null}; renderTree(); renderForm(); } }
 
 PA.init({ modo:'demo' }, function(){
   if (!PA.haySesion()) { location.href='login.html'; return; }
@@ -311,13 +411,9 @@ PA.init({ modo:'demo' }, function(){
     if (ctx.usuario.rol === 'admin_cliente') {
       document.getElementById('btn-nuevo-cliente').style.display = 'none';
     }
-    var cls = PA.demo.listarClientes();
-    // expandir el primer cliente visible por defecto
-    if (ctx.usuario.rol === 'admin_cliente') {
-      if (ctx.usuario.clienteId) expand[ctx.usuario.clienteId] = true;
-    } else if (cls.length) {
-      expand[cls[0].id] = true;
-    }
+    // Árbol desplegado por defecto: todos los clientes visibles y sus empresas.
+    // (Los campos no tienen estado propio: se muestran al abrir su empresa.)
+    expandirTodo();
     renderTree();
   });
 });

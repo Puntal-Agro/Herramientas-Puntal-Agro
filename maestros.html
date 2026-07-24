@@ -43,6 +43,8 @@ table{width:100%;border-collapse:collapse;font-size:13px}
 th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
 th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)}
 .rol-bdg{display:inline-block;font-size:10px;font-family:var(--mono);padding:2px 7px;border-radius:10px;margin:1px 2px 1px 0}
+.badge-perm{display:inline-block;font-size:11px;font-weight:600;color:var(--olive);background:#EDF1E8;border:1px solid #D6E0CB;border-radius:10px;padding:4px 10px;white-space:nowrap}
+.aviso-perm{font-size:12px;color:var(--ochre);background:#FBF1E0;border:1px solid #EAD9B8;border-radius:8px;padding:9px 12px;line-height:1.5;margin-bottom:14px}
 .rb-prov{background:#FBEDE3;color:#9A4A20}.rb-cli{background:#EEF3E8;color:#3A5128}.rb-tipo{background:#EEF0F3;color:#475569}
 .banda-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
 .banda-chip{font-size:11.5px;font-weight:600;border:2px solid var(--border);background:var(--card);color:var(--muted);border-radius:8px;padding:6px 12px;cursor:pointer;font-family:var(--sans)}
@@ -136,6 +138,7 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
     </div>
   </div>
   <div class="h-right">
+    <span id="badge-permiso" class="badge-perm" style="display:none"></span>
     <select class="h-emp" id="hemp" onchange="cambiarEmpresa(this.value)"></select>
     <a class="lnk" href="index.html">← Menú</a>
   </div>
@@ -165,11 +168,12 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
   </div>
 
   <div class="panel" id="panel">
+    <div id="aviso-permiso" class="aviso-perm" style="display:none"></div>
     <!-- VISTA TERCEROS -->
     <div id="vista-terceros">
       <div class="panel-head">
         <h2>Proveedores y Clientes</h2>
-        <button class="btn" onclick="abrirModal()">+ Nuevo</button>
+        <button class="btn btn-nuevo" data-cat="terceros" onclick="abrirModal()">+ Nuevo</button>
       </div>
       <div class="filtros-ter" id="filtros">
         <input id="ter-buscar" class="buscador" placeholder="Buscar por nombre o CUIT…" oninput="render()">
@@ -190,7 +194,7 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
     <div id="vista-choferes" style="display:none">
       <div class="panel-head">
         <h2>Choferes</h2>
-        <button class="btn" id="btn-nuevo-chofer" onclick="abrirModalChofer()">+ Nuevo</button>
+        <button class="btn btn-nuevo" id="btn-nuevo-chofer" data-cat="choferes" onclick="abrirModalChofer()">+ Nuevo</button>
       </div>
       <p style="font-size:12.5px;color:var(--muted);margin-bottom:12px;line-height:1.5">Cada chofer pertenece a un transportista (un tercero con rol transportista).</p>
       <table id="tbl-chof">
@@ -204,7 +208,7 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
     <div id="vista-socios" style="display:none">
       <div class="panel-head">
         <h2>Socios</h2>
-        <button class="btn" onclick="abrirModalSocio()">+ Nuevo</button>
+        <button class="btn btn-nuevo" data-cat="socios" onclick="abrirModalSocio()">+ Nuevo</button>
       </div>
       <table id="tbl-soc">
         <thead><tr><th>Nombre</th><th>Observaciones</th><th></th></tr></thead>
@@ -217,7 +221,7 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
     <div id="vista-depositos" style="display:none">
       <div class="panel-head">
         <h2>Depósitos / Acopios</h2>
-        <button class="btn" onclick="abrirModalDep()">+ Nuevo</button>
+        <button class="btn btn-nuevo" data-cat="depositos" onclick="abrirModalDep()">+ Nuevo</button>
       </div>
       <p style="font-size:12.5px;color:var(--muted);margin-bottom:12px;line-height:1.5">Lugar físico de stock que puede estar en un campo o ser un depósito general de la empresa o ser un depósito de terceros fuera de la empresa.</p>
       <table id="tbl-dep">
@@ -231,7 +235,7 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
     <div id="vista-labores" style="display:none">
       <div class="panel-head">
         <h2>Labores</h2>
-        <button class="btn" onclick="abrirModalLab()">+ Nuevo</button>
+        <button class="btn btn-nuevo" data-cat="labores" onclick="abrirModalLab()">+ Nuevo</button>
       </div>
       <table id="tbl-lab">
         <thead><tr><th>Nombre</th><th>Unidad</th><th></th></tr></thead>
@@ -244,7 +248,7 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
     <div id="vista-cultivos" style="display:none">
       <div class="panel-head">
         <h2>Cultivos/Unidades de Negocio</h2>
-        <button class="btn" onclick="abrirModalCul()">+ Nuevo</button>
+        <button class="btn btn-nuevo" data-cat="cultivos" onclick="abrirModalCul()">+ Nuevo</button>
       </div>
       <table id="tbl-cul">
         <thead><tr><th>Nombre</th><th>Sigla</th><th>Tipo</th><th>Uso</th><th>Especie</th><th>Gramínea</th><th>2ª</th><th></th></tr></thead>
@@ -257,7 +261,7 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
     <div id="vista-categorias" style="display:none">
       <div class="panel-head">
         <h2>Categorías de insumo</h2>
-        <button class="btn" onclick="abrirModalCateg()">+ Nueva</button>
+        <button class="btn btn-nuevo" data-cat="categorias" onclick="abrirModalCateg()">+ Nueva</button>
       </div>
       <div class="help-row" style="margin-bottom:12px">Catálogo global de Puntal. Las categorías predeterminadas no se borran; las fitosanitarias tienen código fijo. Podés renombrar cualquiera y agregar nuevas (nacen no fitosanitarias).</div>
       <table id="tbl-categ">
@@ -271,7 +275,7 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
     <div id="vista-usos" style="display:none">
       <div class="panel-head">
         <h2>Usos</h2>
-        <button class="btn" onclick="abrirModalUso()">+ Nuevo</button>
+        <button class="btn btn-nuevo" data-cat="usos" onclick="abrirModalUso()">+ Nuevo</button>
       </div>
       <table id="tbl-uso">
         <thead><tr><th>Código</th><th>Nombre</th><th></th></tr></thead>
@@ -284,7 +288,7 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
     <div id="vista-especies" style="display:none">
       <div class="panel-head">
         <h2>Especies / Granos</h2>
-        <button class="btn" onclick="abrirModalEsp()">+ Nuevo</button>
+        <button class="btn btn-nuevo" data-cat="especies" onclick="abrirModalEsp()">+ Nuevo</button>
       </div>
       <table id="tbl-esp">
         <thead><tr><th>Nombre</th><th>Sigla</th><th></th></tr></thead>
@@ -297,7 +301,7 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
     <div id="vista-unidades" style="display:none">
       <div class="panel-head">
         <h2>Unidades de medida</h2>
-        <button class="btn" onclick="abrirModalUni()">+ Nuevo</button>
+        <button class="btn btn-nuevo" data-cat="unidades" onclick="abrirModalUni()">+ Nuevo</button>
       </div>
       <table id="tbl-uni">
         <thead><tr><th>Sigla</th><th>Nombre</th><th></th></tr></thead>
@@ -310,7 +314,7 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
     <div id="vista-insumos" style="display:none">
       <div class="panel-head">
         <h2>Insumos</h2>
-        <button class="btn" onclick="abrirModalIns()">+ Nuevo</button>
+        <button class="btn btn-nuevo" data-cat="insumos" onclick="abrirModalIns()">+ Nuevo</button>
       </div>
       <div class="filtros-ter" id="filtros-ins">
         <input id="ins-buscar" class="buscador" placeholder="Buscar por nombre…" oninput="renderInsumos()">
@@ -329,7 +333,7 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
     <div id="vista-modosacc" style="display:none">
       <div class="panel-head">
         <h2>Modos de acción</h2>
-        <button class="btn" onclick="abrirModalMoa()">+ Nuevo</button>
+        <button class="btn btn-nuevo" data-cat="modosacc" onclick="abrirModalMoa()">+ Nuevo</button>
       </div>
       <div style="display:flex;gap:6px;margin-bottom:12px">
         <span class="chip-f on" data-mf="" onclick="setFiltroMoa('')">Todos</span>
@@ -348,7 +352,7 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
     <div id="vista-formul" style="display:none">
       <div class="panel-head">
         <h2>Formulaciones</h2>
-        <button class="btn" onclick="abrirModalFormul()">+ Nuevo</button>
+        <button class="btn btn-nuevo" data-cat="formul" onclick="abrirModalFormul()">+ Nuevo</button>
       </div>
       <p style="font-size:12.5px;color:var(--muted);margin-bottom:12px;line-height:1.5">Tipos de formulación de fitosanitarios (código internacional CropLife/FAO) con su orden de mezclado en tanque. El orden es una guía general; leé siempre el marbete de cada producto.</p>
       <table id="tbl-formul">
@@ -362,7 +366,7 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
     <div id="vista-ppioactivo" style="display:none">
       <div class="panel-head">
         <h2>Principios activos</h2>
-        <button class="btn" onclick="abrirModalPA()">+ Nuevo</button>
+        <button class="btn btn-nuevo" data-cat="ppioactivo" onclick="abrirModalPA()">+ Nuevo</button>
       </div>
       <p style="font-size:12.5px;color:var(--muted);margin-bottom:12px;line-height:1.5">Base de principios activos con su EIQ (Cornell). Los insumos fitosanitarios eligen de esta lista. EIQ "N/D" = sin valor Cornell publicado (feromonas, biológicos, coadyuvantes): suman 0 al EIQ del producto.</p>
       <div class="filtros-ter">
@@ -753,12 +757,127 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
 
 <footer>
   <span>Puntal Agro · Maestros</span>
-  <span>BUILD 10 · v2026-07-14 20:05</span>
+  <span>BUILD 11 · v2026-07-24 11:02</span>
 </footer>
 
 <script src="pa-core.js"></script>
 <script>
 var empresaId = null;
+
+/* ==========================================================================
+   PERMISOS DE MAESTROS
+   --------------------------------------------------------------------------
+   Reglas (definidas con Rosario, jul-2026):
+   1. Catálogos GLOBALES de Puntal (categorías, labores, usos, especies,
+      unidades, modos de acción, formulaciones, principios activos):
+      los ven todos, los edita SOLO el admin_general de Puntal.
+   2. Catálogos POR EMPRESA (terceros, choferes, socios, insumos, cultivos/UN,
+      depósitos): rigen los niveles del permiso.
+        ver         -> solo lectura
+        cargar      -> alta y edición
+        administrar -> alta, edición y borrado
+   3. Depósitos: además se filtran por campo. Un depósito con campoId solo es
+      visible si el usuario tiene ese campo en su permiso.
+   4. Depósito GENERAL de empresa (sin campoId): lo VEN todos los usuarios de
+      la empresa, pero solo lo EDITA nivel 'administrar' o el admin de Puntal.
+
+   NOTA: esto es control de interfaz, no seguridad real. Cualquiera puede
+   editar localStorage. El bloqueo definitivo va en el backend (ver
+   handoff_maestros_pacore.md).
+   ========================================================================== */
+
+// Catálogos globales de Puntal: se ven siempre, los edita solo admin_general.
+var CATS_GLOBALES = {
+  categorias: true, labores: true, usos: true, especies: true,
+  unidades: true, modosacc: true, formul: true, ppioactivo: true
+};
+
+function esCatGlobal(cat){ return !!CATS_GLOBALES[cat]; }
+
+// ¿El usuario logueado es admin general de Puntal?
+function esAdminPuntal(){
+  var c = (typeof PA!=='undefined' && PA.ctx) ? PA.ctx() : null;
+  return !!(c && c.usuario && c.usuario.rol === 'admin_general');
+}
+
+// ¿Tiene nivel 'administrar' en la empresa activa?
+function esAdminEmpresa(){
+  var c = (typeof PA!=='undefined' && PA.ctx) ? PA.ctx() : null;
+  return !!(c && c.permiso && c.permiso.nivel === 'administrar');
+}
+
+// Chequeo de nivel contra el permiso de la empresa activa.
+function puedeNivel(accion){
+  if (esAdminPuntal()) return true;
+  if (typeof PA==='undefined' || typeof PA.can!=='function') return false;
+  return PA.can(accion);
+}
+
+// ¿Puede EDITAR (alta/modificación) esta categoría de maestro?
+function puedeEditar(cat){
+  if (esCatGlobal(cat)) return esAdminPuntal();
+  return puedeNivel('cargar');
+}
+
+// ¿Puede BORRAR en esta categoría de maestro?
+function puedeBorrar(cat){
+  if (esCatGlobal(cat)) return esAdminPuntal();
+  return puedeNivel('administrar');
+}
+
+// Campos habilitados del permiso. [] o null = todos los campos de la empresa.
+function campoIdsPermitidos(){
+  var c = (typeof PA!=='undefined' && PA.ctx) ? PA.ctx() : null;
+  if (!c || !c.permiso) return [];
+  return c.permiso.campoIds || [];
+}
+
+// ¿El permiso alcanza a TODOS los campos de la empresa?
+function verTodosLosCampos(){
+  if (esAdminPuntal()) return true;
+  var ids = campoIdsPermitidos();
+  return !ids.length;   // vacío = todos
+}
+
+// ¿Puede VER un depósito? Los generales (sin campoId) los ve todo el mundo.
+function puedeVerDeposito(d){
+  if (!d) return false;
+  if (!d.campoId) return true;              // depósito general de empresa
+  if (verTodosLosCampos()) return true;
+  var ids = campoIdsPermitidos();
+  for (var i=0;i<ids.length;i++){ if (ids[i]===d.campoId) return true; }
+  return false;
+}
+
+// ¿Puede EDITAR un depósito?
+// General (sin campoId): solo administrar / admin Puntal.
+// Con campo: nivel cargar + que el campo esté en su permiso.
+function puedeEditarDeposito(d){
+  if (!d) return puedeEditar('depositos');           // alta nueva
+  if (!d.campoId) return esAdminPuntal() || esAdminEmpresa();
+  if (!puedeVerDeposito(d)) return false;
+  return puedeEditar('depositos');
+}
+
+function puedeBorrarDeposito(d){
+  if (!d) return false;
+  if (!d.campoId) return esAdminPuntal() || esAdminEmpresa();
+  if (!puedeVerDeposito(d)) return false;
+  return puedeBorrar('depositos');
+}
+
+// Corta la ejecución de una función de escritura si no hay permiso.
+// Devuelve true si el permiso FALTA (o sea: hay que abortar).
+function bloqueaEscritura(cat, accion){
+  var ok = (accion === 'borrar') ? puedeBorrar(cat) : puedeEditar(cat);
+  if (!ok){
+    alert(esCatGlobal(cat)
+      ? 'Este es un catálogo global de Puntal. Solo lo puede editar un administrador de Puntal Agro.'
+      : 'No tenés permiso para realizar esta acción.');
+    return true;
+  }
+  return false;
+}
 var filtro = '';
 var editId = null;
 
@@ -997,7 +1116,19 @@ function eiqTotalCalculado(activos){
 }
 /* ====================================================================== */
 
-function cambiarEmpresa(id){ empresaId = id; poblarFiltroTipos(); render(); }
+function cambiarEmpresa(id){
+  // El permiso es POR EMPRESA: hay que recargar el contexto, no solo el id,
+  // o los botones quedarían con el nivel de la empresa anterior.
+  PA.setEmpresaActiva(id, function(err){
+    if (err){ alert('No se pudo cambiar de empresa.'); return; }
+    empresaId = id;
+    poblarFiltroTipos();
+    renderBadgePermiso();
+    var sel = document.querySelector('.nav-item.sel');
+    var cat = sel ? sel.getAttribute('data-cat') : 'terceros';
+    seleccionarCat(cat);
+  });
+}
 function poblarFiltroTipos(){
   var sel=document.getElementById('ter-tipo'); if(!sel) return;
   var actual=sel.value;
@@ -1014,6 +1145,55 @@ function poblarFiltroTipos(){
   }
   sel.value=actual;
 }
+/* Devuelve el HTML de los botones ✎ / × de una fila, según el permiso de la
+   categoría. Si no hay ninguna acción disponible, devuelve un guión. */
+function accionesFila(cat, fnEditar, fnBorrar, id){
+  var h='';
+  var idEsc = String(id).replace(/'/g, "\\'");
+  if (puedeEditar(cat)) h+='<button class="btn-act-edit" title="Editar" onclick="'+fnEditar+'(\''+idEsc+'\')">✎</button>';
+  if (puedeBorrar(cat) && fnBorrar) h+='<button class="btn-act-del" title="Eliminar" onclick="'+fnBorrar+'(\''+idEsc+'\')">×</button>';
+  return h || '<span style="color:var(--muted)">—</span>';
+}
+
+/* Oculta el botón "+ Nuevo" de la sección activa si no hay permiso de edición,
+   y muestra el aviso de solo lectura correspondiente. */
+function aplicarPermisosUI(cat){
+  var btns = document.querySelectorAll('.btn-nuevo[data-cat]');
+  for (var i=0;i<btns.length;i++){
+    var bc = btns[i].getAttribute('data-cat');
+    btns[i].style.display = puedeEditar(bc) ? '' : 'none';
+  }
+  var av = document.getElementById('aviso-permiso');
+  if (!av) return;
+  if (puedeEditar(cat)){ av.style.display='none'; av.textContent=''; return; }
+  av.textContent = esCatGlobal(cat)
+    ? 'Catálogo global de Puntal Agro. Podés consultarlo, pero solo un administrador de Puntal puede modificarlo.'
+    : 'Tenés acceso de solo lectura a los maestros de esta empresa.';
+  av.style.display='';
+}
+
+/* Badge del header: nivel de acceso y alcance de campos. */
+function renderBadgePermiso(){
+  var el = document.getElementById('badge-permiso');
+  if (!el) return;
+  var c = (typeof PA!=='undefined' && PA.ctx) ? PA.ctx() : null;
+  if (!c || !c.permiso){ el.style.display='none'; return; }
+  var nivel = esAdminPuntal() ? 'Admin Puntal' : c.permiso.nivel;
+  var txt = 'Acceso: ' + nivel;
+  if (!verTodosLosCampos()){
+    var ids = campoIdsPermitidos(), noms = [];
+    var ks = PA.demo.camposDeEmpresa(empresaId);
+    for (var i=0;i<ids.length;i++){
+      for (var j=0;j<ks.length;j++){ if (ks[j].id===ids[i]) { noms.push(ks[j].nombre); break; } }
+    }
+    txt += ' · Campos: ' + (noms.length ? noms.join(', ') : '—');
+  } else {
+    txt += ' · Campos: todos';
+  }
+  el.textContent = txt;
+  el.style.display='';
+}
+
 function seleccionarCat(c){
   var vistas = ['terceros','choferes','socios','depositos','labores','cultivos','usos','especies','unidades','insumos','categorias','modosacc','formul','ppioactivo'];
   for (var i=0;i<vistas.length;i++){
@@ -1037,6 +1217,7 @@ function seleccionarCat(c){
   else if (c==='formul') renderFormul();
   else if (c==='ppioactivo') renderPA();
   else render();
+  aplicarPermisosUI(c);
 }
 
 /* ---- DEPÓSITOS ---- */
@@ -1048,7 +1229,10 @@ function nombreCampo(id){
   return '—';
 }
 function renderDepositos(){
-  var lista=PA.demo.listarDepositos(empresaId);
+  var todos=PA.demo.listarDepositos(empresaId);
+  // Filtro por campo: solo los depósitos de campos habilitados + los generales.
+  var lista=[];
+  for(var di=0; di<todos.length; di++){ if(puedeVerDeposito(todos[di])) lista.push(todos[di]); }
   var tb=document.querySelector('#tbl-dep tbody'); tb.innerHTML='';
   for(var i=0;i<lista.length;i++){(function(d){
     var tipo;
@@ -1058,9 +1242,13 @@ function renderDepositos(){
     } else {
       tipo='<span class="rol-bdg rb-cli">Insumos</span>';
     }
+    var accD='';
+    if(puedeEditarDeposito(d)) accD+='<button class="btn-act-edit" title="Editar" onclick="editarDep(\''+d.id+'\')">✎</button>';
+    if(puedeBorrarDeposito(d)) accD+='<button class="btn-act-del" title="Eliminar" onclick="eliminarDep(\''+d.id+'\')">×</button>';
+    if(!accD) accD='<span style="color:var(--muted)">—</span>';
     var tr=document.createElement('tr');
     tr.innerHTML='<td><strong>'+d.nombre+'</strong></td><td>'+nombreCampo(d.campoId)+'</td><td>'+tipo+'</td>'+
-      '<td class="row-actions"><button class="btn-act-edit" title="Editar" onclick="editarDep(\''+d.id+'\')">✎</button><button class="btn-act-del" title="Eliminar" onclick="eliminarDep(\''+d.id+'\')">×</button></td>';
+      '<td class="row-actions">'+accD+'</td>';
     tb.appendChild(tr);
   })(lista[i]);}
   document.getElementById('empty-dep').style.display=lista.length?'none':'block';
@@ -1080,6 +1268,25 @@ function abrirModalDep(){ editDep=null; document.getElementById('modal-dep-title
 function editarDep(id){ var l=PA.demo.listarDepositos(empresaId); var d=null; for(var i=0;i<l.length;i++){if(l[i].id===id){d=l[i];break;}} if(!d)return; editDep=id; document.getElementById('modal-dep-title').textContent='Editar depósito'; document.getElementById('d-nombre').value=d.nombre||''; cargarSelectCampos(d.campoId); document.getElementById('d-clase').value=d.clase||'insumos'; poblarSelectEspecie('d-especie',d.especieId||''); toggleClaseDep(); document.getElementById('btn-del-dep').style.display=''; document.getElementById('msg-dep').textContent=''; document.getElementById('overlay-dep').className='overlay open'; }
 function cerrarModalDep(){ document.getElementById('overlay-dep').className='overlay'; }
 function guardarDep(){
+  // Permiso: el depósito general (sin campo) solo lo edita administrar / admin Puntal.
+  var dOrig = editDep ? depositoPorId(editDep) : null;
+  if (!puedeEditarDeposito(dOrig)){
+    alert(dOrig && !dOrig.campoId
+      ? 'El depósito general de la empresa solo lo puede editar un administrador.'
+      : 'No tenés permiso para realizar esta acción.');
+    return;
+  }
+  // El destino tampoco puede ser un campo fuera del permiso.
+  var campoDestino = document.getElementById('d-campo').value || null;
+  if (campoDestino && !verTodosLosCampos()){
+    var permitidos = campoIdsPermitidos(), okc = false;
+    for (var ci=0; ci<permitidos.length; ci++){ if (permitidos[ci]===campoDestino){ okc=true; break; } }
+    if (!okc){ vErr('msg-dep','No tenés permiso sobre ese campo.'); return; }
+  }
+  // Si el depósito es general, un usuario no-admin no puede crear uno nuevo general.
+  if (!campoDestino && !(esAdminPuntal() || esAdminEmpresa())){
+    vErr('msg-dep','Solo un administrador puede crear o editar el depósito general de la empresa.'); return;
+  }
   // Nombre de depósito: mayúscula en cada palabra, salvo partículas ("Campo La Elena", "Silo del Norte").
   var n=vNombreProp(document.getElementById('d-nombre').value);
   var e=vReq(n,'el nombre'); if(e){ vErr('msg-dep',e); return; }
@@ -1092,7 +1299,23 @@ function guardarDep(){
   PA.demo.guardarDeposito({id:editDep||undefined,empresaId:empresaId,campoId:document.getElementById('d-campo').value||null,nombre:n,clase:clase,especieId:espId,activo:true});
   cerrarModalDep(); renderDepositos();
 }
-function eliminarDep(id){ var t=id||editDep; if(!t) return; if(confirm('¿Eliminar este depósito?')){ PA.demo.borrarDeposito(t); if(!id){cerrarModalDep();} renderDepositos(); } }
+// Busca un depósito de la empresa activa por id.
+function depositoPorId(id){
+  var l=PA.demo.listarDepositos(empresaId);
+  for(var i=0;i<l.length;i++){ if(l[i].id===id) return l[i]; }
+  return null;
+}
+function eliminarDep(id){
+  var t=id||editDep; if(!t) return;
+  var d=depositoPorId(t);
+  if(!puedeBorrarDeposito(d)){
+    alert(d && !d.campoId
+      ? 'El depósito general de la empresa solo lo puede eliminar un administrador.'
+      : 'No tenés permiso para eliminar este depósito.');
+    return;
+  }
+  if(confirm('¿Eliminar este depósito?')){ PA.demo.borrarDeposito(t); if(!id){cerrarModalDep();} renderDepositos(); }
+}
 
 /* ---- LABORES (global) ---- */
 var editLab=null;
@@ -1106,7 +1329,7 @@ function renderLabores(){
     var uni = l.unidadLabor ? labelUnidadLabor(l.unidadLabor) : '<span style="color:var(--muted)">—</span>';
     var tr=document.createElement('tr');
     tr.innerHTML='<td><strong>'+l.nombre+'</strong></td><td>'+uni+'</td>'+
-      '<td class="row-actions"><button class="btn-act-edit" title="Editar" onclick="editarLab(\''+l.id+'\')">✎</button><button class="btn-act-del" title="Eliminar" onclick="eliminarLab(\''+l.id+'\')">×</button></td>';
+      '<td class="row-actions">'+accionesFila('labores','editarLab','eliminarLab',l.id)+'</td>';
     tb.appendChild(tr);
   })(lista[i]);}
   document.getElementById('empty-lab').style.display=lista.length?'none':'block';
@@ -1117,13 +1340,15 @@ function abrirModalLab(){ editLab=null; precioRefLabEdit=0; document.getElementB
 function editarLab(id){ var l=PA.demo.listarLabores(); var x=null; for(var i=0;i<l.length;i++){if(l[i].id===id){x=l[i];break;}} if(!x)return; editLab=id; precioRefLabEdit=x.precioRef||0; document.getElementById('modal-lab-title').textContent='Editar labor'; document.getElementById('l-nombre').value=x.nombre||''; document.getElementById('l-unidad').value=x.unidadLabor||''; document.getElementById('btn-del-lab').style.display=''; document.getElementById('msg-lab').textContent=''; document.getElementById('overlay-lab').className='overlay open'; }
 function cerrarModalLab(){ document.getElementById('overlay-lab').className='overlay'; }
 function guardarLab(){
+  if (bloqueaEscritura('labores','editar')) return;
   var n=vOracion(document.getElementById('l-nombre').value);
   var e=vReq(n,'el nombre'); if(e){ vErr('msg-lab',e); return; }
   e=vMax(n,80,'Nombre'); if(e){ vErr('msg-lab',e); return; }
   if(vDuplicado(PA.demo.listarLabores(), n, function(it){return it.nombre;}, editLab)){ vErr('msg-lab','Ya existe una labor con ese nombre.'); return; }
   PA.demo.guardarLabor({id:editLab||undefined,nombre:n,unidadLabor:document.getElementById('l-unidad').value||null,precioRef:precioRefLabEdit,activo:true}); cerrarModalLab(); renderLabores();
 }
-function eliminarLab(id){ var t=id||editLab; if(!t) return; if(confirm('¿Eliminar esta labor?')){ PA.demo.borrarLabor(t); if(!id){cerrarModalLab();} renderLabores(); } }
+function eliminarLab(id){
+  if (bloqueaEscritura('labores','borrar')) return; var t=id||editLab; if(!t) return; if(confirm('¿Eliminar esta labor?')){ PA.demo.borrarLabor(t); if(!id){cerrarModalLab();} renderLabores(); } }
 
 /* ---- CULTIVOS ---- */
 var editCul=null;
@@ -1173,7 +1398,7 @@ function renderCultivos(){
     }
     var tr=document.createElement('tr');
     tr.innerHTML='<td><strong>'+c.nombre+'</strong></td><td>'+(c.sigla||'—')+'</td><td>'+tipoBdg+'</td><td>'+uso+'</td><td>'+esp+'</td><td>'+gram+'</td><td>'+def2+'</td>'+
-      '<td class="row-actions"><button class="btn-act-edit" title="Editar" onclick="editarCul(\''+c.id+'\')">✎</button><button class="btn-act-del" title="Eliminar" onclick="eliminarCul(\''+c.id+'\')">×</button></td>';
+      '<td class="row-actions">'+accionesFila('cultivos','editarCul','eliminarCul',c.id)+'</td>';
     tb.appendChild(tr);
   })(lista[i]);}
   document.getElementById('empty-cul').style.display=lista.length?'none':'block';
@@ -1183,6 +1408,7 @@ function abrirModalCul(){ editCul=null; document.getElementById('modal-cul-title
 function editarCul(id){ var l=PA.demo.listarTiposActividad(empresaId); var x=null; for(var i=0;i<l.length;i++){if(l[i].id===id){x=l[i];break;}} if(!x)return; editCul=id; document.getElementById('modal-cul-title').textContent='Editar cultivo / UN'; document.getElementById('cu-nombre').value=x.nombre||''; document.getElementById('cu-sigla').value=x.sigla||''; document.getElementById('cu-escult').value=(x.esCultivo===false?'0':'1'); poblarSelectUso(x.actividad||''); poblarSelectEspecie('cu-especie',x.especieId||''); toggleEspecieCul(); toggleEsCultivo(); document.getElementById('cu-gram').value=(x.graminea==null?'':(x.graminea?'1':'0')); document.getElementById('cu-def2').checked=!!x.default2da; document.getElementById('btn-del-cul').style.display=''; document.getElementById('msg-cul').textContent=''; document.getElementById('overlay-cul').className='overlay open'; }
 function cerrarModalCul(){ document.getElementById('overlay-cul').className='overlay'; }
 function guardarCul(){
+  if (bloqueaEscritura('cultivos','editar')) return;
   // Nombre de cultivo/UN: 1ª letra mayúscula, resto minúscula ("Trigo", "Soja de segunda").
   var n=vOracion(document.getElementById('cu-nombre').value);
   var e=vReq(n,'el nombre'); if(e){ vErr('msg-cul',e); return; }
@@ -1214,7 +1440,8 @@ function guardarCul(){
   PA.demo.guardarTipoActividad({id:editCul||undefined,empresaId:empresaId,nombre:n,sigla:sig,esCultivo:esCultivo,actividad:act,especieId:espId,graminea:graminea,default2da:def2,activo:true});
   cerrarModalCul(); renderCultivos();
 }
-function eliminarCul(id){ var t=id||editCul; if(!t) return; if(confirm('¿Eliminar este cultivo?')){ PA.demo.borrarTipoActividad(t); if(!id){cerrarModalCul();} renderCultivos(); } }
+function eliminarCul(id){
+  if (bloqueaEscritura('cultivos','borrar')) return; var t=id||editCul; if(!t) return; if(confirm('¿Eliminar este cultivo?')){ PA.demo.borrarTipoActividad(t); if(!id){cerrarModalCul();} renderCultivos(); } }
 
 /* ---- USOS (catálogo global Puntal — fallback local hasta pa-core) ---- */
 var editUso=null;
@@ -1224,7 +1451,7 @@ function renderUsos(){
   for(var i=0;i<lista.length;i++){(function(u){
     var tr=document.createElement('tr');
     tr.innerHTML='<td><span class="rol-bdg rb-tipo">'+(u.codigo||'—')+'</span></td><td><strong>'+u.label+'</strong></td>'+
-      '<td class="row-actions"><button class="btn-act-edit" title="Editar" onclick="editarUso(\''+u.id+'\')">✎</button><button class="btn-act-del" title="Eliminar" onclick="eliminarUsoUI(\''+u.id+'\')">×</button></td>';
+      '<td class="row-actions">'+accionesFila('usos','editarUso','eliminarUsoUI',u.id)+'</td>';
     tb.appendChild(tr);
   })(lista[i]);}
   document.getElementById('empty-uso').style.display=lista.length?'none':'block';
@@ -1234,6 +1461,7 @@ function abrirModalUso(){ editUso=null; document.getElementById('modal-uso-title
 function editarUso(id){ var l=listarUsos(); var x=null; for(var i=0;i<l.length;i++){if(l[i].id===id){x=l[i];break;}} if(!x)return; editUso=id; document.getElementById('modal-uso-title').textContent='Editar uso'; document.getElementById('uso-codigo').value=x.codigo||''; document.getElementById('uso-label').value=x.label||''; document.getElementById('uso-codigo').disabled=true; document.getElementById('btn-del-uso').style.display=''; document.getElementById('msg-uso').textContent=''; document.getElementById('overlay-uso').className='overlay open'; }
 function cerrarModalUso(){ document.getElementById('overlay-uso').className='overlay'; }
 function guardarUsoUI(){
+  if (bloqueaEscritura('usos','editar')) return;
   var codRaw=document.getElementById('uso-codigo').value;
   var cod=vCodAlnum(codRaw, 12);  // limpia lo que no sea A-Z0-9
   // Si la limpieza cambió lo que escribió el usuario, reflejarlo en el input.
@@ -1247,7 +1475,8 @@ function guardarUsoUI(){
   guardarUso({id:editUso||undefined,codigo:cod,label:lab,activo:true});
   cerrarModalUso(); renderUsos();
 }
-function eliminarUsoUI(id){ var t=id||editUso; if(!t) return; if(confirm('¿Eliminar este uso?')){ borrarUso(t); if(!id){cerrarModalUso();} renderUsos(); } }
+function eliminarUsoUI(id){
+  if (bloqueaEscritura('usos','borrar')) return; var t=id||editUso; if(!t) return; if(confirm('¿Eliminar este uso?')){ borrarUso(t); if(!id){cerrarModalUso();} renderUsos(); } }
 
 /* ---- CATEGORÍAS DE INSUMO (catálogo global, ABM con candados) ---- */
 var editCateg=null;
@@ -1266,13 +1495,20 @@ function renderCategs(){
     if(c.subcat) tags+='<span class="rol-bdg rb-tipo">Subcat.</span> ';
     if(c.base)   tags+='<span class="rol-bdg" style="background:var(--bg);color:var(--muted)">Base</span>';
     if(!tags) tags='<span style="color:var(--muted)">—</span>';
-    var puedeBorrar = !c.base; // las de fábrica no se borran
-    var btnDel = puedeBorrar
-      ? '<button class="btn-act-del" title="Eliminar" onclick="eliminarCategUI(\''+c.codigo+'\')">×</button>'
-      : '<button class="btn-act-del" title="Categoría predeterminada: no se puede eliminar" disabled>×</button>';
+    // OJO: no llamar a esta variable "puedeBorrar": pisaría a la función global
+    // de permisos dentro de este scope.
+    var esBorrable = !c.base; // las de fábrica no se borran
+    var accC='';
+    if(puedeEditar('categorias')) accC+='<button class="btn-act-edit" title="Editar" onclick="editarCateg(\''+c.codigo+'\')">✎</button>';
+    if(puedeBorrar('categorias')){
+      accC += esBorrable
+        ? '<button class="btn-act-del" title="Eliminar" onclick="eliminarCategUI(\''+c.codigo+'\')">×</button>'
+        : '<button class="btn-act-del" title="Categoría predeterminada: no se puede eliminar" disabled>×</button>';
+    }
+    if(!accC) accC='<span style="color:var(--muted)">—</span>';
     var tr=document.createElement('tr');
     tr.innerHTML='<td><span class="rol-bdg rb-tipo">'+c.codigo+'</span></td><td><strong>'+c.label+'</strong></td><td>'+tags+'</td>'+
-      '<td class="row-actions"><button class="btn-act-edit" title="Editar" onclick="editarCateg(\''+c.codigo+'\')">✎</button>'+btnDel+'</td>';
+      '<td class="row-actions">'+accC+'</td>';
     tb.appendChild(tr);
   })(lista[i]);}
   document.getElementById('empty-categ').style.display=lista.length?'none':'block';
@@ -1312,6 +1548,7 @@ function editarCateg(cod){
 }
 function cerrarModalCateg(){ document.getElementById('overlay-categ').className='overlay'; }
 function guardarCategUI(){
+  if (bloqueaEscritura('categorias','editar')) return;
   var lab=vOracion(document.getElementById('categ-label').value);
   var msg=document.getElementById('msg-categ');
   if(!lab){ msg.textContent='Falta el nombre.'; return; }
@@ -1335,6 +1572,7 @@ function guardarCategUI(){
   if(document.getElementById('i-tipo')) poblarSelectCategoria(document.getElementById('i-tipo').value);
 }
 function eliminarCategUI(cod){
+  if (bloqueaEscritura('categorias','borrar')) return;
   var t=cod||editCateg; if(!t) return;
   var c=categoriaPorCod(t);
   if(c && c.base){ alert('Esta categoría es predeterminada y no se puede eliminar.'); return; }
@@ -1351,7 +1589,7 @@ function renderEspecies(){
   for(var i=0;i<lista.length;i++){(function(e){
     var tr=document.createElement('tr');
     tr.innerHTML='<td><strong>'+e.nombre+'</strong></td><td>'+(e.sigla||'—')+'</td>'+
-      '<td class="row-actions"><button class="btn-act-edit" title="Editar" onclick="editarEsp(\''+e.id+'\')">✎</button><button class="btn-act-del" title="Eliminar" onclick="eliminarEsp(\''+e.id+'\')">×</button></td>';
+      '<td class="row-actions">'+accionesFila('especies','editarEsp','eliminarEsp',e.id)+'</td>';
     tb.appendChild(tr);
   })(lista[i]);}
   document.getElementById('empty-esp').style.display=lista.length?'none':'block';
@@ -1361,6 +1599,7 @@ function abrirModalEsp(){ editEsp=null; document.getElementById('modal-esp-title
 function editarEsp(id){ var l=PA.demo.listarEspecies(); var x=null; for(var i=0;i<l.length;i++){if(l[i].id===id){x=l[i];break;}} if(!x)return; editEsp=id; document.getElementById('modal-esp-title').textContent='Editar especie'; document.getElementById('e-nombre').value=x.nombre||''; document.getElementById('e-sigla').value=x.sigla||''; document.getElementById('btn-del-esp').style.display=''; document.getElementById('msg-esp').textContent=''; document.getElementById('overlay-esp').className='overlay open'; }
 function cerrarModalEsp(){ document.getElementById('overlay-esp').className='overlay'; }
 function guardarEsp(){
+  if (bloqueaEscritura('especies','editar')) return;
   var n=vOracion(document.getElementById('e-nombre').value);
   var e=vReq(n,'el nombre'); if(e){ vErr('msg-esp',e); return; }
   e=vMax(n,80,'Nombre'); if(e){ vErr('msg-esp',e); return; }
@@ -1370,7 +1609,8 @@ function guardarEsp(){
   if(sig && vDuplicado(lista, sig, function(it){return it.sigla;}, editEsp)){ vErr('msg-esp','Ya existe una especie con esa sigla.'); return; }
   PA.demo.guardarEspecie({id:editEsp||undefined,nombre:n,sigla:sig,activo:true}); cerrarModalEsp(); renderEspecies();
 }
-function eliminarEsp(id){ var t=id||editEsp; if(!t) return; if(confirm('¿Eliminar esta especie?')){ PA.demo.borrarEspecie(t); if(!id){cerrarModalEsp();} renderEspecies(); } }
+function eliminarEsp(id){
+  if (bloqueaEscritura('especies','borrar')) return; var t=id||editEsp; if(!t) return; if(confirm('¿Eliminar esta especie?')){ PA.demo.borrarEspecie(t); if(!id){cerrarModalEsp();} renderEspecies(); } }
 
 /* ---- UNIDADES (global) ---- */
 var editUni=null;
@@ -1380,7 +1620,7 @@ function renderUnidades(){
   for(var i=0;i<lista.length;i++){(function(u){
     var tr=document.createElement('tr');
     tr.innerHTML='<td><strong>'+u.sigla+'</strong></td><td>'+(u.nombre||'—')+'</td>'+
-      '<td class="row-actions"><button class="btn-act-edit" title="Editar" onclick="editarUni(\''+u.id+'\')">✎</button><button class="btn-act-del" title="Eliminar" onclick="eliminarUni(\''+u.id+'\')">×</button></td>';
+      '<td class="row-actions">'+accionesFila('unidades','editarUni','eliminarUni',u.id)+'</td>';
     tb.appendChild(tr);
   })(lista[i]);}
   document.getElementById('empty-uni').style.display=lista.length?'none':'block';
@@ -1390,6 +1630,7 @@ function abrirModalUni(){ editUni=null; document.getElementById('modal-uni-title
 function editarUni(id){ var l=PA.demo.listarUnidades(); var x=null; for(var i=0;i<l.length;i++){if(l[i].id===id){x=l[i];break;}} if(!x)return; editUni=id; document.getElementById('modal-uni-title').textContent='Editar unidad'; document.getElementById('u-sigla').value=x.sigla||''; document.getElementById('u-nombre').value=x.nombre||''; document.getElementById('btn-del-uni').style.display=''; document.getElementById('msg-uni').textContent=''; document.getElementById('overlay-uni').className='overlay open'; }
 function cerrarModalUni(){ document.getElementById('overlay-uni').className='overlay'; }
 function guardarUni(){
+  if (bloqueaEscritura('unidades','editar')) return;
   var s=vSigla(document.getElementById('u-sigla').value, 10);
   var e=vReq(s,'la sigla'); if(e){ vErr('msg-uni',e); return; }
   var nom=vOracion(document.getElementById('u-nombre').value);
@@ -1397,7 +1638,8 @@ function guardarUni(){
   if(vDuplicado(PA.demo.listarUnidades(), s, function(it){return it.sigla;}, editUni)){ vErr('msg-uni','Ya existe una unidad con esa sigla.'); return; }
   PA.demo.guardarUnidad({id:editUni||undefined,sigla:s,nombre:nom,activo:true}); cerrarModalUni(); renderUnidades();
 }
-function eliminarUni(id){ var t=id||editUni; if(!t) return; if(confirm('¿Eliminar esta unidad?')){ PA.demo.borrarUnidad(t); if(!id){cerrarModalUni();} renderUnidades(); } }
+function eliminarUni(id){
+  if (bloqueaEscritura('unidades','borrar')) return; var t=id||editUni; if(!t) return; if(confirm('¿Eliminar esta unidad?')){ PA.demo.borrarUnidad(t); if(!id){cerrarModalUni();} renderUnidades(); } }
 
 /* ---- INSUMOS (por empresa) ---- */
 var editIns=null, bandaSel='';
@@ -1507,7 +1749,7 @@ function renderInsumos(){
       var sub = (catX && catX.subcat && x.subcategoria) ? '<span class="rol-bdg rb-tipo">'+x.subcategoria+'</span>' : '<span style="color:var(--muted)">—</span>';
       var tr=document.createElement('tr');
       tr.innerHTML='<td><strong>'+x.nombre+'</strong></td><td>'+sub+'</td><td>'+nombreUnidad(x.unidadId)+'</td><td>'+tecnicoResumen(x)+'</td>'+
-        '<td class="row-actions"><button class="btn-act-edit" title="Editar" onclick="editarIns(\''+x.id+'\')">✎</button><button class="btn-act-del" title="Eliminar" onclick="eliminarIns(\''+x.id+'\')">×</button></td>';
+        '<td class="row-actions">'+accionesFila('insumos','editarIns','eliminarIns',x.id)+'</td>';
       tb.appendChild(tr);
     })(arr[i]);}
   }
@@ -1653,6 +1895,7 @@ function editarIns(id){
 }
 function cerrarModalIns(){ document.getElementById('overlay-ins').className='overlay'; }
 function guardarIns(){
+  if (bloqueaEscritura('insumos','editar')) return;
   // Nombre de insumo: 1ª letra mayúscula, resto minúscula ("GLIFOSATO" -> "Glifosato").
   var n=vOracion(document.getElementById('i-nombre').value);
   // Nombre: obligatorio, máx 120, único por empresa.
@@ -1710,7 +1953,8 @@ function guardarIns(){
   }
   PA.demo.guardarInsumo(obj); cerrarModalIns(); renderInsumos();
 }
-function eliminarIns(id){ var t=id||editIns; if(!t) return; if(confirm('¿Eliminar este insumo?')){ PA.demo.borrarInsumo(t); if(!id){cerrarModalIns();} renderInsumos(); } }
+function eliminarIns(id){
+  if (bloqueaEscritura('insumos','borrar')) return; var t=id||editIns; if(!t) return; if(confirm('¿Eliminar este insumo?')){ PA.demo.borrarInsumo(t); if(!id){cerrarModalIns();} renderInsumos(); } }
 
 /* ---- MODOS DE ACCIÓN (global) ---- */
 var editMoa=null, filtroMoa='';
@@ -1727,7 +1971,7 @@ function renderModosAcc(){
   for(var i=0;i<lista.length;i++){(function(m){
     var tr=document.createElement('tr');
     tr.innerHTML='<td>'+sisBadge(m.sistema)+'</td><td><strong>'+m.codigo+'</strong></td><td>'+m.descripcion+'</td>'+
-      '<td class="row-actions"><button class="btn-act-edit" title="Editar" onclick="editarMoa(\''+m.id+'\')">✎</button><button class="btn-act-del" title="Eliminar" onclick="eliminarMoa(\''+m.id+'\')">×</button></td>';
+      '<td class="row-actions">'+accionesFila('modosacc','editarMoa','eliminarMoa',m.id)+'</td>';
     tb.appendChild(tr);
   })(lista[i]);}
   document.getElementById('empty-moa').style.display=lista.length?'none':'block';
@@ -1737,6 +1981,7 @@ function abrirModalMoa(){ editMoa=null; document.getElementById('modal-moa-title
 function editarMoa(id){ var l=PA.demo.listarModosAccion(); var x=null; for(var i=0;i<l.length;i++){if(l[i].id===id){x=l[i];break;}} if(!x)return; editMoa=id; document.getElementById('modal-moa-title').textContent='Editar modo de acción'; document.getElementById('m-sistema').value=x.sistema||'HRAC'; document.getElementById('m-codigo').value=x.codigo||''; document.getElementById('m-desc').value=x.descripcion||''; document.getElementById('btn-del-moa').style.display=''; document.getElementById('msg-moa').textContent=''; document.getElementById('overlay-moa').className='overlay open'; }
 function cerrarModalMoa(){ document.getElementById('overlay-moa').className='overlay'; }
 function guardarMoa(){
+  if (bloqueaEscritura('modosacc','editar')) return;
   var sis=document.getElementById('m-sistema').value;
   if(!sis){ vErr('msg-moa','Elegí el sistema.'); return; }
   var c=vSigla(document.getElementById('m-codigo').value, 12);
@@ -1749,7 +1994,8 @@ function guardarMoa(){
   if(vDuplicado(mismos, c, function(it){return it.codigo;}, editMoa)){ vErr('msg-moa','Ya existe ese código en '+sis+'.'); return; }
   PA.demo.guardarModoAccion({id:editMoa||undefined,sistema:sis,codigo:c,descripcion:d,activo:true}); cerrarModalMoa(); renderModosAcc();
 }
-function eliminarMoa(id){ var t=id||editMoa; if(!t) return; if(confirm('¿Eliminar este modo de acción?')){ PA.demo.borrarModoAccion(t); if(!id){cerrarModalMoa();} renderModosAcc(); } }
+function eliminarMoa(id){
+  if (bloqueaEscritura('modosacc','borrar')) return; var t=id||editMoa; if(!t) return; if(confirm('¿Eliminar este modo de acción?')){ PA.demo.borrarModoAccion(t); if(!id){cerrarModalMoa();} renderModosAcc(); } }
 
 /* ---- FORMULACIONES (global Puntal — fallback local hasta pa-core) ---- */
 var editFormul=null;
@@ -1765,7 +2011,7 @@ function renderFormul(){
       '<button class="ord-btn" title="Bajar"'+abajoDis+' onclick="moverFormul('+idx+',1)">▼</button></span>';
     var tr=document.createElement('tr');
     tr.innerHTML='<td><span class="ord-cell">'+flechas+'<strong>'+(f.orden!=null?f.orden:'—')+'</strong></span></td><td>'+cod+'</td><td>'+f.descripcion+'</td>'+
-      '<td class="row-actions"><button class="btn-act-edit" title="Editar" onclick="editarFormul(\''+f.id+'\')">✎</button><button class="btn-act-del" title="Eliminar" onclick="eliminarFormulUI(\''+f.id+'\')">×</button></td>';
+      '<td class="row-actions">'+accionesFila('formul','editarFormul','eliminarFormulUI',f.id)+'</td>';
     tb.appendChild(tr);
   })(lista[i], i);}
   document.getElementById('empty-formul').style.display=lista.length?'none':'block';
@@ -1785,6 +2031,7 @@ function abrirModalFormul(){ editFormul=null; document.getElementById('modal-for
 function editarFormul(id){ var l=listarFormulaciones(); var x=null; for(var i=0;i<l.length;i++){if(l[i].id===id){x=l[i];break;}} if(!x)return; editFormul=id; document.getElementById('modal-formul-title').textContent='Editar formulación'; document.getElementById('fm-codigo').value=x.codigo||''; document.getElementById('fm-orden').value=(x.orden!=null?x.orden:''); document.getElementById('fm-desc').value=x.descripcion||''; document.getElementById('btn-del-formul').style.display=''; document.getElementById('msg-formul').textContent=''; document.getElementById('overlay-formul').className='overlay open'; }
 function cerrarModalFormul(){ document.getElementById('overlay-formul').className='overlay'; }
 function guardarFormulUI(){
+  if (bloqueaEscritura('formul','editar')) return;
   var desc=vOracion(document.getElementById('fm-desc').value);
   var e=vReq(desc,'la descripción'); if(e){ vErr('msg-formul',e); return; }
   e=vMax(desc,120,'Descripción'); if(e){ vErr('msg-formul',e); return; }
@@ -1797,7 +2044,8 @@ function guardarFormulUI(){
   guardarFormulacion({id:editFormul||undefined, codigo:cod, descripcion:desc, orden:(ro.val==null?0:ro.val), activo:true});
   cerrarModalFormul(); renderFormul();
 }
-function eliminarFormulUI(id){ var t=id||editFormul; if(!t) return; if(confirm('¿Eliminar esta formulación?')){ borrarFormulacion(t); if(!id){cerrarModalFormul();} renderFormul(); } }
+function eliminarFormulUI(id){
+  if (bloqueaEscritura('formul','borrar')) return; var t=id||editFormul; if(!t) return; if(confirm('¿Eliminar esta formulación?')){ borrarFormulacion(t); if(!id){cerrarModalFormul();} renderFormul(); } }
 
 /* ---- PRINCIPIOS ACTIVOS (global Puntal — fallback local hasta pa-core) ---- */
 var editPA=null;
@@ -1830,7 +2078,7 @@ function renderPA(){
     var uso = p.uso ? '<span class="rol-bdg rb-tipo">'+p.uso+'</span>' : '<span style="color:var(--muted)">—</span>';
     var tr=document.createElement('tr');
     tr.innerHTML='<td>'+p.nombre+'</td><td>'+eiqTxt+'</td><td>'+uso+'</td>'+
-      '<td class="row-actions"><button class="btn-act-edit" title="Editar" onclick="editarPA(\''+p.id+'\')">✎</button><button class="btn-act-del" title="Eliminar" onclick="eliminarPAUI(\''+p.id+'\')">×</button></td>';
+      '<td class="row-actions">'+accionesFila('ppioactivo','editarPA','eliminarPAUI',p.id)+'</td>';
     tb.appendChild(tr);
   })(lista[i]);}
   document.getElementById('empty-pa').style.display=lista.length?'none':'block';
@@ -1840,6 +2088,7 @@ function abrirModalPA(){ editPA=null; document.getElementById('modal-pa-title').
 function editarPA(id){ var p=paById(id); if(!p)return; editPA=id; document.getElementById('modal-pa-title').textContent='Editar principio activo'; document.getElementById('pa-nombre').value=p.nombre||''; document.getElementById('pa-eiq').value=(p.eiq!=null?p.eiq:''); document.getElementById('pa-usotxt').value=p.uso||''; document.getElementById('btn-del-pa').style.display=''; document.getElementById('msg-pa').textContent=''; document.getElementById('overlay-pa').className='overlay open'; }
 function cerrarModalPA(){ document.getElementById('overlay-pa').className='overlay'; }
 function guardarPAUI(){
+  if (bloqueaEscritura('ppioactivo','editar')) return;
   var nom=vOracion(document.getElementById('pa-nombre').value);
   var e=vReq(nom,'el nombre'); if(e){ vErr('msg-pa',e); return; }
   e=vMax(nom,120,'Nombre'); if(e){ vErr('msg-pa',e); return; }
@@ -1851,7 +2100,8 @@ function guardarPAUI(){
   guardarPrincipioActivo({ id:editPA||undefined, nombre:nom, eiq:reiq.val, uso:uso, activo:true });
   cerrarModalPA(); renderPA();
 }
-function eliminarPAUI(id){ var t=id||editPA; if(!t) return; if(confirm('¿Eliminar este principio activo?')){ borrarPrincipioActivo(t); if(!id){cerrarModalPA();} renderPA(); } }
+function eliminarPAUI(id){
+  if (bloqueaEscritura('ppioactivo','borrar')) return; var t=id||editPA; if(!t) return; if(confirm('¿Eliminar este principio activo?')){ borrarPrincipioActivo(t); if(!id){cerrarModalPA();} renderPA(); } }
 
 
 /* ---- CHOFERES ---- */
@@ -1875,7 +2125,7 @@ function renderChoferes(){
       var tr=document.createElement('tr');
       tr.innerHTML='<td><strong>'+c.nombre+'</strong></td><td>'+(c.dni||'—')+'</td><td>'+(c.licencia||'—')+'</td>'+
         '<td>'+nombreTercero(c.terceroId)+'</td>'+
-        '<td class="row-actions"><button class="btn-act-edit" title="Editar" onclick="editarChofer(\''+c.id+'\')">✎</button><button class="btn-act-del" title="Eliminar" onclick="eliminarChofer(\''+c.id+'\')">×</button></td>';
+        '<td class="row-actions">'+accionesFila('choferes','editarChofer','eliminarChofer',c.id)+'</td>';
       tb.appendChild(tr);
     })(lista[i]);
   }
@@ -1934,6 +2184,7 @@ function editarChofer(id){
 function cerrarModalChofer(){ document.getElementById('overlay-chofer').className='overlay'; }
 
 function guardarChofer(){
+  if (bloqueaEscritura('choferes','editar')) return;
   // Nombre de chofer: mayúscula en cada palabra, salvo partículas ("Juan Pérez", "María de los Santos").
   var nombre=vNombreProp(document.getElementById('c-nombre').value);
   var e=vReq(nombre,'el nombre'); if(e){ vErr('msg-chofer',e); return; }
@@ -1952,6 +2203,7 @@ function guardarChofer(){
 }
 
 function eliminarChofer(id){
+  if (bloqueaEscritura('choferes','borrar')) return;
   var t=id||editChofer; if(!t) return;
   if(confirm('¿Eliminar este chofer?')){ PA.demo.borrarChofer(t); if(!id){cerrarModalChofer();} renderChoferes(); }
 }
@@ -1993,7 +2245,7 @@ function renderSocios(){
     (function(s){
       var tr=document.createElement('tr');
       tr.innerHTML='<td><strong>'+s.nombre+'</strong></td><td>'+(s.obs||'—')+'</td>'+
-        '<td class="row-actions"><button class="btn-act-edit" title="Editar" onclick="editarSocio(\''+s.id+'\')">✎</button><button class="btn-act-del" title="Eliminar" onclick="eliminarSocio(\''+s.id+'\')">×</button></td>';
+        '<td class="row-actions">'+accionesFila('socios','editarSocio','eliminarSocio',s.id)+'</td>';
       tb.appendChild(tr);
     })(lista[i]);
   }
@@ -2027,6 +2279,7 @@ function editarSocio(id){
 function cerrarModalSocio(){ document.getElementById('overlay-socio').className='overlay'; }
 
 function guardarSocio(){
+  if (bloqueaEscritura('socios','editar')) return;
   // Nombre de socio: mayúscula en cada palabra, salvo partículas (mismo criterio que terceros/choferes).
   var nombre=vNombreProp(document.getElementById('s-nombre').value);
   var e=vReq(nombre,'el nombre'); if(e){ vErr('msg-socio',e); return; }
@@ -2039,6 +2292,7 @@ function guardarSocio(){
 }
 
 function eliminarSocio(id){
+  if (bloqueaEscritura('socios','borrar')) return;
   var t=id||editSocio; if(!t) return;
   if(confirm('¿Eliminar este socio?')){ borrarSocioDato(t); if(!id){cerrarModalSocio();} renderSocios(); }
 }
@@ -2075,7 +2329,7 @@ function render(){
       var contacto = [t.telefono, t.email].filter(function(x){return x;}).join(' · ') || '—';
       tr.innerHTML = '<td><strong>'+t.nombre+'</strong></td><td>'+(t.cuit||'—')+'</td>'+
         '<td>'+rolesBadges(t)+'</td><td>'+contacto+'</td>'+
-        '<td class="row-actions"><button class="btn-act-edit" title="Editar" onclick="editar(\''+t.id+'\')">✎</button><button class="btn-act-del" title="Eliminar" onclick="eliminar(\''+t.id+'\')">×</button></td>';
+        '<td class="row-actions">'+accionesFila('terceros','editar','eliminar',t.id)+'</td>';
       tb.appendChild(tr);
     })(lista[i]);
   }
@@ -2142,6 +2396,7 @@ function editar(id){
 function cerrarModal(){ document.getElementById('overlay').className='overlay'; }
 
 function guardar(){
+  if (bloqueaEscritura('terceros','editar')) return;
   // Nombre de tercero: mayúscula en cada palabra, salvo partículas ("Agro Servicios del Sur").
   var nombre = vNombreProp(document.getElementById('t-nombre').value);
   var e=vReq(nombre,'el nombre'); if(e){ vErr('msg',e); return; }
@@ -2181,6 +2436,7 @@ function guardar(){
 }
 
 function eliminar(id){
+  if (bloqueaEscritura('terceros','borrar')) return;
   var t=id||editId; if(!t) return;
   if(confirm('¿Eliminar este tercero? (también sus choferes asociados)')){
     PA.demo.borrarTercero(t); if(!id){cerrarModal();} render();
@@ -2202,7 +2458,9 @@ PA.init({ modo:'demo' }, function(){
     empresaId = ctx.empresaActivaId;
     sincronizarCategorias();
     poblarFiltroTipos();
+    renderBadgePermiso();
     render();
+    aplicarPermisosUI('terceros');
   });
 });
 </script>
