@@ -20,6 +20,9 @@ header{background:var(--card);border-bottom:1px solid var(--border);padding:9px 
 .inst-lbl{font-size:10px;color:#475569;text-transform:uppercase;letter-spacing:.5px;font-weight:500;white-space:nowrap}
 .inst-btn{padding:5px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1.5px solid #CBD5E1;background:var(--card);color:#475569;transition:all .12s;font-family:var(--sans)}
 .inst-btn.active{background:var(--verde);color:#fff;border-color:var(--verde)}
+.inst-btn.dol.dis{opacity:.5;cursor:not-allowed;background:var(--card);color:#94A3B8;border-color:#E2E8F0}
+.inst-btn.dol.dis.active{background:#E9EEE4;color:#7B8C6D;border-color:#D6DFCD;opacity:1}
+.inst-lbl.dis{color:#94A3B8}
 .inst-desc{font-size:11px;color:#64748B;margin-left:4px}
 .inst-right{margin-left:auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .upd{font-size:11px;color:var(--muted);background:var(--bg);padding:3px 8px;border-radius:20px;border:1px solid var(--border);font-family:var(--mono);white-space:nowrap}
@@ -50,6 +53,8 @@ main{padding:18px 24px;display:flex;flex-direction:column;gap:18px}
 .leg-bar{width:11px;height:11px;display:inline-block;flex-shrink:0;border-radius:2px}
 .cw{position:relative;width:100%;height:clamp(240px, 38vh, 360px)}
 .pnote{font-size:11px;color:var(--muted);margin-top:8px;padding:8px 12px;background:var(--bg);border-radius:6px;line-height:1.5}
+.base-warn{display:none;font-size:11px;color:#8A3D15;background:#FDF3EC;border-left:3px solid #C8642D;border-radius:4px;padding:7px 11px;margin:8px 0 2px;line-height:1.5}
+.base-warn.show{display:block}
 .varpanel-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px}
 .varpanel-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
 .varpanel-sub{font-size:10px;color:var(--muted);font-family:var(--mono)}
@@ -141,7 +146,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
   <button class="inst-btn" id="vistaReal" onclick="setVista('real',this)">Constante</button>
   <button class="inst-btn" id="vistaUsd" onclick="setVista('usd',this)">USD</button>
   <span class="inst-sep" style="width:1px;height:20px;background:var(--border);margin:0 4px;display:inline-block"></span>
-  <span class="inst-lbl">Dólar:</span>
+  <span class="inst-lbl" id="dolLbl">Dólar:</span>
   <button class="inst-btn dol active" id="dolOf" onclick="setDolar('TC_Oficial_Venta',this)">Oficial</button>
   <button class="inst-btn dol" id="dolMep" onclick="setDolar('TC_MEP_Venta',this)">MEP</button>
   <button class="inst-btn dol" id="dolBlue" onclick="setDolar('TC_Blue_Venta',this)">Blue</button>
@@ -207,9 +212,10 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
         <span class="ct-sub" id="baseInfo"></span>
       </div>
     </div>
+    <div class="base-warn" id="baseWarn"></div>
     <div class="legrow" id="legRow"></div>
     <div class="cw"><canvas id="bigChart"></canvas></div>
-    <div class="pnote">Cada serie se normaliza a base 100 en el primer mes del período. Dólar e inflación se grafican como <b>líneas</b>; granos, hacienda y leche como <b>columnas</b>. Tocá las tarjetas o pills para sumar/quitar series.</div>
+    <div class="pnote">Cada serie se normaliza a base 100 en el primer mes en que <b>todas</b> las series activas tienen dato, para que los índices sean comparables entre sí. Dólar e inflación se grafican como <b>líneas</b>; granos, hacienda y leche como <b>columnas</b>. Tocá las tarjetas o pills para sumar/quitar series.</div>
   </div>
 
   <!-- Barras de variación del período AL FINAL -->
@@ -291,11 +297,11 @@ var FECHA_DATOS='2026-07-14';
 
 // chart: 'line' para dólar+IPC, 'bar' para granos/hacienda/leche
 var VARS=[
-  {k:'IPC_Pampeana',         n:'Inflación Mensual',     u:'%',       src:'INDEC',     grp:'macro', cls:'ipc', col:'#6E1F2A', pill:'p-macro', d:1, tipo:'tasa',      chart:'line'},
-  {k:'IPC_Nivel',            n:'IPC Nivel (índice)',   u:'índice',  src:'INDEC',     grp:'macro', cls:'ipn', col:'#8B2E3C', pill:'p-macro', d:0, tipo:'nivel',     chart:'line'},
-  {k:'TC_Oficial_Venta',     n:'U$S oficial venta',    u:'$/USD',   src:'BNA · promedio mensual',      grp:'macro', cls:'tco', col:'#A8434F', pill:'p-macro', d:0, tipo:'tc',        chart:'line'},
-  {k:'TC_MEP_Venta',         n:'U$S MEP venta',        u:'$/USD',   src:'Ámbito · promedio mensual',    grp:'macro', cls:'tcm', col:'#C25E5E', pill:'p-macro', d:0, tipo:'tc',        chart:'line'},
-  {k:'TC_Blue_Venta',        n:'U$S Blue venta',       u:'$/USD',   src:'Ámbito · promedio mensual',    grp:'macro', cls:'tcb', col:'#D08A7E', pill:'p-macro', d:0, tipo:'tc',        chart:'line'},
+  {k:'IPC_Pampeana',         n:'Inflación Mensual',     u:'%',       src:'INDEC',     grp:'macro', cls:'ipc', col:'#8B2E3C', dash:[], pill:'p-macro', d:1, tipo:'tasa',      chart:'line'},
+  {k:'IPC_Nivel',            n:'IPC Nivel (índice)',   u:'índice',  src:'INDEC',     grp:'macro', cls:'ipn', col:'#B5566B', dash:[7,4], pill:'p-macro', d:0, tipo:'nivel',     chart:'line'},
+  {k:'TC_Oficial_Venta',     n:'U$S oficial venta',    u:'$/USD',   src:'BNA · promedio mensual',      grp:'macro', cls:'tco', col:'#2F5D8C', dash:[], pill:'p-macro', d:0, tipo:'tc',        chart:'line'},
+  {k:'TC_MEP_Venta',         n:'U$S MEP venta',        u:'$/USD',   src:'Ámbito · promedio mensual',    grp:'macro', cls:'tcm', col:'#3E8E8A', dash:[7,4], pill:'p-macro', d:0, tipo:'tc',        chart:'line'},
+  {k:'TC_Blue_Venta',        n:'U$S Blue venta',       u:'$/USD',   src:'Ámbito · promedio mensual',    grp:'macro', cls:'tcb', col:'#7A5EA8', dash:[2,3], pill:'p-macro', d:0, tipo:'tc',        chart:'line'},
   {k:'Trigo_Disp_Rosario',   n:'Trigo disp Rosario',   u:'U$S/ton', src:'Agroseries · promedio mensual',grp:'granos',cls:'trg', col:'#3B6D11', pill:'p-granos',d:1, tipo:'usd_ton',   chart:'bar'},
   {k:'Maiz_Disp_Rosario',    n:'Maíz disp Rosario',    u:'U$S/ton', src:'Agroseries · promedio mensual',grp:'granos',cls:'mai', col:'#639922', pill:'p-granos',d:1, tipo:'usd_ton',   chart:'bar'},
   {k:'Sorgo_Disp_Rosario',   n:'Sorgo disp Rosario',   u:'U$S/ton', src:'Agroseries · promedio mensual',grp:'granos',cls:'sor', col:'#86A832', pill:'p-granos',d:1, tipo:'usd_ton',   chart:'bar'},
@@ -318,6 +324,9 @@ var ML=['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Di
 // ── Estado ────────────────────────────────────────────────────────────────────
 var vista='nom';
 var tcSel='TC_Oficial_Venta';
+// Elección de dólar del usuario. Solo se aplica en vista USD; en Nominal/Constante
+// la conversión U$S -> $ queda fija en Oficial (criterio único y reproducible).
+var tcSelUser='TC_Oficial_Venta';
 // Pizarra real en $/ton por grano-mes (desde mar-2026). Si existe, la vista en $ la usa directo (no deriva USD×TC).
 // Criterio: mes cerrado = promedio mensual de Pizarras; mes abierto = última Pizarra. Igual que tablero comercial.
 // PIZ_ARS: Pizarra real en $/ton por grano-mes (desde mar-2026). La vista en $ la usa directo; si no existe (histórico previo), deriva USD×TC.
@@ -372,7 +381,9 @@ function transformar(varK){
 
   if(vista==='nom'){
     if(v.tipo==='usd_ton'){
-      var tcN=getTC();
+      // El tramo previo a la Pizarra real se deriva SIEMPRE con el oficial,
+      // no con getTC(): en vistas en pesos el selector de dólar no participa.
+      var tcN=SERIE.TC_Oficial_Venta||[];
       return raw.map(function(p){
         var pa=pizARS(varK,p.f);
         if(pa!=null)return{f:p.f,v:pa};
@@ -390,7 +401,7 @@ function transformar(varK){
     if(!ipcNiv.length)return raw.slice();
     var ipcUlt=ipcNiv[ipcNiv.length-1].v;
     if(v.tipo==='usd_ton'){
-      var tcR=getTC();
+      var tcR=SERIE.TC_Oficial_Venta||[];
       return raw.map(function(p){
         var ipcF=lookup(ipcNiv,p.f);
         if(ipcF==null)return{f:p.f,v:null};
@@ -410,7 +421,18 @@ function transformar(varK){
 
   if(vista==='usd'){
     if(v.tipo==='tasa')return raw.slice();
-    if(v.tipo==='usd_ton')return raw.slice();
+    if(v.tipo==='usd_ton'){
+      // La serie base está en U$S/ton al dólar oficial (así la cotiza la Cámara).
+      // Con Oficial se devuelve tal cual; con MEP/Blue se expresa en dólares
+      // libres aplicando la brecha: U$S_elegido = U$S_of × TC_of / TC_elegido.
+      if(tcSel==='TC_Oficial_Venta')return raw.slice();
+      var tcOfG=SERIE.TC_Oficial_Venta||[], tcSelG=getTC();
+      return raw.map(function(p){
+        var tOf=lookup(tcOfG,p.f), tSe=lookup(tcSelG,p.f);
+        if(tOf==null||tSe==null||tSe===0)return{f:p.f,v:null};
+        return{f:p.f,v:p.v*tOf/tSe};
+      });
+    }
     if(v.tipo==='nivel'){
       var tcI=getTC();
       return raw.map(function(p){
@@ -455,10 +477,11 @@ function getRango(){
   return{desde:isoFromAM(dA,dM),hasta:maxIso};
 }
 function filtrarRango(s,d,h){return s.filter(function(p){return p.f>=d&&p.f<=h;});}
-function normalizar(s){
+function normalizar(s,base){
   if(!s.length)return[];
-  var base=null;
-  for(var i=0;i<s.length;i++){if(s[i].v!=null){base=s[i].v;break;}}
+  if(base==null){
+    for(var i=0;i<s.length;i++){if(s[i].v!=null){base=s[i].v;break;}}
+  }
   if(base==null||base===0)return s.map(function(p){return{f:p.f,v:null};});
   return s.map(function(p){return{f:p.f,v:p.v==null?null:p.v/base*100};});
 }
@@ -484,10 +507,14 @@ function calcVarPeriodo(varK){
   return{abs:absDelta,pct:pctDelta,tipo:tipo,cls:cls,arrow:absDelta>0?'↑':'↓',prim:prim,ult:ult};
 }
 
+// Primer mes con dato EN LA VISTA ACTIVA. No usa la serie cruda: con MEP o Blue
+// el tramo previo al inicio de esa serie de TC queda nulo, y el percentil se
+// calcula sobre ese subconjunto. El cartel tiene que decir lo mismo que se calculó.
 function inicioHistorico(varK){
-  var s=SERIE[varK];
+  var s=transformar(varK);
   if(!s||!s.length)return null;
-  return s[0].f;
+  for(var i=0;i<s.length;i++){if(s[i].v!=null)return s[i].f;}
+  return null;
 }
 
 // ── Percentil histórico (vs toda la serie en la vista activa) ───────────────
@@ -766,15 +793,81 @@ function renderBig(){
       cm++;if(cm===13){cm=1;ca++;}
     }
   }
+  // ── Base 100 común ────────────────────────────────────────────────────────
+  // Un gráfico de índices sólo es comparable si todas las series arrancan en el
+  // mismo mes. Se busca el primer mes del período en que TODAS las activas
+  // tienen dato; el período se recorta ahí y se avisa si hubo recorte.
+  var serieDe={}, conDato=[];
   for(var z=0;z<activas.length;z++){
-    var v=activas[z];
-    var sTr=transformar(v.k);
-    var fil=filtrarRango(sTr,rango.desde,rango.hasta);
-    if(!fil.length)continue;
-    var norm=normalizar(fil);
-    var map={};
-    for(var jj=0;jj<norm.length;jj++)map[norm[jj].f]=norm[jj].v;
-    var data=labelsOrdered.map(function(iso){return map[iso]==null?null:map[iso];});
+    var vD=activas[z];
+    var filD=filtrarRango(transformar(vD.k),rango.desde,rango.hasta);
+    var mapD={}, primD=null;
+    for(var jd=0;jd<filD.length;jd++){
+      mapD[filD[jd].f]=filD[jd].v;
+      if(filD[jd].v!=null&&primD==null)primD=filD[jd].f;
+    }
+    serieDe[vD.k]={map:mapD,prim:primD};
+    if(primD!=null)conDato.push(vD);
+  }
+
+  var baseIso=null;
+  if(labelsOrdered&&conDato.length){
+    for(var li=0;li<labelsOrdered.length;li++){
+      var isoC=labelsOrdered[li], todas=true;
+      for(var q=0;q<conDato.length;q++){
+        if(serieDe[conDato[q].k].map[isoC]==null){todas=false;break;}
+      }
+      if(todas){baseIso=isoC;break;}
+    }
+  }
+
+  var mesesDescartados=0, limitante=null, motivoHueco=null, sinBaseComun=false;
+  if(baseIso!=null){
+    var labelsFull=labelsOrdered.slice();
+    var idxBase=0;
+    for(var lb=0;lb<labelsFull.length;lb++){if(labelsFull[lb]===baseIso){idxBase=lb;break;}}
+    mesesDescartados=idxBase;
+    if(idxBase>0){
+      labelsOrdered=labelsFull.slice(idxBase);
+      // La que más acorta = la de arranque más tardío dentro del período.
+      var limIdx=-1;
+      for(var q2=0;q2<conDato.length;q2++){
+        var primQ=serieDe[conDato[q2].k].prim, idxQ=-1;
+        for(var lp=0;lp<labelsFull.length;lp++){if(labelsFull[lp]===primQ){idxQ=lp;break;}}
+        if(idxQ>limIdx){limIdx=idxQ;limitante=conDato[q2].n;}
+      }
+      // Si la base cae después del arranque más tardío, el recorte lo provoca un
+      // hueco, no un arranque: se identifica la serie que falta justo antes.
+      if(idxBase>limIdx){
+        var isoPrev=labelsFull[idxBase-1];
+        for(var q3=0;q3<conDato.length;q3++){
+          if(serieDe[conDato[q3].k].map[isoPrev]==null){
+            limitante=conDato[q3].n;motivoHueco=isoPrev;break;
+          }
+        }
+      }
+    }
+  } else if(conDato.length){
+    // No hay ningún mes con dato simultáneo en todas: se cae a base por serie.
+    sinBaseComun=true;
+  }
+
+  for(var z=0;z<conDato.length;z++){
+    var v=conDato[z];
+    var mapV=serieDe[v.k].map;
+    var baseVal=(baseIso!=null)?mapV[baseIso]:null;
+    var data=labelsOrdered.map(function(iso){
+      var raw=mapV[iso];
+      if(raw==null)return null;
+      if(baseVal!=null&&baseVal!==0)return raw/baseVal*100;
+      return null;
+    });
+    if(sinBaseComun){
+      var filS=[];
+      for(var ls=0;ls<labelsOrdered.length;ls++)filS.push({f:labelsOrdered[ls],v:mapV[labelsOrdered[ls]]==null?null:mapV[labelsOrdered[ls]]});
+      var normS=normalizar(filS);
+      data=normS.map(function(p){return p.v;});
+    }
     if(v.chart==='bar'){
       datasets.push({
         type:'bar',label:v.n,data:data,
@@ -788,16 +881,30 @@ function renderBig(){
         type:'line',label:v.n,data:data,
         borderColor:v.col,backgroundColor:'transparent',
         borderWidth:2.4,pointRadius:0,pointHoverRadius:5,
+        borderDash:(v.dash||[]),
         pointHoverBackgroundColor:v.col,pointHoverBorderColor:'#fff',pointHoverBorderWidth:2,
         tension:0.3,spanGaps:false,order:1
       });
     }
   }
   if(bigC){bigC.destroy();bigC=null;}
+  var elWarn=document.getElementById('baseWarn');
   if(!labelsOrdered||!datasets.length){
     document.getElementById('baseInfo').textContent='(sin variables activas)';
     document.getElementById('legRow').innerHTML='';
+    elWarn.className='base-warn';elWarn.innerHTML='';
     return;
+  }
+  if(sinBaseComun){
+    elWarn.className='base-warn show';
+    elWarn.innerHTML='<b>Sin base común.</b> Las series activas no comparten ningún mes con dato dentro del período, así que cada una se normaliza en su propio primer dato. Los índices <b>no son comparables entre sí</b>: acotá el período o quitá alguna serie.';
+  } else if(mesesDescartados>0){
+    var quien=limitante?('<b>'+limitante+'</b>'):'alguna de las series activas';
+    var causa=motivoHueco?(' tiene un hueco en '+lblMA(motivoHueco)):' no tiene dato antes de esa fecha';
+    elWarn.className='base-warn show';
+    elWarn.innerHTML='<b>Período recortado a '+lblMA(baseIso)+'.</b> Se descartaron '+mesesDescartados+' mes'+(mesesDescartados===1?'':'es')+' del inicio porque '+quien+causa+'. La base 100 es común a todas las series activas.';
+  } else {
+    elWarn.className='base-warn';elWarn.innerHTML='';
   }
   var nomDolB=TC_NOMBRE[tcSel]||'Oficial';
   var vistaTxt=vista==='nom'?'Nominal':vista==='real'?'Constante':'USD';
@@ -806,7 +913,15 @@ function renderBig(){
   var legHTML='';
   for(var z=0;z<datasets.length;z++){
     var isBar=datasets[z].type==='bar';
-    var marker=isBar?'<span class="leg-bar" style="background:'+datasets[z].backgroundColor+'"></span>':'<span class="leg-line" style="background:'+datasets[z].borderColor+'"></span>';
+    var marker;
+    if(isBar){marker='<span class="leg-bar" style="background:'+datasets[z].backgroundColor+'"></span>';}
+    else{
+      var col=datasets[z].borderColor, dd=datasets[z].borderDash||[], bg;
+      if(dd.length===2&&dd[0]<=3)bg='repeating-linear-gradient(90deg,'+col+' 0 2px,transparent 2px 5px)';
+      else if(dd.length===2)bg='repeating-linear-gradient(90deg,'+col+' 0 5px,transparent 5px 8px)';
+      else bg=col;
+      marker='<span class="leg-line" style="background:'+bg+'"></span>';
+    }
     legHTML+='<span class="leg">'+marker+datasets[z].label+'</span>';
   }
   document.getElementById('legRow').innerHTML=legHTML;
@@ -894,15 +1009,40 @@ function applyBlockState(g){
 }
 
 // ── Eventos ──────────────────────────────────────────────────────────────────
+var DOL_BTN_ID={TC_Oficial_Venta:'dolOf',TC_MEP_Venta:'dolMep',TC_Blue_Venta:'dolBlue'};
+
+// Habilita el selector de dólar solo en vista USD.
+// En Nominal/Constante fuerza Oficial: el tramo histórico de granos se deriva
+// siempre con el mismo TC, y la serie en $ deja de depender del botón elegido.
+function aplicarEstadoDolar(){
+  var habilitado=(vista==='usd');
+  tcSel=habilitado?tcSelUser:'TC_Oficial_Venta';
+  var btns=document.querySelectorAll('.inst-btn.dol');
+  for(var i=0;i<btns.length;i++){
+    var b=btns[i];
+    b.classList.remove('active');
+    if(habilitado){b.classList.remove('dis');b.removeAttribute('title');}
+    else{b.classList.add('dis');b.setAttribute('title','El tipo de cambio solo aplica en vista USD. En pesos se usa siempre el dólar oficial.');}
+  }
+  var act=document.getElementById(DOL_BTN_ID[tcSel]);
+  if(act)act.classList.add('active');
+  var lbl=document.getElementById('dolLbl');
+  if(lbl){if(habilitado)lbl.classList.remove('dis');else lbl.classList.add('dis');}
+}
+
 function setVista(v,btn){
   vista=v;
   var btns=document.querySelectorAll('.inst-btn:not(.dol)');
   for(var i=0;i<btns.length;i++)btns[i].classList.remove('active');
   btn.classList.add('active');
+  aplicarEstadoDolar();
   actualizarVistaDesc();
   renderAll();
 }
 function setDolar(k,btn){
+  if(btn&&btn.classList.contains('dis'))return;
+  if(vista!=='usd')return;
+  tcSelUser=k;
   tcSel=k;
   var btns=document.querySelectorAll('.inst-btn.dol');
   for(var i=0;i<btns.length;i++)btns[i].classList.remove('active');
@@ -913,8 +1053,8 @@ function setDolar(k,btn){
 function actualizarVistaDesc(){
   var nom=TC_NOMBRE[tcSel]||'Oficial';
   var d={
-    nom:'Valores en pesos corrientes · granos convertidos por dólar '+nom,
-    real:'Pesos constantes (deflactados por IPC) · granos vía dólar '+nom,
+    nom:'Valores en pesos corrientes',
+    real:'Pesos constantes (deflactados por IPC)',
     usd:'Valores en USD por dólar '+nom+' · dólares en brecha (base = '+nom+') · IPC dolarizado'
   };
   document.getElementById('vistaDesc').textContent=d[vista];
@@ -979,6 +1119,8 @@ function initCustom(){
 }
 
 document.getElementById('updBadge').textContent='Datos al '+FECHA_DATOS;
+aplicarEstadoDolar();
+actualizarVistaDesc();
 initCustom();
 renderAll();
 </script>
