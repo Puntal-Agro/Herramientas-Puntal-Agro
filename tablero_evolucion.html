@@ -20,6 +20,7 @@ header{background:var(--card);border-bottom:1px solid var(--border);padding:9px 
 .inst-lbl{font-size:10px;color:#475569;text-transform:uppercase;letter-spacing:.5px;font-weight:500;white-space:nowrap}
 .inst-btn{padding:5px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1.5px solid #CBD5E1;background:var(--card);color:#475569;transition:all .12s;font-family:var(--sans)}
 .inst-btn.active{background:var(--verde);color:#fff;border-color:var(--verde)}
+.inst-btn.dis{opacity:.4;cursor:not-allowed;pointer-events:none}
 .inst-desc{font-size:11px;color:#64748B;margin-left:4px}
 .inst-right{margin-left:auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .upd{font-size:11px;color:var(--muted);background:var(--bg);padding:3px 8px;border-radius:20px;border:1px solid var(--border);font-family:var(--mono);white-space:nowrap}
@@ -226,6 +227,25 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
   <span>Evolución de Variables · Puntal Agro</span>
   <span id="fts">—</span>
 </footer><script>
+/* #################### FIXES QUE DEBEN ESTAR (verificar en CADA actualización) ####################
+   Si se parte de una versión vieja del archivo, estos arreglos se pueden perder. Chequear que estén:
+
+   [1] SELECTOR DE DÓLAR bloqueado en pesos:
+       - var tcSelUser (recuerda elección del usuario)
+       - function aplicarDolarLock() (deshabilita MEP/Blue en Nominal/Constante, restaura en USD)
+       - CSS .inst-btn.dis (opacity .4 + not-allowed)
+       - setVista() llama a aplicarDolarLock(); setDolar() ignora clics si vista es nom/real
+       - init llama aplicarDolarLock() antes del primer render
+   [2] BRECHA en vista USD (granos responden al dólar elegido):
+       - en transformar(), rama vista==='usd' + tipo 'usd_ton': U$S_elegido = U$S_oficial × TC_oficial / TC_elegido
+       - con Oficial no cambia; con MEP/Blue expresa en dólar libre
+   [3] PIZ_ARS + pizARS(): la vista en $ de granos usa Pizarra real, no deriva USD×TC.
+   [4] Decimales en vista USD: 2 decimales en tarjetas y gráfico.
+   [5] Fecha del badge en español: fmtDiaES(FECHA_DATOS).
+   [ PENDIENTE ] H-5 base común del gráfico comparativo con banner de advertencia:
+       hoy normalizar(s) usa base propia de cada serie; el fix usaba un mes base común + banner. NO reconstruido aún.
+   ################################################################################################ */
+
 /* ============ CRITERIOS DE ACTUALIZACIÓN — Tablero Evolución de Variables ============
    (unificado con el tablero comercial de granos; ver también instructivo_actualizacion_tablero.md)
 
@@ -320,6 +340,7 @@ var ML=['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Di
 // ── Estado ────────────────────────────────────────────────────────────────────
 var vista='nom';
 var tcSel='TC_Oficial_Venta';
+var tcSelUser='TC_Oficial_Venta'; // recuerda la elección del usuario para restaurarla en vista USD
 // Pizarra real en $/ton por grano-mes (desde mar-2026). Si existe, la vista en $ la usa directo (no deriva USD×TC).
 // Criterio: mes cerrado = promedio mensual de Pizarras; mes abierto = última Pizarra. Igual que tablero comercial.
 // PIZ_ARS: Pizarra real en $/ton por grano-mes (desde mar-2026). La vista en $ la usa directo; si no existe (histórico previo), deriva USD×TC.
@@ -412,7 +433,17 @@ function transformar(varK){
 
   if(vista==='usd'){
     if(v.tipo==='tasa')return raw.slice();
-    if(v.tipo==='usd_ton')return raw.slice();
+    if(v.tipo==='usd_ton'){
+      // Granos nacen en U$S (oficial). Se expresan en el dólar elegido por brecha:
+      // U$S_elegido = U$S_oficial × TC_oficial / TC_elegido. Con Oficial no cambia.
+      if(tcSel==='TC_Oficial_Venta')return raw.slice();
+      var tcOf=SERIE.TC_Oficial_Venta, tcEl=getTC();
+      return raw.map(function(p){
+        var of=lookup(tcOf,p.f), el=lookup(tcEl,p.f);
+        if(of==null||el==null||el===0)return{f:p.f,v:null};
+        return{f:p.f,v:p.v*of/el};
+      });
+    }
     if(v.tipo==='nivel'){
       var tcI=getTC();
       return raw.map(function(p){
@@ -901,11 +932,39 @@ function setVista(v,btn){
   var btns=document.querySelectorAll('.inst-btn:not(.dol)');
   for(var i=0;i<btns.length;i++)btns[i].classList.remove('active');
   btn.classList.add('active');
+  aplicarDolarLock();
   actualizarVistaDesc();
   renderAll();
 }
+// En Nominal/Constante el dólar queda fijo en Oficial y los botones se deshabilitan.
+// En USD se restaura la última elección del usuario y se rehabilitan.
+function aplicarDolarLock(){
+  var dolBtns=document.querySelectorAll('.inst-btn.dol');
+  var lock=(vista==='nom'||vista==='real');
+  if(lock){
+    tcSel='TC_Oficial_Venta';
+  }else{
+    tcSel=tcSelUser;
+  }
+  for(var i=0;i<dolBtns.length;i++){
+    var b=dolBtns[i];
+    if(lock){
+      b.classList.add('dis');
+      b.title='En pesos (Nominal/Constante) los granos se convierten siempre por dólar Oficial.';
+    }else{
+      b.classList.remove('dis');
+      b.title='';
+    }
+    // marcar activo el que corresponde
+    b.classList.remove('active');
+  }
+  var idMap={'TC_Oficial_Venta':'dolOf','TC_MEP_Venta':'dolMep','TC_Blue_Venta':'dolBlue'};
+  var act=document.getElementById(idMap[tcSel]);
+  if(act)act.classList.add('active');
+}
 function setDolar(k,btn){
-  tcSel=k;
+  if(vista==='nom'||vista==='real')return; // bloqueado en pesos
+  tcSel=k; tcSelUser=k;
   var btns=document.querySelectorAll('.inst-btn.dol');
   for(var i=0;i<btns.length;i++)btns[i].classList.remove('active');
   btn.classList.add('active');
@@ -982,6 +1041,7 @@ function initCustom(){
 
 document.getElementById('updBadge').textContent='Datos al '+fmtDiaES(FECHA_DATOS);
 initCustom();
+aplicarDolarLock();
 renderAll();
 </script>
 </body>
