@@ -299,7 +299,7 @@ function getCampana(offset){
 
 // Precio de referencia según instancia
 function getPrecioRef(prod){
-  if(preciosRef[prod]!=null)return preciosRef[prod];
+  if(preciosRef[instancia+'_'+prod]!=null)return preciosRef[instancia+'_'+prod];
   if(instancia===1){
     var hoy=new Date();
     var fr=new Date(anoRef,mesRef-1,1);
@@ -429,7 +429,8 @@ function buildAll(){
     var p=this.value.split('_');
     mesRef=parseInt(p[0]);anoRef=parseInt(p[1]);
     mesRefLabel=this.options[this.selectedIndex].text;
-    preciosRef={};renderAll();
+    Object.keys(preciosRef).forEach(function(k){if(k.indexOf(instancia+'_')===0)delete preciosRef[k];});
+    renderAll();
   });
 
   document.getElementById('updBadge').textContent='Datos: '+fmtDiaES(FECHA_DATOS);
@@ -470,7 +471,7 @@ function setInstancia(n,btn){
   }
   var ps=defs[n].split('_');mesRef=parseInt(ps[0]);anoRef=parseInt(ps[1]);
   mesRefLabel=sel.options[sel.selectedIndex].text;
-  preciosRef={};renderAll();
+  renderAll();
 }
 
 // ── Métricas ──────────────────────────────────────────────────────────────────
@@ -480,13 +481,13 @@ function renderMetrics(){
   var html='';
   gs.forEach(function(prod){
     var fas=FAS[FAS_KEY[prod]];
-    var pv=planVars[prod]||(instancia===1?PLAN_VARS_INST1[0]:PLAN_VARS[0]);
+    var pv=planVars[instancia+'_'+prod]||(instancia===1?PLAN_VARS_INST1[0]:PLAN_VARS[0]);
     var pvList=instancia===1?PLAN_VARS_INST1:PLAN_VARS;
     var pval=planVals[instancia+'_'+prod]||'';
     var refP=getPrecioRef(prod);
     var dispExact=DISP_MAP[prod+'|'+mesRef+'_'+anoRef]||(mesRef===MES_ACTUAL&&anoRef===ANO_ACTUAL?getDispActualUSD(prod):null);
     var cosechaRef=instancia===1?null:getPrecioRef(prod);
-    var refVal=preciosRef[prod]!=null?preciosRef[prod]:(instancia===1?(dispExact!=null?dispExact:''):(cosechaRef!=null?cosechaRef:''));
+    var refVal=preciosRef[instancia+'_'+prod]!=null?preciosRef[instancia+'_'+prod]:(instancia===1?(dispExact!=null?dispExact:''):(cosechaRef!=null?cosechaRef:''));
     var refP=getPrecioRef(prod);
     var ars=PIZ_MAP[prod]||null;
     var campLabel=instancia===2?camp0:camp1;
@@ -531,17 +532,17 @@ function renderMetrics(){
   document.getElementById('metricsRow').innerHTML=html;
 }
 
-function setPlanVar(prod,val){planVars[prod]=val;renderPos();}
+function setPlanVar(prod,val){planVars[instancia+'_'+prod]=val;renderPos();}
 function setPlanVal(prod,val){var n=parseFloat(val);if(!isNaN(n)&&n>0)planVals[instancia+'_'+prod]=n;else delete planVals[instancia+'_'+prod];renderPos();}
 function setPrecioRefAndUpdate(prod,val){
   var n=parseFloat(String(val).replace(',','.'));
   if(!isNaN(n)&&n>0){
-    preciosRef[prod]=n;
+    preciosRef[instancia+'_'+prod]=n;
     // Update $ display in banner
     var arsEl=document.getElementById('ars_'+prod);
     if(arsEl) arsEl.textContent='$'+f(Math.round(n*TC_SPOT));
   } else {
-    delete preciosRef[prod];
+    delete preciosRef[instancia+'_'+prod];
   }
   renderPos();renderProb();
 }
