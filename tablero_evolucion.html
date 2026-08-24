@@ -272,6 +272,8 @@ var SERIES_Leche=[{"f":"2003-07-01","v":0.45},{"f":"2003-08-01","v":0.43},{"f":"
 <script>
 // ── Config ────────────────────────────────────────────────────────────────────
 var FECHA_DATOS='2026-08-21';
+function fmtDiaES(iso){var ML=['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];var p=String(iso).split('-');return p.length===3?(p[2]+'-'+ML[parseInt(p[1],10)]+'-'+p[0]):iso;}
+
 /* ============================================================================
  * CRITERIO DE ACTUALIZACIÓN — Unificado
  * ----------------------------------------------------------------------------
@@ -978,7 +980,7 @@ function initCustom(){
   document.getElementById('cTo').value=arr[arr.length-1].substring(0,7);
 }
 
-document.getElementById('updBadge').textContent='Datos al '+FECHA_DATOS;
+document.getElementById('updBadge').textContent='Datos al '+fmtDiaES(FECHA_DATOS);
 initCustom();
 renderAll();
 </script>
