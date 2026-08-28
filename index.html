@@ -50,11 +50,30 @@ main{padding:0;display:flex;flex-direction:column;flex:1}
 .t-gra{border-left-color:#4A6533}.t-var{border-left-color:#A86A1F}.t-ins{border-left-color:#C8642D}
 .t-sue{border-left-color:#7A8B3F}.t-sie{border-left-color:#5E7A2C}.t-hac{border-left-color:#A85A2C}
 .t-lab{border-left-color:#8E5A18}.t-fit{border-left-color:#6B7E2E}.t-ext{border-left-color:#B8AFA2}
+.t-est{border-left-color:#4A6533}.t-usu{border-left-color:#A86A1F}.t-mae{border-left-color:#C8642D}
 .tag-gra{background:#EEF3E8;color:#3A5128}.tag-var{background:#FBF1E0;color:#7A4E16}.tag-ins{background:#FBEDE3;color:#9A4A20}
 .tag-sue{background:#F2F5E8;color:#4F5C28}.tag-sie{background:#EBF1DF;color:#3F5520}.tag-hac{background:#FBEAD9;color:#8A4520}
 .tag-lab{background:#F8EDD9;color:#6E4612}.tag-fit{background:#EFF1E0;color:#4A5520}.tag-ext{background:#EEF0F3;color:#475569}
 footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--card);font-size:11px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
-@media (max-width:768px){.grid{grid-template-columns:1fr}.logo-title{font-size:18px}}
+
+/* ---------- portada: 3 accesos ---------- */
+.view{display:none}
+.view.on{display:block}
+.home-lead{font-size:12.5px;color:var(--muted);margin:2px 0 18px}
+.home-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.acc{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);border-top:4px solid var(--olive);padding:22px 20px 18px;text-align:left;width:100%;font-family:var(--sans);color:inherit;cursor:pointer;display:flex;flex-direction:column;gap:9px;box-shadow:0 1px 3px rgba(15,25,35,.04);transition:box-shadow .12s,transform .12s}
+.acc:hover{box-shadow:0 6px 20px rgba(15,25,35,.10);transform:translateY(-2px)}
+.acc-ico{width:34px;height:34px;stroke-width:1.6;fill:none;stroke:var(--olive)}
+.acc-tit{font-size:17px;font-weight:700;letter-spacing:-.3px}
+.acc-txt{font-size:12.5px;color:var(--muted);line-height:1.5;flex:1}
+.acc-cnt{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--olive)}
+.acc-cnt.vacio{color:var(--muted);font-weight:500;text-transform:none;letter-spacing:0;font-style:italic}
+.acc-b{border-top-color:var(--terra)}.acc-b .acc-ico{stroke:var(--terra)}.acc-b .acc-cnt{color:var(--terra)}
+.acc-c{border-top-color:var(--ochre)}.acc-c .acc-ico{stroke:var(--ochre)}.acc-c .acc-cnt{color:var(--ochre)}
+.volver{background:none;border:none;padding:0;margin-bottom:14px;font-family:var(--sans);font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:6px}
+.volver:hover{color:var(--terra)}
+.volver svg{width:13px;height:13px;stroke:currentColor;stroke-width:2.2;fill:none}
+@media (max-width:768px){.grid,.home-grid{grid-template-columns:1fr}.logo-title{font-size:18px}}
 
 /* Números tabulares: alinea las columnas numéricas de las tablas.
    Criterio unificado con maestros.html y tablero_uso_suelo.html. */
@@ -81,7 +100,40 @@ table, .num, .cnt, input[type=number]{font-variant-numeric:tabular-nums}
 
 <main>
 
-  <div class="sec">
+  <!-- ============ PORTADA ============ -->
+  <div class="view on sec" id="view-home">
+    <div class="block-title">Inicio<span class="ln" style="background:var(--olive)"></span></div>
+    <div class="home-lead" id="home-lead">Elegí por dónde querés entrar.</div>
+
+    <div class="home-grid">
+
+      <button class="acc acc-a" onclick="irA('dec')">
+        <svg class="acc-ico" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>
+        <div class="acc-tit">Tableros de Decisión</div>
+        <div class="acc-txt">Precios, contexto económico y relaciones de referencia para decidir. Incluye tableros propios y fuentes externas.</div>
+        <div class="acc-cnt" id="cnt-dec"></div>
+      </button>
+
+      <button class="acc acc-b" onclick="irA('ges')">
+        <svg class="acc-ico" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
+        <div class="acc-tit">Herramientas de Gestión</div>
+        <div class="acc-txt">Planificación y registro de la operación: uso del suelo, siembra, insumos, labores, ganadería y maestros.</div>
+        <div class="acc-cnt" id="cnt-ges"></div>
+      </button>
+
+      <button class="acc acc-c" id="acc-adm" onclick="irA('adm')">
+        <svg class="acc-ico" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="18" cy="7" r="2"/><path d="M16.5 13c2.5.5 4.5 2.6 4.5 5"/></svg>
+        <div class="acc-tit">Administración</div>
+        <div class="acc-txt">Estructura de clientes, empresas y campos, y gestión de usuarios, roles y permisos de acceso.</div>
+        <div class="acc-cnt" id="cnt-adm">2 módulos</div>
+      </button>
+
+    </div>
+  </div>
+
+  <!-- ============ TABLEROS DE DECISIÓN ============ -->
+  <div class="view sec" id="view-dec">
+    <button class="volver" onclick="irA('home')"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></svg> Volver al inicio</button>
     <div class="block-title">Tableros de Decisión<span class="ln" style="background:var(--olive)"></span></div>
 
     <div class="subsec first">Propios</div>
@@ -127,7 +179,7 @@ table, .num, .cnt, input[type=number]{font-variant-numeric:tabular-nums}
     <div class="empty" id="empty-dec-propios" style="display:none">No tenés tableros de decisión habilitados para esta empresa.</div>
 
     <div class="subsec">Externos</div>
-    <div class="grid">
+    <div class="grid" id="grid-dec-externos">
 
       <div class="tool t-ext">
         <a class="tool-main" href="https://simpleza.com.ar/herramientas/calculadora-alquileres/" target="_blank" rel="noopener">
@@ -186,9 +238,9 @@ table, .num, .cnt, input[type=number]{font-variant-numeric:tabular-nums}
     </div>
   </div>
 
-  <div class="sec-divisor"></div>
-
-  <div class="sec">
+  <!-- ============ HERRAMIENTAS DE GESTIÓN ============ -->
+  <div class="view sec" id="view-ges">
+    <button class="volver" onclick="irA('home')"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></svg> Volver al inicio</button>
     <div class="block-title">Herramientas de Gestión<span class="ln" style="background:var(--terra)"></span></div>
     <div class="grid" id="grid-gestion" style="margin-top:14px">
 
@@ -237,14 +289,23 @@ table, .num, .cnt, input[type=number]{font-variant-numeric:tabular-nums}
         <div class="tool-detail">Existencias de hacienda por negocio, rodeo y categoría. Movimientos, conciliación de stock y seguimiento de cabezas y kilos.</div>
       </div>
 
+      <div class="tool t-mae">
+        <a class="tool-main" href="maestros.html">
+          <span class="tool-name">Maestros / Padrones</span>
+          <span class="tool-right"><span class="tool-tag tag-ins">Configuración</span><svg class="tool-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </a>
+        <button class="tool-toggle" onclick="tog(this)"><span class="ico">+</span> Detalle</button>
+        <div class="tool-detail">Catálogos base que consumen los demás módulos: proveedores y clientes, choferes, depósitos y acopios, labores, cultivos, especies y unidades.</div>
+      </div>
+
     </div>
     <div class="empty" id="empty-gestion" style="display:none">No tenés herramientas de gestión habilitadas para esta empresa.</div>
   </div>
 
-  <div class="sec-divisor"></div>
-
-  <div class="sec">
-    <div class="block-title">Administración<span class="ln" style="background:var(--olive)"></span></div>
+  <!-- ============ ADMINISTRACIÓN ============ -->
+  <div class="view sec" id="view-adm">
+    <button class="volver" onclick="irA('home')"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></svg> Volver al inicio</button>
+    <div class="block-title">Administración<span class="ln" style="background:var(--ochre)"></span></div>
     <div class="grid" style="margin-top:14px">
 
       <div class="tool t-est">
@@ -265,15 +326,6 @@ table, .num, .cnt, input[type=number]{font-variant-numeric:tabular-nums}
         <div class="tool-detail">Gestión de usuarios, roles y permisos de acceso por empresa, campo y herramienta.</div>
       </div>
 
-      <div class="tool t-mae">
-        <a class="tool-main" href="maestros.html">
-          <span class="tool-name">Maestros / Padrones</span>
-          <span class="tool-right"><span class="tool-tag tag-ins">Configuración</span><svg class="tool-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-        </a>
-        <button class="tool-toggle" onclick="tog(this)"><span class="ico">+</span> Detalle</button>
-        <div class="tool-detail">Catálogos base que consumen los demás módulos: proveedores y clientes, choferes, depósitos y acopios, labores, cultivos, especies y unidades.</div>
-      </div>
-
     </div>
   </div>
 
@@ -286,11 +338,53 @@ table, .num, .cnt, input[type=number]{font-variant-numeric:tabular-nums}
 
 <script src="pa-core.js"></script>
 <script>
+/* ================== navegación entre vistas ==================
+   Portada con 3 accesos + una vista por bloque. Sin recarga: se
+   muestra/oculta con la clase .on y se sincroniza con el hash para
+   que el botón Atrás del navegador funcione. */
+var VISTAS = ['home','dec','ges','adm'];
+
+function irA(v){
+  if (v !== 'home' && location.hash !== '#'+v) { location.hash = v; return; }
+  if (v === 'home' && location.hash) { location.hash = ''; return; }
+  mostrar(v);
+}
+
+function mostrar(v){
+  var ok = false, i;
+  for (i=0;i<VISTAS.length;i++) if (VISTAS[i] === v) ok = true;
+  if (!ok) v = 'home';
+  if (v === 'adm' && !puedeAdmin()) v = 'home';
+  for (i=0;i<VISTAS.length;i++){
+    var el = document.getElementById('view-'+VISTAS[i]);
+    if (el) { if (VISTAS[i] === v) el.className = 'view on sec'; else el.className = 'view sec'; }
+  }
+  window.scrollTo(0,0);
+}
+
+function desdeHash(){
+  var h = location.hash ? location.hash.replace('#','') : 'home';
+  mostrar(h);
+}
+
 function tog(btn){ btn.classList.toggle('open'); btn.nextElementSibling.classList.toggle('open'); }
 
+/* ================== contexto y permisos ================== */
+var CTX = null;
+
+/* Sin contexto cargado no se puede decidir: se muestra igual (fail-open).
+   Las pantallas de Administración tienen su propio control de acceso. */
+function puedeAdmin(){
+  if (!CTX || !CTX.usuario) return true;
+  return CTX.usuario.rol === 'admin_general' || CTX.usuario.rol === 'admin_cliente';
+}
+
 function aplicarCtx(ctx){
+  CTX = ctx;
+
   // header: usuario
   document.getElementById('huser').innerHTML = '<strong>'+ctx.usuario.nombre+'</strong> · '+ctx.permiso.nivel;
+
   // selector de empresa
   var sel = document.getElementById('hemp');
   sel.innerHTML = '';
@@ -301,22 +395,51 @@ function aplicarCtx(ctx){
     if (e.id === ctx.empresaActivaId) op.selected = true;
     sel.appendChild(op);
   }
-  // filtrar tarjetas por herramientas del permiso (en ambos bloques)
-  filtrarGrupo('grid-dec-propios', 'empty-dec-propios');
-  filtrarGrupo('grid-gestion', 'empty-gestion');
+
+  // filtrar tarjetas por herramientas del permiso
+  var nDec = filtrarGrupo('grid-dec-propios', 'empty-dec-propios');
+  var nGes = filtrarGrupo('grid-gestion', 'empty-gestion');
+  var nExt = contarVisibles('grid-dec-externos');
+
+  // acceso Administración: solo roles administrativos
+  var accAdm = document.getElementById('acc-adm');
+  accAdm.style.display = puedeAdmin() ? '' : 'none';
+  if (!puedeAdmin() && location.hash === '#adm') { location.hash = ''; }
+
+  // contadores de la portada
+  ponerCnt('cnt-dec', nDec, 'tablero propio', 'tableros propios', nExt + ' externos');
+  ponerCnt('cnt-ges', nGes, 'herramienta disponible', 'herramientas disponibles', '');
+}
+
+function ponerCnt(id, n, sing, plur, extra){
+  var el = document.getElementById(id);
+  if (!el) return;
+  if (n === 0 && !extra){ el.className = 'acc-cnt vacio'; el.textContent = 'Sin herramientas habilitadas'; return; }
+  el.className = 'acc-cnt';
+  el.textContent = n + ' ' + (n === 1 ? sing : plur) + (extra ? ' · ' + extra : '');
+}
+
+function contarVisibles(gridId){
+  var grid = document.getElementById(gridId);
+  if (!grid) return 0;
+  return grid.querySelectorAll('.tool').length;
 }
 
 function filtrarGrupo(gridId, emptyId){
   var grid = document.getElementById(gridId);
-  if (!grid) return;
+  if (!grid) return 0;
   var cards = grid.querySelectorAll('.tool[data-tool]');
+  var libres = grid.querySelectorAll('.tool:not([data-tool])').length; // siempre visibles (ej. Maestros)
   var visibles = 0;
   for (var c=0;c<cards.length;c++){
     var id = cards[c].getAttribute('data-tool');
     if (PA.can('ver', { herramienta: id })) { cards[c].style.display=''; visibles++; }
     else { cards[c].style.display='none'; }
   }
-  document.getElementById(emptyId).style.display = visibles ? 'none' : 'block';
+  var tot = visibles + libres;
+  var emp = document.getElementById(emptyId);
+  if (emp) emp.style.display = tot ? 'none' : 'block';
+  return tot;
 }
 
 function cambiarEmpresa(empresaId){
@@ -327,13 +450,17 @@ function cambiarEmpresa(empresaId){
 }
 function salir(){ PA.logout(); location.href='login.html'; }
 
+if (window.addEventListener) window.addEventListener('hashchange', desdeHash, false);
+else window.attachEvent('onhashchange', desdeHash);
+
 PA.init({ modo:'demo' }, function(){
   if (!PA.haySesion()) { location.href='login.html'; return; }
   PA.loadContext(null, function(err, ctx){
     if (err) { location.href='login.html'; return; }
     aplicarCtx(ctx);
+    desdeHash();
   });
-  document.getElementById('fts2').textContent = new Date().toLocaleString('es-AR');
+  document.getElementById('fts2').textContent = 'v2026-08-28 · BUILD 1 · ' + new Date().toLocaleString('es-AR');
 });
 </script>
 
