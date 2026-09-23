@@ -1130,7 +1130,7 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
 
 <footer>
   <span>Puntal Agro · Plan de Uso de Suelo</span>
-  <span id="fts">Versión v2026-09-23 10:56 · BUILD 47</span>
+  <span id="fts">Versión v2026-09-23 12:09 · BUILD 48</span>
 </footer>
 
 <script>
@@ -2653,8 +2653,8 @@ function renderKpis(){
   var lts = lotesParaTotales();
   var totExpl = 0;         // superficie explotable total (solo lotes con dato)
   var hayExplParcial = false; // algún lote sin explotable cargada
-  var netaTot = 0;         // superficie neta/planificada (sembrada 1ª+2ª) de la campaña
-  var sup1a = 0;           // superficie de 1ª ocupación (para desperdicios de campaña)
+  var netaTot = 0;         // superficie neta/planificada de la campaña: SOLO 1ª ocupación
+  var sup2a = 0;           // 2ª ocupación: se informa aparte, no suma a la neta (reutiliza tierra)
   var lotesConPlan = 0;    // lotes con al menos una actividad en la campaña
   var explSinPlan = 0, lotesSinPlan = 0; // lotes sin ninguna actividad en la campaña
   // Neta y cantidad de lotes POR USO (agrícola / ganadero / doble propósito / …).
@@ -2672,8 +2672,10 @@ function renderKpis(){
     var usosDelLote = {};
     for(var a=0; a<acts.length; a++){
       var ha = acts[a].ha || 0;
+      // La neta y su apertura por uso cuentan solo la 1ª: la 2ª se siembra sobre tierra
+      // ya ocupada, sumarla daría neta > explotable. Queda como dato informativo aparte.
+      if(acts[a].seg){ sup2a += ha; continue; }
       netaTot += ha;
-      if(!acts[a].seg) sup1a += ha; // superficie de 1ª ocupación (no duplica la tierra)
       var u = usoDeCultivo(acts[a].c);
       netaPorUso[u] = (netaPorUso[u] || 0) + ha;
       usosDelLote[u] = true;
@@ -2688,7 +2690,7 @@ function renderKpis(){
   // Nota: incluye la explotable de los lotes sin plan MÁS la fracción no sembrada de los
   // lotes parcialmente planificados, por eso es ≥ "Sin plan" y no son el mismo número.
   var hayExpl = totExpl > 0;
-  var despCampania = hayExpl ? Math.max(0, totExpl - sup1a) : null;
+  var despCampania = hayExpl ? Math.max(0, totExpl - netaTot) : null;
 
   function kpi(cls, lbl, val, sub, title){
     var tt = title ? ' title="'+title+'"' : '';
@@ -2703,7 +2705,7 @@ function renderKpis(){
   var camp = state.campania;
   var html = '';
   html += kpi('kpi-expl', 'Sup. explotable', hayExpl ? (fInt(totExpl)+' ha') : '—', hayExplParcial ? 'faltan lotes por cargar' : 'productiva', 'Superficie de los lotes efectivamente trabajable. Es la base sobre la que se planifica la campaña.');
-  html += kpi('kpi-amb', 'Sup. neta / planificada '+camp, fInt(netaTot)+' ha', lotesConPlan+(lotesConPlan===1?' lote · ':' lotes · ')+(hayExpl ? f(totExpl>0?netaTot/totExpl*100:0,0)+'% de explotable' : '—'), 'Superficie sembrada total (1ª + 2ª ocupación) en la campaña. Se descompone en los usos de abajo.');
+  html += kpi('kpi-amb', 'Sup. neta / planificada '+camp, fInt(netaTot)+' ha', lotesConPlan+(lotesConPlan===1?' lote · ':' lotes · ')+(hayExpl ? f(totExpl>0?netaTot/totExpl*100:0,0)+'% de explotable' : '—')+(sup2a>0 ? ' · + '+fInt(sup2a)+' ha de 2ª' : ''), 'Superficie ocupada en la campaña (1ª ocupación). La 2ª se siembra sobre la misma tierra: no suma a la neta y se informa aparte. Se descompone en los usos de abajo.');
   // Una tarjeta por uso del catálogo, en el orden del catálogo. Solo se muestran los
   // usos con superficie en la campaña (un uso sin planificar no ocupa lugar en la banda).
   // El color sale del catálogo (usoColor), no de una clase CSS fija: así un uso nuevo
