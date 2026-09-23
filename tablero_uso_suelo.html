@@ -110,6 +110,10 @@ tbody tr:hover td{background:#F2F4EE}
 /* Padrón: línea fina entre filas, mismo tono que el Plan */
 #padronBody tr td{border-top:1px solid var(--border)}
 #padronBody tr:first-child td{border-top:none}
+#padronBody tr.padron-cierre td{background:#F7F8F5;color:var(--muted);font-style:italic}
+#padronBody tr.padron-cierre .pc-tag{font-style:normal;font-size:10px;padding:1px 6px;border-radius:4px;background:#ECEFE7;color:var(--muted);margin-left:4px}
+#padronBody tr.padron-cierre .pc-det{font-size:11px}
+#padronBody tr.padron-cierre-exceso td{background:#FEF2F2;color:#991B1B}
 .tdname{font-family:var(--sans)!important;font-weight:600;font-size:12px}
 .tdcampo{font-family:var(--sans);font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
 /* Celdas editables: recuadro gris claro tipo input (estilo Labores) */
@@ -1127,7 +1131,7 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
 
 <footer>
   <span>Puntal Agro · Plan de Uso de Suelo</span>
-  <span id="fts">v2026-09-23 09:55 · BUILD 45</span>
+  <span id="fts">Versión v2026-09-23 10:04 · BUILD 46</span>
 </footer>
 
 <script>
@@ -1354,10 +1358,29 @@ function totalDeCampo(campoCod){
   }
   return 0;
 }
+// Estructura / desperdicios de un campo (dato DERIVADO, no se guarda):
+//   estructura = total del campo (Administración) − Σ sup física de TODOS sus lotes reales.
+// Es una propiedad del campo: no depende de filtros ni del estado activo/inactivo de los
+// lotes (un lote inactivo sigue estando dentro del campo). Devuelve null si el campo no
+// tiene total cargado. exceso=true si los lotes superan el total (error de datos).
+function estructuraDeCampo(campoCod){
+  var total = totalDeCampo(campoCod);
+  var lotes = 0;
+  for(var i=0;i<LOTES.length;i++){
+    var l = LOTES[i];
+    if(l.c !== campoCod || esLoteDesperdicio(l)) continue;
+    lotes += (l.s||0);
+  }
+  if(!(total > 0)) return { total:null, lotes:lotes, estr:null, exceso:false };
+  var dif = total - lotes;
+  return { total:total, lotes:lotes, estr:Math.max(0,dif), exceso:(dif < -0.5), dif:dif };
+}
 function controlCierreCampos(lts){
-  // Suma de sup total por campo (todos los lotes, activos e inactivos)
+  // Suma de sup total por campo (todos los lotes reales, activos e inactivos).
+  // Los lotes marcados como desperdicio no cuentan: la estructura se deriva por resta.
   var sumaPorCampo = {};
   for(var i=0;i<lts.length;i++){
+    if(esLoteDesperdicio(lts[i])) continue;
     var c = lts[i].c || '—';
     sumaPorCampo[c] = (sumaPorCampo[c]||0) + (lts[i].s||0);
   }
@@ -1424,7 +1447,6 @@ var LOTES = [
   {l:"EC DP3 CN",c:"EC",s:66.0,a:"G4",expl:66.0,activo:true,p:{"25-26":[{c:"CND",ha:61.0,seg:false}],"26-27":[{c:"CND",ha:61.0,seg:false}]}},
   {l:"EC DP3 CN1",c:"EC",s:0,a:"G1",expl:0,activo:true,p:{"25-26":[{c:"CN",ha:5.0,seg:false}],"26-27":[{c:"CN",ha:5.0,seg:false},{c:"VI",ha:5.0,seg:true}],"27-28":[{c:"MzP",ha:5.0,seg:false},{c:"PI",ha:5.0,seg:true}]}},
   {l:"EC DP2-3 laguna",c:"EC",s:26.0,a:"G6",expl:26.0,activo:true,p:{"25-26":[{c:"CND",ha:26.0,seg:false}],"26-27":[{c:"CND",ha:26.0,seg:false}]}},
-  {l:"EC Desperdicios",c:"EC",s:46.0,a:"DESP",expl:0,activo:true,p:{},desperdicio:true},
   {l:"EM 18",c:"EM",s:44.0,a:"A1",expl:44.0,activo:true,p:{"25-26":[{c:"Sj1ª",ha:44.0,seg:false}],"26-27":[{c:"Tr",ha:44.0,seg:false},{c:"Sj2ª",ha:44.0,seg:true}],"27-28":[{c:"Mz",ha:44.0,seg:false}]}},
   {l:"EM 19",c:"EM",s:46.0,a:"A1",expl:46.0,activo:true,p:{"25-26":[{c:"Mz",ha:45.0,seg:false}],"26-27":[{c:"Sj1ª",ha:45.0,seg:false}],"27-28":[{c:"Tr",ha:45.0,seg:false},{c:"Sj2ª",ha:45.0,seg:true}]}},
   {l:"EM 20",c:"EM",s:38.0,a:"A1",expl:38.0,activo:true,p:{"25-26":[{c:"Tr",ha:38.0,seg:false},{c:"Sj2ª",ha:38.0,seg:true}],"26-27":[{c:"Sj1ª",ha:38.0,seg:false}],"27-28":[{c:"Tr",ha:38.0,seg:false},{c:"Sj2ª",ha:38.0,seg:true}]}},
@@ -1471,7 +1493,6 @@ var LOTES = [
   {l:"EM 73A",c:"EM",s:20.0,a:"G1",expl:20.0,activo:true,p:{"25-26":[{c:"PPAlf",ha:20.0,seg:false}],"26-27":[{c:"PPAlf",ha:20.0,seg:false}]}},
   {l:"EM 73 CN",c:"EM",s:5.0,a:"G3",expl:5.0,activo:true,p:{"25-26":[{c:"PPAlf",ha:5.0,seg:false}],"26-27":[{c:"PPAlf",ha:5.0,seg:false}]}},
   {l:"EM 73 laguna",c:"EM",s:25.0,a:"G6",expl:25.0,activo:true,p:{"25-26":[{c:"CN",ha:25.0,seg:false}],"26-27":[{c:"CN",ha:25.0,seg:false}]}},
-  {l:"EM Desperdicios",c:"EM",s:35.0,a:"DESP",expl:0,activo:true,p:{},desperdicio:true},
   {l:"LR 1",c:"LR",s:117.0,a:"G5",expl:117.0,activo:true,p:{"25-26":[{c:"CND",ha:87.0,seg:false}],"26-27":[{c:"CND",ha:87.0,seg:false}]}},
   {l:"LR 2",c:"LR",s:76.0,a:"G5",expl:76.0,activo:true,p:{"25-26":[{c:"CND",ha:46.0,seg:false}],"26-27":[{c:"CND",ha:46.0,seg:false}]}},
   {l:"LR 3 loma",c:"LR",s:40.0,a:"A2",expl:40.0,activo:true,p:{"25-26":[{c:"PPFe",ha:40.0,seg:false}],"26-27":[{c:"PPFe",ha:40.0,seg:false}]}},
@@ -1510,7 +1531,6 @@ var LOTES = [
   {l:"LR 25 loma",c:"LR",s:10.0,a:"A2",expl:10.0,activo:true,p:{"25-26":[{c:"Sj1ª",ha:10.0,seg:false}],"26-27":[{c:"Av",ha:10.0,seg:false},{c:"Sj2ª",ha:10.0,seg:true}],"27-28":[{c:"Mz",ha:10.0,seg:false}]}},
   {l:"LR 25 CN",c:"LR",s:106.0,a:"G5",expl:106.0,activo:true,p:{"25-26":[{c:"CND",ha:93.0,seg:false}],"26-27":[{c:"CND",ha:93.0,seg:false}]}},
   {l:"LR Monte casco",c:"LR",s:5.0,a:"A2",expl:5.0,activo:true,p:{"25-26":[{c:"MzP",ha:5.0,seg:false},{c:"VI",ha:5.0,seg:true}],"26-27":[{c:"MzP",ha:5.0,seg:false}]}},
-  {l:"LR Desperdicios",c:"LR",s:39.0,a:"DESP",expl:0,activo:true,p:{},desperdicio:true},
   {l:"LM 1",c:"LM",s:64.0,a:"A1",expl:64.0,activo:true,p:{"25-26":[{c:"MzT",ha:62.0,seg:false}],"26-27":[{c:"Sj1ª",ha:62.0,seg:false}],"27-28":[{c:"Tr",ha:62.0,seg:false},{c:"Sj2ª",ha:62.0,seg:true}]}},
   {l:"LM 2",c:"LM",s:36.3,a:"A1",expl:36.3,activo:true,p:{"25-26":[{c:"MzT",ha:35.0,seg:false}],"26-27":[{c:"Sj1ª",ha:35.0,seg:false}],"27-28":[{c:"Tr",ha:35.0,seg:false},{c:"Sj2ª",ha:35.0,seg:true}]}},
   {l:"LM 3",c:"LM",s:12.6,a:"G1",expl:12.6,activo:true,p:{"25-26":[{c:"G",ha:12.0,seg:false},{c:"PI",ha:12.0,seg:true}],"26-27":[{c:"PPAlf",ha:12.0,seg:false}]}},
@@ -1531,8 +1551,7 @@ var LOTES = [
   {l:"LM 7-8 CNI",c:"LM",s:14.6,a:"G6",expl:14.6,activo:true,p:{"25-26":[{c:"CND",ha:14.6,seg:false}],"26-27":[{c:"CND",ha:14.6,seg:false}]}},
   {l:"LM 6 CN N",c:"LM",s:30.2,a:"G3",expl:30.2,activo:true,p:{"25-26":[{c:"CN",ha:30.2,seg:false}],"26-27":[{c:"CN",ha:30.2,seg:false}]}},
   {l:"LM 6 CN S",c:"LM",s:34.2,a:"A2",expl:34.2,activo:true,p:{"25-26":[{c:"CN",ha:34.2,seg:false}],"26-27":[{c:"CN",ha:34.2,seg:false},{c:"VI",ha:34.2,seg:true}]}},
-  {l:"LM 6 CNI",c:"LM",s:73.9,a:"G6",expl:73.9,activo:true,p:{"25-26":[{c:"CND",ha:73.9,seg:false}],"26-27":[{c:"CND",ha:73.9,seg:false}]}},
-  {l:"LM Desperdicios",c:"LM",s:9.94,a:"DESP",expl:0,activo:true,p:{},desperdicio:true}
+  {l:"LM 6 CNI",c:"LM",s:73.9,a:"G6",expl:73.9,activo:true,p:{"25-26":[{c:"CND",ha:73.9,seg:false}],"26-27":[{c:"CND",ha:73.9,seg:false}]}}
 ];
 
 // ────────────────────────────────────────────────────────────
@@ -3332,6 +3351,24 @@ function closeMasivo(){ var m=document.getElementById('modalMasivo'); if(m) m.cl
 // ────────────────────────────────────────────────────────────
 // RENDER PADRÓN
 // ────────────────────────────────────────────────────────────
+// Fila de cierre de un campo en el Padrón: calculada, gris, sin acciones. No es un lote.
+function filaCierrePadron(campo){
+  var e = estructuraDeCampo(campo);
+  var det, val, cls = 'padron-cierre';
+  if(e.total == null){
+    val = '—';
+    det = 'Cargá el total del campo en Administración para calcularla';
+  } else if(e.exceso){
+    cls += ' padron-cierre-exceso';
+    val = '−'+fInt(-e.dif);
+    det = 'Los lotes ('+fInt(e.lotes)+' ha) superan el total del campo ('+fInt(e.total)+' ha). Revisá las superficies.';
+  } else {
+    val = f(e.estr,1);
+    det = 'Total campo '+fInt(e.total)+' − lotes '+fInt(e.lotes);
+  }
+  return '<tr class="'+cls+'"><td></td><td>'+campo+'</td><td colspan="2">Estructura / desperdicios <span class="pc-tag">calculado</span></td>'
+       + '<td>'+val+'</td><td colspan="4" class="pc-det">'+det+'</td></tr>';
+}
 function renderPadron(){
   pintarResumenFiltros('ctFiltrosPadron');
   var lts = sortLotes(lotesFiltrados());
@@ -3357,7 +3394,13 @@ function renderPadron(){
   var padHayExpl = lts.some(function(l){return loteExpl(l)!=null;});
   // Estructura = Total campo − Total lotes. Sin total de campo cargado no se puede
   // calcular (no se estima: se muestra "—", coherente con la regla de no inventar datos).
-  var estructDesp = hayTotalCampo ? Math.max(0, totalCampo - totalLotes) : null;
+  // Se suma campo por campo con estructuraDeCampo() (todos los lotes del campo, sin
+  // depender de filtros de lote), igual que la fila de cierre de cada grupo y el reporte.
+  var estructDesp = null;
+  if(hayTotalCampo){
+    estructDesp = 0;
+    for(var cmpE in camposVisibles){ var eC = estructuraDeCampo(cmpE); estructDesp += (eC.estr||0); }
+  }
   // NO explotable = Σ(física − explotable) de los lotes reales con explotable cargada.
   // Los lotes de desperdicio no entran (no son lotes; su superficie ya está en Estructura).
   var noExpl = 0, hayNoExpl = false;
@@ -3387,12 +3430,28 @@ function renderPadron(){
     + '<div class="kpi kpi-libre" title="Desperdicio permanente DENTRO de los lotes: bajos, montes, cabeceras. Se calcula como la suma de (sup. total − sup. explotable) de cada lote. Total lotes = Explotable permanente + NO explotable."><div class="kpi-lbl">Sup. NO explotable</div><div class="kpi-val">'+(hayNoExpl?fInt(noExpl)+' ha':'—')+'</div><div class="kpi-sub">'+(hayNoExpl?'dentro de los lotes':'requiere explotable')+'</div></div>';
   updateSortInds(['campo','lote','amb','sup','expl'], 'sp-');
   var html='';
-  for(var i=0;i<lts.length;i++){
-    var l = lts[i];
+  // Sin orden por columna: agrupado por campo, cada grupo cierra con una fila calculada de
+  // Estructura / desperdicios. Con orden por columna: lista plana (la estructura queda en el KPI).
+  var agrupar = !state.sortKey;
+  var grupos = [], porC = {};
+  if(agrupar){
+    for(var gi=0; gi<lts.length; gi++){
+      var cg = lts[gi].c || '—';
+      if(!porC[cg]){ porC[cg] = []; grupos.push(cg); }
+      porC[cg].push(lts[gi]);
+    }
+  } else { grupos = ['*']; porC['*'] = lts; }
+  var nro = 0;
+  for(var g=0; g<grupos.length; g++){
+  var gl = porC[grupos[g]];
+  if(agrupar) html += '<tr class="grp-row grp-campo"><td colspan="9">Campo '+grupos[g]+' · '+gl.length+(gl.length===1?' lote':' lotes')+'</td></tr>';
+  for(var i=0;i<gl.length;i++){
+    var l = gl[i];
+    nro++;
     var nCamps = Object.keys(l.p).filter(function(k){return l.p[k] && l.p[k].length;}).length;
     var en = l.l.replace(/'/g,"\\'");
     html += '<tr'+(loteActivo(l)?'':' style="opacity:.55"')+'>';
-    html += '<td class="tdcampo">'+(i+1)+'</td>';
+    html += '<td class="tdcampo">'+nro+'</td>';
     html += '<td>'+(l.c||'—')+'</td>';
     html += '<td class="tdname">'+l.l+'</td>';
     var ambTxt = l.a ? '<span class="amb-code" title="'+(ambDesc(l.a)||'')+'">'+l.a+'</span>' : '<span style="color:var(--muted)">—</span>';
@@ -3405,6 +3464,8 @@ function renderPadron(){
     html += '<td><span class="lote-meta">'+nCamps+'/6</span></td>';
     html += '<td class="row-actions"><button class="btn-act-edit" title="Editar" onclick="openLoteModal(\''+en+'\')">✎</button><button class="btn-act-del" title="Eliminar" onclick="deleteLote(\''+en+'\')">×</button></td>';
     html += '</tr>';
+  }
+  if(agrupar) html += filaCierrePadron(grupos[g]);
   }
   document.getElementById('padronBody').innerHTML = html;
   // El total va en los cuadros de resultado de arriba (no al pie).
@@ -4024,6 +4085,8 @@ function renderComposicion(){
 
   var ltsComp = lotesParaTotales();
   var explPendiente = false;
+  var noExplPorCampo = {}; // desperdicio permanente dentro de los lotes: Σ(física − explotable)
+  for(var cn=0;cn<campos.length;cn++) noExplPorCampo[campos[cn]] = 0;
   // Desglose por dimensión, separado en 1ª y 2ª por campo.
   // dimPorCampo[clave] = { total1:{campo->ha}, total2:{campo->ha}, t1:0, t2:0 }
   var dimPorCampo = {};
@@ -4038,7 +4101,7 @@ function renderComposicion(){
     if(totalPorCampo[campo]==null) continue;
     var supLote = l.s || 0;
     totalPorCampo[campo] += supLote;
-    if(esLoteDesperdicio(l)){ estructPorCampo[campo] += supLote; continue; }
+    if(esLoteDesperdicio(l)) continue; // no son lotes: la estructura se deriva por resta
     var actsCampo = actsReporte(l);
     for(var an=0; an<actsCampo.length; an++){
       var a = actsCampo[an];
@@ -4056,25 +4119,51 @@ function renderComposicion(){
     var expl = loteExpl(l);
     if(expl == null){ expl = supLote; explPendiente = true; }
     prodPorCampo[campo] += expl;
+    noExplPorCampo[campo] += Math.max(0, supLote - expl);
   }
 
   // El desglose por ambiente usa la siembra (1ª/2ª) igual que por cultivo, agrupada por
   // el ambiente del lote. Así el selector 1ª/2ª también funciona en modo ambiente.
 
   // Totales generales
-  var granTotal=0, granProd=0, granEstruct=0, totalReal=0, hayHaTotales=false;
+  // Superficie total y estructura POR CAMPO, con el mismo modelo que el Padrón:
+  //   total = total del campo (Administración); si no está cargado, suma de lotes (provisorio)
+  //   estructura = total − Σ lotes reales del campo (null si no hay total)
+  // Así la columna de cada campo y el total general usan la misma base.
+  var granTotal=0, granProd=0, granEstruct=0, granNoExpl=0, hayHaTotales=false, faltaTotal=false;
+  var hayEstruct = false, inactPorCampo = {}, granInact = 0;
   for(var c2=0;c2<campos.length;c2++){
-    granTotal += totalPorCampo[campos[c2]];
-    granProd += prodPorCampo[campos[c2]];
-    granEstruct += estructPorCampo[campos[c2]];
-    var tc = totalDeCampo(campos[c2]);
-    if(tc>0){ hayHaTotales = true; totalReal += tc; }
+    var cmp2 = campos[c2];
+    var eC2 = estructuraDeCampo(cmp2);
+    if(eC2.total != null){
+      hayHaTotales = true;
+      totalPorCampo[cmp2] = eC2.total;
+      estructPorCampo[cmp2] = eC2.estr;
+      hayEstruct = true;
+    } else {
+      faltaTotal = true;
+      estructPorCampo[cmp2] = 0;
+    }
+    granTotal += totalPorCampo[cmp2];
+    granProd += prodPorCampo[cmp2];
+    granEstruct += estructPorCampo[cmp2];
+    granNoExpl += noExplPorCampo[cmp2];
+    // Lotes inactivos: siguen dentro del campo pero no entran al resto del árbol
+    // (no se planifican). Se muestran aparte para que el total cierre.
+    inactPorCampo[cmp2] = 0;
+    for(var li2=0; li2<LOTES.length; li2++){
+      var lo2 = LOTES[li2];
+      if(lo2.c===cmp2 && !esLoteDesperdicio(lo2) && !loteActivo(lo2)) inactPorCampo[cmp2] += (lo2.s||0);
+    }
+    granInact += inactPorCampo[cmp2];
   }
-  var baseTotal = hayHaTotales ? totalReal : granTotal; // base física para TODOS los %
+  var baseTotal = granTotal; // base física para TODOS los %
 
   // Nota
-  var nota = hayHaTotales ? 'Superficie total según total del campo.'
-                          : 'Superficie total provisoria (suma de lotes). Cuando se cargue el total del campo, se usará ese.';
+  var nota = !hayHaTotales ? 'Superficie total provisoria (suma de lotes). Cuando se cargue el total del campo en Administración, se usará ese y se calculará la estructura.'
+           : (faltaTotal ? 'Superficie total según total del campo; en los campos sin total cargado se usa la suma de lotes y la estructura no se calcula.'
+                         : 'Superficie total según total del campo.');
+  nota += ' Superficie total = Explotable + NO explotable + Estructura'+(granInact>0?' + Lotes inactivos':'')+'.';
   if(explPendiente) nota += ' La explotable usa la sup física en lotes sin explotable cargada.';
   nota += ' Los % se calculan siempre sobre la superficie física total.';
   if(mostrar2a) nota += ' Con 1ª+2ª, los cultivos pueden superar el 100% por doble cultivo.';
@@ -4168,7 +4257,9 @@ function renderComposicion(){
     body += filaDesglose(etiqueta, dimPorCampo[k], 'rep-n4');
   }
   body += filaFisica('<strong title="Desperdicios de campaña = Superficie explotable − Superficie neta de 1ª. Es la tierra explotable que no se ocupó en la campaña. Neta (1ª) + Desperdicios = Explotable.">Desperdicios de la campaña</strong>', despCampG, despCampPorCampo, 'rep-n3');
-  body += filaFisica('<strong>Estructura + Desperdicios</strong> <span class="rep-nom">(padrón)</span>', granEstruct, estructPorCampo, 'rep-n2');
+  if(granInact > 0) body += filaFisica('<strong title="Lotes marcados como inactivos en el Padrón: están dentro del campo pero no se planifican.">Lotes inactivos</strong>', granInact, inactPorCampo, 'rep-n2');
+  body += filaFisica('<strong title="Desperdicio permanente dentro de los lotes (bajos, montes, cabeceras): suma de (sup. física − sup. explotable).">NO explotable</strong> <span class="rep-nom">(dentro de los lotes)</span>', granNoExpl, noExplPorCampo, 'rep-n2');
+  body += filaFisica('<strong title="Superficie del campo fuera de los lotes (caminos, casco, callejones): total del campo − suma de lotes. Requiere el total del campo cargado en Administración.">Estructura / desperdicios</strong> <span class="rep-nom">(total campo − lotes)</span>', hayEstruct ? granEstruct : 0, estructPorCampo, 'rep-n2');
   document.getElementById('repCompBody').innerHTML = body;
 
   // Torta por ambiente o cultivo (misma dimensión que la tabla) sobre lo filtrado, campaña activa.
