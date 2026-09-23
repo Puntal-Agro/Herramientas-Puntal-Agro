@@ -103,8 +103,14 @@ tr.hist-subtot td{background:#F4F6F1;border-top:1px solid var(--border);border-b
 table{width:100%;border-collapse:collapse}
 thead th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-weight:600;padding:9px 12px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap;background:#FAFBFC;position:sticky;top:0;z-index:1}
 tbody td{padding:6px 12px;border-bottom:none;font-family:var(--sans);font-size:14px;font-variant-numeric:tabular-nums;vertical-align:middle}
-tbody tr:hover td{background:#FAFBFC}
-.tdname{font-family:var(--sans)!important;font-weight:600}
+tbody tr:hover td{background:#F2F4EE}
+/* Plan: un lote multi-actividad ocupa varias filas (rowspan). El JS marca todas las
+   filas del lote con .lg-hover para que se pinte el bloque completo. */
+#planBody tr.lg-hover td{background:#F2F4EE}
+/* Padrón: línea fina entre filas, mismo tono que el Plan */
+#padronBody tr td{border-top:1px solid var(--border)}
+#padronBody tr:first-child td{border-top:none}
+.tdname{font-family:var(--sans)!important;font-weight:600;font-size:12px}
 .tdcampo{font-family:var(--sans);font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
 /* Celdas editables: recuadro gris claro tipo input (estilo Labores) */
 td.editable{cursor:text;border-radius:6px;box-shadow:inset 0 0 0 1px #E4E8EE;background:#FAFBFC;transition:all .12s}
@@ -120,8 +126,8 @@ tbody td.td-act.act-start{border-left:2px solid #EADDD1}
 /* Cultivo en negrita para destacar el bloque a cargar (reemplaza el fondo de color) */
 /* Cultivo actual (columna más importante del Plan): sigla grande y marcada */
 .act-cult{font-weight:700}
-.act-cult .cult-ro .cult-sig{font-size:16px;font-weight:700;color:var(--text)}
-.act-cult .cult-ro .cult-nom{font-size:12px}
+.act-cult .cult-ro .cult-sig{font-size:14px;font-weight:700;color:var(--text)}
+.act-cult .cult-ro .cult-nom{font-size:10px}
 /* Tenencia: dato secundario, fuente más chica (cambio 23) */
 .act-ten{font-family:var(--sans);font-size:11px;color:var(--muted)}
 /* Subfila de actividad extra (2ª, 3ª cultivo del mismo lote): sin borde, se distingue por el color */
@@ -418,10 +424,7 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
 .scroll-x{overflow-x:auto}
 .cierre-banner{border-radius:8px;padding:9px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:12px;font-family:var(--sans)}
 .cierre-banner strong{font-variant-numeric:tabular-nums}
-.cierre-falta{background:#FFFBEB;border:1.5px solid #FCD34D;color:#854F0B}
 .cierre-exceso{background:#FEF2F2;border:1.5px solid #FCA5A5;color:#991B1B}
-.cierre-btn{margin-left:auto;padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid var(--terra);background:var(--terra);color:#fff;font-family:var(--sans);white-space:nowrap}
-.cierre-btn:hover{background:#A84D1F;border-color:#A84D1F}
 /* Maestros: sigla de cultivo (neutra, sin color) */
 .cult-sigla{display:inline-block;padding:2px 8px;border-radius:5px;background:#F0F2F5;color:var(--text);font-family:var(--mono);font-size:12px;font-weight:600}
 .hist-mini-table{width:auto;min-width:420px;border-collapse:collapse;background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden}
@@ -448,6 +451,20 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
   body { background: #fff !important; }
   .cw { page-break-inside: avoid; }
 }
+
+/* ── Tipografía unificada de las tablas Plan y Padrón ──
+   Todos los valores en la misma fuente y tamaño (12px, sans). Solo el nombre del
+   lote y el cultivo de la campaña van 1 punto más grandes (13px) y en negrita. */
+#planBody td, #padronBody td,
+#planBody .tdcampo, #padronBody .tdcampo,
+#planBody .amb-code, #padronBody .amb-code,
+#planBody .cult-ro, #planBody .cult-ro .cult-sig, #planBody .cult-ro .cult-nom,
+#planBody .uso-pill, #planBody .act-ten, #planBody .hist-ha, #planBody .cult-sep{
+  font-family:var(--sans);font-size:12px}
+#planBody .amb-code, #padronBody .amb-code, #planBody .uso-pill, #planBody .hist-ha{font-weight:400}
+#planBody .cult-ro .cult-nom{color:var(--muted)}
+#planBody .tdname, #padronBody .tdname,
+#planBody .act-cult .cult-ro .cult-sig{font-size:13px;font-weight:700;color:var(--text)}
 </style>
 </head>
 <body>
@@ -1356,17 +1373,6 @@ function controlCierreCampos(lts){
     }
   }
   return res;
-}
-// Genera (o ajusta) el lote "<campo> Desperdicios y estructura" con el faltante del campo.
-function generarLoteDesperdicios(campo, faltante){
-  var nombre = campo + ' Desperdicios y estructura';
-  var existente = LOTES.find(function(x){return x.l===nombre;});
-  if(existente){
-    existente.s = (existente.s||0) + faltante;
-  } else {
-    LOTES.push({ l:nombre, c:campo, s:faltante, a:'DESP', expl:0, activo:true, p:{}, desperdicio:true });
-  }
-  renderAll();
 }
 
 var CAMPANIAS = ['25-26','26-27','27-28']; // PRUEBA: solo campañas con datos del Excel
@@ -2805,18 +2811,14 @@ function renderCierreBanner(){
   var html = '';
   for(var i=0;i<descuadres.length;i++){
     var d = descuadres[i];
-    if(d.dif > 0){
-      // Faltan ha para cerrar el campo → ofrecer generar lote de desperdicios
-      html += '<div class="cierre-banner cierre-falta">'
-            + '<span>⚠ Campo <strong>'+d.campo+'</strong>: los lotes suman <strong>'+fInt(d.suma)+' ha</strong> de <strong>'+fInt(d.total)+' ha</strong> del campo. Faltan <strong>'+fInt(d.dif)+' ha</strong>.</span>'
-            + '<button class="cierre-btn" onclick="generarLoteDesperdicios(\''+d.campo+'\','+d.dif+')">Generar «'+d.campo+' Desperdicios y estructura»</button>'
-            + '</div>';
-    } else {
-      // Exceso: los lotes superan el total del campo (error de datos)
-      html += '<div class="cierre-banner cierre-exceso">'
-            + '<span>⚠ Campo <strong>'+d.campo+'</strong>: los lotes suman <strong>'+fInt(d.suma)+' ha</strong>, más que el total del campo (<strong>'+fInt(d.total)+' ha</strong>). Revisá las superficies.</span>'
-            + '</div>';
-    }
+    // Faltante (dif > 0): NO se avisa. Esa diferencia es la estructura/desperdicios del
+    // campo (caminos, casco, callejones) y se deriva por resta en los KPIs del Padrón:
+    // Estructura = Total campo − Total lotes. No hace falta un lote físico que la represente.
+    if(d.dif > 0) continue;
+    // Exceso: los lotes superan el total del campo (error de datos)
+    html += '<div class="cierre-banner cierre-exceso">'
+          + '<span>⚠ Campo <strong>'+d.campo+'</strong>: los lotes suman <strong>'+fInt(d.suma)+' ha</strong>, más que el total del campo (<strong>'+fInt(d.total)+' ha</strong>). Revisá las superficies.</span>'
+          + '</div>';
   }
   cont.innerHTML = html;
 }
@@ -2938,7 +2940,7 @@ function renderRows(lts, cls){
            + '<td class="td-act">'+usoHtml+'</td>'
            + '<td class="td-act">'+negHtml+'</td>'
            + '<td class="td-act'+(exceeded?' exceeded':'')+'">'+f(neta,1)+'</td>'
-           + '<td class="td-act" style="color:'+pctColor+';font-weight:600">'+pctTxt+'</td>'
+           + '<td class="td-act" style="color:'+pctColor+'">'+pctTxt+'</td>'
            + '<td class="td-act td-act-acc">'+acc+'</td>';
     }
 
@@ -2949,10 +2951,10 @@ function renderRows(lts, cls){
     // Primera subfila: bloque lote (rowspan) + primer bloque actividad
     var firstAct = actsOrd.length ? actsOrd[0] : null;
     var ultimaIdx = actsOrd.length - 1;
-    html += '<tr class="'+rowCls+' lote-start">' + loteCells + actCells(firstAct, 0, ultimaIdx===0 && tieneActs) + '</tr>';
+    html += '<tr class="'+rowCls+' lote-start" data-lg="'+i+'">' + loteCells + actCells(firstAct, 0, ultimaIdx===0 && tieneActs) + '</tr>';
     // Subfilas siguientes: solo bloque actividad (2ª, 3ª cultivo...)
     for(var s=1; s<actsOrd.length; s++){
-      html += '<tr class="'+rowCls+' act-sub">' + actCells(actsOrd[s], s, s===ultimaIdx) + '</tr>';
+      html += '<tr class="'+rowCls+' act-sub" data-lg="'+i+'">' + actCells(actsOrd[s], s, s===ultimaIdx) + '</tr>';
     }
 
     // Fila expandida: historia completa de TODAS las campañas (con sup neta por cultivo)
@@ -5214,6 +5216,30 @@ function boot(){
     renderAll();
   }
 }
+
+// Hover por lote en el Plan: pinta todas las filas del mismo lote (data-lg),
+// porque las celdas de lote van con rowspan en la primera fila.
+var _lgHover = null;
+function _lgMarcar(val, on){
+  var rs = document.querySelectorAll('#planBody tr[data-lg="'+val+'"]');
+  for(var i=0;i<rs.length;i++){ if(on) rs[i].classList.add('lg-hover'); else rs[i].classList.remove('lg-hover'); }
+}
+(function(){
+  var pb = document.getElementById('planBody');
+  if(!pb) return;
+  pb.addEventListener('mouseover', function(ev){
+    var tr = ev.target && ev.target.closest ? ev.target.closest('tr') : null;
+    var val = (tr && tr.getAttribute('data-lg')) || null;
+    // Sin atajo por igualdad: tras un renderAll las filas son nuevas y hay que remarcarlas.
+    if(_lgHover != null) _lgMarcar(_lgHover, false);
+    _lgHover = val;
+    if(val != null) _lgMarcar(val, true);
+  });
+  pb.addEventListener('mouseleave', function(){
+    if(_lgHover != null) _lgMarcar(_lgHover, false);
+    _lgHover = null;
+  });
+})();
 
 boot();
 
