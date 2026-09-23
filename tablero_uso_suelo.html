@@ -204,7 +204,6 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
 .amb-G4{background:#FED7AA;color:#9A3412}
 .amb-G5{background:#FECACA;color:#991B1B}
 .amb-G6{background:#DBEAFE;color:#1E40AF}
-.amb-DESP{background:#F3F4F6;color:#6B7280}
 
 /* Filtros multi-select como dropdowns */
 .filtros-extra{background:var(--card);border-bottom:1px solid var(--border);padding:8px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
@@ -1131,7 +1130,7 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
 
 <footer>
   <span>Puntal Agro · Plan de Uso de Suelo</span>
-  <span id="fts">Versión v2026-09-23 10:04 · BUILD 46</span>
+  <span id="fts">Versión v2026-09-23 10:56 · BUILD 47</span>
 </footer>
 
 <script>
@@ -1304,8 +1303,7 @@ var AMBIENTES = {
   'G3':  {d:'Gan. CL/RH/CN No degradado',          t:'GAN', c:'#C8642D'},
   'G4':  {d:'Gan. CL/RH/CN Salino',                t:'GAN', c:'#C8642D'},
   'G5':  {d:'Gan. Espartos',                       t:'GAN', c:'#C8642D'},
-  'G6':  {d:'Gan. CL Inundable',                   t:'GAN', c:'#C8642D'},
-  'DESP':{d:'Desperdicios',                        t:'OTRO',c:'#7A8899'}
+  'G6':  {d:'Gan. CL Inundable',                   t:'GAN', c:'#C8642D'}
 };
 // Helpers de ambiente (compatibilidad + nuevos campos)
 function ambDesc(k){ return AMBIENTES[k] ? AMBIENTES[k].d : ''; }
@@ -1318,13 +1316,12 @@ function ambColor(k){ return AMBIENTES[k] ? AMBIENTES[k].c : '#7A8899'; }
 //          La sup neta de cada actividad se valida contra ésta.
 // l.activo → lote activo (default true). Inactivo: no se planifica pero suma al total del campo.
 function loteExpl(l){
-  if(esLoteDesperdicio(l)) return 0; // un desperdicio/estructura nunca es explotable
   return (l && l.expl != null && l.expl !== '') ? l.expl : null;
 }
 function loteExplPendiente(l){ return loteExpl(l) == null; }
 function loteActivo(l){ return !(l && l.activo === false); }
-// Lote de "Desperdicios y estructura": no se planifica (no se siembra), no editable como lote normal
-function esLoteDesperdicio(l){ return !!(l && (l.desperdicio || l.a === 'DESP')); }
+// Estructura / desperdicios NO se carga como lote: se deriva por resta
+// (total del campo − Σ lotes). Ver estructuraDeCampo().
 
 // ¿El lote pasa el filtro de campo del header? fCampo (multi) tiene prioridad;
 // si está vacío, cae a state.campo ('TODOS' o un código único) por retrocompatibilidad.
@@ -1368,7 +1365,7 @@ function estructuraDeCampo(campoCod){
   var lotes = 0;
   for(var i=0;i<LOTES.length;i++){
     var l = LOTES[i];
-    if(l.c !== campoCod || esLoteDesperdicio(l)) continue;
+    if(l.c !== campoCod) continue;
     lotes += (l.s||0);
   }
   if(!(total > 0)) return { total:null, lotes:lotes, estr:null, exceso:false };
@@ -1376,11 +1373,9 @@ function estructuraDeCampo(campoCod){
   return { total:total, lotes:lotes, estr:Math.max(0,dif), exceso:(dif < -0.5), dif:dif };
 }
 function controlCierreCampos(lts){
-  // Suma de sup total por campo (todos los lotes reales, activos e inactivos).
-  // Los lotes marcados como desperdicio no cuentan: la estructura se deriva por resta.
+  // Suma de sup total por campo (todos los lotes, activos e inactivos).
   var sumaPorCampo = {};
   for(var i=0;i<lts.length;i++){
-    if(esLoteDesperdicio(lts[i])) continue;
     var c = lts[i].c || '—';
     sumaPorCampo[c] = (sumaPorCampo[c]||0) + (lts[i].s||0);
   }
@@ -1389,7 +1384,7 @@ function controlCierreCampos(lts){
     var total = totalDeCampo(campo);
     if(total > 0){ // solo se controla si el total del campo está cargado
       var suma = sumaPorCampo[campo];
-      var dif = total - suma; // >0 faltan lotes (desperdicios); <0 exceso (error de datos)
+      var dif = total - suma; // >0 estructura (no se avisa); <0 exceso (error de datos)
       if(Math.abs(dif) > 0.5){
         res.push({ campo: campo, total: total, suma: suma, dif: dif });
       }
@@ -1988,7 +1983,7 @@ function buildFiltros(){
   if(state.estado==='activos') base = base.filter(function(l){return loteActivo(l);});
   else if(state.estado==='inactivos') base = base.filter(function(l){return !loteActivo(l);});
   
-  // Ambientes: usar TODOS los del catálogo (ordenados A1 A2 G1-G6 DESP), contar apariciones
+  // Ambientes: usar TODOS los del catálogo (ordenados A1 A2 G1-G6), contar apariciones
   var ambCount = {};
   for(var i=0;i<base.length;i++) if(base[i].a) ambCount[base[i].a] = (ambCount[base[i].a]||0)+1;
   var ambOpts = Object.keys(AMBIENTES).map(function(a){
@@ -2684,10 +2679,8 @@ function renderKpis(){
       usosDelLote[u] = true;
     }
     for(var uk in usosDelLote){ lotesPorUso[uk] = (lotesPorUso[uk] || 0) + 1; }
-    // "Sin plan" cuenta solo lotes reales: un lote de desperdicio/estructura no se
-    // planifica nunca, así que su ausencia de actividad no es información.
     if(acts.length) lotesConPlan++;
-    else if(!esLoteDesperdicio(l)){ lotesSinPlan++; explSinPlan += (e || 0); }
+    else { lotesSinPlan++; explSinPlan += (e || 0); }
   }
   // Desperdicios de campaña = explotable − superficie de 1ª ocupación (tierra explotable
   // que no se ocupó ni una vez). Se mide contra la 1ª —no contra la neta 1ª+2ª— para que
@@ -2898,9 +2891,7 @@ function renderRows(lts, cls){
 
     // Nº de subfilas del bloque actividad: una por actividad (mín 1 si no hay).
     // Si hay actividades, se suma 1 fila para el "+ agregar cultivo" (parte A del cambio 8).
-    // Los lotes de desperdicio no se planifican: nunca muestran "+ agregar" ni edición.
-    var esDesp = esLoteDesperdicio(l);
-    var tieneActs = !esDesp && actsOrd.length > 0;
+    var tieneActs = actsOrd.length > 0;
     var nActRows = Math.max(1, actsOrd.length);
     var nSub = nActRows;
 
@@ -2918,10 +2909,6 @@ function renderRows(lts, cls){
 
     // Función para armar el bloque ACTIVIDAD de una subfila
     function actCells(a, aIdx, esUltima){
-      if(esDesp){
-        // Lote de desperdicios/estructura: no se planifica
-        return '<td class="td-act act-start" colspan="6"><span style="color:var(--muted);font-style:italic;font-size:11px">Desperdicios y estructura · no se planifica</span></td>';
-      }
       if(!a){
         // Lote sin actividad en la campaña: bloque vacío con "+ actividad"
         var emptyClick = loteActivo(l) ? 'openCeldaActividades(\''+escName+'\')' : 'avisoLoteInactivo(\''+escName+'\')';
@@ -3046,7 +3033,7 @@ function conciliarFilas(){
   var lts = lotesFiltrados();
   for(var i=0;i<lts.length;i++){
     var l = lts[i];
-    if(esLoteDesperdicio(l) || !loteActivo(l)) continue;
+    if(!loteActivo(l)) continue;
     var li = LOTES.indexOf(l); // índice global único (hay nombres de lote repetidos)
     var acts = actsDe(l, camp);
     for(var j=0;j<acts.length;j++){
@@ -3376,10 +3363,9 @@ function renderPadron(){
   //   Sup. total Campo = Sup. total Lotes + Estructura/Desperdicios
   //   Sup. total Lotes = Sup. explotable permanente + Sup. NO explotable
   // - Total campo: perímetro del establecimiento; se registra al alta del campo (Administración).
-  // - Total lotes: suma de perímetros de los lotes reales (los marcados como desperdicio
-  //   NO son lotes: quedan fuera y su superficie cae dentro de Estructura por la resta).
+  // - Total lotes: suma de perímetros de los lotes.
   // - Estructura/Desperdicios: lo que está fuera del alambrado de los lotes (caminos, casco,
-  //   callejones) más los lotes de desperdicio. Requiere Total campo cargado.
+  //   callejones). Se deriva por resta, no se carga. Requiere Total campo cargado.
   // - Explotable permanente: suma de explotables cargadas.
   // - NO explotable: desperdicio permanente DENTRO de los lotes (bajos, montes, cabeceras).
   var camposVisibles = {};
@@ -3389,7 +3375,7 @@ function renderPadron(){
     var ht = totalDeCampo(cmp);
     if(ht>0) totalCampo += ht; else hayTotalCampo = false;
   }
-  var totalLotes = lts.reduce(function(a,b){return a + (esLoteDesperdicio(b)?0:(b.s||0));},0);
+  var totalLotes = lts.reduce(function(a,b){return a + (b.s||0);},0);
   var padTotExpl = lts.reduce(function(a,b){return a+(loteExpl(b)||0);},0);
   var padHayExpl = lts.some(function(l){return loteExpl(l)!=null;});
   // Estructura = Total campo − Total lotes. Sin total de campo cargado no se puede
@@ -3401,12 +3387,10 @@ function renderPadron(){
     estructDesp = 0;
     for(var cmpE in camposVisibles){ var eC = estructuraDeCampo(cmpE); estructDesp += (eC.estr||0); }
   }
-  // NO explotable = Σ(física − explotable) de los lotes reales con explotable cargada.
-  // Los lotes de desperdicio no entran (no son lotes; su superficie ya está en Estructura).
+  // NO explotable = Σ(física − explotable) de los lotes con explotable cargada.
   var noExpl = 0, hayNoExpl = false;
   for(var k=0;k<lts.length;k++){
     var lo = lts[k];
-    if(esLoteDesperdicio(lo)) continue;
     var ex = loteExpl(lo);
     if(ex == null) continue;          // explotable pendiente: no se asume 0
     hayNoExpl = true;
@@ -3415,17 +3399,24 @@ function renderPadron(){
   // Cantidad de lotes reales (mismo criterio que "Total lotes") y con explotable cargada.
   var nLotes = 0, nLotesExpl = 0;
   for(var j=0;j<lts.length;j++){
-    if(esLoteDesperdicio(lts[j])) continue;
     nLotes++;
     if(loteExpl(lts[j]) != null) nLotesExpl++;
   }
+  // Si los filtros (estado, ambiente, búsqueda…) dejan afuera lotes de los campos visibles,
+  // Total campo ≠ Total lotes + Estructura (la estructura siempre usa todos los lotes del
+  // campo). Se aclara en el subtítulo para que no parezca un descuadre.
+  var nLotesCampos = 0;
+  for(var lx=0; lx<LOTES.length; lx++){ if(camposVisibles[LOTES[lx].c]) nLotesCampos++; }
+  var subLotes = (nLotes < nLotesCampos)
+    ? (fInt(nLotes)+' de '+fInt(nLotesCampos)+' lotes · filtrado')
+    : (fInt(nLotes)+(nLotes===1?' lote':' lotes'));
   var subExpl = nLotesExpl === nLotes
     ? (nLotes + (nLotes===1?' lote':' lotes'))
     : (nLotesExpl + ' de ' + nLotes + ' lotes cargados');
   document.getElementById('padronKpisRow').innerHTML =
     '<div class="kpi" title="Perímetro total del establecimiento. Se registra al dar de alta el campo (módulo Administración). Total campo = Total lotes + Estructura/Desperdicios."><div class="kpi-lbl">Sup. total campo</div><div class="kpi-val">'+(hayTotalCampo?fInt(totalCampo)+' ha':'—')+'</div><div class="kpi-sub">'+(hayTotalCampo?'según alta del campo':'sin cargar en Administración')+'</div></div>'
-    + '<div class="kpi" title="Suma de los perímetros de los lotes. Los lotes marcados como desperdicio/estructura no se cuentan como lotes."><div class="kpi-lbl">Sup. total lotes</div><div class="kpi-val">'+fInt(totalLotes)+' ha</div><div class="kpi-sub">'+fInt(nLotes)+(nLotes===1?' lote':' lotes')+'</div></div>'
-    + '<div class="kpi kpi-libre" title="Estructura / Desperdicios = Total campo − Total lotes. Es la superficie del establecimiento que queda fuera del alambrado de los lotes (caminos, casco, montes, callejones), más los lotes marcados como desperdicio."><div class="kpi-lbl">Sup. estructura / desperdicios</div><div class="kpi-val">'+(estructDesp==null?'—':fInt(estructDesp)+' ha')+'</div><div class="kpi-sub">'+(estructDesp==null?'requiere total del campo':'total campo − lotes')+'</div></div>'
+    + '<div class="kpi" title="Suma de los perímetros de los lotes."><div class="kpi-lbl">Sup. total lotes</div><div class="kpi-val">'+fInt(totalLotes)+' ha</div><div class="kpi-sub">'+subLotes+'</div></div>'
+    + '<div class="kpi kpi-libre" title="Estructura / Desperdicios = Total campo − Total lotes. Es la superficie del establecimiento que queda fuera del alambrado de los lotes (caminos, casco, callejones). Se calcula, no se carga como lote."><div class="kpi-lbl">Sup. estructura / desperdicios</div><div class="kpi-val">'+(estructDesp==null?'—':fInt(estructDesp)+' ha')+'</div><div class="kpi-sub">'+(estructDesp==null?'requiere total del campo':'total campo − lotes')+'</div></div>'
     + '<div class="kpi kpi-expl" title="Superficie de los lotes efectivamente trabajable, descontando las restricciones permanentes de cada lote."><div class="kpi-lbl">Sup. explotable permanente</div><div class="kpi-val">'+(padHayExpl?fInt(padTotExpl)+' ha':'—')+'</div><div class="kpi-sub">'+(padHayExpl?subExpl:'sin cargar')+'</div></div>'
     + '<div class="kpi kpi-libre" title="Desperdicio permanente DENTRO de los lotes: bajos, montes, cabeceras. Se calcula como la suma de (sup. total − sup. explotable) de cada lote. Total lotes = Explotable permanente + NO explotable."><div class="kpi-lbl">Sup. NO explotable</div><div class="kpi-val">'+(hayNoExpl?fInt(noExpl)+' ha':'—')+'</div><div class="kpi-sub">'+(hayNoExpl?'dentro de los lotes':'requiere explotable')+'</div></div>';
   updateSortInds(['campo','lote','amb','sup','expl'], 'sp-');
@@ -3484,28 +3475,6 @@ function buildAmbienteSelect(selectId, current){
   sel.innerHTML = html;
 }
 
-// Un lote de desperdicio/estructura nunca es explotable: el campo se fuerza a 0 y se
-// bloquea. Evita que se cargue explotable en un callejón o en el casco, que rompería
-// la ecuación Total lotes = Explotable + NO explotable.
-function aplicarBloqueoExpl(bloquear){
-  var inp = document.getElementById('mlExpl');
-  if(!inp) return;
-  if(bloquear){
-    inp.value = 0;
-    inp.readOnly = true;
-    inp.style.background = '#F1F5F9';
-    inp.style.color = 'var(--muted)';
-    inp.style.cursor = 'not-allowed';
-    inp.title = 'Un lote de desperdicio / estructura no tiene superficie explotable (siempre 0).';
-  } else {
-    inp.readOnly = false;
-    inp.style.background = '';
-    inp.style.color = '';
-    inp.style.cursor = '';
-    inp.title = '';
-  }
-}
-
 function openLoteModal(loteName, focoExpl){
   loteEditando = loteName || null;
   document.getElementById('modalLoteWarn').style.display = 'none';
@@ -3527,7 +3496,6 @@ function openLoteModal(loteName, focoExpl){
     document.getElementById('mlSup').value = (l.s!=null ? l.s : '');
     document.getElementById('mlExpl').value = (l.expl!=null && l.expl!=='') ? l.expl : '';
     document.getElementById('mlActivo').checked = loteActivo(l);
-    aplicarBloqueoExpl(esLoteDesperdicio(l));
   } else {
     document.getElementById('modalLoteTitle').textContent = 'Agregar lote';
     document.getElementById('mlNombre').value = '';
@@ -3536,11 +3504,7 @@ function openLoteModal(loteName, focoExpl){
     document.getElementById('mlSup').value = '';
     document.getElementById('mlExpl').value = '';
     document.getElementById('mlActivo').checked = true;
-    aplicarBloqueoExpl(false);
   }
-  // El bloqueo se reevalúa si cambia el ambiente (DESP ⇄ productivo) dentro del modal.
-  var selAmb = document.getElementById('mlAmbiente');
-  if(selAmb) selAmb.onchange = function(){ aplicarBloqueoExpl(this.value === 'DESP'); };
   document.getElementById('modalLote').classList.add('on');
   setTimeout(function(){
     // Cambio 22: si venimos a cargar la explotable, enfocar ese campo; si no, el nombre
@@ -3577,10 +3541,6 @@ function confirmLoteModal(){
   } else {
     expl = null; // queda pendiente de carga
   }
-  // Regla de negocio (no solo de UI): un lote de desperdicio/estructura nunca tiene
-  // explotable. Se fuerza a 0 aunque el input se haya salteado el bloqueo.
-  var ambSel = document.getElementById('mlAmbiente').value;
-  if(ambSel === 'DESP') expl = 0;
   if(loteEditando){
     var l = LOTES.find(function(x){return x.l===loteEditando;});
     if(l){
@@ -3711,7 +3671,6 @@ function construirMatriz(dim, dim2, dimCol, supMode){
   var lts = lotesParaTotales();
   for(var i=0;i<lts.length;i++){
     var l = lts[i];
-    if(esLoteDesperdicio(l)) continue;
     if(!loteActivo(l)) continue;
     var acts = actsReporte(l);
     for(var j=0;j<acts.length;j++){
@@ -4101,7 +4060,6 @@ function renderComposicion(){
     if(totalPorCampo[campo]==null) continue;
     var supLote = l.s || 0;
     totalPorCampo[campo] += supLote;
-    if(esLoteDesperdicio(l)) continue; // no son lotes: la estructura se deriva por resta
     var actsCampo = actsReporte(l);
     for(var an=0; an<actsCampo.length; an++){
       var a = actsCampo[an];
@@ -4153,7 +4111,7 @@ function renderComposicion(){
     inactPorCampo[cmp2] = 0;
     for(var li2=0; li2<LOTES.length; li2++){
       var lo2 = LOTES[li2];
-      if(lo2.c===cmp2 && !esLoteDesperdicio(lo2) && !loteActivo(lo2)) inactPorCampo[cmp2] += (lo2.s||0);
+      if(lo2.c===cmp2 && !loteActivo(lo2)) inactPorCampo[cmp2] += (lo2.s||0);
     }
     granInact += inactPorCampo[cmp2];
   }
@@ -4163,6 +4121,9 @@ function renderComposicion(){
   var nota = !hayHaTotales ? 'Superficie total provisoria (suma de lotes). Cuando se cargue el total del campo en Administración, se usará ese y se calculará la estructura.'
            : (faltaTotal ? 'Superficie total según total del campo; en los campos sin total cargado se usa la suma de lotes y la estructura no se calcula.'
                          : 'Superficie total según total del campo.');
+  var camposExceso = [];
+  for(var cx=0;cx<campos.length;cx++){ if(estructuraDeCampo(campos[cx]).exceso) camposExceso.push(campos[cx]); }
+  if(camposExceso.length) nota += ' ⚠ En '+camposExceso.join(', ')+' los lotes suman más que el total del campo: el árbol no cierra hasta corregir las superficies.';
   nota += ' Superficie total = Explotable + NO explotable + Estructura'+(granInact>0?' + Lotes inactivos':'')+'.';
   if(explPendiente) nota += ' La explotable usa la sup física en lotes sin explotable cargada.';
   nota += ' Los % se calculan siempre sobre la superficie física total.';
@@ -4269,7 +4230,6 @@ function renderComposicion(){
   var ltsTorta = lotesParaTotales();
   for(var ti=0;ti<ltsTorta.length;ti++){
     var lt = ltsTorta[ti];
-    if(esLoteDesperdicio(lt)) continue;
     if(!loteActivo(lt)) continue;
     var actsT = actsReporte(lt);
     for(var tj=0;tj<actsT.length;tj++){
@@ -4519,7 +4479,6 @@ function renderHistorico(){
   }
   for(var i=0;i<lts.length;i++){
     var l = lts[i];
-    if(esLoteDesperdicio(l)) continue;
     var loteTotal = l.s || 0;
     var loteExplV = loteExpl(l); if(loteExplV==null) loteExplV = loteTotal; // fallback si no cargada
     for(var jc=0;jc<CAMPANIAS.length;jc++){
@@ -4656,7 +4615,6 @@ function renderHistorico(){
     var cc3 = CAMPANIAS[jc2]; sum1[cc3]=0; sum2[cc3]=0; sumMode[cc3]=0;
     for(var li2=0;li2<lts.length;li2++){
       var lo2 = lts[li2];
-      if(esLoteDesperdicio(lo2)) continue;
       var acts2 = actsDe(lo2, cc3);
       if(!acts2.length) continue;
       if(modoVal==='neta'){
@@ -4697,7 +4655,6 @@ function renderHistorico(){
   }
   for(var gi=0; gi<lts.length; gi++){
     var lo = lts[gi];
-    if(esLoteDesperdicio(lo)) continue;
     for(var gc=0; gc<CAMPANIAS.length; gc++){
       var camp = CAMPANIAS[gc];
       var acts = actsDe(lo, camp);
