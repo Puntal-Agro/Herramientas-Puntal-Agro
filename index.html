@@ -31,6 +31,8 @@ main{padding:0;display:flex;flex-direction:column;flex:1}
 .subsec{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:14px 2px 9px}
 .subsec.first{margin-top:14px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+.tool-off .tool-main{cursor:default}.tool-off .tool-main:hover{background:none}
+.tag-prox{background:#EEF0F2;color:var(--muted)}
 .empty{font-size:13px;color:var(--muted);padding:8px 4px;font-style:italic}
 .tool{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);border-left:3px solid transparent;overflow:hidden;transition:box-shadow .12s;box-shadow:0 1px 3px rgba(15,25,35,.04)}
 .tool:hover{box-shadow:0 4px 14px rgba(15,25,35,.09)}
@@ -318,23 +320,57 @@ table, .num, .cnt, input[type=number]{font-variant-numeric:tabular-nums}
   <div class="view sec" id="view-pun">
     <button class="volver" onclick="irA('home')"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></svg> Volver al inicio</button>
     <div class="block-title">Herramientas Puntal<span class="ln" style="background:var(--pun)"></span></div>
-    <div class="subsec first">Agricultura</div>
-    <div class="grid grid-pun" id="grid-pun-agr">
-    </div>
-    <div class="empty" id="empty-pun-agr" style="display:none">Próximamente.</div>
+    <div class="grid" id="grid-pun-secciones" style="margin-top:14px">
 
-    <div class="subsec">Ganadería</div>
-    <div class="grid grid-pun" id="grid-pun-gan">
-    </div>
-    <div class="empty" id="empty-pun-gan" style="display:none">Próximamente.</div>
+      <div class="tool t-cal tool-off">
+        <div class="tool-main">
+          <span class="tool-name">Agricultura</span>
+          <span class="tool-right"><span class="tool-tag tag-prox">Próximamente</span></span>
+        </div>
+        <button class="tool-toggle" onclick="tog(this)"><span class="ico">+</span> Detalle</button>
+        <div class="tool-detail">Herramientas Puntal para la gestión agrícola.</div>
+      </div>
 
-    <div class="subsec">Ambiente</div>
-    <div class="grid grid-pun" id="grid-pun-amb">
-    </div>
-    <div class="empty" id="empty-pun-amb" style="display:none">Próximamente.</div>
+      <div class="tool t-cal tool-off">
+        <div class="tool-main">
+          <span class="tool-name">Ganadería</span>
+          <span class="tool-right"><span class="tool-tag tag-prox">Próximamente</span></span>
+        </div>
+        <button class="tool-toggle" onclick="tog(this)"><span class="ico">+</span> Detalle</button>
+        <div class="tool-detail">Herramientas Puntal para la gestión ganadera.</div>
+      </div>
 
-    <div class="subsec">Empresa</div>
-    <div class="grid grid-pun" id="grid-pun-emp">
+      <div class="tool t-cal tool-off">
+        <div class="tool-main">
+          <span class="tool-name">Ambiente</span>
+          <span class="tool-right"><span class="tool-tag tag-prox">Próximamente</span></span>
+        </div>
+        <button class="tool-toggle" onclick="tog(this)"><span class="ico">+</span> Detalle</button>
+        <div class="tool-detail">Herramientas Puntal de gestión ambiental.</div>
+      </div>
+
+      <div class="tool t-cal tool-off">
+        <div class="tool-main">
+          <span class="tool-name">Empresa</span>
+          <span class="tool-right"><span class="tool-tag tag-prox">Próximamente</span></span>
+        </div>
+        <button class="tool-toggle" onclick="tog(this)"><span class="ico">+</span> Detalle</button>
+        <div class="tool-detail">Herramientas Puntal para la gestión de la empresa.</div>
+      </div>
+
+      <div class="tool t-cal tool-off">
+        <div class="tool-main">
+          <span class="tool-name">Consulta</span>
+          <span class="tool-right"><span class="tool-tag tag-prox">Próximamente</span></span>
+        </div>
+        <button class="tool-toggle" onclick="tog(this)"><span class="ico">+</span> Detalle</button>
+        <div class="tool-detail">Material y herramientas de consulta de Puntal.</div>
+      </div>
+
+    </div>
+
+    <div class="subsec">Disponible ahora</div>
+    <div class="grid" id="grid-puntal">
 
       <div class="tool t-cal">
         <a class="tool-main" href="calendario_actividades.html">
@@ -346,7 +382,6 @@ table, .num, .cnt, input[type=number]{font-variant-numeric:tabular-nums}
       </div>
 
     </div>
-    <div class="empty" id="empty-pun-emp" style="display:none">Próximamente.</div>
   </div>
 
   <!-- ============ ADMINISTRACIÓN ============ -->
@@ -465,12 +500,7 @@ function aplicarCtx(ctx){
   var accPun = document.getElementById('acc-pun');
   accPun.style.display = puedePuntal() ? '' : 'none';
   if (!puedePuntal() && location.hash === '#pun') { location.hash = ''; }
-  var nPun = 0, secPun = ['agr','gan','amb','emp'];
-  for (var sp=0; sp<secPun.length; sp++){
-    var nSec = contarVisibles('grid-pun-' + secPun[sp]);
-    document.getElementById('empty-pun-' + secPun[sp]).style.display = nSec ? 'none' : 'block';
-    nPun += nSec;
-  }
+  var nPun = contarVisibles('grid-puntal');
 
   // contadores de la portada
   ponerCnt('cnt-dec', nDec, 'tablero propio', 'tableros propios', nExt + ' externos');
