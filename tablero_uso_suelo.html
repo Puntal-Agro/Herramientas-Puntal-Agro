@@ -110,9 +110,9 @@ tbody tr:hover td{background:#F2F4EE}
 /* Padrón: línea fina entre filas, mismo tono que el Plan */
 #padronBody tr td{border-top:1px solid var(--border)}
 #padronBody tr:first-child td{border-top:none}
-#padronBody tr.padron-cierre td{background:#F7F8F5;color:var(--muted);font-style:italic}
-#padronBody tr.padron-cierre .pc-tag{font-style:normal;font-size:10px;padding:1px 6px;border-radius:4px;background:#ECEFE7;color:var(--muted);margin-left:4px}
-#padronBody tr.padron-cierre .pc-det{font-size:11px}
+#padronBody tr.padron-cierre td, #planBody tr.padron-cierre td{background:#F7F8F5;color:var(--muted);font-style:italic}
+#padronBody tr.padron-cierre .pc-tag, #planBody tr.padron-cierre .pc-tag{font-style:normal;font-size:10px;padding:1px 6px;border-radius:4px;background:#ECEFE7;color:var(--muted);margin-left:4px}
+#padronBody tr.padron-cierre .pc-det, #planBody tr.padron-cierre .pc-det{font-size:11px}
 #padronBody tr.padron-cierre-exceso td{background:#FEF2F2;color:#991B1B}
 .tdname{font-family:var(--sans)!important;font-weight:600;font-size:12px}
 .tdcampo{font-family:var(--sans);font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
@@ -1130,7 +1130,7 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
 
 <footer>
   <span>Puntal Agro · Plan de Uso de Suelo</span>
-  <span id="fts">Versión v2026-09-23 12:09 · BUILD 48</span>
+  <span id="fts">Versión v2026-09-24 08:33 · BUILD 49</span>
 </footer>
 
 <script>
@@ -2801,6 +2801,7 @@ function renderPlan(){
         var grupo = porCampo[campo];
         html += '<tr class="grp-row grp-campo"><td colspan="'+colspan+'">Campo '+campo+' · '+grupo.length+' lotes</td></tr>';
         html += renderRows(grupo, 'row-flat');
+        html += filaCierrePlan(campo, grupo, colspan);
       }
     }
   }
@@ -3357,6 +3358,25 @@ function filaCierrePadron(campo){
   }
   return '<tr class="'+cls+'"><td></td><td>'+campo+'</td><td colspan="2">Estructura / desperdicios <span class="pc-tag">calculado</span></td>'
        + '<td>'+val+'</td><td colspan="4" class="pc-det">'+det+'</td></tr>';
+}
+// Fila de cierre de un campo en el Plan: Desperdicios de campaña = explotable − sup. de 1ª,
+// con el MISMO criterio que el cuadro de arriba (lotes activos, actividades visibles, 2ª no
+// suma). Calculada, gris, sin acciones. No es un lote ni se carga nada.
+function filaCierrePlan(campo, grupo, colspan){
+  var expl = 0, hayExpl = false, sup1a = 0;
+  for(var i=0;i<grupo.length;i++){
+    var l = grupo[i];
+    if(!loteActivo(l)) continue;
+    var e = loteExpl(l);
+    if(e != null){ expl += e; hayExpl = true; }
+    var acts = actsVisibles(l, state.campania);
+    for(var a=0;a<acts.length;a++){ if(!acts[a].seg) sup1a += (acts[a].ha||0); }
+  }
+  var val, det;
+  if(!hayExpl){ val = '—'; det = 'Falta cargar la sup. explotable de los lotes en el Padrón'; }
+  else { val = f(Math.max(0, expl - sup1a),1); det = 'Explotable '+fInt(expl)+' − sup. de 1ª '+fInt(sup1a); }
+  return '<tr class="padron-cierre"><td></td><td>'+campo+'</td><td>Desperdicios de campaña <span class="pc-tag">calculado</span></td>'
+       + '<td></td><td>'+val+'</td><td colspan="'+(colspan-5)+'" class="pc-det">'+det+'</td></tr>';
 }
 function renderPadron(){
   pintarResumenFiltros('ctFiltrosPadron');
