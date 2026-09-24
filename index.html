@@ -6,7 +6,7 @@
 <title>Herramientas · Puntal Agro</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#F0F2F5;--card:#fff;--border:#E4E8EE;--text:#0F1923;--muted:#7A8899;--olive:#4A6533;--ochre:#A86A1F;--terra:#C8642D;--radius:12px;--mono:'DM Sans',sans-serif;--sans:'DM Sans',sans-serif;}
+:root{--pun:#2F4220;--bg:#F0F2F5;--card:#fff;--border:#E4E8EE;--text:#0F1923;--muted:#7A8899;--olive:#4A6533;--ochre:#A86A1F;--terra:#C8642D;--radius:12px;--mono:'DM Sans',sans-serif;--sans:'DM Sans',sans-serif;}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:15px;min-height:100vh;display:flex;flex-direction:column}
 .topbar{height:4px;background:var(--olive)}
@@ -70,6 +70,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
 .acc-cnt.vacio{color:var(--muted);font-weight:500;text-transform:none;letter-spacing:0;font-style:italic}
 .acc-b{border-top-color:var(--terra)}.acc-b .acc-ico{stroke:var(--terra)}.acc-b .acc-cnt{color:var(--terra)}
 .acc-c{border-top-color:var(--ochre)}.acc-c .acc-ico{stroke:var(--ochre)}.acc-c .acc-cnt{color:var(--ochre)}
+.acc-d{border-top-color:var(--pun)}.acc-d .acc-ico{stroke:var(--pun)}.acc-d .acc-cnt{color:var(--pun)}
 .volver{background:none;border:none;padding:0;margin-bottom:14px;font-family:var(--sans);font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:6px}
 .volver:hover{color:var(--terra)}
 .volver svg{width:13px;height:13px;stroke:currentColor;stroke-width:2.2;fill:none}
@@ -119,6 +120,13 @@ table, .num, .cnt, input[type=number]{font-variant-numeric:tabular-nums}
         <div class="acc-tit">Herramientas de Gestión</div>
         <div class="acc-txt">Planificación y registro de la operación: uso del suelo, siembra, insumos, labores, ganadería y maestros.</div>
         <div class="acc-cnt" id="cnt-ges"></div>
+      </button>
+
+      <button class="acc acc-d" id="acc-pun" onclick="irA('pun')">
+        <svg class="acc-ico" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg>
+        <div class="acc-tit">Herramientas Puntal</div>
+        <div class="acc-txt">Herramientas internas del equipo Puntal Agro para el trabajo de consultoría.</div>
+        <div class="acc-cnt" id="cnt-pun"></div>
       </button>
 
       <button class="acc acc-c" id="acc-adm" onclick="irA('adm')">
@@ -302,6 +310,20 @@ table, .num, .cnt, input[type=number]{font-variant-numeric:tabular-nums}
     <div class="empty" id="empty-gestion" style="display:none">No tenés herramientas de gestión habilitadas para esta empresa.</div>
   </div>
 
+  <!-- ============ HERRAMIENTAS PUNTAL ============
+       Etapa actual: sección visible solo para admin_general (ver puedePuntal).
+       Tarjetas SIN data-tool: se ven todas dentro de la sección.
+       Etapa futura (filtro por permiso): agregar data-tool a cada tarjeta,
+       dar de alta las herramientas en pa-core y usar filtrarGrupo. -->
+  <div class="view sec" id="view-pun">
+    <button class="volver" onclick="irA('home')"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></svg> Volver al inicio</button>
+    <div class="block-title">Herramientas Puntal<span class="ln" style="background:var(--pun)"></span></div>
+    <div class="grid" id="grid-puntal" style="margin-top:14px">
+
+    </div>
+    <div class="empty" id="empty-puntal" style="display:none">Próximamente.</div>
+  </div>
+
   <!-- ============ ADMINISTRACIÓN ============ -->
   <div class="view sec" id="view-adm">
     <button class="volver" onclick="irA('home')"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></svg> Volver al inicio</button>
@@ -339,10 +361,10 @@ table, .num, .cnt, input[type=number]{font-variant-numeric:tabular-nums}
 <script src="pa-core.js"></script>
 <script>
 /* ================== navegación entre vistas ==================
-   Portada con 3 accesos + una vista por bloque. Sin recarga: se
+   Portada con 4 accesos + una vista por bloque. Sin recarga: se
    muestra/oculta con la clase .on y se sincroniza con el hash para
    que el botón Atrás del navegador funcione. */
-var VISTAS = ['home','dec','ges','adm'];
+var VISTAS = ['home','dec','ges','pun','adm'];
 
 function irA(v){
   if (v !== 'home' && location.hash !== '#'+v) { location.hash = v; return; }
@@ -355,6 +377,7 @@ function mostrar(v){
   for (i=0;i<VISTAS.length;i++) if (VISTAS[i] === v) ok = true;
   if (!ok) v = 'home';
   if (v === 'adm' && !puedeAdmin()) v = 'home';
+  if (v === 'pun' && !puedePuntal()) v = 'home';
   for (i=0;i<VISTAS.length;i++){
     var el = document.getElementById('view-'+VISTAS[i]);
     if (el) { if (VISTAS[i] === v) el.className = 'view on sec'; else el.className = 'view sec'; }
@@ -377,6 +400,13 @@ var CTX = null;
 function puedeAdmin(){
   if (!CTX || !CTX.usuario) return true;
   return CTX.usuario.rol === 'admin_general' || CTX.usuario.rol === 'admin_cliente';
+}
+
+/* Herramientas Puntal: por ahora solo admin_general (equipo Puntal).
+   Mismo criterio fail-open que puedeAdmin. */
+function puedePuntal(){
+  if (!CTX || !CTX.usuario) return true;
+  return CTX.usuario.rol === 'admin_general';
 }
 
 function aplicarCtx(ctx){
@@ -406,9 +436,19 @@ function aplicarCtx(ctx){
   accAdm.style.display = puedeAdmin() ? '' : 'none';
   if (!puedeAdmin() && location.hash === '#adm') { location.hash = ''; }
 
+  // acceso Herramientas Puntal: solo admin_general (etapa actual)
+  var accPun = document.getElementById('acc-pun');
+  accPun.style.display = puedePuntal() ? '' : 'none';
+  if (!puedePuntal() && location.hash === '#pun') { location.hash = ''; }
+  var nPun = contarVisibles('grid-puntal');
+  document.getElementById('empty-puntal').style.display = nPun ? 'none' : 'block';
+
   // contadores de la portada
   ponerCnt('cnt-dec', nDec, 'tablero propio', 'tableros propios', nExt + ' externos');
   ponerCnt('cnt-ges', nGes, 'herramienta disponible', 'herramientas disponibles', '');
+  var cPun = document.getElementById('cnt-pun');
+  if (nPun) { cPun.className = 'acc-cnt'; cPun.textContent = nPun + (nPun === 1 ? ' herramienta' : ' herramientas'); }
+  else { cPun.className = 'acc-cnt vacio'; cPun.textContent = 'Próximamente'; }
 }
 
 function ponerCnt(id, n, sing, plur, extra){
@@ -460,7 +500,7 @@ PA.init({ modo:'demo' }, function(){
     aplicarCtx(ctx);
     desdeHash();
   });
-  document.getElementById('fts2').textContent = 'v2026-08-28 · BUILD 1 · ' + new Date().toLocaleString('es-AR');
+  document.getElementById('fts2').textContent = 'v2026-09-24 · BUILD 1 · ' + new Date().toLocaleString('es-AR');
 });
 </script>
 
