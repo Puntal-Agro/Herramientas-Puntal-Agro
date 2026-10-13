@@ -53,9 +53,11 @@ main{padding:0;display:flex;flex-direction:column;flex:1}
 .t-sue{border-left-color:#7A8B3F}.t-sie{border-left-color:#5E7A2C}.t-hac{border-left-color:#A85A2C}
 .t-lab{border-left-color:#8E5A18}.t-fit{border-left-color:#6B7E2E}.t-ext{border-left-color:#B8AFA2}
 .t-cal{border-left-color:#2F4220}.t-est{border-left-color:#4A6533}.t-usu{border-left-color:#A86A1F}.t-mae{border-left-color:#C8642D}
+.t-fin{border-left-color:#7A4E16}
 .tag-gra{background:#EEF3E8;color:#3A5128}.tag-var{background:#FBF1E0;color:#7A4E16}.tag-ins{background:#FBEDE3;color:#9A4A20}
 .tag-sue{background:#F2F5E8;color:#4F5C28}.tag-sie{background:#EBF1DF;color:#3F5520}.tag-hac{background:#FBEAD9;color:#8A4520}
 .tag-lab{background:#F8EDD9;color:#6E4612}.tag-fit{background:#EFF1E0;color:#4A5520}.tag-ext{background:#EEF0F3;color:#475569}.tag-cal{background:#E7EDE1;color:#2F4220}
+.tag-fin{background:#F3ECDF;color:#6B4416}
 footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--card);font-size:11px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
 
 /* ---------- portada: 3 accesos ---------- */
@@ -120,7 +122,7 @@ table, .num, .cnt, input[type=number]{font-variant-numeric:tabular-nums}
       <button class="acc acc-b" onclick="irA('ges')">
         <svg class="acc-ico" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
         <div class="acc-tit">Herramientas de Gestión</div>
-        <div class="acc-txt">Planificación y registro de la operación: uso del suelo, siembra, insumos, labores, ganadería y maestros.</div>
+        <div class="acc-txt">Planificación y registro de la operación: uso del suelo, siembra, insumos, labores, ganadería, finanzas y maestros.</div>
         <div class="acc-cnt" id="cnt-ges"></div>
       </button>
 
@@ -297,6 +299,15 @@ table, .num, .cnt, input[type=number]{font-variant-numeric:tabular-nums}
         </a>
         <button class="tool-toggle" onclick="tog(this)"><span class="ico">+</span> Detalle</button>
         <div class="tool-detail">Existencias de hacienda por negocio, rodeo y categoría. Movimientos, conciliación de stock y seguimiento de cabezas y kilos.</div>
+      </div>
+
+      <div class="tool t-fin">
+        <a class="tool-main" href="tablero_financiero.html">
+          <span class="tool-name">Plan y Seguimiento Financiero</span>
+          <span class="tool-right"><span class="tool-tag tag-fin">Finanzas</span><svg class="tool-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </a>
+        <button class="tool-toggle" onclick="tog(this)"><span class="ico">+</span> Detalle</button>
+        <div class="tool-detail">Presupuesto financiero de la empresa y seguimiento de lo real contra lo planificado: ingresos, egresos y saldos por período.</div>
       </div>
 
       <div class="tool t-mae">
@@ -559,7 +570,7 @@ PA.init({ modo:'demo' }, function(){
     aplicarCtx(ctx);
     desdeHash();
   });
-  document.getElementById('fts2').textContent = 'v2026-09-24 · BUILD 3 · ' + new Date().toLocaleString('es-AR');
+  document.getElementById('fts2').textContent = 'v2026-10-13 · BUILD 4 · ' + new Date().toLocaleString('es-AR');
 });
 </script>
 
