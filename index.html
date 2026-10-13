@@ -254,7 +254,9 @@ table, .num, .cnt, input[type=number]{font-variant-numeric:tabular-nums}
   <div class="view sec" id="view-ges">
     <button class="volver" onclick="irA('home')"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></svg> Volver al inicio</button>
     <div class="block-title">Herramientas de Gestión<span class="ln" style="background:var(--terra)"></span></div>
-    <div class="grid" id="grid-gestion" style="margin-top:14px">
+
+    <div class="subsec first">Gestión Productiva</div>
+    <div class="grid" id="grid-gestion">
 
       <div class="tool t-sue" data-tool="tablero_uso_suelo">
         <a class="tool-main" href="tablero_uso_suelo.html">
@@ -301,15 +303,6 @@ table, .num, .cnt, input[type=number]{font-variant-numeric:tabular-nums}
         <div class="tool-detail">Existencias de hacienda por negocio, rodeo y categoría. Movimientos, conciliación de stock y seguimiento de cabezas y kilos.</div>
       </div>
 
-      <div class="tool t-fin">
-        <a class="tool-main" href="tablero_financiero.html">
-          <span class="tool-name">Plan y Seguimiento Financiero</span>
-          <span class="tool-right"><span class="tool-tag tag-fin">Finanzas</span><svg class="tool-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-        </a>
-        <button class="tool-toggle" onclick="tog(this)"><span class="ico">+</span> Detalle</button>
-        <div class="tool-detail">Presupuesto financiero de la empresa y seguimiento de lo real contra lo planificado: ingresos, egresos y saldos por período.</div>
-      </div>
-
       <div class="tool t-mae">
         <a class="tool-main" href="maestros.html">
           <span class="tool-name">Maestros / Padrones</span>
@@ -320,7 +313,22 @@ table, .num, .cnt, input[type=number]{font-variant-numeric:tabular-nums}
       </div>
 
     </div>
-    <div class="empty" id="empty-gestion" style="display:none">No tenés herramientas de gestión habilitadas para esta empresa.</div>
+    <div class="empty" id="empty-gestion" style="display:none">No tenés herramientas de gestión productiva habilitadas para esta empresa.</div>
+
+    <div class="subsec">Gestión Económica</div>
+    <div class="grid" id="grid-gestion-eco">
+
+      <div class="tool t-fin">
+        <a class="tool-main" href="tablero_financiero.html">
+          <span class="tool-name">Plan y Seguimiento Financiero</span>
+          <span class="tool-right"><span class="tool-tag tag-fin">Finanzas</span><svg class="tool-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </a>
+        <button class="tool-toggle" onclick="tog(this)"><span class="ico">+</span> Detalle</button>
+        <div class="tool-detail">Presupuesto financiero de la empresa y seguimiento de lo real contra lo planificado: ingresos, egresos y saldos por período.</div>
+      </div>
+
+    </div>
+    <div class="empty" id="empty-gestion-eco" style="display:none">No tenés herramientas de gestión económica habilitadas para esta empresa.</div>
   </div>
 
   <!-- ============ HERRAMIENTAS PUNTAL ============
@@ -499,7 +507,7 @@ function aplicarCtx(ctx){
 
   // filtrar tarjetas por herramientas del permiso
   var nDec = filtrarGrupo('grid-dec-propios', 'empty-dec-propios');
-  var nGes = filtrarGrupo('grid-gestion', 'empty-gestion');
+  var nGes = filtrarGrupo('grid-gestion', 'empty-gestion') + filtrarGrupo('grid-gestion-eco', 'empty-gestion-eco');
   var nExt = contarVisibles('grid-dec-externos');
 
   // acceso Administración: solo roles administrativos
@@ -570,7 +578,7 @@ PA.init({ modo:'demo' }, function(){
     aplicarCtx(ctx);
     desdeHash();
   });
-  document.getElementById('fts2').textContent = 'v2026-10-13 · BUILD 4 · ' + new Date().toLocaleString('es-AR');
+  document.getElementById('fts2').textContent = 'v2026-10-13 · BUILD 5 · ' + new Date().toLocaleString('es-AR');
 });
 </script>
 
