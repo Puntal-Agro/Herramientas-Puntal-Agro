@@ -264,6 +264,16 @@ tr.invon td{background:#EEF3E8 !important}
 #loading.on{display:flex}
 .hide{display:none !important}
 
+.cdet{margin-top:10px;border-top:1px solid var(--border);padding-top:10px}
+.cdm{font-size:14px;font-weight:600;margin-bottom:6px}
+.cdg{display:flex;flex-wrap:wrap;gap:8px}
+.cdg>div{flex:1 1 140px;border:1px solid var(--border);border-left:4px solid #CBD5E1;border-radius:8px;padding:7px 10px;background:#fff}
+.cdg .k{font-size:11px;color:#475569;line-height:1.25}
+.cdg .v{font-size:16px;font-weight:600;margin-top:2px;font-variant-numeric:tabular-nums;white-space:nowrap}.cdg .v.neg{color:var(--neg)}
+.cdg>div.tot{background:#F5F7F2;border-left-color:#0F1923}.cdg>div.tot .k{color:#0F1923;font-weight:600}
+.cdg .op{flex:0 0 auto;border:none;background:none;padding:0;align-self:center;font-size:18px;color:#94A3B8;font-weight:600}
+.pl.ipl{position:static;display:inline-block;vertical-align:middle;width:22px;height:22px;font-size:17px;line-height:21px;margin-right:10px}
+#insTbl tr.tr-mes td{padding-top:8px;padding-bottom:8px}
 footer{padding:14px 24px 22px;display:flex;justify-content:space-between;color:var(--muted);font-size:11px;max-width:1500px;margin:0 auto}
 
 @media (max-width:1100px){
@@ -343,6 +353,7 @@ footer{padding:14px 24px 22px;display:flex;justify-content:space-between;color:v
 </main>
 
 <main id="dash" class="hide">
+  <div id="warnBanner" class="hide" style="background:#FFFBEB;border:1px solid #F3DFA8;border-left:4px solid #D9A21B;border-radius:12px;padding:12px 16px;color:#6B4E0A;font-size:13px"></div>
   <div id="errBanner" class="hide" style="background:#FEF2F2;border:1px solid #F5C2C2;border-left:4px solid #991B1B;border-radius:12px;padding:12px 16px;color:#7F1D1D;font-size:13px"></div>
 
   <div class="card" style="padding:12px 16px">
@@ -359,6 +370,7 @@ footer{padding:14px 24px 22px;display:flex;justify-content:space-between;color:v
     <button class="tab" data-t="flujo" onclick="setTab('flujo')">Flujo financiero</button>
     <button class="tab" data-t="ing" onclick="setTab('ing')">Ingresos</button>
     <button class="tab" data-t="ex" onclick="setTab('ex')">Existencia de granos</button>
+    <button class="tab" data-t="insu" onclick="setTab('insu')">Insumos</button>
     <button class="tab" data-t="inv" onclick="setTab('inv')">Inversiones</button>
     <button class="tab" data-t="resv" onclick="setTab('resv')">Reservas</button>
     <div class="tsepv"></div>
@@ -427,13 +439,10 @@ footer{padding:14px 24px 22px;display:flex;justify-content:space-between;color:v
       <div class="note" id="flowNote"></div>
     </div>
     <div class="card">
-      <div class="chd"><div><div class="ct">Composición de la situación acumulada</div><div class="cs">Existencia de granos − caja negativa − insumos pendientes = situación acumulada</div></div></div>
+      <div class="chd"><div><div class="ct">Composición mensual: caja, granos y reservas</div><div class="cs">Por mes: saldo financiero (mes anterior + financiero del mes + insumos pendientes) · existencia de granos · reservas</div></div></div>
       <div class="legrow" id="compLeg"></div>
       <div class="cw" style="height:320px"><canvas id="chComp"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="chd"><div><div class="ct">Flujo mensual</div><div class="cs">Financiero de cada mes (no acumulado)</div></div></div>
-      <div class="cw" style="height:260px"><canvas id="chFm"></canvas></div>
+      <div id="compDet" class="cdet"></div>
     </div>
     <div class="card">
       <div class="chd"><div><div class="ct">Ingresos vs egresos previstos</div><div class="cs">Tocá un mes para ver su detalle · tocá un total o un rubro para plegarlo o abrirlo</div></div></div>
@@ -474,6 +483,24 @@ footer{padding:14px 24px 22px;display:flex;justify-content:space-between;color:v
     </div>
   </div>
 
+  <div id="tab-insu" class="tabc">
+    <div class="kpirow" id="insRow" style="grid-template-columns:repeat(4,1fr)"></div>
+    <div class="card">
+      <div class="chd"><div><div class="ct">Insumos pendientes de compra</div><div class="cs" id="insSub"></div></div></div>
+      <div class="legrow" id="insLeg"></div>
+      <div class="cw" id="insWrap"><canvas id="chIns"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="chd"><div><div class="ct">¿Cuándo hay que tenerlos?</div><div class="cs">Saldo pendiente que se agrega cada mes, según el requerimiento de las labores · por tipo de insumo · tocá un mes para ver su detalle abajo</div></div></div>
+      <div class="cw" style="height:280px"><canvas id="chInsM"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="chd"><div><div class="ct" id="insDetTit">Detalle por insumo</div><div class="cs" id="insDetSub"></div></div></div>
+      <div class="scroll"><table id="insTbl"></table></div>
+      <div class="note" id="insNote"></div>
+    </div>
+  </div>
+
   <div id="tab-inv" class="tabc">
     <div class="card"><div class="sup" id="invRow" style="margin-top:0;border-top:none"></div></div>
     <div class="g2">
@@ -505,7 +532,7 @@ footer{padding:14px 24px 22px;display:flex;justify-content:space-between;color:v
 
 <footer>
   <span>Puntal Agro · Herramientas para la toma de decisiones</span>
-  <span>Versión v2026-10-12 09:15 · BUILD 33 · Datos leídos: <span id="fts">—</span></span>
+  <span>Versión v2026-10-14 08:45 · BUILD 43 · Datos leídos: <span id="fts">—</span></span>
 </footer>
 
 <div id="dropOv"><div class="drop2">
@@ -745,9 +772,10 @@ function parseWorkbook(wb,fname){
         var pr=pRow?EG.v(pRow,4+m):null;
         if(isNum(pr)&&pr>0){last=pr;gr.preSet.push(true);anyP=true;}else gr.preSet.push(false);
         gr.pre.push(last);
-        if(isNum(t)&&t<-0.5)W.push(D.empresa+': existencias negativas de '+crops[i].n+' en '+D.meses[m]+' ('+f(t,0)+' t). Probablemente se venden más toneladas que las disponibles.');
+        if(isNum(t)&&t<-0.5){(gr.negM=gr.negM||[]).push(m);gr.negMin=Math.min(gr.negMin||0,t);}
       }
       gr.unidad=/\(un\)/i.test(gr.nombre)?'un':'t';
+      if(gr.negM)W.push('Exist.Granos: existencias negativas de '+crops[i].n+' en '+gr.negM.map(function(q){return D.meses[q];}).join(', ')+' (hasta '+f(gr.negMin,0)+' t). Probablemente se venden más toneladas que las disponibles.');
       gr.prod=egRow(prR);gr.resv=egRow(rvR);gr.vent=egRow(veR);gr.exArs=egRow(xR);
       gr.hasPrice=anyP;
       if(anyT||gr.ini>0.5)D.granos.push(gr);
@@ -849,6 +877,23 @@ function parseWorkbook(wb,fname){
   D.defStart=0;
   var mp=key(D.mesPresup),ix=-1;for(i=0;i<12;i++)if(key(D.meses[i])===mp)ix=i;
   if(ix>=0)D.defStart=ix;else{for(i=0;i<12;i++)if(!D.closed[i]){D.defStart=i;break;}}
+  /* --- insumos pendientes de compra (ExistInsumos) --- */
+  D.ins=[];
+  (function(){var EI=getSheet(wb,['ExistInsumos']);if(!EI.ok)return;
+    var hr2=0,c,r,i,C={};
+    for(r=1;r<=20&&!hr2;r++)for(c=1;c<=EI.maxC;c++){if(key(EI.v(r,c))===key('Saldo a comprar ajustado Un.')){hr2=r;break;}}
+    if(!hr2){W.push('ExistInsumos: no se encontró la columna "Saldo a comprar ajustado Un."; la solapa Insumos queda vacía.');return;}
+    var NM={'un.':'u','$/un':'pu','requerim. total':'req','exist inicial':'ex','compra un.':'comp','saldo a comprar ajustado un.':'v','saldo a comprar $':'w'};
+    for(c=1;c<=EI.maxC;c++){var hk=key(EI.v(hr2,c));if(NM[hk]&&!C[NM[hk]])C[NM[hk]]=c;}
+    var cM=0;for(c=(C.w||1)+1;c<=EI.maxC-11&&!cM;c++){if(key(EI.v(hr2,c))===key(D.meses[0])&&key(EI.v(hr2,c+11))===key(D.meses[11]))cM=c;}
+    if(!cM)W.push('ExistInsumos: no se encontró la necesidad de insumos por mes; se asume todo el saldo pendiente en '+D.meses[11]+'.');
+    var cat=norm(EI.v(hr2,2));
+    for(r=hr2+1;r<=EI.maxR;r++){var nb=norm(EI.v(r,2)),un=norm(EI.v(r,C.u||3));
+      if(un==='$')break;if(key(un)==='un.'){cat=nb;continue;}if(!nb)continue;
+      var pend=nz(EI.v(r,C.v));if(!(pend>0))continue;
+      var cum=zeros(12);if(cM){for(i=0;i<12;i++)cum[i]=Math.max(0,-nz(EI.v(r,cM+i)));}else cum[11]=pend;
+      D.ins.push({n:nb,cat:cat,u:un,pu:nz(EI.v(r,C.pu)),req:nz(EI.v(r,C.req)),ex:nz(EI.v(r,C.ex)),comp:nz(EI.v(r,C.comp)),pend:pend,ars:nz(EI.v(r,C.w)),cum:cum});}
+  })();
   return D;
 }
 
@@ -873,6 +918,10 @@ function viewOf(D,cur){
   V.vh=D.vh.filter(function(x){return x.m>=0;}).map(function(x){return {emp:D.empresa,n:x.n,m:x.m,cab:x.cab,kgc:x.kgc,pkg:x.pkg,amt:U?x.ars/D.tc[x.m]:x.ars,est:x.est,obs:x.obs};});
   V.inv=D.inv.map(function(x){return {n:x.n,v:fl(x.v)};});
   V.coloc=D.coloc.map(function(x){return {n:x.n,tn:x.tn,coloc:fl(x.coloc),resc:fl(x.resc),int:fl(x.int)};});
+  (function(){var s0=STATE.startM==null?D.defStart:STATE.startM;
+    V.ins=D.ins.map(function(x){var mon=zeros(12),q=zeros(12),i;
+      for(i=s0;i<12;i++){q[i]=x.cum[i]-(i>s0?x.cum[i-1]:0);mon[i]=q[i]*x.pu/(U?D.tc[i]:1);}
+      return {emp:D.empresa,n:x.n,cat:x.cat,u:x.u,req:x.req,ex:x.ex,comp:x.comp,pend:x.cum[11],q:q,mon:mon,tot:sum(mon)};});})();
   var sb=startBal(D,STATE.startM==null?D.defStart:STATE.startM,U);V.start=sb.v;V.startReal=sb.real;V.startFrom=sb.from;
   (function(){var k=sb.from,c=function(x){return U?x/D.tc[k]:x;},B=D.bankDet;
     if(k>=0)V.bankItems=[['Banco 1',c(B.b1[k])],['Banco 2',c(B.b2[k])],['Caja',c(B.cj[k])],['Cheques no debitados',-c(B.ch[k])],['Pagos pendientes',-c(B.opp[k])],['Cobranzas pendientes',c(B.cob[k])],['Caja mínima',-c(B.cmin[k])]];
@@ -910,7 +959,7 @@ function consolidate(list,cur){
     V.cajaIni+=W2.cajaIni;V.vg=V.vg.concat(W2.vg);V.vh=V.vh.concat(W2.vh);V.vgFijar+=W2.vgFijar;
     var pre=function(o){o.n=W2.names[0]+' · '+o.n;return o;};
     if(i===1){V.inv.forEach(function(o){o.n=V.names[0]+' · '+o.n;});V.coloc.forEach(function(o){o.n=V.names[0]+' · '+o.n;});}
-    V.inv=V.inv.concat(W2.inv.map(pre));V.coloc=V.coloc.concat(W2.coloc.map(pre));W2.bankItems.forEach(function(x){var hit=null;V.bankItems.forEach(function(y){if(y[0]===x[0])hit=y;});if(hit)hit[1]+=x[1];else V.bankItems.push([x[0],x[1]]);});V.bankProj+=W2.bankProj;V.start+=W2.start;V.startReal=V.startReal&&W2.startReal;
+    V.inv=V.inv.concat(W2.inv.map(pre));V.ins=V.ins.concat(W2.ins);V.coloc=V.coloc.concat(W2.coloc.map(pre));W2.bankItems.forEach(function(x){var hit=null;V.bankItems.forEach(function(y){if(y[0]===x[0])hit=y;});if(hit)hit[1]+=x[1];else V.bankItems.push([x[0],x[1]]);});V.bankProj+=W2.bankProj;V.start+=W2.start;V.startReal=V.startReal&&W2.startReal;
     for(j=0;j<12;j++)V.realBal[j]=V.realBal[j]&&W2.realBal[j];
     for(k in W2.res)V.res[k]=nz(V.res[k])+nz(W2.res[k]);
     for(k in W2.pat)V.pat[k]=(V.pat[k]==null&&W2.pat[k]==null)?null:nz(V.pat[k])+nz(W2.pat[k]);
@@ -954,7 +1003,9 @@ function onFiles(fl,role){
         var wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:true,cellFormula:true,cellHTML:false,cellNF:false,cellStyles:false});
         var D=parseWorkbook(wb,file.name);
         var rl=role||(D.defStart===0?'ini':'act'),emp=D.empresa;
-        STATE.files=STATE.files.filter(function(x){return !(x.emp===emp&&x.role===rl);});
+        /* nunca se reemplaza: si ya hay un archivo del mismo rol con ese nombre de empresa, se toma como otra empresa */
+        var base=emp,k=2;while(STATE.files.some(function(x){return x.emp===emp&&x.role===rl;})){emp=base+' ('+k+')';k++;}
+        D.empresa=emp;
         _id++;STATE.files.push({id:'f'+_id,D:D,role:rl,emp:emp});
       }catch(err){errs.push(file.name+': '+err.message);}
       pending--;if(!pending)done();
@@ -998,7 +1049,7 @@ function renderAll(){
   document.getElementById('instBar').className=has?'inst-bar':'inst-bar hide';
   document.getElementById('btnPrint').className=has?'btn sec':'btn sec hide';
   if(!has)return;
-  renderBar();
+  renderBar();renderWarn();
   (function(){var bad=STATE.files.filter(function(x){return x.D.errPF>0;});var el=document.getElementById('errBanner');
     if(!bad.length){el.className='hide';return;}
     el.className='';var h='';
@@ -1013,8 +1064,8 @@ function renderAll(){
       h+='</div></details>';});
     h+='<div style="margin-top:6px;font-size:12px">Si el archivo pasó por Google Drive, aplicá el arreglo en la planilla modelo. Si no, abrilo en Excel de escritorio, guardalo y volvé a cargarlo.</div>';
     el.innerHTML=h;})();
-  var SHOW={sup:['sup'],flujo:['flujo'],ing:['ing'],ex:['ex'],inv:['inv'],resv:['resv'],plan:['planhd','res','prod','pat']};
-  ['sup','flujo','ing','ex','inv','resv','planhd','res','prod','pat'].forEach(function(t){document.getElementById('tab-'+t).style.display=SHOW[STATE.tab].indexOf(t)>=0?'':'none';});
+  var SHOW={sup:['sup'],flujo:['flujo'],ing:['ing'],ex:['ex'],insu:['insu'],inv:['inv'],resv:['resv'],plan:['planhd','res','prod','pat']};
+  ['sup','flujo','ing','ex','insu','inv','resv','planhd','res','prod','pat'].forEach(function(t){document.getElementById('tab-'+t).style.display=SHOW[STATE.tab].indexOf(t)>=0?'':'none';});
   var tb=document.querySelectorAll('.tab');for(var q=0;q<tb.length;q++)tb[q].className='tab'+(tb[q].getAttribute('data-t')==='plan'?' tabplan':'')+(tb[q].getAttribute('data-t')===STATE.tab?' active':'');
   var V=curView(),Vp=curViewPlan();
   var D0=Vp.list[0],pl=esc((D0.plan||'').replace(/^plan\s*/i,'')),fd=planIni(D0);
@@ -1022,7 +1073,7 @@ function renderAll(){
   document.getElementById('planTit').textContent='Plan '+pl+' al '+fd;
   document.getElementById('planFb').innerHTML=Vp.fb.length?'<span class="bdg by">Falta el plan inicio (1/7)'+(V.list.length>1?' de '+esc(Vp.fb.join(', ')):'')+': se muestra el plan actual</span>':'';
   renderId(V);renderFlow(V);renderEx(V);renderSupTbl(V);
-  renderIE(V);renderFm(V);renderInv(V);renderResv(V);renderIng(V);
+  renderIE(V);renderIns(V);renderInv(V);renderResv(V);renderIng(V);
   renderKpis(Vp);renderWf(Vp);renderActs(Vp);renderSitEmp(Vp);renderProd(Vp);renderHac(Vp);
   document.getElementById('fts').textContent=new Date().toLocaleString('es-AR');
 }
@@ -1122,45 +1173,35 @@ function renderFlow(V){
       cx.fillStyle='rgba(255,255,255,0.92)';cx.fillRect(el.x-w/2,y-12,w,16);cx.fillStyle='#0F1923';cx.fillText(t,el.x,y);});cx.restore();}};
   mk('chFlow',{type:'bar',data:{labels:labels,datasets:[
     {type:'bar',label:'Situación sin reservas',data:sit,backgroundColor:sit.map(function(v){return v>=0?'#7A8B4A':C_NEG;}),borderRadius:3,maxBarThickness:46,order:2},
-    {type:'line',label:'Reservas',data:rs,borderColor:'#5B7BA0',backgroundColor:'#5B7BA0',borderDash:[6,4],borderWidth:2.5,pointRadius:3,tension:0.2,order:1}]},
+    {type:'line',label:'Reservas',data:rs,borderColor:'#8A5A2B',backgroundColor:'#8A5A2B',borderDash:[6,4],borderWidth:2.5,pointRadius:3,tension:0.2,order:1}]},
     plugins:[lblPlugin],
     options:(function(){var o=chartBase();o.layout={padding:{top:22}};o.interaction={mode:'index',intersect:false};
       o.plugins.tooltip.callbacks.label=function(c){return ' '+c.dataset.label+': '+mny(c.raw);};return o;})()});
   document.getElementById('flowLeg').innerHTML=
     '<span><i class="sw" style="background:#7A8B4A"></i> Situación acumulada sin reservas</span>'+
-    '<span><i class="swl d" style="border-color:#5B7BA0"></i> Reservas (no incluidas)</span>';
+    '<span><i class="swl d" style="border-color:#8A5A2B"></i> Reservas (no incluidas)</span>';
   function hatch(col){var c=document.createElement('canvas');c.width=c.height=8;var x=c.getContext('2d');x.fillStyle=col+'26';x.fillRect(0,0,8,8);
     x.strokeStyle=col;x.lineWidth=1.6;x.beginPath();x.moveTo(-2,2);x.lineTo(2,-2);x.moveTo(0,8);x.lineTo(8,0);x.moveTo(6,10);x.lineTo(10,6);x.stroke();return x.createPattern(c,'repeat');}
-  var cS=[],cI=[],cC=[],P=[],Ins=[],CjN=[];
-  for(i=0;i<sit.length;i++){var cp=Math.max(acum[i],0),cn=Math.max(-acum[i],0),ins=Math.max(-sp[i],0),pos=gx[i]+cp+Math.max(sp[i],0),T=sit[i],D=cn+ins;
-    P.push(pos);Ins.push(ins);CjN.push(cn);
-    var base=Math.max(T,0),room=Math.max(pos-base,0),fi=D?ins/D:0;
-    cS.push(T>=0?[0,T]:[T,0]);cI.push([base,base+room*fi]);cC.push([base+room*fi,base+room]);}
-  var tPlugin={id:'clab',afterDatasetsDraw:function(ch){var cx=ch.ctx,yS=ch.scales.y,m0=ch.getDatasetMeta(0);cx.save();cx.textAlign='center';
-    m0.data.forEach(function(el,j){var T=sit[j];
-      cx.font='600 12px DM Sans';cx.fillStyle=T>=0?'#3B6D11':'#A84D1F';
-      var yT=T>=0?yS.getPixelForValue(T):yS.getPixelForValue(T)+14;
-      var yTop=yS.getPixelForValue(Math.max(P[j],T));
-      var inside=T>=0&&Math.abs(yS.getPixelForValue(0)-yT)>22;cx.fillStyle=inside?'#fff':'#0F1923';cx.fillText(lab(T),el.x,T>=0?(inside?yT+16:yT-6):yT);
-      cx.font='500 11px DM Sans';cx.fillStyle='#7A8899';cx.fillText('granos '+lab(gx[j]),el.x,yTop-6);});cx.restore();}};
-  var fb=function(l,d,c){return {label:l,data:d,backgroundColor:c,borderColor:'rgba(0,0,0,0)',borderSkipped:false,maxBarThickness:52,grouped:false};};
+  /* 3 barras por mes: [saldo mes anterior + financiero del mes + saldo pendiente de insumos] · existencia de granos · reservas */
+  var pAnt=[],pMes=[],net=[];
+  for(i=0;i<acum.length;i++){var pv=i===0?V.start:acum[i-1];pAnt.push(pv);pMes.push(acum[i]-pv);net.push(acum[i]+sp[i]);}
+  var bb=function(l,d,c,st){return {label:l,data:d,backgroundColor:c,stack:st,borderColor:'#fff',borderWidth:{top:1,bottom:1,left:0,right:0},borderRadius:3,borderSkipped:false,maxBarThickness:26,categoryPercentage:0.72,barPercentage:0.86};};
   mk('chComp',{type:'bar',data:{labels:labels,datasets:[
-    fb('Situación (lo que queda)',cS,sit.map(function(v){return v>=0?'#4A6533':C_NEG;})),
-    fb('Saldo pendiente de insumos',cI,hatch('#64748B')),
-    fb('Caja negativa (deuda acumulada)',cC,hatch('#C8642D'))]},
-    plugins:[tPlugin],
-    options:(function(){var o=chartBase();o.layout={padding:{top:24}};o.interaction={mode:'index',intersect:false};
-      o.plugins.tooltip.callbacks.label=function(c){var j=c.dataIndex;
-        if(c.datasetIndex===0)return ' Situación sin reservas: '+mny(sit[j]);
-        if(c.datasetIndex===1)return Ins[j]?' Saldo pendiente de insumos: −'+mny(Ins[j]):null;
-        return CjN[j]?' Caja negativa: −'+mny(CjN[j]):null;};
-      o.plugins.tooltip.callbacks.footer=function(it){var j=it[0].dataIndex;return 'Existencia de granos: '+mny(gx[j])+(acum[j]>0?' · caja positiva: '+mny(acum[j]):'');};
+    bb('Saldo financiero mes anterior',pAnt,'#2F5A0E','f'),
+    bb('Financiero del mes',pMes,'#639922','f'),
+    bb('Saldo pendiente de insumos',sp,'#C8642D','f'),
+    bb('Existencia de granos',gx,'#E0A526','g'),
+    bb('Reservas',rs,'#8A5A2B','r')]},
+    options:(function(){var o=chartBase();o.layout={padding:{top:10}};o.scales.x.stacked=true;o.scales.y.stacked=true;o.interaction={mode:'index',intersect:false};
+      o.plugins.tooltip.enabled=false;
+      var pick=function(e,els){if(els&&els.length&&els[0].index!==STATE.compJ){STATE.compJ=els[0].index;drawCompDet();}};
+      o.onHover=function(e,els){e.native.target.style.cursor=els&&els.length?'pointer':'default';pick(e,els);};o.onClick=pick;
       return o;})()});
+  if(STATE.compJ==null||STATE.compJ>=labels.length)STATE.compJ=0;
+  CMP={lab:labels,y0:s0,it:[['Saldo financiero mes anterior',pAnt,'#2F5A0E'],['Financiero del mes',pMes,'#639922'],['Saldo pendiente de insumos',sp,'#C8642D'],['Existencia de granos',gx,'#E0A526'],['Reservas',rs,'#8A5A2B']],net:net,sit:sit,V:V};
+  drawCompDet();
   document.getElementById('compLeg').innerHTML=
-    '<span><i class="sw" style="background:#4A6533"></i> Situación sin reservas (lo que queda)</span>'+
-    '<span><i class="sw" style="background:repeating-linear-gradient(45deg,#64748B 0 2px,#E2E8F0 2px 5px)"></i> Saldo pendiente de insumos</span>'+
-    '<span><i class="sw" style="background:repeating-linear-gradient(45deg,#C8642D 0 2px,#F6DCCB 2px 5px)"></i> Caja negativa (deuda acumulada)</span>'+
-    '<span style="color:#7A8899">Altura total de la columna = existencia de granos (+ caja si es positiva)</span>';
+    '<span><i class="sw" style="background:#2F5A0E"></i> Saldo financiero mes anterior</span>'+'<span><i class="sw" style="background:#639922"></i> Financiero del mes</span>'+'<span><i class="sw" style="background:#C8642D"></i> Saldo pendiente de insumos</span>'+'<span><i class="sw" style="background:#E0A526"></i> Existencia de granos</span>'+'<span><i class="sw" style="background:#8A5A2B"></i> Reservas</span>';
   document.getElementById('flowSub').textContent='De '+V.meses[s0]+' al cierre de la campaña · '+unitTxt().replace('en ','eje en ')+(STATE.cur==='USD'?' · cada mes a su dólar':'');
   var fromTxt=V.startReal?('saldo real cargado'):(V.startFrom>=0?('estimado desde '+V.meses[V.startFrom]):'estimado');
   document.getElementById('flowNote').textContent='';
@@ -1180,6 +1221,12 @@ function renderFlow(V){
   h+='<div class="stat ok"><div class="k">Existencia de granos a '+V.meses[11]+'</div><div class="kv">'+mny(V.exG[11])+'</div><div class="ks">respaldo al cierre</div></div>';
   document.getElementById('flowSide').innerHTML=h;
 }
+var CMP=null;
+function drawCompDet(){if(!CMP)return;var j=STATE.compJ||0,h='<div class="cdm">'+esc(mesAnio(CMP.V.list[0],CMP.y0+j))+'<span class="cs" style="font-weight:400;margin-left:8px">pasá el mouse o tocá un mes</span></div><div class="cdg">';
+  CMP.it.forEach(function(x){h+='<div style="border-left-color:'+x[2]+'"><div class="k">'+x[0]+'</div><div class="v'+(x[1][j]<0?' neg':'')+'">'+mny(x[1][j])+'</div></div>';});
+  h+='</div><div class="cdg" style="margin-top:8px"><div class="tot"><div class="k">Caja + insumos pendientes</div><div class="v'+(CMP.net[j]<0?' neg':'')+'">'+mny(CMP.net[j])+'</div></div>';
+  h+='<span class="op">+ granos =</span><div class="tot"><div class="k">Situación sin reservas</div><div class="v'+(CMP.sit[j]<0?' neg':'')+'">'+mny(CMP.sit[j])+'</div></div></div>';
+  document.getElementById('compDet').innerHTML=h;}
 function sum(a){var s=0;for(var i=0;i<a.length;i++)s+=a[i]||0;return s;}
 var ING_LBL=[['granos','Ventas de granos'],['hacienda','Ventas de hacienda'],['otros','Arrendamientos y otros ingresos'],['creditos','Créditos tomados'],['rescates','Rescate de colocaciones']];
 var EGR_LBL=[['insumos','Insumos y fertilizantes'],['labores','Labores, cosecha y servicios agrícolas'],['arrend','Arrendamientos'],['personal','Personal'],
@@ -1637,17 +1684,101 @@ function renderInv(V){
   document.getElementById('invTbl').innerHTML=pend.length?t:'<tbody><tr><td class="tdname">Sin inversiones pendientes desde '+esc(M[s0])+'</td></tr></tbody>';
   document.getElementById('invHint').textContent=pend.length?(hi!=null?'Tocá de nuevo para ver todas':'Tocá una inversión o una barra para resaltarla'):'';
 }
+var INS_COL={'herbicidas':'#2F5A0E','semillas':'#E0A526','coadyuvantes':'#639922','curasemillas e inoculantes':'#B9A27A','fungicidas':'#8A5A2B','insecticidas':'#8C3B2E','fertilizantes':'#C8642D'};
+function insCol(c,i){return INS_COL[key(c)]||GR_EXTRA[i%GR_EXTRA.length];}
+function capF(s){s=String(s||'').toLowerCase();return s.charAt(0).toUpperCase()+s.slice(1);}
+function togInsC(k){if(STATE.insM!=null){STATE.insOpenM=STATE.insOpenM||{};STATE.insOpenM[k]=!STATE.insOpenM[k];}else{STATE.insOpen=STATE.insOpen||{};STATE.insOpen[k]=!STATE.insOpen[k];}renderIns(curView());}
+function setInsM(m){STATE.insM=m;STATE.insOpenM={};renderIns(curView());if(m!=null){var el=document.getElementById('insTbl');if(el&&el.scrollIntoView)setTimeout(function(){el.scrollIntoView({behavior:'smooth',block:'nearest'});},60);}}
+function renderIns(V){
+  var s0=S0(V),M=V.meses,map={},L=[],cats=[],i;
+  V.ins.forEach(function(x){var k=x.n+'|'+x.u,m=map[k];
+    if(!m){m=map[k]={n:x.n,cat:x.cat,u:x.u,req:0,ex:0,comp:0,pend:0,tot:0,mon:zeros(12),q:zeros(12)};L.push(m);}
+    m.req+=x.req;m.ex+=x.ex;m.comp+=x.comp;m.pend+=x.pend;m.tot+=x.tot;m.mon=addArr(m.mon,x.mon);m.q=addArr(m.q,x.q);});
+  L=L.filter(function(x){return x.pend>0.0001&&x.tot>0.5;}).sort(function(a,b){return b.tot-a.tot;});
+  L.forEach(function(x){if(cats.indexOf(x.cat)<0)cats.push(x.cat);});
+  var T=sum(L.map(function(x){return x.tot;})),ct={};
+  L.forEach(function(x){ct[x.cat]=(ct[x.cat]||0)+x.tot;});
+  var topC=cats.slice().sort(function(a,b){return ct[b]-ct[a];})[0];
+  var qf=function(x){return f(x.pend,x.pend<100?1:0)+' '+x.u;};
+  function card(t,v,sub,c){return '<div class="stat" style="border-left-color:'+(c||'#4A6533')+'"><div class="k">'+t+'</div><div class="kv">'+v+'</div><div class="ks">'+sub+'</div></div>';}
+  var h=card('Pendiente de compra',mny(T),L.length+' insumo'+(L.length===1?'':'s')+' · desde '+esc(M[s0]),'#64748B');
+  h+=card('Principal',L[0]?esc(L[0].n):'—',L[0]?mny(L[0].tot)+' · '+qf(L[0]):'',L[0]?insCol(L[0].cat,0):null);
+  h+=card('Tipo con más saldo',topC?esc(capF(topC)):'—',topC?mny(ct[topC])+' · '+fpc(T?ct[topC]/T:0,0)+' del total':'',topC?insCol(topC,cats.indexOf(topC)):null);
+  var sp=V.sdoPdte[11]||0,mm=zeros(12);L.forEach(function(x){mm=addArr(mm,x.mon);});var pk=s0;for(i=s0;i<12;i++)if(mm[i]>mm[pk])pk=i;
+  h+=card('Mes de mayor necesidad',T?esc(mesAnio(V.list[0],pk)):'—',T?mny(mm[pk])+' · '+fpc(mm[pk]/T,0)+' del total':'','#E0A526');
+  document.getElementById('insRow').innerHTML=h;
+  document.getElementById('insSub').textContent=L.length?('Saldo a comprar por insumo, de mayor a menor · cantidad y '+(STATE.cur==='USD'?'U$S (cada mes a su dólar)':'$')+' · sin IVA según la planilla'):'No hay insumos pendientes de compra.';
+  document.getElementById('insLeg').innerHTML=cats.map(function(c,j){return '<span><i class="sw" style="background:'+insCol(c,j)+'"></i> '+esc(capF(c))+'</span>';}).join('');
+  /* barras horizontales: hasta 18 insumos + resto agrupado */
+  var MX=18,B=L.slice(0,MX),rest=L.slice(MX);
+  var lab=B.map(function(x){return x.n;}),dat=B.map(function(x){return x.tot;}),col=B.map(function(x){return insCol(x.cat,cats.indexOf(x.cat));}),qs=B.map(qf);
+  if(rest.length){lab.push('Otros ('+rest.length+')');dat.push(sum(rest.map(function(x){return x.tot;})));col.push('#AEB7C2');qs.push('');}
+  document.getElementById('insWrap').style.height=Math.max(160,lab.length*26+40)+'px';
+  var lp={id:'inslab',afterDatasetsDraw:function(ch){var cx=ch.ctx,meta=ch.getDatasetMeta(0);cx.save();cx.textBaseline='middle';
+    meta.data.forEach(function(el,j){var t=mny(dat[j])+(qs[j]?'  ·  '+qs[j]:'');cx.font='600 12px DM Sans';cx.fillStyle='#0F1923';cx.textAlign='left';cx.fillText(t,el.x+6,el.y);});cx.restore();}};
+  mk('chIns',{type:'bar',data:{labels:lab,datasets:[{label:'Pendiente',data:dat,backgroundColor:col,borderRadius:3,barPercentage:0.8,categoryPercentage:0.9}]},plugins:[lp],
+    options:(function(){var o=chartBase();o.indexAxis='y';var xs=o.scales.y,ys=o.scales.x;o.scales={x:xs,y:ys};
+      o.scales.x.grid={color:'rgba(0,0,0,0.05)'};o.scales.y.ticks.font={size:12,family:'DM Sans',weight:'500'};
+      var mxv=dat.length?Math.max.apply(null,dat):0;o.scales.x.max=mxv*1.45;o.scales.x.ticks.maxTicksLimit=6;
+      o.plugins.tooltip.callbacks.label=function(c){return ' '+mny(c.raw)+(qs[c.dataIndex]?' · '+qs[c.dataIndex]:'');};return o;})()});
+  /* cuándo: saldo que se agrega por mes, apilado por tipo */
+  var labM=M.slice(s0),ds=cats.map(function(c,j){var a=zeros(12);L.forEach(function(x){if(x.cat===c)a=addArr(a,x.mon);});
+    var cc=insCol(c,j);return {label:capF(c),data:a.slice(s0),backgroundColor:labM.map(function(x,q){return STATE.insM==null||STATE.insM===s0+q?cc:cc+'55';}),borderRadius:2,maxBarThickness:42};});
+  var tm=labM.map(function(x,j){return sum(ds.map(function(d){return d.data[j];}));});
+  var lm={id:'insml',afterDatasetsDraw:function(ch){var cx=ch.ctx,yS=ch.scales.y,m0=ch.getDatasetMeta(0);if(!m0)return;cx.save();cx.font='600 12px DM Sans';cx.fillStyle='#0F1923';cx.textAlign='center';
+    m0.data.forEach(function(el,j){if(tm[j]>0.5)cx.fillText(sym()+' '+f(tm[j]/tdiv(),0)+(STATE.cur==='USD'?' mil':' M'),el.x,yS.getPixelForValue(tm[j])-6);});cx.restore();}};
+  mk('chInsM',{type:'bar',data:{labels:labM,datasets:ds},plugins:[lm],options:(function(){var o=chartBase();o.layout={padding:{top:18}};o.scales.x.stacked=true;o.scales.y.stacked=true;
+    o.interaction={mode:'index',intersect:false};
+    o.plugins.tooltip.callbacks.label=function(c){return Math.abs(c.raw)>0.5?' '+c.dataset.label+': '+mny(c.raw):null;};
+    o.plugins.tooltip.callbacks.footer=function(it){return 'Total del mes: '+mny(tm[it[0].dataIndex])+' · tocá para ver el detalle';};
+    o.onClick=function(e,els){if(els&&els.length){var m=s0+els[0].index;setTimeout(function(){setInsM(STATE.insM===m?null:m);},0);}};
+    o.onHover=function(e,els){e.native.target.style.cursor=els&&els.length?'pointer':'default';};return o;})()});
+  /* tabla por tipo: toda la campaña o un mes elegido */
+  STATE.insOpen=STATE.insOpen||{};STATE.insOpenM=STATE.insOpenM||{};
+  if(STATE.insM!=null&&STATE.insM<s0)STATE.insM=null;
+  var MM=STATE.insM,fq=function(v){return Math.abs(v)<0.05?'–':f(v,Math.abs(v)<100?1:0);};
+  var lk=function(js,t){return '<a href="#" style="color:var(--verde);font-weight:600;margin-left:10px" onclick="'+js+';return false;">'+t+'</a>';};
+  var t,LL,TT,cc2={};
+  if(MM==null){
+    LL=L;TT=T;cc2=ct;
+    document.getElementById('insDetTit').textContent='Detalle por insumo';
+    document.getElementById('insDetSub').innerHTML='Pendiente de toda la campaña · tocá + para ver los insumos de cada tipo · tocá un mes en el gráfico de arriba para ver solo ese mes';
+    t='<thead><tr><th>Insumo</th><th style="text-align:left">Un.</th><th>Requerimiento</th><th>Stock inicial</th><th>Comprado</th><th>Pendiente</th><th>'+sym()+' pendiente</th><th>%</th><th style="text-align:left">Se necesita</th></tr></thead><tbody>';
+  }else{
+    LL=L.filter(function(x){return x.mon[MM]>0.5;}).sort(function(a,b){return b.mon[MM]-a.mon[MM];});
+    TT=sum(LL.map(function(x){return x.mon[MM];}));LL.forEach(function(x){cc2[x.cat]=(cc2[x.cat]||0)+x.mon[MM];});
+    document.getElementById('insDetTit').innerHTML='Insumos que se necesitan en <span style="color:#A84D1F">'+esc(mesAnio(V.list[0],MM))+'</span>';
+    document.getElementById('insDetSub').innerHTML='Saldo pendiente que se agrega ese mes · '+mny(TT)+' · tocá + para ver los insumos de cada tipo'+lk('setInsM(null)','Ver toda la campaña');
+    t='<thead><tr><th>Insumo</th><th style="text-align:left">Un.</th><th>Cantidad en '+esc(M[MM])+'</th><th>'+sym()+' en '+esc(M[MM])+'</th><th>% del mes</th><th>Pendiente total campaña</th></tr></thead><tbody>';
+  }
+  var nc=MM==null?9:6;
+  cats.forEach(function(c,j){var R=LL.filter(function(x){return x.cat===c;});if(!R.length)return;
+    var cl=MM==null?!STATE.insOpen[c]:!STATE.insOpenM[c];
+    var head='<td class="tdname"><span class="pl ipl">'+(cl?'+':'−')+'</span><i class="sw" style="background:'+insCol(c,j)+'"></i> '+esc(capF(c))+'</td>';
+    var nI='<span style="font-weight:400;color:#64748B">'+R.length+' insumo'+(R.length===1?'':'s')+'</span>';
+    t+='<tr class="tr-mes clkr" onclick="togInsC(\''+esc(c).replace(/'/g,"\\'")+'\')">'+head+
+      (MM==null?'<td></td><td></td><td></td><td></td><td>'+nI+'</td><td>'+mny(cc2[c])+'</td><td>'+fpc(TT?cc2[c]/TT:0,0)+'</td><td></td>'
+               :'<td></td><td>'+nI+'</td><td>'+mny(cc2[c])+'</td><td>'+fpc(TT?cc2[c]/TT:0,0)+'</td><td></td>')+'</tr>';
+    if(cl)return;
+    R.forEach(function(x){t+='<tr><td class="tdname" style="padding-left:26px">'+esc(x.n)+'</td><td class="tdname" style="font-weight:400">'+esc(x.u)+'</td>'+
+      (MM==null?'<td>'+fq(x.req)+'</td><td>'+fq(x.ex)+'</td><td>'+fq(x.comp)+'</td><td style="font-weight:600">'+fq(x.pend)+'</td><td style="font-weight:600">'+mny(x.tot)+'</td><td>'+fpc(TT?x.tot/TT:0,0)+'</td><td class="tdname" style="font-weight:400">'+mesesTxt(x.mon,M)+'</td>'
+               :'<td style="font-weight:600">'+fq(x.q[MM])+'</td><td style="font-weight:600">'+mny(x.mon[MM])+'</td><td>'+fpc(TT?x.mon[MM]/TT:0,0)+'</td><td style="color:#64748B">'+fq(x.pend)+' '+esc(x.u)+'</td>')+'</tr>';});});
+  if(LL.length)t+='<tr class="tr-key"><td class="tdname">Total'+(MM==null?'':' '+esc(M[MM]))+'</td>'+(MM==null?'<td></td><td></td><td></td><td></td><td></td><td>'+mny(TT)+'</td><td>100%</td><td></td>':'<td></td><td></td><td>'+mny(TT)+'</td><td>100%</td><td></td>')+'</tr>';
+  document.getElementById('insTbl').innerHTML=LL.length?t+'</tbody>':'<tbody><tr><td class="tdname">'+(MM==null?'Sin insumos pendientes de compra.':'En '+esc(M[MM])+' no se agrega saldo pendiente.')+'</td></tr></tbody>';
+  var dif=Math.abs(T+sp);
+  document.getElementById('insNote').textContent='Pendiente = requerimiento − stock inicial − comprado (con el ajuste de la planilla). Fuente: solapa ExistInsumos.'+(dif>Math.max(1,Math.abs(sp)*0.005)?' Atención: el total no coincide con el saldo pendiente del presupuesto financiero ('+mny(-sp)+').':'');
+}
 function renderResv(V){
   var s0=S0(V),M=V.meses,r=V.resX.slice(s0),lab=M.slice(s0);
   var ini=r[0],fin=r[r.length-1],dv=fin-ini;
-  function card(t,v,sub,c){return '<div class="stat" style="border-left-color:'+(c||'#5B7BA0')+'"><div class="k">'+t+'</div><div class="kv">'+mny(v)+'</div><div class="ks">'+sub+'</div></div>';}
+  function card(t,v,sub,c){return '<div class="stat" style="border-left-color:'+(c||'#8A5A2B')+'"><div class="k">'+t+'</div><div class="kv">'+mny(v)+'</div><div class="ks">'+sub+'</div></div>';}
   var h=card('Reservas en '+M[s0],ini,'saldo del mes de presupuesto');
   h+=card('Reservas al cierre '+M[11],fin,'saldo proyectado');
   h+=card('Variación '+(s0<11?M[s0]+'–'+M[11]:M[11]),dv,(ini?fpc(dv/Math.abs(ini),1):'—')+(STATE.cur==='USD'?' · en U$S, cada mes a su dólar':''),dv<0?'#C8642D':'#3B6D11');
   document.getElementById('resRow').innerHTML=h;
   var lp={id:'rlab',afterDatasetsDraw:function(ch){var cx=ch.ctx,meta=ch.getDatasetMeta(0);cx.save();cx.font='600 12px DM Sans';cx.fillStyle='#0F1923';cx.textAlign='center';
     meta.data.forEach(function(el,j){cx.fillText(sym()+' '+f(r[j]/tdiv(),0)+(STATE.cur==='USD'?' mil':' M'),el.x,el.y-6);});cx.restore();}};
-  mk('chRes',{type:'bar',data:{labels:lab,datasets:[{label:'Reservas',data:r,backgroundColor:'#5B7BA0',borderRadius:3,maxBarThickness:46}]},plugins:[lp],
+  mk('chRes',{type:'bar',data:{labels:lab,datasets:[{label:'Reservas',data:r,backgroundColor:'#8A5A2B',borderRadius:3,maxBarThickness:46}]},plugins:[lp],
     options:(function(){var o=chartBase();o.layout={padding:{top:18}};o.plugins.tooltip.callbacks.label=function(c){return ' Reservas: '+mny(c.raw);};return o;})()});
   var act=V.coloc.filter(function(x){return sum(x.coloc.slice(s0))+sum(x.resc.slice(s0))>0;});
   document.getElementById('resColCard').className=act.length?'card':'card hide';
@@ -1668,26 +1799,29 @@ function renderHac(V){
   h+=kv('Monto de ventas',mny(H.vArs));
   document.getElementById('hacBox').innerHTML=h;
 }
-function renderWarn(V){
-  var h='',L=STATE.files.map(function(x){return x.D;});
-  L.forEach(function(D){
-    h+='<li class="'+(D.concilia?'ok':'')+'">'+esc(D.empresa)+': '+(D.concilia?'el flujo recalculado coincide con la planilla ("Financiero mes $").':'revisar conciliación del flujo.')+' <span class="cs">'+esc(D.file)+'</span></li>';
-    var seen={};D.warn.forEach(function(w){if(seen[w])return;seen[w]=1;h+='<li>'+esc(w)+'</li>';});
-  });
+function renderWarn(){
+  var el=document.getElementById('warnBanner'),grp=[],n=0,L=STATE.files.map(function(x){return x.D;});
+  STATE.files.forEach(function(x){var D=x.D,seen={},it=[];
+    D.warn.forEach(function(w){if(seen[w])return;seen[w]=1;it.push(w);});
+    if(it.length){n+=it.length;grp.push({t:(x.role==='ini'?'Plan inicio (1/7)':'Plan actual')+' · '+D.empresa,f:D.file,it:it});}});
+  var gen=[];
   if(L.length>1){
-    var plans={},tcs={};L.forEach(function(D){plans[D.plan]=1;tcs[D.tc.join('|')]=1;});
-    var dm={};L.forEach(function(D){dm[D.meses[D.defStart]]=1;});
-    if(Object.keys(dm).length>1)h+='<li>Las empresas tienen distinto mes de presupuesto ('+esc(Object.keys(dm).join(', '))+'); se usa el de '+esc(L[0].empresa)+'.</li>';
-    if(Object.keys(plans).length>1)h+='<li>Los archivos son de campañas distintas ('+esc(Object.keys(plans).join(', '))+'): el consolidado suma meses que no son comparables.</li>';
-    if(Object.keys(tcs).length>1)h+='<li>Las empresas usan supuestos de dólar distintos; el consolidado en U$S convierte cada una con su propio dólar.</li>';
-    var pr={};L.forEach(function(D){D.granos.forEach(function(g){var k2=g.nombre;var s=g.pre.join('|');if(pr[k2]&&pr[k2]!==s)pr[k2]='DIF';else if(!pr[k2])pr[k2]=s;});});
+    var plans={},tcs={},dm={};L.forEach(function(D){plans[D.plan]=1;tcs[D.tc.join('|')]=1;dm[D.meses[D.defStart]]=1;});
+    if(Object.keys(dm).length>1)gen.push('Las empresas tienen distinto mes de presupuesto ('+Object.keys(dm).join(', ')+'); se usa el de '+L[0].empresa+'.');
+    if(Object.keys(plans).length>1)gen.push('Los archivos son de campañas distintas ('+Object.keys(plans).join(', ')+'): el consolidado suma meses que no son comparables.');
+    var pr={};L.forEach(function(D){D.granos.forEach(function(g){var s2=g.pre.join('|');if(pr[g.nombre]&&pr[g.nombre]!==s2)pr[g.nombre]='DIF';else if(!pr[g.nombre])pr[g.nombre]=s2;});});
     var dif=Object.keys(pr).filter(function(k){return pr[k]==='DIF';});
-    if(dif.length)h+='<li>Los precios de '+esc(dif.join(', '))+' difieren entre empresas. La tabla de supuestos muestra los de '+esc(L[0].empresa)+'.</li>';
-    h+='<li>El consolidado suma las empresas tal cual: no elimina operaciones entre empresas del grupo (por ejemplo, arrendamientos o ventas entre ellas).</li>';
+    if(dif.length)gen.push('Los precios de '+dif.join(', ')+' difieren entre empresas; la tabla de supuestos muestra los de '+L[0].empresa+'.');
+    if(gen.length){n+=gen.length;grp.push({t:'Consolidado',f:'',it:gen});}
   }
-  document.getElementById('warnList').innerHTML=h;
-  var nw=(h.match(/<li>/g)||[]).length;
-  document.getElementById('warnN').textContent=nw?'· '+nw+' aviso'+(nw>1?'s':'')+' para revisar':'· todo en orden';
+  if(!n){el.className='hide';return;}
+  var conc=STATE.files.some(function(x){return !x.D.concilia;});
+  var h='<div style="font-weight:600;font-size:14px">'+(conc?'Atención: el flujo del tablero no coincide con la planilla en algún mes.':'Hay '+n+' aviso'+(n>1?'s':'')+' al leer las planillas.')+'</div>';
+  h+='<div style="margin-top:2px">Puede ser una fila agregada, renombrada o un dato que no se encontró. Revisalo antes de presentar.</div>';
+  h+='<details style="margin-top:6px"'+(conc?' open':'')+'><summary style="cursor:pointer;font-weight:600">Ver '+n+' aviso'+(n>1?'s':'')+'</summary>';
+  grp.forEach(function(g){h+='<div style="margin-top:8px;font-weight:600">'+esc(g.t)+(g.f?' <span style="font-weight:400;color:#8A6410">· '+esc(g.f)+'</span>':'')+'</div><ul style="margin:4px 0 0 18px">';
+    g.it.forEach(function(w){h+='<li style="margin:2px 0">'+esc(w)+'</li>';});h+='</ul>';});
+  el.innerHTML=h+'</details>';el.className='';
 }
 
 /* ---------- drag & drop: soltar sobre "plan inicio" o "plan actual" ---------- */
