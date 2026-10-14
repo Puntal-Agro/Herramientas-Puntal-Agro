@@ -445,7 +445,7 @@ footer{padding:14px 24px 22px;display:flex;justify-content:space-between;color:v
       <div id="compDet" class="cdet"></div>
     </div>
     <div class="card">
-      <div class="chd"><div><div class="ct">Ingresos vs egresos previstos</div><div class="cs">Tocá un mes para ver su detalle · tocá un total o un rubro para plegarlo o abrirlo</div></div></div>
+      <div class="chd"><div><div class="ct">Ingresos vs egresos previstos <span style="font-weight:400;color:#64748B;font-size:13px">(apertura Financiero del mes)</span></div><div class="cs">Tocá un mes para ver su detalle · tocá un total o un rubro para plegarlo o abrirlo</div></div></div>
       <div class="g21" style="grid-template-columns:1.35fr 1fr">
         <div>
           <div class="legrow" id="ieLeg"></div>
@@ -532,7 +532,7 @@ footer{padding:14px 24px 22px;display:flex;justify-content:space-between;color:v
 
 <footer>
   <span>Puntal Agro · Herramientas para la toma de decisiones</span>
-  <span>Versión v2026-10-14 08:45 · BUILD 43 · Datos leídos: <span id="fts">—</span></span>
+  <span>Versión v2026-10-14 09:25 · BUILD 44 · Datos leídos: <span id="fts">—</span></span>
 </footer>
 
 <div id="dropOv"><div class="drop2">
@@ -1192,12 +1192,14 @@ function renderFlow(V){
     bb('Saldo pendiente de insumos',sp,'#C8642D','f'),
     bb('Existencia de granos',gx,'#E0A526','g'),
     bb('Reservas',rs,'#8A5A2B','r')]},
+    plugins:[{id:'selBand',beforeDatasetsDraw:function(ch){var j=STATE.compJ;if(j==null)return;var xs=ch.scales.x,a=ch.chartArea,w=(a.right-a.left)/ch.data.labels.length,x=xs.getPixelForValue(j);
+      var cx=ch.ctx;cx.save();cx.fillStyle='rgba(74,101,51,0.08)';cx.fillRect(x-w/2+2,a.top,w-4,a.bottom-a.top);cx.restore();}}],
     options:(function(){var o=chartBase();o.layout={padding:{top:10}};o.scales.x.stacked=true;o.scales.y.stacked=true;o.interaction={mode:'index',intersect:false};
       o.plugins.tooltip.enabled=false;
-      var pick=function(e,els){if(els&&els.length&&els[0].index!==STATE.compJ){STATE.compJ=els[0].index;drawCompDet();}};
-      o.onHover=function(e,els){e.native.target.style.cursor=els&&els.length?'pointer':'default';pick(e,els);};o.onClick=pick;
+      o.onHover=function(e,els){e.native.target.style.cursor=els&&els.length?'pointer':'default';};
+      o.onClick=function(e,els){if(!els||!els.length)return;var j=els[0].index;setTimeout(function(){selFlowM(s0+j);},0);};
       return o;})()});
-  if(STATE.compJ==null||STATE.compJ>=labels.length)STATE.compJ=0;
+  if(STATE.ieM==null||STATE.ieM<s0||STATE.ieM>11)STATE.ieM=s0;STATE.compJ=STATE.ieM-s0;
   CMP={lab:labels,y0:s0,it:[['Saldo financiero mes anterior',pAnt,'#2F5A0E'],['Financiero del mes',pMes,'#639922'],['Saldo pendiente de insumos',sp,'#C8642D'],['Existencia de granos',gx,'#E0A526'],['Reservas',rs,'#8A5A2B']],net:net,sit:sit,V:V};
   drawCompDet();
   document.getElementById('compLeg').innerHTML=
@@ -1222,7 +1224,9 @@ function renderFlow(V){
   document.getElementById('flowSide').innerHTML=h;
 }
 var CMP=null;
-function drawCompDet(){if(!CMP)return;var j=STATE.compJ||0,h='<div class="cdm">'+esc(mesAnio(CMP.V.list[0],CMP.y0+j))+'<span class="cs" style="font-weight:400;margin-left:8px">pasá el mouse o tocá un mes</span></div><div class="cdg">';
+/* mes elegido en Flujo financiero: lo comparten Composición mensual e Ingresos vs egresos */
+function selFlowM(m){STATE.ieM=m;var V=curView();renderFlow(V);renderIE(V);}
+function drawCompDet(){if(!CMP)return;var j=STATE.compJ||0,h='<div class="cdm">'+esc(mesAnio(CMP.V.list[0],CMP.y0+j))+'<span class="cs" style="font-weight:400;margin-left:8px">hacé click en un mes para cambiarlo (también cambia el gráfico de abajo)</span></div><div class="cdg">';
   CMP.it.forEach(function(x){h+='<div style="border-left-color:'+x[2]+'"><div class="k">'+x[0]+'</div><div class="v'+(x[1][j]<0?' neg':'')+'">'+mny(x[1][j])+'</div></div>';});
   h+='</div><div class="cdg" style="margin-top:8px"><div class="tot"><div class="k">Caja + insumos pendientes</div><div class="v'+(CMP.net[j]<0?' neg':'')+'">'+mny(CMP.net[j])+'</div></div>';
   h+='<span class="op">+ granos =</span><div class="tot"><div class="k">Situación sin reservas</div><div class="v'+(CMP.sit[j]<0?' neg':'')+'">'+mny(CMP.sit[j])+'</div></div></div>';
@@ -1564,7 +1568,7 @@ function renderIE(V){
     options:(function(){var o=chartBase();o.interaction={mode:'index',intersect:false};
       o.plugins.tooltip.callbacks.label=function(c){return ' '+c.dataset.label+': '+mny(c.raw);};
       o.plugins.tooltip.callbacks.footer=function(it){var j=it[0].dataIndex;return 'Saldo del mes: '+mny(ti[j]-te[j]);};
-      o.onClick=function(e,els,ch){var hit=ch.getElementsAtEventForMode(e.native,'nearest',{intersect:true},false);if(hit&&hit.length){STATE.ieM=s0+hit[0].index;}else if(els&&els.length){STATE.ieM=s0+els[0].index;}else return;setTimeout(function(){renderIE(curView());},0);};
+      o.onClick=function(e,els,ch){var hit=ch.getElementsAtEventForMode(e.native,'nearest',{intersect:true},false);var m;if(hit&&hit.length){m=s0+hit[0].index;}else if(els&&els.length){m=s0+els[0].index;}else return;setTimeout(function(){selFlowM(m);},0);};
       o.onHover=function(e,els){e.native.target.style.cursor=els&&els.length?'pointer':'default';};return o;})()});
   document.getElementById('ieLeg').innerHTML='<span><i class="sw" style="background:'+C_POS+'"></i> Ingresos previstos</span><span><i class="sw" style="background:'+C_NEG+'"></i> Egresos previstos</span>';
   var m=STATE.ieM,gi=grpVal(ING_G,V.ing,m),ge=grpVal(EGR_G,V.egr,m),h='',ajm=adjPend(V,m,s0);
