@@ -532,7 +532,7 @@ footer{padding:14px 24px 22px;display:flex;justify-content:space-between;color:v
 
 <footer>
   <span>Puntal Agro · Herramientas para la toma de decisiones</span>
-  <span>Versión v2026-10-14 09:25 · BUILD 44 · Datos leídos: <span id="fts">—</span></span>
+  <span>Versión v2026-10-26 16:00 · BUILD 45 · Datos leídos: <span id="fts">—</span></span>
 </footer>
 
 <div id="dropOv"><div class="drop2">
@@ -680,12 +680,40 @@ function parseWorkbook(wb,fname){
   /* --- flujo (PresupuestoiFinanciero) --- */
   var g={};
   g.estructura=pf('ESTRUCTURA $');g.admin=pf('ADMINISTRACION $');g.impuestos=pf('IMPUESTOS $');
-  g.maquinaria=pf('MAQUINARIA $');g.ganaderia=pf('GANADERÍA $');g.personal=pf('PERSONAL $');
+  /* maquinaria: "MAQUINARIA $" o variantes como "MAQUINARIA Y PTA. SILOS $" */
+  var rMaq=pfRow('MAQUINARIA $')||pfRow('MAQUINARIA',{prefix:true});
+  if(!rMaq)W.push('Presupuesto financiero: no se encontró la fila de MAQUINARIA (se toma 0).');
+  g.maquinaria=rowVals(rMaq);g.ganaderia=pf('GANADERÍA $');g.personal=pf('PERSONAL $');
   g.labores=pf('LABORES PLANTEOS TECNICOS $');g.cosecha=pf('COSECHA PRESUPUESTO $');
   g.dif=pf('DIF.PRESUP.- REAL LAB. $',{optional:true});g.gerenc=pf('GERENCIAMIENTO CULTIVOS $',{optional:true});
   g.seguros=pf('SEGUROS AGRÍCOLAS $',{optional:true});g.otros=pf('OTROS GASTOS $',{optional:true});
   g.silo=pf('COMPRA SILO BOLSA',{prefix:true,optional:true});
   var totG=pf('TOTAL $');
+  /* rubros propios de la empresa que suma TOTAL $ (p.ej. "CASCO $"): se leen de la fórmula de cada mes */
+  var rTotG=pfRow('TOTAL $'),rEstG=pfRow('ESTRUCTURA $'),rImpG=pfRow('IMPUESTOS $'),knownR={};
+  ['ESTRUCTURA $','ADMINISTRACION $','IMPUESTOS $','GANADERÍA $','PERSONAL $','LABORES PLANTEOS TECNICOS $','COSECHA PRESUPUESTO $',
+   'DIF.PRESUP.- REAL LAB. $','GERENCIAMIENTO CULTIVOS $','SEGUROS AGRÍCOLAS $','OTROS GASTOS $'].forEach(function(l){var rr=pfRow(l);if(rr)knownR[rr]=1;});
+  if(rMaq)knownR[rMaq]=1;var rSiloB=pfRow('COMPRA SILO BOLSA',{prefix:true});if(rSiloB)knownR[rSiloB]=1;
+  function totRefs(fx,col){if(!fx||/[!:]/.test(fx))return null;var out=[],m,re=/\$?([A-Z]{1,3})\$?(\d+)/g;
+    while((m=re.exec(fx))){if(m[1]!==col)return null;out.push(+m[2]);}return out.length?out:null;}
+  /* respaldo si no hay fórmula legible: encabezados en mayúscula terminados en "$" entre ESTRUCTURA y TOTAL */
+  var candR=[];
+  if(rEstG&&rTotG){for(r=rEstG+1;r<rTotG;r++){var lbC=norm(PF.v(r,2));
+    if(!knownR[r]&&/\$$/.test(lbC)&&lbC===lbC.toUpperCase()&&key(lbC).indexOf('pagos a contratistas')!==0)candR.push(r);}}
+  var xEst=zeros(12),xOtr=zeros(12),inTot={},xNames={};
+  for(i=0;i<12;i++){
+    var cT=rTotG&&PFws?PFws[XLSX.utils.encode_cell({r:rTotG-1,c:hc+i-1})]:null;
+    var refs=totRefs(cT&&cT.f,XLSX.utils.encode_col(hc+i-1));
+    var rows=refs?refs.filter(function(q){return !knownR[q];}):candR;
+    (refs||[]).forEach(function(q){(inTot[q]=inTot[q]||{})[i]=1;});
+    rows.forEach(function(q){var v=nz(PF.v(q,hc+i));xNames[q]=norm(PF.v(q,2));
+      if(rImpG&&q>rEstG&&q<rImpG)xEst[i]+=v;else xOtr[i]+=v;});
+  }
+  /* fórmula de TOTAL $ distinta entre meses: un rubro con valor que no se suma en algún mes */
+  var anyRef=Object.keys(inTot);
+  anyRef.forEach(function(q){q=+q;var miss=[];
+    for(i=0;i<12;i++){if(!inTot[q][i]&&Math.abs(nz(PF.v(q,hc+i)))>1)miss.push(D.meses[i]);}
+    if(miss.length)W.push('Presupuesto financiero: la fórmula de TOTAL $ no suma "'+norm(PF.v(q,2))+'" en '+miss.join(', ')+' (en otros meses sí). Revisar la planilla.');});
   var ing={},egr={};
   ing.granos=pf('VENTAS GRANOS $');
   ing.hacienda=pf('VENTAS HACIENDA $');
@@ -717,13 +745,13 @@ function parseWorkbook(wb,fname){
   var lab=zeros(12),estA=zeros(12),resid=zeros(12);
   for(i=0;i<12;i++){
     lab[i]=g.labores[i]+g.cosecha[i]+g.dif[i]+g.gerenc[i]+g.seguros[i]+g.otros[i]+g.silo[i];
-    estA[i]=g.estructura[i]+g.admin[i];
-    resid[i]=totG[i]-(lab[i]+estA[i]+g.impuestos[i]+g.maquinaria[i]+g.ganaderia[i]+g.personal[i]);
+    estA[i]=g.estructura[i]+g.admin[i]+xEst[i];
+    resid[i]=totG[i]-(lab[i]+estA[i]+g.impuestos[i]+g.maquinaria[i]+g.ganaderia[i]+g.personal[i]+xOtr[i]);
   }
   for(i=0;i<12;i++){if(Math.abs(resid[i])>1){W.push('El TOTAL $ de gastos no coincide con la suma de sus rubros en '+D.meses[i]+' (diferencia '+f(resid[i],0)+' $); se muestra como "otros".');break;}}
   egr.insumos=compras;egr.labores=lab;egr.arrend=arrPag;egr.personal=g.personal;egr.estAdm=estA;
   egr.impuestos=[];egr.ivaItf=[];egr.creditos=[];egr.otros=[];
-  for(i=0;i<12;i++){egr.impuestos.push(g.impuestos[i]);egr.ivaItf.push(ivaF[i]+itf[i]);egr.creditos.push(amort[i]+inter[i]);egr.otros.push(otrosEg[i]+resid[i]);}
+  for(i=0;i<12;i++){egr.impuestos.push(g.impuestos[i]);egr.ivaItf.push(ivaF[i]+itf[i]);egr.creditos.push(amort[i]+inter[i]);egr.otros.push(otrosEg[i]+resid[i]+xOtr[i]);}
   egr.maquinaria=g.maquinaria;egr.ganaderia=g.ganaderia;egr.comerc=comerc;egr.inversiones=inver;egr.retiros=retiros;egr.colocaciones=coloc;
   D.det={estructura:g.estructura,admin:g.admin,impuestos:g.impuestos,maquinaria:g.maquinaria,ganaderia:g.ganaderia,personal:g.personal,
     labores:g.labores,cosecha:g.cosecha,gerenc:g.gerenc,seguros:g.seguros,silo:g.silo,otros:(function(){var a=zeros(12);for(var q=0;q<12;q++)a[q]=g.dif[q]+g.otros[q];return a;})()};
