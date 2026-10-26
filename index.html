@@ -121,14 +121,14 @@ table, .num, .cnt, input[type=number]{font-variant-numeric:tabular-nums}
 
       <button class="acc acc-b" onclick="irA('ges')">
         <svg class="acc-ico" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
-        <div class="acc-tit">Herramientas de Gestión</div>
+        <div class="acc-tit">Herramientas de Gestión Productiva y Económica</div>
         <div class="acc-txt">Planificación y registro de la operación: uso del suelo, siembra, insumos, labores, ganadería, finanzas y maestros.</div>
         <div class="acc-cnt" id="cnt-ges"></div>
       </button>
 
       <button class="acc acc-d" id="acc-pun" onclick="irA('pun')">
         <svg class="acc-ico" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg>
-        <div class="acc-tit">Herramientas Puntal</div>
+        <div class="acc-tit">Consulta</div>
         <div class="acc-txt">Herramientas internas del equipo Puntal Agro para el trabajo de consultoría.</div>
         <div class="acc-cnt" id="cnt-pun"></div>
       </button>
@@ -253,7 +253,7 @@ table, .num, .cnt, input[type=number]{font-variant-numeric:tabular-nums}
   <!-- ============ HERRAMIENTAS DE GESTIÓN ============ -->
   <div class="view sec" id="view-ges">
     <button class="volver" onclick="irA('home')"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></svg> Volver al inicio</button>
-    <div class="block-title">Herramientas de Gestión<span class="ln" style="background:var(--terra)"></span></div>
+    <div class="block-title">Herramientas de Gestión Productiva y Económica<span class="ln" style="background:var(--terra)"></span></div>
 
     <div class="subsec first">Gestión Productiva</div>
     <div class="grid" id="grid-gestion">
@@ -331,14 +331,14 @@ table, .num, .cnt, input[type=number]{font-variant-numeric:tabular-nums}
     <div class="empty" id="empty-gestion-eco" style="display:none">No tenés herramientas de gestión económica habilitadas para esta empresa.</div>
   </div>
 
-  <!-- ============ HERRAMIENTAS PUNTAL ============
+  <!-- ============ CONSULTA (ex Herramientas Puntal) ============
        Etapa actual: sección visible solo para admin_general (ver puedePuntal).
        Tarjetas SIN data-tool: se ven todas dentro de la sección.
        Etapa futura (filtro por permiso): agregar data-tool a cada tarjeta,
        dar de alta las herramientas en pa-core y usar filtrarGrupo. -->
   <div class="view sec" id="view-pun">
     <button class="volver" onclick="irA('home')"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></svg> Volver al inicio</button>
-    <div class="block-title">Herramientas Puntal<span class="ln" style="background:var(--pun)"></span></div>
+    <div class="block-title">Consulta<span class="ln" style="background:var(--pun)"></span></div>
     <div class="grid" id="grid-pun-secciones" style="margin-top:14px">
 
       <div class="tool t-cal tool-off">
@@ -347,7 +347,7 @@ table, .num, .cnt, input[type=number]{font-variant-numeric:tabular-nums}
           <span class="tool-right"><span class="tool-tag tag-prox">Próximamente</span></span>
         </div>
         <button class="tool-toggle" onclick="tog(this)"><span class="ico">+</span> Detalle</button>
-        <div class="tool-detail">Herramientas Puntal para la gestión agrícola.</div>
+        <div class="tool-detail">Herramientas de consulta para la gestión agrícola.</div>
       </div>
 
       <div class="tool t-cal tool-off">
@@ -356,7 +356,7 @@ table, .num, .cnt, input[type=number]{font-variant-numeric:tabular-nums}
           <span class="tool-right"><span class="tool-tag tag-prox">Próximamente</span></span>
         </div>
         <button class="tool-toggle" onclick="tog(this)"><span class="ico">+</span> Detalle</button>
-        <div class="tool-detail">Herramientas Puntal para la gestión ganadera.</div>
+        <div class="tool-detail">Herramientas de consulta para la gestión ganadera.</div>
       </div>
 
       <div class="tool t-cal tool-off">
@@ -365,7 +365,7 @@ table, .num, .cnt, input[type=number]{font-variant-numeric:tabular-nums}
           <span class="tool-right"><span class="tool-tag tag-prox">Próximamente</span></span>
         </div>
         <button class="tool-toggle" onclick="tog(this)"><span class="ico">+</span> Detalle</button>
-        <div class="tool-detail">Herramientas Puntal de gestión ambiental.</div>
+        <div class="tool-detail">Herramientas de consulta de gestión ambiental.</div>
       </div>
 
       <div class="tool t-cal tool-off">
@@ -374,7 +374,7 @@ table, .num, .cnt, input[type=number]{font-variant-numeric:tabular-nums}
           <span class="tool-right"><span class="tool-tag tag-prox">Próximamente</span></span>
         </div>
         <button class="tool-toggle" onclick="tog(this)"><span class="ico">+</span> Detalle</button>
-        <div class="tool-detail">Herramientas Puntal para la gestión de la empresa.</div>
+        <div class="tool-detail">Herramientas de consulta para la gestión de la empresa.</div>
       </div>
 
       <div class="tool t-cal tool-off">
@@ -578,7 +578,7 @@ PA.init({ modo:'demo' }, function(){
     aplicarCtx(ctx);
     desdeHash();
   });
-  document.getElementById('fts2').textContent = 'v2026-10-13 · BUILD 5 · ' + new Date().toLocaleString('es-AR');
+  document.getElementById('fts2').textContent = 'v2026-10-13 · BUILD 6 · ' + new Date().toLocaleString('es-AR');
 });
 </script>
 
