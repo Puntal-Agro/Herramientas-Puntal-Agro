@@ -532,7 +532,7 @@ footer{padding:14px 24px 22px;display:flex;justify-content:space-between;color:v
 
 <footer>
   <span>Puntal Agro · Herramientas para la toma de decisiones</span>
-  <span>Versión v2026-10-26 16:00 · BUILD 45 · Datos leídos: <span id="fts">—</span></span>
+  <span>Versión v2026-10-26 16:10 · BUILD 46 · Datos leídos: <span id="fts">—</span></span>
 </footer>
 
 <div id="dropOv"><div class="drop2">
@@ -1836,7 +1836,9 @@ function renderWarn(){
   STATE.files.forEach(function(x){var D=x.D,seen={},it=[];
     D.warn.forEach(function(w){if(seen[w])return;seen[w]=1;it.push(w);});
     if(it.length){n+=it.length;grp.push({t:(x.role==='ini'?'Plan inicio (1/7)':'Plan actual')+' · '+D.empresa,f:D.file,it:it});}});
-  var gen=[];
+  /* el consolidado se arma dentro de cada etapa (varios inicios o varios actuales), nunca inicio vs actual */
+  [['ini','Consolidado · Plan inicio (1/7)'],['act','Consolidado · Plan actual']].forEach(function(st){
+  var L=STATE.files.filter(function(x){return x.role===st[0];}).map(function(x){return x.D;}),gen=[];
   if(L.length>1){
     var plans={},tcs={},dm={};L.forEach(function(D){plans[D.plan]=1;tcs[D.tc.join('|')]=1;dm[D.meses[D.defStart]]=1;});
     if(Object.keys(dm).length>1)gen.push('Las empresas tienen distinto mes de presupuesto ('+Object.keys(dm).join(', ')+'); se usa el de '+L[0].empresa+'.');
@@ -1844,8 +1846,9 @@ function renderWarn(){
     var pr={};L.forEach(function(D){D.granos.forEach(function(g){var s2=g.pre.join('|');if(pr[g.nombre]&&pr[g.nombre]!==s2)pr[g.nombre]='DIF';else if(!pr[g.nombre])pr[g.nombre]=s2;});});
     var dif=Object.keys(pr).filter(function(k){return pr[k]==='DIF';});
     if(dif.length)gen.push('Los precios de '+dif.join(', ')+' difieren entre empresas; la tabla de supuestos muestra los de '+L[0].empresa+'.');
-    if(gen.length){n+=gen.length;grp.push({t:'Consolidado',f:'',it:gen});}
+    if(gen.length){n+=gen.length;grp.push({t:st[1],f:'',it:gen});}
   }
+  });
   if(!n){el.className='hide';return;}
   var conc=STATE.files.some(function(x){return !x.D.concilia;});
   var h='<div style="font-weight:600;font-size:14px">'+(conc?'Atención: el flujo del tablero no coincide con la planilla en algún mes.':'Hay '+n+' aviso'+(n>1?'s':'')+' al leer las planillas.')+'</div>';
