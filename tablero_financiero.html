@@ -220,13 +220,15 @@ tr.invon td{background:#EEF3E8 !important}
 .tgl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--verde);background:#EEF3E8;border-radius:10px;padding:3px 9px;align-self:center;margin:0 6px 0 2px}
 .tsep{width:1px;background:var(--border);margin:8px 12px}
 .iem{font-size:17px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:8px}
-.ietot{display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:8px;margin-bottom:6px}
-.ietot>div{border-radius:10px;padding:8px 10px;border:1px solid var(--border)}
-.ietot .k{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)}
-.ietot .v{font-size:18px;font-weight:600;margin-top:2px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ietot{display:grid;grid-template-columns:1fr auto 1fr auto 1fr auto 1.15fr;gap:4px;align-items:stretch;margin-bottom:6px}
+.ietot .op{display:block !important;border:none;padding:0;align-self:center;font-size:16px;font-weight:600;color:#94A3B8}
+.ietot .ta{background:#F5F7F2}.ietot .ta .v{color:#0F1923}.ietot .ta .v.neg{color:var(--neg)}
+.ietot>div{display:flex;flex-direction:column;justify-content:space-between;border-radius:10px;padding:8px 9px;border:1px solid var(--border)}
+.ietot .k{font-size:11px;font-weight:600;line-height:1.2;color:#475569;min-height:27px}
+.ietot .v{font-size:16px;font-weight:600;margin-top:2px;font-variant-numeric:tabular-nums;white-space:nowrap}
 .ietot .ti{background:#F3F8EC}.ietot .ti .v{color:var(--pos)}
 .ietot .te{background:#FDF3EC}.ietot .te .v{color:var(--neg)}
-.ietot .ts{background:#fff;border-width:2px}.ietot .ts .v{font-size:21px}
+.ietot .ts{background:#fff;border-width:2px}.ietot .ts .v{font-size:17px}
 .ietot .ts.pos{border-color:#639922}.ietot .ts.pos .v{color:var(--pos)}
 .ietot .ts.neg{border-color:var(--terra)}.ietot .ts.neg .v{color:var(--neg)}
 .ierow{display:grid;grid-template-columns:minmax(0,2.2fr) 1fr 78px 34px;gap:8px;align-items:center;padding:4px 0;font-size:12px}
@@ -257,6 +259,12 @@ tr.invon td{background:#EEF3E8 !important}
 .drop h2{font-size:18px;font-weight:600;margin-bottom:6px}
 .drop p{color:var(--muted);font-size:13px;max-width:620px;margin:0 auto 4px}
 .drop .btn{margin-top:16px}
+.ertbl td,.ertbl th{padding:6px 8px}.ertbl tr.ersub td{font-weight:700;background:#F5F7F2 !important;border-top:1px solid #D5DFC8}
+.ertbl tr.erkey td{font-weight:700;background:#EEF3E8 !important;font-size:13px}.ertbl td.tdname{min-width:260px}
+.ertbl .pb{display:inline-block;height:6px;border-radius:3px;vertical-align:middle;margin-left:8px}
+.dst{margin-top:12px;font-size:12px;color:#475569;min-height:18px}
+.dst .okf{display:inline-flex;align-items:center;gap:6px;background:#EEF3E8;border:1px solid #C9D6B8;color:#2F5A0E;border-radius:14px;padding:4px 10px;font-weight:600;margin:2px}
+.drop.done{border-style:solid;border-color:#9DBF6B;background:#F5F9F0}
 .howto{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:4px}
 .howto .card p{color:#475569;font-size:12px;margin-top:4px}
 .howto .n{display:inline-flex;width:22px;height:22px;border-radius:50%;background:var(--verde);color:#fff;font-size:12px;font-weight:600;align-items:center;justify-content:center;margin-right:6px}
@@ -336,14 +344,17 @@ footer{padding:14px 24px 22px;display:flex;justify-content:space-between;color:v
       <h2>Arrastrá acá el plan al inicio</h2>
       <p>El Excel al 1/7, que no se toca más. Alimenta la solapa Plan.</p>
       <button class="btn sec" onclick="event.stopPropagation();pickFiles('ini')">o elegí el archivo</button>
+      <div class="dst" id="dst-ini"></div>
     </div>
     <div class="drop" data-role="act" onclick="pickFiles('act')">
       <div class="dtag act">Plan actual</div>
       <h2>Arrastrá acá el plan actual</h2>
       <p>El Excel actualizado del mes. Alimenta todo el seguimiento.</p>
       <button class="btn" onclick="event.stopPropagation();pickFiles('act')">o elegí el archivo</button>
+      <div class="dst" id="dst-act"></div>
     </div>
   </div>
+  <div id="goDash" class="hide" style="text-align:center;margin-top:4px"><button class="btn" style="padding:9px 22px;font-size:13px" onclick="STATE.dashOk=true;renderAll()">Ver tablero con lo cargado →</button><div class="dnote" style="margin-top:6px">Podés seguir sin el otro archivo: el tablero usa el que esté cargado.</div></div>
   <p class="dnote">Podés cargar varias empresas: el tablero muestra cada una y el consolidado. Los archivos se leen en esta computadora: no se suben a ningún servidor.</p>
   <div class="howto">
     <div class="card"><span class="n">1</span><b>Actualizá la planilla</b><p>Cargá en el Excel los datos del mes y guardalo (Excel recalcula al guardar; el tablero lee los valores guardados).</p></div>
@@ -391,18 +402,14 @@ footer{padding:14px 24px 22px;display:flex;justify-content:space-between;color:v
   <div id="tab-planhd" class="tabc"><div class="tabhd" style="padding:4px 2px 0"><div class="ct" style="font-size:20px;color:#A84D1F;letter-spacing:-.3px" id="planTit"></div><div class="cs">Foto del plan al inicio de la campaña: resultado esperado, situación empresarial y producción <span id="planFb"></span></div></div></div>
   <div id="tab-res" class="tabc">
     <div class="metrics" id="kpis"></div>
-    <div class="g2">
+    <div>
       <div class="card">
-        <div class="chd"><div><div class="ct">Del ingreso al crecimiento</div><div class="cs" id="wfSub"></div></div></div>
-        <div class="cw"><canvas id="chWf"></canvas></div>
+        <div class="chd"><div><div class="ct">Del ingreso al crecimiento</div><div class="cs" id="wfSub"></div></div><div class="pbtn noprint" id="erBtn" style="margin-top:0" onclick="togEr()"></div></div>
+        <div class="scroll"><table id="wfTbl" class="ertbl"></table></div>
         <div style="margin-top:12px">
           <div class="ct">Reparto de la utilidad</div>
           <div id="repBox"></div>
         </div>
-      </div>
-      <div class="card">
-        <div class="chd"><div><div class="ct">Aporte de cada actividad</div><div class="cs">Margen bruto por actividad</div></div></div>
-        <div class="scroll"><table id="actTbl"></table></div>
       </div>
     </div>
   </div>
@@ -413,15 +420,12 @@ footer{padding:14px 24px 22px;display:flex;justify-content:space-between;color:v
 
   <div id="tab-prod" class="tabc">
     <div class="card"><div class="sup" id="prodRow" style="margin-top:0;border-top:none"></div></div>
-    <div class="g21">
+    <div>
       <div class="card">
-        <div class="chd"><div><div class="ct">Agricultura</div><div class="cs">Superficie sembrada y rindes proyectados</div></div></div>
-        <div class="scroll"><table id="prodTbl"></table></div>
+        <div class="chd"><div><div class="ct">Actividades: producción y margen bruto</div><div class="cs">Superficie, rinde y producción proyectados, y aporte de cada actividad al margen bruto</div></div></div>
+        <div class="scroll"><table id="actTbl"></table></div>
       </div>
-      <div class="card">
-        <div class="chd"><div class="ct">Ganadería vacuna</div></div>
-        <div id="hacBox"></div>
-      </div>
+      <div id="actExtra" style="display:flex;flex-direction:column;gap:12px;margin-top:12px"></div>
     </div>
   </div>
 
@@ -491,7 +495,7 @@ footer{padding:14px 24px 22px;display:flex;justify-content:space-between;color:v
       <div class="cw" id="insWrap"><canvas id="chIns"></canvas></div>
     </div>
     <div class="card">
-      <div class="chd"><div><div class="ct">¿Cuándo hay que tenerlos?</div><div class="cs">Saldo pendiente que se agrega cada mes, según el requerimiento de las labores · por tipo de insumo · tocá un mes para ver su detalle abajo</div></div></div>
+      <div class="chd"><div><div class="ct">¿Cuándo hay que tenerlos?</div><div class="cs">Saldo pendiente que se agrega cada mes, según el requerimiento de las labores · por tipo de insumo · la línea negra es la necesidad acumulada · tocá un mes para ver su detalle abajo</div></div></div>
       <div class="cw" style="height:280px"><canvas id="chInsM"></canvas></div>
     </div>
     <div class="card">
@@ -532,7 +536,7 @@ footer{padding:14px 24px 22px;display:flex;justify-content:space-between;color:v
 
 <footer>
   <span>Puntal Agro · Herramientas para la toma de decisiones</span>
-  <span>Versión v2026-10-26 16:10 · BUILD 46 · Datos leídos: <span id="fts">—</span></span>
+  <span>Versión v2026-10-27 20:40 · BUILD 49 · Datos leídos: <span id="fts">—</span></span>
 </footer>
 
 <div id="dropOv"><div class="drop2">
@@ -819,6 +823,10 @@ function parseWorkbook(wb,fname){
       fin:['Financiamiento neto',1],ut:['UTILIDAD'],ig:['Impuestos (Ganancias',1],ret:['Retiros'],cre:['CRECIMIENTO']};
     var kx;
     for(kx in L){var rr2=findInCol(RE,2,L[kx][0],{prefix:!!L[kx][1]});D.res[kx]=rr2?nz(RE.v(rr2,5)):0;if(!rr2&&kx!=='rv1'&&kx!=='rv2'&&kx!=='arrc')W.push('Resultado económico: no se encontró "'+L[kx][0]+'".');}
+    /* estado de resultados tal como la solapa: de "Ingreso neto" a "CRECIMIENTO" (cada empresa puede tener renglones propios) */
+    D.er=[];(function(){var r1=findInCol(RE,2,'Ingreso neto'),r2=r1?findInCol(RE,2,'CRECIMIENTO',{from:r1}):0;if(!r1||!r2)return;
+      for(var q=r1;q<=r2;q++){var lb=norm(RE.v(q,2));if(!lb)continue;var v=RE.v(q,5),up=/[A-ZÁÉÍÓÚÑ]/.test(lb)&&lb===lb.toUpperCase();
+        if(!up&&q!==r1&&!(isNum(v)&&Math.abs(v)>0.5))continue;D.er.push({n:lb,v:nz(v),sub:up||q===r1});}})();
     var rU=findInCol(RE,20,'Ingreso neto');var usdIng=rU?RE.v(rU,23):null;
     D.tcRes=(isNum(usdIng)&&usdIng)?D.res.ing/usdIng:(cellNum(RE,'TC $/U$S')||D.tcCierre);
     D.sup=cellNum(RE,'Superficie total =',{c1:6,n:3});
@@ -831,6 +839,17 @@ function parseWorkbook(wb,fname){
       if(ak.indexOf('subtotal agric')===0)continue;
       var a={nombre:ak.indexOf('subtotal vacunos')===0?'Ganadería vacuna':an,ing:nz(RE.v(r,3)),cd:nz(RE.v(r,4)),sup:nz(RE.v(r,5)),ton:nz(RE.v(r,6)),mb:nz(RE.v(r,8)),gan:ak.indexOf('subtotal vacunos')===0};
       if(a.ing||a.cd||a.sup)D.acts.push(a);}}
+    /* tablas de aporte adicionales (p.ej. "Agricultura en aparcería"): mismo encabezado que la principal, con su propio TOTALES */
+    D.acts2=[];
+    for(r=(rT||1)+1;r<=Math.min(RE.maxR,(findInCol(RE,2,'Ingreso neto')||RE.maxR));r++){
+      if(key(RE.v(r,3))!==key('Ingreso Neto total $'))continue;
+      var tb={t:norm(RE.v(r,2))||'Otras actividades',acts:[],fis:0},r9=findInCol(RE,2,'TOTALES',{from:r+1})||r+40,q;
+      for(q=r+1;q<r9;q++){var an2=norm(RE.v(q,2));if(!an2||an2==='0')continue;var ak2=key(an2);
+        if(ak2.indexOf('subtotal agric. ha fisica')===0){tb.fis=nz(RE.v(q,5));continue;}
+        if(ak2.indexOf('subtotal')===0)continue;
+        var a2={nombre:an2,ing:nz(RE.v(q,3)),cd:nz(RE.v(q,4)),sup:nz(RE.v(q,5)),ton:nz(RE.v(q,6)),mb:nz(RE.v(q,8)),gan:/vacun/.test(ak2)};
+        if(a2.ing||a2.cd||a2.sup)tb.acts.push(a2);}
+      if(tb.acts.length)D.acts2.push(tb);r=r9;}
   }else W.push('No se encontró la solapa "ResultadoEconómico".');
 
   /* --- patrimonio --- */
@@ -956,7 +975,9 @@ function viewOf(D,cur){
     else V.bankItems=[['Caja al inicio de la campaña',U?D.cajaIni/(D.tcIni||D.tc[0]):D.cajaIni]];
     V.bankProj=V.start-V.bankItems.reduce(function(t,x){return t+x[1];},0);})();V.realBal=D.realBal.slice();
   for(k in D.res)V.res[k]=rs(D.res[k]);
+  V.er=(D.er||[]).map(function(x){return {n:x.n,v:rs(x.v),sub:x.sub};});
   V.acts=mapArr(D.acts,function(a){return {nombre:a.nombre,gan:a.gan,ing:rs(a.ing),cd:rs(a.cd),mb:rs(a.mb),sup:a.sup,ton:a.ton};});
+  V.acts2=(D.acts2||[]).map(function(tb){return {t:tb.t,fis:tb.fis,acts:tb.acts.map(function(a){return {nombre:a.nombre,gan:a.gan,ing:rs(a.ing),cd:rs(a.cd),mb:rs(a.mb),sup:a.sup,ton:a.ton};})};});
   for(k in D.pat)V.pat[k]=pt(D.pat[k]);
   if(D.hac)V.hac={cabIni:D.hac.cabIni,cabFin:D.hac.cabFin,vCab:D.hac.vCab,vKg:D.hac.vKg,arsIni:rs(D.hac.arsIni),arsFin:rs(D.hac.arsFin),vArs:rs(D.hac.vArs)};
   return V;
@@ -990,8 +1011,14 @@ function consolidate(list,cur){
     V.inv=V.inv.concat(W2.inv.map(pre));V.ins=V.ins.concat(W2.ins);V.coloc=V.coloc.concat(W2.coloc.map(pre));W2.bankItems.forEach(function(x){var hit=null;V.bankItems.forEach(function(y){if(y[0]===x[0])hit=y;});if(hit)hit[1]+=x[1];else V.bankItems.push([x[0],x[1]]);});V.bankProj+=W2.bankProj;V.start+=W2.start;V.startReal=V.startReal&&W2.startReal;
     for(j=0;j<12;j++)V.realBal[j]=V.realBal[j]&&W2.realBal[j];
     for(k in W2.res)V.res[k]=nz(V.res[k])+nz(W2.res[k]);
+    W2.er.forEach(function(x,j){var hit=null;V.er.forEach(function(y){if(key(y.n)===key(x.n))hit=y;});
+      if(hit)hit.v+=x.v;else{var pos=V.er.length;if(j>0){var prev=W2.er[j-1];V.er.forEach(function(y,q){if(key(y.n)===key(prev.n))pos=q+1;});}V.er.splice(pos,0,{n:x.n,v:x.v,sub:x.sub});}});
     for(k in W2.pat)V.pat[k]=(V.pat[k]==null&&W2.pat[k]==null)?null:nz(V.pat[k])+nz(W2.pat[k]);
     V.sup+=W2.sup;V.supProp+=W2.supProp;V.supArr+=W2.supArr;V.supAgrFis+=W2.supAgrFis;V.supAgrSemb+=W2.supAgrSemb;
+    W2.acts2.forEach(function(tb){var T2=null;V.acts2.forEach(function(x){if(key(x.t)===key(tb.t))T2=x;});
+      if(!T2){V.acts2.push({t:tb.t,fis:tb.fis,acts:tb.acts.map(function(a){return {nombre:a.nombre,gan:a.gan,ing:a.ing,cd:a.cd,mb:a.mb,sup:a.sup,ton:a.ton};})});return;}
+      T2.fis+=tb.fis;tb.acts.forEach(function(a){var h2=null;T2.acts.forEach(function(y){if(y.nombre===a.nombre)h2=y;});
+        if(h2){h2.ing+=a.ing;h2.cd+=a.cd;h2.mb+=a.mb;h2.sup+=a.sup;h2.ton+=a.ton;}else T2.acts.push({nombre:a.nombre,gan:a.gan,ing:a.ing,cd:a.cd,mb:a.mb,sup:a.sup,ton:a.ton});});});
     for(j=0;j<W2.acts.length;j++){var a=W2.acts[j],hit=null;
       for(var q=0;q<V.acts.length;q++)if(V.acts[q].nombre===a.nombre)hit=V.acts[q];
       if(hit){hit.ing+=a.ing;hit.cd+=a.cd;hit.mb+=a.mb;hit.sup+=a.sup;hit.ton+=a.ton;}else V.acts.push({nombre:a.nombre,gan:a.gan,ing:a.ing,cd:a.cd,mb:a.mb,sup:a.sup,ton:a.ton});}
@@ -1070,8 +1097,18 @@ function setStart(m){STATE.startM=m;STATE.ieM=null;renderAll();}
 function toggleDet(){STATE.det=!STATE.det;renderFlowTable(curView());}
 
 /* ---------- render ---------- */
+function hasRole(r){return STATE.files.some(function(x){return x.role===r;});}
+function renderLoader(){
+  ['ini','act'].forEach(function(r){var F=STATE.files.filter(function(x){return x.role===r;}),z=document.querySelector('#empty .drop[data-role='+r+']');
+    document.getElementById('dst-'+r).innerHTML=F.map(function(x){return '<span class="okf" title="'+esc(x.D.file)+'">✓ '+esc(x.emp)+'</span>';}).join('');
+    if(z)z.className='drop'+(F.length?' done':'');});
+  document.getElementById('goDash').className=STATE.files.length?'':'hide';
+}
 function renderAll(){
-  var has=STATE.files.length>0;
+  if(!STATE.files.length)STATE.dashOk=false;
+  if(hasRole('ini')&&hasRole('act'))STATE.dashOk=true;
+  var has=STATE.files.length>0&&!!STATE.dashOk;
+  renderLoader();
   document.getElementById('empty').className=has?'hide':'';
   document.getElementById('dash').className=has?'':'hide';
   document.getElementById('instBar').className=has?'inst-bar':'inst-bar hide';
@@ -1102,7 +1139,7 @@ function renderAll(){
   document.getElementById('planFb').innerHTML=Vp.fb.length?'<span class="bdg by">Falta el plan inicio (1/7)'+(V.list.length>1?' de '+esc(Vp.fb.join(', ')):'')+': se muestra el plan actual</span>':'';
   renderId(V);renderFlow(V);renderEx(V);renderSupTbl(V);
   renderIE(V);renderIns(V);renderInv(V);renderResv(V);renderIng(V);
-  renderKpis(Vp);renderWf(Vp);renderActs(Vp);renderSitEmp(Vp);renderProd(Vp);renderHac(Vp);
+  renderKpis(Vp);renderWf(Vp);renderActs(Vp);renderSitEmp(Vp);renderProd(Vp);
   document.getElementById('fts').textContent=new Date().toLocaleString('es-AR');
 }
 function renderBar(){
@@ -1132,7 +1169,7 @@ function renderId(V){
   document.getElementById('idEmp').innerHTML=esc(L.length>1?'Consolidado del grupo':D0.empresa)+'<span class="pmt">Presupuesto '+esc(mesAnio(D0,S0(V)))+'</span>';
   var det=L.length>1?esc(V.names.join(' + ')):esc(D0.campos);
   det+=' · '+esc(D0.plan)+(V.sup?' · '+f(V.sup,0)+' ha ('+f(V.supProp,0)+' propias, '+f(V.supArr,0)+' arrendadas)':'');
-  document.getElementById('idDet').innerHTML=det;
+  document.getElementById('idDet').innerHTML='';document.getElementById('idDet').style.display='none';
   /* supuestos: si hay varias empresas, se informa la primera y se avisa si difieren */
   function rng(fn,d,pct){var vals=L.map(fn).filter(function(x){return x!=null&&!isNaN(x);});if(!vals.length)return '—';
     var mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals);var fm=function(v){return pct?fpc(v,0):f(v,d);};
@@ -1242,7 +1279,7 @@ function renderFlow(V){
     if(Math.abs(V.bankProj)>0.5)bk+=kv('Flujo proyectado hasta '+V.meses[s0],mny(V.bankProj));bk+=kv('<b>Saldo</b>','<b>'+mny(V.start)+'</b>')+'</div>';}
   h+='<div class="stat clk'+(V.start<0?' alert':'')+'" onclick="togBank()"><span class="pl">'+(STATE.bankOpen?'−':'+')+'</span><div class="k">Saldo bancos inicio '+V.meses[s0]+'</div><div class="kv">'+mny(V.start)+'</div><div class="ks">'+fromTxt+'</div>'+bk+'</div>';
   var mi=0,mv=Infinity,pi=0,pv=Infinity;for(i=0;i<sit.length;i++){if(sit[i]<mv){mv=sit[i];mi=i;}if(fm[i]<pv){pv=fm[i];pi=i;}}
-  h+='<div class="stat'+(mv<0?' alert':' ok')+'"><div class="k">Posición más ajustada del año</div><div class="kv">'+mny(mv)+'</div><div class="mth">'+esc(mesAnio(V.list[0],s0+mi))+'</div><div class="ks">situación acumulada sin reservas en su punto más bajo</div></div>';
+  h+='<div class="stat'+(mv<0?' alert':' ok')+'"><div class="k">Posición más ajustada hasta el cierre</div><div class="kv">'+mny(mv)+'</div><div class="mth">'+esc(mesAnio(V.list[0],s0+mi))+'</div><div class="ks">situación acumulada sin reservas en su punto más bajo</div></div>';
   h+='<div class="stat'+(pv<0?' alert':' ok')+'"><div class="k">Piso del flujo mensual</div><div class="kv">'+mny(pv)+'</div><div class="mth">'+esc(mesAnio(V.list[0],s0+pi))+'</div><div class="ks">el mes que más consume</div></div>';
   var last=acum[acum.length-1];
   var sitF=sit[sit.length-1];
@@ -1364,41 +1401,55 @@ function renderSupTbl(V){
   h+='</tbody>';
   document.getElementById('supTbl').innerHTML=h;document.getElementById('supNote').textContent=note;
 }
+function togEr(){STATE.erOpen=!STATE.erOpen;renderWf(curViewPlan());}
 function renderWf(V){
-  var R=V.res;
-  var steps=[['Ingreso neto',R.ing,1]];
-  if(Math.abs(nz(R.arrc))>0)steps.push(['Arrend. cobrados',R.arrc]);
-  steps=steps.concat([['Gastos directos',R.gd],['Act. intermedias',R.ai],['Estructura y adm.',nz(R.est)+nz(R.adm)],['Impuestos inmob.',R.imp],['Arrendamientos',R.arr],
-    ['Amortizaciones',R.am]]);
-  var rv=nz(R.rv1)+nz(R.rv2);if(Math.abs(rv)>0)steps.push(['Venta bienes/exist.',rv]);
-  steps=steps.concat([['Financiamiento',R.fin],['Utilidad',R.ut,1],['Ganancias y BP',R.ig],['Retiros',R.ret],['Crecimiento',R.cre,1]]);
-  var lab=[],dat=[],col=[],run=0;
-  steps.forEach(function(s){var v=nz(s[1]);lab.push(s[0]);
-    if(s[2]){dat.push([0,v]);run=v;col.push(s[0]==='Ingreso neto'?'#4A6533':(v>=0?'#3B6D11':C_NEG));}
-    else{dat.push([run,run+v]);run+=v;col.push(v>=0?C_POS:C_NEG+'cc');}});
-  mk('chWf',{type:'bar',data:{labels:lab,datasets:[{data:dat,backgroundColor:col,borderRadius:2,maxBarThickness:34}]},
-    options:(function(){var o=chartBase();o.scales.x.ticks.maxRotation=50;o.scales.x.ticks.minRotation=40;o.scales.x.ticks.font.size=11;
-      o.plugins.tooltip.callbacks.label=function(c){var d=c.raw;var st=steps[c.dataIndex];return ' '+(st[2]?mny(d[1]):mny(d[1]-d[0]));};return o;})()});
-  document.getElementById('wfSub').textContent='Resultado económico de la campaña · '+unitTxt().replace('en ','eje en ');
+  var R=V.res,sup=V.sup||0,ing=nz(R.ing),E=V.er&&V.er.length?V.er:[];
+  var h='<thead><tr><th>Concepto</th><th>'+sym()+'</th><th>'+sym()+'/ha</th><th>% del ingreso</th></tr></thead><tbody>';
+  var op=!!STATE.erOpen;
+  document.getElementById('erBtn').innerHTML='<span class="pl">'+(op?'−':'+')+'</span>'+(op?'Ver solo resultados':'Ver todos los renglones');
+  E.forEach(function(x,j){var last=j===E.length-1,p=ing?x.v/ing:0,cl=x.v<0?'n':'';if(!op&&!x.sub&&!last)return;
+    h+='<tr class="'+(j===0||last?'erkey':(x.sub?'ersub':''))+'"><td class="tdname"'+(x.sub?'':' style="padding-left:22px"')+'>'+esc(x.n)+'</td><td class="'+cl+'">'+mny(x.v)+'</td><td class="'+cl+'">'+(sup?f(x.v/sup,0):'—')+'</td>'+
+      '<td class="'+cl+'">'+fpc(p,0)+'<span class="pb" style="width:'+Math.min(60,Math.abs(p)*60)+'px;background:'+(x.v<0?'#E8A27A':(x.sub?'#2F5A0E':'#8DBF4E'))+'"></span></td></tr>';});
+  h+='</tbody>';
+  document.getElementById('wfTbl').innerHTML=E.length?h:'<tbody><tr><td class="tdname">No se encontró el estado de resultados en la solapa ResultadoEconómico.</td></tr></tbody>';
+  document.getElementById('wfSub').textContent='Estado de resultados de la campaña, igual que la solapa ResultadoEconómico · '+f(sup,0)+' ha'+(STATE.cur==='USD'?' · en U$S al tipo de cambio de esa solapa':'');
   var ut=nz(R.ut),h='';
+  /* reparto: los renglones entre UTILIDAD y CRECIMIENTO tal como estén en la planilla (impuestos, retiros, casco…) */
+  var iU=-1,iC=-1;E.forEach(function(x,j){if(key(x.n)==='utilidad')iU=j;if(key(x.n)==='crecimiento')iC=j;});
+  var parts=[];
+  if(iU>=0&&iC>iU){E.slice(iU+1,iC).forEach(function(x){if(Math.abs(x.v)>0.5)parts.push([x.n.replace(/\s*\(.*\)$/,'').replace(/^Impuestos$/,'Impuestos'),-x.v,x.n]);});}
+  else parts=[['Impuestos',-nz(R.ig),'Ganancias y Bs. personales'],['Retiros',-nz(R.ret),'Retiros']];
+  var cre=nz(R.cre),PC=['#8A5A2B','#C8642D','#B9A27A','#8C3B2E','#A0522D'];
   if(ut>0){
-    var a=-nz(R.ig)/ut,b=-nz(R.ret)/ut,c=nz(R.cre)/ut;
-    var seg=function(p,cl,t){return p>0.001?'<div style="width:'+(Math.max(p,0)*100)+'%;background:'+cl+'">'+(p>0.08?t+' '+fpc(p,0):'')+'</div>':'';};
-    h+='<div class="rep">'+seg(a,'#8A5A2B','Impuestos')+seg(b,'#C8642D','Retiros')+seg(c,'#4A6533','Crecimiento')+'</div>';
-    h+='<div class="replg"><span><i class="sw" style="background:#8A5A2B"></i> Ganancias y Bs. personales '+mny(-nz(R.ig))+'</span><span><i class="sw" style="background:#C8642D"></i> Retiros '+mny(-nz(R.ret))+'</span><span><i class="sw" style="background:#4A6533"></i> Queda en la empresa '+mny(nz(R.cre))+'</span></div>';
-    if(c<0)h+='<div class="note" style="color:var(--neg)">Los retiros e impuestos superan la utilidad: la empresa se descapitaliza.</div>';
+    var seg=function(v,cl,t){var p2=v/ut;return p2>0.001?'<div style="width:'+(p2*100)+'%;background:'+cl+'">'+(p2>0.08?esc(t)+' '+fpc(p2,0):'')+'</div>':'';};
+    h+='<div class="rep">';parts.forEach(function(x,j){h+=seg(x[1],PC[j%PC.length],x[0]);});h+=seg(Math.max(cre,0),'#4A6533','Crecimiento')+'</div>';
+    h+='<div class="replg">';parts.forEach(function(x,j){h+='<span><i class="sw" style="background:'+PC[j%PC.length]+'"></i> '+esc(x[2])+' '+mny(x[1])+'</span>';});
+    h+='<span><i class="sw" style="background:#4A6533"></i> Queda en la empresa '+mny(cre)+'</span></div>';
+    if(cre<0)h+='<div class="note" style="color:var(--neg)">Lo que sale de la utilidad supera la utilidad: la empresa se descapitaliza.</div>';
   }else h+='<div class="note">Sin utilidad positiva para repartir.</div>';
   document.getElementById('repBox').innerHTML=h;
 }
-function renderActs(V){
-  var A=V.acts.slice().sort(function(a,b){return b.mb-a.mb;}),tot=0,mx=0;
+function actTbl(A0,fisH){
+  var A=A0.slice().sort(function(a,b){return b.mb-a.mb;}),tot=0,mx=0;
   A.forEach(function(a){tot+=a.mb;mx=Math.max(mx,Math.abs(a.mb));});
-  var h='<thead><tr><th>Actividad</th><th>ha</th><th>MB '+sym()+'/ha</th><th>MB total</th><th style="width:22%">% del MB</th></tr></thead><tbody>';
-  A.forEach(function(a){var p=tot?a.mb/tot:0;var rinde=a.gan?(a.sup?f(a.ton*1000/a.sup,0)+' kg/ha':'—'):(a.sup&&a.ton?f(a.ton*1000/a.sup,0)+' kg/ha':'—');
-    h+='<tr><td class="tdname">'+esc(a.nombre)+'</td><td>'+f(a.sup,0)+'</td><td class="'+(a.mb<0?'n':'')+'">'+(a.sup?f(a.mb/a.sup,0):'—')+'</td><td class="'+(a.mb<0?'n':'')+'">'+mny(a.mb)+'</td>'+
+  var h='<thead><tr><th>Actividad</th><th>ha</th><th>Rinde</th><th>Producción</th><th>MB '+sym()+'/ha</th><th>MB total</th><th style="width:20%">% del MB</th></tr></thead><tbody>';
+  A.forEach(function(a){var p=tot?a.mb/tot:0,rin=a.sup&&a.ton?f(a.ton*1000/a.sup,0)+' kg/ha'+(a.gan?' carne':''):'—';
+    h+='<tr><td class="tdname">'+esc(a.nombre)+'</td><td>'+f(a.sup,0)+'</td><td>'+rin+'</td><td>'+(a.ton?f(a.ton,0)+' t':'—')+'</td>'+
+      '<td class="'+(a.mb<0?'n':'')+'">'+(a.sup?f(a.mb/a.sup,0):'—')+'</td><td class="'+(a.mb<0?'n':'')+'" style="font-weight:600">'+mny(a.mb)+'</td>'+
       '<td><div style="display:flex;align-items:center;gap:6px;justify-content:flex-end"><span>'+fpc(p,0)+'</span><div class="bar'+(a.mb<0?' n':'')+'" style="width:'+(mx?Math.abs(a.mb)/mx*70:0)+'px"></div></div></td></tr>';});
-  h+='<tr class="tr-tot"><td class="tdname">Total</td><td>'+f(sum(A.map(function(a){return a.sup;})),0)+'</td><td></td><td>'+mny(tot)+'</td><td>100%</td></tr></tbody>';
-  document.getElementById('actTbl').innerHTML=h;
+  /* totales: por ha sembrada (suma de actividades, cuenta la 2ª) y por ha física (sin la superficie de 2ª) */
+  var sSem=sum(A.map(function(a){return a.sup;})),gS=sum(A.filter(function(a){return a.gan;}).map(function(a){return a.sup;}));
+  var sFis=fisH?fisH+gS:sSem-sum(A.filter(function(a){return /2ª|2da|segunda/i.test(a.nombre);}).map(function(a){return a.sup;}));
+  var mbH=function(x){return x?f(tot/x,0):'—';};
+  h+='<tr class="tr-tot"><td class="tdname">Total · ha sembradas</td><td>'+f(sSem,0)+'</td><td></td><td></td><td>'+mbH(sSem)+'</td><td>'+mny(tot)+'</td><td>100%</td></tr>';
+  h+='<tr class="tr-key"><td class="tdname">Total · ha físicas <span class="cs" style="font-weight:400">(sin la 2ª)</span></td><td>'+f(sFis,0)+'</td><td></td><td></td><td>'+mbH(sFis)+'</td><td>'+mny(tot)+'</td><td></td></tr></tbody>';
+  return h;
+}
+function renderActs(V){
+  document.getElementById('actTbl').innerHTML=actTbl(V.acts,V.supAgrFis);
+  var h='';(V.acts2||[]).forEach(function(tb){
+    h+='<div class="card"><div class="chd"><div><div class="ct">'+esc(tb.t)+'</div><div class="cs">Tabla de aporte separada en la solapa ResultadoEconómico · su resultado entra en Actividades intermedias</div></div></div><div class="scroll"><table>'+actTbl(tb.acts,tb.fis)+'</table></div></div>';});
+  document.getElementById('actExtra').innerHTML=h;
 }
 function kv(a,b){return '<div class="kvrow"><span>'+a+'</span><span>'+b+'</span></div>';}
 /* ---------- Situación empresarial (al 1/7) ---------- */
@@ -1560,13 +1611,6 @@ function renderProd(V){
   h+='<div><div class="k">Ganadera</div><div class="kv">'+(gan?f(gan.sup,0)+' ha':'—')+'</div><div class="ks">'+(gan&&V.sup?fpc(gan.sup/V.sup,0)+' del campo':'')+'</div></div>';
   var tg=sum(ag.filter(function(a){return !/silo/i.test(a.nombre);}).map(function(a){return a.ton;}));
   document.getElementById('prodRow').innerHTML=h;
-  var mx=0;ag.forEach(function(a){mx=Math.max(mx,a.sup);});
-  var t='<thead><tr><th>Cultivo</th><th>ha</th><th style="width:22%">% sembrado</th><th>Rinde</th><th>Producción</th></tr></thead><tbody>';
-  ag.forEach(function(a){
-    t+='<tr><td class="tdname">'+esc(a.nombre)+'</td><td>'+f(a.sup,0)+'</td><td><div style="display:flex;align-items:center;gap:6px;justify-content:flex-end"><span>'+fpc(semb?a.sup/semb:0,0)+'</span><div class="bar" style="width:'+(mx?a.sup/mx*70:0)+'px;background:'+grColor(a.nombre.replace(/ (1ª|2ª|Tardío)$/,''),0)+'"></div></div></td>'+
-      '<td>'+(a.ton?f(a.ton*1000/a.sup,0)+' kg/ha':'—')+'</td><td>'+(a.ton?f(a.ton,0)+' t':'—')+'</td></tr>';});
-  t+='<tr class="tr-tot"><td class="tdname">Total sembrado</td><td>'+f(semb,0)+'</td><td>100%</td><td></td><td>'+f(tg,0)+' t <span class="cs">granos</span></td></tr></tbody>';
-  document.getElementById('prodTbl').innerHTML=t;
 }
 /* Ingresos vs egresos previstos + detalle del mes elegido */
 function grpVal(G,src,m){return G.map(function(g){var t=0,sub=[];g[1].forEach(function(k){var v=src[k]?src[k][m]:0;t+=v;if(Math.abs(v)>0)sub.push([LBL[k],v]);});return [g[0],t,sub];});}
@@ -1586,7 +1630,7 @@ function renderIE(V){
   var lab=[],ti=[],te=[];
   for(i=s0;i<12;i++){lab.push(V.meses[i]);
     var aj=adjPend(V,i,s0);
-    ti.push(sum(grpVal(ING_G,V.ing,i).map(function(x){return x[1];}))+aj[0]+(i===s0?V.start:0));
+    ti.push(sum(grpVal(ING_G,V.ing,i).map(function(x){return x[1];}))+aj[0]);
     te.push(sum(grpVal(EGR_G,V.egr,i).map(function(x){return x[1];}))+aj[1]);}
   var sel=STATE.ieM-s0;
   function cols(c){return lab.map(function(x,j){return j===sel?c:c+'66';});}
@@ -1595,19 +1639,21 @@ function renderIE(V){
     {label:'Egresos',data:te,backgroundColor:cols(C_NEG),borderRadius:3,maxBarThickness:36,categoryPercentage:0.55,barPercentage:0.96}]},
     options:(function(){var o=chartBase();o.interaction={mode:'index',intersect:false};
       o.plugins.tooltip.callbacks.label=function(c){return ' '+c.dataset.label+': '+mny(c.raw);};
-      o.plugins.tooltip.callbacks.footer=function(it){var j=it[0].dataIndex;return 'Saldo del mes: '+mny(ti[j]-te[j]);};
+      o.plugins.tooltip.callbacks.footer=function(it){var j=it[0].dataIndex;return 'Financiero del mes: '+mny(ti[j]-te[j]);};
       o.onClick=function(e,els,ch){var hit=ch.getElementsAtEventForMode(e.native,'nearest',{intersect:true},false);var m;if(hit&&hit.length){m=s0+hit[0].index;}else if(els&&els.length){m=s0+els[0].index;}else return;setTimeout(function(){selFlowM(m);},0);};
       o.onHover=function(e,els){e.native.target.style.cursor=els&&els.length?'pointer':'default';};return o;})()});
   document.getElementById('ieLeg').innerHTML='<span><i class="sw" style="background:'+C_POS+'"></i> Ingresos previstos</span><span><i class="sw" style="background:'+C_NEG+'"></i> Egresos previstos</span>';
   var m=STATE.ieM,gi=grpVal(ING_G,V.ing,m),ge=grpVal(EGR_G,V.egr,m),h='',ajm=adjPend(V,m,s0);
-  if(m===s0)gi.unshift(['Disponibilidades',V.start,V.bankItems.filter(function(x){return Math.abs(x[1])>0.5;}).map(function(x){return [x[0],x[1]];})]);
   if(ajm[0])gi.push(['Cobranzas pendientes',ajm[0],[]]);if(ajm[1])ge.push(['Pagos pendientes',ajm[1],[]]);
   var TI=sum(gi.map(function(x){return x[1];})),TE=sum(ge.map(function(x){return x[1];}));
-  var SAL=TI-TE;
+  /* saldo financiero al cierre del mes anterior (igual que en Composición mensual) */
+  var ANT=V.start;for(i=s0;i<m;i++)ANT+=V.neto[i]+(i>s0?V.banks[i]:0);
+  var SAL=ANT+TI-TE;
   h+='<div class="iem">'+esc(mesAnio(V.list[0],m))+(V.realBal[m]?' <span class="bdg bg">saldo real cargado</span>':'')+'</div>';
-  h+='<div class="ietot"><div class="ti"><div class="k">Ingresos</div><div class="v">'+mny(TI)+'</div></div>'+
-     '<div class="te"><div class="k">Egresos</div><div class="v">'+mny(TE)+'</div></div>'+
-     '<div class="ts '+(SAL<0?'neg':'pos')+'"><div class="k">Saldo del mes</div><div class="v">'+(SAL>0?'+':'')+mny(SAL)+'</div></div></div>';
+  h+='<div class="ietot"><div class="ta"><div class="k">Saldo financiero mes anterior</div><div class="v'+(ANT<0?' neg':'')+'">'+mny(ANT)+'</div></div><span class="op">+</span>'+
+     '<div class="ti"><div class="k">Ingresos</div><div class="v">'+mny(TI)+'</div></div><span class="op">−</span>'+
+     '<div class="te"><div class="k">Egresos</div><div class="v">'+mny(TE)+'</div></div><span class="op">=</span>'+
+     '<div class="ts '+(SAL<0?'neg':'pos')+'"><div class="k">Saldo financiero mes siguiente</div><div class="v">'+mny(SAL)+'</div></div></div>';
   function blk(sec,G,T,col){var L2=G.filter(function(x){return Math.abs(x[1])>0;}).sort(function(a,b){return b[1]-a[1];}),o='',mx=0;
     L2.forEach(function(x){mx=Math.max(mx,Math.abs(x[1]));});
     L2.forEach(function(x){var pc=T?x[1]/T:0,kk=sec+'|'+x[0],can=x[2].length>1||(x[0]==='Disponibilidades'&&x[2].length>0),op=!!STATE.ieOpen[kk];
@@ -1756,13 +1802,16 @@ function renderIns(V){
   /* cuándo: saldo que se agrega por mes, apilado por tipo */
   var labM=M.slice(s0),ds=cats.map(function(c,j){var a=zeros(12);L.forEach(function(x){if(x.cat===c)a=addArr(a,x.mon);});
     var cc=insCol(c,j);return {label:capF(c),data:a.slice(s0),backgroundColor:labM.map(function(x,q){return STATE.insM==null||STATE.insM===s0+q?cc:cc+'55';}),borderRadius:2,maxBarThickness:42};});
-  var tm=labM.map(function(x,j){return sum(ds.map(function(d){return d.data[j];}));});
+  var tm=labM.map(function(x,j){return sum(ds.map(function(d){return d.data[j];}));}),acu=[],ac0=0;tm.forEach(function(v){ac0+=v;acu.push(ac0);});
+  ds.push({type:'line',label:'Necesidad acumulada',data:acu,stack:'acum',borderColor:'#0F1923',backgroundColor:'#0F1923',borderWidth:2,pointRadius:3,pointHoverRadius:5,tension:0.15,order:-1});
   var lm={id:'insml',afterDatasetsDraw:function(ch){var cx=ch.ctx,yS=ch.scales.y,m0=ch.getDatasetMeta(0);if(!m0)return;cx.save();cx.font='600 12px DM Sans';cx.fillStyle='#0F1923';cx.textAlign='center';
-    m0.data.forEach(function(el,j){if(tm[j]>0.5)cx.fillText(sym()+' '+f(tm[j]/tdiv(),0)+(STATE.cur==='USD'?' mil':' M'),el.x,yS.getPixelForValue(tm[j])-6);});cx.restore();}};
+    m0.data.forEach(function(el,j){if(tm[j]>0.5)cx.fillText(sym()+' '+f(tm[j]/tdiv(),0)+(STATE.cur==='USD'?' mil':' M'),el.x,yS.getPixelForValue(tm[j])-6);});
+    var ml=ch.getDatasetMeta(ch.data.datasets.length-1),pl=ml.data[ml.data.length-1];
+    if(pl){cx.textAlign='right';cx.fillStyle='#0F1923';cx.fillText('acumulado '+sym()+' '+f(acu[acu.length-1]/tdiv(),0)+(STATE.cur==='USD'?' mil':' M'),pl.x-8,pl.y-10);}cx.restore();}};
   mk('chInsM',{type:'bar',data:{labels:labM,datasets:ds},plugins:[lm],options:(function(){var o=chartBase();o.layout={padding:{top:18}};o.scales.x.stacked=true;o.scales.y.stacked=true;
     o.interaction={mode:'index',intersect:false};
-    o.plugins.tooltip.callbacks.label=function(c){return Math.abs(c.raw)>0.5?' '+c.dataset.label+': '+mny(c.raw):null;};
-    o.plugins.tooltip.callbacks.footer=function(it){return 'Total del mes: '+mny(tm[it[0].dataIndex])+' · tocá para ver el detalle';};
+    o.plugins.tooltip.callbacks.label=function(c){return c.dataset.type!=='line'&&Math.abs(c.raw)>0.5?' '+c.dataset.label+': '+mny(c.raw):null;};
+    o.plugins.tooltip.callbacks.footer=function(it){var j=it[0].dataIndex;return 'Total del mes: '+mny(tm[j])+'\nAcumulado: '+mny(acu[j])+'\nTocá para ver el detalle';};
     o.onClick=function(e,els){if(els&&els.length){var m=s0+els[0].index;setTimeout(function(){setInsM(STATE.insM===m?null:m);},0);}};
     o.onHover=function(e,els){e.native.target.style.cursor=els&&els.length?'pointer':'default';};return o;})()});
   /* tabla por tipo: toda la campaña o un mes elegido */
@@ -1867,7 +1916,7 @@ function renderWarn(){
   function mark(z){if(last&&last!==z)last.className=last.className.replace(/ ?over/g,'');if(z&&!/\bover\b/.test(z.className))z.className+=' over';last=z;}
   function hide(){ov.className='';mark(null);}
   document.addEventListener('dragover',function(e){if(!hasFiles(e))return;e.preventDefault();
-    if(STATE.files.length&&ov.className!=='on')ov.className='on';mark(zone(e.target));});
+    if(STATE.dashOk&&STATE.files.length&&ov.className!=='on')ov.className='on';mark(zone(e.target));});
   document.addEventListener('dragleave',function(e){if(!e.relatedTarget||e.clientX<=0||e.clientY<=0||e.clientX>=window.innerWidth||e.clientY>=window.innerHeight)hide();});
   document.addEventListener('drop',function(e){e.preventDefault();var z=zone(e.target),rl=z?z.getAttribute('data-role'):null;hide();
     if(e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files.length){STATE.pendRole=null;onFiles(e.dataTransfer.files,rl);}});
