@@ -583,6 +583,32 @@ tbody tr:hover td{background:#FAFBFC}
 .modal.modal-full .fact .btn{padding:8px 14px}
 .modal.modal-full .fact{display:flex;align-items:center;gap:8px}
 
+.btn-menu{text-decoration:none;display:inline-flex;align-items:center;gap:4px}
+.btn-menu:hover{border-color:#4A6533;color:#3B5226}
+
+/* ===== BUILD 10: la OT en 4 ventanas ===== */
+.otl-acciones{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+#ot-pantalla .ot-form-title{display:none}
+.otp-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0 0 12px}
+.otp-tab{text-align:left;padding:10px 12px;border-radius:9px;border:1px solid var(--border);background:var(--card);cursor:pointer;font-family:inherit;color:var(--muted);font-size:12px;line-height:1.35}
+.otp-tab b{display:flex;align-items:center;gap:7px;font-size:13.5px;color:var(--text);font-weight:600;margin-bottom:2px}
+.otp-tab b span{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1px solid var(--border);background:var(--bg);font-size:12px}
+.otp-tab:hover{border-color:#9DB08E}
+.otp-tab.act{background:#EEF3E8;border-color:#4A6533;box-shadow:inset 0 -3px 0 #4A6533}
+.otp-tab.act b span{background:#4A6533;color:#fff;border-color:#4A6533}
+.otp-tab.ok b span{background:#DCE7D2;border-color:#9DB08E;color:#3B5226}
+.otp-tab.off{opacity:.55;cursor:not-allowed}
+@media (max-width:700px){.otp-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}.otp-tab{font-size:11px}}
+.otv{display:none}
+.otv.on{display:block}
+.otp-fact{position:sticky;bottom:0;background:var(--bg);padding:10px 0;z-index:5;align-items:center}
+.otp-ro .paso-bd input,.otp-ro .paso-bd select,.otp-ro .paso-bd textarea{background:#F3F4F0!important;color:var(--text)!important;border-color:#E2E5DD!important;pointer-events:none}
+.otp-ro #trabajoAddBtns,.otp-ro #trabajoForm,.otp-ro .trb-addlote,.otp-ro .dest-x,.otp-ro .btn-danger,.otp-ro #trabajosWrap button{display:none!important}
+.otp-ro-aviso{font-size:12px;color:var(--muted);background:#F5F6F2;border:1px dashed #C9D4BF;border-radius:8px;padding:8px 12px;margin-bottom:10px}
+.otv3-tbl td,.otv3-tbl th{vertical-align:middle}
+.otv-vacio{padding:26px 16px;text-align:center;color:var(--muted);font-size:13px}
+.otv-cta{display:flex;flex-direction:column;align-items:flex-start;gap:10px;padding:18px 4px}
+
 @media print{
   /* Al imprimir se muestra SOLO el documento de la OT: la vista de pantalla
      tiene botones, selects y controles que en papel no sirven. */
@@ -700,6 +726,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
     </div>
   </div>
   <div class="h-right">
+    <a class="btn btn-menu no-print" href="index.html" title="Volver al menú principal de herramientas">← Menú</a>
     <div class="ws-sel">
       <span class="ws-sel-lbl">Empresa:</span>
       <select id="wsSel" onchange="switchWs(this.value)"></select>
@@ -845,12 +872,44 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
 <!-- =============== ÓRDENES DE TRABAJO =============== -->
 <div class="page" id="page-ot">
   <div id="ot-list-view">
-    <div class="ot-form-wrap need-cargar">
+    <div class="otl-acciones need-cargar">
+      <button type="button" class="btn btn-primary btn-lg" onclick="abrirNuevaOT()">＋ Nueva orden de trabajo</button>
+      <button type="button" class="btn" onclick="openOtRapida()" title="Registrar en un paso una labor que ya se hizo">⚡ OT rápida (labor ya hecha)</button>
+    </div>
+
+    <div class="card">
+      <div class="chd">
+        <span class="ct-lg">Órdenes emitidas</span><span class="camp-bdg" id="campBdgOt"></span>
+        <div class="tools">
+          <input type="text" id="otSearch" placeholder="Buscar…" oninput="renderOtList()" style="width:140px">
+          <select id="otCampoFilter" onchange="renderOtList()"><option value="">Todos los campos</option></select>
+          <select id="otLoteFilter" onchange="renderOtList()"><option value="">Todos los lotes</option></select>
+          <select id="otActFilter" onchange="renderOtList()"><option value="">Todas las actividades</option></select>
+          <select id="otEstadoFilter" onchange="renderOtList()">
+            <option value="">Todos los estados</option>
+            <option value="Pendiente">Pendiente</option>
+            <option value="Parcial">Parcial</option>
+            <option value="Aplicada">Confirmada</option>
+            <option value="Cancelada">Cancelada</option>
+          </select>
+          <input type="date" id="otDesde" onchange="renderOtList()" title="Desde">
+          <input type="date" id="otHasta" onchange="renderOtList()" title="Hasta">
+          <button class="btn btn-sm" id="otClearBtn" onclick="clearOtFilters()">Limpiar filtros</button>
+        </div>
+      </div>
+      <div id="otList"></div>
+    </div>
+  </div>
+
+  <div id="ot-pantalla" style="display:none">
+    <div id="otPantHd"></div>
+    <div id="otTabs" class="otp-tabs"></div>
+    <div class="ot-form-wrap">
       <div class="ot-form-title"><span class="ct-lg" id="otFormTitle">Nueva orden de trabajo</span><button type="button" class="btn btn-sm" style="margin-left:auto" onclick="openOtRapida()" title="Registrar en un paso una labor ya realizada (en un lote o en una unidad de negocio del campo)">⚡ OT rápida (labor ya hecha)</button></div>
       <div id="otEditBanner" class="banner-warn" style="display:none;margin-top:8px"></div>
       <form id="otForm" onsubmit="saveOT(event)">
 
-        <div class="paso">
+        <div class="paso otv" id="otV1">
           <div class="paso-hd"><span class="paso-n">1</span><span class="paso-t">Datos de la orden</span><span class="paso-num" id="o_num">OT #—</span></div>
           <div class="paso-bd">
             <div class="form-row r3">
@@ -866,7 +925,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
         <!-- TRABAJOS: la orden es una lista de trabajos (labor + lotes + insumos).
              El bloque de armado está plegado por default: así queda claro cuándo se
              está cargando algo y cuándo no. -->
-        <div class="paso">
+        <div class="paso otv" id="otV2">
           <div class="paso-hd"><span class="paso-n">2</span><span class="paso-t">Trabajos de la orden</span><span class="paso-sub" id="trabajosResumen"></span></div>
           <div class="paso-bd">
             <div id="trabajosWrap"></div>
@@ -963,39 +1022,19 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
           </div>
         </div>
 
-        <div class="fact">
-          <button type="button" class="btn" onclick="resetOtForm()">Limpiar</button>
+        <div class="paso otv" id="otV3"></div>
+        <div class="paso otv" id="otV4"></div>
+        <div class="fact otp-fact" id="otFact">
+          <button type="button" class="btn" id="otBtnAtras" onclick="otIr(otPant.v-1)">← Anterior</button>
+          <span style="flex:1"></span>
+          <button type="button" class="btn" id="otBtnDescartar" onclick="otDescartar()">Descartar cambios</button>
           <button type="submit" class="btn btn-primary btn-emitir">Emitir OT</button>
+          <button type="button" class="btn btn-primary" id="otBtnSig" onclick="otIr(otPant.v+1)">Siguiente →</button>
         </div>
       </form>
     </div>
 
-    <div class="sep-secciones"></div>
-
-    <div class="card">
-      <div class="chd">
-        <span class="ct-lg">Órdenes emitidas</span><span class="camp-bdg" id="campBdgOt"></span>
-        <div class="tools">
-          <input type="text" id="otSearch" placeholder="Buscar…" oninput="renderOtList()" style="width:140px">
-          <select id="otCampoFilter" onchange="renderOtList()"><option value="">Todos los campos</option></select>
-          <select id="otLoteFilter" onchange="renderOtList()"><option value="">Todos los lotes</option></select>
-          <select id="otActFilter" onchange="renderOtList()"><option value="">Todas las actividades</option></select>
-          <select id="otEstadoFilter" onchange="renderOtList()">
-            <option value="">Todos los estados</option>
-            <option value="Pendiente">Pendiente</option>
-            <option value="Parcial">Parcial</option>
-            <option value="Aplicada">Confirmada</option>
-            <option value="Cancelada">Cancelada</option>
-          </select>
-          <input type="date" id="otDesde" onchange="renderOtList()" title="Desde">
-          <input type="date" id="otHasta" onchange="renderOtList()" title="Hasta">
-          <button class="btn btn-sm" id="otClearBtn" onclick="clearOtFilters()">Limpiar filtros</button>
-        </div>
-      </div>
-      <div id="otList"></div>
-    </div>
   </div>
-
   <div id="ot-detail-view" style="display:none"></div>
 </div>
 
@@ -1173,7 +1212,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
 </main>
 
 <footer>
-  <span>Puntal Agro · Insumos &amp; OT · Versión v2026-10-28 08:49 · BUILD 8</span>
+  <span>Puntal Agro · Insumos &amp; OT · Versión v2026-10-28 14:36 · BUILD 10</span>
   <span id="fts">—</span>
 </footer>
 
@@ -2764,6 +2803,7 @@ function refreshWsSelect(){
 // Cambia de empresa activa. Con contexto, recarga el CTX vía pa-core y sincroniza
 // el estado operativo de esa empresa; sin contexto, cae al modo espacio-local.
 function switchWs(id){
+  if(typeof otSalirSinPerder==='function' && !otSalirSinPerder()){ refreshWsSelect(); return; }
   if(CTX && typeof PA!=='undefined'){
     PA.setEmpresaActiva(id, function(err, ctx){
       if(err || !ctx){ alert('No se pudo cambiar de empresa: '+(err||'sin contexto')); refreshWsSelect(); return; }
@@ -2775,7 +2815,7 @@ function switchWs(id){
       for(var i=0;i<CTX.empresasDisponibles.length;i++){ if(CTX.empresasDisponibles[i].id===id){ emp=CTX.empresasDisponibles[i]; break; } }
       syncRootConContexto(id, emp?(emp.razonSocial||emp.nombre):null);
       refreshCtx();
-      correccionTmp=null; resetOtForm();
+      correccionTmp=null; resetOtForm(); otPant={id:null, modo:'nueva', v:1}; mostrarListadoOT();
       setTab(currentTab, document.querySelector('.inst-btn[data-tab="'+currentTab+'"]'));
       toast('Empresa: '+(emp?(emp.razonSocial||emp.nombre):id));
     });
@@ -2783,6 +2823,7 @@ function switchWs(id){
   }
   // Fallback sin contexto
   if(!root.espacios[id]) return;
+  resetOtForm(); mostrarListadoOT();
   root.activoId=id;
   state=root.espacios[id].state;
   saveRoot();
@@ -2809,7 +2850,7 @@ function setTab(tab,btn){
   if(cw) cw.style.display = TABS_CON_CAMPANIA[tab] ? '' : 'none';
   if(tab==='stock') renderStock();
   else if(tab==='movtos') renderMovtos();
-  else if(tab==='ot') renderOtList();
+  else if(tab==='ot'){ if(otPant.id && byId('ot-pantalla').style.display!=='none' && !otHayCambios()) abrirOT(otPant.id, otPant.v, true); renderOtList(); }
   else if(tab==='consumos') renderConsumos();
   else if(tab==='contratistas') renderContratistas();
   else if(tab==='costos') renderCostos();
@@ -3556,14 +3597,16 @@ var trabajosTmp=[];
    Plegado = no se está cargando nada. Abierto = hay un trabajo en curso.
    Esa distinción es la que evita la ambigüedad de "¿esto está vacío
    porque lo agregué o porque todavía no cargué nada?". */
+// "+ Nuevo trabajo" vive en la ventana 2.
 function abrirNuevoTrabajo(){
+  var pant=byId('ot-pantalla');
+  if(pant && pant.style.display!=='none' && otPant.v!==2){ otPant.v=2; mostrarPantallaOT(); }
   limpiarTrabajoEnCurso();
   byId('trabajoForm').style.display='';
   byId('trabajoAddBtns').style.display='none';
   byId('trbFormTit').textContent='Nuevo trabajo';
   actualizarHintTrabajo();
   byId('trabajoForm').scrollIntoView({behavior:'smooth', block:'nearest'});
-  if(typeof ajustarStickies==='function') ajustarStickies();
 }
 function cancelarNuevoTrabajo(){
   if(destinosTmp.length || byId('o_subact').value){
@@ -4127,6 +4170,10 @@ function delCurDestino(di){
 
 function saveOT(e){
   e.preventDefault();
+  // Pantalla en solo lectura: no hay nada que guardar. Una OT nueva se emite desde la ventana 3
+  // (un Enter en las ventanas 1 o 2 pasa a la siguiente).
+  if(otPant.modo==='ver') return;
+  if(otPant.modo==='nueva' && e && e.type==='submit' && otPant.v!==3){ otIr(otPant.v+1); return; }
   if(!guard('cargar')) return;
   // Trabajo a medio armar (labor + lotes sin "Agregar"): se agrega solo.
   if(byId('o_subact').value && destinosTmp.length){ if(!addTrabajoALaOt()) return; }
@@ -4155,7 +4202,7 @@ function saveOT(e){
   var existente=editOtId ? getOtById(editOtId) : null;
   if(existente && !edicionVigente(existente, nuevos)){
     alert('Mientras editabas, cambió lo aplicado de la OT #'+existente.num+' (se registró lo realizado o volvió a pendiente).\n\nPara no duplicar ni perder trabajos, la edición se cancela. Abrila de nuevo con "Editar OT".');
-    resetOtForm(); renderOtList(); return;
+    abrirOT(existente.id, 4, true); return;
   }
   var req=requerimientoPorDep(nuevos), propio=existente ? requerimientoPorDep((existente.trabajos||[]).filter(function(t){ return !trabajoAplicado(t); })) : {};
   var faltantes=[], sinDep=[];
@@ -4179,7 +4226,7 @@ function saveOT(e){
     var faltaDesc=descripcionesUNFaltantes(existente);
     if(faltaDesc){ alert(faltaDesc); return; }
     var cambios=resumenCambiosOT(existente, campaniaOt, nuevos);
-    if(!cambios.length){ toast('Sin cambios'); resetOtForm(); renderOtList(); return; }
+    if(!cambios.length){ toast('Sin cambios'); return; }
     if(existente.impresa && !confirm('La OT #'+existente.num+' ya se imprimió.\n\nCambios:\n• '+cambios.join('\n• ')+'\n\nSi la orden ya está en el campo, avisá al operario. ¿Guardar los cambios?')) return;
     existente.fecha=fechaOt;
     existente.campaniaId=campaniaOt;
@@ -4188,19 +4235,20 @@ function saveOT(e){
     for(var tb=0;tb<(existente.trabajos||[]).length;tb++){ if(trabajoAplicado(existente.trabajos[tb])) bloq.push(existente.trabajos[tb]); }
     guardarEditablesAplicados(existente);
     for(var nn=0;nn<nuevos.length;nn++) precargarTarifaRef(nuevos[nn], campaniaOt);
+    conservarDatosLabores(existente, nuevos);
     existente.trabajos = bloq.concat(nuevos);
     existente.editadaEl=todayISO();
     aplicTmp=null;
     recalcEstadoOT(existente);
     reevaluarFacturacion(existente);
-    save(); resetOtForm(); renderOtList();
-    toast('OT #'+existente.num+' actualizada');
+    save(); abrirOT(existente.id, otPant.v, true);
+    toast('OT #'+existente.num+' guardada');
     return;
   }
   var ot={ id:uid(), num:state.nextOt++, fecha:fechaOt, campaniaId:campaniaOt, obs:byId('o_obs').value, estado:'Pendiente', trabajos:nuevos };
   for(var tr2=0;tr2<ot.trabajos.length;tr2++) precargarTarifaRef(ot.trabajos[tr2], campaniaOt);
   state.ots.push(ot);
-  save(); resetOtForm(); renderOtList();
+  save(); abrirOT(ot.id, 3, true);
   var nUN=0, pz=destinosDeOt(ot); for(var z=0;z<pz.length;z++){ if(esUN(pz[z].destino)) nUN++; }
   toast('OT #'+ot.num+' emitida · '+ot.trabajos.length+' trabajo(s) · '+lotesDeOt(ot).length+' lote(s)'+(nUN?' · '+nUN+' en unidad de negocio':''));
 }
@@ -4209,52 +4257,13 @@ function startEditOT(id){
   if(!guard('cargar')) return;
   var o=getOtById(id); if(!o) return;
   if(o.estado==='Cancelada'){ alert('Esta OT está cancelada. Reactivala antes de editar.'); return; }
-  var tieneApl=otTieneAplicados(o);
-  // Solo se edita una OT pendiente: si tiene algo confirmado, primero se vuelve a pendiente.
-  if(tieneApl){ alert('La OT #'+o.num+' tiene labores confirmadas.\n\nPara editarla, primero tocá «Volver a pendiente» (se devuelve el stock y lo que cargaste queda guardado para la próxima vez).'); return; }
-  editOtId=id;
-  aplicTmp=null;   // lo que se estaba cargando en "Registrar aplicación" ya no vale
-  byId('o_fecha').value=o.fecha||todayISO();
-  byId('o_obs').value=o.obs||'';
-  populateOtSelects();
-  var soc=byId('o_campania');
-  if(soc){ soc.value=o.campaniaId||''; soc.disabled=tieneApl; soc.title=tieneApl?'Con lotes aplicados no se puede cambiar la campaña':''; }
-  otFormCampAnterior=o.campaniaId||'';
-  populateOtSelects();   // cultivos del plan de la campaña de ESTA OT
-  trabajosTmp=[]; trabajosAplTmp=[];
-  var bloqueados=0, trs=o.trabajos||[];
-  for(var t=0;t<trs.length;t++){
-    var tr=trs[t];
-    // Trabajo con lotes aplicados: ya movió stock, su plan no se edita acá. Se muestra en
-    // gris y solo se puede corregir lo que no toca el stock (contratista, observaciones).
-    if(trabajoAplicado(tr)){
-      bloqueados++;
-      var obsD={}; for(var od=0;od<(tr.destinos||[]).length;od++) obsD[tr.destinos[od].id]=tr.destinos[od].obs||'';
-      trabajosAplTmp.push({id:tr.id, contratistaId:tr.contratistaId||'', obs:obsD});
-      continue;
-    }
-    var c={}; for(var k in tr){ if(tr.hasOwnProperty(k) && k!=='destinos' && k!=='plantilla') c[k]=tr[k]; }
-    c.plantilla=[]; for(var p=0;p<(tr.plantilla||[]).length;p++){ var pl=tr.plantilla[p]; c.plantilla.push({insumoId:pl.insumoId, dosis:pl.dosis, depositoId:pl.depositoId||''}); }
-    c.destinos=[]; for(var d=0;d<(tr.destinos||[]).length;d++) c.destinos.push(clonarDestino(tr.destinos[d]));
-    trabajosTmp.push(c);
-  }
-  cerrarFormTrabajo();
-  renderTrabajos();
-  var submitBtn=byId('otForm').querySelector('button[type=submit]');
-  if(submitBtn) submitBtn.textContent='Guardar cambios';
-  var tit=byId('otFormTitle'); if(tit) tit.textContent='Editando OT #'+o.num;
-  var bn=byId('otEditBanner');
-  if(bn){ bn.style.display=''; bn.innerHTML='<strong>Editando la OT #'+o.num+'.</strong> '+(o.impresa?'Ya se imprimió: si salió al campo, avisá al operario de los cambios.':'Cambiá lo que necesites y tocá «Guardar cambios».')+
-    (bloqueados?' Lo ya aplicado se muestra en gris: ahí se corrigen el contratista y las observaciones; para cambiar dosis, insumos, lotes o superficie usá <strong>Corregir aplicación</strong>.':'')+
-    (tieneApl?' La campaña no se puede cambiar porque ya hay aplicaciones.':'')+
-    ' <button type="button" class="btn btn-sm" onclick="resetOtForm()">Descartar edición</button>'; }
-  byId('o_num').textContent='OT #'+o.num;
-  var lv=byId('ot-list-view'); if(lv) lv.style.display=''; var dv=byId('ot-detail-view'); if(dv) dv.style.display='none';
-  window.scrollTo({top:0, behavior:'smooth'});
+  if(otTieneAplicados(o)){ alert('La OT #'+o.num+' tiene labores confirmadas.\n\nPara editarla, primero tocá «Volver a pendiente» (se devuelve el stock y lo que cargaste queda guardado para la próxima vez).'); return; }
+  abrirOT(id, 1, true);
 }
 function resetOtForm(){
   byId('otForm').reset();
   editOtId=null;
+  otPant={id:null, modo:'nueva', v:1};
   byId('o_fecha').value=todayISO();
   var soc=byId('o_campania');
   if(soc){ soc.disabled=false; soc.title=''; }
@@ -4285,8 +4294,6 @@ function clearOtFilters(){
 function renderOtList(){
   populateOtSelects();
   refreshCampBadges();
-  byId('ot-list-view').style.display='';
-  byId('ot-detail-view').style.display='none';
   var q=(byId('otSearch').value||'').toLowerCase();
   var fa=byId('otActFilter').value, fe=byId('otEstadoFilter').value, fc=byId('otCampoFilter').value;
   var flo=byId('otLoteFilter')?byId('otLoteFilter').value:'';
@@ -4326,7 +4333,7 @@ function renderOtList(){
     var hayLP=false, hayLC=false;
     for(var tt=0;tt<(o.trabajos||[]).length;tt++){ if(o.trabajos[tt].laborTipo==='LC') hayLC=true; else hayLP=true; }
     var tipoTxt = (hayLP&&hayLC) ? 'Mixta' : (hayLC?'Contratada':'Propia');
-    rows+='<tr class="otl-row" onclick="viewOT(\''+o.id+'\')">'+
+    rows+='<tr class="otl-row" onclick="abrirOT(\''+o.id+'\')">'+
       '<td class="otl-num">OT #'+o.num+(o.rapida?' <span class="bdg bn" title="Registrada con OT rápida (labor ya realizada)">rápida</span>':'')+'</td>'+
       '<td class="otl-act"><span class="otl-act-cult">'+esc(labelLaboresDeOt(o))+'</span> <span class="otl-act-campo">· '+esc(cultTxt)+' · '+esc(campoNoms.join(', '))+'</span></td>'+
       '<td class="otl-tipo">'+tipoTxt+'</td>'+
@@ -4336,8 +4343,8 @@ function renderOtList(){
       '<td>'+estadoBadge(o.estado)+'</td>'+
       '<td class="otl-acc" onclick="event.stopPropagation()">'+
         ((puedeC && (o.estado==='Pendiente'||o.estado==='Parcial'))
-          ? '<button class="btn btn-sm btn-accion" onclick="openRegistro(\''+o.id+'\')" title="Cargar lo que se hizo">Registrar</button>'
-          : '<button class="btn btn-sm" onclick="viewOT(\''+o.id+'\')">Ver</button>')+
+          ? '<button class="btn btn-sm btn-accion" onclick="abrirOT(\''+o.id+'\',4); if(otPant.id===\''+o.id+'\') otConfirmar(\''+o.id+'\')" title="Confirmar lo que se hizo">Confirmar</button>'
+          : '<button class="btn btn-sm" onclick="abrirOT(\''+o.id+'\')">Ver</button>')+
         (puedeC?'<button class="btn btn-sm btn-danger" onclick="delOT(\''+o.id+'\')" title="Eliminar la OT">✕</button>':'')+
       '</td>'+
     '</tr>';
@@ -4510,123 +4517,19 @@ function buildOtPrint(o){
 function imprimirOT(otId){
   var o=getOtById(otId); if(!o) return;
   var cont=byId('otPrint'); if(!cont) return;
+  // Se imprime lo guardado: si en pantalla hay cambios sin guardar, primero se guardan.
+  if(otPant.id===otId && otPant.modo==='editar' && otHayCambios()){
+    if(!confirm('Hay cambios sin guardar en la orden.\n\nPara imprimirla como está en pantalla, primero se guardan. ¿Guardarlos ahora?')) return;
+    saveOT({preventDefault:function(){}});
+    if(otHayCambios()) return;
+    o=getOtById(otId);
+  }
   cont.innerHTML=buildOtPrint(o);
-  if(!o.impresa){ o.impresa=true; save(); }
+  if(!o.impresa && puede('cargar')){ o.impresa=true; save(); }
   window.print();
 }
-function viewOT(id){
-  var o=getOtById(id); if(!o) return;
-  byId('ot-list-view').style.display='none';
-  var dv=byId('ot-detail-view'); dv.style.display='';
-  var haTotal=haDeOt(o), haApl=otHaAplicada(o);
-  var puedeC=puede('cargar'), tieneApl=otTieneAplicados(o);
-  var vista=trabajosPorLote(o);
-  var destBlocks='';
-  for(var i=0;i<vista.orden.length;i++){
-    var lid=vista.orden[i];
-    var paresL=vista.mapa[lid];
-    var de0=paresL[0].destino, un=esUN(de0);
-    var campoNom=getCampoNombre(de0.campoId);
-    var cultivo=de0.cultivo||'—';
-    var haLote=Number(de0.ha)||0;
-    var aplL=0;
-    for(var e=0;e<paresL.length;e++){ if(paresL[e].destino.estadoLote==='Aplicado') aplL++; }
-    var estLote = aplL===0 ? 'Pendiente' : (aplL===paresL.length ? 'Aplicada' : 'Parcial');
-    var filas='';
-    for(var t=0;t<paresL.length;t++){
-      var tr=paresL[t].trabajo, de=paresL[t].destino;
-      var haTr=Number(de.ha)||0;
-      filas+='<tr class="det-labor">'+
-        '<td class="tdname"><strong>'+esc(nombreLaborDeTrabajo(tr))+'</strong>'+
-          '<span class="bdg '+(tr.laborTipo==='LP'?'bg':'bv')+'" style="margin-left:6px">'+(tr.laborTipo==='LP'?'Propia':'Contratada')+'</span>'+
-          (tr.esResiembra?'<span class="bdg bn" style="margin-left:4px">Resiembra</span>':'')+
-          (tr.contratistaId?('<span class="ot-row-meta" style="margin-left:6px">'+esc(getContratistaNombre(tr.contratistaId))+'</span>'):'')+
-          (tr.laborTipo==='LC' && !tr.contratistaId?'<span class="bdg-falta" style="margin-left:6px" title="Asignalo en la solapa Labores">falta contratista</span>':'')+
-        '</td>'+
-        '<td></td><td>'+(un?'unid.':'ha')+'</td>'+
-        '<td class="num" style="color:var(--muted)">—</td>'+
-        '<td class="num"><strong>'+f(haTr,2)+'</strong></td>'+
-        '<td></td><td></td><td></td>'+
-        '<td>'+estadoBadge(de.estadoLote||'Pendiente')+(de.fechaAplicReal?('<span class="ot-row-meta" style="margin-left:5px">'+fd(de.fechaAplicReal)+'</span>'):'')+'</td>'+
-        '</tr>';
-      // Insumos en ORDEN DE MEZCLADO: el número es el orden de carga al tanque.
-      var lns=lineasEnOrdenMezcla(de), hayIns=false, nOrden=0;
-      for(var j=0;j<lns.length;j++){
-        var ln=lns[j], ins=getInsumo(ln.insumoId);
-        if(!ins) continue;
-        hayIns=true; nOrden++;
-        var fml=labelFormulacion(ln.insumoId);
-        filas+='<tr>'+
-          '<td class="tdname det-ins">'+esc(ins.nombre)+(fml?' <span class="bdg bn" title="Formulación">'+esc(fml)+'</span>':'')+'</td>'+
-          '<td class="num"><span class="det-orden" title="Orden de carga al tanque">'+nOrden+'</span></td>'+
-          '<td>'+esc(ins.un||'')+'</td>'+
-          '<td class="num">'+(un?'—':f(ln.dosis,3))+'</td>'+
-          '<td class="num"><strong>'+f(cantReq(de, ln),2)+'</strong></td>'+
-          '<td style="font-size:11px;color:var(--muted)">'+esc(ln.depositoId?getDepNombre(ln.depositoId):'sin depósito')+'</td>'+
-          '<td class="num">'+fmtEiq(ins.eiq)+'</td>'+
-          '<td>'+badgeBanda(ins.bandaTox)+'</td>'+
-          '<td></td>'+
-          '</tr>';
-      }
-      if(!hayIns) filas+='<tr><td class="det-ins" style="color:var(--muted);font-style:italic">— sin insumos —</td><td colspan="8"></td></tr>';
-    }
-    var obsL=[];
-    for(var q=0;q<paresL.length;q++){ if(paresL[q].destino.obs) obsL.push(paresL[q].destino.obs); }
-    destBlocks+='<div class="det-lote">'+
-      '<div class="det-lote-hd">'+
-        '<span class="det-lote-tit">'+(un?('General del campo<span class="det-lote-campo">· '+esc(campoNom)+'</span> — '+esc(cultivo)+' — '+f(haLote,1)+' unid.')
-                                        :(esc(nombreDestino(de0))+'<span class="det-lote-campo">· '+esc(campoNom)+'</span> — '+esc(cultivo)+' — '+f(haLote,1)+' ha'))+'</span>'+
-        '<span class="det-lote-r"><span class="ot-row-meta">'+paresL.length+' labor(es)</span>'+estadoBadge(estLote)+'</span>'+
-      '</div>'+
-      '<table class="det-tbl">'+
-        '<thead><tr><th>Insumo / Labor</th><th class="num" title="Orden de carga al tanque según la formulación">Orden tanque</th><th>Un.</th><th class="num">'+(un?'—':'Dosis/ha')+'</th><th class="num">Requerimiento total</th><th>Depósito</th><th class="num">EIQ</th><th>Banda</th><th>Estado</th></tr></thead>'+
-        '<tbody>'+filas+'</tbody>'+
-      '</table>'+
-      (obsL.length?('<div class="det-obs"><span class="det-obs-l">'+(un?'Trabajo:':'Obs. del lote:')+'</span> '+esc(obsL.join(' · '))+'</div>'):'')+
-    '</div>';
-  }
-  var totIns={}, paresT=destinosDeOt(o);
-  for(var d2=0;d2<paresT.length;d2++){
-    var lns2=paresT[d2].destino.lineas||[];
-    for(var j2=0;j2<lns2.length;j2++) totIns[lns2[j2].insumoId]=(totIns[lns2[j2].insumoId]||0)+cantReq(paresT[d2].destino, lns2[j2]);
-  }
-  var idsT=[]; for(var iid in totIns){ if(totIns.hasOwnProperty(iid) && getInsumo(iid)) idsT.push(iid); }
-  idsT.sort(function(a,b){ var oa=ordenMezcla(a), ob=ordenMezcla(b); if(oa!==ob) return oa-ob; return getInsumo(a).nombre.localeCompare(getInsumo(b).nombre); });
-  var totRows='';
-  for(var it=0;it<idsT.length;it++){
-    var insT=getInsumo(idsT[it]), fT=labelFormulacion(idsT[it]);
-    totRows+='<tr><td class="tdname">'+esc(insT.nombre)+(fT?' <span class="bdg bn">'+esc(fT)+'</span>':'')+'</td><td>'+esc(insT.un||'')+'</td>'+
-      '<td class="num"><strong>'+f(totIns[idsT[it]],2)+'</strong></td><td class="num">'+fmtEiq(insT.eiq)+'</td><td>'+badgeBanda(insT.bandaTox)+'</td></tr>';
-  }
-  if(totRows){
-    destBlocks+='<div class="det-lote" style="margin-top:18px">'+
-      '<div class="det-lote-hd"><span class="det-lote-tit">Total por producto <span class="det-lote-campo">— lo que sale del depósito para toda la orden, en orden de mezclado</span></span></div>'+
-      '<table class="det-tbl"><thead><tr><th>Insumo</th><th>Un.</th><th class="num">Requerimiento total</th><th class="num">EIQ</th><th>Banda</th></tr></thead><tbody>'+totRows+'</tbody></table>'+
-    '</div>';
-  }
-  dv.innerHTML=
-    '<div class="no-print" style="margin-bottom:10px"><button class="btn" onclick="renderOtList()">← Volver al listado</button></div>'+
-    barraEstadoOT(o)+
-    '<div class="ot-doc">'+
-      '<div class="ot-h">'+
-        '<div class="ot-h-l"><h2>Orden de Trabajo</h2>'+
-          '<p>'+esc((root.espacios[root.activoId]&&root.espacios[root.activoId].nombre)||'—')+' · Campaña '+esc(getCampaniaNombre(o.campaniaId)||'—')+'</p></div>'+
-        '<div class="ot-h-r"><div class="ot-num">OT #'+o.num+'</div><div>'+fd(o.fecha)+'</div><div>'+estadoBadge(o.estado)+'</div></div>'+
-      '</div>'+
-      '<div class="ot-meta">'+
-        '<div class="ot-meta-i"><div class="l">Labores</div><div class="v">'+esc(labelLaboresDeOt(o))+'</div></div>'+
-        '<div class="ot-meta-i"><div class="l">Contratistas</div><div class="v">'+esc(contratistasDeOt(o))+'</div></div>'+
-        '<div class="ot-meta-i"><div class="l">Lotes</div><div class="v">'+lotesDeOt(o).length+'</div></div>'+
-        '<div class="ot-meta-i"><div class="l">Ha totales</div><div class="v">'+f(haTotal,2)+'</div></div>'+
-        '<div class="ot-meta-i"><div class="l">Ha realizadas</div><div class="v">'+f(haApl,2)+'</div></div>'+
-      '</div>'+
-      (hayFormulaciones()?'':'<div class="banner-info no-print" style="margin:8px 0">El <strong>orden de mezclado</strong> sale de la formulación de cada insumo (Maestros → Formulaciones). No hay formulaciones cargadas: el orden mostrado es alfabético.</div>')+
-      destBlocks+
-      (o.obs ? '<div class="ot-obs" style="margin-top:12px"><strong>Observaciones:</strong> '+esc(o.obs)+'</div>' : '')+
-      '<div class="ot-firmas"><div class="ot-firma">Entregador</div><div class="ot-firma">Recibidor / Operario</div></div>'+
-    '</div>'+
-    (tieneApl ? '<div class="card no-print" id="aplicCard" style="margin-top:12px">'+htmlRealizado(o)+'</div>' : '');
-}
+// La ficha que se usaba para ver una OT ahora es la pantalla de ventanas.
+function viewOT(id){ abrirOT(id, 4, true); }
 // ===== Aplicación por tandas con prorrateo (Etapa C) =====
 // Estado temporal del cierre que se está armando: { otId, lotesSel:{destId:true}, fecha, consumos:{insumoId:{consumido,devStock,devBaja}} }
 var aplicTmp=null;
@@ -5073,6 +4976,7 @@ function cancelOT(otId){
   if(!guard('cargar')) return;
   var o=getOtById(otId); if(!o) return;
   if(otTieneAplicados(o)){ alert('La OT #'+o.num+' tiene labores confirmadas.\n\nPara cancelarla, primero tocá «Volver a pendiente» (así sus consumos vuelven al stock). Una OT cancelada no figura en consumos, labores ni costos.'); return; }
+  if(otPant.id===otId && !otSalirSinPerder()) return;
   if(!confirm('¿Cancelar la OT #'+o.num+'?\n\nDeja de figurar en labores, consumos, costos y stock comprometido. Se puede reactivar.')) return;
   o.estado='Cancelada';
   aplicTmp=null;
@@ -6131,58 +6035,60 @@ function etiquetaEstado(e){ return e==='Aplicada' ? 'Confirmada' : (e==='Aplicad
 function nPendientesOT(o){ var p=destinosDeOt(o), n=0; for(var i=0;i<p.length;i++){ if(p[i].destino.estadoLote!=='Aplicado') n++; } return n; }
 
 // Barra de arriba del detalle: estado, qué sigue y el botón de lo que hay que hacer.
+// Barra de arriba: estado, qué sigue y la acción principal.
 function barraEstadoOT(o){
   var puedeC=puede('cargar'), id=o.id, est=o.estado, sigue='', main='', sec='';
-  var imp='<button class="btn" onclick="imprimirOT(\''+id+'\')">🖨 Imprimir</button>';
+  var imp='<button type="button" class="btn" onclick="imprimirOT(\''+id+'\')">🖨 Imprimir</button>';
   var nP=nPendientesOT(o);
   if(est==='Cancelada'){
     sigue='OT cancelada: no figura en consumos, labores, costos ni stock comprometido.';
-    if(puedeC) main='<button class="btn btn-primary" onclick="reactivateOT(\''+id+'\')">Reactivar OT</button>';
+    if(puedeC) main='<button type="button" class="btn btn-primary" onclick="reactivateOT(\''+id+'\')">Reactivar OT</button>';
   } else if(est==='Pendiente'){
-    sigue='Cuando se haga la labor, registrá lo realizado.'+(o.ultimoRegistro?' Lo que cargaste la última vez está guardado y aparece precargado.':'');
+    sigue='Cuando se haga la labor, confirmá lo realizado.'+(o.ultimoRegistro?' Lo que cargaste la última vez está guardado y aparece precargado.':'');
     if(puedeC){
-      main='<button class="btn btn-primary" onclick="openRegistro(\''+id+'\')">Registrar lo realizado</button>';
-      sec='<button class="btn" onclick="startEditOT(\''+id+'\')">✎ Editar</button><button class="btn btn-danger-ghost" onclick="cancelOT(\''+id+'\')">Cancelar OT</button>';
+      main='<button type="button" class="btn btn-primary" onclick="otConfirmar(\''+id+'\')">Confirmar lo realizado</button>';
+      sec='<button type="button" class="btn btn-danger-ghost" onclick="cancelOT(\''+id+'\')">Cancelar OT</button>';
     }
   } else if(est==='Parcial'){
-    sigue='Falta registrar '+nP+(nP===1?' labor':' labores')+'. Registralas cuando se hagan (si alguna ya no se va a hacer, marcala «No se hace»). Para cambiar algo de lo confirmado, volvé a pendiente.';
+    sigue='Falta confirmar '+nP+(nP===1?' labor':' labores')+'. Confirmalas cuando se hagan (si alguna ya no se va a hacer, marcala «No se hace»). Para cambiar algo de lo confirmado, volvé a pendiente.';
     if(puedeC){
-      main='<button class="btn btn-primary" onclick="openRegistro(\''+id+'\')">Registrar lo que falta</button>';
-      sec='<button class="btn" onclick="volverAPendiente(\''+id+'\')">↩ Volver a pendiente</button>';
+      main='<button type="button" class="btn btn-primary" onclick="otConfirmar(\''+id+'\')">Confirmar lo que falta</button>';
+      sec='<button type="button" class="btn" onclick="volverAPendiente(\''+id+'\')">↩ Volver a pendiente</button>';
     }
   } else {
     sigue='Todo confirmado. Para cambiar algo, volvé a pendiente: se devuelve el stock y lo que cargaste queda guardado.';
-    if(puedeC) sec='<button class="btn" onclick="volverAPendiente(\''+id+'\')">↩ Volver a pendiente</button>';
+    if(puedeC) sec='<button type="button" class="btn" onclick="volverAPendiente(\''+id+'\')">↩ Volver a pendiente</button>';
   }
   if(!puedeC) sigue+=' (Tu usuario es de consulta.)';
   return '<div class="ot-barra no-print">'+
-      '<div class="ot-barra-l"><span class="ot-barra-num">OT #'+o.num+'</span>'+estadoBadge(est)+'</div>'+
+      '<div class="ot-barra-l"><button type="button" class="btn btn-sm" onclick="otVolverListado()">← Listado</button><span class="ot-barra-num">OT #'+o.num+'</span>'+estadoBadge(est)+'</div>'+
       '<div class="ot-barra-sigue"><span class="ot-barra-flecha">→</span> '+esc(sigue)+'</div>'+
       '<div class="ot-barra-acc">'+imp+sec+main+'</div>'+
     '</div>';
 }
-
 // Lo ya confirmado de la OT (solo lectura), debajo del documento.
+// Lo confirmado: por lote, fecha, superficie real y, por insumo, dosis real (plan) y consumido.
 function htmlRealizado(o){
-  var pares=destinosDeOt(o), filas='';
-  var apl=[]; for(var i=0;i<pares.length;i++){ if(pares[i].destino.estadoLote==='Aplicado') apl.push(pares[i]); }
+  var pares=destinosDeOt(o), filas='', apl=[];
+  for(var i=0;i<pares.length;i++){ if(pares[i].destino.estadoLote==='Aplicado') apl.push(pares[i]); }
   apl.sort(function(a,b){ var fa=a.destino.fechaAplicReal||'', fb=b.destino.fechaAplicReal||''; return fa<fb?-1:fa>fb?1:0; });
   for(var a=0;a<apl.length;a++){
     var de=apl[a].destino, tr=apl[a].trabajo, un=esUN(de), haR=haRealDe(de), ins='';
     for(var j=0;j<(de.lineas||[]).length;j++){
       var ln=de.lineas[j], x=getInsumo(ln.insumoId); if(!x) continue;
-      var dos = un ? '' : f(ln.dosisReal!=null?ln.dosisReal:(haR>0?(Number(ln.usado)||0)/haR:0),2)+' '+esc(x.un)+'/ha · ';
-      ins+='<div class="real-ins"><span>'+esc(x.nombre)+'</span><span>'+dos+'<strong>'+f(ln.usado,1)+' '+esc(x.un)+'</strong>'+((Number(ln.devBaja)||0)>0?' <span class="trb-apl-sub">(+'+f(ln.devBaja,1)+' perdido)</span>':'')+'</span></div>';
+      var real=ln.dosisReal!=null?ln.dosisReal:(haR>0?(Number(ln.usado)||0)/haR:0), plan=Number(ln.dosis)||0;
+      var dif=!un && plan>0 && Math.abs(real-plan)/plan>0.02;
+      var dos = un ? '' : '<span class="'+(dif?'bad-sum':'')+'">'+f(real,2)+'</span> <span class="trb-apl-sub">(plan '+f(plan,2)+')</span> '+esc(x.un)+'/ha · ';
+      ins+='<div class="real-ins"><span>'+esc(x.nombre)+'</span><span>'+dos+'<strong>'+f(ln.usado,1)+' '+esc(x.un)+'</strong>'+((Number(ln.devBaja)||0)>0?' <span class="trb-apl-sub">(+'+f(ln.devBaja,1)+' baja)</span>':'')+'</span></div>';
     }
     filas+='<tr><td class="otl-fecha">'+fd(de.fechaAplicReal)+'</td>'+
       '<td class="tdname"><strong>'+esc(un?(de.cultivo+' · '+getCampoNombre(de.campoId)):nombreDestino(de))+'</strong><div class="trb-apl-sub">'+esc(nombreLaborDeTrabajo(tr))+'</div></td>'+
-      '<td class="num">'+f(haR,1)+(un?' unid.':' ha')+'</td>'+
+      '<td class="num">'+f(haR,1)+(un?' unid.':' ha')+(Math.abs(haR-(Number(de.ha)||0))>0.01?'<div class="trb-apl-sub">plan '+f(de.ha,1)+'</div>':'')+'</td>'+
       '<td>'+(ins||'<span class="trb-apl-sub">sin insumos</span>')+'</td></tr>';
   }
-  return '<div class="chd"><span class="ct-lg">Lo realizado</span><span class="ct">'+apl.length+(apl.length===1?' labor confirmada':' labores confirmadas')+'</span></div>'+
-    '<div class="tw"><table><thead><tr><th>Fecha</th><th>Lote · labor</th><th class="num">Superficie</th><th>Insumos · dosis real · consumido</th></tr></thead><tbody>'+filas+'</tbody></table></div>';
+  return '<div class="chd" style="margin-top:4px"><span class="ct">Lo realizado · '+apl.length+(apl.length===1?' labor confirmada':' labores confirmadas')+'</span></div>'+
+    '<div class="tw"><table><thead><tr><th>Fecha</th><th>Lote · labor</th><th class="num">Superficie real</th><th>Insumos · dosis real (plan) · consumido</th></tr></thead><tbody>'+filas+'</tbody></table></div>';
 }
-
 /* ===== Registrar lo realizado: asistente en 3 pasos =====
    Usa aplicTmp (el mismo estado que el cálculo de prorrateo): lotesSel = lo marcado "Se hizo". */
 
@@ -6193,9 +6099,9 @@ function regSync(){ aplicTmp.lotesSel={}; for(var k in aplicTmp.est){ if(aplicTm
 function openRegistro(otId){
   if(!guard('cargar')) return;
   var o=getOtById(otId); if(!o || o.estado==='Cancelada') return;
-  if(editOtId===otId){
-    if(!confirm('Estás editando la OT #'+o.num+'. Si seguís, se descartan los cambios que no guardaste.\n\n¿Registrar lo realizado igual?')) return;
-    resetOtForm();
+  if(editOtId===otId && otHayCambios()){
+    if(!confirm('Hay cambios sin guardar en la OT #'+o.num+'. Si seguís, se descartan.\n\n¿Confirmar lo realizado igual?')) return;
+    abrirOT(otId, 4, true);
   }
   var pares=destinosDeOt(o), pend=[];
   for(var i=0;i<pares.length;i++){ if(pares[i].destino.estadoLote!=='Aplicado') pend.push(pares[i]); }
@@ -6277,14 +6183,14 @@ function regValidar(o, paso){
       }
     }
     if(!hay){ alert('Marcá al menos una labor como «Se hizo» (o «No se hace» si ya no se va a hacer).'); return false; }
-    if(!nSi && !nPe && !nAp){ alert('Si no se va a hacer nada de esta orden, cancelala (botón «Cancelar OT»).'); return false; }
+    if(!nSi && !nPe && !nAp){ alert('Si no se va a hacer nada de esta orden, cancelala (botón «Cancelar OT», arriba).'); return false; }
     if(sinHa.length){ alert('Falta la superficie realmente trabajada en:\n\n'+sinHa.join('\n')); return false; }
   }
   if(paso===2){
     var agg=calcEntregadoPorInsumo(o);
     for(k in agg){ if(!agg.hasOwnProperty(k)) continue;
       var ins=getInsumo(insDeClave(k)), c=aplicTmp.consumos[k]||{};
-      if(consumidoCalc(k, agg)<-0.01){ alert('En '+(ins?ins.nombre:'un insumo')+' lo que volvió y lo que se perdió suman más que lo entregado.'); return false; }
+      if(consumidoCalc(k, agg)<-0.01){ alert('En '+(ins?ins.nombre:'un insumo')+' la devolución y la baja suman más que lo entregado.'); return false; }
       if((!c.depositoId || !getDepositoById(c.depositoId)) && entregadoEfectivo(k, agg)>0){ alert('Elegí de qué depósito salió '+(ins?ins.nombre:'un insumo')+'.'); return false; }
     }
   }
@@ -6342,14 +6248,14 @@ function renderRegistro(){
           '<td class="num"><input type="number" step="0.01" min="0" class="inp-num" style="width:80px" id="devb_'+key+'" value="'+c.devBaja+'" oninput="updateConsumo(\''+key+'\',\'devBaja\',this.value)"></td>'+
           '<td class="num" id="aplicSum_'+key+'"><span class="'+(cons<-0.01?'bad-sum':'ok-sum')+'"><strong>'+f(cons,2)+'</strong></span></td></tr>';
       }
-      cuerpo='<div class="reg-ayuda">Ya está cargado lo planificado (dosis × superficie real). Cambialo solo si salió otra cantidad del depósito, si <strong>volvió</strong> algo sin usar o si algo <strong>se perdió</strong> (envase roto, derrame).</div>'+
-        '<div class="tw"><table class="reg-tbl"><thead><tr><th>Insumo</th><th>Salió del depósito</th><th class="num">Planificado</th><th class="num">Entregado</th><th class="num">Volvió</th><th class="num">Se perdió</th><th class="num">Consumido</th></tr></thead><tbody>'+filas+'</tbody></table></div>';
+      cuerpo='<div class="reg-ayuda">Ya está cargado lo planificado (dosis × superficie real). Cambialo solo si salió otra cantidad del depósito. <strong>Devolución</strong>: lo que volvió al depósito sin usar. <strong>Baja</strong>: lo que se perdió (envase roto, vencido, derrame).</div>'+
+        '<div class="tw"><table class="reg-tbl"><thead><tr><th>Insumo</th><th>Salió del depósito</th><th class="num">Planificado</th><th class="num">Entregado</th><th class="num">Devolución</th><th class="num">Baja</th><th class="num">Consumido</th></tr></thead><tbody>'+filas+'</tbody></table></div>';
     }
   } else {
     cuerpo=htmlResumenRegistro(o);
   }
   var mc=byId('modalContent'); mc.className='modal modal-full';
-  mc.innerHTML='<h3>Registrar lo realizado · OT #'+o.num+'</h3>'+
+  mc.innerHTML='<h3>Confirmar lo realizado · OT #'+o.num+'</h3>'+
     '<div class="reg-pasos">'+stp+'</div>'+
     (aplicTmp.precargado&&paso===1?'<div class="banner-info" style="margin:0 0 8px">Están cargados los datos de la última vez. Si no cambiás nada, queda igual que antes.</div>':'')+
     '<div class="reg-cuerpo">'+cuerpo+'</div>'+
@@ -6592,6 +6498,260 @@ function volverAPendiente(otId){
   if(editOtId===otId) resetOtForm();
   save(); viewOT(otId);
   toast('OT #'+o.num+' pendiente: ya podés editarla');
+}
+
+/* ================================================================
+   LA OT EN 4 VENTANAS (BUILD 10)
+   1 Datos · 2 Trabajos · 3 Revisar · 4 Lo realizado. Es la misma pantalla para crear, ver
+   y editar: una OT pendiente se edita directo; parcial, confirmada o cancelada se ve igual
+   pero en solo lectura. El documento para imprimir no se muestra en pantalla.
+================================================================ */
+var otPant={id:null, modo:'nueva', v:1};
+
+var OT_VENTANAS=[['Datos','fecha, campaña'],['Trabajos','labor, lotes, insumos'],['Revisar','totales, stock, imprimir'],['Lo realizado','confirmar lo hecho']];
+
+function abrirNuevaOT(){
+  if(!guard('cargar')) return;
+  if(!otSalirSinPerder()) return;
+  closeModal();
+  resetOtForm();
+  otPant={id:null, modo:'nueva', v:1};
+  mostrarPantallaOT();
+}
+
+// Abre una OT existente. forzar = sin preguntar por cambios sin guardar (después de una acción).
+function abrirOT(id, v, forzar){
+  var o=getOtById(id); if(!o) return;
+  if(!forzar && !otSalirSinPerder()) return;
+  var editable = o.estado==='Pendiente' && puede('cargar');
+  cargarFormDesdeOT(o, editable);
+  otPant={id:id, modo:editable?'editar':'ver', v:v||4};
+  mostrarPantallaOT();
+}
+
+function cargarFormDesdeOT(o, editable){
+  resetOtForm();
+  editOtId = editable ? o.id : null;
+  aplicTmp=null;
+  byId('o_fecha').value=o.fecha||todayISO();
+  byId('o_obs').value=o.obs||'';
+  populateOtSelects();
+  var soc=byId('o_campania'); if(soc){ soc.value=o.campaniaId||''; }
+  otFormCampAnterior=o.campaniaId||'';
+  populateOtSelects();
+  trabajosTmp=[]; trabajosAplTmp=[];
+  var trs=o.trabajos||[];
+  for(var t=0;t<trs.length;t++){
+    var tr=trs[t], c={};
+    for(var k in tr){ if(tr.hasOwnProperty(k) && k!=='destinos' && k!=='plantilla') c[k]=tr[k]; }
+    c.plantilla=[]; for(var p=0;p<(tr.plantilla||[]).length;p++){ var pl=tr.plantilla[p]; c.plantilla.push({insumoId:pl.insumoId, dosis:pl.dosis, depositoId:pl.depositoId||''}); }
+    c.destinos=[]; for(var d=0;d<(tr.destinos||[]).length;d++) c.destinos.push(clonarDestino(tr.destinos[d]));
+    trabajosTmp.push(c);
+  }
+  cerrarFormTrabajo();
+  renderTrabajos();
+  var submitBtn=byId('otForm').querySelector('button[type=submit]'); if(submitBtn) submitBtn.textContent=editable?'Guardar cambios':'Emitir OT';
+  var tit=byId('otFormTitle'); if(tit) tit.textContent=(editable?'Editando OT #':'OT #')+o.num;
+  var bn=byId('otEditBanner');
+  if(bn){ if(editable && o.impresa){ bn.style.display=''; bn.innerHTML='<strong>Ya se imprimió esta OT.</strong> Si salió al campo, avisá al operario de los cambios que hagas.'; } else { bn.style.display='none'; bn.innerHTML=''; } }
+  byId('o_num').textContent='OT #'+o.num;
+}
+
+// ¿Hay algo cargado en la pantalla que se perdería?
+function otHayCambios(){
+  var pant=byId('ot-pantalla'); if(!pant || pant.style.display==='none') return false;
+  var enCurso = !!(byId('o_subact') && byId('o_subact').value) || destinosTmp.length>0 || plantillaTmp.length>0;
+  if(otPant.modo==='nueva') return enCurso || trabajosTmp.length>0 || !!(byId('o_obs').value||'').replace(/\s/g,'');
+  if(otPant.modo==='editar'){
+    var ex=getOtById(otPant.id); if(!ex) return false;
+    if(enCurso) return true;
+    var camp=byId('o_campania')?byId('o_campania').value:'';
+    return resumenCambiosOT(ex, camp, clonarTrabajosForm()).length>0;
+  }
+  return false;
+}
+
+function otSalirSinPerder(){
+  if(!otHayCambios()) return true;
+  return confirm('Hay cambios sin guardar en esta orden.\n\n¿Salir igual y descartarlos?');
+}
+
+function otVolverListado(){
+  if(!otSalirSinPerder()) return;
+  resetOtForm(); otPant={id:null, modo:'nueva', v:1};
+  mostrarListadoOT();
+}
+
+function mostrarListadoOT(){
+  byId('ot-pantalla').style.display='none';
+  byId('ot-detail-view').style.display='none';
+  byId('ot-list-view').style.display='';
+  renderOtList();
+}
+
+function otDescartar(){
+  if(otHayCambios() && !confirm('¿Descartar los cambios que no guardaste?')) return;
+  if(otPant.modo==='nueva'){ resetOtForm(); otPant={id:null, modo:'nueva', v:1}; mostrarPantallaOT(); }
+  else abrirOT(otPant.id, otPant.v, true);
+}
+
+// Ir a una ventana. Al salir de "Trabajos" con un trabajo a medio armar, se agrega (o se avisa qué falta).
+function otIr(v){
+  if(v<1 || v>4) return;
+  if(v===4 && otPant.modo==='nueva'){ alert('Primero emití la orden (ventana 3). Después, cuando se haga la labor, se confirma lo realizado acá.'); return; }
+  if(otPant.v===2 && v>2 && otPant.modo!=='ver' && byId('o_subact').value && destinosTmp.length){ if(!addTrabajoALaOt()) return; }
+  otPant.v=v; mostrarPantallaOT();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function mostrarPantallaOT(){
+  byId('ot-list-view').style.display='none';
+  byId('ot-detail-view').style.display='none';
+  byId('ot-pantalla').style.display='';
+  var o=otPant.id?getOtById(otPant.id):null, v=otPant.v, ro=otPant.modo==='ver';
+  byId('otPantHd').innerHTML = o ? barraEstadoOT(o) : barraNuevaOT();
+  var tabs='';
+  for(var i=0;i<4;i++){
+    var n=i+1, off=(n===4 && !o), ok = o ? (n<=3 && n!==v) : (n<v);
+    tabs+='<button type="button" class="otp-tab'+(n===v?' act':'')+(ok?' ok':'')+(off?' off':'')+'" onclick="otIr('+n+')"><b><span>'+(ok&&!off?'✓':n)+'</span>'+OT_VENTANAS[i][0]+'</b>'+OT_VENTANAS[i][1]+'</button>';
+  }
+  byId('otTabs').innerHTML=tabs;
+  for(var w=1;w<=4;w++){ var el=byId('otV'+w); if(el) el.className='paso otv'+(w===v?' on':''); }
+  var form=byId('otForm'); if(form) form.className = ro ? 'otp-ro' : '';
+  otSoloLectura(ro);
+  if(v===3) byId('otV3').innerHTML=htmlVentanaRevisar(o);
+  if(v===4) byId('otV4').innerHTML=htmlVentanaRealizado(o);
+  // Pie: anterior / siguiente / guardar.
+  var sub=form.querySelector('button[type=submit]');
+  byId('otBtnAtras').style.visibility = v>1 ? 'visible' : 'hidden';
+  var maxV = o ? 4 : 3;
+  byId('otBtnSig').style.display = v<maxV ? '' : 'none';
+  var guardar = !ro && ((otPant.modo==='nueva' && v===3) || (otPant.modo==='editar' && v<4));
+  sub.style.display = guardar ? '' : 'none';
+  sub.textContent = otPant.modo==='editar' ? 'Guardar cambios' : 'Emitir OT';
+  byId('otBtnSig').className = guardar ? 'btn' : 'btn btn-primary';
+  byId('otBtnDescartar').style.display = (!ro && v<4 && (otPant.modo==='editar' || trabajosTmp.length)) ? '' : 'none';
+  byId('otBtnDescartar').textContent = otPant.modo==='editar' ? 'Descartar cambios' : 'Limpiar';
+}
+
+function otSoloLectura(ro){
+  var cont=[byId('otV1'), byId('otV2')];
+  for(var c=0;c<cont.length;c++){
+    if(!cont[c]) continue;
+    var els=cont[c].querySelectorAll('input,select,textarea,button');
+    for(var i=0;i<els.length;i++){ if(ro){ els[i].setAttribute('data-ro','1'); els[i].disabled=true; } else if(els[i].getAttribute('data-ro')){ els[i].removeAttribute('data-ro'); els[i].disabled=false; } }
+  }
+  var av=byId('otRoAviso');
+  if(ro){
+    if(!av){ av=document.createElement('div'); av.id='otRoAviso'; av.className='otp-ro-aviso'; var f=byId('otForm'); f.insertBefore(av, f.firstChild); }
+    var o=getOtById(otPant.id);
+    av.innerHTML = !puede('cargar') ? 'Tu usuario es de consulta: la orden se ve pero no se modifica.'
+      : (o && o.estado==='Cancelada' ? 'OT cancelada: se ve en solo lectura. Para usarla de nuevo, reactivala.' : 'Esta OT tiene labores confirmadas: se ve en solo lectura. Para cambiarla, en la ventana 4 tocá «Volver a pendiente».');
+    av.style.display = otPant.v<4 ? '' : 'none';
+  } else if(av) av.style.display='none';
+}
+
+function barraNuevaOT(){
+  return '<div class="ot-barra no-print">'+
+      '<div class="ot-barra-l"><button type="button" class="btn btn-sm" onclick="otVolverListado()">← Listado</button><span class="ot-barra-num">Nueva OT</span></div>'+
+      '<div class="ot-barra-sigue"><span class="ot-barra-flecha">→</span> Completá los datos (1) y los trabajos (2), revisá (3) y emití la orden.</div>'+
+      '<div class="ot-barra-acc"></div>'+
+    '</div>';
+}
+
+// Confirmar lo realizado: si hay cambios sin guardar en la OT, primero se guardan (o se descartan).
+function otConfirmar(id){
+  if(otPant.id===id && otPant.modo==='editar' && byId('trabajoForm').style.display!=='none' && !destinosTmp.length){
+    // Un trabajo empezado sin lotes no se puede agregar: se ofrece descartarlo.
+    if(byId('o_subact').value || plantillaTmp.length){ if(!confirm('Hay un trabajo empezado en la ventana 2 que todavía no tiene lotes.\n\n¿Descartarlo y seguir?')) return; }
+    cerrarFormTrabajo();
+  }
+  if(otPant.id===id && otPant.modo==='editar' && otHayCambios()){
+    if(!confirm('Hay cambios sin guardar en la orden.\n\nPara confirmar lo realizado, primero se guardan. ¿Guardarlos ahora?')) return;
+    saveOT({preventDefault:function(){}});
+    if(otHayCambios()) return;   // no se guardó (faltaba algo o se canceló)
+  }
+  openRegistro(id);
+}
+
+// Ventana 3: totales por producto y si alcanza el stock (con lo que está en pantalla).
+function htmlVentanaRevisar(o){
+  var trs=trabajosTmp, nL=0, ha=0, vistos={};
+  for(var t=0;t<trs.length;t++){ for(var d=0;d<trs[t].destinos.length;d++){ var de=trs[t].destinos[d]; if(!esUN(de) && !vistos[de.loteId]){ vistos[de.loteId]=true; nL++; ha+=Number(de.ha)||0; } } }
+  var head='<div class="paso-hd"><span class="paso-n">3</span><span class="paso-t">Revisar'+(otPant.modo==='nueva'?' y emitir':'')+'</span></div><div class="paso-bd">';
+  if(!trs.length) return head+'<div class="otv-vacio">Todavía no hay trabajos en la orden. Agregalos en la ventana 2.</div></div>';
+  if(otPant.modo==='ver') return head+htmlTotalesPlan(trs)+'</div>';
+  var req=requerimientoPorDep(trs), propio=(otPant.modo==='editar' && o) ? requerimientoPorDep((o.trabajos||[]).filter(function(x){ return !trabajoAplicado(x); })) : {};
+  var filas='', falta=0, claves=[];
+  for(var k in req){ if(req.hasOwnProperty(k)) claves.push(k); }
+  claves.sort(function(a,b){ var xa=a.split('||')[0], xb=b.split('||')[0], oa=ordenMezcla(xa), ob=ordenMezcla(xb); if(oa!==ob) return oa-ob; var ia=getInsumo(xa), ib=getInsumo(xb); return (ia?ia.nombre:'').localeCompare(ib?ib.nombre:''); });
+  var nOrd={}, kOrd=0;
+  for(var c=0;c<claves.length;c++){
+    var pr=claves[c].split('||'), ins=getInsumo(pr[0]), sinDep=pr[1]===DEP_SIN;
+    var disp = sinDep ? null : stockHoy(pr[0], pr[1]).disp + (propio[claves[c]]||0);
+    var ok = disp===null || req[claves[c]]<=disp+0.01; if(!ok) falta++;
+    if(!nOrd[pr[0]]) nOrd[pr[0]]=++kOrd;
+    filas+='<tr><td class="num"><span class="det-orden" title="Orden de carga al tanque">'+nOrd[pr[0]]+'</span></td><td class="tdname"><strong>'+(ins?esc(ins.nombre):pr[0])+'</strong></td><td>'+(ins?esc(ins.un):'')+'</td>'+
+      '<td class="num"><strong>'+f(req[claves[c]],2)+'</strong></td>'+
+      '<td>'+(sinDep?'<span class="bdg-falta">sin depósito</span>':esc(getDepNombre(pr[1])))+'</td>'+
+      '<td class="num">'+(disp===null?'—':f(disp,1))+'</td>'+
+      '<td>'+(disp===null?'<span class="trb-apl-sub">se elige al confirmar</span>':(ok?'<span class="bdg bg">alcanza</span>':'<span class="bdg-falta">no alcanza</span>'))+'</td></tr>';
+  }
+  return head+
+    '<div class="reg-kpis">'+
+      '<div class="reg-kpi"><div class="l">Fecha</div><div class="v">'+fd(byId('o_fecha').value)+'</div></div>'+
+      '<div class="reg-kpi"><div class="l">Campaña</div><div class="v">'+esc(getCampaniaNombre(byId('o_campania').value)||'—')+'</div></div>'+
+      '<div class="reg-kpi"><div class="l">Trabajos</div><div class="v">'+trs.length+'</div></div>'+
+      '<div class="reg-kpi"><div class="l">Lotes · superficie</div><div class="v">'+nL+' · '+f(ha,1)+' ha</div></div>'+
+    '</div>'+
+    (falta?'<div class="banner-warn" style="margin:0 0 8px">'+falta+(falta===1?' insumo no alcanza':' insumos no alcanzan')+' con el stock disponible (real − lo comprometido por otras OT). Se puede emitir igual: el stock se descuenta recién al confirmar.</div>':'')+
+    (hayFormulaciones()?'':'<p class="trb-apl-sub" style="margin:0 0 6px">El orden de carga al tanque sale de la formulación de cada insumo (Maestros → Formulaciones). Como no hay formulaciones cargadas, el orden es alfabético.</p>')+
+    (filas?'<div class="tw"><table class="otv3-tbl"><thead><tr><th class="num" title="Orden de carga al tanque, según la formulación">Orden</th><th>Insumo</th><th>Un.</th><th class="num">Total de la orden</th><th>Depósito</th><th class="num">Disponible</th><th></th></tr></thead><tbody>'+filas+'</tbody></table></div>'
+          :'<p class="trb-apl-sub">La orden no lleva insumos.</p>')+
+    (o?'<p class="reg-ayuda" style="margin-top:10px">El documento para el campo sale con <strong>🖨 Imprimir</strong> (arriba).</p>':'<p class="reg-ayuda" style="margin-top:10px">Al emitir, la orden queda pendiente y se puede imprimir para el campo.</p>')+
+  '</div>';
+}
+
+// Totales planificados de toda la orden (incluye lo ya confirmado), para verla en solo lectura.
+function htmlTotalesPlan(trs){
+  var tot={}, ids=[];
+  for(var t=0;t<trs.length;t++){ for(var d=0;d<trs[t].destinos.length;d++){ var de=trs[t].destinos[d];
+    for(var l=0;l<(de.lineas||[]).length;l++){ var ln=de.lineas[l]; if(!ln.insumoId) continue; if(!tot.hasOwnProperty(ln.insumoId)){ tot[ln.insumoId]=0; ids.push(ln.insumoId); } tot[ln.insumoId]+=cantReq(de, ln); } } }
+  ids.sort(function(a,b){ var oa=ordenMezcla(a), ob=ordenMezcla(b); if(oa!==ob) return oa-ob; var ia=getInsumo(a), ib=getInsumo(b); return (ia?ia.nombre:'').localeCompare(ib?ib.nombre:''); });
+  var filas='';
+  for(var i=0;i<ids.length;i++){ var ins=getInsumo(ids[i]); filas+='<tr><td class="num"><span class="det-orden">'+(i+1)+'</span></td><td class="tdname"><strong>'+(ins?esc(ins.nombre):ids[i])+'</strong></td><td>'+(ins?esc(ins.un):'')+'</td><td class="num"><strong>'+f(tot[ids[i]],2)+'</strong></td></tr>'; }
+  return filas ? '<div class="ct" style="margin-bottom:6px">Total planificado por producto <span style="font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0">— lo realizado está en la ventana 4</span></div><div class="tw"><table class="otv3-tbl"><thead><tr><th class="num" title="Orden de carga al tanque">Orden</th><th>Insumo</th><th>Un.</th><th class="num">Total planificado</th></tr></thead><tbody>'+filas+'</tbody></table></div>'
+    : '<p class="trb-apl-sub">La orden no lleva insumos.</p>';
+}
+
+// Ventana 4: lo confirmado (plan contra real) y la acción que sigue.
+function htmlVentanaRealizado(o){
+  var head='<div class="paso-hd"><span class="paso-n">4</span><span class="paso-t">Lo realizado</span></div><div class="paso-bd">';
+  if(!o) return head+'<div class="otv-vacio">Primero emití la orden.</div></div>';
+  var puedeC=puede('cargar'), est=o.estado, nP=nPendientesOT(o), cta='';
+  if(est==='Cancelada') cta='<div class="otv-cta"><span>La orden está cancelada.</span>'+(puedeC?'<button type="button" class="btn btn-primary" onclick="reactivateOT(\''+o.id+'\')">Reactivar OT</button>':'')+'</div>';
+  else if(est==='Pendiente') cta='<div class="otv-cta"><span>Todavía no se confirmó nada. Cuando se haga la labor:</span>'+(puedeC?'<button type="button" class="btn btn-primary btn-lg" onclick="otConfirmar(\''+o.id+'\')">Confirmar lo realizado</button>':'')+
+    '<span class="trb-apl-sub">Son 3 pasos: qué se hizo · insumos (entregado, devolución y baja) · revisar y confirmar.</span></div>';
+  var tabla = otTieneAplicados(o) ? htmlRealizado(o) : '';
+  var pie='';
+  if(est==='Parcial' && puedeC) pie='<div class="otv-cta" style="flex-direction:row;flex-wrap:wrap;align-items:center"><span>Falta confirmar '+nP+(nP===1?' labor':' labores')+'.</span><button type="button" class="btn btn-primary" onclick="otConfirmar(\''+o.id+'\')">Confirmar lo que falta</button><button type="button" class="btn" onclick="volverAPendiente(\''+o.id+'\')">↩ Volver a pendiente</button></div>';
+  if(est==='Aplicada' && puedeC) pie='<div class="otv-cta" style="flex-direction:row;flex-wrap:wrap;align-items:center"><span>Para cambiar algo de lo confirmado:</span><button type="button" class="btn" onclick="volverAPendiente(\''+o.id+'\')">↩ Volver a pendiente</button></div>';
+  return head+cta+tabla+pie+'</div>';
+}
+
+
+// Lo que se carga en la solapa Labores (tarifas, facturación, pagos, contratista) no se edita en
+// esta pantalla: al guardar se toma lo vigente, por si cambió mientras la OT estaba abierta.
+function conservarDatosLabores(ex, nuevos){
+  var porId={}, t, d;
+  for(t=0;t<(ex.trabajos||[]).length;t++) porId[ex.trabajos[t].id]=ex.trabajos[t];
+  var campos=['tarifa','tarifaMoneda','estadoFact','montoFacturado','estadoPago','montoPagado','contratistaId'];
+  for(t=0;t<nuevos.length;t++){
+    var v=porId[nuevos[t].id]; if(!v) continue;
+    for(var c=0;c<campos.length;c++){ if(v.hasOwnProperty(campos[c])) nuevos[t][campos[c]]=v[campos[c]]; }
+    var dv={}; for(d=0;d<(v.destinos||[]).length;d++) dv[v.destinos[d].id]=v.destinos[d];
+    for(d=0;d<(nuevos[t].destinos||[]).length;d++){ var od=dv[nuevos[t].destinos[d].id]; if(!od) continue; if(od.tarifa!==undefined) nuevos[t].destinos[d].tarifa=od.tarifa; else delete nuevos[t].destinos[d].tarifa; }
+  }
 }
 
 /* ================================================================
@@ -8166,7 +8326,7 @@ function confirmReset(){
   closeModal();
   byId('modalContent').className='modal';
   refreshCtx();
-  correccionTmp=null; resetOtForm();
+  correccionTmp=null; resetOtForm(); otPant={id:null, modo:'nueva', v:1}; mostrarListadoOT();
   setTab(currentTab, document.querySelector('.inst-btn[data-tab="'+currentTab+'"]'));
   toast('Espacio reseteado');
 }
