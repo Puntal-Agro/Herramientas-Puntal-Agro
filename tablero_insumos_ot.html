@@ -478,14 +478,124 @@ tbody tr:hover td{background:#FAFBFC}
 .pr-firma{flex:1;font-size:8pt;color:#555;text-align:center;text-transform:uppercase;letter-spacing:.4px}
 .pr-firma-l{border-bottom:1px solid #000;height:34px;margin-bottom:3px}
 
+.pr-pie{display:none;position:fixed;left:13mm;right:13mm;bottom:7mm;justify-content:space-between;gap:10px;font-size:7.5pt;color:#555;border-top:0.5px solid #999;padding-top:1.6mm}
+
+/* ===== BUILD 7 ===== */
+/* Ayuda "i" */
+.info-i{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;border:1px solid #7B9A6D;background:#F1F5EC;color:#3B5226;font:italic 700 10.5px/1 Georgia,'Times New Roman',serif;cursor:pointer;padding:0;margin-left:3px;vertical-align:middle;text-transform:none;letter-spacing:0}
+.info-i:hover,.info-i:focus{background:#4A6533;color:#fff;border-color:#4A6533;outline:none}
+.info-pop{position:fixed;z-index:300;max-width:340px;width:calc(100vw - 32px);background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(15,25,35,.18);padding:12px 14px;font-size:12px;line-height:1.5;color:var(--text);text-transform:none;letter-spacing:0;font-weight:400;text-align:left}
+.info-pop-t{font-weight:600;color:#3B5226;margin-bottom:6px;font-size:12.5px}
+.info-pop ul{margin:0;padding-left:16px}
+.info-pop li{margin-bottom:5px}
+.info-pop li:last-child{margin-bottom:0}
+/* Modal a pantalla completa (OT rápida, historia del lote) */
+.modal-bg:has(.modal-full){padding:12px;align-items:stretch}
+.modal.modal-full{max-width:none;width:100%;height:calc(100vh - 24px);overflow-y:auto;padding:20px 24px 0;display:flex;flex-direction:column}
+.modal.modal-full>*{flex:0 0 auto}
+.modal.modal-full h3{font-size:16px}
+.modal.modal-full .fact{position:sticky;bottom:0;background:var(--card);padding:12px 0 16px;margin-top:auto;border-top:1px solid var(--border);z-index:2}
+.modal.modal-full>:nth-last-child(2){margin-bottom:16px}
+@media (max-width:600px){.modal-bg:has(.modal-full){padding:6px}.modal.modal-full{height:calc(100vh - 12px);padding:14px 14px 0}}
+/* Editar una OT con lo aplicado a la vista */
+.trb-apl-tit{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#3B5226;margin:8px 2px 6px}
+.trb-apl-tit span{font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)}
+.dest-card.trb-apl{background:#F5F6F2;border-color:#D9DED3;border-left-color:#9DB08E}
+.dest-card.trb-apl .dest-n{color:#4A6533}
+.dest-card.trb-apl table{background:transparent}
+.trb-apl-contr{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted)}
+.trb-apl-contr select{font-size:12px;padding:3px 6px;border:1px solid var(--border);border-radius:6px;background:var(--card)}
+.trb-apl-btns{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
+.trb-apl-ins{display:flex;justify-content:space-between;gap:12px;font-size:12px;white-space:nowrap}
+.trb-apl-sub{font-size:11px;color:var(--muted)}
+.corr-banner .btn{margin-left:6px}
+/* Historia del lote */
+.hist-filtros{max-width:900px}
+.hist-cab{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:flex-end;border-bottom:2px solid #4A6533;padding:6px 0 12px;margin:8px 0 6px}
+.hist-cab-lote{font-size:22px;font-weight:600;color:var(--text);line-height:1.2}
+.hist-cab-sub{font-size:12.5px;color:var(--muted);margin-top:2px}
+.hist-cab-datos{display:flex;gap:24px;flex-wrap:wrap;font-size:13px}
+.hist-cab-datos span{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:1px}
+.hist-camp{font-size:12px;font-weight:600;color:#4A6533;text-transform:uppercase;letter-spacing:.6px;margin:18px 0 2px;border-bottom:1px solid #C9D4BF;padding-bottom:4px}
+.hist-it{display:grid;grid-template-columns:84px 1fr;gap:16px;padding:14px 0;border-bottom:1px solid var(--border)}
+.hist-f{text-align:center;border-right:3px solid #9DB08E;padding-right:14px}
+.hist-d{display:block;font-size:26px;font-weight:600;line-height:1;color:#3B5226}
+.hist-m{display:block;font-size:11px;color:var(--muted);margin-top:4px}
+.hist-lab{font-size:14px;margin-bottom:8px}
+.hist-meta{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.hist-prod{width:100%;max-width:640px;border-collapse:collapse;font-size:12.5px}
+.hist-prod th{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);text-align:left;font-weight:500;padding:3px 8px;border-bottom:1px solid var(--border);background:none}
+.hist-prod th.num,.hist-prod td.num{text-align:right}
+.hist-prod td{padding:5px 8px;border-bottom:1px dashed #E2E6DC}
+.hist-prod tr:last-child td{border-bottom:none}
+.hist-tot{color:var(--muted)}
+.hist-obs{font-size:12px;color:var(--muted);font-style:italic;margin-top:6px}
+.hist-sin{font-size:12px;color:var(--muted)}
+@media (max-width:600px){.hist-it{grid-template-columns:58px 1fr;gap:10px}.hist-d{font-size:21px}.hist-f{padding-right:8px}.hist-cab-datos{gap:14px}}
+
+/* ===== BUILD 8: estado de la OT y registro en 3 pasos ===== */
+.ot-barra{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;background:var(--card);border:1px solid var(--border);border-left:4px solid #4A6533;border-radius:0 10px 10px 0;padding:12px 16px;margin-bottom:12px}
+.ot-barra-l{display:flex;align-items:center;gap:10px}
+.ot-barra-num{font-family:var(--mono);font-weight:600;font-size:15px;color:#3B5226}
+.ot-barra-sigue{font-size:13px;color:var(--text);line-height:1.45}
+.ot-barra-flecha{color:#4A6533;font-weight:700}
+.ot-barra-acc{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.btn-danger-ghost{color:var(--bad);border-color:#F3C9C9;background:var(--card)}
+.btn-danger-ghost:hover{background:#FEF2F2}
+@media (max-width:760px){.ot-barra{grid-template-columns:1fr}.ot-barra-acc{justify-content:flex-start}}
+.reg-pasos{display:flex;gap:8px;margin:2px 0 14px}
+.reg-paso{flex:1;display:flex;align-items:center;gap:8px;font-size:13px;padding:9px 12px;border-radius:8px;background:var(--bg);color:var(--muted);border:1px solid var(--border)}
+.reg-paso span{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--card);border:1px solid var(--border);font-weight:600;font-size:12px}
+.reg-paso.act{background:#EEF3E8;color:#2E3D24;border-color:#9DB08E;font-weight:600}
+.reg-paso.act span{background:#4A6533;color:#fff;border-color:#4A6533}
+.reg-paso.ok{color:#3B5226}
+.reg-paso.ok span{background:#DCE7D2;border-color:#9DB08E;color:#3B5226}
+.reg-ayuda{font-size:12.5px;color:var(--muted);line-height:1.5;margin-bottom:6px}
+.reg-tbl td{vertical-align:middle}
+.reg-fila-off td{background:#FAFAF7}
+.reg-pills{display:flex;gap:6px;flex-wrap:wrap}
+.reg-pill{font-size:12.5px;padding:6px 11px;border-radius:7px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;white-space:nowrap}
+.reg-pill:hover{border-color:#9DB08E}
+.reg-pill.on{background:#E3EED9;border-color:#4A6533;color:#2E3D24;font-weight:600}
+.reg-pill.pend{background:#FDF3E1;border-color:#D9A441;color:#7A5410;font-weight:600}
+.reg-pill.no{background:#FDECEC;border-color:#E08B8B;color:#8F2626;font-weight:600}
+.reg-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:12px}
+.reg-kpi{background:var(--bg);border-radius:8px;padding:10px 12px}
+.reg-kpi .l{font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+.reg-kpi .v{font-size:17px;font-weight:600;margin-top:2px}
+.reg-kpi-w{grid-column:span 2}
+@media (max-width:600px){.reg-kpi-w{grid-column:auto}.reg-paso{font-size:11.5px;padding:7px 8px}}
+.real-ins{display:flex;justify-content:space-between;gap:12px;font-size:12px;white-space:nowrap;max-width:520px}
+.reg-tbl .bad-sum,.real-ins .bad-sum{color:#C0392B;font-weight:600}
+.reg-tbl .ok-sum{color:#3B5226}
+.reg-fecha-row{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;margin:10px 0 6px}
+.reg-fecha-row .fld{min-width:200px}
+.reg-tbl input[type=date]{font-family:var(--sans);font-size:13px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;background:var(--card);width:150px}
+@media (max-width:600px){
+  .reg-p1 thead{display:none}
+  .reg-p1 tr{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;padding:10px 0;border-bottom:1px solid var(--border)}
+  .reg-p1 td{border:none!important;padding:0!important}
+  .reg-p1 td:nth-child(1),.reg-p1 td:nth-child(2),.reg-p1 td[colspan]{grid-column:1/-1}
+  .reg-p1 td.num{text-align:left}
+  .reg-tbl input[type=date]{width:100%}
+}
+.modal.modal-full .fact .btn-primary{padding:9px 20px;font-size:13.5px}
+.modal.modal-full .fact .btn{padding:8px 14px}
+.modal.modal-full .fact{display:flex;align-items:center;gap:8px}
+
 @media print{
   /* Al imprimir se muestra SOLO el documento de la OT: la vista de pantalla
      tiene botones, selects y controles que en papel no sirven. */
   header,.inst-bar,.fact,.no-print,.page,.kpis{display:none!important}
   body{background:white}
   main{padding:0;max-width:100%}
-  #otPrint{display:block!important}
-  @page{margin:12mm}
+  #otPrint{display:block!important;padding:12mm 13mm 17mm;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+  /* Sin margen de página el navegador no tiene dónde poner su encabezado y su pie
+     (fecha, título, dirección web). Los márgenes los da el padding de #otPrint, que se
+     repite en cada hoja, y el pie propio (.pr-pie) va fijo abajo en todas las hojas. */
+  @page{margin:0}
+  .pr-pie{display:flex!important}
+  body>footer,footer{display:none!important}
 }
 
 /* OT row del listado */
@@ -691,7 +801,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
         <th style="width:6%">Un.</th>
         <th class="mcol-origen" style="width:18%">Origen</th>
         <th class="mcol-destino" style="width:18%">Destino</th>
-        <th class="mcol-precio" style="width:10%">Precio unit.</th>
+        <th class="mcol-precio" style="width:10%">Precio unit. <button type="button" class="info-i" onclick="verInfo(event,'precio')" title="Cómo funciona" aria-label="Cómo funciona">i</button></th>
         <th class="mcol-precio" style="width:7%">Mon.</th>
         <th style="width:4%"></th>
       </tr></thead><tbody id="mlineasBody"></tbody></table></div>
@@ -874,7 +984,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
             <option value="">Todos los estados</option>
             <option value="Pendiente">Pendiente</option>
             <option value="Parcial">Parcial</option>
-            <option value="Aplicada">Aplicada</option>
+            <option value="Aplicada">Confirmada</option>
             <option value="Cancelada">Cancelada</option>
           </select>
           <input type="date" id="otDesde" onchange="renderOtList()" title="Desde">
@@ -913,7 +1023,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
   </div>
 
   <div class="card">
-    <div class="chd"><span class="ct-lg">Consumo por lote</span><span class="camp-bdg" id="campBdgCons"></span><span class="ct" id="consInsHint"></span></div>
+    <div class="chd"><span class="ct-lg">Consumo por lote</span><span class="camp-bdg" id="campBdgCons"></span><span class="ct" id="consInsHint"></span><button class="btn btn-sm" style="margin-left:auto" onclick="openHistoriaLote()" title="Lo que se hizo en un lote, por fecha (labor, producto y dosis), para ver o descargar en PDF">📄 Historia del lote (PDF)</button></div>
     <div class="tw tw-scroll" style="max-height:520px;overflow-y:auto">
       <table>
         <thead><tr>
@@ -1063,7 +1173,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
 </main>
 
 <footer>
-  <span>Puntal Agro · Insumos &amp; OT · Versión v2026-10-27 15:26 · BUILD 6</span>
+  <span>Puntal Agro · Insumos &amp; OT · Versión v2026-10-28 08:49 · BUILD 8</span>
   <span id="fts">—</span>
 </footer>
 
@@ -1850,10 +1960,9 @@ function estadoBadge(estado){
   var e=(estado||'').toLowerCase();
   var cls='st-pend';
   if(e.indexOf('cancel')>=0) cls='st-cancel';
-  else if(e.indexOf('aplicad')>=0 || e.indexOf('facturad')>=0 || e.indexOf('hecho')>=0 || e.indexOf('complet')>=0) cls='st-hecho';
+  else if(e.indexOf('aplicad')>=0 || e.indexOf('confirmad')>=0 || e.indexOf('facturad')>=0 || e.indexOf('hecho')>=0 || e.indexOf('complet')>=0) cls='st-hecho';
   else if(e.indexOf('parcial')>=0 || e.indexOf('curso')>=0 || e.indexOf('proceso')>=0) cls='st-curso';
-  else cls='st-pend';
-  return '<span class="st '+cls+'">'+esc(estado||'—')+'</span>';
+  return '<span class="st '+cls+'">'+esc(etiquetaEstado(estado))+'</span>';
 }
 // Resalta los controles de filtro activos (los que NO están en su valor por defecto) y
 // actualiza un botón "Limpiar (N)". Recibe la lista de IDs de filtros y el ID del botón limpiar.
@@ -2544,7 +2653,7 @@ function convertirMoneda(valor, desde, hacia, fecha){
      no cambia por compras o cierres posteriores. */
 var TIPOS_CON_PRECIO={'Compra':true, 'Stock inicial':true};
 var TXT_PRECIO='Promedio ponderado móvil: cada compra (o stock inicial) con precio recalcula el promedio según el saldo que había; las salidas no lo cambian. '+
-  'Cada aplicación se valúa al promedio vigente en su fecha, así el costo de una OT ya aplicada no cambia después. '+
+  'Cada aplicación se valúa al promedio vigente en su fecha, así el costo de una OT ya confirmada no cambia después. '+
   'Si en un cierre de stock fijás un precio a mano, reemplaza al promedio a partir del día siguiente al cierre y las compras posteriores vuelven a ponderar sobre él. '+
   'Una compra en otra moneda se convierte con el TC de su mes: si ese TC falta, el precio queda sin calcular (y se avisa) hasta que lo cargues.';
 var _ppCache={key:null, st:null, porIns:{}};
@@ -2666,6 +2775,7 @@ function switchWs(id){
       for(var i=0;i<CTX.empresasDisponibles.length;i++){ if(CTX.empresasDisponibles[i].id===id){ emp=CTX.empresasDisponibles[i]; break; } }
       syncRootConContexto(id, emp?(emp.razonSocial||emp.nombre):null);
       refreshCtx();
+      correccionTmp=null; resetOtForm();
       setTab(currentTab, document.querySelector('.inst-btn[data-tab="'+currentTab+'"]'));
       toast('Empresa: '+(emp?(emp.razonSocial||emp.nombre):id));
     });
@@ -3082,7 +3192,6 @@ function renderMovLineas(){
   var pw=byId('m_prov_wrap'); if(pw) pw.style.display = (t && t.signo===1) ? '' : 'none';
   var aviso=byId('mDepAviso'), av='';
   if(!state.depositos.length) av+='<div class="banner-warn">No hay depósitos de insumos. Cargalos en Maestros → Depósitos antes de registrar movimientos.</div>';
-  if(showP) av+='<div class="banner-info"><strong>Precio unitario:</strong> '+esc(TXT_PRECIO)+'</div>';
   var fb=fechaBloqueo(); if(fb) av+='<div class="banner-info">Stock cerrado al <strong>'+fd(fb)+'</strong>: la fecha del movimiento tiene que ser posterior.</div>';
   if(aviso) aviso.innerHTML=av;
   var rows='';
@@ -3156,7 +3265,7 @@ function delMov(comprobanteId){
   if(!guard('cargar')) return;
   var cab=getComprobanteById(comprobanteId);
   if(!cab) return;
-  if(cab.refOt){ alert('Este comprobante lo generó una OT. Para eliminarlo, deshacé la aplicación correspondiente.'); return; }
+  if(cab.refOt){ alert('Este comprobante lo generó una OT. Para eliminarlo, volvé esa OT a pendiente (Órdenes de trabajo → «Volver a pendiente»).'); return; }
   if(bloqueoFecha(cab.fecha,'no se pueden eliminar movimientos')) return;
   var nLineas=0, insSet={};
   for(var k=0;k<state.movtos.length;k++){ if(state.movtos[k].comprobanteId===comprobanteId){ nLineas++; insSet[state.movtos[k].insumoId]=true; } }
@@ -3232,7 +3341,7 @@ function renderMovtos(){
     if(provNom) obsCell = (obsM?obsM+' · ':'')+'Prov: '+provNom;
     var precioCell = (Number(m.precio)>0) ? ((m.moneda==='USD'?'U$S ':'$ ')+f(m.precio,2)) : (TIPOS_CON_PRECIO[tipoM]?'<span style="color:var(--muted)">sin precio</span>':'');
     var accion;
-    if(esAuto) accion='<span class="bdg bn" title="Generado por la aplicación de la OT: se corrige deshaciendo la aplicación">auto</span>';
+    if(esAuto) accion='<span class="bdg bn" title="Generado al registrar una OT: se corrige volviendo esa OT a pendiente">auto</span>';
     else if(!puedeCargar) accion='';
     else if(fb && fechaM<=fb) accion='<span class="bdg bn" title="Fecha cerrada por el cierre de stock al '+fd(fb)+'">cerrado</span>';
     else accion='<button class="btn btn-sm" onclick="openMovEditModal(\''+m.comprobanteId+'\')" title="Editar comprobante">✎</button> <button class="btn btn-sm btn-danger" onclick="delMov(\''+m.comprobanteId+'\')" title="Eliminar comprobante">✕</button>';
@@ -3257,7 +3366,7 @@ function openMovEditModal(comprobanteId){
   if(!guard('cargar')) return;
   var cab=getComprobanteById(comprobanteId);
   if(!cab) return;
-  if(cab.refOt){ alert('Este comprobante lo generó una OT. Corregilo deshaciendo la aplicación correspondiente.'); return; }
+  if(cab.refOt){ alert('Este comprobante lo generó una OT. Para corregirlo, volvé esa OT a pendiente (Órdenes de trabajo → «Volver a pendiente»).'); return; }
   if(bloqueoFecha(cab.fecha,'no se pueden editar movimientos')) return;
   var t=getTipoMov(cab.tipo), conPrecio=!!TIPOS_CON_PRECIO[cab.tipo];
   var lineas=[]; for(var i=0;i<state.movtos.length;i++) if(state.movtos[i].comprobanteId===comprobanteId) lineas.push(state.movtos[i]);
@@ -3486,6 +3595,8 @@ function addTrabajoALaOt(){
   for(var u=0;u<destinosTmp.length;u++){
     if(un && !String(destinosTmp[u].obs||'').replace(/\s/g,'')){ alert('Describí el trabajo de '+destinosTmp[u].cultivo+' en '+getCampoNombre(destinosTmp[u].campoId)+' (ej.: camino de acceso, alambrado, aguada).'); return false; }
   }
+  var sinD=insumosSinDosis(destinosTmp);
+  if(sinD.length){ avisoSinDosis(sinD, un); return false; }
   var laborTipo=byId('o_labor_tipo').value;
   if(laborTipo==='LC' && !byId('o_contratista').value){
     if(!state.contratistas.length){
@@ -3686,8 +3797,11 @@ var THEAD_LOTES='<thead><tr><th>Lote</th><th>Cultivo</th><th class="num">Ha</th>
 function renderTrabajos(){
   var wrap=byId('trabajosWrap'); if(!wrap) return;
   var res=byId('trabajosResumen');
+  var aplHtml=renderTrabajosAplicados();
   if(!trabajosTmp.length){
-    wrap.innerHTML='<p style="font-size:12px;color:var(--muted);padding:10px 2px">Una orden es una o más <strong>labores sobre lotes</strong> (o sobre una unidad de negocio de un campo). Empezá agregando la primera.</p>';
+    wrap.innerHTML=aplHtml+(aplHtml
+      ? '<p style="font-size:12px;color:var(--muted);padding:10px 2px">No quedan trabajos pendientes en esta orden. Si hace falta, agregá uno nuevo.</p>'
+      : '<p style="font-size:12px;color:var(--muted);padding:10px 2px">Una orden es una o más <strong>labores sobre lotes</strong> (o sobre una unidad de negocio de un campo). Empezá agregando la primera.</p>');
     if(res) res.textContent='';
     return;
   }
@@ -3724,7 +3838,7 @@ function renderTrabajos(){
       '</div>'+
     '</div>';
   }
-  wrap.innerHTML=html;
+  wrap.innerHTML=aplHtml+(aplHtml?'<div class="trb-apl-tit">Pendiente de aplicar <span>— se edita normalmente</span></div>':'')+html;
 }
 // Al cambiar la campaña de la OT cambian los cultivos y lotes disponibles.
 function onOtCampaniaChange(){
@@ -4030,15 +4144,20 @@ function saveOT(e){
     }
   }
   var nuevos=clonarTrabajosForm();
+  for(var sd=0;sd<nuevos.length;sd++){
+    var sinD=insumosSinDosis(nuevos[sd].destinos);
+    if(sinD.length){ avisoSinDosis(sinD, trabajoEsUN(nuevos[sd])); return; }
+  }
   // Cada lote tiene que tener ese cultivo en el plan de uso de la campaña de la OT.
-  var sinDosis=[];
-  for(var sd=0;sd<nuevos.length;sd++){ var dsd=nuevos[sd].destinos; for(var sd2=0;sd2<dsd.length;sd2++){ for(var sd3=0;sd3<dsd[sd2].lineas.length;sd3++){ var lsd=dsd[sd2].lineas[sd3]; if(lsd.insumoId && !(Number(lsd.dosis)>0)){ var isd=getInsumo(lsd.insumoId); sinDosis.push(nombreDestino(dsd[sd2])+' · '+(isd?isd.nombre:'')); } } } }
-  if(sinDosis.length && !confirm('Hay insumos sin '+(destinosSonUN(nuevos[0]?nuevos[0].destinos:[])?'cantidad':'dosis')+' (no se comprometen en el stock):\n\n'+sinDosis.slice(0,12).join('\n')+(sinDosis.length>12?'\n…':'')+'\n\n¿Seguir igual?')) return;
   var fuera=destinosFueraDePlan(nuevos, campaniaOt);
   if(fuera.length && !confirm('Estos lotes no tienen ese cultivo en el plan de uso de la campaña '+getCampaniaNombre(campaniaOt)+':\n\n'+fuera.join('\n')+'\n\n¿Seguir igual? (revisá la campaña de la OT o el Plan de Uso)')) return;
   // Stock: lo que pide la OT contra lo DISPONIBLE (real − comprometido por otras OT) en cada depósito.
   var existente=editOtId ? getOtById(editOtId) : null;
-  var req=requerimientoPorDep(nuevos), propio=existente ? requerimientoPorDep(existente.trabajos||[]) : {};
+  if(existente && !edicionVigente(existente, nuevos)){
+    alert('Mientras editabas, cambió lo aplicado de la OT #'+existente.num+' (se registró lo realizado o volvió a pendiente).\n\nPara no duplicar ni perder trabajos, la edición se cancela. Abrila de nuevo con "Editar OT".');
+    resetOtForm(); renderOtList(); return;
+  }
+  var req=requerimientoPorDep(nuevos), propio=existente ? requerimientoPorDep((existente.trabajos||[]).filter(function(t){ return !trabajoAplicado(t); })) : {};
   var faltantes=[], sinDep=[];
   for(var key in req){ if(!req.hasOwnProperty(key)) continue;
     var pr=key.split('||'), ins=getInsumo(pr[0]);
@@ -4057,15 +4176,17 @@ function saveOT(e){
       alert('Esta OT ya tiene lotes aplicados en la campaña '+getCampaniaNombre(existente.campaniaId)+': no se le puede cambiar la campaña.\n\nDeshacé las aplicaciones primero, o emití una OT nueva.');
       return;
     }
+    var faltaDesc=descripcionesUNFaltantes(existente);
+    if(faltaDesc){ alert(faltaDesc); return; }
     var cambios=resumenCambiosOT(existente, campaniaOt, nuevos);
     if(!cambios.length){ toast('Sin cambios'); resetOtForm(); renderOtList(); return; }
-    if(!confirm('⚠ Vas a modificar la OT #'+existente.num+(existente.estado!=='Pendiente'?' ('+existente.estado+')':'')+', que ya está emitida'+(existente.impresa?' e impresa':'')+'.\n\nCambios:\n• '+cambios.join('\n• ')+
-      (tieneApl?'\n\nLos trabajos ya aplicados no se tocan.':'')+'\n\nSi la orden ya está en el campo, avisá al operario. ¿Guardar los cambios?')) return;
+    if(existente.impresa && !confirm('La OT #'+existente.num+' ya se imprimió.\n\nCambios:\n• '+cambios.join('\n• ')+'\n\nSi la orden ya está en el campo, avisá al operario. ¿Guardar los cambios?')) return;
     existente.fecha=fechaOt;
     existente.campaniaId=campaniaOt;
     existente.obs=byId('o_obs').value;
     var bloq=[];
     for(var tb=0;tb<(existente.trabajos||[]).length;tb++){ if(trabajoAplicado(existente.trabajos[tb])) bloq.push(existente.trabajos[tb]); }
+    guardarEditablesAplicados(existente);
     for(var nn=0;nn<nuevos.length;nn++) precargarTarifaRef(nuevos[nn], campaniaOt);
     existente.trabajos = bloq.concat(nuevos);
     existente.editadaEl=todayISO();
@@ -4089,7 +4210,8 @@ function startEditOT(id){
   var o=getOtById(id); if(!o) return;
   if(o.estado==='Cancelada'){ alert('Esta OT está cancelada. Reactivala antes de editar.'); return; }
   var tieneApl=otTieneAplicados(o);
-  if(!confirm('⚠ La OT #'+o.num+' ya está emitida'+(tieneApl?' y tiene lotes aplicados':'')+'.\n\nSi la orden ya salió al campo, cambiarla puede generar diferencias con lo que se hizo. Vas a ver un resumen de los cambios antes de guardar.\n\n¿Editarla?')) return;
+  // Solo se edita una OT pendiente: si tiene algo confirmado, primero se vuelve a pendiente.
+  if(tieneApl){ alert('La OT #'+o.num+' tiene labores confirmadas.\n\nPara editarla, primero tocá «Volver a pendiente» (se devuelve el stock y lo que cargaste queda guardado para la próxima vez).'); return; }
   editOtId=id;
   aplicTmp=null;   // lo que se estaba cargando en "Registrar aplicación" ya no vale
   byId('o_fecha').value=o.fecha||todayISO();
@@ -4099,11 +4221,18 @@ function startEditOT(id){
   if(soc){ soc.value=o.campaniaId||''; soc.disabled=tieneApl; soc.title=tieneApl?'Con lotes aplicados no se puede cambiar la campaña':''; }
   otFormCampAnterior=o.campaniaId||'';
   populateOtSelects();   // cultivos del plan de la campaña de ESTA OT
-  trabajosTmp=[];
+  trabajosTmp=[]; trabajosAplTmp=[];
   var bloqueados=0, trs=o.trabajos||[];
   for(var t=0;t<trs.length;t++){
     var tr=trs[t];
-    if(trabajoAplicado(tr)){ bloqueados++; continue; }
+    // Trabajo con lotes aplicados: ya movió stock, su plan no se edita acá. Se muestra en
+    // gris y solo se puede corregir lo que no toca el stock (contratista, observaciones).
+    if(trabajoAplicado(tr)){
+      bloqueados++;
+      var obsD={}; for(var od=0;od<(tr.destinos||[]).length;od++) obsD[tr.destinos[od].id]=tr.destinos[od].obs||'';
+      trabajosAplTmp.push({id:tr.id, contratistaId:tr.contratistaId||'', obs:obsD});
+      continue;
+    }
     var c={}; for(var k in tr){ if(tr.hasOwnProperty(k) && k!=='destinos' && k!=='plantilla') c[k]=tr[k]; }
     c.plantilla=[]; for(var p=0;p<(tr.plantilla||[]).length;p++){ var pl=tr.plantilla[p]; c.plantilla.push({insumoId:pl.insumoId, dosis:pl.dosis, depositoId:pl.depositoId||''}); }
     c.destinos=[]; for(var d=0;d<(tr.destinos||[]).length;d++) c.destinos.push(clonarDestino(tr.destinos[d]));
@@ -4115,8 +4244,8 @@ function startEditOT(id){
   if(submitBtn) submitBtn.textContent='Guardar cambios';
   var tit=byId('otFormTitle'); if(tit) tit.textContent='Editando OT #'+o.num;
   var bn=byId('otEditBanner');
-  if(bn){ bn.style.display=''; bn.innerHTML='<strong>⚠ Estás editando la OT #'+o.num+', que ya fue emitida.</strong> Si ya salió al campo, avisá al operario de los cambios.'+
-    (bloqueados?' Los '+bloqueados+' trabajo(s) con lotes aplicados no se editan (para corregirlos, deshacé la aplicación).':'')+
+  if(bn){ bn.style.display=''; bn.innerHTML='<strong>Editando la OT #'+o.num+'.</strong> '+(o.impresa?'Ya se imprimió: si salió al campo, avisá al operario de los cambios.':'Cambiá lo que necesites y tocá «Guardar cambios».')+
+    (bloqueados?' Lo ya aplicado se muestra en gris: ahí se corrigen el contratista y las observaciones; para cambiar dosis, insumos, lotes o superficie usá <strong>Corregir aplicación</strong>.':'')+
     (tieneApl?' La campaña no se puede cambiar porque ya hay aplicaciones.':'')+
     ' <button type="button" class="btn btn-sm" onclick="resetOtForm()">Descartar edición</button>'; }
   byId('o_num').textContent='OT #'+o.num;
@@ -4135,7 +4264,7 @@ function resetOtForm(){
   var cup=byId('o_cultivo_pick'); if(cup) cup.value='';
   populateOtSelects();   // los cultivos del selector dependen de la campaña recién elegida
   byId('o_obs').value='';
-  trabajosTmp=[];
+  trabajosTmp=[]; trabajosAplTmp=[];
   cerrarFormTrabajo();
   renderTrabajos();
   var submitBtn=byId('otForm').querySelector('button[type=submit]');
@@ -4206,7 +4335,9 @@ function renderOtList(){
       '<td class="otl-fecha">'+fd(o.fecha)+'</td>'+
       '<td>'+estadoBadge(o.estado)+'</td>'+
       '<td class="otl-acc" onclick="event.stopPropagation()">'+
-        '<button class="btn btn-sm" onclick="viewOT(\''+o.id+'\')">Ver / Aplicar</button>'+
+        ((puedeC && (o.estado==='Pendiente'||o.estado==='Parcial'))
+          ? '<button class="btn btn-sm btn-accion" onclick="openRegistro(\''+o.id+'\')" title="Cargar lo que se hizo">Registrar</button>'
+          : '<button class="btn btn-sm" onclick="viewOT(\''+o.id+'\')">Ver</button>')+
         (puedeC?'<button class="btn btn-sm btn-danger" onclick="delOT(\''+o.id+'\')" title="Eliminar la OT">✕</button>':'')+
       '</td>'+
     '</tr>';
@@ -4371,6 +4502,8 @@ function buildOtPrint(o){
       '<div class="pr-firma"><div class="pr-firma-l"></div>Firma del operario</div>'+
       '<div class="pr-firma"><div class="pr-firma-l"></div>Firma del responsable</div>'+
     '</div>'+
+    // Pie propio (se repite en cada hoja): el del navegador (URL, fecha, título) no se imprime.
+    '<div class="pr-pie"><span>Puntal Agro · '+esc((root.espacios[root.activoId]&&root.espacios[root.activoId].nombre)||'')+'</span><span>OT #'+o.num+' · impresa el '+fd(todayISO())+'</span></div>'+
   '</div>';
 }
 // Arma el documento en el contenedor de impresión y dispara el diálogo del navegador.
@@ -4471,22 +4604,9 @@ function viewOT(id){
       '<table class="det-tbl"><thead><tr><th>Insumo</th><th>Un.</th><th class="num">Requerimiento total</th><th class="num">EIQ</th><th>Banda</th></tr></thead><tbody>'+totRows+'</tbody></table>'+
     '</div>';
   }
-  var botones='<button class="btn" onclick="imprimirOT(\''+o.id+'\')">🖨 Imprimir</button>';
-  if(puedeC){
-    if(o.estado!=='Cancelada'){
-      botones+='<button class="btn" onclick="startEditOT(\''+o.id+'\')" title="La OT ya está emitida: se pide confirmación y se muestra un resumen de cambios">✎ Editar OT</button>';
-      if(o.estado==='Parcial') botones+='<button class="btn" onclick="cerrarPendientesOT(\''+o.id+'\')" title="Lo pendiente ya no se va a hacer: se quita y la OT queda con lo aplicado">✓ Cerrar con lo aplicado</button>';
-      botones+= tieneApl
-        ? '<button class="btn btn-danger" onclick="cancelOT(\''+o.id+'\')" title="Tiene lotes aplicados: deshacé las aplicaciones antes de cancelar">Cancelar OT</button>'
-        : '<button class="btn btn-danger" onclick="cancelOT(\''+o.id+'\')">Cancelar OT</button>';
-    } else botones+='<button class="btn btn-primary" onclick="reactivateOT(\''+o.id+'\')">Reactivar OT</button>';
-  }
   dv.innerHTML=
-    '<div class="no-print" style="margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">'+
-      '<button class="btn" onclick="renderOtList()">← Volver al listado</button>'+
-      '<div style="display:flex;gap:8px;flex-wrap:wrap">'+botones+'</div>'+
-    '</div>'+
-    (o.estado==='Cancelada'?'<div class="banner-warn">OT cancelada: no figura en consumos, labores, costos ni stock comprometido.</div>':'')+
+    '<div class="no-print" style="margin-bottom:10px"><button class="btn" onclick="renderOtList()">← Volver al listado</button></div>'+
+    barraEstadoOT(o)+
     '<div class="ot-doc">'+
       '<div class="ot-h">'+
         '<div class="ot-h-l"><h2>Orden de Trabajo</h2>'+
@@ -4498,15 +4618,14 @@ function viewOT(id){
         '<div class="ot-meta-i"><div class="l">Contratistas</div><div class="v">'+esc(contratistasDeOt(o))+'</div></div>'+
         '<div class="ot-meta-i"><div class="l">Lotes</div><div class="v">'+lotesDeOt(o).length+'</div></div>'+
         '<div class="ot-meta-i"><div class="l">Ha totales</div><div class="v">'+f(haTotal,2)+'</div></div>'+
-        '<div class="ot-meta-i"><div class="l">Ha aplicadas</div><div class="v">'+f(haApl,2)+'</div></div>'+
+        '<div class="ot-meta-i"><div class="l">Ha realizadas</div><div class="v">'+f(haApl,2)+'</div></div>'+
       '</div>'+
       (hayFormulaciones()?'':'<div class="banner-info no-print" style="margin:8px 0">El <strong>orden de mezclado</strong> sale de la formulación de cada insumo (Maestros → Formulaciones). No hay formulaciones cargadas: el orden mostrado es alfabético.</div>')+
       destBlocks+
       (o.obs ? '<div class="ot-obs" style="margin-top:12px"><strong>Observaciones:</strong> '+esc(o.obs)+'</div>' : '')+
       '<div class="ot-firmas"><div class="ot-firma">Entregador</div><div class="ot-firma">Recibidor / Operario</div></div>'+
     '</div>'+
-    (o.estado!=='Cancelada' ? '<div class="card no-print" id="aplicCard" style="margin-top:12px"></div>' : '');
-  if(o.estado!=='Cancelada') renderAplicacion(o.id);
+    (tieneApl ? '<div class="card no-print" id="aplicCard" style="margin-top:12px">'+htmlRealizado(o)+'</div>' : '');
 }
 // ===== Aplicación por tandas con prorrateo (Etapa C) =====
 // Estado temporal del cierre que se está armando: { otId, lotesSel:{destId:true}, fecha, consumos:{insumoId:{consumido,devStock,devBaja}} }
@@ -4521,7 +4640,10 @@ function renderAplicacion(otId){
   for(var d=0;d<pares.length;d++){ (pares[d].destino.estadoLote==='Aplicado'?aplicados:pendientes).push(pares[d]); }
   if(!aplicTmp || aplicTmp.otId!==otId){
     aplicTmp={otId:otId, lotesSel:{}, fecha:todayISO(), consumos:{}};
-    for(var p=0;p<pendientes.length;p++) aplicTmp.lotesSel[pendientes[p].destino.id]=true;
+    // Corrección de una aplicación: se vuelve a abrir con los datos que tenía.
+    if(!sembrarCorreccion(otId, pendientes)){
+      for(var p=0;p<pendientes.length;p++) aplicTmp.lotesSel[pendientes[p].destino.id]=true;
+    }
   }
   var html='<div class="chd"><span class="ct-lg">Registrar aplicación</span></div>';
 
@@ -4539,7 +4661,8 @@ function renderAplicacion(otId){
       var grupo=tandas[ordenT[tk]], fT=grupo[0].destino.fechaAplicReal, cerrada=fb && fT && fT<=fb;
       html+='<div class="tanda-hd"><span>Tanda del <strong>'+fd(fT)+'</strong> · '+grupo.length+' '+(grupo.length===1?'labor':'labores')+'</span>'+
         (!puedeC?'':(cerrada?'<span class="bdg bn" title="Fecha cerrada por el cierre de stock al '+fd(fb)+'">cerrada</span>'
-          :'<button class="btn btn-sm btn-danger" onclick="deshacerTanda(\''+otId+'\',\''+esc(ordenT[tk])+'\')" title="Vuelve a Pendiente todo lo registrado en esta tanda y borra sus consumos y bajas">↩ Deshacer tanda</button>'))+
+          :'<span style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-sm" onclick="corregirTanda(\''+otId+'\',\''+esc(ordenT[tk])+'\')" title="Deshace la tanda y la vuelve a abrir con los mismos datos cargados, para corregir y confirmar de nuevo">✎ Corregir aplicación</button>'+
+            '<button class="btn btn-sm btn-danger" onclick="deshacerTanda(\''+otId+'\',\''+esc(ordenT[tk])+'\')" title="Vuelve a Pendiente todo lo registrado en esta tanda y borra sus consumos y bajas">↩ Deshacer tanda</button></span>'))+
         '</div>';
       for(var g=0;g<grupo.length;g++){
         var de=grupo[g].destino, trA=grupo[g].trabajo, un=esUN(de);
@@ -4583,6 +4706,8 @@ function renderAplicacion(otId){
     return;
   }
   // --- Paso 1: qué se cierra en esta tanda ---
+  if(aplicTmp.correccion) html+='<div class="banner-warn corr-banner"><strong>Corrigiendo la aplicación del '+fd(aplicTmp.correccion)+'.</strong> Están cargados los datos que tenía: fecha, superficie real, depósito, entregado y devoluciones. Cambiá lo que estaba mal y confirmá. Si hay que cambiar un insumo, una dosis planificada o un lote, primero editá la OT (los datos cargados se conservan).'+
+    ' <button type="button" class="btn btn-sm" onclick="descartarCorreccion()">Empezar de cero</button></div>';
   html+='<div class="zona-pend">';
   html+='<div class="grp-aplic-tit"><span class="ic-pend">○</span> Lotes a cerrar en esta tanda <span class="grp-count grp-count-pend">'+pendientes.length+'</span></div>';
   html+='<div class="lotes-pick lotes-pick-hi" style="margin-bottom:0">';
@@ -4786,17 +4911,19 @@ function buildPreviewProrrateo(o){
   }
   return rows || '<p style="font-size:12px;color:var(--muted)">Seleccioná lotes para ver el reparto.</p>';
 }
+// Al cambiar lo tildado, lo entregado se recalcula: los datos de la corrección dejan de valer.
 function toggleAplicLote(destId, checked){
   aplicTmp.lotesSel[destId]=checked;
   aplicTmp.consumos={}; // recalcular defaults con el nuevo entregado
+  aplicTmp.correccion=false; correccionTmp=null;
   renderAplicacion(aplicTmp.otId);
 }
 function selectAllAplicLotes(otId){
-  var o=null; for(var i=0;i<state.ots.length;i++) if(state.ots[i].id===otId){ o=state.ots[i]; break; }
-  if(!o) return;
+  var o=getOtById(otId); if(!o) return;
   var paresS=destinosDeOt(o);
   for(var d=0;d<paresS.length;d++){ if(paresS[d].destino.estadoLote!=='Aplicado') aplicTmp.lotesSel[paresS[d].destino.id]=true; }
   aplicTmp.consumos={};
+  aplicTmp.correccion=false; correccionTmp=null;
   renderAplicacion(otId);
 }
 function updateConsumoDep(insId, depId){
@@ -4926,10 +5053,13 @@ function cerrarTanda(otId){
   if(usoBaja) state.comprobantes.push(compBaja);
   recalcEstadoOT(o);
   reevaluarFacturacion(o);
+  var eraCorr=!!aplicTmp.correccion;
   aplicTmp=null;
+  if(editOtId===otId) resetOtForm();   // lo que estaba en edición ya no refleja la OT
+  if(correccionTmp && correccionTmp.otId===otId) correccionTmp=null;
   save();
   viewOT(otId);
-  toast(lotesSel.length+' labor(es) aplicada(s)');
+  toast(eraCorr ? 'Aplicación corregida' : lotesSel.length+' labor(es) aplicada(s)');
 }
 // Compatibilidad: deshacer desde un destino = deshacer su tanda.
 function deshacerAplicLote(otId, destId){
@@ -4942,7 +5072,7 @@ function deshacerAplicLote(otId, destId){
 function cancelOT(otId){
   if(!guard('cargar')) return;
   var o=getOtById(otId); if(!o) return;
-  if(otTieneAplicados(o)){ alert('La OT #'+o.num+' tiene lotes aplicados.\n\nPara cancelarla, primero deshacé esas aplicaciones (así sus consumos vuelven al stock). Una OT cancelada no figura en consumos, labores ni costos.'); return; }
+  if(otTieneAplicados(o)){ alert('La OT #'+o.num+' tiene labores confirmadas.\n\nPara cancelarla, primero tocá «Volver a pendiente» (así sus consumos vuelven al stock). Una OT cancelada no figura en consumos, labores ni costos.'); return; }
   if(!confirm('¿Cancelar la OT #'+o.num+'?\n\nDeja de figurar en labores, consumos, costos y stock comprometido. Se puede reactivar.')) return;
   o.estado='Cancelada';
   aplicTmp=null;
@@ -5038,6 +5168,23 @@ function clonarDestino(d){
   return o;
 }
 
+// Insumos cargados sin dosis (o sin cantidad, en una UN): no se puede emitir así.
+function insumosSinDosis(destinos){
+  var out=[];
+  for(var d=0;d<(destinos||[]).length;d++){
+    var de=destinos[d], ls=de.lineas||[];
+    for(var l=0;l<ls.length;l++){
+      if(ls[l].insumoId && !(Number(ls[l].dosis)>0)){ var ins=getInsumo(ls[l].insumoId); out.push('• '+(esUN(de)?(de.cultivo+' · '+getCampoNombre(de.campoId)):nombreDestino(de))+' · '+(ins?ins.nombre:'(insumo)')); }
+    }
+  }
+  return out;
+}
+
+function avisoSinDosis(lista, un){
+  alert('Hay insumos sin '+(un?'cantidad':'dosis')+':\n\n'+lista.slice(0,15).join('\n')+(lista.length>15?'\n…':'')+
+    '\n\nCargá '+(un?'la cantidad':'la dosis')+' o quitá el insumo con ✕. Un insumo sin '+(un?'cantidad':'dosis')+' no se puede dejar en la orden.');
+}
+
 
 /* ===== Emitir / guardar la OT ===== */
 // Requerimiento pendiente por insumo+depósito de una lista de trabajos.
@@ -5104,6 +5251,7 @@ function resumenCambiosOT(ex, camp, nuevos){
     else if(firmaTr(prev[a])!==firmaTr(nue[a])) r.push('Trabajo modificado: '+nombreLaborDeTrabajo(nue[a])+' (labor, lotes, ha, insumos, dosis o depósitos)');
   }
   for(var b in prev){ if(prev.hasOwnProperty(b) && !nue[b]) r.push('Trabajo quitado: '+nombreLaborDeTrabajo(prev[b])); }
+  r=r.concat(cambiosAplicados(ex));
   return r;
 }
 
@@ -5160,16 +5308,31 @@ function depSugeridoClave(k){
 function deshacerTanda(otId, tandaId){
   if(!guard('cargar')) return;
   var o=getOtById(otId); if(!o) return;
-  var pares=destinosDeOt(o), afect=[];
-  for(var i=0;i<pares.length;i++){
-    var de=pares[i].destino;
-    if(de.estadoLote==='Aplicado' && (de.tandaId||('tnd_'+de.id))===tandaId) afect.push(pares[i]);
-  }
+  var afect=paresDeTanda(o, tandaId);
   if(!afect.length) return;
   var fApl=afect[0].destino.fechaAplicReal;
   if(bloqueoFecha(fApl,'no se puede deshacer una aplicación')) return;
   var nom=[]; for(var a=0;a<afect.length;a++) nom.push('• '+nombreLaborDeTrabajo(afect[a].trabajo)+' · '+nombreDestino(afect[a].destino));
   if(!confirm('¿Deshacer la tanda del '+fd(fApl)+'?\n\n'+nom.join('\n')+'\n\nVuelven a Pendiente y se borran sus consumos y bajas (los insumos vuelven al stock).')) return;
+  deshacerTandaCore(o, tandaId, afect);
+  if(correccionTmp && correccionTmp.otId===otId) correccionTmp=null;
+  aplicTmp=null;
+  if(editOtId===otId) resetOtForm();
+  save(); viewOT(otId); toast('Tanda deshecha: '+afect.length+' labor(es) vuelven a Pendiente');
+}
+
+// Lo aplicado en una tanda (pares trabajo/destino).
+function paresDeTanda(o, tandaId){
+  var pares=destinosDeOt(o), afect=[];
+  for(var i=0;i<pares.length;i++){
+    var de=pares[i].destino;
+    if(de.estadoLote==='Aplicado' && (de.tandaId||('tnd_'+de.id))===tandaId) afect.push(pares[i]);
+  }
+  return afect;
+}
+
+// Borra los consumos y bajas de la tanda y la vuelve a Pendiente (sin preguntar ni guardar).
+function deshacerTandaCore(o, tandaId, afect){
   var destIds={}; for(var b=0;b<afect.length;b++) destIds[afect[b].destino.id]=true;
   var compsT={}; for(var c=0;c<state.comprobantes.length;c++){ if(state.comprobantes[c].refOt===o.id && state.comprobantes[c].refTanda===tandaId) compsT[state.comprobantes[c].id]=true; }
   state.movtos=state.movtos.filter(function(m){ return !compsT[m.comprobanteId] && !(m.refDest && destIds[m.refDest]); });
@@ -5182,8 +5345,6 @@ function deshacerTanda(otId, tandaId){
   }
   recalcEstadoOT(o);
   reevaluarFacturacion(o);
-  aplicTmp=null;
-  save(); viewOT(otId); toast('Tanda deshecha: '+afect.length+' labor(es) vuelven a Pendiente');
 }
 
 
@@ -5275,9 +5436,9 @@ function renderOtRapida(){
       '<td><button type="button" class="btn btn-sm btn-danger" onclick="otrDelLin('+i+')">✕</button></td></tr>';
   }
   var fb=fechaBloqueo();
-  var mc=byId('modalContent'); mc.className='modal modal-xl';
+  var mc=byId('modalContent'); mc.className='modal modal-full';
   mc.innerHTML='<h3>⚡ OT rápida · labor ya realizada</h3>'+
-    '<p style="font-size:12px;color:var(--muted);margin-bottom:12px">Registra en un paso una labor que ya se hizo: queda la OT emitida y aplicada, y descuenta del depósito lo usado. Sirve para un <strong>lote</strong> o para una <strong>unidad de negocio</strong> del campo (por ejemplo Estructura: camino, alambrado, aguada), que no va a un lote.</p>'+
+    '<p style="font-size:12px;color:var(--muted);margin-bottom:12px">Registra en un paso una labor que ya se hizo: queda la OT emitida y confirmada, y descuenta del depósito lo usado. Sirve para un <strong>lote</strong> o para una <strong>unidad de negocio</strong> del campo (por ejemplo Estructura: camino, alambrado, aguada), que no va a un lote.</p>'+
     (fb?'<div class="banner-info">Stock cerrado al <strong>'+fd(fb)+'</strong>: la fecha tiene que ser posterior.</div>':'')+
     '<div class="otr-grid">'+
       '<div class="otr-sec"><div class="otr-sec-t">1 · Cuándo y dónde</div>'+
@@ -5307,7 +5468,7 @@ function renderOtRapida(){
         '<button type="button" class="btn btn-sm" style="margin-top:6px" onclick="otrAddLin()">+ Agregar insumo</button>'+
       '</div>'+
     '</div>'+
-    '<div class="fact"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="saveOtRapida()">Registrar OT aplicada</button></div>';
+    '<div class="fact"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="saveOtRapida()">Registrar OT confirmada</button></div>';
 }
 
 function saveOtRapida(){
@@ -5351,7 +5512,7 @@ function saveOtRapida(){
   }
   state.ots.push(ot);
   save(); otrTmp=null; closeModal(); renderOtList();
-  toast('OT #'+ot.num+' registrada y aplicada');
+  toast('OT #'+ot.num+' registrada y confirmada');
 }
 
 // La campaña del formulario de OT manda sobre los cultivos y la superficie de sus lotes:
@@ -5392,6 +5553,7 @@ function cerrarPendientesOT(otId){
   o.trabajos=quedan;
   o.cerradaConPendientes=todayISO();
   aplicTmp=null;
+  if(editOtId===otId) resetOtForm();
   recalcEstadoOT(o);
   reevaluarFacturacion(o);
   save(); viewOT(otId); toast('OT #'+o.num+' cerrada con lo aplicado');
@@ -5451,6 +5613,985 @@ function aplicacionesPosteriores(insSet, desde){
       for(var l=0;l<(de.lineas||[]).length;l++){ if(insSet[de.lineas[l].insumoId] && (Number(de.lineas[l].usado)||0)>0){ n++; break; } } }
   }
   return n;
+}
+
+/* ================================================================
+   AYUDA "i": explicaciones cortas que se abren con un clic (sirve en el celular).
+================================================================ */
+var TXT_PRECIO_ITEMS=[
+  'Es un <strong>promedio ponderado móvil</strong>: cada compra (o stock inicial) con precio recalcula el promedio según el saldo que había. Las salidas no lo cambian.',
+  'Cada aplicación se valúa al promedio vigente en su fecha: el costo de una OT ya confirmada no cambia después.',
+  'Un precio fijado a mano en un <strong>cierre de stock</strong> reemplaza al promedio desde el día siguiente al cierre.',
+  'Una compra en otra moneda se convierte con el TC de su mes. Si falta ese TC, el precio queda sin calcular hasta que lo cargues.'
+];
+
+function infoBtn(key){
+  return '<button type="button" class="info-i" onclick="verInfo(event,\''+key+'\')" title="Cómo funciona" aria-label="Cómo funciona">i</button>';
+}
+
+function verInfo(ev, key){
+  if(ev){ ev.stopPropagation(); ev.preventDefault(); }
+  var pop=byId('infoPop');
+  if(!pop){
+    pop=document.createElement('div'); pop.id='infoPop'; pop.className='info-pop'; pop.style.display='none';
+    document.body.appendChild(pop);
+    document.addEventListener('click', function(e){ var p=byId('infoPop'); if(p && p.style.display!=='none' && !p.contains(e.target)) p.style.display='none'; });
+    document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ var p=byId('infoPop'); if(p) p.style.display='none'; } });
+    window.addEventListener('resize', function(){ var p=byId('infoPop'); if(p) p.style.display='none'; });
+  }
+  if(pop.style.display!=='none' && pop.getAttribute('data-k')===key){ pop.style.display='none'; return; }
+  var tit='', items=[];
+  if(key==='precio'){ tit='Precio de los insumos'; items=TXT_PRECIO_ITEMS; }
+  var li=''; for(var i=0;i<items.length;i++) li+='<li>'+items[i]+'</li>';
+  pop.innerHTML='<div class="info-pop-t">'+esc(tit)+'</div><ul>'+li+'</ul>';
+  pop.setAttribute('data-k', key);
+  pop.style.display='block';
+  var btn=ev && (ev.currentTarget||ev.target);
+  var r=btn && btn.getBoundingClientRect ? btn.getBoundingClientRect() : {left:20, right:20, top:20, bottom:20};
+  var w=pop.offsetWidth, h=pop.offsetHeight, vw=window.innerWidth, vh=window.innerHeight;
+  var left=Math.max(8, Math.min(r.left-w/2+8, vw-w-8));
+  var top=r.bottom+6; if(top+h>vh-8) top=Math.max(8, r.top-h-6);
+  pop.style.left=left+'px'; pop.style.top=top+'px';
+}
+
+
+/* ================================================================
+   EDITAR UNA OT CON LOTES APLICADOS
+   Lo aplicado se ve en el formulario (en gris). Se corrigen directo el contratista y las
+   observaciones; lo que toca el stock (dosis, insumos, lotes, superficie) se corrige con
+   "Corregir aplicación": deshace la tanda y la reabre con los mismos datos cargados.
+================================================================ */
+var trabajosAplTmp=[];
+
+function renderTrabajosAplicados(){
+  if(!editOtId || !trabajosAplTmp.length) return '';
+  var o=getOtById(editOtId); if(!o) return '';
+  var fb=fechaBloqueo();
+  var html='<div class="trb-apl-tit">Ya aplicado <span>— el plan no se edita acá; el contratista y las observaciones sí</span></div>';
+  for(var i=0;i<trabajosAplTmp.length;i++){
+    var ta=trabajosAplTmp[i], tr=getTrabajoById(o, ta.id); if(!tr) continue;
+    var un=trabajoEsUN(tr), lab=getLaborById(tr.laborId, tr.laborTipo);
+    // Tandas de este trabajo (para corregir cada una).
+    var tandas={}, ordT=[], ds=tr.destinos||[], d;
+    for(d=0;d<ds.length;d++){
+      if(ds[d].estadoLote!=='Aplicado') continue;
+      var tk=ds[d].tandaId||('tnd_'+ds[d].id);
+      if(!tandas[tk]){ tandas[tk]=ds[d].fechaAplicReal||''; ordT.push(tk); }
+    }
+    ordT.sort(function(a,b){ return tandas[a]<tandas[b]?-1:tandas[a]>tandas[b]?1:0; });
+    var botones='';
+    for(var t=0;t<ordT.length;t++){
+      var fT=tandas[ordT[t]];
+      botones+= (fb && fT && fT<=fb)
+        ? '<span class="bdg bn" title="Fecha cerrada por el cierre de stock al '+fd(fb)+'">aplicación del '+fd(fT)+' · cerrada</span>'
+        : '<button type="button" class="btn btn-sm" onclick="corregirTanda(\''+o.id+'\',\''+esc(ordT[t])+'\')" title="Deshace esta aplicación y la vuelve a abrir con los mismos datos cargados">✎ Corregir aplicación del '+fd(fT)+'</button>';
+    }
+    var contr;
+    if(tr.laborTipo==='LC'){
+      var oc='<option value="">— Sin contratista —</option>';
+      for(var c=0;c<state.contratistas.length;c++) oc+='<option value="'+esc(state.contratistas[c].id)+'"'+(state.contratistas[c].id===ta.contratistaId?' selected':'')+'>'+esc(state.contratistas[c].nombre)+'</option>';
+      contr='<label class="trb-apl-contr">Contratista <select onchange="setAplContr('+i+',this.value)">'+oc+'</select></label>';
+    } else contr='<span class="dest-sub">Labor propia</span>';
+    var rows='';
+    for(d=0;d<ds.length;d++){
+      var de=ds[d], apl=de.estadoLote==='Aplicado', haR=(de.haReal!==undefined && de.haReal!==null && de.haReal!=='')?Number(de.haReal):Number(de.ha)||0;
+      var ins='';
+      for(var l=0;l<(de.lineas||[]).length;l++){
+        var ln=de.lineas[l], x=getInsumo(ln.insumoId); if(!x) continue;
+        var dos;
+        if(un) dos=f(apl?ln.usado:ln.dosis,2)+' '+esc(x.un);
+        else if(apl) dos=f(ln.dosisReal!=null?ln.dosisReal:(haR>0?(Number(ln.usado)||0)/haR:0),3)+' '+esc(x.un)+'/ha';
+        else dos=f(ln.dosis,3)+' '+esc(x.un)+'/ha <span class="trb-apl-sub">plan</span>';
+        ins+='<div class="trb-apl-ins"><span>'+esc(x.nombre)+'</span><span class="num">'+dos+'</span></div>';
+      }
+      rows+='<tr>'+
+        '<td class="tdname"><strong>'+esc(un?getCampoNombre(de.campoId):nombreDestino(de))+'</strong><div class="trb-apl-sub">'+esc(de.cultivo||'')+'</div></td>'+
+        '<td>'+(apl?'<span class="bdg bg">Aplicado '+fd(de.fechaAplicReal)+'</span>':'<span class="bdg by">Pendiente</span>')+'</td>'+
+        '<td class="num">'+f(apl?haR:de.ha,1)+(un?' unid.':' ha')+(apl && Math.abs(haR-(Number(de.ha)||0))>0.01?'<div class="trb-apl-sub">plan '+f(de.ha,1)+'</div>':'')+'</td>'+
+        '<td>'+(ins||'<span class="trb-apl-sub">sin insumos</span>')+'</td>'+
+        '<td><input type="text" class="inp" value="'+esc(ta.obs[de.id]||'')+'" placeholder="'+(un?'Descripción (obligatoria)':'Observaciones')+'" oninput="setAplObs('+i+',\''+de.id+'\',this.value)"></td>'+
+        '</tr>';
+    }
+    var hayPend=false; for(d=0;d<ds.length;d++){ if(ds[d].estadoLote!=='Aplicado') hayPend=true; }
+    html+='<div class="dest-card open trb-apl" style="margin-bottom:10px">'+
+      '<div class="dest-head" style="cursor:default;flex-wrap:wrap">'+
+        '<span class="dest-n">✓</span>'+
+        '<span class="dest-title">'+esc(lab?lab.nombre:'(labor?)')+'</span>'+
+        '<span class="bdg '+(tr.laborTipo==='LP'?'bg':'bv')+'">'+(tr.laborTipo==='LP'?'Propia':'Contratada')+'</span>'+
+        (un?'<span class="bdg by">'+esc(ds[0].cultivo)+' · sin lote</span>':'')+
+        contr+
+        '<span class="trb-apl-btns">'+botones+'</span>'+
+      '</div>'+
+      '<div class="dest-body">'+
+        '<div class="tw"><table><thead><tr><th>'+(un?'Campo':'Lote')+'</th><th>Estado</th><th class="num">Superficie</th><th>Insumos · '+(un?'cantidad':'dosis')+'</th><th>Observaciones</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+        (hayPend?'<div class="trb-apl-sub" style="margin-top:6px">Lo pendiente de este trabajo se registra en <strong>Registrar aplicación</strong> (ahí se carga lo realmente entregado y la superficie real).</div>':'')+
+      '</div>'+
+    '</div>';
+  }
+  return html;
+}
+
+function setAplContr(i, v){ if(trabajosAplTmp[i]) trabajosAplTmp[i].contratistaId=v; }
+
+function setAplObs(i, destId, v){ if(trabajosAplTmp[i]) trabajosAplTmp[i].obs[destId]=v; }
+
+// Cambios en lo aplicado (para el resumen antes de guardar).
+function cambiosAplicados(ex){
+  var r=[];
+  for(var i=0;i<trabajosAplTmp.length;i++){
+    var ta=trabajosAplTmp[i], tr=getTrabajoById(ex, ta.id); if(!tr) continue;
+    if(tr.laborTipo==='LC' && (tr.contratistaId||'')!==(ta.contratistaId||''))
+      r.push('Contratista de '+nombreLaborDeTrabajo(tr)+': '+(getContratistaNombre(tr.contratistaId)||'sin contratista')+' → '+(getContratistaNombre(ta.contratistaId)||'sin contratista'));
+    for(var d=0;d<(tr.destinos||[]).length;d++){
+      var de=tr.destinos[d];
+      if(ta.obs.hasOwnProperty(de.id) && (de.obs||'')!==(ta.obs[de.id]||'')) r.push('Observaciones de '+nombreLaborDeTrabajo(tr)+' · '+nombreDestino(de));
+    }
+  }
+  return r;
+}
+
+function descripcionesUNFaltantes(ex){
+  for(var i=0;i<trabajosAplTmp.length;i++){
+    var ta=trabajosAplTmp[i], tr=getTrabajoById(ex, ta.id); if(!tr) continue;
+    for(var d=0;d<(tr.destinos||[]).length;d++){
+      var de=tr.destinos[d];
+      if(esUN(de) && ta.obs.hasOwnProperty(de.id) && !String(ta.obs[de.id]||'').replace(/\s/g,'')) return 'Describí el trabajo de '+de.cultivo+' en '+getCampoNombre(de.campoId)+': la descripción es obligatoria en una unidad de negocio.';
+    }
+  }
+  return '';
+}
+
+// La edición sigue valiendo si lo aplicado de la OT no cambió desde que se abrió
+// (si no, guardar podría duplicar o perder trabajos).
+function edicionVigente(ex, nuevos){
+  var apl={}, n=0, i;
+  for(i=0;i<(ex.trabajos||[]).length;i++){ if(trabajoAplicado(ex.trabajos[i])){ apl[ex.trabajos[i].id]=true; n++; } }
+  if(n!==trabajosAplTmp.length) return false;
+  for(i=0;i<trabajosAplTmp.length;i++){ if(!apl[trabajosAplTmp[i].id]) return false; }
+  for(i=0;i<(nuevos||[]).length;i++){ if(apl[nuevos[i].id]) return false; }
+  return true;
+}
+
+function guardarEditablesAplicados(ex){
+  for(var i=0;i<trabajosAplTmp.length;i++){
+    var ta=trabajosAplTmp[i], tr=getTrabajoById(ex, ta.id); if(!tr) continue;
+    if(tr.laborTipo==='LC') tr.contratistaId=ta.contratistaId||'';
+    for(var d=0;d<(tr.destinos||[]).length;d++){ var de=tr.destinos[d]; if(ta.obs.hasOwnProperty(de.id)) de.obs=ta.obs[de.id]||''; }
+  }
+}
+
+
+/* ===== Corregir una aplicación ===== */
+var correccionTmp=null;
+
+function r6(x){ return Math.round((Number(x)||0)*1e6)/1e6; }
+
+function corregirTanda(otId, tandaId){
+  if(!guard('cargar')) return;
+  var o=getOtById(otId); if(!o) return;
+  if(o.estado==='Cancelada'){ alert('La OT está cancelada.'); return; }
+  var afect=paresDeTanda(o, tandaId);
+  if(!afect.length) return;
+  var fApl=afect[0].destino.fechaAplicReal;
+  if(bloqueoFecha(fApl,'no se puede corregir una aplicación')) return;
+  var nom=[]; for(var a=0;a<afect.length;a++) nom.push('• '+nombreLaborDeTrabajo(afect[a].trabajo)+' · '+nombreDestino(afect[a].destino));
+  var enEdicion=(editOtId===otId);
+  if(!confirm('¿Corregir la aplicación del '+fd(fApl)+'?\n\n'+nom.join('\n')+
+    '\n\nSe deshace (los insumos vuelven al stock) y se abre "Registrar aplicación" con los mismos datos cargados: fecha, superficie real, depósito, entregado y devoluciones. Cambiás lo que estaba mal y confirmás de nuevo.'+
+    '\n\nHasta que confirmes, esos lotes quedan pendientes.'+(enEdicion?'\n\nLos cambios de la edición que no guardaste se descartan.':''))) return;
+  // Datos de la tanda antes de deshacerla.
+  var cr={otId:otId, fecha:fApl, destIds:{}, haReal:{}, consumos:{}}, reqK={};
+  for(var i=0;i<afect.length;i++){
+    var de=afect[i].destino;
+    cr.destIds[de.id]=true;
+    cr.haReal[de.id]=(de.haReal!==undefined && de.haReal!==null && de.haReal!=='') ? Number(de.haReal) : (Number(de.ha)||0);
+    for(var j=0;j<(de.lineas||[]).length;j++){
+      var ln=de.lineas[j]; if(!ln.insumoId) continue;
+      var k=claveCons(ln);
+      if(!cr.consumos[k]) cr.consumos[k]={devStock:0, devBaja:0, depositoId:ln.depositoId||'', entregadoOverride:0};
+      var c=cr.consumos[k];
+      c.entregadoOverride=r6(c.entregadoOverride+(Number(ln.entregada)||0));
+      c.devStock=r6(c.devStock+(Number(ln.devStock)||0));
+      c.devBaja=r6(c.devBaja+(Number(ln.devBaja)||0));
+      reqK[k]=(reqK[k]||0)+cantReq(de, ln, cr.haReal[de.id]);
+    }
+  }
+  // Lo entregado se fija solo si se había cargado a mano (distinto de dosis × superficie):
+  // si no, se recalcula, y corregir una dosis o la superficie cambia el consumo.
+  for(var kq in cr.consumos){ if(cr.consumos.hasOwnProperty(kq) && Math.abs(cr.consumos[kq].entregadoOverride-(reqK[kq]||0))<0.005) delete cr.consumos[kq].entregadoOverride; }
+  deshacerTandaCore(o, tandaId, afect);
+  correccionTmp=cr;
+  aplicTmp=null;
+  save();
+  if(enEdicion) resetOtForm();
+  viewOT(otId);
+  var card=byId('aplicCard'); if(card && card.scrollIntoView) card.scrollIntoView({behavior:'smooth', block:'start'});
+  toast('Aplicación deshecha: corregí y confirmá');
+}
+
+// Si hay una corrección en curso para esta OT, carga sus datos en aplicTmp.
+function sembrarCorreccion(otId, pendientes){
+  var cr=correccionTmp;
+  if(!cr || cr.otId!==otId) return false;
+  var n=0;
+  for(var p=0;p<pendientes.length;p++){ var id=pendientes[p].destino.id; if(cr.destIds[id]){ aplicTmp.lotesSel[id]=true; n++; } }
+  if(!n){ correccionTmp=null; return false; }
+  aplicTmp.fecha=cr.fecha||todayISO();
+  aplicTmp.haReal={}; for(var h in cr.haReal){ if(cr.haReal.hasOwnProperty(h)) aplicTmp.haReal[h]=cr.haReal[h]; }
+  for(var k in cr.consumos){ if(!cr.consumos.hasOwnProperty(k)) continue;
+    var c=cr.consumos[k]; aplicTmp.consumos[k]={devStock:c.devStock, devBaja:c.devBaja, depositoId:c.depositoId};
+    if(c.entregadoOverride!==undefined) aplicTmp.consumos[k].entregadoOverride=c.entregadoOverride;
+  }
+  aplicTmp.correccion=cr.fecha||'-';
+  return true;
+}
+
+function descartarCorreccion(){
+  if(!aplicTmp) return;
+  var otId=aplicTmp.otId;
+  correccionTmp=null; aplicTmp=null;
+  renderAplicacion(otId);
+}
+
+
+/* ================================================================
+   HISTORIA DEL LOTE: lo que se hizo en un lote, por fecha (solo lo agronómico:
+   labor, quién la hizo, superficie, producto y dosis). Se descarga en PDF.
+================================================================ */
+var histTmp=null;
+
+var JSPDF_URL='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+
+function openHistoriaLote(){
+  var fl=byId('consLoteFilter')?byId('consLoteFilter').value:'';
+  var lo=fl?getLoteById(fl):null;
+  var fc=byId('consCampoFilter')?byId('consCampoFilter').value:'';
+  histTmp={campoId: lo?lo.campoId:fc, loteId: lo?lo.id:'', campania: state.campaniaActivaId||''};
+  if(!histTmp.campoId && state.campos.length===1) histTmp.campoId=state.campos[0].id;
+  renderHistoriaLote();
+  byId('modalBg').classList.add('on');
+}
+
+function histSet(k, v){
+  histTmp[k]=v;
+  if(k==='campoId') histTmp.loteId='';
+  renderHistoriaLote();
+}
+
+// Registros aplicados de un lote, en orden cronológico.
+function datosHistoriaLote(loteId, campania){
+  var regs=[];
+  for(var i=0;i<state.ots.length;i++){
+    var o=state.ots[i]; if(o.estado==='Cancelada') continue;
+    if(campania && (o.campaniaId||'')!==campania) continue;
+    var pares=destinosDeOt(o);
+    for(var p=0;p<pares.length;p++){
+      var de=pares[p].destino, tr=pares[p].trabajo;
+      if(de.loteId!==loteId || de.estadoLote!=='Aplicado' || !destinoVisible(de)) continue;
+      var haR=(de.haReal!==undefined && de.haReal!==null && de.haReal!=='') ? Number(de.haReal) : (Number(de.ha)||0);
+      var prods=[];
+      for(var l=0;l<(de.lineas||[]).length;l++){
+        var ln=de.lineas[l], ins=getInsumo(ln.insumoId), usado=Number(ln.usado)||0;
+        if(!ins || usado<=0) continue;
+        var dos=(ln.dosisReal!==undefined && ln.dosisReal!==null) ? Number(ln.dosisReal) : (haR>0?usado/haR:0);
+        prods.push({nombre:ins.nombre, un:ins.un||'', dosis:dos, total:usado, orden:ordenMezcla(ins.id)});
+      }
+      prods.sort(function(a,b){ return a.orden!==b.orden ? a.orden-b.orden : a.nombre.localeCompare(b.nombre); });
+      var realizo = tr.laborTipo==='LP' ? 'Propia' : (tr.contratistaId ? getContratistaNombre(tr.contratistaId) : 'Contratada');
+      regs.push({fecha:de.fechaAplicReal||o.fecha||'', otNum:o.num, campania:o.campaniaId||'', labor:nombreLaborDeTrabajo(tr),
+        tipo:tr.laborTipo, realizo:realizo, ha:haR, cultivo:de.cultivo||'', resiembra:!!(tr.esResiembra||esLaborResiembra(tr.laborId, tr.laborTipo)),
+        obs:de.obs||'', prods:prods});
+    }
+  }
+  var ordC={}; for(var oc=0;oc<(state.campanias||[]).length;oc++) ordC[state.campanias[oc].id]=oc;
+  regs.sort(function(a,b){
+    if(a.campania!==b.campania){ var ca=ordC.hasOwnProperty(a.campania)?ordC[a.campania]:999, cb=ordC.hasOwnProperty(b.campania)?ordC[b.campania]:999; if(ca!==cb) return ca-cb; return a.campania<b.campania?-1:1; }
+    if(a.fecha!==b.fecha) return a.fecha<b.fecha?-1:1;
+    return a.otNum-b.otNum;
+  });
+  return regs;
+}
+
+// Datos de cabecera: lote, campo, superficie y cultivo(s) del plan de uso.
+function cabeceraHistoria(loteId, campania){
+  var lo=getLoteById(loteId), cults=[], acts=actividadesDe(campania||'', loteId), vistos={};
+  for(var a=0;a<acts.length;a++){
+    var c=acts[a].cultivo; if(!c || vistos[c]) continue; vistos[c]=true;
+    cults.push(c+(campania?'':' ('+getCampaniaNombre(acts[a].campaniaId)+')'));
+  }
+  return {lote:lo?lo.nombre:'', campo:lo?getCampoNombre(lo.campoId):'', ha:lo?Number(lo.ha)||0:0,
+    campania:campania?getCampaniaNombre(campania):'Todas las campañas', cultivos:cults,
+    empresa:(root.espacios[root.activoId]&&root.espacios[root.activoId].nombre)||''};
+}
+
+var MESES_CORTOS=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+
+function renderHistoriaLote(){
+  var t=histTmp;
+  var oc='<option value="">— Campo —</option>';
+  for(var c=0;c<state.campos.length;c++) oc+='<option value="'+esc(state.campos[c].id)+'"'+(state.campos[c].id===t.campoId?' selected':'')+'>'+esc(state.campos[c].nombre)+'</option>';
+  var ol='<option value="">— Lote —</option>';
+  for(var l=0;l<state.lotes.length;l++){ var lo=state.lotes[l]; if(lo.campoId!==t.campoId) continue; ol+='<option value="'+esc(lo.id)+'"'+(lo.id===t.loteId?' selected':'')+'>'+esc(lo.nombre)+'</option>'; }
+  var cuerpo='';
+  if(!t.loteId) cuerpo='<p class="empty" style="padding:30px 10px">Elegí el campo y el lote.</p>';
+  else {
+    var cab=cabeceraHistoria(t.loteId, t.campania), regs=datosHistoriaLote(t.loteId, t.campania);
+    cuerpo='<div class="hist-cab">'+
+        '<div><div class="hist-cab-lote">'+esc(cab.lote)+'</div><div class="hist-cab-sub">'+esc(cab.campo)+(cab.empresa?' · '+esc(cab.empresa):'')+'</div></div>'+
+        '<div class="hist-cab-datos">'+
+          '<div><span>Campaña</span>'+esc(cab.campania)+'</div>'+
+          '<div><span>Superficie</span>'+f(cab.ha,1)+' ha</div>'+
+          '<div><span>Cultivo</span>'+(cab.cultivos.length?esc(cab.cultivos.join(' · ')):'—')+'</div>'+
+          '<div><span>Labores</span>'+regs.length+'</div>'+
+        '</div>'+
+      '</div>';
+    if(!regs.length) cuerpo+='<p class="empty" style="padding:24px 10px">No hay labores aplicadas en este lote'+(t.campania?' en la campaña '+esc(cab.campania):'')+'.</p>';
+    else {
+      var tl='', campAnt=null;
+      for(var r=0;r<regs.length;r++){
+        var x=regs[r], p=String(x.fecha).split('-');
+        if(!t.campania && x.campania!==campAnt){ tl+='<div class="hist-camp">Campaña '+esc(getCampaniaNombre(x.campania))+'</div>'; campAnt=x.campania; }
+        var prods='';
+        for(var q=0;q<x.prods.length;q++){
+          var pr=x.prods[q];
+          prods+='<tr><td>'+esc(pr.nombre)+'</td><td class="num"><strong>'+f(pr.dosis,pr.dosis<10?2:1)+'</strong> '+esc(pr.un)+'/ha</td><td class="num hist-tot">'+f(pr.total,1)+' '+esc(pr.un)+'</td></tr>';
+        }
+        tl+='<div class="hist-it">'+
+          '<div class="hist-f"><span class="hist-d">'+(p[2]||'')+'</span><span class="hist-m">'+(MESES_CORTOS[Number(p[1])-1]||'')+' '+(p[0]||'')+'</span></div>'+
+          '<div class="hist-b">'+
+            '<div class="hist-lab"><strong>'+esc(x.labor)+'</strong>'+(x.resiembra?' <span class="bdg bn">Resiembra</span>':'')+
+              '<span class="hist-meta">'+esc(x.realizo)+' · '+f(x.ha,1)+' ha · '+esc(x.cultivo)+' · OT #'+x.otNum+'</span></div>'+
+            (prods?'<table class="hist-prod"><thead><tr><th>Producto</th><th class="num">Dosis</th><th class="num">Total</th></tr></thead><tbody>'+prods+'</tbody></table>':'<div class="hist-sin">Sin productos</div>')+
+            (x.obs?'<div class="hist-obs">'+esc(x.obs)+'</div>':'')+
+          '</div>'+
+        '</div>';
+      }
+      cuerpo+='<div class="hist-tl">'+tl+'</div>';
+    }
+  }
+  var mc=byId('modalContent'); mc.className='modal modal-full';
+  mc.innerHTML='<h3>Historia del lote</h3>'+
+    '<div class="form-row r4 hist-filtros">'+
+      '<div class="fld"><label>Campo</label><select onchange="histSet(\'campoId\',this.value)">'+oc+'</select></div>'+
+      '<div class="fld"><label>Lote</label><select onchange="histSet(\'loteId\',this.value)">'+ol+'</select></div>'+
+      '<div class="fld"><label>Campaña</label><select onchange="histSet(\'campania\',this.value)">'+campaniaOptions(t.campania,true)+'</select></div>'+
+    '</div>'+
+    '<div class="hist-cuerpo">'+cuerpo+'</div>'+
+    '<div class="fact"><button class="btn" onclick="closeModal()">Cerrar</button>'+
+      '<button class="btn btn-primary" onclick="descargarPdfHistoria()"'+(t.loteId?'':' disabled')+'>⬇ Descargar PDF</button></div>';
+}
+
+function cargarScript(url, ok, cb){
+  if(ok()) return cb(true);
+  var s=document.createElement('script'); s.src=url;
+  s.onload=function(){ cb(ok()); }; s.onerror=function(){ cb(false); };
+  document.head.appendChild(s);
+}
+
+function descargarPdfHistoria(){
+  if(!histTmp || !histTmp.loteId) return;
+  cargarScript(JSPDF_URL, function(){ return !!(window.jspdf && window.jspdf.jsPDF); }, function(ok){
+    if(!ok){ alert('No se pudo cargar el generador de PDF. Revisá la conexión y probá de nuevo.'); return; }
+    var doc=armarPdfHistoria(histTmp.loteId, histTmp.campania);
+    var cab=cabeceraHistoria(histTmp.loteId, histTmp.campania);
+    var nom=('Historia '+cab.lote+' '+cab.campo+' '+(histTmp.campania?cab.campania:'todas')).replace(/[^A-Za-z0-9áéíóúñÁÉÍÓÚÑ_-]+/g,'_');
+    doc.save(nom+'.pdf');
+  });
+}
+
+// El PDF usa las fuentes estándar (Helvetica): se evitan caracteres fuera de Latin-1.
+function pdfTxt(s){ return String(s==null?'':s).replace(/[—–]/g,'-').replace(/[‘’]/g,"'").replace(/[“”]/g,'"').replace(/[^\u0000-ÿ]/g,''); }
+
+function armarPdfHistoria(loteId, campania){
+  var J=window.jspdf.jsPDF, doc=new J({unit:'mm', format:'a4'});
+  var cab=cabeceraHistoria(loteId, campania), regs=datosHistoriaLote(loteId, campania);
+  var W=210, H=297, M=14, y=M;
+  var VERDE=[74,101,51], GRIS=[110,110,110], FONDO=[243,246,239], LINEA=[210,215,205];
+  // columnas: fecha, labor, realizó, ha, producto, dosis
+  var cols=[{t:'Fecha',w:20},{t:'Labor',w:40},{t:'Realizó',w:32},{t:'Ha',w:14,r:1},{t:'Producto',w:46},{t:'Dosis',w:30,r:1}];
+  var x0=M, xs=[]; for(var i=0;i<cols.length;i++){ xs.push(x0); x0+=cols[i].w; }
+  var LH=4.2;
+  function encabezadoTabla(){
+    doc.setFillColor(VERDE[0],VERDE[1],VERDE[2]); doc.rect(M, y, W-2*M, 7, 'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.setTextColor(255,255,255);
+    for(var c=0;c<cols.length;c++){
+      if(cols[c].r) doc.text(cols[c].t, xs[c]+cols[c].w-1.5, y+4.7, {align:'right'});
+      else doc.text(cols[c].t, xs[c]+1.5, y+4.7);
+    }
+    y+=7;
+  }
+  var campAct=null;
+  function rotuloCampania(txt){
+    doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(VERDE[0],VERDE[1],VERDE[2]);
+    doc.text(pdfTxt(txt), M+1.5, y+5.2);
+    doc.setDrawColor(VERDE[0],VERDE[1],VERDE[2]); doc.setLineWidth(0.3); doc.line(M, y+7, W-M, y+7);
+    y+=8;
+  }
+  function nuevaHoja(){ doc.addPage(); y=M; encabezadoTabla(); if(!campania && campAct) rotuloCampania('Campaña '+getCampaniaNombre(campAct)+' (sigue)'); }
+  // Cabecera del documento
+  doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(VERDE[0],VERDE[1],VERDE[2]);
+  doc.text('PUNTAL AGRO', M, y+3);
+  doc.setFont('helvetica','normal'); doc.setTextColor(GRIS[0],GRIS[1],GRIS[2]);
+  doc.text(pdfTxt(cab.empresa), W-M, y+3, {align:'right'});
+  y+=10;
+  doc.setFont('helvetica','bold'); doc.setFontSize(17); doc.setTextColor(30,30,30);
+  doc.text(pdfTxt('Historia del lote '+cab.lote), M, y);
+  y+=6;
+  doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(GRIS[0],GRIS[1],GRIS[2]);
+  doc.text(pdfTxt(cab.campo), M, y);
+  y+=6;
+  doc.setDrawColor(LINEA[0],LINEA[1],LINEA[2]); doc.setLineWidth(0.3); doc.line(M, y, W-M, y);
+  y+=5;
+  var datos=[['Campaña', cab.campania], ['Superficie', f(cab.ha,1)+' ha'], ['Cultivo', cab.cultivos.length?cab.cultivos.join(' · '):'-'], ['Labores', String(regs.length)]];
+  var xd=M, anchos=[38,26,88,20];
+  for(var d=0;d<datos.length;d++){
+    doc.setFontSize(7.5); doc.setTextColor(GRIS[0],GRIS[1],GRIS[2]); doc.text(pdfTxt(datos[d][0]).toUpperCase(), xd, y);
+    doc.setFontSize(10); doc.setTextColor(30,30,30);
+    var vl=doc.splitTextToSize(pdfTxt(datos[d][1]), anchos[d]-3); doc.text(vl, xd, y+5);
+    xd+=anchos[d];
+  }
+  y+=14;
+  if(!regs.length){
+    doc.setFontSize(10); doc.setTextColor(GRIS[0],GRIS[1],GRIS[2]);
+    doc.text(pdfTxt('No hay labores aplicadas en este lote'+(campania?' en la campaña '+cab.campania:'')+'.'), M, y+4);
+  } else {
+    encabezadoTabla();
+    var campAnt=null, par=false;
+    for(var r=0;r<regs.length;r++){
+      var x=regs[r];
+      if(!campania && x.campania!==campAnt){
+        campAct=null;
+        if(y+8+18>H-M-8) nuevaHoja();   // el rótulo no queda solo al pie de la hoja
+        rotuloCampania('Campaña '+getCampaniaNombre(x.campania));
+        campAnt=x.campania; campAct=x.campania;
+      }
+      doc.setFont('helvetica','normal'); doc.setFontSize(8.5);
+      var lab=doc.splitTextToSize(pdfTxt(x.labor+(x.resiembra?' (resiembra)':'')), cols[1].w-3);
+      var rea=doc.splitTextToSize(pdfTxt(x.realizo), cols[2].w-3);
+      var filasP=[];
+      for(var q=0;q<x.prods.length;q++){
+        var pr=x.prods[q];
+        filasP.push({n:doc.splitTextToSize(pdfTxt(pr.nombre), cols[4].w-3), d:pdfTxt(f(pr.dosis, pr.dosis<10?2:1)+' '+pr.un+'/ha')});
+      }
+      var altP=0; for(var q2=0;q2<filasP.length;q2++) altP+=filasP[q2].n.length*LH;
+      if(!filasP.length) altP=LH;
+      var obs=x.obs?doc.splitTextToSize(pdfTxt('Obs.: '+x.obs), W-2*M-cols[0].w-3):[];
+      var contH=Math.max(lab.length*LH, rea.length*LH+LH, altP);
+      var alto=contH+(obs.length?obs.length*LH+1.5:0)+3;
+      if(y+alto>H-M-8) nuevaHoja();
+      if(par){ doc.setFillColor(FONDO[0],FONDO[1],FONDO[2]); doc.rect(M, y, W-2*M, alto, 'F'); }
+      par=!par;
+      var yt=y+4.3;
+      doc.setFont('helvetica','bold'); doc.setTextColor(30,30,30);
+      doc.text(pdfTxt(fd(x.fecha)), xs[0]+1.5, yt);
+      doc.text(lab, xs[1]+1.5, yt);
+      doc.setFont('helvetica','normal');
+      doc.text(rea, xs[2]+1.5, yt);
+      doc.setFontSize(7); doc.setTextColor(GRIS[0],GRIS[1],GRIS[2]);
+      doc.text('OT #'+x.otNum, xs[2]+1.5, yt+rea.length*LH);
+      doc.setFontSize(8.5); doc.setTextColor(30,30,30);
+      doc.text(f(x.ha,1), xs[3]+cols[3].w-1.5, yt, {align:'right'});
+      if(!filasP.length){ doc.setTextColor(GRIS[0],GRIS[1],GRIS[2]); doc.text('Sin productos', xs[4]+1.5, yt); doc.setTextColor(30,30,30); }
+      var yp=yt;
+      for(var q3=0;q3<filasP.length;q3++){
+        doc.text(filasP[q3].n, xs[4]+1.5, yp);
+        doc.setFont('helvetica','bold'); doc.text(filasP[q3].d, xs[5]+cols[5].w-1.5, yp, {align:'right'}); doc.setFont('helvetica','normal');
+        yp+=filasP[q3].n.length*LH;
+      }
+      if(obs.length){
+        doc.setFont('helvetica','italic'); doc.setFontSize(8); doc.setTextColor(GRIS[0],GRIS[1],GRIS[2]);
+        doc.text(obs, xs[1]+1.5, y+4.3+contH+1.5);
+        doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(30,30,30);
+      }
+      y+=alto;
+      doc.setDrawColor(LINEA[0],LINEA[1],LINEA[2]); doc.setLineWidth(0.2); doc.line(M, y, W-M, y);
+    }
+  }
+  // Pie de cada hoja
+  var n=doc.getNumberOfPages();
+  for(var pg=1;pg<=n;pg++){
+    doc.setPage(pg);
+    doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(GRIS[0],GRIS[1],GRIS[2]);
+    doc.text(pdfTxt('Puntal Agro · Historia del lote '+cab.lote+' · '+cab.campo+' · generado el '+fd(todayISO())), M, H-8);
+    doc.text('Página '+pg+' de '+n, W-M, H-8, {align:'right'});
+  }
+  return doc;
+}
+
+/* ================================================================
+   ESTADOS DE LA OT (BUILD 8)
+   Pendiente → se edita libremente. Parcial → hay labores confirmadas y otras por hacer.
+   Confirmada → todo hecho. Cancelada → no figura en ningún lado.
+   Para cambiar algo confirmado: "Volver a pendiente" (devuelve el stock y guarda lo cargado,
+   que vuelve precargado al registrar de nuevo).
+   Internamente la OT confirmada sigue guardada como 'Aplicada' (y el lote como 'Aplicado').
+================================================================ */
+function etiquetaEstado(e){ return e==='Aplicada' ? 'Confirmada' : (e==='Aplicado' ? 'Confirmado' : (e||'—')); }
+
+function nPendientesOT(o){ var p=destinosDeOt(o), n=0; for(var i=0;i<p.length;i++){ if(p[i].destino.estadoLote!=='Aplicado') n++; } return n; }
+
+// Barra de arriba del detalle: estado, qué sigue y el botón de lo que hay que hacer.
+function barraEstadoOT(o){
+  var puedeC=puede('cargar'), id=o.id, est=o.estado, sigue='', main='', sec='';
+  var imp='<button class="btn" onclick="imprimirOT(\''+id+'\')">🖨 Imprimir</button>';
+  var nP=nPendientesOT(o);
+  if(est==='Cancelada'){
+    sigue='OT cancelada: no figura en consumos, labores, costos ni stock comprometido.';
+    if(puedeC) main='<button class="btn btn-primary" onclick="reactivateOT(\''+id+'\')">Reactivar OT</button>';
+  } else if(est==='Pendiente'){
+    sigue='Cuando se haga la labor, registrá lo realizado.'+(o.ultimoRegistro?' Lo que cargaste la última vez está guardado y aparece precargado.':'');
+    if(puedeC){
+      main='<button class="btn btn-primary" onclick="openRegistro(\''+id+'\')">Registrar lo realizado</button>';
+      sec='<button class="btn" onclick="startEditOT(\''+id+'\')">✎ Editar</button><button class="btn btn-danger-ghost" onclick="cancelOT(\''+id+'\')">Cancelar OT</button>';
+    }
+  } else if(est==='Parcial'){
+    sigue='Falta registrar '+nP+(nP===1?' labor':' labores')+'. Registralas cuando se hagan (si alguna ya no se va a hacer, marcala «No se hace»). Para cambiar algo de lo confirmado, volvé a pendiente.';
+    if(puedeC){
+      main='<button class="btn btn-primary" onclick="openRegistro(\''+id+'\')">Registrar lo que falta</button>';
+      sec='<button class="btn" onclick="volverAPendiente(\''+id+'\')">↩ Volver a pendiente</button>';
+    }
+  } else {
+    sigue='Todo confirmado. Para cambiar algo, volvé a pendiente: se devuelve el stock y lo que cargaste queda guardado.';
+    if(puedeC) sec='<button class="btn" onclick="volverAPendiente(\''+id+'\')">↩ Volver a pendiente</button>';
+  }
+  if(!puedeC) sigue+=' (Tu usuario es de consulta.)';
+  return '<div class="ot-barra no-print">'+
+      '<div class="ot-barra-l"><span class="ot-barra-num">OT #'+o.num+'</span>'+estadoBadge(est)+'</div>'+
+      '<div class="ot-barra-sigue"><span class="ot-barra-flecha">→</span> '+esc(sigue)+'</div>'+
+      '<div class="ot-barra-acc">'+imp+sec+main+'</div>'+
+    '</div>';
+}
+
+// Lo ya confirmado de la OT (solo lectura), debajo del documento.
+function htmlRealizado(o){
+  var pares=destinosDeOt(o), filas='';
+  var apl=[]; for(var i=0;i<pares.length;i++){ if(pares[i].destino.estadoLote==='Aplicado') apl.push(pares[i]); }
+  apl.sort(function(a,b){ var fa=a.destino.fechaAplicReal||'', fb=b.destino.fechaAplicReal||''; return fa<fb?-1:fa>fb?1:0; });
+  for(var a=0;a<apl.length;a++){
+    var de=apl[a].destino, tr=apl[a].trabajo, un=esUN(de), haR=haRealDe(de), ins='';
+    for(var j=0;j<(de.lineas||[]).length;j++){
+      var ln=de.lineas[j], x=getInsumo(ln.insumoId); if(!x) continue;
+      var dos = un ? '' : f(ln.dosisReal!=null?ln.dosisReal:(haR>0?(Number(ln.usado)||0)/haR:0),2)+' '+esc(x.un)+'/ha · ';
+      ins+='<div class="real-ins"><span>'+esc(x.nombre)+'</span><span>'+dos+'<strong>'+f(ln.usado,1)+' '+esc(x.un)+'</strong>'+((Number(ln.devBaja)||0)>0?' <span class="trb-apl-sub">(+'+f(ln.devBaja,1)+' perdido)</span>':'')+'</span></div>';
+    }
+    filas+='<tr><td class="otl-fecha">'+fd(de.fechaAplicReal)+'</td>'+
+      '<td class="tdname"><strong>'+esc(un?(de.cultivo+' · '+getCampoNombre(de.campoId)):nombreDestino(de))+'</strong><div class="trb-apl-sub">'+esc(nombreLaborDeTrabajo(tr))+'</div></td>'+
+      '<td class="num">'+f(haR,1)+(un?' unid.':' ha')+'</td>'+
+      '<td>'+(ins||'<span class="trb-apl-sub">sin insumos</span>')+'</td></tr>';
+  }
+  return '<div class="chd"><span class="ct-lg">Lo realizado</span><span class="ct">'+apl.length+(apl.length===1?' labor confirmada':' labores confirmadas')+'</span></div>'+
+    '<div class="tw"><table><thead><tr><th>Fecha</th><th>Lote · labor</th><th class="num">Superficie</th><th>Insumos · dosis real · consumido</th></tr></thead><tbody>'+filas+'</tbody></table></div>';
+}
+
+/* ===== Registrar lo realizado: asistente en 3 pasos =====
+   Usa aplicTmp (el mismo estado que el cálculo de prorrateo): lotesSel = lo marcado "Se hizo". */
+
+function regFecha(destId){ return (aplicTmp.fechas && aplicTmp.fechas[destId]) || aplicTmp.fecha; }
+
+function regSync(){ aplicTmp.lotesSel={}; for(var k in aplicTmp.est){ if(aplicTmp.est.hasOwnProperty(k) && aplicTmp.est[k]==='si') aplicTmp.lotesSel[k]=true; } }
+
+function openRegistro(otId){
+  if(!guard('cargar')) return;
+  var o=getOtById(otId); if(!o || o.estado==='Cancelada') return;
+  if(editOtId===otId){
+    if(!confirm('Estás editando la OT #'+o.num+'. Si seguís, se descartan los cambios que no guardaste.\n\n¿Registrar lo realizado igual?')) return;
+    resetOtForm();
+  }
+  var pares=destinosDeOt(o), pend=[];
+  for(var i=0;i<pares.length;i++){ if(pares[i].destino.estadoLote!=='Aplicado') pend.push(pares[i]); }
+  if(!pend.length){ toast('No queda nada pendiente en esta OT'); return; }
+  var fb=fechaBloqueo(), hoy=todayISO();
+  aplicTmp={otId:otId, paso:1, fecha:(fb && hoy<=fb)?addDias(fb,1):hoy, est:{}, fechas:{}, haReal:{}, consumos:{}, lotesSel:{}, registro:true};
+  var ur=o.ultimoRegistro, nPre=0;
+  for(var p=0;p<pend.length;p++){
+    var de=pend[p].destino, s=ur && ur.dest && ur.dest[de.id];
+    if(s){ aplicTmp.est[de.id]='si'; aplicTmp.haReal[de.id]=s.haReal; aplicTmp.fechas[de.id]=s.fecha; nPre++; }
+    else aplicTmp.est[de.id]= ur ? 'pend' : 'si';
+  }
+  if(nPre){
+    // La fecha general es la más usada entre los lotes precargados.
+    var cnt={}, mejor='', mx=0;
+    for(var fk in aplicTmp.fechas){ if(aplicTmp.fechas.hasOwnProperty(fk)){ var fv=aplicTmp.fechas[fk]; cnt[fv]=(cnt[fv]||0)+1; if(cnt[fv]>mx){ mx=cnt[fv]; mejor=fv; } } }
+    aplicTmp.fecha=mejor||aplicTmp.fecha;
+    for(var fk2 in aplicTmp.fechas){ if(aplicTmp.fechas.hasOwnProperty(fk2) && aplicTmp.fechas[fk2]===aplicTmp.fecha) delete aplicTmp.fechas[fk2]; }
+    regSync();
+    var agg=calcEntregadoPorInsumo(o), nUr=0; for(var ku in ur.dest){ if(ur.dest.hasOwnProperty(ku)) nUr++; }
+    // Las cantidades son totales de todos los lotes guardados: solo se precargan si están todos.
+    var consOk = ur.consumos && nPre===nUr;
+    for(var k in (consOk?ur.consumos:{})){ if(!ur.consumos.hasOwnProperty(k) || !agg.hasOwnProperty(k)) continue;
+      var c=ur.consumos[k];
+      aplicTmp.consumos[k]={depositoId:(getDepositoById(c.depositoId)?c.depositoId:''), devStock:c.devStock, devBaja:c.devBaja};
+      // Lo entregado queda fijo solo si se había cargado a mano (distinto de dosis × superficie);
+      // si no, sigue a la dosis y la superficie actuales.
+      if(Math.abs((c.entregada||0)-(c.req||0))>0.005) aplicTmp.consumos[k].entregadoOverride=c.entregada;
+    }
+    aplicTmp.precargado=nPre;
+  } else regSync();
+  renderRegistro();
+  byId('modalBg').classList.add('on');
+}
+
+function regSetEst(destId, v){ if(aplicTmp.est[destId]===v) return; aplicTmp.est[destId]=v; regSync(); aplicTmp.consumos=limpiarConsumosReg(); renderRegistro(); }
+
+// Al cambiar lo marcado, lo entregado a mano deja de valer (cambió lo que se pide).
+function limpiarConsumosReg(){ var o=getOtById(aplicTmp.otId), agg=calcEntregadoPorInsumo(o), out={}; for(var k in aplicTmp.consumos){ if(aplicTmp.consumos.hasOwnProperty(k) && agg.hasOwnProperty(k)){ var c=aplicTmp.consumos[k]; out[k]={depositoId:c.depositoId, devStock:0, devBaja:0}; } } return out; }
+
+function regSetHa(destId, v){ aplicTmp.haReal[destId]=v; }
+
+function regSetFecha(destId, v){ if(v===aplicTmp.fecha) delete aplicTmp.fechas[destId]; else aplicTmp.fechas[destId]=v; }
+
+function regSetFechaGral(v){ aplicTmp.fecha=v; renderRegistro(); }
+
+function regTodos(v){
+  var cambia=false; for(var k in aplicTmp.est){ if(aplicTmp.est.hasOwnProperty(k) && aplicTmp.est[k]!==v){ aplicTmp.est[k]=v; cambia=true; } }
+  if(!cambia) return;
+  regSync(); aplicTmp.consumos=limpiarConsumosReg(); renderRegistro();
+}
+
+function regIr(paso){
+  var o=getOtById(aplicTmp.otId); if(!o) return;
+  if(paso>aplicTmp.paso && !regValidar(o, aplicTmp.paso)) return;
+  // Sin nada "Se hizo", no hay insumos que cargar.
+  if(paso===2 && !regHaySi()) paso = (aplicTmp.paso===3 ? 1 : 3);
+  aplicTmp.paso=paso; renderRegistro();
+  var mc=byId('modalContent'); if(mc) mc.scrollTop=0;
+}
+
+function regHaySi(){ for(var k in aplicTmp.est){ if(aplicTmp.est.hasOwnProperty(k) && aplicTmp.est[k]==='si') return true; } return false; }
+
+function regValidar(o, paso){
+  var pares=destinosDeOt(o), k;
+  if(paso===1){
+    var hay=false, sinHa=[], fb=fechaBloqueo(), nSi=0, nPe=0, nAp=0;
+    for(var i=0;i<pares.length;i++){
+      var de=pares[i].destino, e=aplicTmp.est[de.id];
+      if(de.estadoLote==='Aplicado'){ nAp++; continue; }
+      if(!e) continue;
+      if(e!=='pend') hay=true;
+      if(e==='si') nSi++; if(e==='pend') nPe++;
+      if(e==='si'){
+        if(!(haRealDe(de)>0)) sinHa.push('• '+nombreDestinoCorto(de)+' · '+nombreLaborDeTrabajo(pares[i].trabajo));
+        var fe=regFecha(de.id);
+        if(!fe){ alert('Falta la fecha de '+nombreDestinoCorto(de)+'.'); return false; }
+        if(fb && fe<=fb){ bloqueoFecha(fe,'no se pueden registrar labores'); return false; }
+      }
+    }
+    if(!hay){ alert('Marcá al menos una labor como «Se hizo» (o «No se hace» si ya no se va a hacer).'); return false; }
+    if(!nSi && !nPe && !nAp){ alert('Si no se va a hacer nada de esta orden, cancelala (botón «Cancelar OT»).'); return false; }
+    if(sinHa.length){ alert('Falta la superficie realmente trabajada en:\n\n'+sinHa.join('\n')); return false; }
+  }
+  if(paso===2){
+    var agg=calcEntregadoPorInsumo(o);
+    for(k in agg){ if(!agg.hasOwnProperty(k)) continue;
+      var ins=getInsumo(insDeClave(k)), c=aplicTmp.consumos[k]||{};
+      if(consumidoCalc(k, agg)<-0.01){ alert('En '+(ins?ins.nombre:'un insumo')+' lo que volvió y lo que se perdió suman más que lo entregado.'); return false; }
+      if((!c.depositoId || !getDepositoById(c.depositoId)) && entregadoEfectivo(k, agg)>0){ alert('Elegí de qué depósito salió '+(ins?ins.nombre:'un insumo')+'.'); return false; }
+    }
+  }
+  return true;
+}
+
+function nombreDestinoCorto(de){ return esUN(de) ? (de.cultivo+' · '+getCampoNombre(de.campoId)) : nombreDestino(de); }
+
+function renderRegistro(){
+  var o=getOtById(aplicTmp.otId); if(!o) return;
+  var paso=aplicTmp.paso, pares=destinosDeOt(o), fb=fechaBloqueo();
+  var pasos=['Qué se hizo','Insumos','Revisar y confirmar'], stp='';
+  for(var s=0;s<3;s++) stp+='<div class="reg-paso'+(s+1===paso?' act':(s+1<paso?' ok':''))+'"><span>'+(s+1<paso?'✓':(s+1))+'</span>'+pasos[s]+'</div>';
+  var cuerpo='';
+  if(paso===1){
+    var rows='';
+    for(var i=0;i<pares.length;i++){
+      var de=pares[i].destino, tr=pares[i].trabajo; if(de.estadoLote==='Aplicado') continue;
+      var e=aplicTmp.est[de.id], un=esUN(de);
+      var pill=function(v, txt, cls){ return '<button type="button" class="reg-pill'+(e===v?' '+cls:'')+'" onclick="regSetEst(\''+de.id+'\',\''+v+'\')">'+txt+'</button>'; };
+      rows+='<tr class="reg-fila'+(e==='si'?'':' reg-fila-off')+'">'+
+        '<td class="tdname"><strong>'+esc(nombreDestinoCorto(de))+'</strong><div class="trb-apl-sub">'+esc(nombreLaborDeTrabajo(tr))+(un?'':' · '+esc(de.cultivo||''))+' · plan '+f(de.ha,1)+(un?' unid.':' ha')+'</div></td>'+
+        '<td><div class="reg-pills">'+pill('si','Se hizo','on')+pill('pend','Queda pendiente','pend')+pill('no','No se hace','no')+'</div></td>'+
+        (e==='si'
+          ? '<td class="num"><input type="number" step="0.01" min="0" class="inp-num" style="width:90px" value="'+(aplicTmp.haReal[de.id]!==undefined?aplicTmp.haReal[de.id]:de.ha)+'" oninput="regSetHa(\''+de.id+'\',this.value)"> <span class="trb-apl-sub">'+(un?'unid.':'ha')+'</span></td>'+
+            '<td><input type="date" value="'+regFecha(de.id)+'"'+(fb?' min="'+addDias(fb,1)+'"':'')+' onchange="regSetFecha(\''+de.id+'\',this.value)"></td>'
+          : '<td colspan="2" class="trb-apl-sub">'+(e==='no'?'Sale de la orden: deja de estar comprometida.':'Sigue en la orden para registrarla más adelante.')+'</td>')+
+        '</tr>';
+    }
+    cuerpo='<div class="reg-ayuda">Por defecto está todo en <strong>Se hizo</strong>. Cambiá a <strong>Queda pendiente</strong> lo que todavía no se hizo, o a <strong>No se hace</strong> lo que ya no se va a hacer.</div>'+
+      '<div class="reg-fecha-row"><div class="fld"><label>Fecha de aplicación (para todos)</label><input type="date" value="'+aplicTmp.fecha+'"'+(fb?' min="'+addDias(fb,1)+'"':'')+' onchange="regSetFechaGral(this.value)"></div>'+
+        '<span class="trb-apl-sub" style="padding-bottom:9px">Si algún lote se hizo otro día, cambiale la fecha en su fila.'+(fb?' Stock cerrado al '+fd(fb)+': la fecha tiene que ser posterior.':'')+'</span>'+
+        '<span style="flex:1"></span><button type="button" class="btn btn-sm" onclick="regTodos(\'si\')">Marcar todo «Se hizo»</button></div>'+
+      '<div class="tw"><table class="reg-tbl reg-p1"><thead><tr><th>Lote · labor</th><th>¿Se hizo?</th><th class="num">Superficie real</th><th>Fecha</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  } else if(paso===2){
+    var agg=calcEntregadoPorInsumo(o), ids=[]; for(var k in agg){ if(agg.hasOwnProperty(k)) ids.push(k); }
+    if(!ids.length) cuerpo='<p class="empty" style="padding:24px 10px">Lo que marcaste como hecho no lleva insumos. Seguí al paso 3.</p>';
+    else {
+      var porIns={}, filas='';
+      for(var a=0;a<ids.length;a++){ var ii=insDeClave(ids[a]); porIns[ii]=(porIns[ii]||0)+1;
+        if(!aplicTmp.consumos[ids[a]]) aplicTmp.consumos[ids[a]]={devStock:0, devBaja:0, depositoId:''};
+        if(!aplicTmp.consumos[ids[a]].depositoId || !getDepositoById(aplicTmp.consumos[ids[a]].depositoId)) aplicTmp.consumos[ids[a]].depositoId=depSugeridoClave(ids[a]); }
+      var fMax=regFechaMax(o);
+      for(var m=0;m<ids.length;m++){
+        var key=ids[m], insId=insDeClave(key), ins=getInsumo(insId), c=aplicTmp.consumos[key];
+        var req=agg[key], ent=entregadoEfectivo(key, agg), cons=consumidoCalc(key, agg);
+        var od=c.depositoId?'':'<option value="">— Elegir —</option>';
+        for(var d=0;d<state.depositos.length;d++){ var dp=state.depositos[d], st=stockDe(insId, dp.id, {desde:'', hasta:fMax}).real;
+          od+='<option value="'+esc(dp.id)+'"'+(dp.id===c.depositoId?' selected':'')+'>'+esc(dp.nombre)+' · hay '+f(st,0)+'</option>'; }
+        filas+='<tr><td class="tdname"><strong>'+(ins?esc(ins.nombre):'—')+'</strong> <span class="trb-apl-sub">'+(ins?esc(ins.un):'')+'</span>'+(porIns[insId]>1?'<div class="trb-apl-sub">planificado de '+esc(depDeClave(key)?getDepNombre(depDeClave(key)):'sin depósito')+'</div>':'')+'</td>'+
+          '<td><select class="inp" style="min-width:170px" onchange="updateConsumoDep(\''+key+'\',this.value)">'+od+'</select></td>'+
+          '<td class="num trb-apl-sub">'+f(req,2)+'</td>'+
+          '<td class="num"><input type="number" step="0.01" min="0" class="inp-num" style="width:90px" id="entr_'+key+'" value="'+(Math.round(ent*100)/100)+'" oninput="updateEntregado(\''+key+'\',this.value)"></td>'+
+          '<td class="num"><input type="number" step="0.01" min="0" class="inp-num" style="width:80px" id="devs_'+key+'" value="'+c.devStock+'" oninput="updateConsumo(\''+key+'\',\'devStock\',this.value)"></td>'+
+          '<td class="num"><input type="number" step="0.01" min="0" class="inp-num" style="width:80px" id="devb_'+key+'" value="'+c.devBaja+'" oninput="updateConsumo(\''+key+'\',\'devBaja\',this.value)"></td>'+
+          '<td class="num" id="aplicSum_'+key+'"><span class="'+(cons<-0.01?'bad-sum':'ok-sum')+'"><strong>'+f(cons,2)+'</strong></span></td></tr>';
+      }
+      cuerpo='<div class="reg-ayuda">Ya está cargado lo planificado (dosis × superficie real). Cambialo solo si salió otra cantidad del depósito, si <strong>volvió</strong> algo sin usar o si algo <strong>se perdió</strong> (envase roto, derrame).</div>'+
+        '<div class="tw"><table class="reg-tbl"><thead><tr><th>Insumo</th><th>Salió del depósito</th><th class="num">Planificado</th><th class="num">Entregado</th><th class="num">Volvió</th><th class="num">Se perdió</th><th class="num">Consumido</th></tr></thead><tbody>'+filas+'</tbody></table></div>';
+    }
+  } else {
+    cuerpo=htmlResumenRegistro(o);
+  }
+  var mc=byId('modalContent'); mc.className='modal modal-full';
+  mc.innerHTML='<h3>Registrar lo realizado · OT #'+o.num+'</h3>'+
+    '<div class="reg-pasos">'+stp+'</div>'+
+    (aplicTmp.precargado&&paso===1?'<div class="banner-info" style="margin:0 0 8px">Están cargados los datos de la última vez. Si no cambiás nada, queda igual que antes.</div>':'')+
+    '<div class="reg-cuerpo">'+cuerpo+'</div>'+
+    '<div class="fact"><button class="btn" onclick="closeModal()">Cancelar</button>'+
+      '<span style="flex:1"></span>'+
+      (paso>1?'<button class="btn" onclick="regIr('+(paso-1)+')">← Atrás</button>':'')+
+      (paso<3?'<button class="btn btn-primary" onclick="regIr('+(paso+1)+')">Siguiente →</button>'
+             :'<button class="btn btn-primary" onclick="confirmarRegistro()">✓ Confirmar</button>')+
+    '</div>';
+}
+
+function regFechaMax(o){ var mx='', p=destinosDeOt(o); for(var i=0;i<p.length;i++){ var id=p[i].destino.id; if(aplicTmp.est[id]==='si'){ var fe=regFecha(id); if(fe>mx) mx=fe; } } return mx||aplicTmp.fecha; }
+
+// Stock que sale por insumo y depósito (lo entregado menos lo que volvió).
+function regSalidas(o){
+  var agg=calcEntregadoPorInsumo(o), sale={};
+  for(var k in agg){ if(!agg.hasOwnProperty(k)) continue;
+    var c=aplicTmp.consumos[k]||{}, v=entregadoEfectivo(k, agg)-(Number(c.devStock)||0);
+    if(v<=0 || !c.depositoId) continue;
+    var kd=insDeClave(k)+'||'+c.depositoId; sale[kd]=(sale[kd]||0)+v;
+  }
+  return sale;
+}
+
+function htmlResumenRegistro(o){
+  var pares=destinosDeOt(o), si=[], pe=[], no=[], ha=0, i;
+  for(i=0;i<pares.length;i++){ var de=pares[i].destino; if(de.estadoLote==='Aplicado') continue;
+    var e=aplicTmp.est[de.id]; if(e==='si'){ si.push(pares[i]); if(!esUN(de)) ha+=haRealDe(de); } else if(e==='no') no.push(pares[i]); else pe.push(pares[i]); }
+  var sale=regSalidas(o), fMax=regFechaMax(o), saleTxt=[], avisos=[];
+  for(var kd in sale){ if(!sale.hasOwnProperty(kd)) continue;
+    var pp=kd.split('||'), ins=getInsumo(pp[0]), hay=stockDe(pp[0], pp[1], {desde:'', hasta:fMax}).real;
+    saleTxt.push(f(sale[kd],1)+' '+(ins?ins.un:'')+' de '+(ins?ins.nombre:''));
+    if(sale[kd]>hay+0.01) avisos.push('Stock insuficiente: '+(ins?ins.nombre:'')+' en '+getDepNombre(pp[1])+' (sale '+f(sale[kd],1)+', hay '+f(hay,1)+' al '+fd(fMax)+'). Va a quedar negativo.');
+  }
+  var antes=0; for(i=0;i<si.length;i++){ if(regFecha(si[i].destino.id)<(o.fecha||'')) antes++; }
+  if(antes) avisos.push(antes+(antes===1?' labor tiene':' labores tienen')+' fecha anterior a la de la OT ('+fd(o.fecha)+'). Revisá que sea correcta.');
+  var fb2=laboresFacturadasQueSeBorran(o);
+  if(fb2.length) avisos.push('Ojo: '+fb2.join(', ')+' se queda sin lotes y se borra de la orden, con la facturación y los pagos al contratista que tenía cargados.');
+  // Dosis real contra la del plan, por lote.
+  var prr=calcProrrateo(o), filas='';
+  for(i=0;i<si.length;i++){
+    var d2=si[i].destino, un=esUN(d2), rep=prr[d2.id]||{}, partes='';
+    for(var li in rep){ if(!rep.hasOwnProperty(li)) continue;
+      var x=rep[li], insx=getInsumo(x.insumoId), plan=Number((d2.lineas[li]||{}).dosis)||0;
+      var dif = !un && plan>0 && Math.abs(x.dosisReal-plan)/plan>0.02;
+      partes+='<div class="real-ins"><span>'+(insx?esc(insx.nombre):'—')+'</span><span>'+(un?'':'<span class="'+(dif?'bad-sum':'')+'">'+f(x.dosisReal,2)+'</span> <span class="trb-apl-sub">(plan '+f(plan,2)+')</span> · ')+'<strong>'+f(x.usado,1)+' '+(insx?esc(insx.un):'')+'</strong></span></div>';
+    }
+    filas+='<tr><td class="otl-fecha">'+fd(regFecha(d2.id))+'</td><td class="tdname"><strong>'+esc(nombreDestinoCorto(d2))+'</strong><div class="trb-apl-sub">'+esc(nombreLaborDeTrabajo(si[i].trabajo))+'</div></td><td class="num">'+f(haRealDe(d2),1)+(un?' unid.':' ha')+'</td><td>'+(partes||'<span class="trb-apl-sub">sin insumos</span>')+'</td></tr>';
+  }
+  var lista=function(arr){ var r=[]; for(var q=0;q<arr.length;q++) r.push(esc(nombreDestinoCorto(arr[q].destino))+' <span class="trb-apl-sub">('+esc(nombreLaborDeTrabajo(arr[q].trabajo))+')</span>'); return r.join(' · '); };
+  var nAv=''; for(i=0;i<avisos.length;i++) nAv+='<div class="banner-warn" style="margin:0 0 6px">'+esc(avisos[i])+'</div>';
+  return '<div class="reg-kpis">'+
+      '<div class="reg-kpi"><div class="l">Se confirma</div><div class="v">'+si.length+(si.length===1?' labor':' labores')+(ha?' · '+f(ha,1)+' ha':'')+'</div></div>'+
+      '<div class="reg-kpi"><div class="l">Queda pendiente</div><div class="v">'+(pe.length?pe.length+(pe.length===1?' labor':' labores'):'nada')+'</div></div>'+
+      '<div class="reg-kpi"><div class="l">Sale de la orden</div><div class="v">'+(no.length?no.length+(no.length===1?' labor':' labores'):'nada')+'</div></div>'+
+      '<div class="reg-kpi reg-kpi-w"><div class="l">Sale del stock</div><div class="v" style="font-size:14px">'+(saleTxt.length?esc(saleTxt.join(' · ')):'nada')+'</div></div>'+
+    '</div>'+nAv+
+    (filas?'<div class="tw"><table class="reg-tbl"><thead><tr><th>Fecha</th><th>Lote · labor</th><th class="num">Superficie</th><th>Insumos · dosis real · consumido</th></tr></thead><tbody>'+filas+'</tbody></table></div>':'')+
+    (pe.length?'<p class="trb-apl-sub" style="margin-top:8px"><strong>Queda pendiente:</strong> '+lista(pe)+'</p>':'')+
+    (no.length?'<p class="trb-apl-sub" style="margin-top:4px"><strong>Sale de la orden:</strong> '+lista(no)+'</p>':'')+
+    '<p class="reg-ayuda" style="margin-top:12px">Al confirmar se descuenta el stock y las labores pasan a Consumos, Labores, Costos y la historia del lote. Si después hay que cambiar algo, se vuelve la OT a pendiente.</p>';
+}
+
+// Labores con facturación o pagos que, con lo marcado "No se hace", se quedan sin ningún lote.
+function laboresFacturadasQueSeBorran(o){
+  var out=[];
+  for(var t=0;t<(o.trabajos||[]).length;t++){
+    var tr=o.trabajos[t], ds=tr.destinos||[], queda=false;
+    for(var d=0;d<ds.length;d++){ if(aplicTmp.est[ds[d].id]!=='no') queda=true; }
+    if(!queda && ((tr.estadoFact&&tr.estadoFact!=='Sin facturar')||(Number(tr.montoPagado)||0)>0||(Number(tr.montoFacturado)||0)>0)) out.push(nombreLaborDeTrabajo(tr));
+  }
+  return out;
+}
+
+// ¿Lo que se está por confirmar es exactamente lo que se guardó al volver a pendiente?
+function registroSinCambios(o){
+  var ur=o.ultimoRegistro; if(!ur || !ur.dest || !ur.consumos || !ur.movs) return false;
+  var pares=destinosDeOt(o), nSi=0, nUr=0, k;
+  for(k in ur.dest){ if(ur.dest.hasOwnProperty(k)) nUr++; }
+  for(var i=0;i<pares.length;i++){
+    var de=pares[i].destino; if(de.estadoLote==='Aplicado') continue;
+    var e=aplicTmp.est[de.id], s=ur.dest[de.id];
+    if(e==='no') return false;
+    if(e!=='si') continue;
+    nSi++;
+    if(!s || Math.abs(haRealDe(de)-s.haReal)>1e-9 || regFecha(de.id)!==s.fecha) return false;
+    if((de.lineas||[]).length!==s.lineas.length) return false;
+    for(var l=0;l<de.lineas.length;l++){ var a=de.lineas[l], b=s.lineas[l]; if(a.insumoId!==b.insumoId || (a.depositoId||'')!==(b.depositoId||'') || Math.abs((Number(a.dosis)||0)-(Number(b.dosis)||0))>1e-9) return false; }
+  }
+  if(nSi!==nUr) return false;
+  var agg=calcEntregadoPorInsumo(o);
+  for(k in agg){ if(!agg.hasOwnProperty(k)) continue;
+    var c=aplicTmp.consumos[k]||{}, u=ur.consumos[k]; if(!u) return false;
+    if((c.depositoId||'')!==(u.depositoId||'') || Math.abs(entregadoEfectivo(k, agg)-u.entregada)>0.005 || Math.abs((Number(c.devStock)||0)-u.devStock)>0.005 || Math.abs((Number(c.devBaja)||0)-u.devBaja)>0.005) return false;
+  }
+  for(k in ur.consumos){ if(ur.consumos.hasOwnProperty(k) && !agg.hasOwnProperty(k)) return false; }
+  return true;
+}
+
+function confirmarRegistro(){
+  if(!guard('cargar')) return;
+  var o=getOtById(aplicTmp.otId); if(!o || o.estado==='Cancelada') return;
+  if(!regValidar(o,1) || (regHaySi() && !regValidar(o,2))) return;
+  var pares=destinosDeOt(o), si=[], no=[], i;
+  for(i=0;i<pares.length;i++){ var de0=pares[i].destino; if(de0.estadoLote==='Aplicado') continue; if(aplicTmp.est[de0.id]==='si') si.push(pares[i]); else if(aplicTmp.est[de0.id]==='no') no.push(pares[i]); }
+  var sale=regSalidas(o), fMax=regFechaMax(o), falt=[];
+  for(var kd in sale){ if(!sale.hasOwnProperty(kd)) continue; var pp=kd.split('||'); if(sale[kd]>stockDe(pp[0], pp[1], {desde:'', hasta:fMax}).real+0.01){ var ins=getInsumo(pp[0]); falt.push((ins?ins.nombre:pp[0])+' en '+getDepNombre(pp[1])); } }
+  if(falt.length && !confirm('Stock insuficiente en: '+falt.join(', ')+'.\n\n¿Confirmar igual? El stock va a quedar negativo.')) return;
+  var fBorra=laboresFacturadasQueSeBorran(o);
+  if(no.length && !confirm('Vas a sacar de la orden '+no.length+(no.length===1?' labor que no se va a hacer':' labores que no se van a hacer')+'.'+
+    (fBorra.length?'\n\nOJO: '+fBorra.join(', ')+' se queda sin lotes y se borra, con la facturación y los pagos al contratista que tenía cargados.':'')+'\n\n¿Seguir?')) return;
+  var exacto=si.length && registroSinCambios(o);
+  if(exacto) restaurarRegistro(o, si);
+  else if(si.length) grabarRegistro(o, si);
+  // "No se hace": sale de la orden (deja de estar comprometido).
+  if(no.length){
+    var quitar={}; for(i=0;i<no.length;i++) quitar[no[i].destino.id]=true;
+    var quedan=[];
+    for(var t=0;t<(o.trabajos||[]).length;t++){ var tr=o.trabajos[t]; tr.destinos=(tr.destinos||[]).filter(function(d){ return !quitar[d.id]; }); if(tr.destinos.length) quedan.push(tr); }
+    o.trabajos=quedan;
+  }
+  // Lo guardado al volver a pendiente: se usa lo de los lotes recién registrados; lo de los
+  // que siguen pendientes se conserva para precargarlos la próxima vez.
+  if(o.ultimoRegistro){
+    var ur=o.ultimoRegistro, quedan=0;
+    if(exacto) ur.dest={};
+    else { for(i=0;i<si.length;i++) delete ur.dest[si[i].destino.id]; for(i=0;i<no.length;i++) delete ur.dest[no[i].destino.id]; delete ur.consumos; ur.movs=[]; }
+    for(var kq in ur.dest){ if(ur.dest.hasOwnProperty(kq)) quedan++; }
+    if(!quedan) delete o.ultimoRegistro;
+  }
+  recalcEstadoOT(o);
+  reevaluarFacturacion(o);
+  aplicTmp=null;
+  save(); closeModal(); viewOT(o.id);
+  toast(si.length ? ('OT #'+o.num+': '+si.length+(si.length===1?' labor confirmada':' labores confirmadas')) : ('OT #'+o.num+' actualizada'));
+}
+
+// Registro normal: prorrateo por dosis × superficie real; cada lote con su fecha.
+function grabarRegistro(o, si){
+  var prr=calcProrrateo(o), agg=calcEntregadoPorInsumo(o), tanda='tnd_'+uid(), comps={}, k;
+  var compDe=function(tipo, fecha){
+    var key=tipo+'|'+fecha; if(comps[key]) return comps[key];
+    var c={id:uid(), fecha:fecha, tipo:tipo, comp_tipo:'OT', comp_nro:'#'+o.num, proveedorId:'', campaniaId:o.campaniaId||'',
+      obs:(tipo==='Consumo OT'?'Aplicación OT #':'Baja en aplicación OT #')+o.num, refOt:o.id, refOtNum:o.num, refTanda:tanda};
+    comps[key]=c; state.comprobantes.push(c); return c;
+  };
+  for(var s=0;s<si.length;s++){
+    var de=si[s].destino, rep=prr[de.id]||{}, fe=regFecha(de.id);
+    de.haReal=haRealDe(de);
+    for(var j=0;j<(de.lineas||[]).length;j++){
+      var ln=de.lineas[j]; if(!ln.insumoId) continue;
+      var x=rep[j]||{clave:claveCons(ln), entregada:0, usado:0, devStock:0, devBaja:0, dosisReal:null};
+      var cIns=aplicTmp.consumos[x.clave]||{};
+      ln.entregada=x.entregada; ln.usado=x.usado; ln.devStock=x.devStock; ln.devBaja=x.devBaja;
+      if(x.dosisReal===null) delete ln.dosisReal; else ln.dosisReal=x.dosisReal;
+      ln.depositoId=cIns.depositoId||ln.depositoId||'';
+      if(ln.usado>0.0000001) state.movtos.push({id:uid(), comprobanteId:compDe('Consumo OT', fe).id, insumoId:ln.insumoId, cant:ln.usado, origenId:ln.depositoId, destinoId:'', refDest:de.id});
+    }
+    de.estadoLote='Aplicado'; de.fechaAplicReal=fe; de.tandaId=tanda;
+  }
+  // Lo que se perdió: una línea por insumo y depósito, con la última fecha del registro.
+  var fMax=regFechaMax(o);
+  for(k in agg){ if(!agg.hasOwnProperty(k)) continue;
+    var cb=aplicTmp.consumos[k]||{}, vb=Number(cb.devBaja)||0;
+    if(vb>0) state.movtos.push({id:uid(), comprobanteId:compDe('Baja por aplicación OT', fMax).id, insumoId:insDeClave(k), cant:vb, origenId:cb.depositoId||'', destinoId:''});
+  }
+}
+
+// Sin cambios respecto de lo guardado: vuelve exactamente lo que había (líneas y movimientos).
+function restaurarRegistro(o, si){
+  var ur=o.ultimoRegistro, comps={};
+  for(var s=0;s<si.length;s++){
+    var de=si[s].destino, sv=ur.dest[de.id];
+    de.haReal=sv.haReal; de.fechaAplicReal=sv.fecha; de.estadoLote='Aplicado'; de.tandaId=sv.tandaId;
+    for(var j=0;j<de.lineas.length;j++){
+      var ln=de.lineas[j], b=sv.lineas[j];
+      ln.entregada=b.entregada; ln.usado=b.usado; ln.devStock=b.devStock; ln.devBaja=b.devBaja; ln.depositoId=b.depositoId;
+      if(b.dosisReal===undefined || b.dosisReal===null) delete ln.dosisReal; else ln.dosisReal=b.dosisReal;
+    }
+  }
+  for(var m=0;m<ur.movs.length;m++){
+    var mv=ur.movs[m], key=mv.tipo+'|'+mv.fecha+'|'+mv.tanda;
+    if(!comps[key]){ comps[key]={id:uid(), fecha:mv.fecha, tipo:mv.tipo, comp_tipo:'OT', comp_nro:'#'+o.num, proveedorId:'', campaniaId:o.campaniaId||'',
+        obs:(mv.tipo==='Consumo OT'?'Aplicación OT #':'Baja en aplicación OT #')+o.num, refOt:o.id, refOtNum:o.num, refTanda:mv.tanda}; state.comprobantes.push(comps[key]); }
+    var nm={id:uid(), comprobanteId:comps[key].id, insumoId:mv.insumoId, cant:mv.cant, origenId:mv.origenId, destinoId:''};
+    if(mv.refDest) nm.refDest=mv.refDest;
+    state.movtos.push(nm);
+  }
+}
+
+/* ===== Volver a pendiente ===== */
+function volverAPendiente(otId){
+  if(!guard('cargar')) return;
+  var o=getOtById(otId); if(!o) return;
+  var pares=destinosDeOt(o), apl=[], i, fb=fechaBloqueo();
+  for(i=0;i<pares.length;i++){ if(pares[i].destino.estadoLote==='Aplicado') apl.push(pares[i]); }
+  if(!apl.length) return;
+  for(i=0;i<apl.length;i++){ if(fb && apl[i].destino.fechaAplicReal && apl[i].destino.fechaAplicReal<=fb){ bloqueoFecha(apl[i].destino.fechaAplicReal, 'no se puede volver a pendiente'); return; } }
+  var vuelve={};
+  for(i=0;i<apl.length;i++){ var ls=apl[i].destino.lineas||[]; for(var l=0;l<ls.length;l++){ var q=(Number(ls[l].usado)||0)+(Number(ls[l].devBaja)||0); if(q>0){ var x=getInsumo(ls[l].insumoId); var nm=x?x.nombre+' ('+x.un+')':ls[l].insumoId; vuelve[nm]=(vuelve[nm]||0)+q; } } }
+  var vt=[]; for(var n in vuelve){ if(vuelve.hasOwnProperty(n)) vt.push('• '+n+': '+f(vuelve[n],1)); }
+  var fact=false; for(i=0;i<(o.trabajos||[]).length;i++){ var tr=o.trabajos[i]; if((tr.estadoFact&&tr.estadoFact!=='Sin facturar')||(Number(tr.montoPagado)||0)>0) fact=true; }
+  if(!confirm('¿Volver la OT #'+o.num+' a pendiente?\n\n'+
+    (vt.length?'Vuelve al stock lo que se descontó:\n'+vt.join('\n')+'\n\n':'')+
+    'Lo que cargaste (fechas, superficies y cantidades) queda guardado y aparece precargado cuando registres de nuevo.'+
+    (fact?'\n\nLa facturación y los pagos al contratista se conservan.':'')+'\n\nDespués podés editar la OT.')) return;
+  // Se guarda todo lo cargado, para precargarlo (y restaurarlo igual si no se cambia nada).
+  var ur={dest:{}, consumos:{}, movs:[]};
+  for(i=0;i<apl.length;i++){
+    var de=apl[i].destino, sv={fecha:de.fechaAplicReal, haReal:haRealDe(de), tandaId:de.tandaId||'', lineas:[]};
+    for(var j=0;j<(de.lineas||[]).length;j++){
+      var ln=de.lineas[j];
+      sv.lineas.push({insumoId:ln.insumoId, depositoId:ln.depositoId||'', dosis:Number(ln.dosis)||0, entregada:Number(ln.entregada)||0, usado:Number(ln.usado)||0, devStock:Number(ln.devStock)||0, devBaja:Number(ln.devBaja)||0, dosisReal:ln.dosisReal});
+      if(!ln.insumoId) continue;
+      var k=claveCons(ln), c=ur.consumos[k]||(ur.consumos[k]={depositoId:ln.depositoId||'', entregada:0, devStock:0, devBaja:0, req:0});
+      c.req=r6(c.req+cantReq(de, ln, sv.haReal));
+      c.entregada=r6(c.entregada+(Number(ln.entregada)||0)); c.devStock=r6(c.devStock+(Number(ln.devStock)||0)); c.devBaja=r6(c.devBaja+(Number(ln.devBaja)||0));
+    }
+    ur.dest[de.id]=sv;
+  }
+  var destIds={}; for(i=0;i<pares.length;i++) destIds[pares[i].destino.id]=true;
+  var compsOT={}, compById={};
+  for(i=0;i<state.comprobantes.length;i++){ var cp=state.comprobantes[i]; compById[cp.id]=cp; if(cp.refOt===o.id && (cp.tipo==='Consumo OT' || cp.tipo==='Baja por aplicación OT')) compsOT[cp.id]=true; }
+  for(i=0;i<state.movtos.length;i++){ var mv=state.movtos[i];
+    if(compsOT[mv.comprobanteId] || (mv.refDest && destIds[mv.refDest])){ var cc=compById[mv.comprobanteId]; if(!cc) continue;
+      ur.movs.push({fecha:cc.fecha, tipo:cc.tipo, tanda:cc.refTanda||'', insumoId:mv.insumoId, cant:mv.cant, origenId:mv.origenId, refDest:mv.refDest||''}); }
+  }
+  state.movtos=state.movtos.filter(function(m){ return !compsOT[m.comprobanteId] && !(m.refDest && destIds[m.refDest]); });
+  state.comprobantes=state.comprobantes.filter(function(x){ return !compsOT[x.id]; });
+  limpiarComprobantesHuerfanos();
+  for(i=0;i<apl.length;i++){
+    var d=apl[i].destino;
+    for(var j2=0;j2<(d.lineas||[]).length;j2++){ var l2=d.lineas[j2]; l2.entregada=0; l2.usado=0; l2.devStock=0; l2.devBaja=0; delete l2.dosisReal; }
+    d.estadoLote='Pendiente'; d.fechaAplicReal=''; delete d.haReal; delete d.tandaId;
+  }
+  o.ultimoRegistro=ur;
+  recalcEstadoOT(o);
+  reevaluarFacturacion(o);
+  aplicTmp=null; correccionTmp=null;
+  if(editOtId===otId) resetOtForm();
+  save(); viewOT(otId);
+  toast('OT #'+o.num+' pendiente: ya podés editarla');
 }
 
 /* ================================================================
@@ -6861,7 +8002,7 @@ function exportExcel(){
     var pz=destinosDeOt(o); for(var z=0;z<pz.length;z++){ if(esUN(pz[z].destino)) uns[pz[z].destino.cultivo+' '+getCampoNombre(pz[z].destino.campoId)]=true; }
     var unl=[]; for(var uk in uns){ if(uns.hasOwnProperty(uk)) unl.push(uk); }
     hO.push([o.num, o.fecha, getCampaniaNombre(o.campaniaId)||'', labelLaboresDeOt(o), (lp&&lc)?'Mixta':(lc?'Contratada':'Propia'), contratistasDeOt(o),
-      lotesDeOt(o).length, num(haDeOt(o)), num(otHaAplicada(o)), unl.join(' | '), o.estado, o.rapida?'Sí':'', o.obs||'']);
+      lotesDeOt(o).length, num(haDeOt(o)), num(otHaAplicada(o)), unl.join(' | '), etiquetaEstado(o.estado), o.rapida?'Sí':'', o.obs||'']);
   }
   hoja('OT', hO);
   // Labores (trabajos), sin las OT canceladas
@@ -6963,13 +8104,12 @@ function renderMInsumos(){
   byId('maestrosCard').innerHTML=
     '<div class="chd"><span class="ct-lg">Insumos</span><span class="bdg" style="background:#E8EDF2;color:#475569">Nombre, categoría y unidad: solo lectura</span></div>'+
     '<p style="font-size:11px;color:var(--muted);margin-bottom:6px">Los insumos se administran en <strong>Maestros</strong>. Acá se elige el <strong>depósito sugerido</strong> (se propone en las OT y en los movimientos) y la <strong>moneda</strong> del precio. El stock inicial se carga en Movimientos (tipo "Stock inicial", con fecha y precio).</p>'+
-    '<div class="banner-info"><strong>Cómo funciona el precio.</strong> '+esc(TXT_PRECIO)+'</div>'+
     '<div class="tw"><table><thead><tr>'+
       '<th class="th-sort" style="cursor:pointer" onclick="setInsSort(\'nombre\')">Nombre '+insSortArrow('nombre')+'</th>'+
       '<th class="th-sort" style="cursor:pointer" onclick="setInsSort(\'cat\')">Categoría '+insSortArrow('cat')+'</th>'+
       '<th class="th-sort" style="cursor:pointer" onclick="setInsSort(\'un\')">Un. '+insSortArrow('un')+'</th>'+
       '<th title="Formulación: define el orden de mezclado en el tanque">Formul.</th><th>Depósito sugerido</th>'+
-      '<th class="num th-sort" style="cursor:pointer" onclick="setInsSort(\'precio\')">Precio a hoy '+insSortArrow('precio')+'</th><th>Mon.</th>'+
+      '<th class="num th-sort" style="cursor:pointer" onclick="setInsSort(\'precio\')">Precio a hoy '+infoBtn('precio')+' '+insSortArrow('precio')+'</th><th>Mon.</th>'+
     '</tr></thead><tbody>'+(rows||'<tr><td colspan="7" class="empty">Sin insumos. Se cargan en Maestros.</td></tr>')+'</tbody></table></div>';
 }
 
@@ -7026,6 +8166,7 @@ function confirmReset(){
   closeModal();
   byId('modalContent').className='modal';
   refreshCtx();
+  correccionTmp=null; resetOtForm();
   setTab(currentTab, document.querySelector('.inst-btn[data-tab="'+currentTab+'"]'));
   toast('Espacio reseteado');
 }
