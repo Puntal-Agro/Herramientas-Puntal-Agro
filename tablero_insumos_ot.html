@@ -466,14 +466,14 @@ tbody tr:hover td{background:#FAFBFC}
 .pr-obs{padding:4px 8px;font-size:9pt;border-top:1px solid #DDD;background:#FAFAFA}
 .pr-linea{display:inline-block;border-bottom:1px solid #999;min-width:280px;height:12px}
 /* Totales de la orden: lo que se retira del depósito */
-.pr-tot{border:1.5px solid #000;margin-top:12px;page-break-inside:avoid;break-inside:avoid}
-.pr-tot-tit{background:#EAEDE6;border-bottom:1px solid #000;padding:5px 8px;font-size:10pt;font-weight:700;text-transform:uppercase;letter-spacing:.3px}
+.pr-tot{border:1.5px solid #000;margin-top:26px;page-break-inside:avoid;break-inside:avoid}
+.pr-tot-tit{background:#EAEDE6;border-bottom:1px solid #000;padding:6px 8px;font-size:10.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.3px;text-align:center}
 .pr-tot .pr-tbl{padding:0 8px}
 .pr-tot .pr-tbl th{padding-top:5px}
 .pr-tot .pr-tbl td{padding:5px 4px}
 .pr-box-th{text-align:center}
 .pr-box-td{text-align:center}
-.pr-box-td .pr-box{width:78px;height:20px}
+.pr-box-td .pr-box{width:78px;height:30px}
 .pr-firmas{display:flex;gap:26px;margin-top:26px;page-break-inside:avoid}
 .pr-firma{flex:1;font-size:8pt;color:#555;text-align:center;text-transform:uppercase;letter-spacing:.4px}
 .pr-firma-l{border-bottom:1px solid #000;height:34px;margin-bottom:3px}
@@ -622,7 +622,7 @@ tbody tr:hover td{background:#FAFBFC}
 .otv-ok-t{font-size:16px;font-weight:600;color:#2E3D24;margin-bottom:10px}
 .otv-ok-acc{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
 .otreg{margin-top:6px}
-.btn-barra{padding:10px 18px!important;font-size:14px!important;font-weight:600}
+.btn-barra{padding:10px 18px!important;font-size:14px!important;font-weight:600;min-height:42px;line-height:1.2}
 .btn-terra{background:#C8642D;border-color:#C8642D;color:#fff}
 .btn-terra:hover{background:#A9521F;border-color:#A9521F;color:#fff}
 .ot-barra-acc{align-items:center}
@@ -631,6 +631,24 @@ tbody tr:hover td{background:#FAFBFC}
 .otreg .reg-fact{position:static;border-top:1px solid var(--border);margin-top:12px;padding-top:12px}
 .otreg .reg-fact .btn-primary{padding:9px 20px;font-size:13.5px}
 
+/* ===== BUILD 17: cambio de cultivo en el plan de uso ===== */
+.cc-aviso{display:flex;align-items:center;gap:14px;background:#FDF0E6;border:1px solid #F0C9A8;border-left:4px solid #C8642D;border-radius:10px;padding:12px 16px;margin:0 0 14px}
+.cc-aviso-t{flex:1;font-size:13px;color:#5A2E10;line-height:1.45}
+#otPantHd .cc-aviso{margin:10px 0 12px}
+.cc-intro{font-size:12.5px;color:var(--muted);margin:0 0 14px}
+.cc-grupo{border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:12px;background:var(--card)}
+.cc-tit{font-size:14px}
+.cc-sub{color:var(--muted);font-size:12px;margin-left:4px}
+.cc-cambio{font-size:13px;margin:4px 0 8px}
+.cc-tbl{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:10px}
+.cc-tbl th{font-size:10.5px;text-transform:uppercase;letter-spacing:.3px;color:var(--muted);text-align:left;padding:4px 6px;border-bottom:1px solid var(--border);font-weight:600}
+.cc-tbl td{padding:5px 6px;border-bottom:1px solid #EEF0EA}
+.cc-tbl .num{text-align:right}
+.cc-tot td{font-weight:700;border-bottom:none}
+.cc-ops{margin-bottom:6px}
+.cc-expl{font-size:12px;color:var(--muted)}
+.mb-fuera td{background:#FDF6EE}
+.mb-fuera-sub{display:block;font-size:10.5px;color:#9A4A16;margin-left:18px}
 @media print{
   /* Al imprimir se muestra SOLO el documento de la OT: la vista de pantalla
      tiene botones, selects y controles que en papel no sirven. */
@@ -1047,12 +1065,12 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
         <div class="paso otv" id="otV3"></div>
         <div class="paso otv" id="otV4"></div>
         <div class="fact otp-fact" id="otFact">
-          <button type="button" class="btn" id="otBtnAtras" onclick="otIr(otPant.v-1)">← Anterior</button>
+          <button type="button" class="btn btn-barra" id="otBtnAtras" onclick="otIr(otPant.v-1)">← Anterior</button>
           <button type="button" class="btn-link" id="otBtnDescartar" onclick="otDescartar()">Descartar cambios</button>
           <span style="flex:1"></span>
-          <button type="submit" class="btn btn-primary btn-emitir">Emitir OT</button>
+          <button type="submit" class="btn btn-primary btn-emitir btn-barra">Emitir OT</button>
           <button type="button" class="btn btn-primary" id="otBtnSig" onclick="otIr(otPant.v+1)">Siguiente →</button>
-          <button type="button" class="btn btn-primary btn-barra" id="otBtnListado" style="display:none" onclick="otVolverListado()">Volver al listado →</button>
+          <button type="button" class="btn btn-primary btn-barra" id="otBtnListado" style="display:none" onclick="otVolverListado()">Volver</button>
         </div>
       </form>
     </div>
@@ -1235,7 +1253,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
 </main>
 
 <footer>
-  <span>Puntal Agro · Insumos &amp; OT · Versión v2026-10-28 15:52 · BUILD 15</span>
+  <span>Puntal Agro · Insumos &amp; OT · Versión v2026-10-28 16:23 · BUILD 17</span>
   <span id="fts">—</span>
 </footer>
 
@@ -4180,6 +4198,8 @@ function saveOT(e){
   // (un Enter en las ventanas 1 o 2 pasa a la siguiente).
   if(otPant.modo==='ver') return;
   if(otPant.modo==='nueva' && e && e.type==='submit' && otPant.v!==3){ otIr(otPant.v+1); return; }
+  // En la ventana 4 (Confirmar) los botones e inputs del registro no guardan la OT.
+  if(e && e.type==='submit' && otPant.v===4) return;
   if(!guard('cargar')) return;
   // Trabajo a medio armar (labor + lotes sin "Agregar"): se agrega solo.
   if(byId('o_subact').value && destinosTmp.length){ if(!addTrabajoALaOt()) return; }
@@ -4300,6 +4320,7 @@ function clearOtFilters(){
 function renderOtList(){
   populateOtSelects();
   refreshCampBadges();
+  pintarAvisoCultivo('ot-list-view');
   var q=(byId('otSearch').value||'').toLowerCase();
   var fa=byId('otActFilter').value, fe=byId('otEstadoFilter').value, fc=byId('otCampoFilter').value;
   var flo=byId('otLoteFilter')?byId('otLoteFilter').value:'';
@@ -5807,7 +5828,7 @@ function datosHistoriaLote(loteId, campania){
       var realizo = tr.laborTipo==='LP' ? 'Propia' : (tr.contratistaId ? getContratistaNombre(tr.contratistaId) : 'Contratada');
       regs.push({fecha:de.fechaAplicReal||o.fecha||'', otNum:o.num, campania:o.campaniaId||'', labor:nombreLaborDeTrabajo(tr),
         tipo:tr.laborTipo, realizo:realizo, ha:haR, cultivo:de.cultivo||'', resiembra:!!(tr.esResiembra||esLaborResiembra(tr.laborId, tr.laborTipo)),
-        obs:de.obs||'', prods:prods});
+        obs:[de.obs||'', notaCambioCultivo(de)].filter(function(x){ return !!x; }).join(' · '), prods:prods});
     }
   }
   var ordC={}; for(var oc=0;oc<(state.campanias||[]).length;oc++) ordC[state.campanias[oc].id]=oc;
@@ -6041,7 +6062,7 @@ function nPendientesOT(o){ var p=destinosDeOt(o), n=0; for(var i=0;i<p.length;i+
 // Barra de arriba: estado, qué sigue y la acción principal.
 function barraEstadoOT(o){
   var puedeC=puede('cargar'), id=o.id, est=o.estado, sigue='', main='', sec='';
-  var imp='<button type="button" class="btn" onclick="imprimirOT(\''+id+'\')">🖨 Imprimir</button>';
+  var imp='<button type="button" class="btn btn-barra" onclick="imprimirOT(\''+id+'\')">🖨 Imprimir</button>';
   var nP=nPendientesOT(o);
   if(est==='Cancelada'){
     sigue='OT cancelada: no figura en consumos, labores, costos ni stock comprometido.';
@@ -6050,7 +6071,7 @@ function barraEstadoOT(o){
     sigue='Cuando se haga la labor, confirmá la OT.'+(o.ultimoRegistro?' Lo que cargaste la última vez está guardado y aparece precargado.':'');
     if(puedeC){
       if(otPant.v!==4) main='<button type="button" class="btn btn-primary btn-barra" onclick="otConfirmar(\''+id+'\')">Confirmar OT</button>';
-      sec='<button type="button" class="btn btn-danger-ghost" onclick="cancelOT(\''+id+'\')">Cancelar OT</button>';
+      sec='<button type="button" class="btn btn-terra btn-barra" onclick="cancelOT(\''+id+'\')">Cancelar OT</button>';
     }
   } else if(est==='Parcial'){
     sigue='Falta confirmar '+nP+(nP===1?' labor':' labores')+'. Confirmá la OT cuando se hagan (si alguna ya no se va a hacer, marcala «No se hace»). Para cambiar algo de lo confirmado, volvé a pendiente.';
@@ -6262,9 +6283,9 @@ function renderRegistro(){
     '<div class="reg-cuerpo">'+cuerpo+'</div>'+
     '<div class="fact reg-fact">'+
       '<span style="flex:1"></span>'+
-      (paso>1?'<button class="btn" onclick="regIr('+(paso-1)+')">← Atrás</button>':'')+
-      (paso<2?'<button class="btn btn-primary" onclick="regIr(2)">Siguiente: Insumos →</button>'
-             :'<button class="btn btn-primary" onclick="confirmarRegistro()">✓ Confirmar OT</button>')+
+      (paso>1?'<button class="btn btn-barra" onclick="regIr('+(paso-1)+')">← Atrás</button>':'')+
+      (paso<2?'<button class="btn btn-primary btn-barra" onclick="regIr(2)">Siguiente →</button>'
+             :'<button class="btn btn-primary btn-barra" onclick="confirmarRegistro()">✓ Confirmar OT</button>')+
     '</div>';
 }
 
@@ -6354,6 +6375,7 @@ function registroSinCambios(o){
 function confirmarRegistro(){
   if(!guard('cargar')) return;
   var o=getOtById(aplicTmp.otId); if(!o || o.estado==='Cancelada') return;
+  if(cambiosDeCultivo(o.id).length){ alert('Cambió el plan de uso en lotes de esta OT: el cultivo de la orden ya no está en el plan.\n\nAntes de confirmar, elegí a qué cultivo va cada lote.'); abrirCambioCultivo(o.id); return; }
   if(!regValidar(o,1) || (regHaySi() && !regValidar(o,2))) return;
   var pares=destinosDeOt(o), si=[], no=[], i;
   for(i=0;i<pares.length;i++){ var de0=pares[i].destino; if(de0.estadoLote==='Aplicado') continue; if(aplicTmp.est[de0.id]==='si') si.push(pares[i]); else if(aplicTmp.est[de0.id]==='no') no.push(pares[i]); }
@@ -6621,7 +6643,7 @@ function mostrarPantallaOT(){
   byId('ot-detail-view').style.display='none';
   byId('ot-pantalla').style.display='';
   var o=otPant.id?getOtById(otPant.id):null, v=otPant.v, ro=otPant.modo==='ver';
-  byId('otPantHd').innerHTML = o ? barraEstadoOT(o) : barraNuevaOT();
+  byId('otPantHd').innerHTML = o ? barraEstadoOT(o)+htmlAvisoCultivo(o.id) : barraNuevaOT();
   var tabs='';
   for(var i=0;i<4;i++){
     var n=i+1, off=(n===4 && !o), ok = o ? (n<=3 && n!==v) : (n<v);
@@ -6843,6 +6865,194 @@ function htmlChipsLotes(camp, fCult, fCampo, yaEsta){
 }
 
 /* ================================================================
+   CAMBIO DE CULTIVO EN EL PLAN DE USO: si un lote ya tiene labores cargadas a nombre de
+   un cultivo que salió del plan (ej.: barbecho de maíz y el lote pasa a soja), se avisa
+   y se elige: pasar los costos al nuevo cultivo o dejarlos como gasto del original.
+================================================================ */
+// ¿El lote tiene ese cultivo en el plan de uso de la campaña?
+function cultivoEnPlan(campaniaId, loteId, cultivo){
+  var acts=actividadesDe(campaniaId, loteId);
+  for(var i=0;i<acts.length;i++){ if(acts[i].cultivo===cultivo) return true; }
+  return false;
+}
+
+// Labores de un cultivo que salió del plan y que se decidió dejar como gasto de ese cultivo.
+function destinoFueraDePlanMantenido(o, de){
+  return !esUN(de) && !!de.cultivo && de.cultivoMantenido===de.cultivo && !cultivoEnPlan(o.campaniaId||'', de.loteId, de.cultivo);
+}
+
+// Lotes de OT cuyo cultivo ya no está en el plan de uso, agrupados por campaña, lote y cultivo.
+// Solo se mira una campaña que tenga plan cargado (si no, todo saldría como cambiado).
+function cambiosDeCultivo(otId){
+  var grupos={}, orden=[], conPlan={}, out=[];
+  for(var i=0;i<state.ots.length;i++){
+    var o=state.ots[i]; if(o.estado==='Cancelada') continue;
+    if(otId && o.id!==otId) continue;
+    var camp=o.campaniaId||''; if(!camp) continue;
+    if(!conPlan.hasOwnProperty(camp)) conPlan[camp]=actividadesDe(camp).length>0;
+    if(!conPlan[camp]) continue;
+    var pares=destinosDeOt(o);
+    for(var p=0;p<pares.length;p++){
+      var de=pares[p].destino;
+      if(esUN(de) || !de.cultivo || de.cultivoMantenido===de.cultivo) continue;
+      if(!getLoteById(de.loteId) || cultivoEnPlan(camp, de.loteId, de.cultivo)) continue;
+      var key=camp+'|'+de.loteId+'|'+de.cultivo;
+      if(!grupos[key]){
+        var acts=actividadesDe(camp, de.loteId), nuevos=[], vistos={};
+        for(var a=0;a<acts.length;a++){ var c=acts[a].cultivo; if(c && !vistos[c]){ vistos[c]=true; nuevos.push(c); } }
+        grupos[key]={key:key, camp:camp, loteId:de.loteId, campoId:de.campoId, cultivo:de.cultivo, nuevos:nuevos, items:[]};
+        orden.push(key);
+      }
+      grupos[key].items.push({o:o, tr:pares[p].trabajo, de:de});
+    }
+  }
+  for(var k=0;k<orden.length;k++) out.push(grupos[orden[k]]);
+  return out;
+}
+
+function textoNuevosCultivos(g){
+  if(!g.nuevos.length) return 'ya no figura en el plan de uso';
+  return (g.nuevos.length===1 ? 'ahora es ' : 'ahora tiene ')+g.nuevos.join(' y ');
+}
+
+// Costo en $ de lo confirmado en un lote (labor + insumos), para mostrar en la ventana.
+function costoDestinoARS(tr, de){
+  var r={v:0, falta:false};
+  if(de.estadoLote!=='Aplicado') return r;
+  var fApp=de.fechaAplicReal||'';
+  var haD=(de.haReal!==undefined && de.haReal!==null && de.haReal!=='') ? Number(de.haReal) : (Number(de.ha)||0);
+  var tar=tarifaDe(tr, de);
+  if(tar>0){ var vL=valorizarTarifa(tar, tarifaMonedaDe(tr, de), haD, fApp); if(vL.ars==null) r.falta=true; else r.v+=vL.ars; }
+  var lns=de.lineas||[];
+  for(var j=0;j<lns.length;j++){
+    var us=Number(lns[j].usado)||0; if(us<=0) continue;
+    var ins=getInsumo(lns[j].insumoId); if(!ins) continue;
+    var vi=valorizarInsumo(ins, us, fApp); if(vi.ars==null) r.falta=true; else r.v+=vi.ars;
+  }
+  return r;
+}
+
+// Aviso naranja (listado de OT, Consumos, Costos y la propia OT).
+function htmlAvisoCultivo(otId){
+  var gs=cambiosDeCultivo(otId||''); if(!gs.length) return '';
+  var det=[];
+  for(var i=0;i<gs.length && i<3;i++){ var lo=getLoteById(gs[i].loteId); det.push((lo?lo.nombre:'')+' tenía '+gs[i].cultivo+', '+textoNuevosCultivos(gs[i])); }
+  var txt=det.join(' · ')+(gs.length>3?' · y '+(gs.length-3)+' más':'')+'.';
+  return '<div class="cc-aviso no-print"><div class="cc-aviso-t"><strong>Cambió el plan de uso en '+gs.length+(gs.length===1?' lote':' lotes')+' con labores cargadas.</strong> '+esc(txt)+
+      (otId?' Resolvelo antes de confirmar.':'')+'</div>'+
+    (puede('cargar')?'<button type="button" class="btn btn-terra btn-barra" onclick="abrirCambioCultivo(\''+(otId||'')+'\')">Resolver</button>':'')+
+  '</div>';
+}
+
+function pintarAvisoCultivo(contId){
+  var cont=byId(contId); if(!cont) return;
+  var box=byId('ccAv-'+contId);
+  if(!box){ box=document.createElement('div'); box.id='ccAv-'+contId; cont.insertBefore(box, cont.firstChild); }
+  box.innerHTML=htmlAvisoCultivo('');
+}
+
+var ccTmp=null;
+
+function abrirCambioCultivo(otId){
+  if(!guard('cargar')) return;
+  if(otHayCambios()){ alert('Primero guardá o descartá los cambios de la OT que tenés abierta.'); return; }
+  var gs=cambiosDeCultivo(otId||'');
+  if(!gs.length){ toast('No hay cambios de cultivo para resolver.'); return; }
+  ccTmp={otId:otId||'', elec:{}};
+  for(var i=0;i<gs.length;i++) ccTmp.elec[gs[i].key] = gs[i].nuevos.length ? 'a:'+gs[i].nuevos[0] : 'mantener';
+  renderCambioCultivo();
+  byId('modalBg').classList.add('on');
+}
+
+function ccElegir(key, val){ ccTmp.elec[key]=val; renderCambioCultivo(); }
+
+function renderCambioCultivo(){
+  var gs=cambiosDeCultivo(ccTmp.otId), h='';
+  for(var i=0;i<gs.length;i++){
+    var g=gs[i], lo=getLoteById(g.loteId), el=ccTmp.elec[g.key], filas='', tot=0, falta=false;
+    for(var t=0;t<g.items.length;t++){
+      var it=g.items[t], ap=it.de.estadoLote==='Aplicado', cs=costoDestinoARS(it.tr, it.de), ins=[];
+      for(var l=0;l<(it.de.lineas||[]).length;l++){ var iN=getInsumo(it.de.lineas[l].insumoId); if(iN) ins.push(iN.nombre); }
+      tot+=cs.v; if(cs.falta) falta=true;
+      filas+='<tr><td>OT #'+it.o.num+'</td><td class="tdname">'+esc(nombreLaborDeTrabajo(it.tr))+'</td>'+
+        '<td>'+(ap?'<span class="bdg bg">Confirmada</span>':'<span class="bdg by">Pendiente</span>')+'</td>'+
+        '<td class="tdname" style="font-size:12px;color:var(--muted)">'+esc(ins.join(', ')||'—')+'</td>'+
+        '<td class="num">'+(ap?fm(cs.v)+(cs.falta?' <span class="bdg-falta">+ s/v</span>':''):'—')+'</td></tr>';
+    }
+    var pills='';
+    for(var n=0;n<g.nuevos.length;n++){
+      var v='a:'+g.nuevos[n];
+      pills+='<button type="button" class="reg-pill'+(el===v?' on':'')+'" onclick="ccElegir(\''+g.key+'\',\''+v.replace(/'/g,"\\'")+'\')">Pasar a '+esc(g.nuevos[n])+'</button>';
+    }
+    pills+='<button type="button" class="reg-pill'+(el==='mantener'?' pend':'')+'" onclick="ccElegir(\''+g.key+'\',\'mantener\')">Dejar como gasto del '+esc(g.cultivo)+'</button>';
+    var expl = el==='mantener'
+      ? 'Queda imputado al '+g.cultivo+'. En Costos va en una fila aparte («cultivos que no se hicieron»): suma al total pero no entra en el costo por ha.'
+      : 'Los costos, consumos y la historia del lote pasan a '+el.slice(2)+'.';
+    h+='<div class="cc-grupo">'+
+        '<div class="cc-tit"><strong>'+esc(lo?lo.nombre:'')+'</strong> <span class="cc-sub">'+esc(getCampoNombre(g.campoId))+' · Campaña '+esc(getCampaniaNombre(g.camp))+'</span></div>'+
+        '<div class="cc-cambio">Tenía <strong>'+esc(g.cultivo)+'</strong> → '+esc(textoNuevosCultivos(g))+'</div>'+
+        '<table class="cc-tbl"><thead><tr><th>OT</th><th>Labor</th><th>Estado</th><th>Insumos</th><th class="num">Costo</th></tr></thead><tbody>'+filas+
+          '<tr class="cc-tot"><td colspan="4">Total confirmado</td><td class="num">'+fm(tot)+(falta?' <span class="bdg-falta">+ s/v</span>':'')+'</td></tr></tbody></table>'+
+        '<div class="reg-pills cc-ops">'+pills+'</div>'+
+        '<div class="cc-expl">'+esc(expl)+'</div>'+
+      '</div>';
+  }
+  var mc=byId('modalContent');
+  mc.className='modal modal-lg';
+  mc.innerHTML='<h3>Cambió el cultivo en el plan de uso</h3>'+
+    '<p class="cc-intro">Estos lotes tienen labores cargadas a nombre de un cultivo que ya no está en el Plan de Uso. Elegí qué hacer con cada uno. El stock no cambia: solo a qué cultivo se imputa.</p>'+
+    h+
+    '<div class="fact"><span style="flex:1"></span><button class="btn btn-barra" onclick="closeModal()">Cancelar</button><button class="btn btn-primary btn-barra" onclick="aplicarCambioCultivo()">✓ Aplicar</button></div>';
+}
+
+function aplicarCambioCultivo(){
+  if(!guard('cargar') || !ccTmp) return;
+  var gs=cambiosDeCultivo(ccTmp.otId), hoy=todayISO(), nP=0, nM=0;
+  for(var i=0;i<gs.length;i++){
+    var g=gs[i], el=ccTmp.elec[g.key]||'mantener';
+    for(var t=0;t<g.items.length;t++){
+      var de=g.items[t].de;
+      if(el.indexOf('a:')===0){
+        var nuevo=el.slice(2);
+        de.cambiosCultivo=(de.cambiosCultivo||[]).concat([{de:de.cultivo, a:nuevo, fecha:hoy}]);
+        de.cultivo=nuevo;
+        delete de.cultivoMantenido; delete de.cultivoMantenidoFecha; delete de.cultivoMantenidoAhora;
+        if(de.estadoLote!=='Aplicado'){ var hn=haNetaDe(g.camp, g.loteId, nuevo); if(hn>0) de.ha=hn; }
+        nP++;
+      } else {
+        de.cultivoMantenido=de.cultivo; de.cultivoMantenidoFecha=hoy; de.cultivoMantenidoAhora=g.nuevos.join(' y ');
+        nM++;
+      }
+    }
+  }
+  save();
+  closeModal();
+  ccTmp=null;
+  toast('Listo: '+(nP?nP+(nP===1?' labor pasó':' labores pasaron')+' al nuevo cultivo':'')+(nP&&nM?' · ':'')+(nM?nM+(nM===1?' labor queda':' labores quedan')+' como gasto del cultivo original':''));
+  refrescarTrasCambioCultivo();
+}
+
+function refrescarTrasCambioCultivo(){
+  var pant=byId('ot-pantalla');
+  if(currentTab==='ot' && pant && pant.style.display!=='none' && otPant.id){
+    var keep=(otPant.v===4 && aplicTmp && aplicTmp.otId===otPant.id) ? aplicTmp : null;
+    abrirOT(otPant.id, otPant.v, true);
+    if(keep && byId('otRegBox')){ aplicTmp=keep; renderRegistro(); }
+  }
+  else if(currentTab==='ot') renderOtList();
+  else if(currentTab==='consumos') renderConsumos();
+  else if(currentTab==='costos') renderCostos();
+}
+
+// Nota para la historia del lote y la OT.
+function notaCambioCultivo(de){
+  var out=[], cc=de.cambiosCultivo||[];
+  for(var i=0;i<cc.length;i++) out.push('Reasignado de '+cc[i].de+' a '+cc[i].a+' el '+fd(cc[i].fecha)+' por cambio en el plan de uso');
+  if(de.cultivoMantenido && de.cultivoMantenido===de.cultivo) out.push('Queda como gasto de '+de.cultivo+(de.cultivoMantenidoAhora?' (el lote pasó a '+de.cultivoMantenidoAhora+')':' (el cultivo no se hizo)')+(de.cultivoMantenidoFecha?', decidido el '+fd(de.cultivoMantenidoFecha):''));
+  return out.join(' · ');
+}
+
+/* ================================================================
    CONSUMOS POR LOTE / AVANCE
 ================================================================ */
 function clearConsFilters(){
@@ -6855,6 +7065,7 @@ function clearConsFilters(){
 }
 function renderConsumos(){
   refreshCampBadges();
+  pintarAvisoCultivo('page-consumos');
   // === Poblar selects de filtros ===
   var fcamp=fillSelect('consCampoFilter','Todos los campos', opcionesCampos());
   var optsLoteK=[];
@@ -7656,6 +7867,7 @@ function setCostMoneda(m){ window.costMoneda=(m==='USD'?'USD':'ARS'); renderCost
 var COST_MAX_FILAS=400;
 function renderCostos(){
   refreshCampBadges();
+  pintarAvisoCultivo('page-costos');
   var fcampania=state.campaniaActivaId||'';
   var fcamp=fillSelect('costCampoFilter','Todos los campos', opcionesCampos());
   var optsLoteC=[];
@@ -7704,7 +7916,7 @@ function renderCostos(){
   // Acumuladores en las dos monedas; cada uno cuenta lo que quedó sin valuar.
   function acc(){ return {ars:0, usd:0, faltaArs:0, faltaUsd:0}; }
   function sumar(a, v){ if(v.ars==null) a.faltaArs++; else a.ars+=v.ars; if(v.usd==null) a.faltaUsd++; else a.usd+=v.usd; }
-  var catTot={}, labProp=acc(), labContr=acc(), unTot={}, totHa=0, totEiq=0, hayInsSinEiq=false;
+  var fueraTot=acc(), catTot={}, labProp=acc(), labContr=acc(), unTot={}, totHa=0, totEiq=0, hayInsSinEiq=false;
   var sinPrecio={}, faltaTCCompra={}, mesesSinTC={}, detalle=[], supLote={}, labSinTarifa={};
   for(var k=0;k<state.ots.length;k++){
     var o=state.ots[k]; if(o.estado==='Cancelada') continue;
@@ -7713,7 +7925,7 @@ function renderCostos(){
     for(var d=0;d<paresC.length;d++){
       var de=paresC[d].destino, trC=paresC[d].trabajo;
       if(de.estadoLote!=='Aplicado') continue;
-      var un=esUN(de);
+      var un=esUN(de), fueraPlan=destinoFueraDePlanMantenido(o, de);
       if(!destinoVisible(de)) continue;
       if(fcamp && de.campoId!==fcamp) continue;
       if(fl && de.loteId!==fl) continue;
@@ -7727,7 +7939,7 @@ function renderCostos(){
       var haDest=(de.haReal!==undefined && de.haReal!==null && de.haReal!=='') ? Number(de.haReal) : (Number(de.ha)||0);
       // Superficie del cultivo en el lote: la neta del plan de uso; si no hay, la mayor
       // superficie real aplicada (no depende del orden ni de una pasada parcial).
-      if(!un){ var keySup=de.loteId+'||'+actDest; if(!supLote[keySup]) supLote[keySup]={lote:de.loteId, cult:actDest, max:0}; if(haDest>supLote[keySup].max) supLote[keySup].max=haDest; }
+      if(!un && !fueraPlan){ var keySup=de.loteId+'||'+actDest; if(!supLote[keySup]) supLote[keySup]={lote:de.loteId, cult:actDest, max:0}; if(haDest>supLote[keySup].max) supLote[keySup].max=haDest; }
       var loteNom=un ? 'General del campo' : nombreDestino(de), campoNom=getCampoNombre(de.campoId);
       // Una UN va aparte (sin superficie), salvo que se esté mirando justamente esa UN.
       var aparte=un && !filtroUN, unKey=actDest+' · '+campoNom;
@@ -7739,9 +7951,9 @@ function renderCostos(){
       var vL=valorizarTarifa(tarD, monT, haDest, fApp);
       if(vL.sinTC && fApp) mesesSinTC[fApp.slice(0,7)]=true;
       if(!(tarD>0)) labSinTarifa[nombreLaborDeTrabajo(trC)+' (OT #'+o.num+')']=true;
-      if(aparte) sumar(unTot[unKey].lab, vL); else sumar(esContratada?labContr:labProp, vL);
+      if(fueraPlan) sumar(fueraTot, vL); else if(aparte) sumar(unTot[unKey].lab, vL); else sumar(esContratada?labContr:labProp, vL);
       if(tarD>0){
-        detalle.push({fecha:fApp, campo:campoNom, lote:loteNom, cultivo:actDest, un:un,
+        detalle.push({fecha:fApp, campo:campoNom, lote:loteNom, cultivo:actDest, un:un, fuera:fueraPlan,
           concepto:(esContratada?'Labor contratada':'Labor propia')+' · OT#'+o.num+' · '+nombreLaborDeTrabajo(trC),
           subact:nombreLaborDeTrabajo(trC), laborClase:(esContratada?'LC':'LP'), tipo:'labor',
           cant:haDest, unidad:(un?'unid.':'ha'), precio:tarD, monedaOrig:monT, ars:vL.ars, usd:vL.usd});
@@ -7756,11 +7968,12 @@ function renderCostos(){
         if(val.sinPrecio){ if(val.faltaTCCompra) faltaTCCompra[ins.nombre]=true; else sinPrecio[ins.nombre]=true; }
         if(val.sinTC && fApp) mesesSinTC[fApp.slice(0,7)]=true;
         var cat=ins.cat||'Sin categoría';
-        if(aparte) sumar(unTot[unKey].ins, val);
+        if(fueraPlan) sumar(fueraTot, val);
+        else if(aparte) sumar(unTot[unKey].ins, val);
         else { if(!catTot[cat]) catTot[cat]=acc(); sumar(catTot[cat], val); }
         var eiqLn=eiqAplicado(ln.insumoId, usado);
         if(!aparte){ if(eiqLn===null) hayInsSinEiq=true; else totEiq+=eiqLn; }
-        detalle.push({fecha:fApp, campo:campoNom, lote:loteNom, cultivo:actDest, un:un,
+        detalle.push({fecha:fApp, campo:campoNom, lote:loteNom, cultivo:actDest, un:un, fuera:fueraPlan,
           concepto:ins.nombre, insumoId:ln.insumoId, tipo:'insumo', cat:cat,
           cant:usado, unidad:ins.un||'', precio:val.precio, monedaOrig:val.moneda,
           ars:val.ars, usd:val.usd, sinPrecio:val.sinPrecio, eiqAplic:eiqLn});
@@ -7771,7 +7984,11 @@ function renderCostos(){
   var totIns=acc(), c;
   for(c in catTot){ if(catTot.hasOwnProperty(c)){ totIns.ars+=catTot[c].ars; totIns.usd+=catTot[c].usd; totIns.faltaArs+=catTot[c].faltaArs; totIns.faltaUsd+=catTot[c].faltaUsd; } }
   var totLab={ars:labProp.ars+labContr.ars, usd:labProp.usd+labContr.usd, faltaArs:labProp.faltaArs+labContr.faltaArs, faltaUsd:labProp.faltaUsd+labContr.faltaUsd};
-  var totGen={ars:totIns.ars+totLab.ars, usd:totIns.usd+totLab.usd, faltaArs:totIns.faltaArs+totLab.faltaArs, faltaUsd:totIns.faltaUsd+totLab.faltaUsd};
+  // totCult: lo de los cultivos del plan (base del costo por ha); totGen suma además los gastos de
+  // cultivos que no se hicieron (lotes que cambiaron de cultivo), que no entran en el costo por ha.
+  var totCult={ars:totIns.ars+totLab.ars, usd:totIns.usd+totLab.usd, faltaArs:totIns.faltaArs+totLab.faltaArs, faltaUsd:totIns.faltaUsd+totLab.faltaUsd};
+  var hayFuera=!filtroUN && (fueraTot.ars>0 || fueraTot.usd>0 || fueraTot.faltaArs>0 || fueraTot.faltaUsd>0);
+  var totGen=hayFuera ? {ars:totCult.ars+fueraTot.ars, usd:totCult.usd+fueraTot.usd, faltaArs:totCult.faltaArs+fueraTot.faltaArs, faltaUsd:totCult.faltaUsd+fueraTot.faltaUsd} : totCult;
   var totUN=acc(), nUN=0;
   for(var ukk in unTot){ if(!unTot.hasOwnProperty(ukk)) continue; nUN++; var Ux=unTot[ukk];
     totUN.ars+=Ux.ins.ars+Ux.lab.ars; totUN.usd+=Ux.ins.usd+Ux.lab.usd; totUN.faltaArs+=Ux.ins.faltaArs+Ux.lab.faltaArs; totUN.faltaUsd+=Ux.ins.faltaUsd+Ux.lab.faltaUsd; }
@@ -7799,7 +8016,7 @@ function renderCostos(){
   kp+='<div class="kpi kpi-neutral"><div class="kpi-lbl">Insumos'+(filtroUN?'':' (cultivos)')+'</div><div class="kpi-val">'+fMM(totIns)+'</div></div>';
   kp+='<div class="kpi kpi-neutral"><div class="kpi-lbl">Labores'+(filtroUN?'':' (cultivos)')+'</div><div class="kpi-val">'+fMM(totLab)+'</div></div>';
   kp+='<div class="kpi kpi-total"><div class="kpi-lbl">'+(filtroUN?'Costo de '+esc(fcult):'Costo directo cultivos')+'</div><div class="kpi-val">'+fMM(totGen)+'</div></div>';
-  if(!filtroUN) kp+='<div class="kpi kpi-primary" title="Superficie de cada cultivo en cada lote según el plan de uso (o la mayor aplicada si no figura en el plan)"><div class="kpi-lbl">Costo por ha ('+f(totHa,1)+' ha)</div><div class="kpi-val">'+fHa(totGen)+'</div></div>';
+  if(!filtroUN) kp+='<div class="kpi kpi-primary" title="Superficie de cada cultivo en cada lote según el plan de uso (o la mayor aplicada si no figura en el plan)"><div class="kpi-lbl">Costo por ha ('+f(totHa,1)+' ha)'+(hayFuera?' *':'')+'</div><div class="kpi-val">'+fHa(totCult)+'</div></div>';
   if(!filtroUN && nUN && !fcult) kp+='<div class="kpi kpi-neutral" title="Estructura, maquinaria y otras unidades de negocio: no tienen superficie y no entran en el costo por ha"><div class="kpi-lbl">Unidades de negocio</div><div class="kpi-val">'+fMM(totUN)+'</div></div>';
   if(!filtroUN){
     kp+='<div class="kpi kpi-neutral" title="Superficie sembrable según el Plan de Uso"><div class="kpi-lbl">Ha neta (plan)</div><div class="kpi-val">'+f(supNeta,1)+'</div></div>';
@@ -7811,7 +8028,7 @@ function renderCostos(){
   var ordenCat=(state.catInsumos||[]).slice(), catKeys=[];
   for(var oc=0;oc<ordenCat.length;oc++){ if(catTot[ordenCat[oc]]) catKeys.push(ordenCat[oc]); }
   for(var ck in catTot){ if(catTot.hasOwnProperty(ck) && catKeys.indexOf(ck)<0) catKeys.push(ck); }
-  var filtroDet = function(x){ return filtroUN ? x.un : !x.un; };
+  var filtroDet = function(x){ return (filtroUN ? x.un : !x.un) && !x.fuera; };
   var rowsMB='<tr class="mb-sub"><td colspan="4">Insumos</td></tr>';
   for(var ic=0;ic<catKeys.length;ic++){
     var cat2=catKeys[ic], cv=catTot[cat2], detKey='cat::'+cat2, abierto=!!costExpand[detKey];
@@ -7830,8 +8047,14 @@ function renderCostos(){
     '<td class="num">'+fHa(labContr)+'</td><td class="num">'+fMM(labContr)+'</td><td class="num">'+pct(labContr)+'</td></tr>';
   if(abLC) rowsMB+=detalleAgrupado(detalle, function(x){ return filtroDet(x) && x.tipo==='labor' && x.laborClase==='LC'; }, monVis, 'subact');
   rowsMB+='<tr class="mb-subtotal"><td class="tdname"><strong>Subtotal labores</strong></td><td class="num"><strong>'+fHa(totLab)+'</strong></td><td class="num"><strong>'+fMM(totLab)+'</strong></td><td class="num">'+pct(totLab)+'</td></tr>';
-  rowsMB+='<tr class="row-total"><td class="tdname"><strong>'+(filtroUN?'COSTO '+esc(fcult).toUpperCase():'COSTO DIRECTO CULTIVOS')+'</strong></td><td class="num"><strong>'+fHa(totGen)+'</strong></td><td class="num"><strong>'+fMM(totGen)+'</strong></td><td class="num">100%</td></tr>';
-  var hayAlgo = catKeys.length || totLab.ars>0 || totLab.usd>0 || totLab.faltaArs || totLab.faltaUsd;
+  if(hayFuera){
+    var abF=!!costExpand['fuera'];
+    rowsMB+='<tr class="mb-row mb-fuera" onclick="toggleCostDet(\'fuera\')" style="cursor:pointer" title="Labores de lotes que cambiaron de cultivo en el plan de uso y se dejaron como gasto del cultivo original. Suman al total, no al costo por ha."><td class="tdname"><span class="mb-caret">'+(abF?'▾':'▸')+'</span> Gastos de cultivos que no se hicieron <span class="mb-fuera-sub">lotes que cambiaron de cultivo · no entran en el costo por ha</span></td>'+
+      '<td class="num">—</td><td class="num">'+fMM(fueraTot)+'</td><td class="num">'+pct(fueraTot)+'</td></tr>';
+    if(abF) rowsMB+=detalleRows(detalle, function(x){ return !!x.fuera; }, monVis, false);
+  }
+  rowsMB+='<tr class="row-total"><td class="tdname"><strong>'+(filtroUN?'COSTO '+esc(fcult).toUpperCase():'COSTO DIRECTO CULTIVOS')+'</strong></td><td class="num"><strong>'+fHa(totCult)+(hayFuera?' *':'')+'</strong></td><td class="num"><strong>'+fMM(totGen)+'</strong></td><td class="num">100%</td></tr>';
+  var hayAlgo = hayFuera || catKeys.length || totLab.ars>0 || totLab.usd>0 || totLab.faltaArs || totLab.faltaUsd;
   byId('costMBBody').innerHTML = hayAlgo ? rowsMB : '<tr><td colspan="4" class="empty">Sin labores aplicadas para los filtros aplicados.</td></tr>';
   var tit=byId('costTitulo');
   if(tit) tit.textContent=(filtroUN?'Costo de '+fcult+' (unidad de negocio, sin superficie)':'Resumen de costos de cultivos')+' · '+(fcampania?'Campaña '+getCampaniaNombre(fcampania):'Todas las campañas');
@@ -7865,6 +8088,7 @@ function renderCostos(){
   var ms=[]; for(var m1 in mesesSinTC){ if(mesesSinTC.hasOwnProperty(m1)) ms.push(m1.slice(5,7)+'/'+m1.slice(0,4)); }
   ms.sort();
   if(ms.length) avisos.push('Falta el tipo de cambio de '+ms.join(', ')+' (Maestros → TC): lo que está en otra moneda esos meses queda sin valuar en '+(monVis==='USD'?'U$S':'$')+'.');
+  if(hayFuera) avisos.push('* El costo por ha no incluye '+fmtMon(fueraTot[MK])+' de gastos de cultivos que no se hicieron (lotes que cambiaron de cultivo en el plan de uso y se dejaron como gasto del cultivo original).');
   if(falta(totGen)) avisos.push(falta(totGen)+' importe(s) marcados "+ s/v" no están sumados.');
   if(avisos.length){ avisoCard.style.display=''; avisoTxt.innerHTML=esc(avisos.join(' · ')); } else avisoCard.style.display='none';
   var bAr=byId('costMonARS'), bUs=byId('costMonUSD');
@@ -7884,7 +8108,7 @@ function detalleRows(detalle, filtro, monVis, full){
     if(full){
       html+='<tr>'+
         '<td>'+fd(x.fecha)+'</td><td class="tdname">'+esc(x.campo)+'</td><td class="tdname">'+esc(x.lote)+'</td>'+
-        '<td class="tdname">'+esc(x.cultivo)+(x.un?' <span class="bdg by">UN</span>':'')+'</td><td class="tdname">'+esc(x.concepto)+'</td>'+
+        '<td class="tdname">'+esc(x.cultivo)+(x.un?' <span class="bdg by">UN</span>':'')+(x.fuera?' <span class="bdg by" title="El lote cambió de cultivo en el plan de uso: queda como gasto de este cultivo">no se hizo</span>':'')+'</td><td class="tdname">'+esc(x.concepto)+'</td>'+
         '<td class="num">'+f(x.cant,2)+'</td><td>'+esc(x.unidad)+'</td>'+
         '<td class="num">'+(x.tipo==='labor' ? '<span style="color:#C7CDD6">—</span>'
              : (x.eiqAplic===null||x.eiqAplic===undefined ? '<span style="color:var(--muted)" title="Sin valor EIQ publicado">N/D</span>' : f(x.eiqAplic,1)))+'</td>'+
