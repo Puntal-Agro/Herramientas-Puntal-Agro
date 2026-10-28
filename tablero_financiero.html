@@ -536,7 +536,7 @@ footer{padding:14px 24px 22px;display:flex;justify-content:space-between;color:v
 
 <footer>
   <span>Puntal Agro · Herramientas para la toma de decisiones</span>
-  <span>Versión v2026-10-28 08:55 · BUILD 50 · Datos leídos: <span id="fts">—</span></span>
+  <span>Versión v2026-10-28 09:45 · BUILD 51 · Datos leídos: <span id="fts">—</span></span>
 </footer>
 
 <div id="dropOv"><div class="drop2">
@@ -1253,7 +1253,8 @@ function renderFlow(V){
   /* venta adicional de granos para no quedar en rojo: lo que crece el faltante (caja + insumos pendientes < 0) respecto del máximo anterior */
   var SR=[],vend=[],gComp=[],gLib=[],mx0=0;
   for(i=0;i<net.length;i++){var need=Math.max(0,-net[i]);vend.push(Math.max(0,need-mx0));mx0=Math.max(mx0,need);SR.push(mx0);
-    var cmp=Math.min(Math.max(gx[i],0),need);gComp.push(cmp);gLib.push(gx[i]-cmp);}
+    /* parte de arriba = venta adicional acumulada hasta ese mes (lo vendido en un mes ya no está en los siguientes) */
+    var cmp=Math.min(Math.max(gx[i],0),mx0);gComp.push(cmp);gLib.push(gx[i]-cmp);}
   var GR=(function(){var D=V.list[0],g=null;D.granos.forEach(function(x){if(!g&&/^soja/i.test(x.nombre)&&x.unidad==='t')g=x;});
     if(!g)D.granos.forEach(function(x){if(x.unidad==='t'&&!/silo/i.test(x.nombre)&&x.hasPrice&&(!g||x.exArs[11]>g.exArs[11]))g=x;});return g?{g:g,D:D}:null;})();
   var ton=function(v,j){if(!GR)return null;var m=s0+j,pr=GR.g.pre[m];if(!(pr>0))return null;return STATE.cur==='USD'?v/pr:v/(pr*GR.D.tc[m]);};
