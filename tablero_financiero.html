@@ -536,7 +536,7 @@ footer{padding:14px 24px 22px;display:flex;justify-content:space-between;color:v
 
 <footer>
   <span>Puntal Agro · Herramientas para la toma de decisiones</span>
-  <span>Versión v2026-10-27 20:40 · BUILD 49 · Datos leídos: <span id="fts">—</span></span>
+  <span>Versión v2026-10-28 08:55 · BUILD 50 · Datos leídos: <span id="fts">—</span></span>
 </footer>
 
 <div id="dropOv"><div class="drop2">
@@ -1250,25 +1250,37 @@ function renderFlow(V){
   /* 3 barras por mes: [saldo mes anterior + financiero del mes + saldo pendiente de insumos] · existencia de granos · reservas */
   var pAnt=[],pMes=[],net=[];
   for(i=0;i<acum.length;i++){var pv=i===0?V.start:acum[i-1];pAnt.push(pv);pMes.push(acum[i]-pv);net.push(acum[i]+sp[i]);}
+  /* venta adicional de granos para no quedar en rojo: lo que crece el faltante (caja + insumos pendientes < 0) respecto del máximo anterior */
+  var SR=[],vend=[],gComp=[],gLib=[],mx0=0;
+  for(i=0;i<net.length;i++){var need=Math.max(0,-net[i]);vend.push(Math.max(0,need-mx0));mx0=Math.max(mx0,need);SR.push(mx0);
+    var cmp=Math.min(Math.max(gx[i],0),need);gComp.push(cmp);gLib.push(gx[i]-cmp);}
+  var GR=(function(){var D=V.list[0],g=null;D.granos.forEach(function(x){if(!g&&/^soja/i.test(x.nombre)&&x.unidad==='t')g=x;});
+    if(!g)D.granos.forEach(function(x){if(x.unidad==='t'&&!/silo/i.test(x.nombre)&&x.hasPrice&&(!g||x.exArs[11]>g.exArs[11]))g=x;});return g?{g:g,D:D}:null;})();
+  var ton=function(v,j){if(!GR)return null;var m=s0+j,pr=GR.g.pre[m];if(!(pr>0))return null;return STATE.cur==='USD'?v/pr:v/(pr*GR.D.tc[m]);};
   var bb=function(l,d,c,st){return {label:l,data:d,backgroundColor:c,stack:st,borderColor:'#fff',borderWidth:{top:1,bottom:1,left:0,right:0},borderRadius:3,borderSkipped:false,maxBarThickness:26,categoryPercentage:0.72,barPercentage:0.86};};
   mk('chComp',{type:'bar',data:{labels:labels,datasets:[
     bb('Saldo financiero mes anterior',pAnt,'#2F5A0E','f'),
     bb('Financiero del mes',pMes,'#639922','f'),
     bb('Saldo pendiente de insumos',sp,'#C8642D','f'),
-    bb('Existencia de granos',gx,'#E0A526','g'),
+    bb('Granos que quedan',gLib,'#E0A526','g'),
+    bb('Granos a vender para cubrir el faltante',gComp,'#EFCB72','g'),
     bb('Reservas',rs,'#8A5A2B','r')]},
-    plugins:[{id:'selBand',beforeDatasetsDraw:function(ch){var j=STATE.compJ;if(j==null)return;var xs=ch.scales.x,a=ch.chartArea,w=(a.right-a.left)/ch.data.labels.length,x=xs.getPixelForValue(j);
+    plugins:[{id:'vendTag',afterDatasetsDraw:function(ch){var cx=ch.ctx,a=ch.chartArea,xs=ch.scales.x;cx.save();cx.font='700 11px DM Sans';cx.textAlign='center';cx.textBaseline='middle';
+      vend.forEach(function(v,j){if(v<0.5)return;var x=xs.getPixelForValue(j),t='Vender '+sym()+' '+f(v/tdiv(),0)+(STATE.cur==='USD'?' mil':' M'),w=cx.measureText(t).width+14,y=a.top-14;
+        cx.fillStyle='#A84D1F';if(cx.roundRect){cx.beginPath();cx.roundRect(x-w/2,y-10,w,20,10);cx.fill();}else cx.fillRect(x-w/2,y-10,w,20);
+        cx.fillStyle='#fff';cx.fillText(t,x,y);cx.beginPath();cx.moveTo(x-5,y+10);cx.lineTo(x+5,y+10);cx.lineTo(x,y+15);cx.fillStyle='#A84D1F';cx.fill();});cx.restore();}},
+      {id:'selBand',beforeDatasetsDraw:function(ch){var j=STATE.compJ;if(j==null)return;var xs=ch.scales.x,a=ch.chartArea,w=(a.right-a.left)/ch.data.labels.length,x=xs.getPixelForValue(j);
       var cx=ch.ctx;cx.save();cx.fillStyle='rgba(74,101,51,0.08)';cx.fillRect(x-w/2+2,a.top,w-4,a.bottom-a.top);cx.restore();}}],
-    options:(function(){var o=chartBase();o.layout={padding:{top:10}};o.scales.x.stacked=true;o.scales.y.stacked=true;o.interaction={mode:'index',intersect:false};
+    options:(function(){var o=chartBase();o.layout={padding:{top:34}};o.scales.x.stacked=true;o.scales.y.stacked=true;o.interaction={mode:'index',intersect:false};
       o.plugins.tooltip.enabled=false;
       o.onHover=function(e,els){e.native.target.style.cursor=els&&els.length?'pointer':'default';};
       o.onClick=function(e,els){if(!els||!els.length)return;var j=els[0].index;setTimeout(function(){selFlowM(s0+j);},0);};
       return o;})()});
   if(STATE.ieM==null||STATE.ieM<s0||STATE.ieM>11)STATE.ieM=s0;STATE.compJ=STATE.ieM-s0;
-  CMP={lab:labels,y0:s0,it:[['Saldo financiero mes anterior',pAnt,'#2F5A0E'],['Financiero del mes',pMes,'#639922'],['Saldo pendiente de insumos',sp,'#C8642D'],['Existencia de granos',gx,'#E0A526'],['Reservas',rs,'#8A5A2B']],net:net,sit:sit,V:V};
+  CMP={lab:labels,y0:s0,it:[['Saldo financiero mes anterior',pAnt,'#2F5A0E'],['Financiero del mes',pMes,'#639922'],['Saldo pendiente de insumos',sp,'#C8642D'],['Existencia de granos',gx,'#E0A526'],['Reservas',rs,'#8A5A2B']],net:net,sit:sit,V:V,vend:vend,SR:SR,gx:gx,ton:ton,gr:GR?GR.g.nombre.replace(/ (1ª|2ª)$/,''):''};
   drawCompDet();
   document.getElementById('compLeg').innerHTML=
-    '<span><i class="sw" style="background:#2F5A0E"></i> Saldo financiero mes anterior</span>'+'<span><i class="sw" style="background:#639922"></i> Financiero del mes</span>'+'<span><i class="sw" style="background:#C8642D"></i> Saldo pendiente de insumos</span>'+'<span><i class="sw" style="background:#E0A526"></i> Existencia de granos</span>'+'<span><i class="sw" style="background:#8A5A2B"></i> Reservas</span>';
+    '<span><i class="sw" style="background:#2F5A0E"></i> Saldo financiero mes anterior</span>'+'<span><i class="sw" style="background:#639922"></i> Financiero del mes</span>'+'<span><i class="sw" style="background:#C8642D"></i> Saldo pendiente de insumos</span>'+'<span><i class="sw" style="background:#E0A526"></i> Granos que quedan</span>'+'<span><i class="sw" style="background:#EFCB72"></i> Granos a vender para cubrir el faltante</span>'+'<span><i class="sw" style="background:#A84D1F;border-radius:6px;width:16px"></i> Mes en que hay que vender (venta adicional a la presupuestada)</span>'+'<span><i class="sw" style="background:#8A5A2B"></i> Reservas</span>';
   document.getElementById('flowSub').textContent='De '+V.meses[s0]+' al cierre de la campaña · '+unitTxt().replace('en ','eje en ')+(STATE.cur==='USD'?' · cada mes a su dólar':'');
   var fromTxt=V.startReal?('saldo real cargado'):(V.startFrom>=0?('estimado desde '+V.meses[V.startFrom]):'estimado');
   document.getElementById('flowNote').textContent='';
@@ -1295,6 +1307,10 @@ function drawCompDet(){if(!CMP)return;var j=STATE.compJ||0,h='<div class="cdm">'
   CMP.it.forEach(function(x){h+='<div style="border-left-color:'+x[2]+'"><div class="k">'+x[0]+'</div><div class="v'+(x[1][j]<0?' neg':'')+'">'+mny(x[1][j])+'</div></div>';});
   h+='</div><div class="cdg" style="margin-top:8px"><div class="tot"><div class="k">Caja + insumos pendientes</div><div class="v'+(CMP.net[j]<0?' neg':'')+'">'+mny(CMP.net[j])+'</div></div>';
   h+='<span class="op">+ granos =</span><div class="tot"><div class="k">Situación sin reservas</div><div class="v'+(CMP.sit[j]<0?' neg':'')+'">'+mny(CMP.sit[j])+'</div></div></div>';
+  var v=CMP.vend[j],t=v>0.5?CMP.ton(v,j):null,tA=CMP.SR[j]>0.5?CMP.ton(CMP.SR[j],j):null;
+  h+='<div class="cdg" style="margin-top:8px"><div style="border-left-color:#A84D1F;'+(v>0.5?'background:#FBEDE4':'')+'"><div class="k">Venta adicional de granos en este mes</div><div class="v'+(v>0.5?' neg':'')+'">'+(v>0.5?mny(v)+(t?' <span style="font-size:13px;font-weight:500;color:#475569">≈ '+f(t,0)+' t de '+esc(CMP.gr)+'</span>':''):'No hace falta')+'</div></div>'+
+     '<div style="border-left-color:#EFCB72"><div class="k">Granos a vender para cubrir el faltante (acumulado)</div><div class="v">'+(CMP.SR[j]>0.5?mny(Math.min(CMP.SR[j],CMP.gx[j]))+(tA?' <span style="font-size:13px;font-weight:500;color:#475569">≈ '+f(tA,0)+' t</span>':''):'—')+'</div></div>'+
+     (CMP.SR[j]>CMP.gx[j]+0.5?'<div style="border-left-color:#991B1B;background:#FEF2F2"><div class="k">Atención</div><div class="v neg" style="font-size:13px;white-space:normal">Los granos no alcanzan a cubrir el faltante</div></div>':'')+'</div>';
   document.getElementById('compDet').innerHTML=h;}
 function sum(a){var s=0;for(var i=0;i<a.length;i++)s+=a[i]||0;return s;}
 var ING_LBL=[['granos','Ventas de granos'],['hacienda','Ventas de hacienda'],['otros','Arrendamientos y otros ingresos'],['creditos','Créditos tomados'],['rescates','Rescate de colocaciones']];
