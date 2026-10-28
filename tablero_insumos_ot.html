@@ -1038,7 +1038,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
               <div class="trb-form-ft">
                 <span class="trb-form-hint" id="trbFormHint"></span>
                 <button type="button" class="btn" onclick="cancelarNuevoTrabajo()">Cancelar</button>
-                <button type="button" class="btn btn-primary btn-lg" onclick="addTrabajoALaOt()">✓ Agregar este trabajo a la orden</button>
+                <button type="button" class="btn btn-primary btn-lg" onclick="addTrabajoALaOt()">✓ Agregar</button>
               </div>
             </div>
           </div>
@@ -1052,6 +1052,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
           <span style="flex:1"></span>
           <button type="submit" class="btn btn-primary btn-emitir">Emitir OT</button>
           <button type="button" class="btn btn-primary" id="otBtnSig" onclick="otIr(otPant.v+1)">Siguiente →</button>
+          <button type="button" class="btn btn-primary btn-barra" id="otBtnListado" style="display:none" onclick="otVolverListado()">Volver al listado →</button>
         </div>
       </form>
     </div>
@@ -1084,7 +1085,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
   </div>
 
   <div class="card">
-    <div class="chd"><span class="ct-lg">Consumo por lote</span><span class="camp-bdg" id="campBdgCons"></span><span class="ct" id="consInsHint"></span><button class="btn btn-sm" style="margin-left:auto" onclick="openHistoriaLote()" title="Lo que se hizo en un lote, por fecha (labor, producto y dosis), para ver o descargar en PDF">📄 Historia del lote (PDF)</button></div>
+    <div class="chd"><span class="ct-lg">Consumo por lote</span><span class="camp-bdg" id="campBdgCons"></span><span class="ct" id="consInsHint"></span><button class="btn btn-primary btn-barra" style="margin-left:auto" onclick="openHistoriaLote()" title="Lo que se hizo en un lote, por fecha (labor, producto y dosis), para ver o descargar en PDF">📄 Historia del lote (PDF)</button></div>
     <div class="tw tw-scroll" style="max-height:520px;overflow-y:auto">
       <table>
         <thead><tr>
@@ -1142,7 +1143,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
       <table>
         <thead><tr>
           <th>Contratista</th><th>OT</th><th>Labor</th><th>Tipo</th><th>Estado OT</th><th>Campo(s)</th><th>Cultivo(s)</th>
-          <th class="num">Ha total</th><th class="num">Ha aplic.</th><th class="num">Tarifa</th><th class="num">Tarifa (otra mon.)</th><th class="num">Importe</th>
+          <th class="num">Ha total</th><th class="num">Ha aplic.</th><th style="text-align:center">Tarifa por ha</th><th class="num" title="La tarifa convertida a la otra moneda con el TC del mes de la OT">Equivale a</th><th class="num">Importe</th>
           <th>Estado fact.</th><th class="num">Facturado</th><th>Pagado</th><th class="num">$ Pagado</th><th class="num">Adeudado</th>
         </tr></thead>
         <tbody id="contrBody"></tbody>
@@ -1234,7 +1235,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
 </main>
 
 <footer>
-  <span>Puntal Agro · Insumos &amp; OT · Versión v2026-10-28 15:31 · BUILD 14</span>
+  <span>Puntal Agro · Insumos &amp; OT · Versión v2026-10-28 15:52 · BUILD 15</span>
   <span id="fts">—</span>
 </footer>
 
@@ -5546,6 +5547,8 @@ function verInfo(ev, key){
   if(pop.style.display!=='none' && pop.getAttribute('data-k')===key){ pop.style.display='none'; return; }
   var tit='', items=[];
   if(key==='precio'){ tit='Precio de los insumos'; items=TXT_PRECIO_ITEMS; }
+  if(key==='devolucion'){ tit='Devolución'; items=['Lo que salió del depósito y <strong>volvió sin usar</strong>. Vuelve al stock y no va al costo del lote.']; }
+  if(key==='baja'){ tit='Baja'; items=['Lo que salió del depósito y <strong>se perdió</strong>: envase roto, vencido, derrame. Sale del stock como baja y no va al costo del lote.']; }
   var li=''; for(var i=0;i<items.length;i++) li+='<li>'+items[i]+'</li>';
   pop.innerHTML='<div class="info-pop-t">'+esc(tit)+'</div><ul>'+li+'</ul>';
   pop.setAttribute('data-k', key);
@@ -6081,7 +6084,7 @@ function htmlRealizado(o){
     }
     items.push(it);
   }
-  return '<div class="chd" style="margin-top:4px"><span class="ct">Lo realizado · '+apl.length+(apl.length===1?' labor confirmada':' labores confirmadas')+'</span></div>'+tablaRealizado(items, '');
+  return '<div class="chd" style="margin-top:4px"><span class="ct">Confirmado · '+apl.length+(apl.length===1?' labor':' labores')+'</span></div>'+tablaRealizado(items, '');
 }
 /* ===== Registrar lo realizado: asistente en 3 pasos =====
    Usa aplicTmp (el mismo estado que el cálculo de prorrateo): lotesSel = lo marcado "Se hizo". */
@@ -6246,8 +6249,8 @@ function renderRegistro(){
           '<td class="num"><input type="number" step="0.01" min="0" class="inp-num" style="width:80px" id="devb_'+key+'" value="'+c.devBaja+'" oninput="updateConsumo(\''+key+'\',\'devBaja\',this.value)"></td>'+
           '<td class="num" id="aplicSum_'+key+'"><span class="'+(cons<-0.01?'bad-sum':'ok-sum')+'"><strong>'+f(cons,2)+'</strong></span></td></tr>';
       }
-      cuerpo='<div class="reg-ayuda">Ya está cargado lo planificado (dosis × superficie real). Cambialo solo si salió otra cantidad del depósito. <strong>Devolución</strong>: lo que volvió al depósito sin usar. <strong>Baja</strong>: lo que se perdió (envase roto, vencido, derrame).</div>'+
-        '<div class="tw"><table class="reg-tbl"><thead><tr><th>Insumo</th><th>Salió del depósito</th><th class="num">Planificado</th><th class="num">Entregado</th><th class="num">Devolución</th><th class="num">Baja</th><th class="num">Consumido</th></tr></thead><tbody>'+filas+'</tbody></table></div>'+
+      cuerpo=
+        '<div class="tw"><table class="reg-tbl"><thead><tr><th>Insumo</th><th>Salió del depósito</th><th class="num">Planificado</th><th class="num">Entregado</th><th class="num">Devolución '+infoBtn('devolucion')+'</th><th class="num">Baja '+infoBtn('baja')+'</th><th class="num">Consumido</th></tr></thead><tbody>'+filas+'</tbody></table></div>'+
         '<button type="button" class="reg-toggle" onclick="regToggleLote()">'+(aplicTmp.verLote?'▾ Ocultar consumo por lote':'▸ Ver consumo por lote')+'</button>'+
         '<div id="aplicPreview" style="display:'+(aplicTmp.verLote?'':'none')+'">'+tablaPorLoteRegistro(o)+'</div>';
     }
@@ -6305,12 +6308,7 @@ function htmlResumenRegistro(o){
   var filas=items.length?'x':'';
   var lista=function(arr){ var r=[]; for(var q=0;q<arr.length;q++) r.push(esc(nombreDestinoCorto(arr[q].destino))+' <span class="trb-apl-sub">('+esc(nombreLaborDeTrabajo(arr[q].trabajo))+')</span>'); return r.join(' · '); };
   var nAv=''; for(i=0;i<avisos.length;i++) nAv+='<div class="banner-warn" style="margin:0 0 6px">'+esc(avisos[i])+'</div>';
-  return '<div class="reg-kpis">'+
-      '<div class="reg-kpi"><div class="l">Se confirma</div><div class="v">'+si.length+(si.length===1?' labor':' labores')+(ha?' · '+f(ha,1)+' ha':'')+'</div></div>'+
-      '<div class="reg-kpi"><div class="l">Queda pendiente</div><div class="v">'+(pe.length?pe.length+(pe.length===1?' labor':' labores'):'nada')+'</div></div>'+
-      '<div class="reg-kpi"><div class="l">Sale de la orden</div><div class="v">'+(no.length?no.length+(no.length===1?' labor':' labores'):'nada')+'</div></div>'+
-      '<div class="reg-kpi reg-kpi-w"><div class="l">Sale del stock</div><div class="v" style="font-size:14px">'+(saleTxt.length?esc(saleTxt.join(' · ')):'nada')+'</div></div>'+
-    '</div>'+nAv+
+  return nAv+
 
     (pe.length?'<p class="trb-apl-sub" style="margin-top:8px"><strong>Queda pendiente:</strong> '+lista(pe)+'</p>':'')+
     (no.length?'<p class="trb-apl-sub" style="margin-top:4px"><strong>Sale de la orden:</strong> '+lista(no)+'</p>':'')+
@@ -6522,7 +6520,7 @@ function tablaPorLoteRegistro(o){
 ================================================================ */
 var otPant={id:null, modo:'nueva', v:1};
 
-var OT_VENTANAS=[['Datos','fecha, campaña'],['Trabajos','labor, lotes, insumos'],['Revisar','totales, stock, imprimir'],['Lo realizado','confirmar la OT']];
+var OT_VENTANAS=[['Datos','fecha, campaña'],['Trabajos','labor, lotes, insumos'],['Revisar','totales, stock, imprimir'],['Confirmar','lo hecho en el campo']];
 
 function abrirNuevaOT(){
   if(!guard('cargar')) return;
@@ -6612,7 +6610,7 @@ function otDescartar(){
 // Ir a una ventana. Al salir de "Trabajos" con un trabajo a medio armar, se agrega (o se avisa qué falta).
 function otIr(v){
   if(v<1 || v>4) return;
-  if(v===4 && otPant.modo==='nueva'){ alert('Primero emití la orden (ventana 3). Después, cuando se haga la labor, se confirma lo realizado acá.'); return; }
+  if(v===4 && otPant.modo==='nueva'){ alert('Primero emití la orden (ventana 3). Después, cuando se haga la labor, se confirma acá.'); return; }
   if(otPant.v===2 && v>2 && otPant.modo!=='ver' && byId('o_subact').value && destinosTmp.length){ if(!addTrabajoALaOt()) return; }
   otPant.v=v; otPant.recien=false; mostrarPantallaOT();
   window.scrollTo({top:0, behavior:'smooth'});
@@ -6679,7 +6677,7 @@ function htmlVentanaRevisar(o){
   var head='<div class="paso-hd"><span class="paso-n">3</span><span class="paso-t">Revisar'+(otPant.modo==='nueva'?' y emitir':'')+'</span></div><div class="paso-bd">'+
     (otPant.recien && o ? '<div class="otv-ok"><div class="otv-ok-t">✓ OT #'+o.num+' emitida</div>'+
       '<div class="otv-ok-acc"><button type="button" class="btn btn-primary" onclick="imprimirOT(\''+o.id+'\')">🖨 Imprimir para el campo</button><button type="button" class="btn" onclick="abrirNuevaOT()">＋ Nueva OT</button><button type="button" class="btn" onclick="otVolverListado()">Ir al listado</button></div>'+
-      '<div class="trb-apl-sub">Cuando se haga la labor, confirmá la OT en la ventana 4.</div></div>' : '');
+      '<div class="trb-apl-sub">Cuando se haga la labor, confirmá la OT en la ventana 4 (Confirmar).</div></div>' : '');
   if(!trs.length) return head+'<div class="otv-vacio">Todavía no hay trabajos en la orden. Agregalos en la ventana 2.</div></div>';
   if(otPant.modo==='ver') return head+htmlTotalesPlan(trs)+'</div>';
   var req=requerimientoPorDep(trs), propio=(otPant.modo==='editar' && o) ? requerimientoPorDep((o.trabajos||[]).filter(function(x){ return !trabajoAplicado(x); })) : {};
@@ -6709,7 +6707,7 @@ function htmlVentanaRevisar(o){
     (hayFormulaciones()?'':'<p class="trb-apl-sub" style="margin:0 0 6px">El orden de carga al tanque sale de la formulación de cada insumo (Maestros → Formulaciones). Como no hay formulaciones cargadas, el orden es alfabético.</p>')+
     (filas?'<div class="tw"><table class="otv3-tbl"><thead><tr><th class="num" title="Orden de carga al tanque, según la formulación">Orden</th><th>Insumo</th><th>Un.</th><th class="num">Total de la orden</th><th>Depósito</th><th class="num">Disponible</th><th></th></tr></thead><tbody>'+filas+'</tbody></table></div>'
           :'<p class="trb-apl-sub">La orden no lleva insumos.</p>')+
-    (o?'<p class="reg-ayuda" style="margin-top:10px">El documento para el campo sale con <strong>🖨 Imprimir</strong> (arriba).</p>':'<p class="reg-ayuda" style="margin-top:10px">Al emitir, la orden queda pendiente y se puede imprimir para el campo.</p>')+
+    (o?'':'<p class="reg-ayuda" style="margin-top:10px">Al emitir, la orden queda pendiente y se puede imprimir para el campo.</p>')+
   '</div>';
 }
 
@@ -6727,7 +6725,7 @@ function htmlTotalesPlan(trs){
 
 // Ventana 4: lo confirmado (plan contra real) y la acción que sigue.
 function htmlVentanaRealizado(o){
-  var head='<div class="paso-hd"><span class="paso-n">4</span><span class="paso-t">Lo realizado</span></div><div class="paso-bd">';
+  var head='<div class="paso-hd"><span class="paso-n">4</span><span class="paso-t">Confirmar</span></div><div class="paso-bd">';
   if(!o) return head+'<div class="otv-vacio">Primero emití la orden.</div></div>';
   var puedeC=puede('cargar'), est=o.estado, cuerpo='';
   var tabla = otTieneAplicados(o) ? htmlRealizado(o) : '';
@@ -6736,10 +6734,9 @@ function htmlVentanaRealizado(o){
     if(otPant.modo==='editar' && otHayCambios()){
       cuerpo='<div class="banner-warn" style="margin:6px 0">Hay cambios sin guardar en la orden (ventanas 1 a 3). Para confirmar la OT, primero guardalos o descartalos.'+
         '<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn btn-primary" onclick="otGuardarYSeguir()">Guardar cambios y seguir</button><button type="button" class="btn" onclick="otDescartar()">Descartar cambios</button></div></div>';
-    } else cuerpo='<div class="ct" style="margin:'+(tabla?'14px':'2px')+' 0 6px">Confirmar OT'+(tabla?' · lo que falta':'')+'</div><div id="otRegBox" class="otreg"></div>';
+    } else cuerpo=(tabla?'<div class="ct" style="margin:14px 0 6px">Falta confirmar</div>':'')+'<div id="otRegBox" class="otreg"></div>';
   } else if(!tabla) cuerpo='<div class="otv-vacio">Todavía no se confirmó nada.'+(puedeC?'':' (Tu usuario es de consulta.)')+'</div>';
   var pie='';
-  if((est==='Parcial' || est==='Aplicada') && puedeC) pie='<div class="otv-cta" style="flex-direction:row;flex-wrap:wrap;align-items:center;padding-top:10px"><span class="trb-apl-sub">Para cambiar algo de lo confirmado:</span><button type="button" class="btn btn-sm" onclick="volverAPendiente(\''+o.id+'\')">↩ Volver a pendiente</button></div>';
   return head+tabla+cuerpo+pie+'</div>';
 }
 
@@ -6796,7 +6793,9 @@ function otActualizarPie(){
   var sig=byId('otBtnSig'), maxV=o?4:3;
   sig.style.display = (v<maxV && !armando) ? '' : 'none';
   sig.className = guardar ? 'btn' : 'btn btn-primary';
-  if(v<4) sig.textContent='Siguiente: '+OT_VENTANAS[v][0]+' →';
+  sig.textContent='Siguiente →';
+  sig.className += ' btn-barra';
+  var bl=byId('otBtnListado'); if(bl) bl.style.display = (o && v===maxV) ? '' : 'none';
   byId('otBtnAtras').style.visibility = v>1 ? 'visible' : 'hidden';
   var ds=byId('otBtnDescartar'); ds.style.display = (dirty && v<4) ? '' : 'none'; ds.textContent='Descartar cambios';
 }
@@ -7262,7 +7261,7 @@ function renderContratistas(){
       '<td class="num">'+f(x.haTot,1)+(x.esUN?' <span style="font-size:10px;color:var(--muted)">unid.</span>':'')+'</td>'+
       '<td class="num">'+f(x.haApl,1)+(x.esUN?' <span style="font-size:10px;color:var(--muted)">unid.</span>':'')+'</td>'+
       '<td class="num" style="white-space:nowrap"><div style="display:inline-flex;align-items:center;gap:4px;flex-wrap:nowrap;justify-content:flex-end">'+
-        '<input type="number"'+disR+' step="0.01" min="0" value="'+x.tarifa+'" onchange="updateContrTarifa(\''+o.id+'\',\''+tr.id+'\',this.value)" style="width:72px;text-align:right;font-size:12px;border:1px solid var(--border);border-radius:6px;padding:3px 6px">'+
+        '<input type="number"'+disR+' step="0.01" min="0" value="'+(x.tarifa>0?x.tarifa:'')+'" placeholder="$ por ha" onchange="updateContrTarifa(\''+o.id+'\',\''+tr.id+'\',this.value)" style="width:72px;text-align:right;font-size:12px;border:1px solid var(--border);border-radius:6px;padding:3px 6px">'+
         '<select'+disR+' onchange="updateContrTarifaMon(\''+o.id+'\',\''+tr.id+'\',this.value)" style="font-size:11px;border:1px solid var(--border);border-radius:6px;padding:3px 4px;background:var(--card);flex-shrink:0">'+
         '<option value="ARS"'+((tr.tarifaMoneda||'ARS')==='ARS'?' selected':'')+'>$</option>'+
         '<option value="USD"'+((tr.tarifaMoneda)==='USD'?' selected':'')+'>U$S</option>'+
