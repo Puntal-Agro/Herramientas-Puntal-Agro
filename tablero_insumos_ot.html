@@ -607,6 +607,12 @@ tbody tr:hover td{background:#FAFBFC}
 .otp-ro-aviso{font-size:12px;color:var(--muted);background:#F5F6F2;border:1px dashed #C9D4BF;border-radius:8px;padding:8px 12px;margin-bottom:10px}
 .otv3-tbl td,.otv3-tbl th{vertical-align:middle}
 .otv-vacio{padding:26px 16px;text-align:center;color:var(--muted);font-size:13px}
+.addlote-cult{width:100%;font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#3B5226;margin:6px 0 2px}
+.real-tbl td{vertical-align:top}
+.real-tbl tr.real-grp td{border-top:1px solid var(--border)}
+.real-tbl tr.real-sub td{border-top:1px dashed #E7EAE2}
+.real-tbl td.num{white-space:nowrap}
+.real-tbl .bad-sum{color:#C0392B;font-weight:600}
 .otv-cta{display:flex;flex-direction:column;align-items:flex-start;gap:10px;padding:18px 4px}
 
 @media print{
@@ -1212,7 +1218,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
 </main>
 
 <footer>
-  <span>Puntal Agro · Insumos &amp; OT · Versión v2026-10-28 14:36 · BUILD 10</span>
+  <span>Puntal Agro · Insumos &amp; OT · Versión v2026-10-28 14:50 · BUILD 12</span>
   <span id="fts">—</span>
 </footer>
 
@@ -3689,35 +3695,40 @@ function toggleAddLote(ti){
   wrap.style.display='';
   renderAddLotePick(ti);
 }
-// Agregar lotes (o campos, si es UN) a un trabajo ya agregado. La receta se copia.
 function renderAddLotePick(ti){
   var wrap=byId('addLotePick_'+ti); if(!wrap) return;
   var tr=trabajosTmp[ti], camp=otCampaniaForm();
   var yaEsta={}, html='', hay=false, y;
-  for(y=0;y<tr.destinos.length;y++) yaEsta[tr.destinos[y].loteId]=true;
+  for(y=0;y<tr.destinos.length;y++) yaEsta[tr.destinos[y].loteId+'|'+(tr.destinos[y].cultivo||'')]=true;
+  var sel='';
   if(trabajoEsUN(tr)){
     var unNom=tr.destinos[0].cultivo;
     for(var c=0;c<state.campos.length;c++){
-      var cp=state.campos[c]; if(yaEsta[loteUN(cp.id)]) continue;
+      var cp=state.campos[c]; if(yaEsta[loteUN(cp.id)+'|'+unNom]) continue;
       hay=true;
       html+='<label class="lote-chk lote-chk-un"><input type="checkbox" value="'+loteUN(cp.id)+'" data-cult="'+esc(unNom)+'"> '+esc(cp.nombre)+' · general del campo</label>';
     }
     if(!hay){ wrap.innerHTML='<span class="hint">— Ya están todos los campos —</span>'; return; }
   } else {
-    var cults={}, listaCults=[];
-    for(var d=0;d<tr.destinos.length;d++){ var cc=tr.destinos[d].cultivo; if(cc && !cults[cc]){ cults[cc]=true; listaCults.push(cc); } }
-    for(var ci=0;ci<listaCults.length;ci++){
-      var cult=listaCults[ci], lotes=lotesDeCultivo(camp, cult);
+    // Cualquier cultivo del plan de uso de la campaña (no solo los que ya tiene el trabajo).
+    var cults=cultivosDeCampania(camp), fc=addLoteCult[ti]||'';
+    if(fc && cults.indexOf(fc)<0) fc='';
+    sel='<div class="fld" style="max-width:280px;margin-bottom:6px"><label>Cultivo</label><select onchange="addLoteCult['+ti+']=this.value; renderAddLotePick('+ti+')"><option value="">Todos los cultivos</option>';
+    for(var k=0;k<cults.length;k++) sel+='<option value="'+esc(cults[k])+'"'+(cults[k]===fc?' selected':'')+'>'+esc(cults[k])+'</option>';
+    sel+='</select></div>';
+    for(var ci=0;ci<cults.length;ci++){
+      var cult=cults[ci]; if(fc && cult!==fc) continue;
+      var lotes=lotesDeCultivo(camp, cult), grupo='';
       for(var l=0;l<lotes.length;l++){
-        if(yaEsta[lotes[l].id]) continue;
-        hay=true;
-        html+='<label class="lote-chk"><input type="checkbox" value="'+lotes[l].id+'" data-cult="'+esc(cult)+'"> '+
-          esc(lotes[l].nombre)+' <span style="color:var(--muted)">('+f(haNetaDe(camp, lotes[l].id, cult),1)+' ha · '+esc(cult)+')</span></label>';
+        if(yaEsta[lotes[l].id+'|'+cult]) continue;
+        grupo+='<label class="lote-chk"><input type="checkbox" value="'+lotes[l].id+'" data-cult="'+esc(cult)+'"> '+
+          esc(lotes[l].nombre)+' <span style="color:var(--muted)">('+f(haNetaDe(camp, lotes[l].id, cult),1)+' ha)</span></label>';
       }
+      if(grupo){ hay=true; html+=(fc?'':'<div class="addlote-cult">'+esc(cult)+'</div>')+grupo; }
     }
-    if(!hay){ wrap.innerHTML='<span class="hint">— Todos los lotes de '+esc(listaCults.join(', '))+' de esta campaña ya están en el trabajo —</span>'; return; }
+    if(!hay){ wrap.innerHTML=sel+'<span class="hint">— No quedan lotes '+(fc?'de '+esc(fc)+' ':'')+'para agregar en esta campaña —</span>'; return; }
   }
-  wrap.innerHTML='<div class="lotes-pick">'+html+'</div>'+
+  wrap.innerHTML=sel+'<div class="lotes-pick">'+html+'</div>'+
     '<div style="margin-top:6px;display:flex;gap:6px">'+
       '<button type="button" class="btn btn-sm btn-accion" onclick="confirmarAddLote('+ti+')">↓ Sumar al trabajo</button>'+
       '<button type="button" class="btn btn-sm" onclick="toggleAddLote('+ti+')">Cancelar</button>'+
@@ -5089,6 +5100,9 @@ function avisoSinDosis(lista, un){
     '\n\nCargá '+(un?'la cantidad':'la dosis')+' o quitá el insumo con ✕. Un insumo sin '+(un?'cantidad':'dosis')+' no se puede dejar en la orden.');
 }
 
+// Agregar lotes (o campos, si es UN) a un trabajo ya agregado. La receta se copia.
+var addLoteCult={};   // cultivo elegido en "+ Agregar lote" de cada trabajo ('' = todos)
+
 
 /* ===== Emitir / guardar la OT ===== */
 // Requerimiento pendiente por insumo+depósito de una lista de trabajos.
@@ -6067,27 +6081,21 @@ function barraEstadoOT(o){
     '</div>';
 }
 // Lo ya confirmado de la OT (solo lectura), debajo del documento.
-// Lo confirmado: por lote, fecha, superficie real y, por insumo, dosis real (plan) y consumido.
+// Lo confirmado: por lote, fecha, superficie real y, por insumo, dosis real, plan y consumido.
 function htmlRealizado(o){
-  var pares=destinosDeOt(o), filas='', apl=[];
+  var pares=destinosDeOt(o), apl=[], items=[];
   for(var i=0;i<pares.length;i++){ if(pares[i].destino.estadoLote==='Aplicado') apl.push(pares[i]); }
   apl.sort(function(a,b){ var fa=a.destino.fechaAplicReal||'', fb=b.destino.fechaAplicReal||''; return fa<fb?-1:fa>fb?1:0; });
   for(var a=0;a<apl.length;a++){
-    var de=apl[a].destino, tr=apl[a].trabajo, un=esUN(de), haR=haRealDe(de), ins='';
+    var de=apl[a].destino, un=esUN(de), haR=haRealDe(de);
+    var it={fecha:de.fechaAplicReal, lote:un?(de.cultivo+' · '+getCampoNombre(de.campoId)):nombreDestino(de), labor:nombreLaborDeTrabajo(apl[a].trabajo), ha:haR, haPlan:Number(de.ha)||0, un:un, prods:[]};
     for(var j=0;j<(de.lineas||[]).length;j++){
       var ln=de.lineas[j], x=getInsumo(ln.insumoId); if(!x) continue;
-      var real=ln.dosisReal!=null?ln.dosisReal:(haR>0?(Number(ln.usado)||0)/haR:0), plan=Number(ln.dosis)||0;
-      var dif=!un && plan>0 && Math.abs(real-plan)/plan>0.02;
-      var dos = un ? '' : '<span class="'+(dif?'bad-sum':'')+'">'+f(real,2)+'</span> <span class="trb-apl-sub">(plan '+f(plan,2)+')</span> '+esc(x.un)+'/ha · ';
-      ins+='<div class="real-ins"><span>'+esc(x.nombre)+'</span><span>'+dos+'<strong>'+f(ln.usado,1)+' '+esc(x.un)+'</strong>'+((Number(ln.devBaja)||0)>0?' <span class="trb-apl-sub">(+'+f(ln.devBaja,1)+' baja)</span>':'')+'</span></div>';
+      it.prods.push({nombre:x.nombre, unidad:x.un, real:ln.dosisReal!=null?ln.dosisReal:(haR>0?(Number(ln.usado)||0)/haR:0), plan:Number(ln.dosis)||0, usado:Number(ln.usado)||0, baja:Number(ln.devBaja)||0});
     }
-    filas+='<tr><td class="otl-fecha">'+fd(de.fechaAplicReal)+'</td>'+
-      '<td class="tdname"><strong>'+esc(un?(de.cultivo+' · '+getCampoNombre(de.campoId)):nombreDestino(de))+'</strong><div class="trb-apl-sub">'+esc(nombreLaborDeTrabajo(tr))+'</div></td>'+
-      '<td class="num">'+f(haR,1)+(un?' unid.':' ha')+(Math.abs(haR-(Number(de.ha)||0))>0.01?'<div class="trb-apl-sub">plan '+f(de.ha,1)+'</div>':'')+'</td>'+
-      '<td>'+(ins||'<span class="trb-apl-sub">sin insumos</span>')+'</td></tr>';
+    items.push(it);
   }
-  return '<div class="chd" style="margin-top:4px"><span class="ct">Lo realizado · '+apl.length+(apl.length===1?' labor confirmada':' labores confirmadas')+'</span></div>'+
-    '<div class="tw"><table><thead><tr><th>Fecha</th><th>Lote · labor</th><th class="num">Superficie real</th><th>Insumos · dosis real (plan) · consumido</th></tr></thead><tbody>'+filas+'</tbody></table></div>';
+  return '<div class="chd" style="margin-top:4px"><span class="ct">Lo realizado · '+apl.length+(apl.length===1?' labor confirmada':' labores confirmadas')+'</span></div>'+tablaRealizado(items, '');
 }
 /* ===== Registrar lo realizado: asistente en 3 pasos =====
    Usa aplicTmp (el mismo estado que el cálculo de prorrateo): lotesSel = lo marcado "Se hizo". */
@@ -6295,16 +6303,16 @@ function htmlResumenRegistro(o){
   var fb2=laboresFacturadasQueSeBorran(o);
   if(fb2.length) avisos.push('Ojo: '+fb2.join(', ')+' se queda sin lotes y se borra de la orden, con la facturación y los pagos al contratista que tenía cargados.');
   // Dosis real contra la del plan, por lote.
-  var prr=calcProrrateo(o), filas='';
+  var prr=calcProrrateo(o), items=[];
   for(i=0;i<si.length;i++){
-    var d2=si[i].destino, un=esUN(d2), rep=prr[d2.id]||{}, partes='';
+    var d2=si[i].destino, rep=prr[d2.id]||{}, it={fecha:regFecha(d2.id), lote:nombreDestinoCorto(d2), labor:nombreLaborDeTrabajo(si[i].trabajo), ha:haRealDe(d2), haPlan:Number(d2.ha)||0, un:esUN(d2), prods:[]};
     for(var li in rep){ if(!rep.hasOwnProperty(li)) continue;
-      var x=rep[li], insx=getInsumo(x.insumoId), plan=Number((d2.lineas[li]||{}).dosis)||0;
-      var dif = !un && plan>0 && Math.abs(x.dosisReal-plan)/plan>0.02;
-      partes+='<div class="real-ins"><span>'+(insx?esc(insx.nombre):'—')+'</span><span>'+(un?'':'<span class="'+(dif?'bad-sum':'')+'">'+f(x.dosisReal,2)+'</span> <span class="trb-apl-sub">(plan '+f(plan,2)+')</span> · ')+'<strong>'+f(x.usado,1)+' '+(insx?esc(insx.un):'')+'</strong></span></div>';
+      var x=rep[li], insx=getInsumo(x.insumoId);
+      it.prods.push({nombre:insx?insx.nombre:'—', unidad:insx?insx.un:'', real:x.dosisReal, plan:Number((d2.lineas[li]||{}).dosis)||0, usado:x.usado, baja:x.devBaja});
     }
-    filas+='<tr><td class="otl-fecha">'+fd(regFecha(d2.id))+'</td><td class="tdname"><strong>'+esc(nombreDestinoCorto(d2))+'</strong><div class="trb-apl-sub">'+esc(nombreLaborDeTrabajo(si[i].trabajo))+'</div></td><td class="num">'+f(haRealDe(d2),1)+(un?' unid.':' ha')+'</td><td>'+(partes||'<span class="trb-apl-sub">sin insumos</span>')+'</td></tr>';
+    items.push(it);
   }
+  var filas=items.length?'x':'';
   var lista=function(arr){ var r=[]; for(var q=0;q<arr.length;q++) r.push(esc(nombreDestinoCorto(arr[q].destino))+' <span class="trb-apl-sub">('+esc(nombreLaborDeTrabajo(arr[q].trabajo))+')</span>'); return r.join(' · '); };
   var nAv=''; for(i=0;i<avisos.length;i++) nAv+='<div class="banner-warn" style="margin:0 0 6px">'+esc(avisos[i])+'</div>';
   return '<div class="reg-kpis">'+
@@ -6313,7 +6321,7 @@ function htmlResumenRegistro(o){
       '<div class="reg-kpi"><div class="l">Sale de la orden</div><div class="v">'+(no.length?no.length+(no.length===1?' labor':' labores'):'nada')+'</div></div>'+
       '<div class="reg-kpi reg-kpi-w"><div class="l">Sale del stock</div><div class="v" style="font-size:14px">'+(saleTxt.length?esc(saleTxt.join(' · ')):'nada')+'</div></div>'+
     '</div>'+nAv+
-    (filas?'<div class="tw"><table class="reg-tbl"><thead><tr><th>Fecha</th><th>Lote · labor</th><th class="num">Superficie</th><th>Insumos · dosis real · consumido</th></tr></thead><tbody>'+filas+'</tbody></table></div>':'')+
+    (filas?tablaRealizado(items, 'reg-tbl'):'')+
     (pe.length?'<p class="trb-apl-sub" style="margin-top:8px"><strong>Queda pendiente:</strong> '+lista(pe)+'</p>':'')+
     (no.length?'<p class="trb-apl-sub" style="margin-top:4px"><strong>Sale de la orden:</strong> '+lista(no)+'</p>':'')+
     '<p class="reg-ayuda" style="margin-top:12px">Al confirmar se descuenta el stock y las labores pasan a Consumos, Labores, Costos y la historia del lote. Si después hay que cambiar algo, se vuelve la OT a pendiente.</p>';
@@ -6737,6 +6745,31 @@ function htmlVentanaRealizado(o){
   if(est==='Parcial' && puedeC) pie='<div class="otv-cta" style="flex-direction:row;flex-wrap:wrap;align-items:center"><span>Falta confirmar '+nP+(nP===1?' labor':' labores')+'.</span><button type="button" class="btn btn-primary" onclick="otConfirmar(\''+o.id+'\')">Confirmar lo que falta</button><button type="button" class="btn" onclick="volverAPendiente(\''+o.id+'\')">↩ Volver a pendiente</button></div>';
   if(est==='Aplicada' && puedeC) pie='<div class="otv-cta" style="flex-direction:row;flex-wrap:wrap;align-items:center"><span>Para cambiar algo de lo confirmado:</span><button type="button" class="btn" onclick="volverAPendiente(\''+o.id+'\')">↩ Volver a pendiente</button></div>';
   return head+cta+tabla+pie+'</div>';
+}
+
+// Tabla de lo realizado: un renglón por insumo, con columnas alineadas (dosis real, plan, consumido, baja).
+function tablaRealizado(items, cls){
+  var hayBaja=false, i, p;
+  for(i=0;i<items.length;i++){ for(p=0;p<items[i].prods.length;p++){ if((items[i].prods[p].baja||0)>0.0001) hayBaja=true; } }
+  var filas='';
+  for(i=0;i<items.length;i++){
+    var it=items[i], n=Math.max(1, it.prods.length);
+    var cab='<td class="otl-fecha" rowspan="'+n+'">'+fd(it.fecha)+'</td>'+
+      '<td class="tdname" rowspan="'+n+'"><strong>'+esc(it.lote)+'</strong><div class="trb-apl-sub">'+esc(it.labor)+'</div></td>'+
+      '<td class="num" rowspan="'+n+'">'+f(it.ha,1)+(it.un?' unid.':' ha')+(Math.abs(it.ha-it.haPlan)>0.01?'<div class="trb-apl-sub">plan '+f(it.haPlan,1)+'</div>':'')+'</td>';
+    if(!it.prods.length){ filas+='<tr class="real-grp">'+cab+'<td colspan="'+(hayBaja?5:4)+'" class="trb-apl-sub">sin insumos</td></tr>'; continue; }
+    for(p=0;p<it.prods.length;p++){
+      var x=it.prods[p], dif=!it.un && x.plan>0 && Math.abs(x.real-x.plan)/x.plan>0.02;
+      filas+='<tr class="'+(p===0?'real-grp':'real-sub')+'">'+(p===0?cab:'')+
+        '<td class="tdname">'+esc(x.nombre)+'</td>'+
+        '<td class="num">'+(it.un?'—':'<span class="'+(dif?'bad-sum':'')+'">'+f(x.real,2)+'</span> <span class="trb-apl-sub">'+esc(x.unidad)+'/ha</span>')+'</td>'+
+        '<td class="num trb-apl-sub">'+(it.un?'—':f(x.plan,2))+'</td>'+
+        '<td class="num"><strong>'+f(x.usado,1)+'</strong> <span class="trb-apl-sub">'+esc(x.unidad)+'</span></td>'+
+        (hayBaja?'<td class="num">'+((x.baja||0)>0.0001?f(x.baja,1)+' <span class="trb-apl-sub">'+esc(x.unidad)+'</span>':'<span class="trb-apl-sub">—</span>')+'</td>':'')+
+      '</tr>';
+    }
+  }
+  return '<div class="tw"><table class="real-tbl '+(cls||'')+'"><thead><tr><th>Fecha</th><th>Lote · labor</th><th class="num">Superficie</th><th>Insumo</th><th class="num">Dosis real</th><th class="num">Plan</th><th class="num">Consumido</th>'+(hayBaja?'<th class="num">Baja</th>':'')+'</tr></thead><tbody>'+filas+'</tbody></table></div>';
 }
 
 
