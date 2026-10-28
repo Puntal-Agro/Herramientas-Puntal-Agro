@@ -536,7 +536,7 @@ footer{padding:14px 24px 22px;display:flex;justify-content:space-between;color:v
 
 <footer>
   <span>Puntal Agro · Herramientas para la toma de decisiones</span>
-  <span>Versión v2026-10-28 09:45 · BUILD 51 · Datos leídos: <span id="fts">—</span></span>
+  <span>Versión v2026-10-28 09:55 · BUILD 52 · Datos leídos: <span id="fts">—</span></span>
 </footer>
 
 <div id="dropOv"><div class="drop2">
@@ -1253,8 +1253,8 @@ function renderFlow(V){
   /* venta adicional de granos para no quedar en rojo: lo que crece el faltante (caja + insumos pendientes < 0) respecto del máximo anterior */
   var SR=[],vend=[],gComp=[],gLib=[],mx0=0;
   for(i=0;i<net.length;i++){var need=Math.max(0,-net[i]);vend.push(Math.max(0,need-mx0));mx0=Math.max(mx0,need);SR.push(mx0);
-    /* parte de arriba = venta adicional acumulada hasta ese mes (lo vendido en un mes ya no está en los siguientes) */
-    var cmp=Math.min(Math.max(gx[i],0),mx0);gComp.push(cmp);gLib.push(gx[i]-cmp);}
+    /* parte de arriba = lo que hay que vender ESE mes (solo en los meses con etiqueta "Vender") */
+    var cmp=Math.min(Math.max(gx[i],0),vend[i]);gComp.push(cmp);gLib.push(gx[i]-cmp);}
   var GR=(function(){var D=V.list[0],g=null;D.granos.forEach(function(x){if(!g&&/^soja/i.test(x.nombre)&&x.unidad==='t')g=x;});
     if(!g)D.granos.forEach(function(x){if(x.unidad==='t'&&!/silo/i.test(x.nombre)&&x.hasPrice&&(!g||x.exArs[11]>g.exArs[11]))g=x;});return g?{g:g,D:D}:null;})();
   var ton=function(v,j){if(!GR)return null;var m=s0+j,pr=GR.g.pre[m];if(!(pr>0))return null;return STATE.cur==='USD'?v/pr:v/(pr*GR.D.tc[m]);};
@@ -1264,7 +1264,7 @@ function renderFlow(V){
     bb('Financiero del mes',pMes,'#639922','f'),
     bb('Saldo pendiente de insumos',sp,'#C8642D','f'),
     bb('Granos que quedan',gLib,'#E0A526','g'),
-    bb('Granos a vender para cubrir el faltante',gComp,'#EFCB72','g'),
+    bb('Granos a vender ese mes',gComp,'#EFCB72','g'),
     bb('Reservas',rs,'#8A5A2B','r')]},
     plugins:[{id:'vendTag',afterDatasetsDraw:function(ch){var cx=ch.ctx,a=ch.chartArea,xs=ch.scales.x;cx.save();cx.font='700 11px DM Sans';cx.textAlign='center';cx.textBaseline='middle';
       vend.forEach(function(v,j){if(v<0.5)return;var x=xs.getPixelForValue(j),t='Vender '+sym()+' '+f(v/tdiv(),0)+(STATE.cur==='USD'?' mil':' M'),w=cx.measureText(t).width+14,y=a.top-14;
@@ -1281,7 +1281,7 @@ function renderFlow(V){
   CMP={lab:labels,y0:s0,it:[['Saldo financiero mes anterior',pAnt,'#2F5A0E'],['Financiero del mes',pMes,'#639922'],['Saldo pendiente de insumos',sp,'#C8642D'],['Existencia de granos',gx,'#E0A526'],['Reservas',rs,'#8A5A2B']],net:net,sit:sit,V:V,vend:vend,SR:SR,gx:gx,ton:ton,gr:GR?GR.g.nombre.replace(/ (1ª|2ª)$/,''):''};
   drawCompDet();
   document.getElementById('compLeg').innerHTML=
-    '<span><i class="sw" style="background:#2F5A0E"></i> Saldo financiero mes anterior</span>'+'<span><i class="sw" style="background:#639922"></i> Financiero del mes</span>'+'<span><i class="sw" style="background:#C8642D"></i> Saldo pendiente de insumos</span>'+'<span><i class="sw" style="background:#E0A526"></i> Granos que quedan</span>'+'<span><i class="sw" style="background:#EFCB72"></i> Granos a vender para cubrir el faltante</span>'+'<span><i class="sw" style="background:#A84D1F;border-radius:6px;width:16px"></i> Mes en que hay que vender (venta adicional a la presupuestada)</span>'+'<span><i class="sw" style="background:#8A5A2B"></i> Reservas</span>';
+    '<span><i class="sw" style="background:#2F5A0E"></i> Saldo financiero mes anterior</span>'+'<span><i class="sw" style="background:#639922"></i> Financiero del mes</span>'+'<span><i class="sw" style="background:#C8642D"></i> Saldo pendiente de insumos</span>'+'<span><i class="sw" style="background:#E0A526"></i> Granos que quedan</span>'+'<span><i class="sw" style="background:#EFCB72"></i> Granos a vender ese mes</span>'+'<span><i class="sw" style="background:#A84D1F;border-radius:6px;width:16px"></i> Mes en que hay que vender (venta adicional a la presupuestada)</span>'+'<span><i class="sw" style="background:#8A5A2B"></i> Reservas</span>';
   document.getElementById('flowSub').textContent='De '+V.meses[s0]+' al cierre de la campaña · '+unitTxt().replace('en ','eje en ')+(STATE.cur==='USD'?' · cada mes a su dólar':'');
   var fromTxt=V.startReal?('saldo real cargado'):(V.startFrom>=0?('estimado desde '+V.meses[V.startFrom]):'estimado');
   document.getElementById('flowNote').textContent='';
@@ -1310,7 +1310,7 @@ function drawCompDet(){if(!CMP)return;var j=STATE.compJ||0,h='<div class="cdm">'
   h+='<span class="op">+ granos =</span><div class="tot"><div class="k">Situación sin reservas</div><div class="v'+(CMP.sit[j]<0?' neg':'')+'">'+mny(CMP.sit[j])+'</div></div></div>';
   var v=CMP.vend[j],t=v>0.5?CMP.ton(v,j):null,tA=CMP.SR[j]>0.5?CMP.ton(CMP.SR[j],j):null;
   h+='<div class="cdg" style="margin-top:8px"><div style="border-left-color:#A84D1F;'+(v>0.5?'background:#FBEDE4':'')+'"><div class="k">Venta adicional de granos en este mes</div><div class="v'+(v>0.5?' neg':'')+'">'+(v>0.5?mny(v)+(t?' <span style="font-size:13px;font-weight:500;color:#475569">≈ '+f(t,0)+' t de '+esc(CMP.gr)+'</span>':''):'No hace falta')+'</div></div>'+
-     '<div style="border-left-color:#EFCB72"><div class="k">Granos a vender para cubrir el faltante (acumulado)</div><div class="v">'+(CMP.SR[j]>0.5?mny(Math.min(CMP.SR[j],CMP.gx[j]))+(tA?' <span style="font-size:13px;font-weight:500;color:#475569">≈ '+f(tA,0)+' t</span>':''):'—')+'</div></div>'+
+     '<div style="border-left-color:#EFCB72"><div class="k">Venta adicional acumulada hasta este mes</div><div class="v">'+(CMP.SR[j]>0.5?mny(Math.min(CMP.SR[j],CMP.gx[j]))+(tA?' <span style="font-size:13px;font-weight:500;color:#475569">≈ '+f(tA,0)+' t</span>':''):'—')+'</div></div>'+
      (CMP.SR[j]>CMP.gx[j]+0.5?'<div style="border-left-color:#991B1B;background:#FEF2F2"><div class="k">Atención</div><div class="v neg" style="font-size:13px;white-space:normal">Los granos no alcanzan a cubrir el faltante</div></div>':'')+'</div>';
   document.getElementById('compDet').innerHTML=h;}
 function sum(a){var s=0;for(var i=0;i<a.length;i++)s+=a[i]||0;return s;}
