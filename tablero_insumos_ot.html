@@ -615,6 +615,22 @@ tbody tr:hover td{background:#FAFBFC}
 .real-tbl .bad-sum{color:#C0392B;font-weight:600}
 .otv-cta{display:flex;flex-direction:column;align-items:flex-start;gap:10px;padding:18px 4px}
 
+/* BUILD 13 */
+.btn-link{background:none;border:none;color:var(--muted);text-decoration:underline;cursor:pointer;font:inherit;font-size:12.5px;padding:6px 8px}
+.btn-link:hover{color:var(--bad)}
+.otv-ok{background:#EEF3E8;border:1px solid #9DB08E;border-radius:10px;padding:14px 16px;margin-bottom:14px}
+.otv-ok-t{font-size:16px;font-weight:600;color:#2E3D24;margin-bottom:10px}
+.otv-ok-acc{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.otreg{margin-top:6px}
+.btn-barra{padding:10px 18px!important;font-size:14px!important;font-weight:600}
+.btn-terra{background:#C8642D;border-color:#C8642D;color:#fff}
+.btn-terra:hover{background:#A9521F;border-color:#A9521F;color:#fff}
+.ot-barra-acc{align-items:center}
+.reg-toggle{background:none;border:none;color:#3B5226;font:inherit;font-size:13px;font-weight:600;cursor:pointer;padding:10px 2px 4px}
+.reg-toggle:hover{text-decoration:underline}
+.otreg .reg-fact{position:static;border-top:1px solid var(--border);margin-top:12px;padding-top:12px}
+.otreg .reg-fact .btn-primary{padding:9px 20px;font-size:13.5px}
+
 @media print{
   /* Al imprimir se muestra SOLO el documento de la OT: la vista de pantalla
      tiene botones, selects y controles que en papel no sirven. */
@@ -1011,7 +1027,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
                       <div id="o_lotes_pick" class="lotes-pick"><span class="hint">Elegí un cultivo para ver sus lotes.</span></div>
                     </div>
                     <div class="fld" style="flex:0 0 auto">
-                      <button type="button" class="btn btn-accion" onclick="addDestinosDesdePick()">↓ Sumar a la lista</button>
+                      <button type="button" class="btn btn-accion" onclick="addDestinosDesdePick()">↓ Sumar al trabajo</button>
                     </div>
                   </div>
                   <div id="destinosWrap"></div>
@@ -1022,7 +1038,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
               <div class="trb-form-ft">
                 <span class="trb-form-hint" id="trbFormHint"></span>
                 <button type="button" class="btn" onclick="cancelarNuevoTrabajo()">Cancelar</button>
-                <button type="button" class="btn btn-primary btn-lg" onclick="addTrabajoALaOt()">✓ Listo, agregar a la orden</button>
+                <button type="button" class="btn btn-primary btn-lg" onclick="addTrabajoALaOt()">✓ Agregar este trabajo a la orden</button>
               </div>
             </div>
           </div>
@@ -1032,8 +1048,8 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
         <div class="paso otv" id="otV4"></div>
         <div class="fact otp-fact" id="otFact">
           <button type="button" class="btn" id="otBtnAtras" onclick="otIr(otPant.v-1)">← Anterior</button>
+          <button type="button" class="btn-link" id="otBtnDescartar" onclick="otDescartar()">Descartar cambios</button>
           <span style="flex:1"></span>
-          <button type="button" class="btn" id="otBtnDescartar" onclick="otDescartar()">Descartar cambios</button>
           <button type="submit" class="btn btn-primary btn-emitir">Emitir OT</button>
           <button type="button" class="btn btn-primary" id="otBtnSig" onclick="otIr(otPant.v+1)">Siguiente →</button>
         </div>
@@ -1218,7 +1234,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
 </main>
 
 <footer>
-  <span>Puntal Agro · Insumos &amp; OT · Versión v2026-10-28 14:50 · BUILD 12</span>
+  <span>Puntal Agro · Insumos &amp; OT · Versión v2026-10-28 15:31 · BUILD 14</span>
   <span id="fts">—</span>
 </footer>
 
@@ -3608,10 +3624,12 @@ function abrirNuevoTrabajo(){
   var pant=byId('ot-pantalla');
   if(pant && pant.style.display!=='none' && otPant.v!==2){ otPant.v=2; mostrarPantallaOT(); }
   limpiarTrabajoEnCurso();
+  if(!plantillaTmp.length){ plantillaTmp.push({insumoId:'', dosis:0, depositoId:''}); renderPlantilla(); }
   byId('trabajoForm').style.display='';
   byId('trabajoAddBtns').style.display='none';
   byId('trbFormTit').textContent='Nuevo trabajo';
   actualizarHintTrabajo();
+  otActualizarPie();
   byId('trabajoForm').scrollIntoView({behavior:'smooth', block:'nearest'});
 }
 function cancelarNuevoTrabajo(){
@@ -3625,6 +3643,7 @@ function cerrarFormTrabajo(){
   byId('trabajoForm').style.display='none';
   byId('trabajoAddBtns').style.display='';
   if(typeof ajustarStickies==='function') ajustarStickies();
+  otActualizarPie();
 }
 // El hint del pie va guiando qué falta para poder agregar el trabajo.
 function actualizarHintTrabajo(){
@@ -3700,43 +3719,28 @@ function renderAddLotePick(ti){
   var tr=trabajosTmp[ti], camp=otCampaniaForm();
   var yaEsta={}, html='', hay=false, y;
   for(y=0;y<tr.destinos.length;y++) yaEsta[tr.destinos[y].loteId+'|'+(tr.destinos[y].cultivo||'')]=true;
-  var sel='';
   if(trabajoEsUN(tr)){
     var unNom=tr.destinos[0].cultivo;
     for(var c=0;c<state.campos.length;c++){
-      var cp=state.campos[c]; if(yaEsta[loteUN(cp.id)+'|'+unNom]) continue;
+      var cp=state.campos[c], ya=!!yaEsta[loteUN(cp.id)+'|'+unNom];
       hay=true;
-      html+='<label class="lote-chk lote-chk-un"><input type="checkbox" value="'+loteUN(cp.id)+'" data-cult="'+esc(unNom)+'"> '+esc(cp.nombre)+' · general del campo</label>';
+      html+='<label class="lote-chk lote-chk-un'+(ya?' dest-ya':'')+'"><input type="checkbox" value="'+loteUN(cp.id)+'" data-cult="'+esc(unNom)+'"'+(ya?' checked disabled':'')+'> '+esc(cp.nombre)+' · general del campo'+(ya?' ✓':'')+'</label>';
     }
-    if(!hay){ wrap.innerHTML='<span class="hint">— Ya están todos los campos —</span>'; return; }
-  } else {
-    // Cualquier cultivo del plan de uso de la campaña (no solo los que ya tiene el trabajo).
-    var cults=cultivosDeCampania(camp), fc=addLoteCult[ti]||'';
-    if(fc && cults.indexOf(fc)<0) fc='';
-    sel='<div class="fld" style="max-width:280px;margin-bottom:6px"><label>Cultivo</label><select onchange="addLoteCult['+ti+']=this.value; renderAddLotePick('+ti+')"><option value="">Todos los cultivos</option>';
-    for(var k=0;k<cults.length;k++) sel+='<option value="'+esc(cults[k])+'"'+(cults[k]===fc?' selected':'')+'>'+esc(cults[k])+'</option>';
-    sel+='</select></div>';
-    for(var ci=0;ci<cults.length;ci++){
-      var cult=cults[ci]; if(fc && cult!==fc) continue;
-      var lotes=lotesDeCultivo(camp, cult), grupo='';
-      for(var l=0;l<lotes.length;l++){
-        if(yaEsta[lotes[l].id+'|'+cult]) continue;
-        grupo+='<label class="lote-chk"><input type="checkbox" value="'+lotes[l].id+'" data-cult="'+esc(cult)+'"> '+
-          esc(lotes[l].nombre)+' <span style="color:var(--muted)">('+f(haNetaDe(camp, lotes[l].id, cult),1)+' ha)</span></label>';
-      }
-      if(grupo){ hay=true; html+=(fc?'':'<div class="addlote-cult">'+esc(cult)+'</div>')+grupo; }
-    }
-    if(!hay){ wrap.innerHTML=sel+'<span class="hint">— No quedan lotes '+(fc?'de '+esc(fc)+' ':'')+'para agregar en esta campaña —</span>'; return; }
+    wrap.innerHTML='<div class="lotes-pick">'+html+'</div>'+botonesAddLote(ti); return;
   }
-  wrap.innerHTML=sel+'<div class="lotes-pick">'+html+'</div>'+
-    '<div style="margin-top:6px;display:flex;gap:6px">'+
-      '<button type="button" class="btn btn-sm btn-accion" onclick="confirmarAddLote('+ti+')">↓ Sumar al trabajo</button>'+
-      '<button type="button" class="btn btn-sm" onclick="toggleAddLote('+ti+')">Cancelar</button>'+
-    '</div>';
+  var cults=cultivosDeCampania(camp), fc=addLoteCult[ti]||'', fp=addLoteCampo[ti]||'';
+  if(fc && cults.indexOf(fc)<0) fc='';
+  var sel='<div class="form-row r3" style="margin-bottom:6px"><div class="fld"><label>Cultivo</label><select onchange="addLoteCult['+ti+']=this.value; renderAddLotePick('+ti+')"><option value="">Todos los cultivos</option>';
+  for(var k=0;k<cults.length;k++) sel+='<option value="'+esc(cults[k])+'"'+(cults[k]===fc?' selected':'')+'>'+esc(cults[k])+'</option>';
+  sel+='</select></div><div class="fld"><label>Campo</label><select onchange="addLoteCampo['+ti+']=this.value; renderAddLotePick('+ti+')"><option value="">Todos los campos</option>';
+  for(var cc=0;cc<state.campos.length;cc++) sel+='<option value="'+esc(state.campos[cc].id)+'"'+(state.campos[cc].id===fp?' selected':'')+'>'+esc(state.campos[cc].nombre)+'</option>';
+  sel+='</select></div></div>';
+  var r=htmlChipsLotes(camp, fc, fp, function(lid, cu){ return !!yaEsta[lid+'|'+cu]; });
+  wrap.innerHTML=sel+(r.hay?'<div class="lotes-pick">'+r.html+'</div>':'<span class="hint">— No hay lotes para esos filtros en la campaña —</span>')+botonesAddLote(ti);
 }
 function confirmarAddLote(ti){
   var wrap=byId('addLotePick_'+ti); if(!wrap) return;
-  var checks=wrap.querySelectorAll('input[type=checkbox]:checked');
+  var checks=wrap.querySelectorAll('input[type=checkbox]:checked:not(:disabled)');
   if(!checks.length){ alert('Tildá al menos uno.'); return; }
   var tr=trabajosTmp[ti], camp=otCampaniaForm();
   for(var c=0;c<checks.length;c++){
@@ -3786,9 +3790,13 @@ function delTrbLinea(ti, di, li){
   trabajosTmp[ti].destinos[di].lineas.splice(li,1);
   renderTrabajos();
 }
+// Quitar el último lote de un trabajo = quitar el trabajo (con confirmación).
 function delTrbDestino(ti, di){
-  var tr=trabajosTmp[ti];
-  if(tr.destinos.length<=1){ alert('El trabajo tiene que tener al menos un lote. Si no lo querés, quitá el trabajo entero.'); return; }
+  var tr=trabajosTmp[ti]; if(!tr) return;
+  if(tr.destinos.length<=1){
+    if(!confirm('Es el último '+(trabajoEsUN(tr)?'campo':'lote')+' de este trabajo: se quita el trabajo entero.\n\n¿Seguir?')) return;
+    trabajosTmp.splice(ti,1); renderTrabajos(); return;
+  }
   tr.destinos.splice(di,1);
   renderTrabajos();
 }
@@ -3893,6 +3901,7 @@ function renderTrabajos(){
     '</div>';
   }
   wrap.innerHTML=aplHtml+(aplHtml?'<div class="trb-apl-tit">Pendiente de aplicar <span>— se edita normalmente</span></div>':'')+html;
+  if(typeof otActualizarPie==='function') otActualizarPie();
 }
 // Al cambiar la campaña de la OT cambian los cultivos y lotes disponibles.
 function onOtCampaniaChange(){
@@ -3914,7 +3923,9 @@ function onOtCampaniaChange(){
    abajo, después de cargar la receta. */
 
 /* ===== Receta base del trabajo ===== */
+// Al elegir un insumo, se usa primero la línea vacía (la que ya viene abierta).
 function addPlantillaLinea(insumoId, dosis){
+  if(insumoId){ for(var i=0;i<plantillaTmp.length;i++){ if(!plantillaTmp[i].insumoId){ plantillaTmp[i]={insumoId:insumoId, dosis:dosis||0, depositoId:depDefaultDeInsumo(insumoId)}; renderPlantilla(); sincronizarRecetaEnLotes(); return; } } }
   plantillaTmp.push({insumoId:insumoId||'', dosis:dosis||0, depositoId:insumoId?depDefaultDeInsumo(insumoId):''});
   renderPlantilla();
   sincronizarRecetaEnLotes();
@@ -4082,7 +4093,6 @@ function renderLotesPick(){
   var campoId=byId('o_campo_pick').value;
   var cont=byId('o_lotes_pick');
   var lbl=byId('o_lotes_pick_lbl');
-  if(!cultivo){ if(lbl) lbl.textContent='Lotes con ese cultivo en la campaña (tildá los que entran)'; cont.innerHTML='<span class="hint">Elegí un cultivo (o una unidad de negocio) para ver dónde se trabaja.</span>'; return; }
   var html='', hay=false, d;
   if(esNombreUN(cultivo)){
     // UNIDAD DE NEGOCIO: no hay lote; el trabajo se imputa a la UN en un campo.
@@ -4097,29 +4107,13 @@ function renderLotesPick(){
     cont.innerHTML = hay ? html : '<span class="hint">— No hay campos —</span>';
     return;
   }
-  if(lbl) lbl.textContent='Lotes con ese cultivo en la campaña (tildá los que entran)';
-  var campaniaOt=otCampaniaForm();
-  var lotes=lotesDeCultivo(campaniaOt, cultivo);
-  for(var i=0;i<lotes.length;i++){
-    var lo=lotes[i];
-    if(campoId && lo.campoId!==campoId) continue;
-    hay=true;
-    var yaEsta=false;
-    for(d=0;d<destinosTmp.length;d++){ if(destinosTmp[d].loteId===lo.id && destinosTmp[d].cultivo===cultivo){ yaEsta=true; break; } }
-    var neta=haNetaDe(campaniaOt, lo.id, cultivo);
-    html+='<label class="lote-chk'+(yaEsta?' dest-ya':'')+'">'+
-      '<input type="checkbox" value="'+lo.id+'"'+(yaEsta?' checked disabled':'')+'> '+
-      esc(lo.nombre)+' ('+f(neta,1)+' ha)'+(yaEsta?' ✓':'')+'</label>';
-  }
-  if(!hay){
-    cont.innerHTML='<span class="hint">— No hay lotes con <strong>'+esc(cultivo)+'</strong> planificado en la campaña '+esc(getCampaniaNombre(campaniaOt)||campaniaOt)+(campoId?' en ese campo':'')+'. Las actividades se cargan en Plan de Uso del Suelo. —</span>';
-    return;
-  }
-  cont.innerHTML=html;
+  // Lotes: el mismo selector que "+ Agregar lote" (agrupados por cultivo, filtro por cultivo y campo).
+  if(lbl) lbl.textContent='Lotes de la campaña (tildá los que entran)';
+  var r=htmlChipsLotes(otCampaniaForm(), cultivo, campoId, function(lid, cu){ for(var q=0;q<destinosTmp.length;q++){ if(destinosTmp[q].loteId===lid && destinosTmp[q].cultivo===cu) return true; } return false; });
+  cont.innerHTML = r.hay ? r.html : '<span class="hint">— No hay lotes '+(cultivo?'con <strong>'+esc(cultivo)+'</strong> ':'')+'en el plan de uso de la campaña'+(campoId?' en ese campo':'')+'. Las actividades se cargan en Plan de Uso del Suelo. —</span>';
 }
 function addDestinosDesdePick(){
-  var cultivo=byId('o_cultivo_pick').value;
-  if(!cultivo){ alert('Elegí el cultivo (o la unidad de negocio) primero.'); return; }
+  var cultivo=byId('o_cultivo_pick').value, campoSel=byId('o_campo_pick').value;
   var checks=byId('o_lotes_pick').querySelectorAll('input[type=checkbox]:checked:not(:disabled)');
   if(!checks.length){ alert('Tildá al menos un '+(esNombreUN(cultivo)?'campo':'lote')+' para agregar.'); return; }
   var esUnPick=esNombreUN(cultivo);
@@ -4135,9 +4129,9 @@ function addDestinosDesdePick(){
       destinosTmp.push({campoId:cid, loteId:loteUN(cid), cultivo:cultivo, ha:1, obs:'', lineas:lineasDesdeReceta(), _open:false});
       continue;
     }
-    var loteId=checks[c].value, lo=getLoteById(loteId);
-    if(!lo) continue;
-    destinosTmp.push({campoId:lo.campoId, loteId:loteId, cultivo:cultivo, ha:haNetaDe(campaniaOt, loteId, cultivo), obs:'', lineas:lineasDesdeReceta(), _open:false});
+    var loteId=checks[c].value, lo=getLoteById(loteId), cultL=cultivo||checks[c].getAttribute('data-cult');
+    if(!lo || !cultL) continue;
+    destinosTmp.push({campoId:lo.campoId, loteId:loteId, cultivo:cultL, ha:haNetaDe(campaniaOt, loteId, cultL), obs:'', lineas:lineasDesdeReceta(), _open:false});
   }
   renderLotesPick();
   renderPlantilla();
@@ -4149,7 +4143,7 @@ function addDestinosDesdePick(){
 function renderDestinos(){
   var wrap=byId('destinosWrap');
   if(!destinosTmp.length){
-    wrap.innerHTML='<p style="font-size:12px;color:var(--muted);padding:8px 2px">Sin lotes todavía. Elegí el cultivo (o la UN), tildá dónde y tocá "↓ Sumar a la lista".</p>';
+    wrap.innerHTML='<p style="font-size:12px;color:var(--muted);padding:8px 2px">Sin lotes todavía. Tildá los lotes (podés filtrar por cultivo o campo) y tocá "↓ Sumar al trabajo".</p>';
     return;
   }
   wrap.innerHTML='<div class="tw"><table>'+theadLotes(destinosTmp)+'<tbody>'+filasLotesInsumos(destinosTmp, null)+'</tbody></table></div>';
@@ -4188,7 +4182,7 @@ function saveOT(e){
   if(!guard('cargar')) return;
   // Trabajo a medio armar (labor + lotes sin "Agregar"): se agrega solo.
   if(byId('o_subact').value && destinosTmp.length){ if(!addTrabajoALaOt()) return; }
-  if(!trabajosTmp.length && !(editOtId && otTieneAplicados(getOtById(editOtId)))){ alert('Agregá al menos un trabajo a la OT (labor + lotes).'); return; }
+  if(!trabajosTmp.length && !(editOtId && otTieneAplicados(getOtById(editOtId)))){ alert(editOtId ? 'La orden quedó sin trabajos: agregá uno, o si ya no va, cancelá la OT.' : 'Agregá al menos un trabajo a la OT (labor + lotes).'); return; }
   var fechaOt=byId('o_fecha').value;
   if(!fechaOt){ alert('Cargá la fecha de la OT.'); return; }
   // Toda OT tiene campaña.
@@ -4259,7 +4253,7 @@ function saveOT(e){
   var ot={ id:uid(), num:state.nextOt++, fecha:fechaOt, campaniaId:campaniaOt, obs:byId('o_obs').value, estado:'Pendiente', trabajos:nuevos };
   for(var tr2=0;tr2<ot.trabajos.length;tr2++) precargarTarifaRef(ot.trabajos[tr2], campaniaOt);
   state.ots.push(ot);
-  save(); abrirOT(ot.id, 3, true);
+  save(); abrirOT(ot.id, 3, true); otPant.recien=true; mostrarPantallaOT();
   var nUN=0, pz=destinosDeOt(ot); for(var z=0;z<pz.length;z++){ if(esUN(pz[z].destino)) nUN++; }
   toast('OT #'+ot.num+' emitida · '+ot.trabajos.length+' trabajo(s) · '+lotesDeOt(ot).length+' lote(s)'+(nUN?' · '+nUN+' en unidad de negocio':''));
 }
@@ -4354,7 +4348,7 @@ function renderOtList(){
       '<td>'+estadoBadge(o.estado)+'</td>'+
       '<td class="otl-acc" onclick="event.stopPropagation()">'+
         ((puedeC && (o.estado==='Pendiente'||o.estado==='Parcial'))
-          ? '<button class="btn btn-sm btn-accion" onclick="abrirOT(\''+o.id+'\',4); if(otPant.id===\''+o.id+'\') otConfirmar(\''+o.id+'\')" title="Confirmar lo que se hizo">Confirmar</button>'
+          ? '<button class="btn btn-sm btn-accion" onclick="abrirOT(\''+o.id+'\',4)" title="Confirmar lo que se hizo">Confirmar</button>'
           : '<button class="btn btn-sm" onclick="abrirOT(\''+o.id+'\')">Ver</button>')+
         (puedeC?'<button class="btn btn-sm btn-danger" onclick="delOT(\''+o.id+'\')" title="Eliminar la OT">✕</button>':'')+
       '</td>'+
@@ -4804,26 +4798,10 @@ function toggleProrrPreview(){
   pv.style.display=abierto?'none':'block';
   if(c) c.textContent=abierto?'▶':'▼';
 }
+// Lo llaman updateEntregado / updateConsumo al cambiar un valor: refresca el reparto y el resumen.
 function buildPreviewProrrateo(o){
-  var prr=calcProrrateo(o), pares=destinosDeOt(o), rows='';
-  for(var d=0;d<pares.length;d++){
-    var de=pares[d].destino, tr=pares[d].trabajo;
-    if(!prr[de.id]) continue;
-    var un=esUN(de), haR=haRealDe(de), difHa=Math.abs(haR-(Number(de.ha)||0))>0.01, parts='';
-    for(var li in prr[de.id]){ if(!prr[de.id].hasOwnProperty(li)) continue;
-      var x=prr[de.id][li], ins=getInsumo(x.insumoId), lnDosis=Number((de.lineas[li]||{}).dosis)||0;
-      var difDosis = !un && lnDosis>0 && Math.abs(x.dosisReal-lnDosis)/lnDosis>0.02;
-      parts+='<tr><td class="tdname">'+(ins?esc(ins.nombre):'—')+'</td>'+
-        '<td class="num" style="color:var(--muted)">'+(un?'—':f(lnDosis,3))+'</td>'+
-        '<td class="num"><span class="'+(difDosis?'bad-sum':'')+'">'+(un?'—':f(x.dosisReal,3))+'</span></td>'+
-        '<td class="num"><strong>'+f(x.usado,2)+'</strong></td></tr>';
-    }
-    rows+='<div style="margin-bottom:6px"><div style="font-size:12px;font-weight:600;margin-bottom:2px">'+
-      esc(nombreLaborDeTrabajo(tr))+' · '+esc(un?(de.cultivo+' '+getCampoNombre(de.campoId)):nombreDestino(de))+
-      ' <span style="font-weight:400;color:var(--muted)">('+f(haR,1)+(un?' unid.':' ha real')+(difHa?(' vs '+f(de.ha,1)+' plan'):'')+')</span></div>'+
-      '<table><thead><tr><th>Insumo</th><th class="num">Dosis plan</th><th class="num">Dosis real</th><th class="num">Consumido</th></tr></thead><tbody>'+parts+'</tbody></table></div>';
-  }
-  return rows || '<p style="font-size:12px;color:var(--muted)">Seleccioná lotes para ver el reparto.</p>';
+  var r=byId('regResumen'); if(r && aplicTmp && aplicTmp.registro) r.innerHTML=htmlResumenRegistro(o);
+  return tablaPorLoteRegistro(o);
 }
 // Al cambiar lo tildado, lo entregado se recalcula: los datos de la corrección dejan de valer.
 function toggleAplicLote(destId, checked){
@@ -5056,6 +5034,7 @@ function updatePlantillaDep(i, val){
   renderDestinos();
 }
 
+
 function lineasDesdeReceta(){
   var lineas=[];
   for(var p=0;p<plantillaTmp.length;p++){
@@ -5101,7 +5080,14 @@ function avisoSinDosis(lista, un){
 }
 
 // Agregar lotes (o campos, si es UN) a un trabajo ya agregado. La receta se copia.
-var addLoteCult={};   // cultivo elegido en "+ Agregar lote" de cada trabajo ('' = todos)
+var addLoteCult={}, addLoteCampo={};   // filtros de "+ Agregar lote" de cada trabajo ('' = todos)
+
+function botonesAddLote(ti){
+  return '<div style="margin-top:6px;display:flex;gap:6px">'+
+      '<button type="button" class="btn btn-sm btn-accion" onclick="confirmarAddLote('+ti+')">↓ Sumar al trabajo</button>'+
+      '<button type="button" class="btn btn-sm" onclick="toggleAddLote('+ti+')">Cancelar</button>'+
+    '</div>';
+}
 
 
 /* ===== Emitir / guardar la OT ===== */
@@ -6056,22 +6042,22 @@ function barraEstadoOT(o){
   var nP=nPendientesOT(o);
   if(est==='Cancelada'){
     sigue='OT cancelada: no figura en consumos, labores, costos ni stock comprometido.';
-    if(puedeC) main='<button type="button" class="btn btn-primary" onclick="reactivateOT(\''+id+'\')">Reactivar OT</button>';
+    if(puedeC) main='<button type="button" class="btn btn-primary btn-barra" onclick="reactivateOT(\''+id+'\')">Reactivar OT</button>';
   } else if(est==='Pendiente'){
-    sigue='Cuando se haga la labor, confirmá lo realizado.'+(o.ultimoRegistro?' Lo que cargaste la última vez está guardado y aparece precargado.':'');
+    sigue='Cuando se haga la labor, confirmá la OT.'+(o.ultimoRegistro?' Lo que cargaste la última vez está guardado y aparece precargado.':'');
     if(puedeC){
-      main='<button type="button" class="btn btn-primary" onclick="otConfirmar(\''+id+'\')">Confirmar lo realizado</button>';
+      if(otPant.v!==4) main='<button type="button" class="btn btn-primary btn-barra" onclick="otConfirmar(\''+id+'\')">Confirmar OT</button>';
       sec='<button type="button" class="btn btn-danger-ghost" onclick="cancelOT(\''+id+'\')">Cancelar OT</button>';
     }
   } else if(est==='Parcial'){
-    sigue='Falta confirmar '+nP+(nP===1?' labor':' labores')+'. Confirmalas cuando se hagan (si alguna ya no se va a hacer, marcala «No se hace»). Para cambiar algo de lo confirmado, volvé a pendiente.';
+    sigue='Falta confirmar '+nP+(nP===1?' labor':' labores')+'. Confirmá la OT cuando se hagan (si alguna ya no se va a hacer, marcala «No se hace»). Para cambiar algo de lo confirmado, volvé a pendiente.';
     if(puedeC){
-      main='<button type="button" class="btn btn-primary" onclick="otConfirmar(\''+id+'\')">Confirmar lo que falta</button>';
-      sec='<button type="button" class="btn" onclick="volverAPendiente(\''+id+'\')">↩ Volver a pendiente</button>';
+      if(otPant.v!==4) main='<button type="button" class="btn btn-primary btn-barra" onclick="otConfirmar(\''+id+'\')">Confirmar OT</button>';
+      sec='<button type="button" class="btn btn-terra btn-barra" onclick="volverAPendiente(\''+id+'\')">↩ Volver a pendiente</button>';
     }
   } else {
     sigue='Todo confirmado. Para cambiar algo, volvé a pendiente: se devuelve el stock y lo que cargaste queda guardado.';
-    if(puedeC) sec='<button type="button" class="btn" onclick="volverAPendiente(\''+id+'\')">↩ Volver a pendiente</button>';
+    if(puedeC) sec='<button type="button" class="btn btn-terra btn-barra" onclick="volverAPendiente(\''+id+'\')">↩ Volver a pendiente</button>';
   }
   if(!puedeC) sigue+=' (Tu usuario es de consulta.)';
   return '<div class="ot-barra no-print">'+
@@ -6104,16 +6090,22 @@ function regFecha(destId){ return (aplicTmp.fechas && aplicTmp.fechas[destId]) |
 
 function regSync(){ aplicTmp.lotesSel={}; for(var k in aplicTmp.est){ if(aplicTmp.est.hasOwnProperty(k) && aplicTmp.est[k]==='si') aplicTmp.lotesSel[k]=true; } }
 
+// Confirmar lo realizado se carga en la ventana 4 de la OT.
 function openRegistro(otId){
   if(!guard('cargar')) return;
   var o=getOtById(otId); if(!o || o.estado==='Cancelada') return;
-  if(editOtId===otId && otHayCambios()){
-    if(!confirm('Hay cambios sin guardar en la OT #'+o.num+'. Si seguís, se descartan.\n\n¿Confirmar lo realizado igual?')) return;
-    abrirOT(otId, 4, true);
-  }
+  var pant=byId('ot-pantalla');
+  if(!(otPant.id===otId && pant && pant.style.display!=='none')) abrirOT(otId, 4, true);
+  else { otPant.v=4; mostrarPantallaOT(); }
+}
+
+// Arma el estado de la carga (aplicTmp). false si no queda nada pendiente.
+function iniciarRegistro(otId){
+  if(!puede('cargar')) return false;
+  var o=getOtById(otId); if(!o || o.estado==='Cancelada') return false;
   var pares=destinosDeOt(o), pend=[];
   for(var i=0;i<pares.length;i++){ if(pares[i].destino.estadoLote!=='Aplicado') pend.push(pares[i]); }
-  if(!pend.length){ toast('No queda nada pendiente en esta OT'); return; }
+  if(!pend.length) return false;
   var fb=fechaBloqueo(), hoy=todayISO();
   aplicTmp={otId:otId, paso:1, fecha:(fb && hoy<=fb)?addDias(fb,1):hoy, est:{}, fechas:{}, haReal:{}, consumos:{}, lotesSel:{}, registro:true};
   var ur=o.ultimoRegistro, nPre=0;
@@ -6141,8 +6133,7 @@ function openRegistro(otId){
     }
     aplicTmp.precargado=nPre;
   } else regSync();
-  renderRegistro();
-  byId('modalBg').classList.add('on');
+  return true;
 }
 
 function regSetEst(destId, v){ if(aplicTmp.est[destId]===v) return; aplicTmp.est[destId]=v; regSync(); aplicTmp.consumos=limpiarConsumosReg(); renderRegistro(); }
@@ -6165,10 +6156,9 @@ function regTodos(v){
 function regIr(paso){
   var o=getOtById(aplicTmp.otId); if(!o) return;
   if(paso>aplicTmp.paso && !regValidar(o, aplicTmp.paso)) return;
-  // Sin nada "Se hizo", no hay insumos que cargar.
-  if(paso===2 && !regHaySi()) paso = (aplicTmp.paso===3 ? 1 : 3);
+  if(paso>2) paso=2;   // son dos pasos: qué se hizo · insumos y confirmar
   aplicTmp.paso=paso; renderRegistro();
-  var mc=byId('modalContent'); if(mc) mc.scrollTop=0;
+  var bx=byId('otRegBox'); if(bx && bx.scrollIntoView) bx.scrollIntoView({behavior:'smooth', block:'start'});
 }
 
 function regHaySi(){ for(var k in aplicTmp.est){ if(aplicTmp.est.hasOwnProperty(k) && aplicTmp.est[k]==='si') return true; } return false; }
@@ -6210,8 +6200,8 @@ function nombreDestinoCorto(de){ return esUN(de) ? (de.cultivo+' · '+getCampoNo
 function renderRegistro(){
   var o=getOtById(aplicTmp.otId); if(!o) return;
   var paso=aplicTmp.paso, pares=destinosDeOt(o), fb=fechaBloqueo();
-  var pasos=['Qué se hizo','Insumos','Revisar y confirmar'], stp='';
-  for(var s=0;s<3;s++) stp+='<div class="reg-paso'+(s+1===paso?' act':(s+1<paso?' ok':''))+'"><span>'+(s+1<paso?'✓':(s+1))+'</span>'+pasos[s]+'</div>';
+  var pasos=['Qué se hizo','Insumos y confirmar'], letras=['a','b'], stp='';
+  for(var s=0;s<2;s++) stp+='<div class="reg-paso'+(s+1===paso?' act':(s+1<paso?' ok':''))+'"><span>'+(s+1<paso?'✓':letras[s])+'</span>'+pasos[s]+'</div>';
   var cuerpo='';
   if(paso===1){
     var rows='';
@@ -6235,7 +6225,7 @@ function renderRegistro(){
       '<div class="tw"><table class="reg-tbl reg-p1"><thead><tr><th>Lote · labor</th><th>¿Se hizo?</th><th class="num">Superficie real</th><th>Fecha</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
   } else if(paso===2){
     var agg=calcEntregadoPorInsumo(o), ids=[]; for(var k in agg){ if(agg.hasOwnProperty(k)) ids.push(k); }
-    if(!ids.length) cuerpo='<p class="empty" style="padding:24px 10px">Lo que marcaste como hecho no lleva insumos. Seguí al paso 3.</p>';
+    if(!ids.length) cuerpo='<p class="trb-apl-sub" style="padding:10px 2px">Lo que marcaste no lleva insumos.</p>';
     else {
       var porIns={}, filas='';
       for(var a=0;a<ids.length;a++){ var ii=insDeClave(ids[a]); porIns[ii]=(porIns[ii]||0)+1;
@@ -6257,21 +6247,21 @@ function renderRegistro(){
           '<td class="num" id="aplicSum_'+key+'"><span class="'+(cons<-0.01?'bad-sum':'ok-sum')+'"><strong>'+f(cons,2)+'</strong></span></td></tr>';
       }
       cuerpo='<div class="reg-ayuda">Ya está cargado lo planificado (dosis × superficie real). Cambialo solo si salió otra cantidad del depósito. <strong>Devolución</strong>: lo que volvió al depósito sin usar. <strong>Baja</strong>: lo que se perdió (envase roto, vencido, derrame).</div>'+
-        '<div class="tw"><table class="reg-tbl"><thead><tr><th>Insumo</th><th>Salió del depósito</th><th class="num">Planificado</th><th class="num">Entregado</th><th class="num">Devolución</th><th class="num">Baja</th><th class="num">Consumido</th></tr></thead><tbody>'+filas+'</tbody></table></div>';
+        '<div class="tw"><table class="reg-tbl"><thead><tr><th>Insumo</th><th>Salió del depósito</th><th class="num">Planificado</th><th class="num">Entregado</th><th class="num">Devolución</th><th class="num">Baja</th><th class="num">Consumido</th></tr></thead><tbody>'+filas+'</tbody></table></div>'+
+        '<button type="button" class="reg-toggle" onclick="regToggleLote()">'+(aplicTmp.verLote?'▾ Ocultar consumo por lote':'▸ Ver consumo por lote')+'</button>'+
+        '<div id="aplicPreview" style="display:'+(aplicTmp.verLote?'':'none')+'">'+tablaPorLoteRegistro(o)+'</div>';
     }
-  } else {
-    cuerpo=htmlResumenRegistro(o);
+    cuerpo+='<div id="regResumen" style="margin-top:14px">'+htmlResumenRegistro(o)+'</div>';
   }
-  var mc=byId('modalContent'); mc.className='modal modal-full';
-  mc.innerHTML='<h3>Confirmar lo realizado · OT #'+o.num+'</h3>'+
-    '<div class="reg-pasos">'+stp+'</div>'+
+  var mc=byId('otRegBox'); if(!mc) return;
+  mc.innerHTML='<div class="reg-pasos">'+stp+'</div>'+
     (aplicTmp.precargado&&paso===1?'<div class="banner-info" style="margin:0 0 8px">Están cargados los datos de la última vez. Si no cambiás nada, queda igual que antes.</div>':'')+
     '<div class="reg-cuerpo">'+cuerpo+'</div>'+
-    '<div class="fact"><button class="btn" onclick="closeModal()">Cancelar</button>'+
+    '<div class="fact reg-fact">'+
       '<span style="flex:1"></span>'+
       (paso>1?'<button class="btn" onclick="regIr('+(paso-1)+')">← Atrás</button>':'')+
-      (paso<3?'<button class="btn btn-primary" onclick="regIr('+(paso+1)+')">Siguiente →</button>'
-             :'<button class="btn btn-primary" onclick="confirmarRegistro()">✓ Confirmar</button>')+
+      (paso<2?'<button class="btn btn-primary" onclick="regIr(2)">Siguiente: Insumos →</button>'
+             :'<button class="btn btn-primary" onclick="confirmarRegistro()">✓ Confirmar OT</button>')+
     '</div>';
 }
 
@@ -6321,7 +6311,7 @@ function htmlResumenRegistro(o){
       '<div class="reg-kpi"><div class="l">Sale de la orden</div><div class="v">'+(no.length?no.length+(no.length===1?' labor':' labores'):'nada')+'</div></div>'+
       '<div class="reg-kpi reg-kpi-w"><div class="l">Sale del stock</div><div class="v" style="font-size:14px">'+(saleTxt.length?esc(saleTxt.join(' · ')):'nada')+'</div></div>'+
     '</div>'+nAv+
-    (filas?tablaRealizado(items, 'reg-tbl'):'')+
+
     (pe.length?'<p class="trb-apl-sub" style="margin-top:8px"><strong>Queda pendiente:</strong> '+lista(pe)+'</p>':'')+
     (no.length?'<p class="trb-apl-sub" style="margin-top:4px"><strong>Sale de la orden:</strong> '+lista(no)+'</p>':'')+
     '<p class="reg-ayuda" style="margin-top:12px">Al confirmar se descuenta el stock y las labores pasan a Consumos, Labores, Costos y la historia del lote. Si después hay que cambiar algo, se vuelve la OT a pendiente.</p>';
@@ -6508,6 +6498,22 @@ function volverAPendiente(otId){
   toast('OT #'+o.num+' pendiente: ya podés editarla');
 }
 
+
+function regToggleLote(){ aplicTmp.verLote=!aplicTmp.verLote; renderRegistro(); }
+
+// Consumo por lote de lo que se está por confirmar (se recalcula al cambiar los totales).
+function tablaPorLoteRegistro(o){
+  var prr=calcProrrateo(o), pares=destinosDeOt(o), items=[];
+  for(var i=0;i<pares.length;i++){
+    var d2=pares[i].destino; if(d2.estadoLote==='Aplicado' || aplicTmp.est[d2.id]!=='si') continue;
+    var rep=prr[d2.id]||{}, it={fecha:regFecha(d2.id), lote:nombreDestinoCorto(d2), labor:nombreLaborDeTrabajo(pares[i].trabajo), ha:haRealDe(d2), haPlan:Number(d2.ha)||0, un:esUN(d2), prods:[]};
+    for(var li in rep){ if(!rep.hasOwnProperty(li)) continue; var x=rep[li], insx=getInsumo(x.insumoId);
+      it.prods.push({nombre:insx?insx.nombre:'—', unidad:insx?insx.un:'', real:x.dosisReal, plan:Number((d2.lineas[li]||{}).dosis)||0, usado:x.usado, baja:x.devBaja}); }
+    items.push(it);
+  }
+  return items.length ? tablaRealizado(items, 'reg-tbl') : '';
+}
+
 /* ================================================================
    LA OT EN 4 VENTANAS (BUILD 10)
    1 Datos · 2 Trabajos · 3 Revisar · 4 Lo realizado. Es la misma pantalla para crear, ver
@@ -6516,7 +6522,7 @@ function volverAPendiente(otId){
 ================================================================ */
 var otPant={id:null, modo:'nueva', v:1};
 
-var OT_VENTANAS=[['Datos','fecha, campaña'],['Trabajos','labor, lotes, insumos'],['Revisar','totales, stock, imprimir'],['Lo realizado','confirmar lo hecho']];
+var OT_VENTANAS=[['Datos','fecha, campaña'],['Trabajos','labor, lotes, insumos'],['Revisar','totales, stock, imprimir'],['Lo realizado','confirmar la OT']];
 
 function abrirNuevaOT(){
   if(!guard('cargar')) return;
@@ -6568,7 +6574,7 @@ function cargarFormDesdeOT(o, editable){
 // ¿Hay algo cargado en la pantalla que se perdería?
 function otHayCambios(){
   var pant=byId('ot-pantalla'); if(!pant || pant.style.display==='none') return false;
-  var enCurso = !!(byId('o_subact') && byId('o_subact').value) || destinosTmp.length>0 || plantillaTmp.length>0;
+  var enCurso = !!(byId('o_subact') && byId('o_subact').value) || destinosTmp.length>0 || plantillaConInsumo();
   if(otPant.modo==='nueva') return enCurso || trabajosTmp.length>0 || !!(byId('o_obs').value||'').replace(/\s/g,'');
   if(otPant.modo==='editar'){
     var ex=getOtById(otPant.id); if(!ex) return false;
@@ -6608,7 +6614,7 @@ function otIr(v){
   if(v<1 || v>4) return;
   if(v===4 && otPant.modo==='nueva'){ alert('Primero emití la orden (ventana 3). Después, cuando se haga la labor, se confirma lo realizado acá.'); return; }
   if(otPant.v===2 && v>2 && otPant.modo!=='ver' && byId('o_subact').value && destinosTmp.length){ if(!addTrabajoALaOt()) return; }
-  otPant.v=v; mostrarPantallaOT();
+  otPant.v=v; otPant.recien=false; mostrarPantallaOT();
   window.scrollTo({top:0, behavior:'smooth'});
 }
 
@@ -6629,17 +6635,9 @@ function mostrarPantallaOT(){
   otSoloLectura(ro);
   if(v===3) byId('otV3').innerHTML=htmlVentanaRevisar(o);
   if(v===4) byId('otV4').innerHTML=htmlVentanaRealizado(o);
-  // Pie: anterior / siguiente / guardar.
-  var sub=form.querySelector('button[type=submit]');
-  byId('otBtnAtras').style.visibility = v>1 ? 'visible' : 'hidden';
-  var maxV = o ? 4 : 3;
-  byId('otBtnSig').style.display = v<maxV ? '' : 'none';
-  var guardar = !ro && ((otPant.modo==='nueva' && v===3) || (otPant.modo==='editar' && v<4));
-  sub.style.display = guardar ? '' : 'none';
-  sub.textContent = otPant.modo==='editar' ? 'Guardar cambios' : 'Emitir OT';
-  byId('otBtnSig').className = guardar ? 'btn' : 'btn btn-primary';
-  byId('otBtnDescartar').style.display = (!ro && v<4 && (otPant.modo==='editar' || trabajosTmp.length)) ? '' : 'none';
-  byId('otBtnDescartar').textContent = otPant.modo==='editar' ? 'Descartar cambios' : 'Limpiar';
+  if(v===4) iniciarRegistroEnVentana(o);
+  otActualizarPie();
+  if(!window._otPieOk){ window._otPieOk=true; var fm=byId('otForm'); fm.addEventListener('input', otActualizarPie); fm.addEventListener('change', otActualizarPie); }
 }
 
 function otSoloLectura(ro){
@@ -6669,24 +6667,19 @@ function barraNuevaOT(){
 
 // Confirmar lo realizado: si hay cambios sin guardar en la OT, primero se guardan (o se descartan).
 function otConfirmar(id){
-  if(otPant.id===id && otPant.modo==='editar' && byId('trabajoForm').style.display!=='none' && !destinosTmp.length){
-    // Un trabajo empezado sin lotes no se puede agregar: se ofrece descartarlo.
-    if(byId('o_subact').value || plantillaTmp.length){ if(!confirm('Hay un trabajo empezado en la ventana 2 que todavía no tiene lotes.\n\n¿Descartarlo y seguir?')) return; }
-    cerrarFormTrabajo();
-  }
-  if(otPant.id===id && otPant.modo==='editar' && otHayCambios()){
-    if(!confirm('Hay cambios sin guardar en la orden.\n\nPara confirmar lo realizado, primero se guardan. ¿Guardarlos ahora?')) return;
-    saveOT({preventDefault:function(){}});
-    if(otHayCambios()) return;   // no se guardó (faltaba algo o se canceló)
-  }
-  openRegistro(id);
+  var pant=byId('ot-pantalla');
+  if(otPant.id===id && pant && pant.style.display!=='none') otIr(4);
+  else abrirOT(id, 4);
 }
 
 // Ventana 3: totales por producto y si alcanza el stock (con lo que está en pantalla).
 function htmlVentanaRevisar(o){
   var trs=trabajosTmp, nL=0, ha=0, vistos={};
   for(var t=0;t<trs.length;t++){ for(var d=0;d<trs[t].destinos.length;d++){ var de=trs[t].destinos[d]; if(!esUN(de) && !vistos[de.loteId]){ vistos[de.loteId]=true; nL++; ha+=Number(de.ha)||0; } } }
-  var head='<div class="paso-hd"><span class="paso-n">3</span><span class="paso-t">Revisar'+(otPant.modo==='nueva'?' y emitir':'')+'</span></div><div class="paso-bd">';
+  var head='<div class="paso-hd"><span class="paso-n">3</span><span class="paso-t">Revisar'+(otPant.modo==='nueva'?' y emitir':'')+'</span></div><div class="paso-bd">'+
+    (otPant.recien && o ? '<div class="otv-ok"><div class="otv-ok-t">✓ OT #'+o.num+' emitida</div>'+
+      '<div class="otv-ok-acc"><button type="button" class="btn btn-primary" onclick="imprimirOT(\''+o.id+'\')">🖨 Imprimir para el campo</button><button type="button" class="btn" onclick="abrirNuevaOT()">＋ Nueva OT</button><button type="button" class="btn" onclick="otVolverListado()">Ir al listado</button></div>'+
+      '<div class="trb-apl-sub">Cuando se haga la labor, confirmá la OT en la ventana 4.</div></div>' : '');
   if(!trs.length) return head+'<div class="otv-vacio">Todavía no hay trabajos en la orden. Agregalos en la ventana 2.</div></div>';
   if(otPant.modo==='ver') return head+htmlTotalesPlan(trs)+'</div>';
   var req=requerimientoPorDep(trs), propio=(otPant.modo==='editar' && o) ? requerimientoPorDep((o.trabajos||[]).filter(function(x){ return !trabajoAplicado(x); })) : {};
@@ -6736,15 +6729,30 @@ function htmlTotalesPlan(trs){
 function htmlVentanaRealizado(o){
   var head='<div class="paso-hd"><span class="paso-n">4</span><span class="paso-t">Lo realizado</span></div><div class="paso-bd">';
   if(!o) return head+'<div class="otv-vacio">Primero emití la orden.</div></div>';
-  var puedeC=puede('cargar'), est=o.estado, nP=nPendientesOT(o), cta='';
-  if(est==='Cancelada') cta='<div class="otv-cta"><span>La orden está cancelada.</span>'+(puedeC?'<button type="button" class="btn btn-primary" onclick="reactivateOT(\''+o.id+'\')">Reactivar OT</button>':'')+'</div>';
-  else if(est==='Pendiente') cta='<div class="otv-cta"><span>Todavía no se confirmó nada. Cuando se haga la labor:</span>'+(puedeC?'<button type="button" class="btn btn-primary btn-lg" onclick="otConfirmar(\''+o.id+'\')">Confirmar lo realizado</button>':'')+
-    '<span class="trb-apl-sub">Son 3 pasos: qué se hizo · insumos (entregado, devolución y baja) · revisar y confirmar.</span></div>';
+  var puedeC=puede('cargar'), est=o.estado, cuerpo='';
   var tabla = otTieneAplicados(o) ? htmlRealizado(o) : '';
+  if(est==='Cancelada') cuerpo='<div class="otv-cta"><span>La orden está cancelada.</span>'+(puedeC?'<button type="button" class="btn btn-primary" onclick="reactivateOT(\''+o.id+'\')">Reactivar OT</button>':'')+'</div>';
+  else if((est==='Pendiente' || est==='Parcial') && puedeC){
+    if(otPant.modo==='editar' && otHayCambios()){
+      cuerpo='<div class="banner-warn" style="margin:6px 0">Hay cambios sin guardar en la orden (ventanas 1 a 3). Para confirmar la OT, primero guardalos o descartalos.'+
+        '<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn btn-primary" onclick="otGuardarYSeguir()">Guardar cambios y seguir</button><button type="button" class="btn" onclick="otDescartar()">Descartar cambios</button></div></div>';
+    } else cuerpo='<div class="ct" style="margin:'+(tabla?'14px':'2px')+' 0 6px">Confirmar OT'+(tabla?' · lo que falta':'')+'</div><div id="otRegBox" class="otreg"></div>';
+  } else if(!tabla) cuerpo='<div class="otv-vacio">Todavía no se confirmó nada.'+(puedeC?'':' (Tu usuario es de consulta.)')+'</div>';
   var pie='';
-  if(est==='Parcial' && puedeC) pie='<div class="otv-cta" style="flex-direction:row;flex-wrap:wrap;align-items:center"><span>Falta confirmar '+nP+(nP===1?' labor':' labores')+'.</span><button type="button" class="btn btn-primary" onclick="otConfirmar(\''+o.id+'\')">Confirmar lo que falta</button><button type="button" class="btn" onclick="volverAPendiente(\''+o.id+'\')">↩ Volver a pendiente</button></div>';
-  if(est==='Aplicada' && puedeC) pie='<div class="otv-cta" style="flex-direction:row;flex-wrap:wrap;align-items:center"><span>Para cambiar algo de lo confirmado:</span><button type="button" class="btn" onclick="volverAPendiente(\''+o.id+'\')">↩ Volver a pendiente</button></div>';
-  return head+cta+tabla+pie+'</div>';
+  if((est==='Parcial' || est==='Aplicada') && puedeC) pie='<div class="otv-cta" style="flex-direction:row;flex-wrap:wrap;align-items:center;padding-top:10px"><span class="trb-apl-sub">Para cambiar algo de lo confirmado:</span><button type="button" class="btn btn-sm" onclick="volverAPendiente(\''+o.id+'\')">↩ Volver a pendiente</button></div>';
+  return head+tabla+cuerpo+pie+'</div>';
+}
+
+// Prepara (o retoma) la carga de lo realizado dentro de la ventana 4.
+function iniciarRegistroEnVentana(o){
+  var box=byId('otRegBox'); if(!box || !o) return;
+  if(!aplicTmp || aplicTmp.otId!==o.id || !aplicTmp.registro){ if(!iniciarRegistro(o.id)){ box.innerHTML=''; return; } }
+  renderRegistro();
+}
+
+function otGuardarYSeguir(){
+  saveOT({preventDefault:function(){}});
+  if(!otHayCambios()){ otPant.v=4; mostrarPantallaOT(); }
 }
 
 // Tabla de lo realizado: un renglón por insumo, con columnas alineadas (dosis real, plan, consumido, baja).
@@ -6772,6 +6780,28 @@ function tablaRealizado(items, cls){
   return '<div class="tw"><table class="real-tbl '+(cls||'')+'"><thead><tr><th>Fecha</th><th>Lote · labor</th><th class="num">Superficie</th><th>Insumo</th><th class="num">Dosis real</th><th class="num">Plan</th><th class="num">Consumido</th>'+(hayBaja?'<th class="num">Baja</th>':'')+'</tr></thead><tbody>'+filas+'</tbody></table></div>';
 }
 
+function plantillaConInsumo(){ for(var i=0;i<plantillaTmp.length;i++){ if(plantillaTmp[i].insumoId) return true; } return false; }
+
+// Pie de la pantalla: un solo botón verde por vez (Emitir, Guardar cambios o Siguiente).
+function otActualizarPie(){
+  var form=byId('otForm'), pant=byId('ot-pantalla'); if(!form || !pant || pant.style.display==='none') return;
+  var o=otPant.id?getOtById(otPant.id):null, v=otPant.v, ro=otPant.modo==='ver';
+  var armando = v===2 && byId('trabajoForm').style.display!=='none';
+  var dirty = otPant.modo==='editar' && otHayCambios();
+  var emitir = !ro && otPant.modo==='nueva' && v===3;
+  var guardar = !ro && (emitir || (dirty && v<4));
+  var sub=form.querySelector('button[type=submit]');
+  sub.style.display = guardar ? '' : 'none';
+  sub.textContent = emitir ? 'Emitir OT' : 'Guardar cambios';
+  var sig=byId('otBtnSig'), maxV=o?4:3;
+  sig.style.display = (v<maxV && !armando) ? '' : 'none';
+  sig.className = guardar ? 'btn' : 'btn btn-primary';
+  if(v<4) sig.textContent='Siguiente: '+OT_VENTANAS[v][0]+' →';
+  byId('otBtnAtras').style.visibility = v>1 ? 'visible' : 'hidden';
+  var ds=byId('otBtnDescartar'); ds.style.display = (dirty && v<4) ? '' : 'none'; ds.textContent='Descartar cambios';
+}
+
+
 
 // Lo que se carga en la solapa Labores (tarifas, facturación, pagos, contratista) no se edita en
 // esta pantalla: al guardar se toma lo vigente, por si cambió mientras la OT estaba abierta.
@@ -6785,6 +6815,32 @@ function conservarDatosLabores(ex, nuevos){
     var dv={}; for(d=0;d<(v.destinos||[]).length;d++) dv[v.destinos[d].id]=v.destinos[d];
     for(d=0;d<(nuevos[t].destinos||[]).length;d++){ var od=dv[nuevos[t].destinos[d].id]; if(!od) continue; if(od.tarifa!==undefined) nuevos[t].destinos[d].tarifa=od.tarifa; else delete nuevos[t].destinos[d].tarifa; }
   }
+}
+
+
+// Lotes de la campaña agrupados por cultivo, para tildar. Se usa en el paso C de un trabajo nuevo
+// y en "+ Agregar lote". yaEsta(loteId, cultivo) = ya está en el trabajo (se muestra tildado, gris).
+function htmlChipsLotes(camp, fCult, fCampo, yaEsta){
+  var cults=cultivosDeCampania(camp), html='', hay=false, conPlan={};
+  for(var c=0;c<cults.length;c++){
+    var cult=cults[c]; if(fCult && cult!==fCult) continue;
+    var lotes=lotesDeCultivo(camp, cult), g='';
+    for(var l=0;l<lotes.length;l++){
+      var lo=lotes[l]; conPlan[lo.id]=true; if(fCampo && lo.campoId!==fCampo) continue;
+      var ya=yaEsta(lo.id, cult);
+      g+='<label class="lote-chk'+(ya?' dest-ya':'')+'"><input type="checkbox" value="'+lo.id+'" data-cult="'+esc(cult)+'"'+(ya?' checked disabled':'')+'> '+
+        esc(lo.nombre)+' <span style="color:var(--muted)">('+f(haNetaDe(camp, lo.id, cult),1)+' ha'+(fCampo?'':' · '+esc(getCampoNombre(lo.campoId)))+')</span>'+(ya?' ✓':'')+'</label>';
+    }
+    if(g){ hay=true; html+='<div class="addlote-cult">'+esc(cult)+'</div>'+g; }
+  }
+  // Con un campo elegido (y sin filtro de cultivo), los lotes sin cultivo en el plan se ven en gris.
+  if(fCampo && !fCult){
+    var sp='';
+    for(var z=0;z<state.lotes.length;z++){ var lz=state.lotes[z]; if(lz.campoId!==fCampo) continue;
+      if(!actividadesDe(camp, lz.id).length) sp+='<label class="lote-chk dest-ya" title="Sin cultivo en el plan de uso de la campaña"><input type="checkbox" disabled> '+esc(lz.nombre)+' <span style="color:var(--muted)">sin cultivo en el plan</span></label>'; }
+    if(sp){ hay=true; html+='<div class="addlote-cult">Sin cultivo en el plan</div>'+sp; }
+  }
+  return {html:html, hay:hay};
 }
 
 /* ================================================================
