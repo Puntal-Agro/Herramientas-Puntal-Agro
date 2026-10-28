@@ -618,6 +618,9 @@ tbody tr:hover td{background:#FAFBFC}
 /* BUILD 13 */
 .btn-link{background:none;border:none;color:var(--muted);text-decoration:underline;cursor:pointer;font:inherit;font-size:12.5px;padding:6px 8px}
 .btn-link:hover{color:var(--bad)}
+.btn-link-terra{color:#C8642D;font-weight:600}
+.otv-ok .trb-apl-sub{margin:4px 0 12px;font-size:13px}
+.btn-link-terra:hover{color:#A9521F}
 .otv-ok{background:#EEF3E8;border:1px solid #9DB08E;border-radius:10px;padding:14px 16px;margin-bottom:14px}
 .otv-ok-t{font-size:16px;font-weight:600;color:#2E3D24;margin-bottom:10px}
 .otv-ok-acc{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
@@ -1253,7 +1256,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
 </main>
 
 <footer>
-  <span>Puntal Agro · Insumos &amp; OT · Versión v2026-10-28 16:23 · BUILD 17</span>
+  <span>Puntal Agro · Insumos &amp; OT · Versión v2026-10-28 16:38 · BUILD 18</span>
   <span id="fts">—</span>
 </footer>
 
@@ -6061,33 +6064,29 @@ function nPendientesOT(o){ var p=destinosDeOt(o), n=0; for(var i=0;i<p.length;i+
 // Barra de arriba del detalle: estado, qué sigue y el botón de lo que hay que hacer.
 // Barra de arriba: estado, qué sigue y la acción principal.
 function barraEstadoOT(o){
-  var puedeC=puede('cargar'), id=o.id, est=o.estado, sigue='', main='', sec='';
-  var imp='<button type="button" class="btn btn-barra" onclick="imprimirOT(\''+id+'\')">🖨 Imprimir</button>';
+  // Arriba solo se sale (Volver), se imprime y, aparte, lo que cambia el estado de la orden.
+  // La acción principal de cada paso está siempre abajo a la derecha, en verde.
+  var puedeC=puede('cargar'), id=o.id, est=o.estado, sigue='', acc='';
+  var imp = otPant.recien ? '' : '<button type="button" class="btn btn-barra" onclick="imprimirOT(\''+id+'\')">🖨 Imprimir</button>';
   var nP=nPendientesOT(o);
   if(est==='Cancelada'){
     sigue='OT cancelada: no figura en consumos, labores, costos ni stock comprometido.';
-    if(puedeC) main='<button type="button" class="btn btn-primary btn-barra" onclick="reactivateOT(\''+id+'\')">Reactivar OT</button>';
+    if(puedeC) acc='<button type="button" class="btn btn-primary btn-barra" onclick="reactivateOT(\''+id+'\')">Reactivar OT</button>';
   } else if(est==='Pendiente'){
-    sigue='Cuando se haga la labor, confirmá la OT.'+(o.ultimoRegistro?' Lo que cargaste la última vez está guardado y aparece precargado.':'');
-    if(puedeC){
-      if(otPant.v!==4) main='<button type="button" class="btn btn-primary btn-barra" onclick="otConfirmar(\''+id+'\')">Confirmar OT</button>';
-      sec='<button type="button" class="btn btn-terra btn-barra" onclick="cancelOT(\''+id+'\')">Cancelar OT</button>';
-    }
+    sigue='Cuando se haga la labor, confirmá la OT (paso 4).'+(o.ultimoRegistro?' Lo que cargaste la última vez está guardado y aparece precargado.':'');
+    if(puedeC) acc='<button type="button" class="btn-link btn-link-terra" onclick="cancelOT(\''+id+'\')">Cancelar OT</button>';
   } else if(est==='Parcial'){
-    sigue='Falta confirmar '+nP+(nP===1?' labor':' labores')+'. Confirmá la OT cuando se hagan (si alguna ya no se va a hacer, marcala «No se hace»). Para cambiar algo de lo confirmado, volvé a pendiente.';
-    if(puedeC){
-      if(otPant.v!==4) main='<button type="button" class="btn btn-primary btn-barra" onclick="otConfirmar(\''+id+'\')">Confirmar OT</button>';
-      sec='<button type="button" class="btn btn-terra btn-barra" onclick="volverAPendiente(\''+id+'\')">↩ Volver a pendiente</button>';
-    }
+    sigue='Falta confirmar '+nP+(nP===1?' labor':' labores')+' (paso 4). Para cambiar algo de lo confirmado, volvé a pendiente.';
+    if(puedeC) acc='<button type="button" class="btn btn-terra btn-barra" onclick="volverAPendiente(\''+id+'\')">↩ Volver a pendiente</button>';
   } else {
     sigue='Todo confirmado. Para cambiar algo, volvé a pendiente: se devuelve el stock y lo que cargaste queda guardado.';
-    if(puedeC) sec='<button type="button" class="btn btn-terra btn-barra" onclick="volverAPendiente(\''+id+'\')">↩ Volver a pendiente</button>';
+    if(puedeC) acc='<button type="button" class="btn btn-terra btn-barra" onclick="volverAPendiente(\''+id+'\')">↩ Volver a pendiente</button>';
   }
   if(!puedeC) sigue+=' (Tu usuario es de consulta.)';
   return '<div class="ot-barra no-print">'+
-      '<div class="ot-barra-l"><button type="button" class="btn btn-sm" onclick="otVolverListado()">← Listado</button><span class="ot-barra-num">OT #'+o.num+'</span>'+estadoBadge(est)+'</div>'+
-      '<div class="ot-barra-sigue"><span class="ot-barra-flecha">→</span> '+esc(sigue)+'</div>'+
-      '<div class="ot-barra-acc">'+imp+sec+main+'</div>'+
+      '<div class="ot-barra-l"><button type="button" class="btn btn-barra" onclick="otVolverListado()">← Volver</button><span class="ot-barra-num">OT #'+o.num+'</span>'+estadoBadge(est)+'</div>'+
+      '<div class="ot-barra-sigue">'+esc(sigue)+'</div>'+
+      '<div class="ot-barra-acc">'+imp+acc+'</div>'+
     '</div>';
 }
 // Lo ya confirmado de la OT (solo lectura), debajo del documento.
@@ -6283,7 +6282,7 @@ function renderRegistro(){
     '<div class="reg-cuerpo">'+cuerpo+'</div>'+
     '<div class="fact reg-fact">'+
       '<span style="flex:1"></span>'+
-      (paso>1?'<button class="btn btn-barra" onclick="regIr('+(paso-1)+')">← Atrás</button>':'')+
+      (paso>1?'<button class="btn btn-barra" onclick="regIr('+(paso-1)+')">← Qué se hizo</button>':'')+
       (paso<2?'<button class="btn btn-primary btn-barra" onclick="regIr(2)">Siguiente →</button>'
              :'<button class="btn btn-primary btn-barra" onclick="confirmarRegistro()">✓ Confirmar OT</button>')+
     '</div>';
@@ -6679,7 +6678,7 @@ function otSoloLectura(ro){
 
 function barraNuevaOT(){
   return '<div class="ot-barra no-print">'+
-      '<div class="ot-barra-l"><button type="button" class="btn btn-sm" onclick="otVolverListado()">← Listado</button><span class="ot-barra-num">Nueva OT</span></div>'+
+      '<div class="ot-barra-l"><button type="button" class="btn btn-barra" onclick="otVolverListado()">← Volver</button><span class="ot-barra-num">Nueva OT</span></div>'+
       '<div class="ot-barra-sigue"><span class="ot-barra-flecha">→</span> Completá los datos (1) y los trabajos (2), revisá (3) y emití la orden.</div>'+
       '<div class="ot-barra-acc"></div>'+
     '</div>';
@@ -6698,8 +6697,8 @@ function htmlVentanaRevisar(o){
   for(var t=0;t<trs.length;t++){ for(var d=0;d<trs[t].destinos.length;d++){ var de=trs[t].destinos[d]; if(!esUN(de) && !vistos[de.loteId]){ vistos[de.loteId]=true; nL++; ha+=Number(de.ha)||0; } } }
   var head='<div class="paso-hd"><span class="paso-n">3</span><span class="paso-t">Revisar'+(otPant.modo==='nueva'?' y emitir':'')+'</span></div><div class="paso-bd">'+
     (otPant.recien && o ? '<div class="otv-ok"><div class="otv-ok-t">✓ OT #'+o.num+' emitida</div>'+
-      '<div class="otv-ok-acc"><button type="button" class="btn btn-primary" onclick="imprimirOT(\''+o.id+'\')">🖨 Imprimir para el campo</button><button type="button" class="btn" onclick="abrirNuevaOT()">＋ Nueva OT</button><button type="button" class="btn" onclick="otVolverListado()">Ir al listado</button></div>'+
-      '<div class="trb-apl-sub">Cuando se haga la labor, confirmá la OT en la ventana 4 (Confirmar).</div></div>' : '');
+      '<div class="trb-apl-sub">Imprimila para el campo. Cuando se haga la labor, confirmá la OT (paso 4).</div>'+
+      '<div class="otv-ok-acc"><button type="button" class="btn btn-primary btn-barra" onclick="imprimirOT(\''+o.id+'\')">🖨 Imprimir para el campo</button><button type="button" class="btn btn-barra" onclick="abrirNuevaOT()">＋ Nueva OT</button></div></div>' : '');
   if(!trs.length) return head+'<div class="otv-vacio">Todavía no hay trabajos en la orden. Agregalos en la ventana 2.</div></div>';
   if(otPant.modo==='ver') return head+htmlTotalesPlan(trs)+'</div>';
   var req=requerimientoPorDep(trs), propio=(otPant.modo==='editar' && o) ? requerimientoPorDep((o.trabajos||[]).filter(function(x){ return !trabajoAplicado(x); })) : {};
@@ -6751,11 +6750,11 @@ function htmlVentanaRealizado(o){
   if(!o) return head+'<div class="otv-vacio">Primero emití la orden.</div></div>';
   var puedeC=puede('cargar'), est=o.estado, cuerpo='';
   var tabla = otTieneAplicados(o) ? htmlRealizado(o) : '';
-  if(est==='Cancelada') cuerpo='<div class="otv-cta"><span>La orden está cancelada.</span>'+(puedeC?'<button type="button" class="btn btn-primary" onclick="reactivateOT(\''+o.id+'\')">Reactivar OT</button>':'')+'</div>';
+  if(est==='Cancelada') cuerpo='<div class="otv-vacio">La orden está cancelada.'+(puedeC?' Para volver a usarla, tocá «Reactivar OT» arriba.':'')+'</div>';
   else if((est==='Pendiente' || est==='Parcial') && puedeC){
     if(otPant.modo==='editar' && otHayCambios()){
       cuerpo='<div class="banner-warn" style="margin:6px 0">Hay cambios sin guardar en la orden (ventanas 1 a 3). Para confirmar la OT, primero guardalos o descartalos.'+
-        '<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn btn-primary" onclick="otGuardarYSeguir()">Guardar cambios y seguir</button><button type="button" class="btn" onclick="otDescartar()">Descartar cambios</button></div></div>';
+        '<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn btn-primary btn-barra" onclick="otGuardarYSeguir()">Guardar cambios y seguir</button><button type="button" class="btn btn-barra" onclick="otDescartar()">Descartar cambios</button></div></div>';
     } else cuerpo=(tabla?'<div class="ct" style="margin:14px 0 6px">Falta confirmar</div>':'')+'<div id="otRegBox" class="otreg"></div>';
   } else if(!tabla) cuerpo='<div class="otv-vacio">Todavía no se confirmó nada.'+(puedeC?'':' (Tu usuario es de consulta.)')+'</div>';
   var pie='';
@@ -6803,6 +6802,7 @@ function plantillaConInsumo(){ for(var i=0;i<plantillaTmp.length;i++){ if(planti
 
 // Pie de la pantalla: un solo botón verde por vez (Emitir, Guardar cambios o Siguiente).
 function otActualizarPie(){
+  // Abajo: a la izquierda «← Anterior»; a la derecha UN solo botón verde, el que sigue en el proceso.
   var form=byId('otForm'), pant=byId('ot-pantalla'); if(!form || !pant || pant.style.display==='none') return;
   var o=otPant.id?getOtById(otPant.id):null, v=otPant.v, ro=otPant.modo==='ver';
   var armando = v===2 && byId('trabajoForm').style.display!=='none';
@@ -6813,11 +6813,16 @@ function otActualizarPie(){
   sub.style.display = guardar ? '' : 'none';
   sub.textContent = emitir ? 'Emitir OT' : 'Guardar cambios';
   var sig=byId('otBtnSig'), maxV=o?4:3;
+  var aConfirmar = !!o && v===3 && (o.estado==='Pendiente' || o.estado==='Parcial') && puede('cargar');
+  // Ventana 2 sin trabajos: lo que sigue es armar el primero («+ Nuevo trabajo» en verde).
+  var sinTrabajos = v===2 && !trabajosTmp.length && !ro;
+  var ab=document.querySelector('#trabajoAddBtns button'); if(ab) ab.className=(sinTrabajos && !guardar ? 'btn btn-primary' : 'btn')+' btn-barra';
+  var sigVerde = !guardar && !sinTrabajos && !(o && o.estado==='Cancelada') && !(aConfirmar && otPant.recien);
   sig.style.display = (v<maxV && !armando) ? '' : 'none';
-  sig.className = guardar ? 'btn' : 'btn btn-primary';
-  sig.textContent='Siguiente →';
-  sig.className += ' btn-barra';
-  var bl=byId('otBtnListado'); if(bl) bl.style.display = (o && v===maxV) ? '' : 'none';
+  sig.textContent = aConfirmar ? 'Confirmar OT →' : 'Siguiente →';
+  sig.className = (sigVerde ? 'btn btn-primary' : 'btn')+' btn-barra';
+  var bl=byId('otBtnListado');
+  if(bl) bl.style.display = (o && v===maxV && !byId('otRegBox') && !dirty) ? '' : 'none';
   byId('otBtnAtras').style.visibility = v>1 ? 'visible' : 'hidden';
   var ds=byId('otBtnDescartar'); ds.style.display = (dirty && v<4) ? '' : 'none'; ds.textContent='Descartar cambios';
 }
