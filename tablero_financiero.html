@@ -571,7 +571,7 @@ footer{padding:14px 24px 22px;display:flex;justify-content:space-between;color:v
 
 <footer>
   <span>Puntal Agro · Herramientas para la toma de decisiones</span>
-  <span>Versión v2026-10-28 12:15 · BUILD 63 · Datos leídos: <span id="fts">—</span></span>
+  <span>Versión v2026-10-29 09:10 · BUILD 66 · Datos leídos: <span id="fts">—</span></span>
 </footer>
 
 <div id="dropOv"><div class="drop2">
@@ -763,12 +763,13 @@ function parseWorkbook(wb,fname){
   var ing={},egr={};
   ing.granos=pf('VENTAS GRANOS $');
   ing.hacienda=pf('VENTAS HACIENDA $');
-  var otrosIng=pf('Total Otros Ingresos',{optional:true}),arrCob=pf('Arrendamientos Cobrados',{optional:true});
-  ing.otros=[];for(i=0;i<12;i++)ing.otros.push(otrosIng[i]+arrCob[i]);
+  /* "Total Otros Ingresos" o "TOTAL OTROS INGRESOS $": se busca por el comienzo, sin importar mayúsculas */
+  var otrosIng=pf('Total Otros Ingresos',{prefix:true,optional:true}),arrCob=pf('Arrendamientos Cobrados',{optional:true});
+  ing.otros=otrosIng;ing.arrc=arrCob;
   ing.creditos=pf('Ingreso fondos créditos $',{optional:true});
   var compras=pf('TOTAL COMPRAS $'),comerc=pf('GASTOS COMERCIALES GRANOS+GAN'),arrPag=pf('Arrendamientos Pagados');
   var inver=pf('Inversiones Bs. Uso / otros $',{prefix:true}),amort=pf('Amortización créditos $',{optional:true}),inter=pf('Intereses créditos $',{optional:true});
-  var otrosEg=pf('Total Otros Egresos',{optional:true}),retiros=pf('Retiros $'),ivaF=pf('Efecto financiero IVA $',{optional:true}),itf=pf('ITF',{optional:true});
+  var otrosEg=pf('Total Otros Egresos',{prefix:true,optional:true}),retiros=pf('Retiros $'),ivaF=pf('Efecto financiero IVA $',{optional:true}),itf=pf('ITF',{optional:true});
   /* colocaciones / rescates entre "Reservas $" y "Cálculo efecto IVA" */
   var rRes=pfRow('Reservas $'),rIva=pfRow('Cálculo efecto IVA=',{prefix:true})||(rRes?rRes+20:0);
   var coloc=zeros(12),resc=zeros(12),k2;
@@ -805,6 +806,16 @@ function parseWorkbook(wb,fname){
   /* saldos reales cargados (bancos, caja, cheques) */
   var b1=pf('Saldo Banco 1 $',{optional:true}),b2=pf('Saldo Banco2 $',{optional:true}),cj=pf('SALDO Caja $',{optional:true});
   var ch1=pf('Cheques no debitados Bco. 1 $',{optional:true}),ch2=pf('Cheques no debitados Bco. 2 $',{optional:true});
+  D.bankNames=['Banco 1','Banco 2'];
+  /* bancos con nombre propio (p.ej. "Saldo Banco GALICIA $", "Saldo BAPRO $"): se toman los renglones de arriba de "SALDO Caja $" */
+  (function(){if(pfRow('Saldo Banco 1 $')||pfRow('Saldo Banco2 $'))return;var rC=pfRow('SALDO Caja $');if(!rC)return;
+    var bk=[],cq=[],q;for(q=rC-1;q>=Math.max(1,rC-10);q--){var lb=key(PF.v(q,2));if(!lb)break;
+      if(lb.indexOf('cheques no debitados')===0)cq.unshift(q);else if(lb.indexOf('saldo')===0)bk.unshift(q);else break;}
+    if(!bk.length)return;
+    b1=rowVals(bk[0]);b2=zeros(12);bk.slice(1).forEach(function(r2){b2=addArr(b2,rowVals(r2));});
+    ch1=cq.length?rowVals(cq[0]):zeros(12);ch2=zeros(12);cq.slice(1).forEach(function(r2){ch2=addArr(ch2,rowVals(r2));});
+    var nm=function(r2){return norm(PF.v(r2,2)).replace(/^saldo\s*(banco)?\s*/i,'').replace(/\s*\$$/,'')||'Banco';};
+    D.bankNames=[nm(bk[0]),bk.length>1?bk.slice(1).map(nm).join(' + '):'Banco 2'];})();
   var opp=pf('Otros pagos pendientes $',{optional:true}),cob=pf('Cobranzas pendientes $',{optional:true}),cmin=pf('Caja mínima $',{optional:true});
   D.bankDet={b1:b1,b2:b2,cj:cj,ch:addArr(ch1,ch2),opp:opp,cob:cob,cmin:cmin};
   D.banks=zeros(12);D.closed=[];
@@ -1013,7 +1024,7 @@ function viewOf(D,cur){
       return {emp:D.empresa,n:x.n,cat:x.cat,u:x.u,req:x.req,ex:x.ex,comp:x.comp,pend:x.cum[11],q:q,mon:mon,tot:sum(mon)};});})();
   var sb=startBal(D,STATE.startM==null?D.defStart:STATE.startM,U);V.start=sb.v;V.startReal=sb.real;V.startFrom=sb.from;
   (function(){var k=sb.from,c=function(x){return U?x/D.tc[k]:x;},B=D.bankDet;
-    if(k>=0)V.bankItems=[['Banco 1',c(B.b1[k])],['Banco 2',c(B.b2[k])],['Caja',c(B.cj[k])],['Cheques no debitados',-c(B.ch[k])],['Pagos pendientes',-c(B.opp[k])],['Cobranzas pendientes',c(B.cob[k])],['Caja mínima',-c(B.cmin[k])]];
+    if(k>=0)V.bankItems=[[D.bankNames[0],c(B.b1[k])],[D.bankNames[1],c(B.b2[k])],['Caja',c(B.cj[k])],['Cheques no debitados',-c(B.ch[k])],['Pagos pendientes',-c(B.opp[k])],['Cobranzas pendientes',c(B.cob[k])],['Caja mínima',-c(B.cmin[k])]];
     else V.bankItems=[['Caja al inicio de la campaña',U?D.cajaIni/(D.tcIni||D.tc[0]):D.cajaIni]];
     V.bankProj=V.start-V.bankItems.reduce(function(t,x){return t+x[1];},0);})();V.realBal=D.realBal.slice();
   for(k in D.res)V.res[k]=rs(D.res[k]);
@@ -1349,12 +1360,12 @@ function drawCompDet(){if(!CMP)return;var j=STATE.compJ||0,h='<div class="cdm">'
   h+='<span class="op">+ granos =</span><div class="tot"><div class="k">Situación sin reservas</div><div class="v'+(CMP.sit[j]<0?' neg':'')+'">'+mny(CMP.sit[j])+'</div></div></div>';
   document.getElementById('compDet').innerHTML=h;}
 function sum(a){var s=0;for(var i=0;i<a.length;i++)s+=a[i]||0;return s;}
-var ING_LBL=[['granos','Ventas de granos'],['hacienda','Ventas de hacienda'],['otros','Arrendamientos y otros ingresos'],['creditos','Créditos tomados'],['rescates','Rescate de colocaciones']];
+var ING_LBL=[['granos','Ventas de granos'],['hacienda','Ventas de hacienda'],['arrc','Arrendamientos cobrados'],['otros','Otros ingresos'],['creditos','Créditos tomados'],['rescates','Rescate de colocaciones']];
 var EGR_LBL=[['insumos','Insumos y fertilizantes'],['labores','Labores, cosecha y servicios agrícolas'],['arrend','Arrendamientos'],['personal','Personal'],
   ['estAdm','Estructura y administración'],['impuestos','Impuestos'],['ivaItf','IVA (efecto financiero) e ITF'],['maquinaria','Maquinaria'],['ganaderia','Ganadería (sanidad, mantenimiento)'],
   ['comerc','Gastos comerciales y fletes'],['inversiones','Inversiones'],['creditos','Créditos (capital e intereses)'],['otros','Otros egresos'],['retiros','Retiros'],['colocaciones','Colocaciones en reservas']];
 var LBL={};ING_LBL.concat(EGR_LBL).forEach(function(x){LBL[x[0]]=x[1];});
-var ING_G=[['Ventas de granos',['granos']],['Ventas de hacienda',['hacienda']],['Otros ingresos',['otros']],['Créditos y rescates de reservas',['creditos','rescates']]];
+var ING_G=[['Ventas de granos',['granos']],['Ventas de hacienda',['hacienda']],['Arrendamientos cobrados',['arrc']],['Otros ingresos',['otros']],['Créditos y rescates de reservas',['creditos','rescates']]];
 var EGR_G=[['Producción y comercialización',['insumos','labores','maquinaria','ganaderia','comerc']],['Arrendamientos',['arrend']],['Sueldos y cargas',['personal']],
   ['Estructura y administración',['estAdm']],['Impuestos',['impuestos','ivaItf']],['Inversiones',['inversiones']],['Retiros',['retiros']],['Créditos, reservas y otros',['creditos','colocaciones','otros']]];
 var TS0=0;
@@ -1812,18 +1823,18 @@ function renderIE(V){
 function mesesTxt(a,M){var f0=-1,f1=-1;for(var i=0;i<12;i++)if(Math.abs(a[i])>0){if(f0<0)f0=i;f1=i;}if(f0<0)return '';return f0===f1?M[f0]:M[f0]+'–'+M[f1];}
 function renderIng(V){
   var s0=S0(V),M=V.meses,lab=M.slice(s0);
-  var G=V.ing.granos.slice(s0),Hc=V.ing.hacienda.slice(s0),O=V.ing.otros.slice(s0);
+  var G=V.ing.granos.slice(s0),Hc=V.ing.hacienda.slice(s0),O=addArr(V.ing.otros,V.ing.arrc).slice(s0);
   var tg=sum(G),th=sum(Hc),to=sum(O),T=tg+th+to,per=s0<11?M[s0]+'–'+M[11]:M[11];
   function card(t,v,c,sub,k){var on=k&&STATE.ingK===k;return '<div class="stat'+(k?' clk':'')+'" style="border-left-color:'+c+(on?';background:#F7F9F4;border-color:'+c:'')+'"'+(k?' onclick="togIng(\''+k+'\')"':'')+'>'+(k?'<span class="pl">'+(on?'−':'+')+'</span>':'')+'<div class="k">'+t+'</div><div class="kv">'+mny(v)+'</div><div class="ks">'+sub+'</div></div>';}
   var h=card('Total ingresos '+per,T,'#4A6533','ventas y otros ingresos');
   h+=card('Ventas de granos',tg,'#C99A2E',fpc(T?tg/T:0,0)+' del total','g');
   h+=card('Ventas de hacienda',th,'#A84D1F',fpc(T?th/T:0,0)+' del total','h');
-  h+=card('Otros ingresos',to,'#94A3B8',fpc(T?to/T:0,0)+' del total');
+  h+=card('Arrendamientos y otros ingresos',to,'#94A3B8',fpc(T?to/T:0,0)+' del total');
   document.getElementById('ingRow').innerHTML=h;
   renderIngDet(V,s0,per);
   var ds=[{label:'Ventas de granos',data:G,backgroundColor:'#C99A2E',borderRadius:3,maxBarThickness:28,categoryPercentage:0.6,barPercentage:0.95},
           {label:'Ventas de hacienda',data:Hc,backgroundColor:'#A84D1F',borderRadius:3,maxBarThickness:28,categoryPercentage:0.6,barPercentage:0.95}];
-  if(Math.abs(to)>0.5)ds.push({label:'Otros ingresos',data:O,backgroundColor:'#94A3B8',borderRadius:3,maxBarThickness:28,categoryPercentage:0.6,barPercentage:0.95});
+  if(Math.abs(to)>0.5)ds.push({label:'Arrendamientos y otros ingresos',data:O,backgroundColor:'#94A3B8',borderRadius:3,maxBarThickness:28,categoryPercentage:0.6,barPercentage:0.95});
   mk('chIng',{type:'bar',data:{labels:lab,datasets:ds},options:(function(){var o=chartBase();o.interaction={mode:'index',intersect:false};
     o.onClick=function(e,els,ch){var hit=ch.getElementsAtEventForMode(e.native,'nearest',{intersect:true},false);if(!hit||!hit.length)return;var di=hit[0].datasetIndex;if(di>1)return;
       STATE.ingK=di===0?'g':'h';STATE.ingM=s0+hit[0].index;renderIngDet(curView(),s0,per);var el=document.getElementById('ingDet');if(el&&el.scrollIntoView)el.scrollIntoView({behavior:'smooth',block:'nearest'});};
@@ -2029,6 +2040,8 @@ function renderHac(V){
   h+=kv('Monto de ventas',mny(H.vArs));
   document.getElementById('hacBox').innerHTML=h;
 }
+/* campaña normalizada: "Plan 2026-2027", "Plan 2026-27" y "2026/27" son la misma (2026-27) */
+function campKey(pl){var m=/(\d{4})\s*[-\/]\s*(\d{2,4})/.exec(pl||'');if(m)return m[1]+'-'+m[2].slice(-2);var y=/(\d{4})/.exec(pl||'');return y?y[1]:norm(pl);}
 function renderWarn(){
   var el=document.getElementById('warnBanner'),grp=[],n=0,L=STATE.files.map(function(x){return x.D;});
   STATE.files.forEach(function(x){var D=x.D,seen={},it=[];
@@ -2038,7 +2051,7 @@ function renderWarn(){
   [['ini','Consolidado · Plan inicio (1/7)'],['act','Consolidado · Plan actual']].forEach(function(st){
   var L=STATE.files.filter(function(x){return x.role===st[0];}).map(function(x){return x.D;}),gen=[];
   if(L.length>1){
-    var plans={},tcs={},dm={};L.forEach(function(D){plans[D.plan]=1;tcs[D.tc.join('|')]=1;dm[D.meses[D.defStart]]=1;});
+    var plans={},tcs={},dm={};L.forEach(function(D){plans[campKey(D.plan)]=1;tcs[D.tc.join('|')]=1;dm[D.meses[D.defStart]]=1;});
     if(Object.keys(dm).length>1)gen.push('Las empresas tienen distinto mes de presupuesto ('+Object.keys(dm).join(', ')+'); se usa el de '+L[0].empresa+'.');
     if(Object.keys(plans).length>1)gen.push('Los archivos son de campañas distintas ('+Object.keys(plans).join(', ')+'): el consolidado suma meses que no son comparables.');
     var pr={};L.forEach(function(D){D.granos.forEach(function(g){var s2=g.pre.join('|');if(pr[g.nombre]&&pr[g.nombre]!==s2)pr[g.nombre]='DIF';else if(!pr[g.nombre])pr[g.nombre]=s2;});});
