@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carga de datos · Puntal Agro</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="pa-core.js"></script>
+<style>
+:root{--bg:#E8ECF2;--card:#fff;--border:#D4DAE4;--text:#0F1923;--muted:#7A8899;--green:#4A6533;--green-d:#3B5226;--green-l:#EDF2E6;--terra:#C8642D;--terra-l:#FBEFE7;--radius:12px;--sans:'DM Sans',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14px;min-height:100vh;display:flex;flex-direction:column}
+td,.num{font-variant-numeric:tabular-nums}
+header{background:var(--card);border-bottom:1px solid var(--border);padding:10px 24px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:20}
+.logo{display:flex;align-items:center;gap:11px}
+.logo-img{height:38px;width:auto;display:block}
+.logo-title{font-size:15px;font-weight:600;letter-spacing:-.2px;line-height:1.15}
+.logo-sub{font-size:11px;color:var(--muted)}
+.h-right{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted)}
+main{flex:1;width:100%;max-width:1060px;margin:0 auto;padding:20px 24px 40px;display:flex;flex-direction:column;gap:14px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px}
+.paso{display:flex;gap:14px;align-items:flex-start}
+.paso-n{flex:0 0 auto;width:26px;height:26px;border-radius:50%;background:var(--green);color:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.paso.off .paso-n{background:#C5CDD8}
+.paso-c{flex:1;min-width:0}
+h2{font-size:15px;font-weight:600;margin-bottom:4px}
+.lead{font-size:12.5px;color:var(--muted);line-height:1.5;margin-bottom:12px}
+.lead b{color:var(--text);font-weight:500}
+select,input[type=date]{font-family:var(--sans);font-size:13px;border:1px solid var(--border);border-radius:8px;padding:7px 10px;background:#fff;color:var(--text)}
+select:focus,input:focus{outline:none;border-color:#185FA5;background:#EFF6FF}
+.btn{font-family:var(--sans);font-size:13px;font-weight:500;border-radius:8px;padding:8px 16px;cursor:pointer;border:1px solid var(--border);background:#fff;color:var(--text);text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{background:#F4F6F9}
+.btn-pri{background:var(--green);border-color:var(--green);color:#fff}
+.btn-pri:hover{background:var(--green-d)}
+.btn-terra{background:var(--terra);border-color:var(--terra);color:#fff}
+.btn-terra:hover{background:#A9521F}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.files{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.drop{border:1.5px dashed #B9C3D0;border-radius:10px;padding:14px;background:#FAFBFC;display:flex;flex-direction:column;gap:8px;min-height:118px}
+.drop.ok{border-style:solid;border-color:#A9BE8F;background:var(--green-l)}
+.drop.err{border-style:solid;border-color:#E0A27E;background:var(--terra-l)}
+.drop.over{border-color:var(--green);background:#F3F7EE}
+.drop-t{font-size:13px;font-weight:600}
+.drop-s{font-size:11.5px;color:var(--muted);line-height:1.4}
+.drop input[type=file]{font-family:var(--sans);font-size:12px}
+.drop .res{font-size:12px;line-height:1.5}
+.drop .res b{font-weight:600}
+.chk{display:flex;align-items:center;gap:7px;font-size:12.5px;cursor:pointer;user-select:none}
+.chk input{accent-color:var(--green);width:15px;height:15px}
+table{width:100%;border-collapse:collapse}
+thead th{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;font-weight:500;padding:5px 8px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap}
+tbody td{padding:7px 8px;border-bottom:1px solid #F0F2F5;font-size:12.5px;vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+.tdname{font-weight:500}
+.mut{color:var(--muted)}
+.sug{display:inline-block;font-size:10.5px;color:#92400E;background:#FFFBEB;border-radius:10px;padding:1px 7px;margin-left:6px;white-space:nowrap}
+.sug.ok{color:#166534;background:#F0FDF4}
+.sub{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:16px 0 6px}
+.params{display:flex;flex-wrap:wrap;gap:18px;align-items:center}
+.params label{font-size:12.5px;display:flex;align-items:center;gap:8px}
+.resumen{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:6px}
+.res-g{border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.res-g h3{font-size:12px;font-weight:600;margin-bottom:8px;color:var(--green)}
+.res-row{display:flex;gap:10px;font-size:12.5px;padding:3px 0;border-bottom:1px solid #F3F5F8}
+.res-row:last-child{border-bottom:none}
+.res-k{flex:0 0 130px;color:var(--muted)}
+.res-v{flex:1;font-variant-numeric:tabular-nums}
+.av-g{border:1px solid var(--border);border-radius:10px;margin-top:8px;overflow:hidden}
+.av-h{display:flex;align-items:center;gap:8px;padding:9px 12px;cursor:pointer;font-size:12.5px;font-weight:500;background:#FAFBFC}
+.av-h:hover{background:#F4F6F9}
+.av-car{font-size:9px;color:var(--muted);transition:transform .15s;width:10px}
+.av-g.open .av-car{transform:rotate(90deg)}
+.av-b{display:none;padding:4px 12px 10px 30px}
+.av-g.open .av-b{display:block}
+.av-i{font-size:12px;line-height:1.5;padding:4px 0;border-bottom:1px solid #F3F5F8;white-space:pre-line}
+.av-i:last-child{border-bottom:none}
+.bdg{display:inline-block;padding:1px 7px;border-radius:10px;font-size:10.5px;font-weight:600;font-variant-numeric:tabular-nums}
+.bg{background:#F0FDF4;color:#166534}.by{background:#FFFBEB;color:#92400E}.bi{background:#EEF2F7;color:#475569}
+.av-cnt{margin-left:auto;display:flex;gap:5px}
+.aviso-top{font-size:12.5px;line-height:1.5;border-radius:10px;padding:11px 14px;background:var(--terra-l);border:1px solid #EFC9B0;color:#7A3410;margin-bottom:12px}
+.aviso-top.inf{background:#EEF2F7;border-color:#D4DAE4;color:#334155}
+.acciones{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
+.prog{font-size:12.5px;color:var(--muted)}
+.hecho{display:flex;flex-direction:column;gap:10px}
+.hecho-t{font-size:15px;font-weight:600;color:var(--green)}
+.cuentas{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.cuenta{border:1px solid var(--border);border-radius:10px;padding:9px 12px}
+.cuenta .v{font-size:17px;font-weight:600;font-variant-numeric:tabular-nums}
+.cuenta .k{font-size:11px;color:var(--muted)}
+.bloqueo{text-align:center;padding:36px 20px}
+#app{display:flex;flex-direction:column;gap:14px}
+.oculto{display:none!important}
+footer{border-top:1px solid var(--border);background:var(--card);padding:10px 24px;display:flex;justify-content:space-between;font-size:11px;color:var(--muted);gap:10px;flex-wrap:wrap}
+@media (max-width:760px){
+  header,main{padding-left:16px;padding-right:16px}
+  .files,.resumen{grid-template-columns:1fr}
+  .res-k{flex-basis:100px}
+  thead{display:none}
+  tbody td{display:block;border-bottom:none;padding:3px 0}
+  tbody tr{display:block;border-bottom:1px solid var(--border);padding:8px 0}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">
+    <img class="logo-img" src="data:image/png;base64,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" alt="Puntal Agro">
+    <div>
+      <div class="logo-title">Carga de datos desde Excel</div>
+      <div class="logo-sub">Plan de Uso del Suelo · Registro de Labores e Insumos · Puntal Agro</div>
+    </div>
+  </div>
+  <div class="h-right">
+    <span id="usrLbl"></span>
+    <a class="btn" href="index.html">← Menú</a>
+  </div>
+</header>
+
+<main id="main">
+  <div class="card bloqueo oculto" id="bloqueo"></div>
+
+  <div id="app">
+  <!-- PASO 1 -->
+  <div class="card paso" id="p1">
+    <div class="paso-n">1</div>
+    <div class="paso-c">
+      <h2>Empresa</h2>
+      <div class="lead">Los datos se cargan en la empresa que elijas. <b>Se borra y reemplaza</b> lo que esa empresa tenga hoy en las partes que importes; las demás empresas no se tocan.</div>
+      <select id="selEmp" onchange="onEmpresa()"></select>
+      <span class="mut" id="empInfo" style="font-size:12px;margin-left:10px"></span>
+    </div>
+  </div>
+
+  <!-- PASO 2 -->
+  <div class="card paso" id="p2">
+    <div class="paso-n">2</div>
+    <div class="paso-c">
+      <h2>Archivos</h2>
+      <div class="lead">Podés importar uno solo o los dos. Si importás solo el de Registros, las órdenes de trabajo se cruzan con los lotes que ya están cargados en el Plan de Uso.</div>
+      <div class="files">
+        <div class="drop" id="dropPlan">
+          <div class="drop-t">Plan de Uso del Suelo</div>
+          <div class="drop-s">Excel con las hojas <b>UsoSuelo</b> y <b>Altas</b> (ej.: PlanUsoSuelo3.xlsx)</div>
+          <input type="file" id="fPlan" accept=".xlsx,.xlsm,.xls" onchange="leerArchivo('plan', this.files[0])">
+          <div class="res" id="resPlan"></div>
+        </div>
+        <div class="drop" id="dropReg">
+          <div class="drop-t">Registro de Labores e Insumos</div>
+          <div class="drop-s">Excel con <b>Altas, StockInsumos, MovtoInsumos y ConsumosLotes</b> (ej.: RegistrosLaboresInsumos…2627.xlsx)</div>
+          <input type="file" id="fReg" accept=".xlsx,.xlsm,.xls" onchange="leerArchivo('reg', this.files[0])">
+          <div class="res" id="resReg"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASO 3 -->
+  <div class="card paso off" id="p3">
+    <div class="paso-n">3</div>
+    <div class="paso-c">
+      <h2>Revisión</h2>
+      <div class="lead" id="p3lead">Cargá al menos un archivo.</div>
+      <div id="revLotes"></div>
+      <div id="revDeps"></div>
+      <div id="revParams"></div>
+    </div>
+  </div>
+
+  <!-- PASO 4 -->
+  <div class="card paso off" id="p4">
+    <div class="paso-n">4</div>
+    <div class="paso-c">
+      <h2>Importar</h2>
+      <div class="lead" id="p4lead">Primero revisá qué se va a cargar: no se escribe nada hasta que confirmes.</div>
+      <div id="vista"></div>
+      <div class="acciones">
+        <button class="btn btn-pri" id="btnVista" onclick="armarVista()" disabled>Ver qué se va a cargar</button>
+        <button class="btn btn-terra oculto" id="btnImp" onclick="importar()">Importar y reemplazar</button>
+        <button class="btn oculto" id="btnInf" onclick="descargarInforme()">Descargar informe</button>
+        <span class="prog" id="prog"></span>
+      </div>
+    </div>
+  </div>
+  </div>
+</main>
+
+<footer>
+  <span>Puntal Agro · Carga de datos · Versión v2026-10-29 15:30 · BUILD 1</span>
+  <span id="fts"></span>
+</footer>
+
+<script id="imp-logic">
+/* ================================================================
+   IMP — lógica del importador de datos (Plan de Uso + Labores e Insumos)
+   ES5 estricto. Depende de XLSX (SheetJS) y de PA (pa-core.js) solo en aplicar().
+   Tres pasos:
+     1) leerPlan(wb) / leerRegistros(wb): leen los Excel ubicando columnas por
+        su ENCABEZADO (no por posición fija), para que sirvan para otras campañas.
+     2) analizar(...): arma lo que hay que revisar (lotes sin equivalencia,
+        depósitos y su campo) con sugerencias.
+     3) construir(...) → paquete + informe;  aplicar(paquete, partes) → escribe.
+   Regla de datos: no se inventa ni se estima nada. Lo que falta queda vacío
+   y se informa en el informe de importación.
+================================================================ */
+var IMP = (function(){
+  'use strict';
+  var X = {};
+  var LS_INSUMOS_ROOT = 'puntalagro_insumos_v4';
+  var LS_LOG = 'pa_import_log';
+
+  /* ---------------- utilidades ---------------- */
+  function norm(s){
+    if(s===null || s===undefined) return '';
+    var t = String(s).toLowerCase().replace(/ª/g,'a').replace(/º/g,'o');
+    if(t.normalize) t = t.normalize('NFD').replace(/[̀-ͯ]/g,'');
+    return t.replace(/\s+/g,' ').replace(/^\s+|\s+$/g,'');
+  }
+  function slug(s){ return norm(s).replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'') || 'x'; }
+  function txt(v){
+    if(v===null || v===undefined) return '';
+    if(typeof v==='number') return String(v);
+    return String(v).replace(/\s+/g,' ').replace(/^\s+|\s+$/g,'');
+  }
+  function num(v){
+    if(v===null || v===undefined || v==='') return null;
+    if(typeof v==='number') return isFinite(v) ? v : null;
+    var s = String(v).replace(/\s/g,'');
+    if(s==='') return null;
+    if(s.indexOf(',')>=0 && s.indexOf('.')>=0) s = s.lastIndexOf(',')>s.lastIndexOf('.') ? s.replace(/\./g,'').replace(',','.') : s.replace(/,/g,'');
+    else if(s.indexOf(',')>=0) s = s.replace(',','.');
+    var n = parseFloat(s);
+    return isNaN(n) ? null : n;
+  }
+  function r3(n){ return Math.round(n*1000)/1000; }
+  function pad2(n){ return (n<10?'0':'')+n; }
+  function fechaISO(v){
+    if(v===null || v===undefined || v==='') return '';
+    if(typeof v==='number'){
+      if(v<20000 || v>80000) return '';
+      var dc = XLSX.SSF.parse_date_code(v);
+      return dc ? dc.y+'-'+pad2(dc.m)+'-'+pad2(dc.d) : '';
+    }
+    if(v instanceof Date) return v.getFullYear()+'-'+pad2(v.getMonth()+1)+'-'+pad2(v.getDate());
+    var m = String(v).match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+    if(m){ var y=Number(m[3]); if(y<100) y+=2000; return y+'-'+pad2(Number(m[2]))+'-'+pad2(Number(m[1])); }
+    return '';
+  }
+  // Grilla completa de la hoja, indexada desde la celda A1 (fila 0 / columna 0).
+  function grilla(ws){
+    if(!ws || !ws['!ref']) return [];
+    var rg = XLSX.utils.decode_range(ws['!ref']), out = [];
+    for(var r=0;r<=rg.e.r;r++){
+      var fila = [];
+      for(var c=0;c<=rg.e.c;c++){
+        var cell = ws[XLSX.utils.encode_cell({r:r,c:c})];
+        fila.push(cell ? (cell.v===undefined ? null : cell.v) : null);
+      }
+      out.push(fila);
+    }
+    return out;
+  }
+  function hoja(wb, nombre){
+    var n = norm(nombre);
+    for(var i=0;i<wb.SheetNames.length;i++){ if(norm(wb.SheetNames[i])===n) return wb.Sheets[wb.SheetNames[i]]; }
+    return null;
+  }
+  function col(fila, etiqueta, desde){
+    var e = norm(etiqueta);
+    for(var c=(desde||0); c<fila.length; c++){ if(norm(fila[c])===e) return c; }
+    return -1;
+  }
+  function colEmpieza(fila, prefijo){
+    var p = norm(prefijo);
+    for(var c=0;c<fila.length;c++){ if(norm(fila[c]).indexOf(p)===0) return c; }
+    return -1;
+  }
+  // Primera fila (hasta 'lim') que contiene TODAS las etiquetas.
+  function filaCon(G, etiquetas, lim){
+    for(var r=0; r<Math.min(G.length, lim||60); r++){
+      var ok = true;
+      for(var k=0;k<etiquetas.length;k++){ if(col(G[r], etiquetas[k])<0){ ok=false; break; } }
+      if(ok) return r;
+    }
+    return -1;
+  }
+  function primerTexto(G, desdeFila, hastaFila){
+    for(var r=desdeFila;r<Math.min(G.length,hastaFila);r++) for(var c=0;c<G[r].length;c++){
+      var v = G[r][c]; if(typeof v==='string' && txt(v)) return txt(v);
+    }
+    return '';
+  }
+  function aviso(lista, nivel, grupo, texto){ lista.push({nivel:nivel, grupo:grupo, texto:texto}); }
+  function esCampania(v){ return /^\d{2}-\d{2}$/.test(txt(v)); }
+  function iniciales(nombre){
+    var ps = txt(nombre).split(' '), s = '';
+    for(var i=0;i<ps.length;i++){ if(ps[i]) s += ps[i].charAt(0).toUpperCase(); }
+    return s;
+  }
+  X.util = { norm:norm, slug:slug, num:num, fechaISO:fechaISO };
+
+  /* ================================================================
+     1a) PLAN DE USO DEL SUELO (hojas UsoSuelo + Altas)
+  ================================================================ */
+  X.leerPlan = function(wb){
+    var res = { tipo:'plan', empresa:'', campanias:[], lotes:[], desperdicios:{}, cultivos:[], ambientes:[], avisos:[] };
+    var ws = hoja(wb,'UsoSuelo');
+    if(!ws){ for(var s=0;s<wb.SheetNames.length;s++){ var g0=grilla(wb.Sheets[wb.SheetNames[s]]); if(filaCon(g0,['Lote','Sup. Total'])>=0){ ws=wb.Sheets[wb.SheetNames[s]]; break; } } }
+    if(!ws) throw new Error('No encuentro la hoja "UsoSuelo" (con las columnas Lote y Sup. Total). ¿Es el Excel del Plan de Uso del Suelo?');
+    var G = grilla(ws);
+    var hr = filaCon(G, ['Lote','Sup. Total']);
+    if(hr<0) throw new Error('En la hoja UsoSuelo no encuentro el encabezado "Lote / Sup. Total".');
+    res.empresa = primerTexto(G, 0, hr);
+    var H = G[hr], H2 = G[hr+1] || [];
+    var cLote = col(H,'Lote'), cSup = col(H,'Sup. Total'), cAmb = colEmpieza(H,'Ambte');
+    if(cAmb<0) cAmb = colEmpieza(H,'Ambiente');
+    var cCampo = cLote+1;
+    var camps = [];
+    for(var c=0;c<H.length;c++){
+      if(esCampania(H[c])){
+        if(norm(H2[c])!=='ha neta') aviso(res.avisos,'warn','Plan de uso','La campaña '+txt(H[c])+' no tiene la columna "Ha Neta" donde se espera; se leyó igual.');
+        camps.push({ id:txt(H[c]), cHa:c, c1:c+1, c2:c+2 });
+      }
+    }
+    if(!camps.length) throw new Error('No encuentro columnas de campaña (22-23, 23-24…) en la hoja UsoSuelo.');
+    for(var k=0;k<camps.length;k++) res.campanias.push(camps[k].id);
+
+    var vistos = {};
+    for(var r=hr+2; r<G.length; r++){
+      var F = G[r], nombre = txt(F[cLote]);
+      if(!nombre) continue;
+      // Debajo del padrón la hoja tiene totales y cuadros resumen: ahí termina la lista.
+      if(norm(nombre)==='total' || norm(nombre)==='totales') break;
+      var campo = txt(F[cCampo]);
+      if(!campo){ aviso(res.avisos,'warn','Plan de uso','Fila '+(r+1)+': el lote "'+nombre+'" no tiene campo; no se importa.'); continue; }
+      var amb = cAmb>=0 ? txt(F[cAmb]) : '';
+      var sup = num(F[cSup]);
+      if(amb.toUpperCase()==='DESP' || /desperdicio/i.test(nombre)){
+        res.desperdicios[campo] = r3((res.desperdicios[campo]||0) + (sup||0));
+        continue;
+      }
+      var lote = { fila:r+1, nombre:nombre, campo:campo, sup:(sup===null?0:sup), supFalta:(sup===null), amb:amb, p:{} };
+      if(sup===null) aviso(res.avisos,'warn','Plan de uso','Fila '+(r+1)+': el lote "'+nombre+'" ('+campo+') no tiene superficie total; queda en 0.');
+      for(var j=0;j<camps.length;j++){
+        var cp = camps[j], ha = num(F[cp.cHa]), s1 = txt(F[cp.c1]), s2 = txt(F[cp.c2]);
+        var acts = [];
+        if(s1) acts.push({ sigla:s1, ha:ha, seg:false });
+        if(s2){ acts.push({ sigla:s2, ha:ha, seg:!!s1 }); if(!s1) aviso(res.avisos,'warn','Plan de uso','Lote "'+nombre+'" '+cp.id+': tiene 2º cultivo sin 1º; se cargó como única actividad.'); }
+        if(acts.length && ha===null) aviso(res.avisos,'warn','Plan de uso','Lote "'+nombre+'" '+cp.id+': tiene cultivo pero no Ha Neta; la actividad queda sin hectáreas.');
+        if(ha!==null && sup!==null && ha>sup+0.01){ (lote._exc = lote._exc || []).push(cp.id+' ('+ha+')'); }
+        if(acts.length) lote.p[cp.id] = acts;
+      }
+      if(lote._exc){ aviso(res.avisos,'info','Plan de uso','Lote "'+nombre+'": Ha Neta mayor que la superficie total ('+sup+' ha) en '+lote._exc.join(', ')+'.'); delete lote._exc; }
+      var kn = norm(campo+'|'+nombre);
+      if(vistos[kn]) aviso(res.avisos,'info','Plan de uso','El lote "'+nombre+'" ('+campo+') aparece más de una vez en el Excel (filas '+vistos[kn]+' y '+(r+1)+'); se importan las dos filas como lotes separados.');
+      else vistos[kn] = r+1;
+      res.lotes.push(lote);
+    }
+
+    // Catálogos de la hoja Altas: cultivos (sigla, actividad) y ambientes.
+    var wa = hoja(wb,'Altas');
+    if(wa){
+      var A = grilla(wa), ha2 = filaCon(A, ['Cultivos']);
+      if(ha2>=0){
+        var cC = col(A[ha2],'Cultivos'), cAm = col(A[ha2],'Ambiente');
+        for(var ra=ha2+1; ra<A.length; ra++){
+          var nom = txt(A[ra][cC]), sig = txt(A[ra][cC+1]);
+          if(nom && sig) res.cultivos.push({ nombre:nom, sigla:sig, actividad:txt(A[ra][cC+2]).toUpperCase(), producto:txt(A[ra][cC+3]) });
+          if(cAm>=0){ var an=txt(A[ra][cAm]), asg=txt(A[ra][cAm+1]); if(an && asg) res.ambientes.push({ sigla:asg, nombre:an, descripcion:txt(A[ra][cAm+2]) }); }
+        }
+      }
+    }
+    // Siglas: se normalizan contra el catálogo del propio Excel (MzSPe → MzSPE).
+    var canon = {}; for(var q=0;q<res.cultivos.length;q++) canon[norm(res.cultivos[q].sigla)] = res.cultivos[q].sigla;
+    var corr = {}, desc = {};
+    for(var l=0;l<res.lotes.length;l++){
+      for(var cmp in res.lotes[l].p){ if(!res.lotes[l].p.hasOwnProperty(cmp)) continue;
+        var as = res.lotes[l].p[cmp];
+        for(var z=0;z<as.length;z++){
+          var sg = as[z].sigla, cn = canon[norm(sg)];
+          if(cn && cn!==sg){ corr[sg+' → '+cn]=(corr[sg+' → '+cn]||0)+1; as[z].sigla = cn; }
+          else if(!cn && res.cultivos.length){ desc[sg]=(desc[sg]||0)+1; }
+        }
+      }
+    }
+    for(var cc in corr) if(corr.hasOwnProperty(cc)) aviso(res.avisos,'info','Plan de uso','Sigla corregida '+cc+' ('+corr[cc]+' vez/veces): estaba escrita distinto que en la hoja Altas.');
+    for(var dd in desc) if(desc.hasOwnProperty(dd)) aviso(res.avisos,'warn','Plan de uso','La sigla "'+dd+'" ('+desc[dd]+' vez/veces) no está en la hoja Altas.');
+    return res;
+  };
+
+  /* ================================================================
+     1b) REGISTROS DE LABORES E INSUMOS
+         (Carátula, Altas, StockInsumos, MovtoInsumos, ConsumosLotes)
+  ================================================================ */
+  X.leerRegistros = function(wb){
+    var res = { tipo:'reg', empresa:'', campania:'', lotes:[], actividades:[], laboresLP:[], laboresLC:[],
+                insumos:[], depositosStock:[], movs:[], otFilas:[], avisos:[] };
+    var fal = [];
+    ['Altas','StockInsumos','MovtoInsumos','ConsumosLotes'].forEach(function(n){ if(!hoja(wb,n)) fal.push(n); });
+    if(fal.length) throw new Error('Faltan hojas en el Excel de Registros: '+fal.join(', ')+'. ¿Es el Excel de Labores e Insumos?');
+
+    var wc = hoja(wb,'Carátula') || hoja(wb,'Caratula');
+    if(wc){ var Cg = grilla(wc); for(var r0=0;r0<Math.min(Cg.length,40) && !res.campania;r0++) for(var c0=0;c0<Cg[r0].length;c0++) if(esCampania(Cg[r0][c0])){ res.campania=txt(Cg[r0][c0]); break; } }
+
+    // ---- Altas: actividades, labores propias / contratadas, lotes
+    var A = grilla(hoja(wb,'Altas'));
+    res.empresa = primerTexto(A, 0, 3);
+    if(!res.campania){ for(var r1=0;r1<6 && !res.campania;r1++) for(var c1=0;c1<A[r1].length;c1++) if(esCampania(A[r1][c1])){ res.campania=txt(A[r1][c1]); break; } }
+    var ha = filaCon(A, ['Lotes','Actividades']);
+    if(ha>=0){
+      var cAct = col(A[ha],'Actividades'), cLP = col(A[ha],'Labores propias'), cLC = col(A[ha],'Labores contratadas'), cLo = col(A[ha],'Lotes');
+      var finAct = false, finLo = false;
+      for(var ra=ha+1; ra<A.length; ra++){
+        var F = A[ra];
+        if(cAct>=0 && !finAct){ var a = txt(F[cAct]); if(norm(a)==='comprobantes') finAct = true; else if(a && !/^lista\d+$/i.test(a)) res.actividades.push(a); }
+        if(cLP>=0){ var lp = txt(F[cLP]); if(lp && !/^lista\d+$/i.test(lp) && norm(lp)!=='un.') res.laboresLP.push({ nombre:lp, un:txt(F[cLP+1]) }); }
+        if(cLC>=0){ var lc = txt(F[cLC]); if(lc && !/^lista\d+$/i.test(lc) && norm(lc)!=='un.') res.laboresLC.push({ nombre:lc, un:txt(F[cLC+1]) }); }
+        if(cLo>=0 && !finLo){ var lo = txt(F[cLo]); if(/^superficie total/i.test(lo)) finLo = true; else if(lo) res.lotes.push({ nombre:lo, ha:num(F[cLo+1]) }); }
+      }
+    }
+
+    // ---- StockInsumos: catálogo de insumos (categoría, unidad) + existencias por depósito
+    var S = grilla(hoja(wb,'StockInsumos'));
+    var hs = -1;
+    for(var rs=0; rs<Math.min(S.length,40); rs++){ if(colEmpieza(S[rs],'Existencia Inicial')>=0){ hs=rs; break; } }
+    if(hs<0) throw new Error('En la hoja StockInsumos no encuentro "Existencia Inicial Depósitos".');
+    var cIni = colEmpieza(S[hs],'Existencia Inicial'), cTotIni = colEmpieza(S[hs],'Total Stock Inicial');
+    var cActu = colEmpieza(S[hs],'Existencia Actual'), cTotAct = colEmpieza(S[hs],'Total Stock actual');
+    var cNom = col(S[hs],'Insumos'); if(cNom<0) cNom = 1;
+    var D = S[hs+1] || [], depsIni = [], depsAct = [];
+    for(var ci=cIni; ci<cTotIni; ci++) depsIni.push({ c:ci, nombre:txt(D[ci]) });
+    if(cActu>=0) for(var ca=cActu; ca<(cTotAct>0?cTotAct:cActu); ca++) depsAct.push({ c:ca, nombre:txt(D[ca]) });
+    var setDep = {};
+    for(var di=0;di<depsIni.length;di++) if(depsIni[di].nombre && !setDep[norm(depsIni[di].nombre)]){ setDep[norm(depsIni[di].nombre)]=true; res.depositosStock.push(depsIni[di].nombre); }
+    var cUn = -1, cat = '', vistosIns = {};
+    for(var r2=hs+2; r2<S.length; r2++){
+      var Fi = S[r2], nom = txt(Fi[cNom]);
+      if(!nom) continue;
+      if(/^lista\d+$/i.test(txt(Fi[cNom+1]))){ cat = nom; if(cUn<0) cUn = col(Fi,'Un.'); continue; }
+      var un = txt(Fi[cUn>=0?cUn:cNom+2]);
+      if(!un) continue;
+      var ini = {}, act = {}, hayIni = false;
+      for(var d1=0; d1<depsIni.length; d1++){ var v1 = num(Fi[depsIni[d1].c]); if(v1){ ini[depsIni[d1].nombre]=v1; hayIni=true; } }
+      for(var d2=0; d2<depsAct.length; d2++){ var v2 = num(Fi[depsAct[d2].c]); if(v2!==null) act[depsAct[d2].nombre]=v2; }
+      var kn = norm(nom);
+      if(vistosIns[kn]){ aviso(res.avisos,'warn','Insumos','El insumo "'+nom+'" aparece dos veces en StockInsumos (fila '+(r2+1)+'); se sumó su stock inicial al primero.');
+        var prev = vistosIns[kn]; for(var dk in ini) if(ini.hasOwnProperty(dk)) prev.ini[dk]=(prev.ini[dk]||0)+ini[dk]; continue; }
+      var ins = { nombre:nom, cat:cat, un:un, ini:ini, act:act, fila:r2+1 };
+      vistosIns[kn] = ins; res.insumos.push(ins);
+    }
+
+    // ---- MovtoInsumos: compras, traslados, consumos, ajustes
+    var M = grilla(hoja(wb,'MovtoInsumos'));
+    var hm = filaCon(M, ['Fecha','Insumo','Movimiento']);
+    if(hm<0) throw new Error('En la hoja MovtoInsumos no encuentro el encabezado (Fecha / Insumo / Movimiento).');
+    var Hm = M[hm], Sm = M[hm+1] || [];
+    var mF = col(Hm,'Fecha'), mTi = col(Sm,'Tipo'), mNr = col(Sm,'Nº'), mIn = col(Hm,'Insumo'), mUn = col(Hm,'Unidad'),
+        mCa = col(Hm,'Cantidad'), mMo = col(Hm,'Movimiento'), mOr = col(Hm,'Origen'), mDe = col(Hm,'Destino'), mOb = col(Hm,'Observaciones');
+    for(var r3m=hm+2; r3m<M.length; r3m++){
+      var Fm = M[r3m], insm = txt(Fm[mIn]), mov = txt(Fm[mMo]);
+      if(!insm || !mov) continue;
+      var cant = num(Fm[mCa]);
+      if(!cant){ aviso(res.avisos,'warn','Movimientos','Fila '+(r3m+1)+': "'+mov+'" de '+insm+' sin cantidad; no se importa.'); continue; }
+      res.movs.push({ fila:r3m+1, fecha:fechaISO(Fm[mF]), compTipo:txt(Fm[mTi]), compNro:txt(Fm[mNr]), insumo:insm, un:txt(Fm[mUn]),
+        cant:cant, mov:mov, origen:txt(Fm[mOr]), destino:txt(Fm[mDe]), obs:mOb>=0?txt(Fm[mOb]):'' });
+    }
+
+    // ---- ConsumosLotes: las OT (una fila por labor o insumo y por lote)
+    var C = grilla(hoja(wb,'ConsumosLotes'));
+    var hc = filaCon(C, ['Fecha OT','Lote','Insumo']);
+    if(hc<0) throw new Error('En la hoja ConsumosLotes no encuentro el encabezado (Fecha OT / Lote / Insumo).');
+    var Hc = C[hc], Sc = C[hc+1] || [];
+    var k = {
+      fecha:col(Hc,'Fecha OT'), tipo:col(Sc,'Tipo'), nro:col(Sc,'Nº'), act:col(Hc,'Actividad'), lote:col(Hc,'Lote'),
+      sub:col(Hc,'Subactividad'), ins:col(Hc,'Insumo'), un:col(Hc,'Un.'), dosis:col(Hc,'Dosis a aplicar Un/ha'),
+      ha:col(Hc,'Ha a aplicar'), cant:col(Hc,'Cant. Un. a aplicar'), fApl:col(Hc,'Fecha de aplicación'),
+      cApl:col(Hc,'Cant. Un. aplicadas'), hApl:col(Hc,'Ha aplicadas'), dApl:col(Hc,'Dosis aplicada'), fact:col(Hc,'FACT'), obs:col(Hc,'Observaciones')
+    };
+    if(k.nro<0 || k.ins<0 || k.lote<0) throw new Error('En ConsumosLotes faltan columnas (Nº de comprobante, Lote o Insumo).');
+    for(var rc=hc+2; rc<C.length; rc++){
+      var Fc = C[rc], nro = num(Fc[k.nro]), insc = txt(Fc[k.ins]);
+      if(!nro || !insc) continue;
+      res.otFilas.push({ fila:rc+1, fecha:fechaISO(Fc[k.fecha]), compTipo:txt(Fc[k.tipo]), nro:nro, actividad:txt(Fc[k.act]),
+        lote:txt(Fc[k.lote]), sub:txt(Fc[k.sub]), insumo:insc, un:txt(Fc[k.un]), dosis:num(Fc[k.dosis]), ha:num(Fc[k.ha]),
+        cant:num(Fc[k.cant]), fechaApl:fechaISO(Fc[k.fApl]), cantApl:num(Fc[k.cApl]), haApl:num(Fc[k.hApl]),
+        dosisApl:num(Fc[k.dApl]), fact:!!txt(Fc[k.fact]) && txt(Fc[k.fact])!=='0', obs:k.obs>=0?txt(Fc[k.obs]):'' });
+    }
+    if(!res.campania) aviso(res.avisos,'warn','Registros','No encontré la campaña en la Carátula.');
+    return res;
+  };
+
+  /* ================================================================
+     Equivalencias de ACTIVIDAD: nombre del Excel de Registros → siglas
+     del plan de uso (en orden de preferencia). Si el lote tiene en el plan
+     alguna de esas siglas en la campaña, la OT toma ESA actividad del plan.
+  ================================================================ */
+  var EQUIV_ACT = {
+    'trigo':['Tr'], 'cebada':['Cb'], 'avena':['Av'], 'centeno':[], 'girasol':['G'],
+    'maiz':['Mz','MzT','Mz2ª'], 'maiz tardio':['MzT','Mz'], 'maiz 2a':['Mz2ª','Mz'],
+    'soja 1a':['Sj1ª'], 'soja 2a':['Sj2ª'], 'sorgo':['Sg'],
+    'verdeo invierno':['VI'], 'verdeo verano':['MzP','SgF'], 'verdeo diferido':['MzD','SgD'],
+    'implantacion praderas':['PI','PPAlf','PPFe','PPAg'], 'conservacion praderas':['PPAlf','PPFe','PPAg','PD','PI'],
+    'promociones rye grass':['PRG'], 'silajes':['MzSPE'], 'vicia cosecha':[]
+  };
+  X.EQUIV_ACT = EQUIV_ACT;
+  function esLabor(f){ return /^(LC|LP)-/i.test(f.insumo) || norm(f.sub)==='labores contratadas' || norm(f.sub)==='labores propias'; }
+  function laborDe(f){
+    var m = f.insumo.match(/^(LC|LP)-\s*(.*)$/i);
+    if(m) return { tipo:m[1].toUpperCase(), nombre:txt(m[2]) };
+    return { tipo: norm(f.sub)==='labores propias' ? 'LP' : 'LC', nombre:f.insumo };
+  }
+  function esEstructura(act){ return norm(act)==='estructura'; }
+
+  // Referencia de lotes contra la que se cruzan las OT: los del plan que se importa
+  // (si se importa) o los que ya están en pa-core.
+  function lotesReferencia(plan, empresaId){
+    var out = [], i;
+    if(plan){
+      for(i=0;i<plan.lotes.length;i++){
+        var L = plan.lotes[i], acts = {};
+        for(var c in L.p) if(L.p.hasOwnProperty(c)){ acts[c]=[]; for(var j=0;j<L.p[c].length;j++) acts[c].push(L.p[c][j].sigla); }
+        out.push({ key:'p'+i, nombre:L.nombre, campo:L.campo, acts:acts, sup:L.sup });
+      }
+      return out;
+    }
+    if(typeof PA==='undefined') return out;
+    var campos = PA.demo.camposDeEmpresa(empresaId) || [], cn = {};
+    for(i=0;i<campos.length;i++) cn[campos[i].id] = campos[i].nombre;
+    var tipos = PA.demo.listarTiposActividad(empresaId) || [], sig = {};
+    for(i=0;i<tipos.length;i++) sig[tipos[i].id] = tipos[i].sigla;
+    var ls = PA.demo.listarLotes(empresaId) || [], as = PA.demo.listarActividades(empresaId) || [], porL = {};
+    for(i=0;i<as.length;i++){ var a=as[i]; if(!porL[a.loteId]) porL[a.loteId]={}; if(!porL[a.loteId][a.campaniaId]) porL[a.loteId][a.campaniaId]=[]; porL[a.loteId][a.campaniaId].push(sig[a.tipoActividadId]||a.sigla||''); }
+    for(i=0;i<ls.length;i++) out.push({ key:'x'+ls[i].id, id:ls[i].id, nombre:ls[i].nombre, campo:cn[ls[i].campoId]||'', acts:porL[ls[i].id]||{}, sup:ls[i].ha });
+    return out;
+  }
+  function camposConocidos(plan, empresaId){
+    var set = {}, out = [], i;
+    if(plan){ for(i=0;i<plan.lotes.length;i++){ if(!set[plan.lotes[i].campo]){ set[plan.lotes[i].campo]=true; out.push(plan.lotes[i].campo); } } }
+    if(typeof PA!=='undefined' && empresaId){ var cs = PA.demo.camposDeEmpresa(empresaId)||[]; for(i=0;i<cs.length;i++) if(!set[cs[i].nombre]){ set[cs[i].nombre]=true; out.push(cs[i].nombre); } }
+    return out;
+  }
+  // Sugerencia de lote para un nombre del Registro que no está en el plan.
+  function sugerirLote(nombre, ref, campos){
+    var n = norm(nombre).replace(/\bsur\b/g,'s').replace(/\bnorte\b/g,'n');
+    var i;
+    for(i=0;i<ref.length;i++) if(norm(ref[i].nombre)===n) return { tipo:'lote', key:ref[i].key, motivo:'mismo nombre (Sur/Norte → S/N)' };
+    var base = n.split('/')[0];
+    for(i=0;i<ref.length;i++) if(norm(ref[i].nombre)===base) return { tipo:'lote', key:ref[i].key, motivo:'primer lote de "'+nombre+'"' };
+    // mejor coincidencia por palabras (mismo campo/prefijo)
+    var tk = n.replace(/[\/\-]/g,' ').split(' '), best=null, bs=0;
+    for(i=0;i<ref.length;i++){
+      var rn = norm(ref[i].nombre).replace(/[\/\-]/g,' ').split(' '), s=0;
+      if(rn[0]!==tk[0]) continue;
+      for(var j=0;j<tk.length;j++) if(rn.indexOf(tk[j])>=0) s++;
+      if(rn[1]===tk[1]) s += 1;            // mismo número de lote: pesa más
+      s = s/Math.max(tk.length, rn.length);
+      if(s>bs){ bs=s; best=ref[i]; }
+    }
+    if(best && bs>=0.5) return { tipo:'lote', key:best.key, motivo:'nombre parecido' };
+    return null;
+  }
+
+  /* ================================================================
+     2) ANALIZAR: lo que el usuario tiene que revisar antes de importar
+  ================================================================ */
+  X.analizar = function(plan, reg, empresaId){
+    var out = { lotes:[], depositos:[], campos:camposConocidos(plan, empresaId) };
+    if(!reg) return out;
+    var ref = lotesReferencia(plan, empresaId), porNom = {}, i;
+    for(i=0;i<ref.length;i++){ var nn=norm(ref[i].nombre); if(!porNom[nn]) porNom[nn]=ref[i]; }
+    var vistos = {};
+    for(i=0;i<reg.otFilas.length;i++){
+      var f = reg.otFilas[i];
+      if(!esLabor(f)) continue;
+      var n = norm(f.lote);
+      if(porNom[n]) continue;
+      if(!vistos[n]) vistos[n] = { nombre:f.lote, filas:0, ots:{}, acts:{} };
+      vistos[n].filas++; vistos[n].ots[f.nro]=true; vistos[n].acts[f.actividad]=true;
+    }
+    for(var k in vistos){ if(!vistos.hasOwnProperty(k)) continue;
+      var v = vistos[k], sug = null;
+      var estr = true; for(var a in v.acts) if(v.acts.hasOwnProperty(a) && !esEstructura(a)) estr=false;
+      if(estr){
+        var campoUN = ''; var tks = v.nombre.split(' ');
+        for(var t=0;t<tks.length;t++) if(out.campos.indexOf(tks[t])>=0) campoUN = tks[t];
+        sug = { tipo:'un', campo:campoUN, motivo:'OT de estructura' };
+      } else sug = sugerirLote(v.nombre, ref, out.campos);
+      out.lotes.push({ nombre:v.nombre, ots:Object.keys(v.ots).sort(function(x,y){return x-y;}), actividades:Object.keys(v.acts), sugerencia:sug });
+    }
+    out.lotesRef = ref;
+    // Depósitos: los del stock + los nombrados como origen/destino en movimientos.
+    var deps = {}, orden = [];
+    function addDep(nm){ var nk = norm(nm); if(!nm || /^consumo\b/.test(nk) || deps[nk]) return; deps[nk]=nm; orden.push(nm); }
+    for(i=0;i<reg.depositosStock.length;i++) addDep(reg.depositosStock[i]);
+    for(i=0;i<reg.movs.length;i++){ addDep(reg.movs[i].origen); addDep(reg.movs[i].destino); }
+    for(i=0;i<orden.length;i++){
+      var ini = iniciales(orden[i]), campo = out.campos.indexOf(ini)>=0 ? ini : '';
+      out.depositos.push({ nombre:orden[i], campo:campo, motivo: campo ? 'iniciales del nombre' : 'depósito en poder de un tercero (proveedor)' });
+    }
+    return out;
+  };
+
+  /* ================================================================
+     3) CONSTRUIR el paquete a escribir + informe
+     dec = { empresaId, fechaStockIni, explIgualSup, lotes:{nombreReg:{tipo:'lote',key}|{tipo:'un',campo}|{tipo:'omitir'}},
+             depCampo:{nombreDep:'EC'|''} }
+  ================================================================ */
+  X.construir = function(plan, reg, dec){
+    var emp = dec.empresaId, inf = { resumen:[], avisos:[] }, i, j;
+    var P = { empresaId:emp, plan:null, reg:null, informe:inf };
+    if(plan) for(i=0;i<plan.avisos.length;i++) inf.avisos.push(plan.avisos[i]);
+    if(reg)  for(i=0;i<reg.avisos.length;i++)  inf.avisos.push(reg.avisos[i]);
+    var hayPA = typeof PA!=='undefined';
+
+    // ---------- CAMPOS ----------
+    var camposPA = hayPA ? (PA.demo.camposDeEmpresa(emp)||[]) : [];
+    var campoId = {}, camposOut = [];
+    for(i=0;i<camposPA.length;i++) campoId[norm(camposPA[i].nombre)] = camposPA[i].id;
+    function idCampo(nombre){ return campoId[norm(nombre)] || ('campo_'+slug(emp)+'_'+slug(nombre)); }
+
+    // ---------- TIPOS DE ACTIVIDAD (por sigla; se conservan los existentes) ----------
+    var tiposPA = hayPA ? (PA.demo.listarTiposActividad(emp)||[]) : [];
+    var tipoPorSigla = {}, tiposNuevos = [];
+    for(i=0;i<tiposPA.length;i++) if(tiposPA[i].sigla) tipoPorSigla[norm(tiposPA[i].sigla)] = tiposPA[i];
+    function tipoDe(sigla, nombre, actividad, extra){
+      var t = tipoPorSigla[norm(sigla)];
+      if(t) return t;
+      t = { id:'ta_'+slug(emp)+'_'+slug(sigla), empresaId:emp, nombre:nombre||sigla, sigla:sigla, actividad:actividad||'', activo:true };
+      if(extra) for(var e in extra) if(extra.hasOwnProperty(e)) t[e]=extra[e];
+      tipoPorSigla[norm(sigla)] = t; tiposNuevos.push(t);
+      return t;
+    }
+    var cultCat = {};
+    if(plan) for(i=0;i<plan.cultivos.length;i++) cultCat[norm(plan.cultivos[i].sigla)] = plan.cultivos[i];
+
+    // ---------- PLAN: lotes + actividades ----------
+    var refKeyToId = {}, lotesOut = [], actsOut = [], campanias = [];
+    if(plan){
+      var supCampo = {}, ordenCampos = [];
+      var usadosId = {};
+      for(i=0;i<plan.lotes.length;i++){
+        var L = plan.lotes[i];
+        if(supCampo[L.campo]===undefined){ supCampo[L.campo]=0; ordenCampos.push(L.campo); }
+        supCampo[L.campo] += L.sup;
+        var cid = idCampo(L.campo);
+        var lid = 'lot_'+slug(emp)+'_'+slug(L.campo)+'_'+slug(L.nombre), b = lid, n2 = 2;
+        while(usadosId[lid]){ lid = b+'_'+n2; n2++; }
+        usadosId[lid] = true;
+        refKeyToId['p'+i] = lid;
+        lotesOut.push({ id:lid, campoId:cid, empresaId:emp, nombre:L.nombre, ha:L.sup, ambiente:L.amb,
+          expl:(dec.explIgualSup ? L.sup : null), activo:true, orden:i+1 });
+        var nAct = 0;
+        for(var cp in L.p){ if(!L.p.hasOwnProperty(cp)) continue;
+          for(j=0;j<L.p[cp].length;j++){
+            var a = L.p[cp][j], cc = cultCat[norm(a.sigla)];
+            var t = tipoDe(a.sigla, cc?cc.nombre:a.sigla, cc?cc.actividad:'');
+            actsOut.push({ id:'act_'+lid.replace(/^lot_/,'')+'_'+slug(cp)+'_'+j, empresaId:emp, loteId:lid, campaniaId:cp,
+              tipoActividadId:t.id, sigla:t.sigla, ha:a.ha, seg:!!a.seg });
+            nAct++;
+          }
+        }
+      }
+      for(i=0;i<ordenCampos.length;i++){
+        var cn = ordenCampos[i], desp = plan.desperdicios[cn]||0;
+        camposOut.push({ id:idCampo(cn), nombre:cn, haTotales:r3(supCampo[cn]+desp), haLotes:r3(supCampo[cn]), haEstructura:desp, existe:!!campoId[norm(cn)] });
+      }
+      campanias = plan.campanias.slice();
+      P.plan = { campos:camposOut, lotes:lotesOut, actividades:actsOut, campanias:campanias };
+      var tot=0; for(i=0;i<camposOut.length;i++) tot+=camposOut[i].haTotales;
+      inf.resumen.push({ g:'Plan de uso', k:'Campos', v:camposOut.map(function(c){ return c.nombre+' '+fmt(c.haTotales)+' ha'; }).join(' · ') });
+      inf.resumen.push({ g:'Plan de uso', k:'Superficie total', v:fmt(tot)+' ha (lotes + estructura/desperdicios)' });
+      inf.resumen.push({ g:'Plan de uso', k:'Lotes', v:String(lotesOut.length) });
+      inf.resumen.push({ g:'Plan de uso', k:'Actividades', v:actsOut.length+' en '+campanias.length+' campañas ('+campanias.join(', ')+')' });
+      if(dec.explIgualSup) aviso(inf.avisos,'info','Plan de uso','La superficie explotable no está en el Excel: se cargó igual a la superficie total de cada lote (provisorio).');
+    }
+
+    // ---------- REGISTROS ----------
+    if(reg){
+      var R = { labores:[], unidades:[], insumos:[], depositos:[], terceros:[], espacio:null };
+      var camp = reg.campania || dec.campania || '';
+      if(camp && campanias.indexOf(camp)<0) campanias.push(camp);
+      var ref = dec.lotesRef || lotesReferencia(plan, emp);
+      var refPorNom = {}, refPorKey = {};
+      for(i=0;i<ref.length;i++){ refPorKey[ref[i].key]=ref[i]; var rn=norm(ref[i].nombre); if(!refPorNom[rn]) refPorNom[rn]=[]; refPorNom[rn].push(ref[i]); }
+      function idLoteRef(r){ return r.id || refKeyToId[r.key]; }
+
+      // Labores (catálogo global): se agregan las que falten, por nombre.
+      var labsPA = hayPA ? (PA.demo.listarLabores()||[]) : [];
+      var labPorNom = {};
+      for(i=0;i<labsPA.length;i++) labPorNom[norm(labsPA[i].nombre)] = labsPA[i];
+      function laborId(nombre){
+        var l = labPorNom[norm(nombre)];
+        if(l) return l.id;
+        l = { id:'lab_'+slug(nombre), nombre:nombre, precioRef:0, activo:true };
+        labPorNom[norm(nombre)] = l; R.labores.push(l); return l.id;
+      }
+
+      // Unidades (catálogo global)
+      var unsPA = hayPA ? (PA.demo.listarUnidades()||[]) : [];
+      var unPorSig = {};
+      for(i=0;i<unsPA.length;i++) unPorSig[norm(unsPA[i].sigla)] = unsPA[i];
+      var ALIAS_UN = { 'lt':'l', 'lts':'l', 'litro':'l', 'litros':'l', 'kg':'kg', 'kgs':'kg', 'bolsa':'bolsa', 'bolsas':'bolsa',
+        'un':'u', 'un.':'u', 'unidad':'u', 'u':'u', 'ton':'tn', 'tn':'tn', 'cc':'cm³', 'cm3':'cm³', 'ml':'ml', 'g':'g', 'gr':'g', 'dosis':'dosis', 'caja':'caja' };
+      function unidadId(un){
+        var s = ALIAS_UN[norm(un)] || norm(un) || 'u';
+        var u = unPorSig[norm(s)];
+        if(u) return u.id;
+        u = { id:'uni_'+slug(s), sigla:un, nombre:un, activo:true };
+        unPorSig[norm(s)] = u; R.unidades.push(u); return u.id;
+      }
+
+      // Depósitos y terceros
+      var depId = {}, campoDeDep = dec.depCampo || {};
+      var depNombres = [];
+      (dec.depositos||[]).forEach(function(d){ depNombres.push(d.nombre); });
+      function asegurarDep(nombre){
+        var nk = norm(nombre);
+        if(!nombre || /^consumo\b/.test(nk)) return '';
+        if(depId[nk]) return depId[nk];
+        var cpo = campoDeDep[nombre]!==undefined ? campoDeDep[nombre] : '';
+        var d = { id:'dep_'+slug(emp)+'_'+slug(nombre), empresaId:emp, campoId: cpo ? idCampo(cpo) : null, nombre:nombre, clase:'insumos', especieId:null, activo:true };
+        R.depositos.push(d); depId[nk] = d.id;
+        if(!cpo) R.terceros.push({ id:'ter_'+slug(emp)+'_'+slug(nombre), empresaId:emp, nombre:nombre, cuit:'', telefono:'', email:'', direccion:'',
+          esProveedor:true, esCliente:false, tiposProveedor:['insumos'], activo:true });
+        return d.id;
+      }
+      for(i=0;i<depNombres.length;i++) asegurarDep(depNombres[i]);
+      function terceroIdDe(nombre){ var id='ter_'+slug(emp)+'_'+slug(nombre); for(var q=0;q<R.terceros.length;q++) if(R.terceros[q].id===id) return id; return ''; }
+
+      // Insumos
+      var insPorNom = {};
+      var TIPO_INS = { 'semillas':'Semilla', 'herbicidas':'Herbicida', 'insecticidas':'Insecticida', 'fungicidas':'Fungicida',
+        'coadyuvantes/correctores':'Coadyuvante', 'fertilizantes':'Fertilizante' };
+      function tipoIns(cat, nombre){
+        var c = norm(cat);
+        if(TIPO_INS[c]) return TIPO_INS[c];
+        if(c==='curasemillas/inoculantes') return /inocul/i.test(nombre) ? 'Inoculante' : 'Curasemilla';
+        if(/gas ?oil|nafta|combust|lubric/i.test(nombre)) return 'Combustible';
+        return 'Otro';
+      }
+      function asegurarIns(nombre, cat, un, origen){
+        var nk = norm(nombre);
+        if(insPorNom[nk]) return insPorNom[nk].id;
+        var x = { id:'ins_'+slug(emp)+'_'+slug(nombre), empresaId:emp, activo:true, nombre:txt(nombre), tipo:tipoIns(cat, nombre), unidadId:unidadId(un),
+          modoAccionId:null, bandaTox:'', eiq:null, concentracion:null, concUnidad:'', nutrientes:null };
+        insPorNom[nk] = x; R.insumos.push(x);
+        if(origen) aviso(inf.avisos,'info','Insumos','"'+x.nombre+'" no estaba en StockInsumos: se dio de alta desde '+origen+' ('+x.tipo+', '+un+').');
+        return x.id;
+      }
+      for(i=0;i<reg.insumos.length;i++) asegurarIns(reg.insumos[i].nombre, reg.insumos[i].cat, reg.insumos[i].un, '');
+
+      // ---- comprobantes y movimientos
+      var comps = [], movtos = [], compPorClave = {}, nUid = 0;
+      function uidL(p){ nUid++; return p+'_imp'+nUid.toString(36); }
+      function comp(clave, base){
+        if(compPorClave[clave]) return compPorClave[clave];
+        base.id = uidL('cmp'); if(base.refOt===undefined){ base.refOt=''; base.refOtNum=''; }
+        comps.push(base); compPorClave[clave] = base; return base;
+      }
+      // Stock inicial
+      var fIni = dec.fechaStockIni || '';
+      var nIni = 0;
+      for(i=0;i<reg.insumos.length;i++){
+        var I = reg.insumos[i];
+        for(var dn in I.ini){ if(!I.ini.hasOwnProperty(dn)) continue;
+          var ci0 = comp('ini', { fecha:fIni, tipo:'Stock inicial', comp_tipo:'', comp_nro:'', proveedorId:'', campaniaId:camp, obs:'Stock inicial importado de Excel' });
+          movtos.push({ id:uidL('mv'), comprobanteId:ci0.id, insumoId:insPorNom[norm(I.nombre)].id, cant:I.ini[dn], origenId:'', destinoId:asegurarDep(dn) });
+          nIni++;
+        }
+      }
+      // Movimientos del Excel
+      var consOT = {}, consOTIns = {}, nMov = { 'Compra':0, 'Traslado':0, 'Ajuste inventario (+)':0, 'Ajuste inventario (-)':0 }, nConsSinOT = 0, otsConConsumo = {};
+      var nros = {}; for(i=0;i<reg.otFilas.length;i++) nros[reg.otFilas[i].nro] = true;
+      for(i=0;i<reg.movs.length;i++){
+        var mv = reg.movs[i], tipoM = mv.mov, nmv = norm(tipoM);
+        var insId = asegurarIns(mv.insumo, '', mv.un, 'MovtoInsumos (fila '+mv.fila+')');
+        var clave = [mv.fecha, tipoM, mv.compTipo, mv.compNro, mv.origen].join('|');
+        if(nmv==='consumo'){
+          var nroOT = norm(mv.compTipo)==='ot' ? num(mv.compNro) : null;
+          if(nroOT && nros[nroOT]){
+            var kk = nroOT+'|'+norm(mv.insumo);
+            if(!consOT[kk]) consOT[kk] = { cant:0, porDep:{} };
+            consOT[kk].cant += mv.cant; consOT[kk].porDep[mv.origen] = (consOT[kk].porDep[mv.origen]||0) + mv.cant;
+            if(!consOTIns[norm(mv.insumo)]) consOTIns[norm(mv.insumo)] = {};
+            consOTIns[norm(mv.insumo)][mv.origen] = (consOTIns[norm(mv.insumo)][mv.origen]||0) + mv.cant;
+            otsConConsumo[nroOT] = true;
+            continue; // el consumo lo genera la aplicación de la OT
+          }
+          var cA = comp('aj|'+clave+'|'+mv.destino, { fecha:mv.fecha, tipo:'Ajuste inventario (-)', comp_tipo:mv.compTipo, comp_nro:mv.compNro, proveedorId:'',
+            obs:(mv.destino||'Consumo')+' (importado: en el Excel era un consumo sin OT)'+(mv.obs?' · '+mv.obs:'') });
+          movtos.push({ id:uidL('mv'), comprobanteId:cA.id, insumoId:insId, cant:mv.cant, origenId:asegurarDep(mv.origen), destinoId:'' });
+          nConsSinOT++;
+          if(nroOT) aviso(inf.avisos,'warn','Movimientos','Fila '+mv.fila+': consumo con OT '+nroOT+' que no está en ConsumosLotes; se cargó como ajuste (-).');
+          continue;
+        }
+        if(nmv==='compra'){
+          var dDest = mv.destino && !/^consumo/i.test(mv.destino) ? mv.destino : mv.origen;
+          var cC2 = comp('c|'+clave, { fecha:mv.fecha, tipo:'Compra', comp_tipo:mv.compTipo, comp_nro:mv.compNro, proveedorId:terceroIdDe(mv.origen), obs:mv.obs||'' });
+          movtos.push({ id:uidL('mv'), comprobanteId:cC2.id, insumoId:insId, cant:mv.cant, origenId:'', destinoId:asegurarDep(dDest) });
+          nMov['Compra']++; continue;
+        }
+        if(nmv==='traslado'){
+          var cT = comp('t|'+clave+'|'+mv.destino, { fecha:mv.fecha, tipo:'Traslado', comp_tipo:mv.compTipo, comp_nro:mv.compNro, proveedorId:'', obs:mv.obs||'' });
+          movtos.push({ id:uidL('mv'), comprobanteId:cT.id, insumoId:insId, cant:mv.cant, origenId:asegurarDep(mv.origen), destinoId:asegurarDep(mv.destino) });
+          nMov['Traslado']++; continue;
+        }
+        if(nmv.indexOf('ajuste')===0){
+          var mas = /\+/.test(tipoM), tN = mas ? 'Ajuste inventario (+)' : 'Ajuste inventario (-)';
+          var dep = asegurarDep(mas ? (mv.destino||mv.origen) : (mv.origen||mv.destino));
+          var cJ = comp('j|'+clave+'|'+tN, { fecha:mv.fecha, tipo:tN, comp_tipo:mv.compTipo, comp_nro:mv.compNro, proveedorId:'', obs:mv.obs||'Ajuste importado de Excel' });
+          movtos.push({ id:uidL('mv'), comprobanteId:cJ.id, insumoId:insId, cant:mv.cant, origenId:mas?'':dep, destinoId:mas?dep:'' });
+          nMov[tN]++; continue;
+        }
+        var tiposOk = ['ingreso por prod. propia','devolucion a deposito','baja por vencimiento','baja por rotura envase','venta'];
+        var nombresOk = ['Ingreso por prod. propia','Devolución a depósito','Baja por vencimiento','Baja por rotura envase','Venta'];
+        var ix = tiposOk.indexOf(nmv);
+        if(ix>=0){
+          var entra = ix<=1;
+          var cO = comp('o|'+clave+'|'+tipoM, { fecha:mv.fecha, tipo:nombresOk[ix], comp_tipo:mv.compTipo, comp_nro:mv.compNro, proveedorId:'', obs:mv.obs||'' });
+          movtos.push({ id:uidL('mv'), comprobanteId:cO.id, insumoId:insId, cant:mv.cant, origenId:entra?'':asegurarDep(mv.origen||mv.destino), destinoId:entra?asegurarDep(mv.destino||mv.origen):'' });
+          nMov[nombresOk[ix]] = (nMov[nombresOk[ix]]||0)+1; continue;
+        }
+        aviso(inf.avisos,'warn','Movimientos','Fila '+mv.fila+': tipo de movimiento "'+tipoM+'" no reconocido; no se importa.');
+      }
+
+      // Depósito más usado para consumos (respaldo para líneas sin dato)
+      var totDep = {};
+      for(var ki in consOTIns) if(consOTIns.hasOwnProperty(ki)) for(var dk in consOTIns[ki]) if(consOTIns[ki].hasOwnProperty(dk)) totDep[dk]=(totDep[dk]||0)+consOTIns[ki][dk];
+      function maxKey(o){ var b='', bv=-1; for(var q in o) if(o.hasOwnProperty(q) && o[q]>bv){ bv=o[q]; b=q; } return b; }
+      var depGlobal = maxKey(totDep);
+      var sinDepOT = 0, sinDepPend = 0, lineaConDepGlobal = false;
+      function depParaLinea(nro, insNombre){
+        var c1 = consOT[nro+'|'+norm(insNombre)];
+        if(c1) return asegurarDep(maxKey(c1.porDep));
+        var c2 = consOTIns[norm(insNombre)];
+        if(c2) return asegurarDep(maxKey(c2));
+        lineaConDepGlobal = true;
+        return depGlobal ? asegurarDep(depGlobal) : '';
+      }
+
+      // ---- ÓRDENES DE TRABAJO
+      var porNro = {}, ordenNro = [];
+      for(i=0;i<reg.otFilas.length;i++){ var fo = reg.otFilas[i]; if(!porNro[fo.nro]){ porNro[fo.nro]=[]; ordenNro.push(fo.nro); } porNro[fo.nro].push(fo); }
+      ordenNro.sort(function(a,b){ return a-b; });
+      var ots = [], maxNro = 0, nDest = 0, nAplic = 0, nLineas = 0, fueraPlan = {}, sinLote = {}, aplicPorKey = {};
+      var decL = dec.lotes || {}, dupAvisado = {};
+      function resolverLote(nombre){
+        var d = decL[nombre];
+        if(d){
+          if(d.tipo==='omitir') return { omitir:true };
+          if(d.tipo==='un') return { un:true, campo:d.campo };
+          if(d.tipo==='lote' && refPorKey[d.key]) return { ref:refPorKey[d.key], mapeado:true };
+        }
+        var cand = refPorNom[norm(nombre)];
+        if(cand && cand.length){
+          if(cand.length>1 && !dupAvisado[norm(nombre)]){ dupAvisado[norm(nombre)]=true; aviso(inf.avisos,'info','Órdenes de trabajo','El lote "'+nombre+'" está más de una vez en el plan; sus OT se imputaron al primero.'); }
+          return { ref:cand[0] };
+        }
+        return null;
+      }
+      function tipoNombrePorSigla(s){ var t = tipoPorSigla[norm(s)]; return t ? t.nombre : s; }
+      function resolverCultivo(ref, actividad){
+        var base = actividad.replace(/^sementera\s+/i,'');
+        var cands = EQUIV_ACT[norm(base)];
+        var plan = (ref.acts && ref.acts[camp]) || [];
+        var pn = plan.map(norm);
+        if(cands) for(var q=0;q<cands.length;q++){ var w = pn.indexOf(norm(cands[q])); if(w>=0) return { nombre:tipoNombrePorSigla(plan[w]), enPlan:true }; }
+        if(norm(base)==='barbecho' && plan.length) return { nombre:tipoNombrePorSigla(plan[0]), enPlan:true };
+        if(cands && cands.length) return { nombre:tipoNombrePorSigla(cands[0]), enPlan:false };
+        for(var tk in tipoPorSigla) if(tipoPorSigla.hasOwnProperty(tk) && norm(tipoPorSigla[tk].nombre)===norm(base)) return { nombre:tipoPorSigla[tk].nombre, enPlan:pn.indexOf(tk)>=0 };
+        return { nombre:actividad, enPlan:false };
+      }
+      var tEstr = null;
+      function cultivoUN(){ if(!tEstr) tEstr = tipoDe('EST','Estructura','UN',{ esCultivo:0 }); return tEstr.nombre; }
+
+      for(var on=0; on<ordenNro.length; on++){
+        var nro = ordenNro[on], filas = porNro[nro];
+        if(nro>maxNro) maxNro = nro;
+        var fechaOT = '', trabajos = [], trPorKey = {}, destPorKey = {}, tandas = {};
+        for(i=0;i<filas.length;i++) if(filas[i].fecha && (!fechaOT || filas[i].fecha<fechaOT)) fechaOT = filas[i].fecha;
+        for(i=0;i<filas.length;i++){
+          var fl = filas[i], dkey = norm(fl.lote)+'|'+norm(fl.actividad);
+          if(esLabor(fl)){
+            var lb = laborDe(fl), lkey = lb.tipo+'|'+norm(lb.nombre);
+            var tr = trPorKey[lkey];
+            if(!tr){
+              tr = { id:uidL('trb'), laborId:laborId(lb.nombre), laborTipo:lb.tipo, contratistaId:'', tarifa:'', tarifaMoneda:'ARS',
+                esResiembra:/resiembra/i.test(lb.nombre), estadoFact:'Sin facturar', montoFacturado:0, estadoPago:'No', montoPagado:0,
+                plantilla:[], destinos:[], _fact:0, _n:0 };
+              trPorKey[lkey] = tr; trabajos.push(tr);
+            }
+            tr._n++; if(fl.fact) tr._fact++;
+            var rl = resolverLote(fl.lote), de;
+            if(!rl){ sinLote[fl.lote] = (sinLote[fl.lote]||0)+1; destPorKey[dkey] = null; continue; }
+            if(rl.omitir){ destPorKey[dkey] = null; continue; }
+            if(rl.un || esEstructura(fl.actividad)){
+              var cpoUN = rl.un ? rl.campo : (rl.ref ? rl.ref.campo : '');
+              de = { id:uidL('dst'), campoId:idCampo(cpoUN), loteId:'UN:'+idCampo(cpoUN), cultivo:cultivoUN(), ha:1,
+                obs:fl.lote+(fl.obs?' · '+fl.obs:''), lineas:[], estadoLote:'Pendiente', fechaAplicReal:'' };
+            } else {
+              var cu = resolverCultivo(rl.ref, fl.actividad);
+              if(!cu.enPlan){ var fk = fl.lote+' · '+fl.actividad; fueraPlan[fk] = (fueraPlan[fk]||[]); if(fueraPlan[fk].indexOf(nro)<0) fueraPlan[fk].push(nro); }
+              de = { id:uidL('dst'), campoId:idCampo(rl.ref.campo), loteId:idLoteRef(rl.ref), cultivo:cu.nombre, ha:fl.ha||0,
+                obs:fl.obs||'', lineas:[], estadoLote:'Pendiente', fechaAplicReal:'' };
+            }
+            if(fl.fechaApl){
+              de.estadoLote = 'Aplicado'; de.fechaAplicReal = fl.fechaApl;
+              de.haReal = de.loteId.indexOf('UN:')===0 ? 1 : (fl.haApl!==null ? fl.haApl : de.ha);
+              if(!tandas[fl.fechaApl]) tandas[fl.fechaApl] = 'tnd_'+uidL('imp');
+              de.tandaId = tandas[fl.fechaApl];
+              nAplic++;
+            }
+            tr.destinos.push(de); destPorKey[dkey] = de; nDest++;
+          } else {
+            var dst = destPorKey[dkey];
+            if(dst===undefined){ aviso(inf.avisos,'warn','Órdenes de trabajo','OT '+nro+' (fila '+fl.fila+'): "'+fl.insumo+'" en '+fl.lote+' no tiene una labor antes; no se importa la línea.'); continue; }
+            if(dst===null) continue;
+            var iid = asegurarIns(fl.insumo, fl.sub, fl.un, 'ConsumosLotes (OT '+nro+')');
+            var esUNd = dst.loteId.indexOf('UN:')===0;
+            var dosis = esUNd ? (fl.cant!==null ? fl.cant : (fl.dosis||0)) : (fl.dosis!==null ? fl.dosis : ((fl.cant!==null && fl.ha) ? r3(fl.cant/fl.ha) : 0));
+            lineaConDepGlobal = false;
+            var ln = { insumoId:iid, dosis:dosis, depositoId:depParaLinea(nro, fl.insumo), entregada:0, usado:0, devStock:0, devBaja:0 };
+            if(lineaConDepGlobal){ if(dst.estadoLote==='Aplicado') sinDepOT++; else sinDepPend++; }
+            if(dst.estadoLote==='Aplicado'){
+              var us;
+              if(fl.fechaApl) us = fl.cantApl!==null ? fl.cantApl : (esUNd ? dosis : r3(dosis*(dst.haReal||0)));
+              else { us = 0; aviso(inf.avisos,'warn','Órdenes de trabajo','OT '+nro+': en '+fl.lote+' la labor está aplicada pero "'+fl.insumo+'" no tiene fecha de aplicación; quedó con 0 usado.'); }
+              ln.entregada = us; ln.usado = us;
+              if(fl.dosisApl!==null && fl.dosisApl!==dosis && !esUNd) ln.dosisReal = fl.dosisApl;
+              var ak = nro+'|'+norm(fl.insumo); aplicPorKey[ak] = (aplicPorKey[ak]||0) + us;
+            }
+            dst.lineas.push(ln); nLineas++;
+          }
+        }
+        var trs = [];
+        for(i=0;i<trabajos.length;i++){
+          var t2 = trabajos[i];
+          t2.estadoFact = t2._fact===0 ? 'Sin facturar' : (t2._fact===t2._n ? 'Facturado' : 'Parcial');
+          delete t2._fact; delete t2._n;
+          if(t2.destinos.length) trs.push(t2);
+        }
+        if(!trs.length){ aviso(inf.avisos,'warn','Órdenes de trabajo','La OT '+nro+' quedó sin lotes válidos; no se importa.'); continue; }
+        var ot = { id:'ot_'+slug(emp)+'_'+nro, num:nro, fecha:fechaOT, campaniaId:camp, obs:'', estado:'Pendiente', trabajos:trs, importada:true };
+        var tot2 = 0, apl2 = 0;
+        for(i=0;i<trs.length;i++) for(j=0;j<trs[i].destinos.length;j++){ tot2++; if(trs[i].destinos[j].estadoLote==='Aplicado') apl2++; }
+        ot.estado = apl2===0 ? 'Pendiente' : (apl2===tot2 ? 'Aplicada' : 'Parcial');
+        // Consumos de las aplicaciones (un comprobante por tanda = OT + fecha de aplicación)
+        for(i=0;i<trs.length;i++) for(j=0;j<trs[i].destinos.length;j++){
+          var d3 = trs[i].destinos[j];
+          if(d3.estadoLote!=='Aplicado') continue;
+          for(var q=0;q<d3.lineas.length;q++){
+            var l3 = d3.lineas[q];
+            if(!(l3.usado>0.0000001)) continue;
+            var cOT = comp('ot|'+nro+'|'+d3.fechaAplicReal, { fecha:d3.fechaAplicReal, tipo:'Consumo OT', comp_tipo:'OT', comp_nro:'#'+nro, proveedorId:'',
+              campaniaId:camp, obs:'Aplicación OT #'+nro, refOt:ot.id, refOtNum:nro, refTanda:d3.tandaId });
+            movtos.push({ id:uidL('mv'), comprobanteId:cOT.id, insumoId:l3.insumoId, cant:l3.usado, origenId:l3.depositoId, destinoId:'', refDest:d3.id });
+          }
+        }
+        ots.push(ot);
+      }
+
+      // ---- Informe: cruces y controles
+      for(var sl in sinLote) if(sinLote.hasOwnProperty(sl)) aviso(inf.avisos,'warn','Órdenes de trabajo','El lote "'+sl+'" no tiene equivalencia en el plan: sus '+sinLote[sl]+' labor(es) no se importaron.');
+      var fpN = 0; for(var fp in fueraPlan) if(fueraPlan.hasOwnProperty(fp)){ fpN++; aviso(inf.avisos,'info','Fuera del plan de uso',fp+' (OT '+fueraPlan[fp].join(', ')+'): el lote no tiene esa actividad en el plan '+camp+'.'); }
+      if(sinDepOT) aviso(inf.avisos,'warn','Órdenes de trabajo',sinDepOT+' línea(s) APLICADAS de OT sin depósito de origen en el Excel: se descontaron de '+(depGlobal||'(ninguno)')+', el depósito de donde salen casi todos los consumos.');
+      if(sinDepPend) aviso(inf.avisos,'info','Órdenes de trabajo',sinDepPend+' línea(s) de OT pendientes de aplicar no traen depósito (el Excel lo registra recién al consumir): se sugirió '+(depGlobal||'(ninguno)')+'; se puede cambiar al aplicar.');
+      var difs = [];
+      for(var ck in consOT) if(consOT.hasOwnProperty(ck)){
+        var ap = aplicPorKey[ck]||0;
+        if(Math.abs(ap-consOT[ck].cant)>0.01) difs.push(ck.split('|')[0]+' · '+ck.split('|')[1]+': OT aplicada '+fmt(ap)+' vs consumo en movimientos '+fmt(consOT[ck].cant));
+      }
+      for(var ak2 in aplicPorKey) if(aplicPorKey.hasOwnProperty(ak2) && aplicPorKey[ak2]>0.01 && !consOT[ak2]) difs.push(ak2.split('|')[0]+' · '+ak2.split('|')[1]+': OT aplicada '+fmt(aplicPorKey[ak2])+' sin consumo en movimientos');
+      if(difs.length) aviso(inf.avisos,'warn','Consumos OT vs movimientos','Hay '+difs.length+' diferencia(s) entre lo aplicado en ConsumosLotes y los consumos de MovtoInsumos. El stock se descontó con lo aplicado en las OT:\n• '+difs.slice(0,40).join('\n• ')+(difs.length>40?'\n• …':''));
+
+      // Stock final calculado vs "Existencia Actual" del Excel
+      var depNom = {}; for(i=0;i<R.depositos.length;i++) depNom[R.depositos[i].id] = R.depositos[i].nombre;
+      var tipoComp = {}; for(i=0;i<comps.length;i++) tipoComp[comps[i].id] = comps[i].tipo;
+      var calc = {};
+      for(i=0;i<movtos.length;i++){
+        var m2 = movtos[i];
+        if(!calc[m2.insumoId]) calc[m2.insumoId] = {};
+        if(m2.destinoId) calc[m2.insumoId][m2.destinoId] = (calc[m2.insumoId][m2.destinoId]||0) + m2.cant;
+        if(m2.origenId)  calc[m2.insumoId][m2.origenId]  = (calc[m2.insumoId][m2.origenId]||0)  - m2.cant;
+      }
+      var difStock = [];
+      for(i=0;i<reg.insumos.length;i++){
+        var I2 = reg.insumos[i], idI = insPorNom[norm(I2.nombre)].id, cI = calc[idI]||{};
+        var deps2 = {};
+        for(var a1 in I2.act) if(I2.act.hasOwnProperty(a1)) deps2[a1]=true;
+        for(var a2 in cI) if(cI.hasOwnProperty(a2)) deps2[depNom[a2]||a2]=true;
+        for(var dn2 in deps2){ if(!deps2.hasOwnProperty(dn2)) continue;
+          var ex = I2.act[dn2]||0, ca2 = cI[depId[norm(dn2)]]||0;
+          if(Math.abs(ex-ca2)>0.01) difStock.push(I2.nombre+' en '+dn2+': Excel '+fmt(ex)+' · importado '+fmt(ca2));
+        }
+      }
+      if(difStock.length) aviso(inf.avisos,'warn','Stock actual vs Excel','El stock que queda en la herramienta difiere de "Existencia Actual" del Excel en '+difStock.length+' caso(s) (en general por las diferencias de consumos de arriba):\n• '+difStock.slice(0,40).join('\n• ')+(difStock.length>40?'\n• …':''));
+      else aviso(inf.avisos,'ok','Stock actual vs Excel','El stock que queda en la herramienta coincide con "Existencia Actual" del Excel en todos los insumos y depósitos.');
+      if(nConsSinOT) aviso(inf.avisos,'info','Movimientos',nConsSinOT+' consumo(s) sin OT (ganadería, estructura, maquinaria) se cargaron como "Ajuste inventario (-)", que es como la herramienta registra las salidas que no van a un lote.');
+
+      // Insumos sin depósito sugerido: el de más stock inicial
+      var opIns = [];
+      for(i=0;i<R.insumos.length;i++){
+        var ri = reg.insumos.filter(function(x){ return norm(x.nombre)===norm(R.insumos[i].nombre); })[0];
+        var depSug = '';
+        if(ri){ var bm=''; var bv=0; for(var dd in ri.ini) if(ri.ini.hasOwnProperty(dd) && ri.ini[dd]>bv){ bv=ri.ini[dd]; bm=dd; } if(bm) depSug = asegurarDep(bm); }
+        var cOTi = consOTIns[norm(R.insumos[i].nombre)]; if(cOTi) depSug = asegurarDep(maxKey(cOTi));
+        opIns.push({ id:R.insumos[i].id, depositoId:depSug, stockMin:0, moneda:'ARS' });
+      }
+
+      R.espacio = {
+        contexto:{ empresa:'', 'campaña':camp },
+        campanias:[], campaniaActivaId:camp, campaniaDefectoId:camp,
+        catInsumos:[], insumos:opIns, campos:[], lotes:[], depositos:R.depositos.map(function(d){ return { id:d.id, nombre:d.nombre, campoId:d.campoId||'' }; }),
+        planUso:[], tiposActividad:[], actividades:[], laboresLP:[], laboresLC:[],
+        tiposMov:[
+          {nombre:'Stock inicial',signo:1,requiereDestino:true,requiereOrigen:false},
+          {nombre:'Compra',signo:1,requiereDestino:true,requiereOrigen:false},
+          {nombre:'Ingreso por prod. propia',signo:1,requiereDestino:true,requiereOrigen:false},
+          {nombre:'Ajuste inventario (+)',signo:1,requiereDestino:true,requiereOrigen:false},
+          {nombre:'Consumo OT',signo:-1,requiereOrigen:true,requiereDestino:false},
+          {nombre:'Baja por aplicación OT',signo:-1,requiereOrigen:true,requiereDestino:false},
+          {nombre:'Traslado',signo:0,requiereOrigen:true,requiereDestino:true},
+          {nombre:'Devolución a depósito',signo:1,requiereOrigen:false,requiereDestino:true},
+          {nombre:'Baja por vencimiento',signo:-1,requiereOrigen:true,requiereDestino:false},
+          {nombre:'Baja por rotura envase',signo:-1,requiereOrigen:true,requiereDestino:false},
+          {nombre:'Ajuste inventario (-)',signo:-1,requiereOrigen:true,requiereDestino:false},
+          {nombre:'Venta',signo:-1,requiereOrigen:true,requiereDestino:false}
+        ],
+        tarifasLP:{}, movtos:movtos, comprobantes:comps, proveedores:[], contratistas:[], ots:ots,
+        nextOt:maxNro+1, tcMensual:{}, cierres:[], mig:{ bajaOT:true, tandas:true }
+      };
+      if(tEstr && !plan) { /* el tipo Estructura se agrega igual en aplicar() */ }
+      R.campania = camp;
+      P.reg = R;
+      var nApl = ots.filter(function(o){ return o.estado==='Aplicada'; }).length, nPar = ots.filter(function(o){ return o.estado==='Parcial'; }).length;
+      inf.resumen.push({ g:'Labores e insumos', k:'Campaña', v:camp||'—' });
+      inf.resumen.push({ g:'Labores e insumos', k:'Insumos', v:R.insumos.length+' ('+nIni+' saldos de stock inicial al '+fmtFecha(fIni)+')' });
+      inf.resumen.push({ g:'Labores e insumos', k:'Depósitos', v:R.depositos.length+' ('+R.depositos.filter(function(d){return d.campoId;}).length+' en campos, '+R.terceros.length+' en terceros)' });
+      inf.resumen.push({ g:'Labores e insumos', k:'Movimientos', v:nMov['Compra']+' compras · '+nMov['Traslado']+' traslados · '+(nMov['Ajuste inventario (+)']+nMov['Ajuste inventario (-)']+nConsSinOT)+' ajustes' });
+      inf.resumen.push({ g:'Labores e insumos', k:'Órdenes de trabajo', v:ots.length+' OT (#'+(ordenNro[0]||'')+' a #'+maxNro+') · '+nApl+' aplicadas, '+nPar+' parciales, '+(ots.length-nApl-nPar)+' pendientes' });
+      inf.resumen.push({ g:'Labores e insumos', k:'Lotes en OT', v:nDest+' (de esos, '+nAplic+' aplicados) · '+nLineas+' líneas de insumo' + (fpN ? ' · '+fpN+' fuera del plan' : '') });
+      if(R.labores.length) aviso(inf.avisos,'info','Maestros','Labores nuevas agregadas al catálogo: '+R.labores.map(function(l){return l.nombre;}).join(', ')+'.');
+      if(R.unidades.length) aviso(inf.avisos,'info','Maestros','Unidades nuevas agregadas: '+R.unidades.map(function(u){return u.sigla;}).join(', ')+'.');
+    }
+    if(tiposNuevos.length) aviso(inf.avisos,'info','Maestros','Cultivos/actividades nuevos en el padrón de la empresa: '+tiposNuevos.map(function(t){return t.nombre+' ('+t.sigla+')';}).join(', ')+'.');
+    P.tiposNuevos = tiposNuevos;
+    P.campanias = campanias;
+    return P;
+  };
+  function fmt(n){ if(n===null||n===undefined||isNaN(n)) return '—'; return Number(n).toLocaleString('es-AR',{maximumFractionDigits:2}); }
+  function fmtFecha(iso){ if(!iso) return '(sin fecha)'; var p=iso.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+  X.fmt = fmt;
+
+  /* ================================================================
+     4) APLICAR: borra lo de la empresa y escribe el paquete
+     partes = { plan:bool, reg:bool }. Usa la API de pa-core (PA.demo.*);
+     el estado operativo de Insumos/OT va a su propia clave (como lo guarda la herramienta).
+  ================================================================ */
+  X.aplicar = function(P, partes, progreso){
+    var emp = P.empresaId, i, n = { borrados:{}, escritos:{} };
+    function prog(t){ if(progreso) progreso(t); }
+    function borrarTodos(lista, fn, etiqueta){ for(var k=0;k<lista.length;k++) fn(lista[k].id); n.borrados[etiqueta]=(n.borrados[etiqueta]||0)+lista.length; }
+    // Escribe en bloque reemplazando solo lo de la empresa (evita N lecturas/escrituras).
+    function reemplazar(lsKey, filtroFuera, nuevos, etiqueta){
+      var arr = []; try{ arr = JSON.parse(localStorage.getItem(lsKey)||'[]')||[]; }catch(e){ arr=[]; }
+      var queda = [], borr = 0;
+      for(var k=0;k<arr.length;k++){ if(filtroFuera(arr[k])) borr++; else queda.push(arr[k]); }
+      localStorage.setItem(lsKey, JSON.stringify(queda.concat(nuevos)));
+      n.borrados[etiqueta] = borr; n.escritos[etiqueta] = nuevos.length;
+    }
+    var deEmp = function(x){ return x && x.empresaId===emp; };
+    // Campañas (globales): se agregan las que falten, con orden correlativo.
+    var cs = PA.demo.listarCampanias(), ids = {}, maxO = 0;
+    for(i=0;i<cs.length;i++){ ids[cs[i].id]=cs[i]; if((cs[i].orden||0)>maxO) maxO=cs[i].orden; }
+    var todas = (P.campanias||[]).slice().sort();
+    for(i=0;i<todas.length;i++) if(!ids[todas[i]]){ maxO++; PA.demo.guardarCampania({ id:todas[i], nombre:todas[i], orden:maxO, activa:false }); n.escritos['campañas nuevas']=(n.escritos['campañas nuevas']||0)+1; }
+    if(partes.reg && P.reg && P.reg.campania){
+      cs = PA.demo.listarCampanias();
+      for(i=0;i<cs.length;i++){ var act = cs[i].id===P.reg.campania; if(!!cs[i].activa!==act){ cs[i].activa=act; PA.demo.guardarCampania(cs[i]); } }
+    }
+    // Tipos de actividad nuevos (se conservan los existentes)
+    for(i=0;i<(P.tiposNuevos||[]).length;i++) PA.demo.guardarTipoActividad(P.tiposNuevos[i]);
+
+    if(partes.plan && P.plan){
+      prog('Guardando campos…');
+      for(i=0;i<P.plan.campos.length;i++){
+        var c = P.plan.campos[i], prev = null, ex = PA.demo.camposDeEmpresa(emp);
+        for(var k=0;k<ex.length;k++) if(ex[k].id===c.id) prev = ex[k];
+        var nuevo = prev || { id:c.id, empresaId:emp, nombre:c.nombre, localidad:'', partido:'', provincia:'' };
+        nuevo.haTotales = c.haTotales;
+        PA.demo.guardarCampo(nuevo);
+      }
+      prog('Guardando lotes y actividades…');
+      if(PA.demo.listarLotes && PA.demo.guardarLote){
+        reemplazar('pa_lotes', deEmp, P.plan.lotes, 'lotes');
+        reemplazar('pa_actividades', deEmp, P.plan.actividades, 'actividades');
+      }
+    }
+    if(partes.reg && P.reg){
+      var R = P.reg;
+      prog('Guardando maestros…');
+      for(i=0;i<R.labores.length;i++) PA.demo.guardarLabor(R.labores[i]);
+      for(i=0;i<R.unidades.length;i++) if(PA.demo.guardarUnidad) PA.demo.guardarUnidad(R.unidades[i]);
+      reemplazar('pa_insumos', deEmp, R.insumos, 'insumos');
+      reemplazar('pa_depositos', deEmp, R.depositos, 'depósitos');
+      var tercerosIds = {}; for(i=0;i<R.terceros.length;i++) tercerosIds[R.terceros[i].id]=true;
+      reemplazar('pa_terceros', deEmp, R.terceros, 'terceros');
+      try{
+        var ch = JSON.parse(localStorage.getItem('pa_choferes')||'[]')||[];
+        localStorage.setItem('pa_choferes', JSON.stringify(ch.filter(function(x){ return x.empresaId!==emp; })));
+      }catch(e){}
+      prog('Guardando órdenes de trabajo y movimientos…');
+      var root = null;
+      try{ root = JSON.parse(localStorage.getItem(LS_INSUMOS_ROOT)||'null'); }catch(e){ root = null; }
+      if(!root || !root.espacios) root = { espacios:{}, activoId:null };
+      var emps = PA.demo.listarEmpresas(), nomE = emp;
+      for(i=0;i<emps.length;i++) if(emps[i].id===emp) nomE = emps[i].razonSocial || emps[i].nombre || emp;
+      R.espacio.contexto.empresa = nomE;
+      var antes = root.espacios[emp] && root.espacios[emp].state;
+      n.borrados['OT'] = antes && antes.ots ? antes.ots.length : 0;
+      n.borrados['movimientos'] = antes && antes.movtos ? antes.movtos.length : 0;
+      root.espacios[emp] = { nombre:nomE, state:R.espacio };
+      root.activoId = emp;
+      localStorage.setItem(LS_INSUMOS_ROOT, JSON.stringify(root));
+      n.escritos['OT'] = R.espacio.ots.length; n.escritos['movimientos'] = R.espacio.movtos.length;
+    }
+    // Registro de la importación
+    try{
+      var log = JSON.parse(localStorage.getItem(LS_LOG)||'[]')||[];
+      log.unshift({ fecha:new Date().toISOString(), empresaId:emp, partes:partes, resumen:P.informe.resumen });
+      localStorage.setItem(LS_LOG, JSON.stringify(log.slice(0,20)));
+    }catch(e){}
+    return n;
+  };
+
+  return X;
+})();
+if(typeof module!=='undefined' && module.exports) module.exports = IMP;
+
+</script>
+<script>
+/* ================================================================
+   Pantalla del importador (ES5)
+================================================================ */
+var CTX = null;
+var LIB = { plan:null, reg:null };          // libros leídos (resultado de IMP.leer*)
+var NOMBRE = { plan:'', reg:'' };           // nombre de archivo
+var USAR = { plan:true, reg:true };         // partes a importar
+var AN = null;                              // resultado de IMP.analizar
+var PAQ = null;                             // paquete construido (vista previa)
+var DEC_LOTES = {}, DEC_DEPS = {};          // decisiones del usuario
+var OPC = { fechaIni:'', expl:true };
+
+function byId(id){ return document.getElementById(id); }
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function f(v,d){ d=d||0; if(v==null||isNaN(Number(v))) return '—'; return Number(v).toLocaleString('es-AR',{minimumFractionDigits:d,maximumFractionDigits:d}); }
+function empresaId(){ return byId('selEmp').value; }
+function nombreEmpresa(id){ var es = CTX ? CTX.empresasDisponibles : []; for(var i=0;i<es.length;i++) if(es[i].id===id) return es[i].razonSocial||es[i].nombre||id; return id; }
+
+function bloquear(html){ byId('app').classList.add('oculto'); var b=byId('bloqueo'); b.innerHTML=html; b.classList.remove('oculto'); }
+
+function boot(){
+  if(typeof PA==='undefined'){ bloquear('<h2>No se pudo cargar la plataforma</h2><p class="lead" style="margin-top:8px">Falta el archivo <b>pa-core.js</b>. Esta página se abre desde la plataforma de Puntal Agro, en la misma carpeta que las herramientas.</p>'); return; }
+  if(typeof XLSX==='undefined'){ bloquear('<h2>No se pudo cargar el lector de Excel</h2><p class="lead" style="margin-top:8px">Revisá la conexión a internet y recargá la página.</p>'); return; }
+  PA.init({}, function(){
+    if(!PA.haySesion()){ bloquear('<h2>Entrá con tu usuario</h2><p class="lead" style="margin-top:8px">Para cargar datos tenés que iniciar sesión en la plataforma.</p><a class="btn btn-pri" href="login.html">Ir al ingreso</a>'); return; }
+    PA.loadContext(null, function(err, ctx){
+      if(err || !ctx){ bloquear('<h2>No se pudo cargar tu sesión</h2><p class="lead">'+esc(err||'')+'</p>'); return; }
+      CTX = ctx;
+      byId('usrLbl').textContent = ctx.usuario.nombre;
+      var sel = byId('selEmp'), es = ctx.empresasDisponibles || [], h = '', n = 0;
+      for(var i=0;i<es.length;i++){
+        // Solo empresas donde el usuario puede administrar (admin general: todas).
+        var ok = ctx.usuario.rol==='admin_general' || ctx.usuario.rol==='admin_cliente';
+        if(!ok) continue;
+        h += '<option value="'+esc(es[i].id)+'"'+(es[i].id===ctx.empresaActivaId?' selected':'')+'>'+esc(es[i].razonSocial||es[i].nombre||es[i].id)+'</option>'; n++;
+      }
+      if(!n){ bloquear('<h2>Sin permiso para cargar datos</h2><p class="lead" style="margin-top:8px">La carga masiva desde Excel la hace un administrador.</p>'); return; }
+      sel.innerHTML = h;
+      onEmpresa();
+    });
+  });
+}
+
+function onEmpresa(){
+  infoEmpresa();
+  reanalizar();
+}
+function infoEmpresa(){
+  var emp = empresaId();
+  var cs = PA.demo.camposDeEmpresa(emp)||[], ls = PA.demo.listarLotes ? (PA.demo.listarLotes(emp)||[]) : [];
+  byId('empInfo').textContent = 'Hoy tiene '+cs.length+' campo'+(cs.length===1?'':'s')+' y '+ls.length+' lote'+(ls.length===1?'':'s')+' cargados.';
+  avisarEmpresaExcel();
+}
+
+// ---------- lectura de archivos ----------
+function leerArchivo(cual, file){
+  if(!file) return;
+  var drop = byId(cual==='plan'?'dropPlan':'dropReg'), out = byId(cual==='plan'?'resPlan':'resReg');
+  drop.className = 'drop'; out.innerHTML = '<span class="mut">Leyendo…</span>';
+  var rd = new FileReader();
+  rd.onload = function(e){
+    try{
+      var wb = XLSX.read(new Uint8Array(e.target.result), { type:'array' });
+      LIB[cual] = cual==='plan' ? IMP.leerPlan(wb) : IMP.leerRegistros(wb);
+      NOMBRE[cual] = file.name;
+      USAR[cual] = true;
+      drop.className = 'drop ok';
+      pintarResumenArchivo(cual);
+    }catch(err){
+      LIB[cual] = null;
+      drop.className = 'drop err';
+      out.innerHTML = '<b>No se pudo leer.</b> '+esc(err && err.message ? err.message : err);
+    }
+    avisarEmpresaExcel();
+    reanalizar();
+  };
+  rd.onerror = function(){ drop.className='drop err'; out.textContent='No se pudo abrir el archivo.'; };
+  rd.readAsArrayBuffer(file);
+}
+function pintarResumenArchivo(cual){
+  var L = LIB[cual], h = '';
+  if(cual==='plan'){
+    var campos = {}, nc = 0, nAct = 0;
+    for(var i=0;i<L.lotes.length;i++){ if(!campos[L.lotes[i].campo]){ campos[L.lotes[i].campo]=0; nc++; } campos[L.lotes[i].campo]++;
+      for(var c in L.lotes[i].p) if(L.lotes[i].p.hasOwnProperty(c)) nAct += L.lotes[i].p[c].length; }
+    var cl = []; for(var k in campos) if(campos.hasOwnProperty(k)) cl.push(k+' ('+campos[k]+')');
+    h = '<b>'+esc(L.empresa||'(sin nombre de empresa)')+'</b><br>'+L.lotes.length+' lotes en '+nc+' campos: '+esc(cl.join(', '))+'<br>'+nAct+' actividades · campañas '+esc(L.campanias.join(', '));
+  } else {
+    var ots = {}; for(var j=0;j<L.otFilas.length;j++) ots[L.otFilas[j].nro]=true;
+    h = '<b>'+esc(L.empresa||'(sin nombre de empresa)')+'</b> · campaña <b>'+esc(L.campania||'?')+'</b><br>'+L.insumos.length+' insumos · '+L.depositosStock.length+' depósitos · '+L.movs.length+' movimientos<br>'+Object.keys(ots).length+' órdenes de trabajo ('+L.otFilas.length+' filas)';
+  }
+  h += '<label class="chk" style="margin-top:6px"><input type="checkbox" '+(USAR[cual]?'checked':'')+' onchange="USAR[\''+cual+'\']=this.checked;reanalizar()"> Importar esta parte</label>';
+  byId(cual==='plan'?'resPlan':'resReg').innerHTML = h;
+}
+function avisarEmpresaExcel(){
+  var nom = IMP.util.norm(nombreEmpresa(empresaId())), msg = [];
+  ['plan','reg'].forEach(function(k){
+    if(LIB[k] && LIB[k].empresa && IMP.util.norm(LIB[k].empresa)!==nom) msg.push('El Excel '+(k==='plan'?'del Plan de Uso':'de Registros')+' es de "'+LIB[k].empresa+'"');
+  });
+  var el = byId('empInfo');
+  el.innerHTML = el.textContent.split(' ⚠ ')[0] + (msg.length ? ' <span style="color:#A84D1F">⚠ '+esc(msg.join(' · '))+' y elegiste otra empresa.</span>' : '');
+}
+
+// ---------- revisión ----------
+function planActivo(){ return LIB.plan && USAR.plan ? LIB.plan : null; }
+function regActivo(){ return LIB.reg && USAR.reg ? LIB.reg : null; }
+function reanalizar(){
+  PAQ = null;
+  byId('vista').innerHTML = ''; byId('btnImp').classList.add('oculto'); byId('btnInf').classList.add('oculto'); byId('prog').textContent = '';
+  var plan = planActivo(), reg = regActivo();
+  var hay = !!(plan || reg);
+  byId('p3').classList.toggle('off', !hay); byId('p4').classList.toggle('off', !hay);
+  byId('btnVista').disabled = !hay;
+  byId('btnVista').classList.remove('oculto');
+  if(!hay){ byId('p3lead').textContent = 'Cargá al menos un archivo.'; byId('revLotes').innerHTML=''; byId('revDeps').innerHTML=''; byId('revParams').innerHTML=''; return; }
+  AN = IMP.analizar(plan, reg, empresaId());
+  DEC_LOTES = {}; DEC_DEPS = {};
+  for(var i=0;i<AN.lotes.length;i++){ var s = AN.lotes[i].sugerencia; DEC_LOTES[AN.lotes[i].nombre] = s ? s : { tipo:'' }; }
+  for(var j=0;j<AN.depositos.length;j++) DEC_DEPS[AN.depositos[j].nombre] = AN.depositos[j].campo;
+  if(!OPC.fechaIni && reg && reg.campania) OPC.fechaIni = '20'+reg.campania.substr(0,2)+'-07-01';
+  pintarRevision();
+}
+function opcionesLote(nombreReg, dec){
+  var ref = AN.lotesRef || [], porCampo = {}, orden = [], h = '<option value="">— elegí a qué lote va —</option>';
+  for(var i=0;i<ref.length;i++){ var c = ref[i].campo||'(sin campo)'; if(!porCampo[c]){ porCampo[c]=[]; orden.push(c); } porCampo[c].push(ref[i]); }
+  for(var k=0;k<orden.length;k++){
+    h += '<optgroup label="Campo '+esc(orden[k])+'">';
+    var ls = porCampo[orden[k]].slice().sort(function(a,b){ return a.nombre.localeCompare(b.nombre,'es',{numeric:true}); });
+    for(var j=0;j<ls.length;j++) h += '<option value="L:'+esc(ls[j].key)+'"'+(dec.tipo==='lote'&&dec.key===ls[j].key?' selected':'')+'>'+esc(ls[j].nombre)+'</option>';
+    h += '</optgroup>';
+  }
+  h += '<optgroup label="Otras opciones">';
+  for(var m=0;m<AN.campos.length;m++) h += '<option value="U:'+esc(AN.campos[m])+'"'+(dec.tipo==='un'&&dec.campo===AN.campos[m]?' selected':'')+'>Estructura / unidad de negocio del campo '+esc(AN.campos[m])+'</option>';
+  h += '<option value="X:"'+(dec.tipo==='omitir'?' selected':'')+'>No importar estas labores</option></optgroup>';
+  return h;
+}
+function pintarRevision(){
+  var reg = regActivo(), plan = planActivo();
+  var lead = [];
+  if(plan) lead.push('el Plan de Uso reemplaza los lotes y actividades de la empresa');
+  if(reg) lead.push('Registros reemplaza insumos, depósitos, proveedores, stock, movimientos y órdenes de trabajo');
+  byId('p3lead').innerHTML = 'Al importar, '+esc(lead.join('; '))+'.' + (reg ? ' Revisá las equivalencias: lo marcado como <span class="sug">sugerido</span> lo propuse yo por el nombre y conviene confirmarlo.' : '');
+  // Lotes sin equivalencia
+  var h = '';
+  if(reg){
+    if(AN.lotes.length){
+      h += '<div class="sub">Lotes de las OT que no están con ese nombre en el plan ('+AN.lotes.length+')</div>';
+      h += '<table><thead><tr><th>Lote en Registros</th><th>OT</th><th>Actividad</th><th>Se imputa a</th></tr></thead><tbody>';
+      for(var i=0;i<AN.lotes.length;i++){
+        var l = AN.lotes[i], d = DEC_LOTES[l.nombre], s = l.sugerencia;
+        h += '<tr><td class="tdname">'+esc(l.nombre)+'</td><td class="mut">'+esc(l.ots.join(', '))+'</td><td class="mut">'+esc(l.actividades.join(', '))+'</td>'+
+             '<td><select data-lote="'+esc(l.nombre)+'" onchange="onDecLote(this)">'+opcionesLote(l.nombre, d)+'</select>'+(s?'<span class="sug" title="'+esc(s.motivo||'')+'">sugerido</span>':'')+'</td></tr>';
+      }
+      h += '</tbody></table>';
+    } else h += '<div class="sub">Lotes de las OT</div><div class="lead" style="margin:0">Todos los lotes de las órdenes de trabajo están en el plan de uso con el mismo nombre.</div>';
+  }
+  byId('revLotes').innerHTML = h;
+  // Depósitos
+  var hd = '';
+  if(reg){
+    hd += '<div class="sub">Depósitos ('+AN.depositos.length+')</div><table><thead><tr><th>Depósito en el Excel</th><th>Está en</th></tr></thead><tbody>';
+    for(var j=0;j<AN.depositos.length;j++){
+      var dp = AN.depositos[j], v = DEC_DEPS[dp.nombre], opt = '<option value=""'+(v===''?' selected':'')+'>En poder de un tercero (se crea como proveedor)</option>';
+      for(var c=0;c<AN.campos.length;c++) opt += '<option value="'+esc(AN.campos[c])+'"'+(v===AN.campos[c]?' selected':'')+'>Campo '+esc(AN.campos[c])+'</option>';
+      hd += '<tr><td class="tdname">'+esc(dp.nombre)+'</td><td><select data-dep="'+esc(dp.nombre)+'" onchange="onDecDep(this)">'+opt+'</select></td></tr>';
+    }
+    hd += '</tbody></table>';
+  }
+  byId('revDeps').innerHTML = hd;
+  // Parámetros
+  var hp = '<div class="sub">Opciones</div><div class="params">';
+  if(reg) hp += '<label>Fecha del stock inicial <input type="date" value="'+esc(OPC.fechaIni)+'" onchange="OPC.fechaIni=this.value;PAQ=null;limpiarVista()"></label>';
+  if(plan) hp += '<label class="chk"><input type="checkbox" '+(OPC.expl?'checked':'')+' onchange="OPC.expl=this.checked;limpiarVista()"> Superficie explotable = superficie total (el Excel no la trae)</label>';
+  hp += '</div>';
+  byId('revParams').innerHTML = hp;
+}
+function onDecLote(sel){
+  var v = sel.value, n = sel.getAttribute('data-lote');
+  if(v.indexOf('L:')===0) DEC_LOTES[n] = { tipo:'lote', key:v.substr(2) };
+  else if(v.indexOf('U:')===0) DEC_LOTES[n] = { tipo:'un', campo:v.substr(2) };
+  else if(v.indexOf('X:')===0) DEC_LOTES[n] = { tipo:'omitir' };
+  else DEC_LOTES[n] = { tipo:'' };
+  var b = sel.parentNode.querySelector('.sug'); if(b){ b.textContent='elegido'; b.className='sug ok'; }
+  limpiarVista();
+}
+function onDecDep(sel){ DEC_DEPS[sel.getAttribute('data-dep')] = sel.value; limpiarVista(); }
+function limpiarVista(){ PAQ=null; byId('vista').innerHTML=''; byId('btnImp').classList.add('oculto'); byId('btnInf').classList.add('oculto'); byId('btnVista').classList.remove('oculto'); byId('prog').textContent=''; }
+
+// ---------- vista previa ----------
+function armarVista(){
+  var reg = regActivo();
+  if(reg){
+    var falt = [];
+    for(var n in DEC_LOTES) if(DEC_LOTES.hasOwnProperty(n) && !DEC_LOTES[n].tipo) falt.push(n);
+    if(falt.length){ alert('Falta decidir a qué lote van las OT de: '+falt.join(', ')+'.\n\nSi no van, elegí "No importar estas labores".'); return; }
+    if(!OPC.fechaIni){ alert('Cargá la fecha del stock inicial.'); return; }
+  }
+  try{
+    PAQ = IMP.construir(planActivo(), reg, { empresaId:empresaId(), fechaStockIni:OPC.fechaIni, explIgualSup:OPC.expl,
+      lotes:DEC_LOTES, depCampo:DEC_DEPS, depositos:AN.depositos, lotesRef:AN.lotesRef });
+  }catch(err){ alert('No se pudo armar la importación: '+(err && err.message ? err.message : err)); return; }
+  pintarVista();
+}
+function pintarVista(){
+  var inf = PAQ.informe, h = '', grupos = {}, ordenG = [], i;
+  h += '<div class="aviso-top">Se va a <b>borrar y reemplazar</b> en <b>'+esc(nombreEmpresa(empresaId()))+'</b>: '+
+       esc([planActivo()?'lotes y actividades del plan de uso (y la superficie de cada campo)':'', regActivo()?'insumos, depósitos, proveedores, stock, movimientos y órdenes de trabajo':''].filter(function(x){return x;}).join('; '))+
+       '. Las demás empresas y los usuarios no se tocan.</div>';
+  var porG = {}, og = [];
+  for(i=0;i<inf.resumen.length;i++){ var r = inf.resumen[i]; if(!porG[r.g]){ porG[r.g]=[]; og.push(r.g); } porG[r.g].push(r); }
+  h += '<div class="resumen">';
+  for(i=0;i<og.length;i++){
+    h += '<div class="res-g"><h3>'+esc(og[i])+'</h3>';
+    for(var j=0;j<porG[og[i]].length;j++) h += '<div class="res-row"><span class="res-k">'+esc(porG[og[i]][j].k)+'</span><span class="res-v">'+esc(porG[og[i]][j].v)+'</span></div>';
+    h += '</div>';
+  }
+  h += '</div>';
+  for(i=0;i<inf.avisos.length;i++){ var a = inf.avisos[i]; if(!grupos[a.grupo]){ grupos[a.grupo]=[]; ordenG.push(a.grupo); } grupos[a.grupo].push(a); }
+  if(ordenG.length) h += '<div class="sub">Controles y avisos</div>';
+  for(i=0;i<ordenG.length;i++){
+    var g = grupos[ordenG[i]], nw=0, ni=0, nok=0;
+    for(var k=0;k<g.length;k++){ if(g[k].nivel==='warn') nw++; else if(g[k].nivel==='ok') nok++; else ni++; }
+    h += '<div class="av-g'+(nw&&i<2?' open':'')+'"><div class="av-h" onclick="this.parentNode.classList.toggle(\'open\')"><span class="av-car">▶</span>'+esc(ordenG[i])+
+         '<span class="av-cnt">'+(nw?'<span class="bdg by">'+nw+' para revisar</span>':'')+(ni?'<span class="bdg bi">'+ni+' info</span>':'')+(nok?'<span class="bdg bg">OK</span>':'')+'</span></div><div class="av-b">';
+    for(var q=0;q<g.length;q++) h += '<div class="av-i">'+(g[q].nivel==='warn'?'<span class="bdg by">revisar</span> ':g[q].nivel==='ok'?'<span class="bdg bg">OK</span> ':'')+esc(g[q].texto)+'</div>';
+    h += '</div></div>';
+  }
+  byId('vista').innerHTML = h;
+  byId('btnImp').classList.remove('oculto');
+  byId('btnInf').classList.remove('oculto');
+  byId('btnVista').classList.add('oculto');
+  byId('p4lead').textContent = 'Esto es lo que se va a cargar. Si algo no te cierra, cambiá la revisión del paso 3 y volvé a ver.';
+}
+
+// ---------- importar ----------
+function importar(){
+  if(!PAQ) return;
+  var partes = { plan:!!planActivo(), reg:!!regActivo() };
+  if(!confirm('¿Importar en '+nombreEmpresa(empresaId())+'?\n\nSe borran y reemplazan los datos actuales de esa empresa en '+(partes.plan&&partes.reg?'Plan de Uso y en Labores e Insumos':partes.plan?'Plan de Uso':'Labores e Insumos')+'. No se puede deshacer (se puede volver a importar).')) return;
+  byId('btnImp').disabled = true;
+  byId('prog').textContent = 'Importando…';
+  setTimeout(function(){
+    var res;
+    try{ res = IMP.aplicar(PAQ, partes, function(t){ byId('prog').textContent = t; }); }
+    catch(err){ byId('btnImp').disabled=false; byId('prog').textContent=''; alert('Falló la importación: '+(err && err.message ? err.message : err)+'\n\nSi el navegador avisa que no hay espacio, avisá a sistemas.'); return; }
+    // Las herramientas abren en la empresa recién cargada.
+    try{ PA.setEmpresaActiva(empresaId(), function(){}); }catch(e){}
+    pintarHecho(res, partes);
+  }, 30);
+}
+function pintarHecho(res, partes){
+  var cnt = '', k;
+  var etiquetas = ['lotes','actividades','insumos','depósitos','terceros','OT','movimientos'];
+  for(var i=0;i<etiquetas.length;i++){ k = etiquetas[i]; if(res.escritos[k]!==undefined) cnt += '<div class="cuenta"><div class="v">'+f(res.escritos[k])+'</div><div class="k">'+esc(k==='terceros'?'proveedores':k)+(res.borrados[k]?' · reemplazó '+f(res.borrados[k]):'')+'</div></div>'; }
+  var links = '';
+  if(partes.plan) links += '<a class="btn btn-pri" href="tablero_uso_suelo.html">Abrir Plan de Uso del Suelo</a>';
+  if(partes.reg) links += '<a class="btn btn-pri" href="tablero_insumos_ot.html">Abrir Labores e Insumos</a>';
+  byId('vista').insertAdjacentHTML('afterbegin', '<div class="hecho card" style="margin-bottom:12px;border-color:#A9BE8F;background:var(--green-l)"><div class="hecho-t">Listo: datos cargados en '+esc(nombreEmpresa(empresaId()))+'</div><div class="cuentas">'+cnt+'</div><div class="acciones" style="margin-top:4px">'+links+'</div></div>');
+  byId('btnImp').classList.add('oculto');
+  byId('prog').textContent = '';
+  byId('p4lead').textContent = 'Importación terminada. Si volvés a importar, se reemplaza de nuevo todo lo de esta empresa.';
+  infoEmpresa(); // refresca "hoy tiene…"
+  byId('btnVista').classList.add('oculto');
+  byId('btnInf').classList.remove('oculto');
+  window.scrollTo(0, byId('p4').offsetTop - 70);
+}
+function descargarInforme(){
+  if(!PAQ) return;
+  var t = 'Importación de datos · '+nombreEmpresa(empresaId())+' · '+new Date().toLocaleString('es-AR')+'\n';
+  t += 'Archivos: '+[NOMBRE.plan&&USAR.plan?NOMBRE.plan:'', NOMBRE.reg&&USAR.reg?NOMBRE.reg:''].filter(function(x){return x;}).join(' · ')+'\n\n';
+  var inf = PAQ.informe, i;
+  t += 'RESUMEN\n'; for(i=0;i<inf.resumen.length;i++) t += '['+inf.resumen[i].g+'] '+inf.resumen[i].k+': '+inf.resumen[i].v+'\n';
+  t += '\nEQUIVALENCIAS DE LOTES\n';
+  for(var n in DEC_LOTES) if(DEC_LOTES.hasOwnProperty(n)){ var d = DEC_LOTES[n], dest = d.tipo==='lote' ? (AN.lotesRef.filter(function(r){return r.key===d.key;})[0]||{}).nombre : d.tipo==='un' ? 'Estructura campo '+d.campo : 'no importado'; t += n+' → '+dest+'\n'; }
+  t += '\nAVISOS\n'; for(i=0;i<inf.avisos.length;i++) t += (inf.avisos[i].nivel==='warn'?'[REVISAR] ':inf.avisos[i].nivel==='ok'?'[OK] ':'[info] ')+'['+inf.avisos[i].grupo+'] '+inf.avisos[i].texto+'\n';
+  var b = new Blob([t], { type:'text/plain;charset=utf-8' }), a = document.createElement('a');
+  a.href = URL.createObjectURL(b); a.download = 'informe_importacion_'+new Date().toISOString().substr(0,10)+'.txt';
+  document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+
+// Arrastrar y soltar sobre las zonas de archivo
+(function(){
+  ['dropPlan','dropReg'].forEach(function(id){
+    var el = byId(id), cual = id==='dropPlan' ? 'plan' : 'reg';
+    el.addEventListener('dragover', function(e){ e.preventDefault(); el.classList.add('over'); });
+    el.addEventListener('dragleave', function(){ el.classList.remove('over'); });
+    el.addEventListener('drop', function(e){ e.preventDefault(); el.classList.remove('over'); if(e.dataTransfer.files && e.dataTransfer.files[0]) leerArchivo(cual, e.dataTransfer.files[0]); });
+  });
+})();
+boot();
+</script>
+</body>
+</html>
