@@ -571,7 +571,7 @@ footer{padding:14px 24px 22px;display:flex;justify-content:space-between;color:v
 
 <footer>
   <span>Puntal Agro · Herramientas para la toma de decisiones</span>
-  <span>Versión v2026-10-29 09:10 · BUILD 66 · Datos leídos: <span id="fts">—</span></span>
+  <span>Versión v2026-10-29 09:15 · BUILD 67 · Datos leídos: <span id="fts">—</span></span>
 </footer>
 
 <div id="dropOv"><div class="drop2">
@@ -1361,12 +1361,12 @@ function drawCompDet(){if(!CMP)return;var j=STATE.compJ||0,h='<div class="cdm">'
   document.getElementById('compDet').innerHTML=h;}
 function sum(a){var s=0;for(var i=0;i<a.length;i++)s+=a[i]||0;return s;}
 var ING_LBL=[['granos','Ventas de granos'],['hacienda','Ventas de hacienda'],['arrc','Arrendamientos cobrados'],['otros','Otros ingresos'],['creditos','Créditos tomados'],['rescates','Rescate de colocaciones']];
-var EGR_LBL=[['insumos','Insumos y fertilizantes'],['labores','Labores, cosecha y servicios agrícolas'],['arrend','Arrendamientos'],['personal','Personal'],
+var EGR_LBL=[['insumos','Insumos y fertilizantes'],['labores','Labores, cosecha y servicios agrícolas'],['arrend','Arrendamientos pagados'],['personal','Personal'],
   ['estAdm','Estructura y administración'],['impuestos','Impuestos'],['ivaItf','IVA (efecto financiero) e ITF'],['maquinaria','Maquinaria'],['ganaderia','Ganadería (sanidad, mantenimiento)'],
   ['comerc','Gastos comerciales y fletes'],['inversiones','Inversiones'],['creditos','Créditos (capital e intereses)'],['otros','Otros egresos'],['retiros','Retiros'],['colocaciones','Colocaciones en reservas']];
 var LBL={};ING_LBL.concat(EGR_LBL).forEach(function(x){LBL[x[0]]=x[1];});
 var ING_G=[['Ventas de granos',['granos']],['Ventas de hacienda',['hacienda']],['Arrendamientos cobrados',['arrc']],['Otros ingresos',['otros']],['Créditos y rescates de reservas',['creditos','rescates']]];
-var EGR_G=[['Producción y comercialización',['insumos','labores','maquinaria','ganaderia','comerc']],['Arrendamientos',['arrend']],['Sueldos y cargas',['personal']],
+var EGR_G=[['Producción y comercialización',['insumos','labores','maquinaria','ganaderia','comerc']],['Arrendamientos pagados',['arrend']],['Sueldos y cargas',['personal']],
   ['Estructura y administración',['estAdm']],['Impuestos',['impuestos','ivaItf']],['Inversiones',['inversiones']],['Retiros',['retiros']],['Créditos, reservas y otros',['creditos','colocaciones','otros']]];
 var TS0=0;
 function rowHtml(lbl,arr,cls,signCls){
