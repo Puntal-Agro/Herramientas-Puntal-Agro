@@ -1284,7 +1284,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
 </main>
 
 <footer>
-  <span>Puntal Agro · Insumos &amp; OT · Versión v2026-10-29 08:12 · BUILD 22</span>
+  <span>Puntal Agro · Insumos &amp; OT · Versión v2026-10-29 08:58 · BUILD 23</span>
   <span id="fts">—</span>
 </footer>
 
@@ -2882,7 +2882,7 @@ function switchWs(id){
       CTX=ctx;
       if(!puede('ver')){ mostrarSinAcceso(); return; }
       aplicarNivelUI();
-      aplicTmp=null; otrTmp=null; editOtId=null;
+      aplicTmp=null; otrTmp=null; editOtId=null; contrSel=null;
       var emp=null;
       for(var i=0;i<CTX.empresasDisponibles.length;i++){ if(CTX.empresasDisponibles[i].id===id){ emp=CTX.empresasDisponibles[i]; break; } }
       syncRootConContexto(id, emp?(emp.razonSocial||emp.nombre):null);
@@ -7296,6 +7296,7 @@ function contrNOtsAcc(a){ var n=0; for(var k in a.ots){ if(a.ots.hasOwnProperty(
 
 /* ===== Reporte de labores en PDF (con los filtros y la selección que se ven) ===== */
 function descargarPdfLabores(){
+  if(!state.campaniaActivaId){ alert('El reporte es por campaña: elegí una campaña en el encabezado.'); return; }
   cargarScript(JSPDF_URL, function(){ return !!(window.jspdf && window.jspdf.jsPDF); }, function(ok){
     if(!ok){ alert('No se pudo cargar el generador de PDF. Revisá la conexión y probá de nuevo.'); return; }
     var filas=contrAplicarSel(contrFilasFiltradas());
@@ -7370,8 +7371,8 @@ function armarPdfLabores(filas, soloP){
   // 1) Resumen
   doc.setFont('helvetica','bold'); doc.setFontSize(10.5); doc.setTextColor(30,30,30); doc.text('Resumen por contratista y labor', M, y); y+=3;
   var colsR=soloP
-    ? [{t:'Contratista / labor',w:120},{t:'A realizar (ha)',w:40,r:1},{t:'Realizado',w:40,r:1},{t:'Pendiente',w:35,r:1},{t:'Importe',w:38,r:1}]
-    : [{t:'Contratista / labor',w:75},{t:'A realizar (ha)',w:25,r:1},{t:'Realizado',w:27,r:1},{t:'Pendiente',w:22,r:1},{t:'Importe',w:27,r:1},{t:'Facturado',w:25,r:1},{t:'A facturar',w:25,r:1},{t:'Pagado',w:22,r:1},{t:'Adeudado',w:25,r:1}];
+    ? [{t:'Contratista / labor',w:120},{t:'Total (ha)',w:40,r:1},{t:'Realizado',w:40,r:1},{t:'A realizar',w:35,r:1},{t:'Importe',w:38,r:1}]
+    : [{t:'Contratista / labor',w:75},{t:'Total (ha)',w:25,r:1},{t:'Realizado',w:27,r:1},{t:'A realizar',w:22,r:1},{t:'Importe',w:27,r:1},{t:'Facturado',w:25,r:1},{t:'A facturar',w:25,r:1},{t:'Pagado',w:22,r:1},{t:'Adeudado',w:25,r:1}];
   function celR(a){ var b=[haTxt(a,'tot'), haTxt(a,'apl'), haTxt(a,'pend'), fm(a.imp)]; if(!soloP) b=b.concat([fm(a.fact), fm(Math.max(0,a.imp-a.fact)), fm(a.pag), fm(a.adeu)]); return b; }
   var fr=[];
   for(var g=0;g<R.grupos.length;g++){
@@ -7958,6 +7959,8 @@ function renderContrChips(){
 }
 function renderContrGrafico(filas){
   var box=byId('contrGrafico'); if(!box) return;
+  // Los totales son por campaña (igual que las tarjetas de arriba): sin campaña no se suma nada.
+  if(!state.campaniaActivaId){ box.innerHTML='<div class="banner-info" style="margin:0">El resumen es <strong>por campaña</strong>: elegí una campaña en el encabezado. Abajo se listan las labores de todas las campañas.</div>'; return; }
   var R=resumenLabores(filas);
   if(!R.grupos.length){ box.innerHTML='<p style="font-size:12px;color:var(--muted);padding:6px 2px">Sin labores para los filtros aplicados.</p>'; return; }
   var h='';
@@ -7973,7 +7976,7 @@ function renderContrGrafico(filas){
   var T=R.tot, aFactT=Math.max(0, R.totLC.imp-R.totLC.fact);
   h+='<tr class="lr-tot"><td class="tdname">Total general</td><td class="num">'+lrHa(T,'tot')+'</td><td class="num">'+lrHa(T,'apl')+'</td><td class="num">'+lrHa(T,'pend')+'</td>'+
     '<td class="num">'+lrMon(T.imp, T.faltaImp)+'</td><td class="num">'+fm(R.totLC.fact)+'</td><td class="num">'+fm(aFactT)+'</td><td class="num">'+fm(R.totLC.pag)+'</td><td class="num">'+fm(R.totLC.adeu)+'</td></tr>';
-  box.innerHTML='<div class="tw"><table class="lr-tbl"><thead><tr><th>Contratista / labor</th><th class="num">A realizar (ha)</th><th class="num">Realizado</th><th class="num">Pendiente</th>'+
+  box.innerHTML='<div class="tw"><table class="lr-tbl"><thead><tr><th>Contratista / labor</th><th class="num">Total (ha)</th><th class="num">Realizado</th><th class="num">A realizar</th>'+
     '<th class="num">Importe</th><th class="num">Facturado</th><th class="num">A facturar</th><th class="num">Pagado</th><th class="num">Adeudado</th></tr></thead><tbody>'+h+'</tbody></table></div>'+
     '<div class="lr-ayuda">Tocá un contratista o una labor para ver abajo solo esas OT. Facturado, pagado y adeudado son de las labores contratadas.</div>';
 }
@@ -8671,6 +8674,7 @@ function refreshCtx(){
 // formulario está vacío (nunca pisa una OT que se está armando o editando).
 function setCampaniaFiltro(id){
   state.campaniaActivaId=id;
+  contrSel=null;   // la selección del resumen de Labores es de la campaña que se estaba viendo
   save();
   var oc=byId('o_campania');
   if(oc && id && !editOtId && !trabajosTmp.length && !destinosTmp.length){ oc.value=id; otFormCampAnterior=id; }
