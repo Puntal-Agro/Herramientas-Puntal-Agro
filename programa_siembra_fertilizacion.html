@@ -38,9 +38,12 @@ select,input[type=text],input[type=number],input[type=date]{
   padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;
   background:var(--card);color:var(--text);outline:none;
 }
-select:focus,input:focus{background:#EFF6FF;border-color:#185FA5}
+select,input[type=text],input[type=number],input[type=date]{padding:7px 9px}
+select:focus,input:focus{background:#F7FAF5;border-color:var(--verde);box-shadow:0 0 0 3px rgba(74,101,51,.10)}
 input[type=number]{text-align:right}
-label.fl{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-weight:500;margin-bottom:3px}
+input::placeholder{color:#B3BDC9}
+/* Nivel 3 de jerarquía: nombre de campo. Subordinado a todo lo demás. */
+label.fl{display:block;font-size:10.5px;color:#8995A3;letter-spacing:.2px;font-weight:500;margin-bottom:5px}
 
 .btn{font-family:var(--sans);font-size:12px;font-weight:500;padding:5px 12px;border-radius:6px;cursor:pointer;border:1.5px solid var(--border);background:var(--card);color:#475569;transition:all .12s}
 .btn:hover{border-color:#CBD5E1;background:#FAFBFC}
@@ -62,30 +65,46 @@ label.fl{display:block;font-size:10px;color:var(--muted);text-transform:uppercas
 main{padding:16px 24px;display:flex;flex-direction:column;gap:12px}
 .view{display:none;flex-direction:column;gap:12px}
 .view.active{display:flex}
-.card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:12px}
-.chd{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px;flex-wrap:wrap}
-.ct{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
-.cact{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:16px 16px 14px}
+.chd{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;gap:10px;flex-wrap:wrap}
+/* Nivel 2 de jerarquía: título de tarjeta. Barra de color igual que el portal. */
+.ct{font-size:13px;font-weight:600;letter-spacing:-.1px;color:var(--text);line-height:1.2}
+.ct .ln{display:block;height:2px;width:28px;margin-top:6px;border-radius:2px;background:var(--verde)}
+.ct-t .ln{background:var(--terra)}
+.ct-n .ln{background:#A86A1F}
+.cact{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding-top:1px}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .scroll{overflow-x:auto}
 
 /* ── Métricas ─────────────────────────────────────────── */
 .metrics{display:flex;gap:10px;flex-wrap:wrap}
-.mc{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);border-left:3px solid var(--border);padding:10px 16px;min-width:130px;flex:1}
+.mc{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);border-left:3px solid var(--border);padding:13px 18px;min-width:130px;flex:1}
 .mc-v{background:var(--verde)!important}
-.mc .mv{font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.2}
-.mc .ml{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-weight:500;margin-top:2px}
+.mc .mv{font-size:20px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.15;letter-spacing:-.4px}
+.mc .ml{font-size:10.5px;color:#8995A3;letter-spacing:.1px;font-weight:500;margin-top:4px}
+.mc-g .mv{color:var(--verde)}
+.mc-t .mv{color:var(--terra)}
 .mc-t{border-left-color:var(--terra)}
 .mc-g{border-left-color:var(--verde)}
 
 /* ── Tablas ───────────────────────────────────────────── */
 table{width:100%;border-collapse:collapse}
-thead th{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;font-weight:500;padding:4px 5px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap}
+thead th{font-size:10px;color:#8995A3;text-transform:uppercase;letter-spacing:.4px;font-weight:600;padding:7px 6px;border-bottom:1.5px solid var(--border);text-align:left;white-space:nowrap}
 thead th.r{text-align:right}
 thead th.c{text-align:center}
-thead th.gh{text-align:center;font-weight:600;color:#475569;border-bottom:1px solid var(--border);background:#FAFBFC;letter-spacing:.4px}
-thead th.gh-b{background:#F5F7FA}
-tbody td{padding:7px 6px;border-bottom:1px solid #F5F7FA;font-family:var(--sans);font-variant-numeric:tabular-nums;font-size:12px;white-space:nowrap}
+/* Encabezado de grupo de columnas */
+thead th.gh{text-align:center;font-weight:600;font-size:10px;color:#56626F;letter-spacing:.5px;
+            border-bottom:1px solid var(--border);padding:6px 6px 5px}
+thead th.gh-v{color:var(--verde)}
+thead th.gh-t{color:var(--terra)}
+thead th.gh-n{color:#8E5A18}
+/* Primera columna de cada grupo: línea divisoria vertical */
+thead th.gs, tbody td.gs{border-left:1px solid #E4E8EE}
+/* Banda tenue para que cada grupo se lea como una unidad */
+thead th.bd, tbody td.bd{background:#F6F9FB}
+tbody tr:hover td.bd{background:#EFF4F8}
+tbody tr.sp td{color:var(--muted)}
+tbody td{padding:9px 6px;border-bottom:1px solid #F2F5F8;font-family:var(--sans);font-variant-numeric:tabular-nums;font-size:12px;white-space:nowrap}
 tbody td.r{text-align:right}
 tbody td.c{text-align:center}
 tbody tr:hover td{background:#FAFBFC}
@@ -93,40 +112,92 @@ tbody tr:hover td{background:#FAFBFC}
 .grp td{background:#F5F7FA!important;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.3px;color:#475569}
 .sub td{background:#FCFDFE;font-size:11px;color:#475569}
 .sub td:first-child{padding-left:20px}
-.empty{padding:28px 12px;text-align:center;color:var(--muted);font-size:12px;line-height:1.7}
+.empty{padding:30px 18px;text-align:center;color:#8995A3;font-size:12.5px;line-height:1.75;
+       background:#FAFBFC;border:1px dashed #DFE5EC;border-radius:10px;margin:4px 0}
+.empty b{color:#56626F}
 
 /* ── Badges ───────────────────────────────────────────── */
-.bdg{display:inline-block;padding:1px 6px;border-radius:10px;font-size:10px;font-weight:600;font-family:var(--sans);font-variant-numeric:tabular-nums}
+.bdg{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:600;font-family:var(--sans);font-variant-numeric:tabular-nums}
 .bg{background:#F0FDF4;color:#166534}
 .by{background:#FFFBEB;color:#92400E}
 .br{background:#FEF2F2;color:#991B1B}
 .bn{background:#F0F2F5;color:#7A8899}
-.bamb{background:#F0F2F5;color:#475569;font-weight:500}
+.bamb{background:#EEF1F5;color:#56626F;font-weight:500;letter-spacing:.2px}
+/* Badge que además es el botón de la fila */
+.bdg-act{border:1px solid transparent;cursor:pointer;padding:3px 10px;line-height:1.35;transition:all .12s}
+.bdg-act:hover{filter:brightness(.97)}
+.bg.bdg-act:hover{border-color:#9BD2AE}
+.by.bdg-act:hover{border-color:#EBCF8E}
+.bn.bdg-act:hover{border-color:#C3CCD6;color:var(--text)}
+.bdg-act:focus-visible{outline:2px solid var(--verde);outline-offset:2px}
 
 /* ── Modal ────────────────────────────────────────────── */
 .ovl{display:none;position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(15,25,35,.42);z-index:60;padding:24px;overflow-y:auto}
 .ovl.open{display:block}
-.mdl{background:var(--card);border-radius:var(--radius);max-width:880px;margin:0 auto;box-shadow:0 8px 32px rgba(15,25,35,.18)}
-.mdl-h{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
-.mdl-t{font-size:14px;font-weight:600}
-.mdl-b{padding:16px 18px}
-.mdl-f{padding:12px 18px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
-.frow{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.mdl{background:var(--card);border-radius:14px;max-width:880px;margin:0 auto;box-shadow:0 10px 34px rgba(15,25,35,.16)}
+.mdl-h{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.mdl-t{font-size:17px;font-weight:600;letter-spacing:-.3px}
+.mdl-b{padding:22px 24px 26px}
+.mdl-f{padding:14px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;background:#FBFCFD;border-radius:0 0 14px 14px}
+.mdl-f .btn{padding:7px 18px}
+.frow{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.frow:last-child{margin-bottom:0}
 .fcol{flex:1;min-width:120px}
 .fcol input,.fcol select{width:100%}
-.fsec{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:16px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+
+/* Nivel 1 de jerarquía: encabezado de sección del formulario.
+   Barra de color a la izquierda + aire arriba: separa un bloque del siguiente. */
+.fsec{font-size:14px;font-weight:600;letter-spacing:-.2px;color:var(--text);
+      margin:30px 0 12px;padding-left:11px;border-left:3px solid var(--verde);line-height:1.3}
 .fsec:first-child{margin-top:0}
-.calc{background:#F5F7FA;border-radius:8px;padding:10px 12px;display:flex;gap:18px;flex-wrap:wrap}
+.fsec-t{border-left-color:var(--terra)}
+.fsec-n{border-left-color:#A86A1F}
+.fsec .fsub{display:block;font-size:11.5px;font-weight:400;color:var(--muted);margin-top:3px;letter-spacing:0}
+
+/* Bloque de contenido de una sección: fondo propio para que se lea como unidad */
+.blk{background:#FAFBFC;border:1px solid #EDF0F4;border-radius:10px;padding:14px}
+/* Subtítulo dentro de un bloque */
+.blk-t{font-size:11.5px;font-weight:600;color:#56626F;margin-bottom:9px;letter-spacing:.1px}
+
+/* ── Colapsar secciones y tarjetas ── */
+.fsec.cl{cursor:pointer;user-select:none;display:flex;align-items:baseline;gap:8px}
+.fsec.cl:hover{color:var(--verde)}
+.fsec.cl .fsub{flex:1}
+.chev{display:inline-block;font-size:9px;color:#A8B2BD;transition:transform .15s;flex:none;
+      transform:rotate(0deg);line-height:1}
+.cerrado > .chev, .chd .chev.cerrado{transform:rotate(-90deg)}
+.fsec.cerrado{margin-bottom:0}
+.fsec.cerrado + .blk, .fsec.cerrado + .pick, .fsec.cerrado + .scroll{display:none}
+.ct.cl{cursor:pointer;user-select:none;display:flex;align-items:center;gap:8px}
+.ct.cl:hover{color:var(--verde)}
+.ct .ln{flex:none}
+.ct.cl .ln{display:none}
+.ct.cl::before{content:'';display:block;width:3px;height:15px;border-radius:2px;background:var(--verde);flex:none}
+.ct-t.cl::before{background:var(--terra)}
+.ct-n.cl::before{background:#A86A1F}
+.card.cerrado > *:not(.chd){display:none}
+.card.cerrado{padding-bottom:14px}
+.card.cerrado .chd{margin-bottom:0}
+.blk > .frow:last-child{margin-bottom:0}
+.blk table thead th{background:transparent}
+
+/* El resultado del cálculo: el único momento fuerte del formulario */
+.calc{background:#F2F6EE;border:1px solid #DDE7D3;border-radius:10px;padding:14px 16px;
+      display:flex;gap:26px;flex-wrap:wrap;margin-top:14px}
 .calc .ci{min-width:72px}
-.calc .cv{font-size:14px;font-weight:600;font-variant-numeric:tabular-nums}
-.calc .cl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-weight:500}
-.warn{background:#FFFBEB;color:#92400E;border-radius:6px;padding:7px 10px;font-size:11px;margin-top:8px;display:none;line-height:1.5}
-.hint{font-size:11px;color:var(--muted);line-height:1.5;margin-top:6px}
+.calc .cv{font-size:19px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.15;color:var(--verde)}
+.calc .ci-fin .cv{color:var(--terra)}
+.calc .cl{font-size:10.5px;color:#7F8B79;font-weight:500;margin-top:3px;letter-spacing:.1px}
+
+.warn{background:#FFF8E6;color:#8A5A10;border:1px solid #F3E2BC;border-radius:8px;
+      padding:10px 13px;font-size:11.5px;margin-top:14px;display:none;line-height:1.6}
+.hint{font-size:11px;color:#99A3AE;line-height:1.55;margin-top:8px}
+.blk .hint{margin-top:10px}
 
 /* ── Picker de lotes ──────────────────────────────────── */
-.pick{max-height:220px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:4px}
-.pick-r{display:flex;align-items:center;gap:8px;padding:5px 7px;border-radius:5px;cursor:pointer;font-size:12px}
-.pick-r:hover{background:#FAFBFC}
+.pick{max-height:230px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:4px;background:var(--card)}
+.pick-r{display:flex;align-items:center;gap:10px;padding:7px 9px;border-radius:6px;cursor:pointer;font-size:12px}
+.pick-r:hover{background:#F2F6EE}
 .pick-r input{margin:0;cursor:pointer}
 .pick-r .pn{font-weight:500;flex:1}
 .pick-r .ph{color:var(--muted);font-variant-numeric:tabular-nums}
@@ -185,7 +256,7 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
   <div class="metrics" id="lot-metrics"></div>
   <div class="card">
     <div class="chd">
-      <div class="ct">Avance de la planificación</div>
+      <div class="ct">Avance de la planificación<span class="ln"></span></div>
       <div class="cact">
         <select id="lot-f-campo" onchange="renderLotes()"><option value="">Todos los campos</option></select>
         <select id="lot-f-cult" onchange="renderLotes()"><option value="">Todos los cultivos</option></select>
@@ -199,7 +270,7 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
     <div class="scroll"><table>
       <thead><tr>
         <th>Campo</th><th>Lote</th><th class="r">Sup (ha)</th><th>Ambiente</th>
-        <th>Cultivo</th><th class="c">Siembra</th><th class="c">Fertilización</th><th></th>
+        <th>Cultivo</th><th class="c">Siembra</th><th class="c">Fertilización</th>
       </tr></thead>
       <tbody id="tb-lot"></tbody>
     </table></div>
@@ -211,7 +282,7 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
   <div class="metrics" id="sb-metrics"></div>
   <div class="card">
     <div class="chd">
-      <div class="ct">Programación de siembra</div>
+      <div class="ct">Programación de siembra<span class="ln"></span></div>
       <div class="cact">
         <select id="sb-f-campo" onchange="renderSiembra()"><option value="">Todos los campos</option></select>
         <select id="sb-f-cult" onchange="renderSiembra()"><option value="">Todos los cultivos</option></select>
@@ -221,13 +292,23 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
       </div>
     </div>
     <div class="scroll"><table>
-      <thead><tr>
-        <th>Campo</th><th>Lote</th><th>Amb.</th><th class="r">Sup</th>
-        <th>Cultivo</th><th>Genotipo / Partida</th><th>Rango</th><th class="c">Orden</th>
-        <th class="r">D.E.S.</th><th class="r">Obj pl/m²</th><th class="r">VC%</th><th class="r">Pérd%</th>
-        <th class="r">sem/m lin.</th><th class="r">sem/m²</th><th class="r">Dens/ha</th><th class="r">Total</th>
-        <th>Curasemilla</th><th>Inoculante</th><th>Fert. a la siembra</th><th></th>
-      </tr></thead>
+      <thead>
+        <tr>
+          <th colspan="4" class="gh">Lote</th>
+          <th colspan="4" class="gh gh-v gs">Qué y cuándo se siembra</th>
+          <th colspan="4" class="gh gs bd">Parámetros</th>
+          <th colspan="4" class="gh gh-v gs">Densidad</th>
+          <th colspan="3" class="gh gh-t gs bd">Insumos</th>
+          <th></th>
+        </tr>
+        <tr>
+          <th>Campo</th><th>Lote</th><th>Amb.</th><th class="r">Sup</th>
+          <th class="gs">Cultivo</th><th>Genotipo / Partida</th><th>Rango</th><th class="c">Orden</th>
+          <th class="r gs bd">D.E.S.</th><th class="r bd">Obj pl/m²</th><th class="r bd">VC%</th><th class="r bd">Pérd%</th>
+          <th class="r gs">sem/m lin.</th><th class="r">sem/m²</th><th class="r">Dens/ha</th><th class="r">Total</th>
+          <th class="gs bd">Curasemilla</th><th class="bd">Inoculante</th><th class="bd">Fert. a la siembra</th><th></th>
+        </tr>
+      </thead>
       <tbody id="tb-sb"></tbody>
     </table></div>
   </div>
@@ -238,7 +319,7 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
   <div class="metrics" id="ft-metrics"></div>
   <div class="card">
     <div class="chd">
-      <div class="ct">Análisis, recomendación y aplicaciones</div>
+      <div class="ct ct-n">Análisis, recomendación y aplicaciones<span class="ln"></span></div>
       <div class="cact">
         <select id="ft-f-campo" onchange="renderFert()"><option value="">Todos los campos</option></select>
         <select id="ft-f-cult" onchange="renderFert()"><option value="">Todos los cultivos</option></select>
@@ -255,18 +336,18 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
       <thead>
         <tr>
           <th colspan="5" class="gh">Lote</th>
-          <th colspan="6" class="gh gh-b">Análisis de suelo</th>
-          <th colspan="4" class="gh">Recomendado kg/ha</th>
-          <th colspan="4" class="gh gh-b">Aplicado kg/ha</th>
-          <th colspan="2" class="gh">Alcanzado</th>
+          <th colspan="6" class="gh gh-n gs bd">Análisis de suelo</th>
+          <th colspan="4" class="gh gh-v gs">Recomendado kg/ha</th>
+          <th colspan="4" class="gh gh-t gs bd">Aplicado kg/ha</th>
+          <th colspan="2" class="gh gs">Alcanzado</th>
           <th></th>
         </tr>
         <tr>
           <th>Campo</th><th>Lote</th><th class="r">Sup</th><th>Amb.</th><th>Cultivo</th>
-          <th class="r">MO%</th><th class="r">P ppm</th><th class="r">S ppm</th><th class="r">K ppm</th><th class="r">Zn ppm</th><th class="r">N suelo</th>
-          <th class="r">P2O5</th><th class="r">S</th><th class="r">K2O</th><th class="r">N</th>
-          <th class="r">P2O5</th><th class="r">S</th><th class="r">K2O</th><th class="r">N</th>
-          <th class="r">P ppm</th><th class="r">N kg/ha</th>
+          <th class="r gs bd">MO%</th><th class="r bd">P ppm</th><th class="r bd">S ppm</th><th class="r bd">K ppm</th><th class="r bd">Zn ppm</th><th class="r bd">N suelo</th>
+          <th class="r gs">P2O5</th><th class="r">S</th><th class="r">K2O</th><th class="r">N</th>
+          <th class="r gs bd">P2O5</th><th class="r bd">S</th><th class="r bd">K2O</th><th class="r bd">N</th>
+          <th class="r gs">P ppm</th><th class="r">N kg/ha</th>
           <th></th>
         </tr>
       </thead>
@@ -285,7 +366,7 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
   <div class="metrics" id="se-metrics"></div>
   <div class="card">
     <div class="chd">
-      <div class="ct">Capacidad contra demanda por rango</div>
+      <div class="ct">Capacidad contra demanda por rango<span class="ln"></span></div>
       <div class="cact">
         <select id="se-f-cult" onchange="renderBalance()"><option value="">Todos los cultivos</option></select>
       </div>
@@ -293,7 +374,7 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
     <div class="cw"><canvas id="se-chart"></canvas></div>
   </div>
   <div class="card">
-    <div class="chd"><div class="ct">Detalle por rango</div></div>
+    <div class="chd"><div class="ct">Detalle por rango<span class="ln"></span></div></div>
     <div class="scroll"><table>
       <thead><tr>
         <th>Rango</th><th>Desde</th><th>Hasta</th><th class="r">Días</th>
@@ -314,7 +395,7 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
 <div class="view" id="v-insumos">
   <div class="card">
     <div class="chd">
-      <div class="ct">Necesidad de insumos de la campaña</div>
+      <div class="ct ct-t">Necesidad de insumos de la campaña<span class="ln"></span></div>
       <div class="cact">
         <select id="in-f-campo" onchange="renderInsumos()"><option value="">Todos los campos</option></select>
         <select id="in-f-cult" onchange="renderInsumos()"><option value="">Todos los cultivos</option></select>
@@ -328,14 +409,14 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
 
   <div class="g2">
     <div class="card">
-      <div class="chd"><div class="ct">Semilla por partida</div></div>
+      <div class="chd"><div class="ct">Semilla por partida<span class="ln"></span></div></div>
       <div class="scroll"><table>
         <thead><tr><th>Cultivo</th><th>Partida</th><th class="r">Lotes</th><th class="r">ha</th><th class="r">Cantidad</th><th>Unidad</th></tr></thead>
         <tbody id="tb-in-sem"></tbody>
       </table></div>
     </div>
     <div class="card">
-      <div class="chd"><div class="ct">Curasemillas e inoculantes</div></div>
+      <div class="chd"><div class="ct ct-t">Curasemillas e inoculantes<span class="ln"></span></div></div>
       <div class="scroll"><table>
         <thead><tr><th>Tipo</th><th>Producto</th><th class="r">Lotes</th><th class="r">ha</th><th class="r">Cantidad</th><th>Unidad</th></tr></thead>
         <tbody id="tb-in-cur"></tbody>
@@ -344,7 +425,7 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
   </div>
 
   <div class="card">
-    <div class="chd"><div class="ct">Fertilizantes por producto y momento</div></div>
+    <div class="chd"><div class="ct ct-t">Fertilizantes por producto y momento<span class="ln"></span></div></div>
     <div class="scroll"><table>
       <thead><tr>
         <th>Fertilizante</th><th>Momento</th><th class="r">Lotes</th><th class="r">ha</th>
@@ -362,7 +443,7 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
 
   <div class="card">
     <div class="chd">
-      <div class="ct">Partidas de semilla</div>
+      <div class="ct">Partidas de semilla<span class="ln"></span></div>
       <div class="cact">
         <select id="pa-f-cult" onchange="renderPartidas()"><option value="">Todos los cultivos</option></select>
         <button class="btn btn-pri" onclick="abrirPartida(null)">+ Agregar partida</button>
@@ -383,7 +464,7 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
   <div class="g2">
     <div class="card">
       <div class="chd">
-        <div class="ct">Rangos de fecha de siembra</div>
+        <div class="ct">Rangos de fecha de siembra<span class="ln"></span></div>
         <div class="cact">
           <label class="fl" style="margin:0">Días por rango</label>
           <input type="number" id="cfg-dias" style="width:56px" min="1" step="1" onchange="guardarDias()">
@@ -400,7 +481,7 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
 
     <div class="card">
       <div class="chd">
-        <div class="ct">Parque de sembradoras</div>
+        <div class="ct">Parque de sembradoras<span class="ln"></span></div>
         <div class="cact"><button class="btn btn-sm btn-pri" onclick="abrirSembradora(null)">+ Agregar</button></div>
       </div>
       <div class="scroll" style="max-height:300px;overflow-y:auto"><table>
@@ -426,7 +507,7 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
 
   <div class="card">
     <div class="chd">
-      <div class="ct">Fertilizantes y grados</div>
+      <div class="ct ct-t">Fertilizantes y grados<span class="ln"></span></div>
       <div class="cact">
         <button class="btn btn-sm" onclick="sembrarFertDesdeMaestros()">Traer de Maestros</button>
         <button class="btn btn-sm btn-pri" onclick="abrirFertProd(null)">+ Agregar</button>
@@ -448,7 +529,7 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
   </div>
 
   <div class="card">
-    <div class="chd"><div class="ct">Parámetros de fertilización</div></div>
+    <div class="chd"><div class="ct ct-n">Parámetros de fertilización<span class="ln"></span></div></div>
     <div class="frow">
       <div class="fcol"><label class="fl">Factor P → P2O5</label><input type="number" id="cfg-pfac" step="0.001" onchange="guardarCfg()"></div>
       <div class="fcol"><label class="fl">Aporte P fert. a suelo</label><input type="number" id="cfg-paporte" step="0.001" onchange="guardarCfg()"></div>
@@ -478,7 +559,7 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
   <div class="g2">
     <div class="card">
       <div class="chd">
-        <div class="ct">Coeficiente de recuperación de P por ambiente</div>
+        <div class="ct ct-n">Coeficiente de recuperación de P por ambiente<span class="ln"></span></div>
       </div>
       <div class="scroll" style="max-height:240px;overflow-y:auto"><table>
         <thead><tr><th>Ambiente</th><th>Descripción</th><th class="r">Coef.</th></tr></thead>
@@ -489,7 +570,7 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
 
     <div class="card">
       <div class="chd">
-        <div class="ct">Umbral de fitotoxicidad de N en línea de siembra</div>
+        <div class="ct ct-n">Umbral de fitotoxicidad de N en línea de siembra<span class="ln"></span></div>
       </div>
       <div class="scroll" style="max-height:240px;overflow-y:auto"><table>
         <thead><tr><th>Cultivo</th><th class="r">kg N/ha máx.</th></tr></thead>
@@ -500,7 +581,7 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
   </div>
 
   <div class="card">
-    <div class="chd"><div class="ct">Datos</div></div>
+    <div class="chd"><div class="ct">Datos<span class="ln"></span></div></div>
     <div class="cact">
       <button class="btn btn-dan" onclick="borrarTodo()">Borrar todos los datos de esta herramienta</button>
     </div>
@@ -552,8 +633,8 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
      suelo y aplicaciones de fertilizante.  → ver handoff para Mariana.
    ═══════════════════════════════════════════════════════════════════════ */
 
-var BUILD = 6;
-var VERSION = 'v2026-10-30 18:51';
+var BUILD = 8;
+var VERSION = 'v2026-10-30 19:07';
 
 /* ── Claves de almacenamiento ──────────────────────────────────────── */
 var K = {
@@ -588,7 +669,8 @@ function cfgDefault(){
     horasDia:  8,
     efect:     80,      /* % de días efectivos de siembra */
     coefP:     {},      /* por código de ambiente → coeficiente (default 0.6) */
-    fito:      {}       /* por nombre de cultivo → kg N/ha máx. en línea */
+    fito:      {},      /* por nombre de cultivo → kg N/ha máx. en línea */
+    cerradas:  {}       /* secciones y tarjetas que el usuario dejó colapsadas */
   };
 }
 var COEF_P_DEFAULT = 0.6;
@@ -1245,6 +1327,14 @@ function badgeEstado(st){
   var cls = st.e === 'listo' ? 'bg' : (st.e === 'parcial' ? 'by' : 'bn');
   return '<span class="bdg ' + cls + '">' + esc(st.t) + '</span>';
 }
+/* El estado ES el botón: se toca el de siembra o el de fertilización
+   y se abre el que corresponde, sin un botón aparte que no dice cuál. */
+function badgeAccion(st, onclick, que){
+  var cls = st.e === 'listo' ? 'bg' : (st.e === 'parcial' ? 'by' : 'bn');
+  var verbo = (st.e === 'nada') ? 'Programar ' : 'Editar ';
+  return '<button class="bdg bdg-act ' + cls + '" onclick="' + onclick + '" title="' + verbo + que + '">'
+       + esc(st.t) + '</button>';
+}
 
 /* ═══════════════════════════════════════════════════════════════════
    6. VISTA — LOTES DE LA CAMPAÑA
@@ -1301,23 +1391,21 @@ function renderLotes(){
       + '<td class="r">' + f(r.ha, 1) + '</td>'
       + '<td>' + (r.amb ? '<span class="bdg bamb">' + esc(r.amb) + '</span>' : '—') + '</td>'
       + '<td class="tdname">' + esc(r.cultivo) + '</td>'
-      + '<td class="c">' + badgeEstado(stS) + '</td>'
-      + '<td class="c">' + badgeEstado(stF) + '</td>'
-      + '<td class="r">'
-      +   '<button class="btn btn-sm" onclick="programarDesdeLote(\'' + jsq(r.loteId) + '\',\'' + jsq(r.cultivo) + '\')">'
-      +   (s ? 'Editar siembra' : 'Programar') + '</button>'
-      + '</td>'
+      + '<td class="c">' + badgeAccion(stS,
+            'programarDesdeLote(\'' + jsq(r.loteId) + '\',\'' + jsq(r.cultivo) + '\')', 'siembra') + '</td>'
+      + '<td class="c">' + badgeAccion(stF,
+            'fertDesdeLoteTab(\'' + jsq(r.loteId) + '\',\'' + jsq(r.cultivo) + '\')', 'fertilización') + '</td>'
       + '</tr>';
     mostradas++;
   }
 
   var tb = document.getElementById('tb-lot');
   if(!filas.length){
-    tb.innerHTML = filaVacia(8, !CAMPANIA
+    tb.innerHTML = filaVacia(7, !CAMPANIA
       ? 'Elegí una campaña para ver sus lotes.'
       : 'No hay actividades cargadas para esta campaña.<br>Los lotes y cultivos se crean en <b>Plan de Uso del Suelo</b>.');
   } else if(!mostradas){
-    tb.innerHTML = filaVacia(8, 'Ningún lote cumple con los filtros aplicados.');
+    tb.innerHTML = filaVacia(7, 'Ningún lote cumple con los filtros aplicados.');
   } else {
     tb.innerHTML = h;
   }
@@ -1352,6 +1440,12 @@ function programarDesdeLote(loteId, cultivo){
   document.getElementById('tb-siembra').click();
   if(s) abrirSiembra(s.id);
   else abrirSiembra(null, { loteId:loteId, cultivo:cultivo });
+}
+function fertDesdeLoteTab(loteId, cultivo){
+  var ft = fertDeLote(loteId, cultivo, CAMPANIA);
+  document.getElementById('tb-fert').click();
+  if(ft) abrirFert(ft.id);
+  else abrirFert(null, { loteId:loteId, cultivo:cultivo });
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -1448,21 +1542,21 @@ function renderSiembra(){
       + '<td class="r">' + (dsup
             ? '<span class="bdg by" title="Plan de Uso le asigna ' + f(dsup.haRef,1) + ' ha">' + f(c.haTot,1) + ' !</span>'
             : f(c.haTot, 1)) + '</td>'
-      + '<td class="tdname">' + esc(s.cultivo) + '</td>'
+      + '<td class="tdname gs">' + esc(s.cultivo) + '</td>'
       + '<td class="tdname">' + (c.p ? esc(c.p.nombre) : '<span class="bdg br">sin partida</span>') + '</td>'
       + '<td>' + rgTxt + '</td>'
       + '<td class="c">' + (s.orden != null ? s.orden : '—') + '</td>'
-      + '<td class="r">' + f(s.des, 2) + '</td>'
-      + '<td class="r">' + (multi ? '<span style="color:var(--muted)">pond.</span>' : f(c.filas.length ? c.filas[0].calc.objPl : null, 0)) + '</td>'
-      + '<td class="r">' + f(vcPartida(c.p), 1) + '</td>'
-      + '<td class="r">' + f(s.perd, 0) + '</td>'
-      + '<td class="r">' + f(c.wSemMl, 2) + '</td>'
+      + '<td class="r gs bd">' + f(s.des, 2) + '</td>'
+      + '<td class="r bd">' + (multi ? '<span style="color:var(--muted)">pond.</span>' : f(c.filas.length ? c.filas[0].calc.objPl : null, 0)) + '</td>'
+      + '<td class="r bd">' + f(vcPartida(c.p), 1) + '</td>'
+      + '<td class="r bd">' + f(s.perd, 0) + '</td>'
+      + '<td class="r gs">' + f(c.wSemMl, 2) + '</td>'
       + '<td class="r">' + f(c.wSemM2, 1) + '</td>'
       + '<td class="r">' + (c.wDensHa !== null ? f(c.wDensHa, u === 'bol' ? 2 : 1) + ' ' + u : '—') + '</td>'
       + '<td class="r"><b>' + (c.total ? f(c.total, u === 'bol' ? 1 : 0) + ' ' + u : '—') + '</b></td>'
-      + '<td class="tdname" style="white-space:normal">' + insLabel(s.curas) + '</td>'
-      + '<td class="tdname" style="white-space:normal">' + insLabel(s.inocs) + '</td>'
-      + '<td class="tdname" style="white-space:normal">' + fertSiembraLabel(s, avisos) + '</td>'
+      + '<td class="tdname gs bd" style="white-space:normal">' + insLabel(s.curas) + '</td>'
+      + '<td class="tdname bd" style="white-space:normal">' + insLabel(s.inocs) + '</td>'
+      + '<td class="tdname bd" style="white-space:normal">' + fertSiembraLabel(s, avisos) + '</td>'
       + '<td class="r">'
       +   '<button class="btn-ico" title="Editar" onclick="abrirSiembra(\'' + s.id + '\')">&#9998;</button>'
       +   '<button class="btn-ico" title="Duplicar" onclick="duplicarSiembra(\'' + s.id + '\')">&#8599;</button>'
@@ -1478,14 +1572,15 @@ function renderSiembra(){
           + '<td></td><td></td>'
           + '<td><span class="bdg bamb">' + esc(fila.amb || '—') + '</span></td>'
           + '<td class="r">' + f(fila.calc.ha, 1) + '</td>'
-          + '<td></td><td></td><td></td><td></td><td></td>'
-          + '<td class="r">' + f(fila.calc.objPl, 0) + '</td>'
-          + '<td></td><td></td>'
-          + '<td class="r">' + f(fila.calc.semMl, 2) + '</td>'
+          + '<td class="gs"></td><td></td><td></td><td></td>'
+          + '<td class="gs bd"></td>'
+          + '<td class="r bd">' + f(fila.calc.objPl, 0) + '</td>'
+          + '<td class="bd"></td><td class="bd"></td>'
+          + '<td class="r gs">' + f(fila.calc.semMl, 2) + '</td>'
           + '<td class="r">' + f(fila.calc.semM2, 1) + '</td>'
           + '<td class="r">' + (fila.calc.densHa !== null ? f(fila.calc.densHa, u === 'bol' ? 2 : 1) : '—') + '</td>'
           + '<td class="r">' + (fila.calc.total !== null ? f(fila.calc.total, u === 'bol' ? 1 : 0) : '—') + '</td>'
-          + '<td></td><td></td><td></td>'
+          + '<td class="gs bd"></td><td class="bd"></td><td class="bd"></td><td></td>'
           + '</tr>';
       }
     }
@@ -1568,10 +1663,11 @@ function fertById(id){
   return null;
 }
 /* Celda de nutriente aplicado, en rojo si no llega a lo recomendado */
-function tdNutri(rec, apl){
-  if(rec === null) return '<td class="r">' + f(apl, 1) + '</td>';
+function tdNutri(rec, apl, cls){
+  cls = 'r' + (cls ? ' ' + cls : '');
+  if(rec === null) return '<td class="' + cls + '">' + f(apl, 1) + '</td>';
   var falta = apl + 0.5 < rec;
-  return '<td class="r">' + (falta
+  return '<td class="' + cls + '">' + (falta
     ? '<span class="bdg br">' + f(apl,1) + '</span>'
     : f(apl, 1)) + '</td>';
 }
@@ -1615,29 +1711,29 @@ function renderFert(){
       + '<td class="tdname">' + esc(r.cultivo) + '</td>';
 
     if(!ft){
-      h += '<td colspan="16" style="color:var(--muted)">' + esc(st.t) + '</td>';
+      h += '<td colspan="16" class="gs bd" style="color:#8995A3">Sin análisis cargado</td>';
     } else {
-      h += '<td class="r">' + f(a.mo, 2) + '</td>'
-        + '<td class="r">' + f(a.pPpm, 1) + '</td>'
-        + '<td class="r">' + f(a.sPpm, 1) + '</td>'
-        + '<td class="r">' + f(c.kPpm, 0) + '</td>'
-        + '<td class="r">' + (zn === null ? '—' : (znBajo
+      h += '<td class="r gs bd">' + f(a.mo, 2) + '</td>'
+        + '<td class="r bd">' + f(a.pPpm, 1) + '</td>'
+        + '<td class="r bd">' + f(a.sPpm, 1) + '</td>'
+        + '<td class="r bd">' + f(c.kPpm, 0) + '</td>'
+        + '<td class="r bd">' + (zn === null ? '—' : (znBajo
             ? '<span class="bdg br">' + f(zn,2) + '</span>' : f(zn,2))) + '</td>'
-        + '<td class="r">' + (c.nSuelo.kg !== null
-            ? f(c.nSuelo.kg,0) + (c.nSuelo.estimado ? '<span title="Incluye capas estimadas">*</span>' : '')
+        + '<td class="r bd">' + (c.nSuelo.kg !== null
+            ? f(c.nSuelo.kg,0) + (c.nSuelo.estimado ? '<span title="Incluye capas estimadas" style="color:#A86A1F">*</span>' : '')
             : '—') + '</td>'
-        + '<td class="r">' + f(c.rec.p2o5, 1) + '</td>'
+        + '<td class="r gs">' + f(c.rec.p2o5, 1) + '</td>'
         + '<td class="r">' + f(c.rec.s, 1) + '</td>'
         + '<td class="r">' + f(c.rec.k2o, 1) + '</td>'
         + '<td class="r">' + f(c.rec.n, 1) + '</td>'
-        + tdNutri(c.rec.p2o5, c.apl.p2o5)
-        + tdNutri(c.rec.s,    c.apl.s)
-        + tdNutri(c.rec.k2o,  c.apl.k2o)
-        + '<td class="r">' + (fito
+        + tdNutri(c.rec.p2o5, c.apl.p2o5, 'gs bd')
+        + tdNutri(c.rec.s,    c.apl.s,    'bd')
+        + tdNutri(c.rec.k2o,  c.apl.k2o,  'bd')
+        + '<td class="r bd">' + (fito
             ? '<span class="bdg by" title="N en línea de siembra sobre el límite">' + f(c.apl.n,1) + ' !</span>'
             : (c.rec.n !== null && c.apl.n + 0.5 < c.rec.n
                 ? '<span class="bdg br">' + f(c.apl.n,1) + '</span>' : f(c.apl.n,1))) + '</td>'
-        + '<td class="r">' + f(c.pAlcanz, 1) + '</td>'
+        + '<td class="r gs">' + f(c.pAlcanz, 1) + '</td>'
         + '<td class="r">' + f(c.nAlcanz, 0) + '</td>';
     }
     h += '<td class="r">'
@@ -1884,6 +1980,12 @@ function totalesInsumos(){
     kgSem   = (u === 'kg')  ? c.total : null;
     bolsas  = (u === 'bol') ? c.total : null;
 
+    if(!c.p){
+      avisar(avisos, s.lote + ' está programado sin partida de semilla, así que no suma a los totales.');
+    } else if(c.total === null || !c.total){
+      avisar(avisos, s.lote + ' no tiene la dosis calculada: falta P1000 o semillas por bolsa en ' + c.p.nombre + '.');
+    }
+
     /* Semilla */
     if(c.p){
       key = s.cultivo + '|' + c.p.nombre;
@@ -1902,8 +2004,11 @@ function totalesInsumos(){
         key = grupos[j][0] + '|' + lin.n + '|' + (lin.unit || '');
         if(!cur[key]) cur[key] = { tipo:grupos[j][0], prod:lin.n, lotes:0, ha:0, cant:0, unidad:(lin.unit || ''), incompleto:false };
         cur[key].lotes++; cur[key].ha += ha;
-        if(tot === null) cur[key].incompleto = true;
-        else cur[key].cant += tot;
+        if(tot === null){
+          cur[key].incompleto = true;
+          avisar(avisos, lin.n + ' en ' + s.lote + ': no se pudo calcular el total. '
+            + 'Revisá la dosis y la base en la programación de siembra.');
+        } else cur[key].cant += tot;
       }
     }
   }
@@ -1930,14 +2035,16 @@ function totalesInsumos(){
       fert[key].p2o5 += l.p2o5 * ha;
       fert[key].k2o  += l.k2o  * ha;
       fert[key].s    += l.s    * ha;
-    }
-    for(j=0; j<cf.avisos.length; j++){
-      var m = ft.lote + ': ' + cf.avisos[j];
-      if(avisos.indexOf(m) < 0) avisos.push(m);
+      /* Solo lo que afecta a los totales: grados o densidad que faltan.
+         Los avisos agronómicos (zinc, N estimado) viven en Fertilización. */
+      if(l.aviso) avisar(avisos, l.aviso);
     }
   }
 
   return { semilla:aOrdenado(semilla), cur:aOrdenado(cur), fert:aOrdenado(fert), avisos:avisos };
+}
+function avisar(arr, msg){
+  if(arr.indexOf(msg) < 0) arr.push(msg);
 }
 function aOrdenado(obj){
   var out = [], k;
@@ -1987,7 +2094,8 @@ function renderInsumos(){
   var av = document.getElementById('in-avisos');
   if(av){
     av.innerHTML = t.avisos.length
-      ? '<div class="warn" style="display:block">' + t.avisos.join('<br>') + '</div>'
+      ? '<div class="warn" style="display:block;margin-top:0">'
+        + '<b>Revisá esto antes de comprar</b><br>' + t.avisos.join('<br>') + '</div>'
       : '';
   }
 
@@ -2207,6 +2315,7 @@ function abrirModalBase(titulo, cuerpo){
   document.getElementById('mdl-t').textContent = titulo;
   document.getElementById('mdl-b').innerHTML = cuerpo;
   document.getElementById('ovl').classList.add('open');
+  prepararSecs();
 }
 function cerrarModal(){
   document.getElementById('ovl').classList.remove('open');
@@ -2371,11 +2480,11 @@ function abrirRango(id){
   var r = null, i;
   if(id){ for(i=0; i<DB.rangos.length; i++){ if(DB.rangos[i].id === id){ r = DB.rangos[i]; break; } } }
   MODAL = { tipo:'rango', id:id };
-  var h = '<div class="frow">'
+  var h = '<div class="blk"><div class="frow">'
     + fcol('Código', '<input type="text" id="ra-cod" value="' + esc(r ? r.cod : ('F' + (DB.rangos.length+1))) + '">')
     + fcol('Fecha mínima', '<input type="date" id="ra-desde" value="' + esc(r ? r.desde : '') + '">')
     + fcol('Fecha máxima', '<input type="date" id="ra-hasta" value="' + esc(r ? r.hasta : '') + '">')
-    + '</div>'
+    + '</div></div>'
     + '<div class="hint">Los rangos son las ventanas de siembra. Cada lote programado se asigna a un rango, y el balance de sembradoras compara la demanda de cada ventana contra la capacidad disponible.</div>';
   abrirModalBase(id ? 'Editar rango' : 'Nuevo rango de siembra', h);
 }
@@ -2585,7 +2694,8 @@ function abrirSiembra(id, pre){
   var cultSel = s ? s.cultivo : (pre && pre.cultivo ? pre.cultivo : '');
 
   var h = ''
-    + '<div class="fsec">Lote y cultivo</div>'
+    + '<div class="fsec">Lote y cultivo<span class="fsub">Qué se siembra, con qué partida y en qué ventana de fecha.</span></div>'
+    + '<div class="blk">'
     + '<div class="frow">'
     +   fcol('Cultivo', '<select id="sb-cult" onchange="onSiembraCultivo()">' + opts(lc, cultSel, '— elegir —') + '</select>')
     +   fcol('Partida de semilla', '<select id="sb-partida" onchange="onSiembraPartida()"></select>')
@@ -2596,28 +2706,33 @@ function abrirSiembra(id, pre){
     +   fcol('D.E.S. (m)', '<input type="number" id="sb-des" step="0.01" value="' + (s && s.des != null ? s.des : '') + '" oninput="recalcSiembraModal()">')
     +   fcol('Coef. de pérdida %', '<input type="number" id="sb-perd" step="1" value="' + (s && s.perd != null ? s.perd : 0) + '" oninput="recalcSiembraModal()">')
     + '</div>'
+    + '</div>'
     + '<div id="sb-lote-zona"></div>'
-    + '<div class="fsec">Ambientes y objetivo de plantas</div>'
-    + '<div id="sb-ambs"></div>'
+    + '<div class="fsec">Ambientes y objetivo de plantas'
+    +   '<span class="fsub">Una fila por ambiente cuando el lote tiene potenciales distintos.</span></div>'
+    + '<div class="blk" id="sb-ambs"></div>'
     + '<div class="calc" style="margin-top:10px">'
     +   '<div class="ci"><div class="cv" id="sb-c-ha">—</div><div class="cl">ha totales</div></div>'
     +   '<div class="ci"><div class="cv" id="sb-c-vc">—</div><div class="cl">VC %</div></div>'
     +   '<div class="ci"><div class="cv" id="sb-c-m2">—</div><div class="cl">sem/m² pond.</div></div>'
     +   '<div class="ci"><div class="cv" id="sb-c-ml">—</div><div class="cl">sem/m lineal</div></div>'
     +   '<div class="ci"><div class="cv" id="sb-c-ha2">—</div><div class="cl" id="sb-c-ha2l">dosis/ha</div></div>'
-    +   '<div class="ci"><div class="cv" id="sb-c-tot">—</div><div class="cl" id="sb-c-totl">total</div></div>'
+    +   '<div class="ci ci-fin"><div class="cv" id="sb-c-tot">—</div><div class="cl" id="sb-c-totl">total</div></div>'
     + '</div>'
     + '<div class="warn" id="sb-warn"></div>'
-    + '<div class="fsec">Curasemillas</div>'
-    + '<div id="sb-curas"></div>'
-    + '<button class="btn btn-sm" onclick="addInsRow(\'curas\')" style="margin-top:6px">+ Agregar curasemilla</button>'
-    + '<div class="fsec">Inoculantes</div>'
-    + '<div id="sb-inocs"></div>'
-    + '<button class="btn btn-sm" onclick="addInsRow(\'inocs\')" style="margin-top:6px">+ Agregar inoculante</button>'
-    + '<div class="fsec">Fertilizante a la siembra</div>'
-    + '<div class="hint" style="margin-top:0">El fertilizante se carga una sola vez en <b>Fertilización</b> (Etapa 2), '
+    + '<div class="fsec fsec-t">Tratamiento de la semilla'
+    +   '<span class="fsub">Curasemillas e inoculantes que van sobre la semilla de este lote.</span></div>'
+    + '<div class="blk">'
+    +   '<div id="sb-curas"></div>'
+    +   '<button class="btn btn-sm" onclick="addInsRow(\'curas\')" style="margin-top:10px">+ Agregar curasemilla</button>'
+    +   '<div style="height:1px;background:#EDF0F4;margin:16px 0"></div>'
+    +   '<div id="sb-inocs"></div>'
+    +   '<button class="btn btn-sm" onclick="addInsRow(\'inocs\')" style="margin-top:10px">+ Agregar inoculante</button>'
+    + '</div>'
+    + '<div class="fsec fsec-t">Fertilizante a la siembra</div>'
+    + '<div class="blk"><div class="hint" style="margin-top:0">El fertilizante se carga una sola vez en <b>Fertilización</b>, '
     + 'con su momento de aplicación. Lo que caiga en el momento “siembra” aparece acá y es lo que se controla por fitotoxicidad. '
-    + 'Así el N del arrancador se descuenta del N a aplicar, como en la Hoja1 de tu Excel, y no se cuenta dos veces en la necesidad de insumos.</div>';
+    + 'Así el N del arrancador se descuenta del N a aplicar y no se cuenta dos veces en la necesidad de insumos.</div></div>';
 
   abrirModalBase(id ? 'Editar programación de siembra' : 'Programar lote', h);
 
@@ -2671,9 +2786,8 @@ function onSiembraCultivo(primera){
   /* Zona de lotes: en alta se eligen varios; en edición queda fijo */
   var zona = document.getElementById('sb-lote-zona');
   if(MODAL.id && s){
-    zona.innerHTML = '<div class="frow"><div class="fcol" style="flex:1">'
-      + '<label class="fl">Lote</label>'
-      + '<div style="padding:6px 0;font-weight:500">' + esc(s.campo) + ' · ' + esc(s.lote) + '</div></div></div>';
+    zona.innerHTML = '<div class="blk" style="margin-top:14px"><label class="fl">Lote</label>'
+      + '<div style="font-weight:600;font-size:14px">' + esc(s.campo) + ' · ' + esc(s.lote) + '</div></div>';
   } else {
     var disp = lotesDelCultivo(cult);
     var h = '', j, r, chk, ya;
@@ -2688,13 +2802,14 @@ function onSiembraCultivo(primera){
         + (ya ? '<span class="bdg bg">ya programado</span>' : '')
         + '</label>';
     }
-    zona.innerHTML = '<div class="fsec">Lotes</div>'
+    zona.innerHTML = '<div class="fsec">Lotes</div><div class="blk">'
       + '<div class="pick">' + (h || '<div class="empty">' + (cult ? 'Este cultivo no tiene lotes asignados en la campaña ' + esc(CAMPANIA) + '.<br>Asignalo en <b>Plan de Uso del Suelo</b>.' : 'Elegí un cultivo para ver sus lotes.') + '</div>') + '</div>'
-      + '<div class="hint">Podés programar varios lotes de una vez: se crea una programación por lote, con los mismos parámetros.</div>';
+      + '<div class="hint">Podés programar varios lotes de una vez: se crea una programación por lote, con los mismos parámetros.</div></div>';
   }
 
   if(primera) sincronizarAmbs();
   else { MODAL.ambs = []; sincronizarAmbs(); }
+  prepararSecs();
 }
 function onToggleLote(){
   var cont = document.getElementById('sb-lote-zona');
@@ -2749,7 +2864,8 @@ function renderAmbRows(){
     }
     MODAL.ambs[0].ha = ha;
     var cu = calcAmb(MODAL.ambs[0], p, des, perd);
-    h = '<div class="frow" style="margin-bottom:0">'
+    h = '<div class="blk-t">Objetivo para los ' + sel.length + ' lotes elegidos</div>'
+      + '<div class="frow" style="margin-bottom:0">'
       + '<div class="fcol"><label class="fl">Objetivo pl/m²</label>'
       +   '<input type="number" step="0.1" value="' + (MODAL.ambs[0].objPl != null ? MODAL.ambs[0].objPl : '') + '" '
       +   'oninput="setAmb(0,\'objPl\',this.value)"></div>'
@@ -2889,12 +3005,18 @@ function renderInsRows(tipo){
   var lista = [], i;
   for(i=0; i<cat.length; i++) lista.push(cat[i].nombre);
 
+  var titulo = (tipo === 'curas') ? 'Curasemillas' : 'Inoculantes';
   if(!MODAL[tipo].length){
-    cont.innerHTML = '<div class="hint" style="margin-top:0">Sin ' + (tipo === 'curas' ? 'curasemillas' : 'inoculantes') + '.'
-      + (lista.length ? '' : ' <b>No hay ' + (tipo === 'curas' ? 'curasemillas' : 'inoculantes') + ' cargados en Maestros.</b>') + '</div>';
+    cont.innerHTML = '<div class="blk-t">' + titulo + '</div>'
+      + '<div class="hint" style="margin-top:0">'
+      + (lista.length
+          ? 'Todavía no agregaste ninguno.'
+          : 'No hay ' + titulo.toLowerCase() + ' en Maestros. Cargalos ahí para poder elegirlos acá.')
+      + '</div>';
     return;
   }
-  var h = '<div class="scroll"><table><thead><tr>'
+  var h = '<div class="blk-t">' + titulo + '</div>'
+    + '<div class="scroll"><table><thead><tr>'
     + '<th>Producto</th><th class="r">Dosis</th><th>Unidad</th><th>Cada</th><th></th>'
     + '</tr></thead><tbody>';
   for(i=0; i<MODAL[tipo].length; i++){
@@ -3155,13 +3277,17 @@ function abrirFert(id, pre){
 
   var h = ''
     + '<div class="fsec">Lote y cultivo</div>'
+    + '<div class="blk">'
     + '<div class="frow">'
     +   fcol('Cultivo', '<select id="ft-cult" onchange="onFertCultivo()">' + opts(lc, cultSel, '— elegir —') + '</select>')
     +   fcol('Fecha de muestreo', '<input type="date" id="ft-fecha" value="' + esc(a.fecha || '') + '">')
     + '</div>'
+    + '</div>'
     + '<div id="ft-lote-zona"></div>'
 
-    + '<div class="fsec">Análisis de suelo</div>'
+    + '<div class="fsec fsec-n">Análisis de suelo'
+    +   '<span class="fsub">Lo que informó el laboratorio. Las capas de N que falten se estiman.</span></div>'
+    + '<div class="blk">'
     + '<div class="frow">'
     +   fcol('M.O. %',        '<input type="number" id="ft-mo"   step="0.01" value="' + (a.mo    != null ? a.mo    : '') + '" oninput="recalcFertModal()">')
     +   fcol('P ppm (0-20)',  '<input type="number" id="ft-p"    step="0.1"  value="' + (a.pPpm  != null ? a.pPpm  : '') + '" oninput="recalcFertModal()">')
@@ -3186,23 +3312,33 @@ function abrirFert(id, pre){
     +     '<div style="padding:6px 0;font-weight:600;font-variant-numeric:tabular-nums" id="ft-nsuelo">—</div></div>'
     + '</div>'
     + '<div class="hint" style="margin-top:0">Si falta una capa de N, se estima como la mitad de la de arriba y queda marcada.</div>'
+    + '</div>'
 
-    + '<div class="fsec">Objetivos</div>'
+    + '<div class="fsec">Objetivos'
+    +   '<span class="fsub">A qué nivel de P y de N querés llegar en este lote.</span></div>'
+    + '<div class="blk">'
     + '<div class="frow">'
     +   fcol('P objetivo (ppm)',   '<input type="number" id="ft-pobj" step="0.1" value="' + (o.pObj != null ? o.pObj : '') + '" oninput="recalcFertModal()">')
     +   fcol('N objetivo (kg/ha)', '<input type="number" id="ft-nobj" step="1"   value="' + (o.nObj != null ? o.nObj : '') + '" oninput="recalcFertModal()">')
     +   '<div class="fcol" style="flex:2"><label class="fl">Coeficiente de recuperación de P</label>'
     +     '<div style="padding:6px 0;font-variant-numeric:tabular-nums" id="ft-coef">—</div></div>'
     + '</div>'
+    + '</div>'
 
-    + '<div class="fsec">Recomendación</div>'
+    + '<div class="fsec">Recomendación'
+    +   '<span class="fsub">Lo que hace falta aplicar contra lo que ya cargaste abajo.</span></div>'
+    + '<div class="blk">'
     + '<div class="scroll"><table><thead><tr>'
     +   '<th>Nutriente</th><th class="r">Recomendado kg/ha</th><th class="r">Aplicado kg/ha</th><th class="r">Diferencia</th>'
     + '</tr></thead><tbody id="ft-rec"></tbody></table></div>'
+    + '</div>'
 
-    + '<div class="fsec">Aplicaciones</div>'
-    + '<div id="ft-aplic"></div>'
-    + '<button class="btn btn-sm" onclick="addAplic()" style="margin-top:6px">+ Agregar aplicación</button>'
+    + '<div class="fsec fsec-t">Aplicaciones'
+    +   '<span class="fsub">Qué se aplica, cuándo y a qué dosis. Cada producto aporta a todos sus nutrientes.</span></div>'
+    + '<div class="blk">'
+    +   '<div id="ft-aplic"></div>'
+    +   '<button class="btn btn-sm" onclick="addAplic()" style="margin-top:10px">+ Agregar aplicación</button>'
+    + '</div>'
     + '<div class="warn" id="ft-warn"></div>';
 
   abrirModalBase(id ? 'Editar fertilización' : 'Cargar fertilización', h);
@@ -3226,9 +3362,8 @@ function onFertCultivo(primera){
   var zona = document.getElementById('ft-lote-zona');
 
   if(MODAL.id && ft){
-    zona.innerHTML = '<div class="frow"><div class="fcol" style="flex:1">'
-      + '<label class="fl">Lote</label>'
-      + '<div style="padding:6px 0;font-weight:500">' + esc(ft.campo) + ' · ' + esc(ft.lote) + '</div></div></div>';
+    zona.innerHTML = '<div class="blk" style="margin-top:14px"><label class="fl">Lote</label>'
+      + '<div style="font-weight:600;font-size:14px">' + esc(ft.campo) + ' · ' + esc(ft.lote) + '</div></div>';
   } else {
     var disp = lotesDelCultivo(cult), h = '', j, r, ya;
     for(j=0; j<disp.length; j++){
@@ -3241,14 +3376,14 @@ function onFertCultivo(primera){
         + (ya ? '<span class="bdg bg">ya cargado</span>' : '')
         + '</label>';
     }
-    zona.innerHTML = '<div class="fsec">Lotes</div><div class="pick">'
+    zona.innerHTML = '<div class="fsec">Lotes</div><div class="blk"><div class="pick">'
       + (h || '<div class="empty">' + (cult
           ? 'Este cultivo no tiene lotes asignados en la campaña ' + esc(CAMPANIA) + '.'
           : 'Elegí un cultivo para ver sus lotes.') + '</div>') + '</div>'
-      + '<div class="hint">El análisis y las aplicaciones se copian a todos los lotes que elijas.</div>';
+      + '<div class="hint">El análisis y las aplicaciones se copian a todos los lotes que elijas.</div></div>';
   }
-  if(!primera) recalcFertModal();
-  else recalcFertModal();
+  recalcFertModal();
+  prepararSecs();
 }
 function onToggleLoteFert(){
   var boxes = document.getElementById('ft-lote-zona').querySelectorAll('input[data-lote]'), i;
@@ -3358,8 +3493,11 @@ function renderAplicRows(){
   for(i=0; i<DB.fertProd.length; i++) lista.push(DB.fertProd[i].nombre);
 
   if(!MODAL.aplic.length){
-    cont.innerHTML = '<div class="hint" style="margin-top:0">Sin aplicaciones.'
-      + (lista.length ? '' : ' <b>Cargá primero los fertilizantes y sus grados en Configuración.</b>') + '</div>';
+    cont.innerHTML = '<div class="hint" style="margin-top:0">'
+      + (lista.length
+          ? 'Todavía no agregaste ninguna aplicación.'
+          : 'No hay fertilizantes con grados cargados. Cargalos en <b>Configuración</b> para poder elegirlos acá.')
+      + '</div>';
     recalcFertModal();
     return;
   }
@@ -3537,6 +3675,82 @@ function borrarTodo(){
    10. NAVEGACIÓN Y ARRANQUE
    ═══════════════════════════════════════════════════════════════════ */
 
+/* ═══════════════════════════════════════════════════════════════════
+   9-bis. COLAPSAR SECCIONES
+   Las secciones largas se pueden cerrar y el estado se recuerda,
+   así cada uno deja abierto solo lo que usa.
+   ═══════════════════════════════════════════════════════════════════ */
+
+function cerradas(){
+  if(!DB.cfg.cerradas) DB.cfg.cerradas = {};
+  return DB.cfg.cerradas;
+}
+function marcarCerrado(clave, cerrado){
+  var c = cerradas();
+  if(cerrado) c[clave] = 1; else delete c[clave];
+  sv('cfg');
+}
+function textoSec(el){
+  var t = '', i, n;
+  for(i=0; i<el.childNodes.length; i++){
+    n = el.childNodes[i];
+    if(n.nodeType === 3) t += n.nodeValue;
+    else if(n.className && String(n.className).indexOf('fsub') < 0 && String(n.className).indexOf('chev') < 0){
+      t += (n.textContent || '');
+    }
+  }
+  return t.replace(/\s+/g, ' ').replace(/^\s|\s$/g, '');
+}
+/* Prepara los encabezados de sección de un modal recién abierto */
+function prepararSecs(){
+  var secs = document.querySelectorAll('#mdl-b .fsec'), i, el, clave;
+  for(i=0; i<secs.length; i++){
+    el = secs[i];
+    if(el.className.indexOf('cl') >= 0) continue;
+    if(!el.nextElementSibling) continue;
+    clave = 'sec:' + textoSec(el);
+    el.setAttribute('data-sec', clave);
+    el.className += ' cl';
+    el.insertBefore(chevron(), el.firstChild);
+    el.onclick = function(){ togSec(this); };
+    if(cerradas()[clave]) el.className += ' cerrado';
+  }
+}
+function chevron(){
+  var sp = document.createElement('span');
+  sp.className = 'chev';
+  sp.innerHTML = '&#9660;';
+  return sp;
+}
+function togSec(el){
+  var cerrado = el.className.indexOf('cerrado') >= 0;
+  el.className = cerrado ? el.className.replace(/\s*cerrado/, '') : el.className + ' cerrado';
+  marcarCerrado(el.getAttribute('data-sec'), !cerrado);
+}
+/* Lo mismo para las tarjetas de las vistas */
+function prepararTarjetas(){
+  var cts = document.querySelectorAll('.card > .chd > .ct'), i, el, clave, card;
+  for(i=0; i<cts.length; i++){
+    el = cts[i];
+    if(el.className.indexOf('cl') >= 0) continue;
+    card = el.parentNode.parentNode;
+    clave = 'card:' + textoSec(el);
+    el.setAttribute('data-sec', clave);
+    el.className += ' cl';
+    el.appendChild(chevron());
+    el.onclick = function(){ togCard(this); };
+    if(cerradas()[clave]) card.className += ' cerrado';
+  }
+}
+function togCard(el){
+  var card = el.parentNode.parentNode;
+  var cerrado = card.className.indexOf('cerrado') >= 0;
+  card.className = cerrado ? card.className.replace(/\s*cerrado/, '') : card.className + ' cerrado';
+  marcarCerrado(el.getAttribute('data-sec'), !cerrado);
+  /* el gráfico necesita re-medirse cuando la tarjeta vuelve a abrirse */
+  if(!cerrado === false && CHART_BAL) CHART_BAL.resize();
+}
+
 function showTab(t, btn){
   TAB = t;
   var vs = document.querySelectorAll('.view'), i;
@@ -3565,6 +3779,7 @@ function renderTodo(){
   try{ renderBalance(); }catch(e){ console.error('renderBalance', e); }
   try{ renderInsumos(); }catch(e){ console.error('renderInsumos', e); }
   try{ renderLotes(); }catch(e){ console.error('renderLotes', e); }
+  try{ prepararTarjetas(); }catch(e){ console.error('prepararTarjetas', e); }
 }
 function renderCampanias(){
   var cs = coreCampanias();
