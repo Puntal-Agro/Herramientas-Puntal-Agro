@@ -1157,9 +1157,13 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
         <select id="consTipoLaborFilter" onchange="renderConsumos()"><option value="">Toda labor</option></select>
         <select id="consCatFilter" onchange="renderConsumos()"><option value="">Todas las categorías</option></select>
         <select id="consInsFilter" onchange="renderConsumos()"><option value="">Todos los insumos</option></select>
-        <input type="date" id="consDesde" onchange="renderConsumos()" title="Desde">
-        <input type="date" id="consHasta" onchange="renderConsumos()" title="Hasta">
-        <button class="btn btn-sm" onclick="clearConsFilters()">Limpiar filtros</button>
+        <span style="display:flex;flex-basis:100%;flex-wrap:wrap;align-items:center;gap:8px">
+          <span style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em">Desde</span>
+          <input type="date" id="consDesde" onchange="renderConsumos()" title="Desde">
+          <span style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em">Hasta</span>
+          <input type="date" id="consHasta" onchange="renderConsumos()" title="Hasta">
+          <button class="btn btn-sm" onclick="clearConsFilters()">Limpiar filtros</button>
+        </span>
       </div>
     </div>
   </div>
@@ -1313,7 +1317,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
 </main>
 
 <footer>
-  <span>Puntal Agro · Insumos &amp; OT · Versión v2026-10-30 11:05 · BUILD 28</span>
+  <span>Puntal Agro · Insumos &amp; OT · Versión v2026-10-30 11:20 · BUILD 30</span>
   <span id="fts">—</span>
 </footer>
 
@@ -6660,7 +6664,14 @@ function renderHistoriaLote(){
   var oc='<option value="">— Campo —</option>';
   for(var c=0;c<state.campos.length;c++) oc+='<option value="'+esc(state.campos[c].id)+'"'+(state.campos[c].id===t.campoId?' selected':'')+'>'+esc(state.campos[c].nombre)+'</option>';
   var ol='<option value="">— Lote —</option>';
-  for(var l=0;l<state.lotes.length;l++){ var lo=state.lotes[l]; if(lo.campoId!==t.campoId) continue; ol+='<option value="'+esc(lo.id)+'"'+(lo.id===t.loteId?' selected':'')+'>'+esc(lo.nombre)+'</option>'; }
+  var nLab={};
+  for(var o2=0;o2<state.ots.length;o2++){ var ox=state.ots[o2]; if(ox.estado==='Cancelada') continue; if(t.campania && (ox.campaniaId||'')!==t.campania) continue;
+    var px=destinosDeOt(ox); for(var q2=0;q2<px.length;q2++){ var dx=px[q2].destino; if(dx.estadoLote==='Aplicado') nLab[dx.loteId]=(nLab[dx.loteId]||0)+1; } }
+  var conL='', sinL='';
+  for(var l=0;l<state.lotes.length;l++){ var lo=state.lotes[l]; if(lo.campoId!==t.campoId) continue;
+    var nl=nLab[lo.id]||0, opt='<option value="'+esc(lo.id)+'"'+(lo.id===t.loteId?' selected':'')+(nl?'':' style="color:#9AA5B1"')+'>'+esc(lo.nombre)+(nl?' ('+nl+(nl===1?' labor)':' labores)'):' · sin labores')+'</option>';
+    if(nl) conL+=opt; else sinL+=opt; }
+  ol+=conL+(sinL?'<option disabled>──────────</option>'+sinL:'');
   var cuerpo='';
   if(!t.loteId) cuerpo='<p class="empty" style="padding:30px 10px">Elegí el campo y el lote.</p>';
   else {
