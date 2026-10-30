@@ -1312,7 +1312,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
 </main>
 
 <footer>
-  <span>Puntal Agro · Insumos &amp; OT · Versión v2026-10-30 10:50 · BUILD 25</span>
+  <span>Puntal Agro · Insumos &amp; OT · Versión v2026-10-30 10:45 · BUILD 26</span>
   <span id="fts">—</span>
 </footer>
 
@@ -4931,7 +4931,7 @@ var PAMAP = (function(){
         if(!est.escenas) h += '<option>Buscando fechas…</option>';
         else if(!est.escenas.length) h += '<option>Sin imágenes con pocas nubes</option>';
         else for(var j=0;j<est.escenas.length;j++){ var e = est.escenas[j], d = e.fecha.split('-'); h += '<option value="'+j+'"'+(est.escena===e?' selected':'')+'>'+d[2]+'/'+d[1]+'/'+d[0]+(e.nubes!=null?' · '+Math.round(e.nubes)+'% nubes':'')+'</option>'; }
-        h += '</select><label class="pamap-op">Transparencia <input type="range" min="30" max="100" value="'+Math.round(est.opacidad*100)+'"></label>';
+        h += '</select><label class="pamap-op">Transparencia <input type="range" min="0" max="80" step="5" value="'+Math.round((1-est.opacidad)*100)+'"><b>'+Math.round((1-est.opacidad)*100)+'%</b></label>';
         var cfg = X.INDICES[est.indice];
         if(cfg.colores) h += '<span class="pamap-ley"><span>'+cfg.desde+'</span><i style="background:linear-gradient(90deg,'+cfg.colores.join(',')+')"></i><span>'+cfg.hasta+'</span></span>';
       }
@@ -4940,13 +4940,14 @@ var PAMAP = (function(){
       var bs = cont.querySelectorAll('.pamap-seg button');
       for(var k=0;k<bs.length;k++) bs[k].onclick = function(){ elegirIndice(this.getAttribute('data-i')); };
       var sf = cont.querySelector('.pamap-fecha'); if(sf) sf.onchange = function(){ var e2 = est.escenas && est.escenas[Number(this.value)]; if(e2){ est.escena = e2; cargarCapa(); } };
-      var rg = cont.querySelector('.pamap-op input'); if(rg) rg.oninput = function(){ est.opacidad = Number(this.value)/100; if(est.capa) est.capa.setOpacity(est.opacidad); };
+      var rg = cont.querySelector('.pamap-op input'); if(rg) rg.oninput = function(){ est.opacidad = 1 - Number(this.value)/100; if(est.capa) est.capa.setOpacity(est.opacidad); var bv = cont.querySelector('.pamap-op b'); if(bv) bv.textContent = this.value+'%'; };
     }
     function estado(t){ var e = cont.querySelector('.pamap-est'); if(e) e.textContent = t||''; }
     function quitarCapa(){ if(est.capa){ try{ mapa.removeLayer(est.capa); }catch(e){} est.capa = null; } est.url = null; }
     function elegirIndice(ind){
       est.indice = ind; quitarCapa();
-      if(!ind){ dibujar(); if(alCambiar) alCambiar(); return; }
+      if(alCambiar) alCambiar(est.indice);
+      if(!ind){ dibujar(); return; }
       if(est.escenas && est.escenas.length){ dibujar(); cargarCapa(); return; }
       est.escenas = null; dibujar(); estado('Buscando imágenes Sentinel-2 de los últimos 4 meses…');
       X.buscarEscenas(bbFn(), 4, 30, function(err, lista){
@@ -4967,14 +4968,14 @@ var PAMAP = (function(){
         var fallas = 0;
         est.capa.on('tileerror', function(){ if(++fallas===4) estado('Algunas partes de la imagen no cargaron. Probá otra fecha.'); });
         est.capa.on('load', function(){ if(fallas<4) estado(''); });
-        if(alCambiar) alCambiar();
+        if(alCambiar) alCambiar(est.indice);
       });
     }
     if(!mapa.getPane('pamapIndice')){ var pn = mapa.createPane('pamapIndice'); pn.style.zIndex = 350; }
     dibujar();
     return {
       estado: function(){ return { indice:est.indice, escena:est.escena, url:est.url, opacidad:est.opacidad }; },
-      restaurar: function(prev){ if(prev && prev.indice){ est.indice = prev.indice; est.escenas = prev.escenas||null; est.escena = prev.escena||null; est.opacidad = prev.opacidad||.85; dibujar(); if(est.escena) cargarCapa(); else elegirIndice(prev.indice); } },
+      restaurar: function(prev){ if(prev && prev.indice){ est.indice = prev.indice; if(alCambiar) alCambiar(est.indice); est.escenas = prev.escenas||null; est.escena = prev.escena||null; est.opacidad = prev.opacidad||.85; dibujar(); if(est.escena) cargarCapa(); else elegirIndice(prev.indice); } },
       _est: est
     };
   };
@@ -5046,7 +5047,7 @@ var PAMAP = (function(){
     '.pamap-seg button{font:500 12px "DM Sans",sans-serif;border:none;background:#fff;color:#475569;padding:6px 11px;cursor:pointer;border-right:1px solid #D4DAE4}'+
     '.pamap-seg button:last-child{border-right:none}.pamap-seg button.on{background:#4A6533;color:#fff}'+
     '.pamap-fecha{font:12px "DM Sans",sans-serif;border:1px solid #D4DAE4;border-radius:8px;padding:5px 8px;background:#fff}'+
-    '.pamap-op{display:inline-flex;align-items:center;gap:6px;color:#7A8899;font-size:11px}.pamap-op input{width:90px;accent-color:#4A6533}'+
+    '.pamap-op{display:inline-flex;align-items:center;gap:6px;color:#7A8899;font-size:11px}.pamap-op input{width:90px;accent-color:#4A6533}.pamap-op b{font-weight:600;color:#475569;min-width:30px;font-variant-numeric:tabular-nums}'+
     '.pamap-ley{display:inline-flex;align-items:center;gap:6px;color:#7A8899;font-size:11px}.pamap-ley i{display:inline-block;width:110px;height:10px;border-radius:5px}'+
     '.pamap-est{color:#A84D1F;font-size:11.5px}'+
     '.pamap-v{border-radius:50%;background:#fff;border:2px solid #C8642D;box-shadow:0 1px 3px rgba(0,0,0,.5);cursor:grab}'+
@@ -5143,6 +5144,7 @@ function htmlMapaOT(trs, o){
       '<td class="num">'+f(x.ha,1)+(x.centro?'':' <span class="otmap-sin">· sin mapa</span>')+'</td>'+celdaArea+'</tr>';
   }
   h += '</tbody></table></div>';
+  if(!hayEdit && lst.some(function(x){ return x.mapaLote; })) h += '<p class="trb-apl-sub" style="margin-top:6px">Para marcar en el mapa qué parte de un lote se trabaja, la OT tiene que estar <b>pendiente</b> (con lotes sin confirmar).</p>';
   if(hayEdit) h += '<p class="trb-apl-sub" style="margin-top:6px">Con <b>Marcar área</b> dibujás sobre el mapa la parte del lote que se trabaja en esta orden (por ejemplo, sobre el NDVI), para que el contratista sepa dónde va. Es solo el dibujo: las hectáreas son las que cargaste en la OT. El mapa del lote en Plan de Uso no cambia.</p>';
   if(conMapa<lst.length) h += '<p class="trb-apl-sub" style="margin-top:6px">'+(lst.length-conMapa)+' lote(s) de la orden no tienen mapa: se cargan en Plan de Uso → Mapa.</p>';
   return h+'</div>';
@@ -5155,7 +5157,7 @@ function otMapaPintar(trs){
     if(!ok){ cont.innerHTML = '<p class="empty">No se pudo cargar el mapa (revisá la conexión a internet).</p>'; return; }
     if(!document.body.contains(cont)) return;
     PAMAP.inyectarCSS();
-    var lst = lotesMapaDeTrabajos(trs), polys = poligonosMapaOT(lst), L = window.L, rings = [];
+    var lst = lotesMapaDeTrabajos(trs), polys = poligonosMapaOT(lst), L = window.L, rings = [], capasLote = [];
     OTMAPA = PAMAP.crearMapa(cont);
     for(var i=0;i<polys.length;i++){
       var p = polys[i], estilo;
@@ -5163,7 +5165,8 @@ function otMapaPintar(trs){
       else if(p.enOt) estilo = { color:'#FFFFFF', weight:2.2, fillColor:p.color, fillOpacity:.6 };
       else if(p.recortado) estilo = { color:'#FFFFFF', weight:1.8, dashArray:'6 5', fillColor:'#FFFFFF', fillOpacity:.04 };
       else estilo = { color:'rgba(255,255,255,.6)', weight:1, fillColor:'#FFFFFF', fillOpacity:.04 };
-      L.polygon(p.ring, estilo).bindTooltip(p.etiqueta+(p.area?' · área de esta OT':''), { sticky:true }).addTo(OTMAPA);
+      var pl = L.polygon(p.ring, estilo).bindTooltip(p.etiqueta+(p.area?' · área de esta OT':''), { sticky:true }).addTo(OTMAPA);
+      pl._fillBase = estilo.fillOpacity; capasLote.push(pl);
       if(p.enOt) L.marker(PAMAP.centroide(p.ring), { icon:PAMAP.etiquetaIcono(esc(p.etiqueta), p.num), interactive:false, keyboard:false }).addTo(OTMAPA);
       if(p.enOt || p.recortado) rings.push(p.ring);
     }
@@ -5176,7 +5179,9 @@ function otMapaPintar(trs){
     var barra = byId('otMapaBarra');
     if(barra){
       var todos = polys.map(function(q){ return q.ring; });
-      OTMAPA_BARRA = PAMAP.barraImagen(barra, OTMAPA, function(){ return PAMAP.bbox(todos); });
+      // Con NDVI (u otra imagen) los lotes quedan sin relleno, solo con el borde, para que se vea la imagen adentro.
+      var alCambiarImg = function(indice){ for(var q=0;q<capasLote.length;q++) capasLote[q].setStyle({ fillOpacity: indice ? 0 : capasLote[q]._fillBase }); };
+      OTMAPA_BARRA = PAMAP.barraImagen(barra, OTMAPA, function(){ return PAMAP.bbox(todos); }, alCambiarImg);
       if(OTMAPA_IMG && OTMAPA_IMG.indice && vista) OTMAPA_BARRA.restaurar(OTMAPA_IMG);
     }
   });
@@ -5250,7 +5255,7 @@ function imagenMapaOT(trs, o, ancho, alto, cb, escala){
   }
   // Si en pantalla está elegido NDVI (u otra imagen Sentinel), sale también en la imagen.
   var img = OTMAPA_BARRA ? OTMAPA_BARRA.estado() : null, ov = null, txtImg = '';
-  if(img && img.url && img.escena){ ov = { url:img.url, alpha:img.opacidad }; var dd = img.escena.fecha.split('-'); txtImg = PAMAP.INDICES[img.indice].nombre+' Sentinel-2 del '+dd[2]+'/'+dd[1]+'/'+dd[0]; }
+  if(img && img.url && img.escena){ for(var di=0;di<dib.length;di++) dib[di].alpha = 0; ov = { url:img.url, alpha:img.opacidad }; var dd = img.escena.fecha.split('-'); txtImg = PAMAP.INDICES[img.indice].nombre+' Sentinel-2 del '+dd[2]+'/'+dd[1]+'/'+dd[0]; }
   var emp = (root.espacios[root.activoId] && root.espacios[root.activoId].nombre) || '';
   var tit = (escala && escala>1) ? (txtImg ? [txtImg] : null)
           : o ? ['OT #'+o.num+' · '+emp, (o.fecha?fd(o.fecha)+' · ':'')+'Campaña '+(getCampaniaNombre(o.campaniaId)||'—')+' · '+lst.length+' lote(s)'].concat(txtImg?[txtImg]:[]) : ['Orden de trabajo · '+emp];

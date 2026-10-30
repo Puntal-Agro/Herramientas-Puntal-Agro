@@ -1206,7 +1206,7 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
 
 <footer>
   <span>Puntal Agro · Plan de Uso de Suelo</span>
-  <span id="fts">Versión v2026-10-30 10:30 · BUILD 52</span>
+  <span id="fts">Versión v2026-10-30 10:45 · BUILD 53</span>
 </footer>
 
 <script>
@@ -1920,7 +1920,7 @@ var PAMAP = (function(){
         if(!est.escenas) h += '<option>Buscando fechas…</option>';
         else if(!est.escenas.length) h += '<option>Sin imágenes con pocas nubes</option>';
         else for(var j=0;j<est.escenas.length;j++){ var e = est.escenas[j], d = e.fecha.split('-'); h += '<option value="'+j+'"'+(est.escena===e?' selected':'')+'>'+d[2]+'/'+d[1]+'/'+d[0]+(e.nubes!=null?' · '+Math.round(e.nubes)+'% nubes':'')+'</option>'; }
-        h += '</select><label class="pamap-op">Transparencia <input type="range" min="30" max="100" value="'+Math.round(est.opacidad*100)+'"></label>';
+        h += '</select><label class="pamap-op">Transparencia <input type="range" min="0" max="80" step="5" value="'+Math.round((1-est.opacidad)*100)+'"><b>'+Math.round((1-est.opacidad)*100)+'%</b></label>';
         var cfg = X.INDICES[est.indice];
         if(cfg.colores) h += '<span class="pamap-ley"><span>'+cfg.desde+'</span><i style="background:linear-gradient(90deg,'+cfg.colores.join(',')+')"></i><span>'+cfg.hasta+'</span></span>';
       }
@@ -1929,13 +1929,14 @@ var PAMAP = (function(){
       var bs = cont.querySelectorAll('.pamap-seg button');
       for(var k=0;k<bs.length;k++) bs[k].onclick = function(){ elegirIndice(this.getAttribute('data-i')); };
       var sf = cont.querySelector('.pamap-fecha'); if(sf) sf.onchange = function(){ var e2 = est.escenas && est.escenas[Number(this.value)]; if(e2){ est.escena = e2; cargarCapa(); } };
-      var rg = cont.querySelector('.pamap-op input'); if(rg) rg.oninput = function(){ est.opacidad = Number(this.value)/100; if(est.capa) est.capa.setOpacity(est.opacidad); };
+      var rg = cont.querySelector('.pamap-op input'); if(rg) rg.oninput = function(){ est.opacidad = 1 - Number(this.value)/100; if(est.capa) est.capa.setOpacity(est.opacidad); var bv = cont.querySelector('.pamap-op b'); if(bv) bv.textContent = this.value+'%'; };
     }
     function estado(t){ var e = cont.querySelector('.pamap-est'); if(e) e.textContent = t||''; }
     function quitarCapa(){ if(est.capa){ try{ mapa.removeLayer(est.capa); }catch(e){} est.capa = null; } est.url = null; }
     function elegirIndice(ind){
       est.indice = ind; quitarCapa();
-      if(!ind){ dibujar(); if(alCambiar) alCambiar(); return; }
+      if(alCambiar) alCambiar(est.indice);
+      if(!ind){ dibujar(); return; }
       if(est.escenas && est.escenas.length){ dibujar(); cargarCapa(); return; }
       est.escenas = null; dibujar(); estado('Buscando imágenes Sentinel-2 de los últimos 4 meses…');
       X.buscarEscenas(bbFn(), 4, 30, function(err, lista){
@@ -1956,14 +1957,14 @@ var PAMAP = (function(){
         var fallas = 0;
         est.capa.on('tileerror', function(){ if(++fallas===4) estado('Algunas partes de la imagen no cargaron. Probá otra fecha.'); });
         est.capa.on('load', function(){ if(fallas<4) estado(''); });
-        if(alCambiar) alCambiar();
+        if(alCambiar) alCambiar(est.indice);
       });
     }
     if(!mapa.getPane('pamapIndice')){ var pn = mapa.createPane('pamapIndice'); pn.style.zIndex = 350; }
     dibujar();
     return {
       estado: function(){ return { indice:est.indice, escena:est.escena, url:est.url, opacidad:est.opacidad }; },
-      restaurar: function(prev){ if(prev && prev.indice){ est.indice = prev.indice; est.escenas = prev.escenas||null; est.escena = prev.escena||null; est.opacidad = prev.opacidad||.85; dibujar(); if(est.escena) cargarCapa(); else elegirIndice(prev.indice); } },
+      restaurar: function(prev){ if(prev && prev.indice){ est.indice = prev.indice; if(alCambiar) alCambiar(est.indice); est.escenas = prev.escenas||null; est.escena = prev.escena||null; est.opacidad = prev.opacidad||.85; dibujar(); if(est.escena) cargarCapa(); else elegirIndice(prev.indice); } },
       _est: est
     };
   };
@@ -2035,7 +2036,7 @@ var PAMAP = (function(){
     '.pamap-seg button{font:500 12px "DM Sans",sans-serif;border:none;background:#fff;color:#475569;padding:6px 11px;cursor:pointer;border-right:1px solid #D4DAE4}'+
     '.pamap-seg button:last-child{border-right:none}.pamap-seg button.on{background:#4A6533;color:#fff}'+
     '.pamap-fecha{font:12px "DM Sans",sans-serif;border:1px solid #D4DAE4;border-radius:8px;padding:5px 8px;background:#fff}'+
-    '.pamap-op{display:inline-flex;align-items:center;gap:6px;color:#7A8899;font-size:11px}.pamap-op input{width:90px;accent-color:#4A6533}'+
+    '.pamap-op{display:inline-flex;align-items:center;gap:6px;color:#7A8899;font-size:11px}.pamap-op input{width:90px;accent-color:#4A6533}.pamap-op b{font-weight:600;color:#475569;min-width:30px;font-variant-numeric:tabular-nums}'+
     '.pamap-ley{display:inline-flex;align-items:center;gap:6px;color:#7A8899;font-size:11px}.pamap-ley i{display:inline-block;width:110px;height:10px;border-radius:5px}'+
     '.pamap-est{color:#A84D1F;font-size:11.5px}'+
     '.pamap-v{border-radius:50%;background:#fff;border:2px solid #C8642D;box-shadow:0 1px 3px rgba(0,0,0,.5);cursor:grab}'+
@@ -2045,6 +2046,7 @@ var PAMAP = (function(){
   return X;
 })();
 
+var MAPA_IMG_ON = false;
 var MAPA = null, MAPA_CAPA = null, MAPA_ENCUADRE = '', MAPA_SEL = null;
 // Clave de comparación de nombres: sin el código de campo, sin "lote" y sin espacios.
 function _kmlClave(nombre, campo){
@@ -2210,10 +2212,11 @@ function renderMapa(){
   PAMAP.inyectarCSS();
   if(!MAPA){
     MAPA = PAMAP.crearMapa(cont); MAPA_CAPA = window.L.layerGroup().addTo(MAPA);
+    MAPA_IMG_ON = false;
     PAMAP.barraImagen(document.getElementById('mapaBarra'), MAPA, function(){
       var rs = []; for(var q=0;q<LOTES.length;q++) if(LOTES[q]._geo && campoMatch(LOTES[q])) for(var w=0;w<LOTES[q]._geo.length;w++) rs.push(LOTES[q]._geo[w].ring);
       return PAMAP.bbox(rs);
-    });
+    }, function(indice){ MAPA_IMG_ON = !!indice; MAPA_CAPA.eachLayer(function(l){ if(l.setStyle && l._fillBase!=null) l.setStyle({ fillOpacity: MAPA_IMG_ON ? 0 : l._fillBase }); }); });
     var zoomCls = function(){ var z = MAPA.getZoom(); cont.classList.toggle('lejos', z<13.75); cont.classList.toggle('medio', z>=13.75 && z<15); };
     MAPA.on('zoomend', zoomCls); MAPA.whenReady(zoomCls);
   }
@@ -2229,7 +2232,8 @@ function renderMapa(){
     var mayor = refs.slice().sort(function(a,b){ return (Number(b.s)||0)-(Number(a.s)||0); })[0];
     var sig = _cultivoMapa(mayor, camp), col = sig ? cultColor(sig) : '#9AA5B1';
     var pol = window.L.polygon(p.ring, { color: vis ? '#FFFFFF' : 'rgba(255,255,255,.45)', weight: vis ? 1.6 : 1,
-      fillColor: col, fillOpacity: vis ? 0.55 : 0.08 });
+      fillColor: col, fillOpacity: MAPA_IMG_ON ? 0 : (vis ? 0.55 : 0.08) });
+    pol._fillBase = vis ? 0.55 : 0.08;
     (function(pp, rr){ pol.on('click', function(){ MAPA_SEL = pp.id; pintarLadoMapa(polys, sinGeo, camp); }); })(p, refs);
     pol.bindTooltip(refs.map(function(r){ return r.l; }).join(' · '), { sticky:true });
     MAPA_CAPA.addLayer(pol);
