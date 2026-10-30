@@ -35,8 +35,13 @@ header{background:var(--card);border-bottom:1px solid var(--border)}
 .logo-icon img{height:54px;width:auto;display:block}
 .logo-sub{font-size:10.5px;font-weight:600;letter-spacing:1.6px;text-transform:uppercase;color:var(--terra);margin-bottom:4px}
 .logo-title{font-size:21px;font-weight:700;letter-spacing:-.4px;line-height:1.2;color:var(--pun)}
-.h-right{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-.h-user{font-size:12px;color:var(--muted);white-space:nowrap}
+/* Alineación: el selector lleva la etiqueta "Empresa" encima, así que
+   todo el bloque se alinea por abajo y los tres controles miden 36px. */
+.h-right{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap}
+.h-user{font-size:12px;color:var(--muted);white-space:nowrap;line-height:36px}
+.h-sep{align-self:flex-end;margin-bottom:4px}
+.h-emp{height:36px}
+.h-out{height:36px}
 .h-user strong{color:var(--text);font-weight:600}
 .h-sep{width:1px;height:28px;background:var(--line)}
 .h-emp-wrap{display:flex;flex-direction:column;gap:2px}
@@ -584,7 +589,7 @@ PA.init({ modo:'demo' }, function(){
     aplicarCtx(ctx);
     desdeHash();
   });
-  document.getElementById('fts2').textContent = 'Versión v2026-10-30 19:58 · BUILD 16';
+  document.getElementById('fts2').textContent = 'Versión v2026-10-30 20:00 · BUILD 17';
 });
 </script>
 
