@@ -684,6 +684,7 @@ body:not([data-tab="maestros"]) .btn-reset-gl{display:none!important}
 .otmap-wrap{position:relative}
 .otmap-ed{position:absolute;z-index:600;left:56px;right:12px;top:10px;background:rgba(255,255,255,.96);border:1px solid var(--border);border-radius:10px;padding:9px 12px;box-shadow:0 4px 14px rgba(0,0,0,.18);font-size:12.5px}
 .otmap-ed-t b{font-weight:600}
+.otmap-ed-ref{color:var(--muted);font-size:11.5px}
 .otmap-ed-ay{color:var(--muted);font-size:11.5px;margin:3px 0 7px}
 .otmap-ed-acc{display:flex;gap:6px;flex-wrap:wrap}
 .otmap-ley{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;margin:-2px 0 10px}
@@ -1312,7 +1313,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
 </main>
 
 <footer>
-  <span>Puntal Agro · Insumos &amp; OT · Versión v2026-10-30 10:45 · BUILD 26</span>
+  <span>Puntal Agro · Insumos &amp; OT · Versión v2026-10-30 10:55 · BUILD 27</span>
   <span id="fts">—</span>
 </footer>
 
@@ -4991,7 +4992,7 @@ var PAMAP = (function(){
     function icono(cls){ return L.divIcon({ className:'pamap-v '+cls, iconSize:[14,14], iconAnchor:[7,7] }); }
     function pintar(){
       capa.clearLayers();
-      if(ring.length>=2) L.polygon(ring, { color:'#FFD54A', weight:2.5, dashArray: ring.length<3?'4 4':null, fillColor:'#FFD54A', fillOpacity:.18, interactive:false }).addTo(capa);
+      if(ring.length>=2) L.polygon(ring, { color:'#FF7A2F', weight:3, dashArray: ring.length<3?'4 4':null, fillColor:'#FF7A2F', fillOpacity:.22, interactive:false }).addTo(capa);
       for(var i=0;i<ring.length;i++){
         (function(ix){
           var m = L.marker(ring[ix], { draggable:true, icon:icono('pamap-vtx'), zIndexOffset:1000 }).addTo(capa);
@@ -5050,8 +5051,8 @@ var PAMAP = (function(){
     '.pamap-op{display:inline-flex;align-items:center;gap:6px;color:#7A8899;font-size:11px}.pamap-op input{width:90px;accent-color:#4A6533}.pamap-op b{font-weight:600;color:#475569;min-width:30px;font-variant-numeric:tabular-nums}'+
     '.pamap-ley{display:inline-flex;align-items:center;gap:6px;color:#7A8899;font-size:11px}.pamap-ley i{display:inline-block;width:110px;height:10px;border-radius:5px}'+
     '.pamap-est{color:#A84D1F;font-size:11.5px}'+
-    '.pamap-v{border-radius:50%;background:#fff;border:2px solid #C8642D;box-shadow:0 1px 3px rgba(0,0,0,.5);cursor:grab}'+
-    '.pamap-v.pamap-mid{background:rgba(255,213,74,.85);border:1.5px solid #fff;transform:scale(.7);cursor:copy}';
+    '.pamap-v{border-radius:50%;background:#FF7A2F;border:2.5px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.6);cursor:grab}'+
+    '.pamap-v.pamap-mid{background:rgba(255,255,255,.9);border:1.5px solid #FF7A2F;transform:scale(.65);cursor:copy}';
   X.inyectarCSS = function(){ if(document.getElementById('pamap-css')) return; var s=document.createElement('style'); s.id='pamap-css'; s.textContent=X.CSS; document.head.appendChild(s); };
 
   return X;
@@ -5112,10 +5113,10 @@ function poligonosMapaOT(lst){
     var p = polys[i], items = [], conArea = 0;
     for(j=0;j<p.lotes.length;j++){ var it = enOt[p.lotes[j].id]; if(it){ if(it.area) conArea++; else items.push(it); } }
     items.sort(function(a,b){ return a.num-b.num; });
-    out.push({ ring:p.ring, enOt:items.length>0, recortado:conArea>0 && !items.length, color:items.length ? colorCultivoOT(items[0].cultivos[0]) : null, num:items.length ? items.map(function(x){ return x.num; }).join('·') : null,
+    out.push({ ring:p.ring, loteIds:p.lotes.map(function(x){ return x.id; }), enOt:items.length>0, recortado:conArea>0 && !items.length, color:items.length ? colorCultivoOT(items[0].cultivos[0]) : null, num:items.length ? items.map(function(x){ return x.num; }).join('·') : null,
       etiqueta:items.length ? items.map(function(x){ return x.lote.nombre; }).join(' · ') : p.lotes.map(function(x){ return x.nombre; }).join(' · ') });
   }
-  for(i=0;i<lst.length;i++) if(lst[i].area) recortes.push({ ring:lst[i].area.ring, enOt:true, area:true, color:colorCultivoOT(lst[i].cultivos[0]), num:String(lst[i].num), etiqueta:lst[i].lote.nombre, loteId:lst[i].lote.id });
+  for(i=0;i<lst.length;i++) if(lst[i].area) recortes.push({ ring:lst[i].area.ring, loteIds:[lst[i].lote.id], enOt:true, area:true, color:colorCultivoOT(lst[i].cultivos[0]), num:String(lst[i].num), etiqueta:lst[i].lote.nombre, loteId:lst[i].lote.id });
   return out.concat(recortes);
 }
 function htmlMapaOT(trs, o){
@@ -5159,15 +5160,17 @@ function otMapaPintar(trs){
     PAMAP.inyectarCSS();
     var lst = lotesMapaDeTrabajos(trs), polys = poligonosMapaOT(lst), L = window.L, rings = [], capasLote = [];
     OTMAPA = PAMAP.crearMapa(cont);
+    OTMAPA._capasLote = capasLote;
     for(var i=0;i<polys.length;i++){
       var p = polys[i], estilo;
-      if(p.area) estilo = { color:'#FFD54A', weight:2.6, fillColor:p.color, fillOpacity:.6 };
+      if(p.area) estilo = { color:'#FFFFFF', weight:3.2, fillColor:p.color, fillOpacity:.6 };
       else if(p.enOt) estilo = { color:'#FFFFFF', weight:2.2, fillColor:p.color, fillOpacity:.6 };
       else if(p.recortado) estilo = { color:'#FFFFFF', weight:1.8, dashArray:'6 5', fillColor:'#FFFFFF', fillOpacity:.04 };
       else estilo = { color:'rgba(255,255,255,.6)', weight:1, fillColor:'#FFFFFF', fillOpacity:.04 };
       var pl = L.polygon(p.ring, estilo).bindTooltip(p.etiqueta+(p.area?' · área de esta OT':''), { sticky:true }).addTo(OTMAPA);
-      pl._fillBase = estilo.fillOpacity; capasLote.push(pl);
-      if(p.enOt) L.marker(PAMAP.centroide(p.ring), { icon:PAMAP.etiquetaIcono(esc(p.etiqueta), p.num), interactive:false, keyboard:false }).addTo(OTMAPA);
+      pl._fillBase = estilo.fillOpacity; pl._loteIds = p.loteIds||[]; pl._esArea = !!p.area; capasLote.push(pl);
+      if(p.enOt){ pl._marca = null; }
+      if(p.enOt) pl._marca = L.marker(PAMAP.centroide(p.ring), { icon:PAMAP.etiquetaIcono(esc(p.etiqueta), p.num), interactive:false, keyboard:false }).addTo(OTMAPA);
       if(p.enOt || p.recortado) rings.push(p.ring);
     }
     var zc = function(){ cont.classList.toggle('lejos', OTMAPA.getZoom()<14); };
@@ -5208,18 +5211,31 @@ function otEditarArea(loteId){
   var actual = ds[0].geoOt && ds[0].geoOt.ring ? ds[0].geoOt.ring : null;
   var base = lo.geo.slice().sort(function(a,b){ return (b.ha||0)-(a.ha||0); })[0].ring;
   var panel = byId('otMapaEd');
+  var capas = OTMAPA._capasLote || [];
+  for(var c=0;c<capas.length;c++){
+    var cl = capas[c]; if(cl._loteIds.indexOf(loteId)<0) continue;
+    if(cl._esArea){ cl.setStyle({ opacity:0, fillOpacity:0 }); }
+    else cl.setStyle({ color:'#E8ECF2', weight:2, dashArray:'6 6', fillOpacity:0 });
+    if(cl._marca){ try{ OTMAPA.removeLayer(cl._marca); }catch(e){} }
+  }
   function abrir(ringIni){
-    if(OTMAPA_ED){ OTMAPA_ED.cancelar(); }
+    if(OTMAPA_ED){ var viejo = OTMAPA_ED; OTMAPA_ED = null; viejo._sinRedibujar = true; viejo.cancelar(); }
     var b = PAMAP.bbox([base]); OTMAPA.fitBounds([[b.s,b.w],[b.n,b.e]], { padding:[30,30] });
-    OTMAPA_ED = PAMAP.editor(OTMAPA, ringIni, function(ring){ panel.style.display='none'; var ed = OTMAPA_ED; OTMAPA_ED = null; if(ring===undefined) return; terminarArea(loteId, ring); });
+    var ed = PAMAP.editor(OTMAPA, ringIni, function(ring){
+      if(ed._sinRedibujar) return;
+      panel.style.display='none'; OTMAPA_ED = null;
+      if(ring===undefined){ mostrarPantallaOT(); return; }   // cancelar: vuelve a como estaba
+      terminarArea(loteId, ring);
+    });
+    OTMAPA_ED = ed;
     OTMAPA_ED.alCambiar(pintarPanel); pintarPanel(OTMAPA_ED.ring());
   }
   function pintarPanel(ring){
-    panel.innerHTML = '<div class="otmap-ed-t">Marcando el área a trabajar en <b>'+esc(lo.nombre)+'</b></div>'+
-      '<div class="otmap-ed-ay">'+(ring.length ? 'Arrastrá los puntos para mover los bordes; tocá un punto amarillo para agregar un vértice; clic derecho en un punto lo quita.' : 'Tocá el mapa para marcar cada vértice del área (mínimo 3).')+'</div>'+
+    panel.innerHTML = '<div class="otmap-ed-t">Marcando el área a trabajar en <b>'+esc(lo.nombre)+'</b> <span class="otmap-ed-ref">· punteado gris: el lote completo</span></div>'+
+      '<div class="otmap-ed-ay">'+(ring.length ? 'Arrastrá los puntos naranjas para mover el borde; tocá un punto blanco (mitad de un lado) para agregar un vértice; clic derecho en un punto naranja lo quita.' : 'Tocá el mapa para marcar cada vértice del área (mínimo 3).')+'</div>'+
       '<div class="otmap-ed-acc"><button type="button" class="btn btn-sm btn-primary" onclick="otAreaTerminar()"'+(ring.length>=3?'':' disabled')+'>✓ Terminar</button>'+
       '<button type="button" class="btn btn-sm" onclick="otAreaDeCero()">Dibujar de cero</button>'+
-      '<button type="button" class="btn btn-sm" onclick="otAreaCancelar()">Cancelar</button></div>';
+      '<button type="button" class="btn btn-sm" onclick="otAreaCancelar()">Descartar dibujo</button></div>';
     panel.style.display = '';
   }
   window.otAreaDeCero = function(){ abrir(null); };
@@ -5248,7 +5264,7 @@ function imagenMapaOT(trs, o, ancho, alto, cb, escala){
   var dib = [], marco = [];
   for(var i=0;i<polys.length;i++){
     var p = polys[i];
-    if(p.area) dib.push({ ring:p.ring, fill:p.color, alpha:.6, stroke:'#FFD54A', ancho:3.5, num:p.num, etiqueta:p.etiqueta });
+    if(p.area) dib.push({ ring:p.ring, fill:p.color, alpha:.6, stroke:'#FFFFFF', ancho:4, num:p.num, etiqueta:p.etiqueta });
     else if(p.enOt) dib.push({ ring:p.ring, fill:p.color, alpha:.6, stroke:'#FFFFFF', ancho:3, num:p.num, etiqueta:p.etiqueta });
     else dib.push({ ring:p.ring, fill:'#FFFFFF', alpha:.05, stroke:p.recortado?'#FFFFFF':'rgba(255,255,255,.65)', ancho:p.recortado?2:1.2 });
     if(p.enOt || p.recortado) marco.push(p.ring);   // el lote completo entra en el encuadre aunque se marque solo una parte
@@ -5285,7 +5301,7 @@ function htmlHojaMapaOT(o, url, lst){
       '<div class="pr-hd-r"><div><span class="pr-l">Fecha</span> '+fd(o.fecha)+'</div><div><span class="pr-l">Lotes</span> '+lst.length+'</div></div></div>'+
     '<img class="pr-mapa-img" src="'+url+'" alt="Mapa de los lotes de la OT">'+
     leyendaCultivosOT(lst, true)+
-    (hayArea?'<p style="font-size:8.5pt;margin:-2mm 0 3mm">Borde amarillo: área a trabajar en esta orden. Borde blanco punteado: resto del lote (no se trabaja).</p>':'')+
+    (hayArea?'<p style="font-size:8.5pt;margin:-2mm 0 3mm">Área pintada: lo que se trabaja en esta orden. Borde blanco punteado: resto del lote (no se trabaja).</p>':'')+
     '<table class="pr-tbl pr-mapa-tbl"><colgroup><col style="width:10mm"><col style="width:50mm"><col><col style="width:26mm"></colgroup>'+
       '<thead><tr><th>N°</th><th>Lote</th><th>Cultivo · labor</th><th style="text-align:right">Sup.</th></tr></thead><tbody>'+filas+'</tbody></table>'+
     '<div class="pr-pie"><span>Puntal Agro · '+esc(emp)+'</span><span>OT #'+o.num+' · mapa · impresa el '+fd(todayISO())+'</span></div>'+

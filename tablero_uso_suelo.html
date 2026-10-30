@@ -1206,7 +1206,7 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
 
 <footer>
   <span>Puntal Agro · Plan de Uso de Suelo</span>
-  <span id="fts">Versión v2026-10-30 10:45 · BUILD 53</span>
+  <span id="fts">Versión v2026-10-30 10:55 · BUILD 54</span>
 </footer>
 
 <script>
@@ -1980,7 +1980,7 @@ var PAMAP = (function(){
     function icono(cls){ return L.divIcon({ className:'pamap-v '+cls, iconSize:[14,14], iconAnchor:[7,7] }); }
     function pintar(){
       capa.clearLayers();
-      if(ring.length>=2) L.polygon(ring, { color:'#FFD54A', weight:2.5, dashArray: ring.length<3?'4 4':null, fillColor:'#FFD54A', fillOpacity:.18, interactive:false }).addTo(capa);
+      if(ring.length>=2) L.polygon(ring, { color:'#FF7A2F', weight:3, dashArray: ring.length<3?'4 4':null, fillColor:'#FF7A2F', fillOpacity:.22, interactive:false }).addTo(capa);
       for(var i=0;i<ring.length;i++){
         (function(ix){
           var m = L.marker(ring[ix], { draggable:true, icon:icono('pamap-vtx'), zIndexOffset:1000 }).addTo(capa);
@@ -2039,8 +2039,8 @@ var PAMAP = (function(){
     '.pamap-op{display:inline-flex;align-items:center;gap:6px;color:#7A8899;font-size:11px}.pamap-op input{width:90px;accent-color:#4A6533}.pamap-op b{font-weight:600;color:#475569;min-width:30px;font-variant-numeric:tabular-nums}'+
     '.pamap-ley{display:inline-flex;align-items:center;gap:6px;color:#7A8899;font-size:11px}.pamap-ley i{display:inline-block;width:110px;height:10px;border-radius:5px}'+
     '.pamap-est{color:#A84D1F;font-size:11.5px}'+
-    '.pamap-v{border-radius:50%;background:#fff;border:2px solid #C8642D;box-shadow:0 1px 3px rgba(0,0,0,.5);cursor:grab}'+
-    '.pamap-v.pamap-mid{background:rgba(255,213,74,.85);border:1.5px solid #fff;transform:scale(.7);cursor:copy}';
+    '.pamap-v{border-radius:50%;background:#FF7A2F;border:2.5px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.6);cursor:grab}'+
+    '.pamap-v.pamap-mid{background:rgba(255,255,255,.9);border:1.5px solid #FF7A2F;transform:scale(.65);cursor:copy}';
   X.inyectarCSS = function(){ if(document.getElementById('pamap-css')) return; var s=document.createElement('style'); s.id='pamap-css'; s.textContent=X.CSS; document.head.appendChild(s); };
 
   return X;
