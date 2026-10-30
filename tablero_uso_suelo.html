@@ -434,6 +434,43 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
 .hist-mini-table thead th{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-weight:600;padding:6px 12px;border-bottom:1px solid var(--border);text-align:left;background:#FAFBFC;position:static}
 .hist-mini-table tbody td{padding:6px 12px;border-bottom:1px solid #F5F7FA;font-size:11px;vertical-align:middle}
 .hist-mini-table tbody tr:last-child td{border-bottom:none}
+/* ---------- Mapa ---------- */
+.mapa-sub{font-size:11px;color:var(--muted);margin-right:6px}
+.mapa-wrap{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:12px}
+.mapa-cv{position:relative;z-index:0;height:calc(100vh - 330px);min-height:460px;border-radius:10px;overflow:hidden;border:1px solid var(--border);background:#DDE3D6}
+.mapa-vacio{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:24px;color:var(--muted);font-size:13px;z-index:500;background:#F4F6F9}
+.mapa-vacio b{color:var(--text)}
+.mapa-side{display:flex;flex-direction:column;gap:10px;font-size:12px;max-height:calc(100vh - 330px);min-height:460px;overflow-y:auto}
+.mapa-blk{border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+.mapa-blk-t{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:7px}
+.mapa-ley{display:flex;align-items:center;gap:7px;padding:2px 0}
+.mapa-ley i{width:14px;height:14px;border-radius:3px;flex:0 0 auto;border:1px solid rgba(0,0,0,.15)}
+.mapa-ley span{flex:1}
+.mapa-ley em{font-style:normal;color:var(--muted);font-variant-numeric:tabular-nums}
+.mapa-sel-n{font-size:15px;font-weight:600}
+.mapa-sel-r{display:flex;justify-content:space-between;gap:8px;padding:3px 0;border-bottom:1px solid #F0F2F5}
+.mapa-sel-r:last-child{border-bottom:none}
+.mapa-sel-r span:first-child{color:var(--muted)}
+.mapa-sin{color:var(--muted);line-height:1.6}
+.mapa-cv.lejos .pamap-lbl{display:none}
+.mapa-cv.medio .pamap-txt{font-size:10px}
+.leaflet-popup-content{font-family:var(--sans);font-size:12px;margin:10px 12px}
+.modal.modal-kml{max-width:960px;width:94%}
+.kml-paso{display:grid;grid-template-columns:auto 200px auto 1fr;gap:8px 10px;align-items:center;margin-bottom:10px}
+.kml-estado{font-size:12px;color:var(--muted);margin:4px 0 8px}
+.kml-tw{max-height:52vh;overflow-y:auto;border:1px solid var(--border);border-radius:8px}
+.kml-tw table{width:100%;border-collapse:collapse}
+.kml-tw th{position:sticky;top:0;background:#F7F8FA;font-size:10px;text-transform:uppercase;letter-spacing:.3px;color:var(--muted);font-weight:500;text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)}
+.kml-tw td{padding:6px 8px;border-bottom:1px solid #F0F2F5;font-size:12px;vertical-align:middle;font-variant-numeric:tabular-nums}
+.kml-chip{display:inline-flex;align-items:center;gap:4px;background:#EEF3E8;color:#3A5128;border-radius:12px;padding:2px 4px 2px 9px;margin:2px 4px 2px 0;font-size:11.5px;font-weight:500}
+.kml-chip button{border:none;background:none;color:#7A8899;cursor:pointer;font-size:13px;line-height:1;padding:0 3px}
+.kml-chip button:hover{color:#C8642D}
+.kml-add{font-family:var(--sans);font-size:11px;border:1px dashed #B9C3D0;border-radius:12px;padding:2px 6px;background:#fff;color:var(--muted);max-width:150px}
+.kml-sug{font-size:10px;color:#92400E;background:#FFFBEB;border-radius:8px;padding:1px 6px;margin-left:4px}
+.kml-dif{color:#A84D1F}
+.kml-pie{font-size:11.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+@media (max-width:900px){.mapa-wrap{grid-template-columns:1fr}.mapa-side{max-height:none;min-height:0}.kml-paso{grid-template-columns:auto 1fr}}
+
 @media print {
   @page { margin: 12mm; size: landscape; }
   .print-ctx { display: block !important; font-size: 12px; color: #333; font-weight: 600; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid #DDD; }
@@ -498,6 +535,7 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
   <span class="nav-lbl">MÓDULO:</span>
   <button class="nav-btn" data-view="padron" onclick="setView('padron',this)">Padrón de lotes</button>
   <button class="nav-btn active" data-view="plan" onclick="setView('plan',this)">Plan de uso</button>
+  <button class="nav-btn" data-view="mapa" onclick="setView('mapa',this)">Mapa</button>
   <button class="nav-btn" data-view="reportes" onclick="setView('reportes',this)">Reportes</button>
   <button class="nav-btn" data-view="historico" onclick="setView('historico',this)">Histórico / Rotación</button>
   <button class="nav-btn" data-view="maestros" onclick="setView('maestros',this)">Maestros</button>
@@ -794,6 +832,23 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
   </div>
 </div>
 
+<!-- VISTA MAPA -->
+<div class="view" id="view-mapa">
+  <div class="card">
+    <div class="chd">
+      <span class="ct" id="mapaTit">Mapa de lotes</span>
+      <div class="ct-actions">
+        <span class="mapa-sub" id="mapaSub"></span>
+        <button class="btn-sm" onclick="abrirCargaKML()">⬆ Cargar KML / KMZ de un campo</button>
+      </div>
+    </div>
+    <div class="mapa-wrap">
+      <div class="mapa-cv" id="mapaCanvas"><div class="mapa-vacio" id="mapaVacio"></div></div>
+      <div class="mapa-side" id="mapaSide"></div>
+    </div>
+  </div>
+</div>
+
 <!-- VISTA MAESTROS -->
 <div class="view" id="view-maestros">
   <div class="card" id="cardAmbientes">
@@ -1016,6 +1071,26 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
   </div>
 </div>
 
+<!-- MODAL: Cargar KML / KMZ -->
+<div class="modal-bg" id="modalKML">
+  <div class="modal modal-kml">
+    <div class="modal-title">Cargar mapa de lotes (KML / KMZ)</div>
+    <div class="modal-sub">Exportá la planimetría del campo desde Google Earth (un polígono por lote). Cada polígono se asocia a uno o más lotes del padrón: revisá las sugerencias antes de guardar. Al guardar se <b>reemplaza</b> el mapa que ese campo tenía.</div>
+    <div class="kml-paso">
+      <label class="modal-lbl">Campo</label>
+      <select class="modal-input" id="kmlCampo" onchange="kmlCambioCampo()"></select>
+      <label class="modal-lbl">Archivo</label>
+      <input type="file" id="kmlFile" accept=".kml,.kmz" multiple onchange="kmlLeerArchivos(this.files)">
+    </div>
+    <div id="kmlEstado" class="kml-estado"></div>
+    <div id="kmlTabla"></div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="cerrarCargaKML()">Cancelar</button>
+      <button class="modal-ok" id="kmlGuardar" onclick="guardarKML()" disabled>Guardar mapa del campo</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: Editar / Agregar LOTE -->
 <div class="modal-bg" id="modalLote">
   <div class="modal">
@@ -1130,7 +1205,7 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
 
 <footer>
   <span>Puntal Agro · Plan de Uso de Suelo</span>
-  <span id="fts">Versión v2026-10-29 15:10 · BUILD 50</span>
+  <span id="fts">Versión v2026-10-29 19:20 · BUILD 51</span>
 </footer>
 
 <script>
@@ -1456,7 +1531,8 @@ function cargarLotesDesdePA(){
   for(i=0;i<ls.length;i++){
     var L = ls[i];
     var o = { l:L.nombre, c:cn[L.campoId] || '', s:Number(L.ha)||0, a:L.ambiente||'',
-              expl:(L.expl===undefined ? null : L.expl), activo:(L.activo!==false), p:{}, _id:L.id };
+              expl:(L.expl===undefined ? null : L.expl), activo:(L.activo!==false), p:{}, _id:L.id,
+              _geo:(L.geo && L.geo.length ? L.geo : null) };
     var acts = (porLote[L.id] || []).slice();
     acts.sort(function(x,y){ if(!!x.seg !== !!y.seg) return x.seg ? 1 : -1; return String(x.id).localeCompare(String(y.id), 'es', {numeric:true}); });
     for(var j=0;j<acts.length;j++){
@@ -1482,7 +1558,8 @@ function _registrosDesdeLotes(){
     var L = LOTES[i];
     if(!L._id) L._id = 'lot_'+_slugId(emp)+'_'+_slugId(L.c)+'_'+_slugId(L.l)+'_'+Date.now().toString(36)+i;
     lot.push({ id:L._id, campoId:(cid[L.c] || ''), empresaId:emp, nombre:L.l, ha:Number(L.s)||0, ambiente:L.a||'',
-               expl:(L.expl==null ? null : Number(L.expl)), activo:(L.activo!==false), orden:i+1, tipoUso:(TIPO_OVERRIDE[L.l] || '') });
+               expl:(L.expl==null ? null : Number(L.expl)), activo:(L.activo!==false), orden:i+1, tipoUso:(TIPO_OVERRIDE[L.l] || ''),
+               geo:(L._geo && L._geo.length ? L._geo : null) });
     var core = String(L._id).replace(/^lot_/,'');
     for(var camp in L.p){
       if(!L.p.hasOwnProperty(camp)) continue;
@@ -1515,6 +1592,526 @@ function persistirLotesPA(){
   for(k in LOTES_SNAP.lot){ if(LOTES_SNAP.lot.hasOwnProperty(k) && !nuevo.lot.hasOwnProperty(k)){ PA.demo.borrarLote(k); cambios++; } }
   LOTES_SNAP = nuevo;
   return cambios;
+}
+
+// ────────────────────────────────────────────────────────────
+// MAPA DE LOTES (KML/KMZ → polígonos guardados en el lote de pa-core)
+// ────────────────────────────────────────────────────────────
+/* ================================================================
+   PAMAP — mapas de lotes (compartido por Plan de Uso y Labores e Insumos)
+   ES5. Carga Leaflet y JSZip bajo demanda desde cdnjs.
+   Geometría del lote en pa-core:  lote.geo = [ {id, nombre, ha, ring:[[lat,lng],…]} , … ]
+     · un lote puede tener varios polígonos y un polígono puede ser de varios lotes
+       (mismo id en los lotes que lo comparten: p.ej. "EC 1A" del KML = EC 1A + EC 1A CN).
+================================================================ */
+var PAMAP = (function(){
+  'use strict';
+  var X = {};
+  var CDN = 'https://cdnjs.cloudflare.com/ajax/libs/';
+  var URL_LEAFLET_JS = CDN+'leaflet/1.9.4/leaflet.min.js', URL_LEAFLET_CSS = CDN+'leaflet/1.9.4/leaflet.min.css';
+  var URL_JSZIP = CDN+'jszip/3.10.1/jszip.min.js';
+  // Imagen satelital de Esri (sin clave). Admite CORS, así el mapa se puede capturar para imprimir.
+  X.TILE_SAT = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
+  X.TILE_REF = 'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}';
+
+  function cargarScript(url, ok, cb){
+    if(ok()){ cb(true); return; }
+    var s = document.createElement('script'); s.src = url;
+    s.onload = function(){ cb(ok()); }; s.onerror = function(){ cb(false); };
+    document.head.appendChild(s);
+  }
+  X.cargarLeaflet = function(cb){
+    if(!document.getElementById('pamap-leaflet-css')){
+      var l = document.createElement('link'); l.id='pamap-leaflet-css'; l.rel='stylesheet'; l.href=URL_LEAFLET_CSS; document.head.appendChild(l);
+    }
+    cargarScript(URL_LEAFLET_JS, function(){ return !!window.L; }, cb);
+  };
+  X.cargarJSZip = function(cb){ cargarScript(URL_JSZIP, function(){ return !!window.JSZip; }, cb); };
+
+  /* ---------------- geometría ---------------- */
+  // Área en ha (aprox. equirectangular local; error despreciable a escala de lote).
+  X.areaHa = function(ring){
+    if(!ring || ring.length<3) return 0;
+    var lat0 = 0, i; for(i=0;i<ring.length;i++) lat0 += ring[i][0]; lat0 /= ring.length;
+    var R = 6371000, k = Math.cos(lat0*Math.PI/180), a = 0;
+    for(i=0;i<ring.length;i++){
+      var p = ring[i], q = ring[(i+1)%ring.length];
+      var x1 = p[1]*Math.PI/180*R*k, y1 = p[0]*Math.PI/180*R, x2 = q[1]*Math.PI/180*R*k, y2 = q[0]*Math.PI/180*R;
+      a += x1*y2 - x2*y1;
+    }
+    return Math.abs(a)/2/10000;
+  };
+  // Centroide del polígono (si cae fuera, en lotes muy cóncavos, se usa el promedio de vértices).
+  X.centroide = function(ring){
+    var a=0, cx=0, cy=0, i;
+    for(i=0;i<ring.length;i++){
+      var p=ring[i], q=ring[(i+1)%ring.length], f=p[1]*q[0]-q[1]*p[0];
+      a+=f; cx+=(p[1]+q[1])*f; cy+=(p[0]+q[0])*f;
+    }
+    if(Math.abs(a)<1e-14){ var la=0, lo=0; for(i=0;i<ring.length;i++){ la+=ring[i][0]; lo+=ring[i][1]; } return [la/ring.length, lo/ring.length]; }
+    var c = [cy/(3*a), cx/(3*a)];
+    if(!X.dentro(c, ring)){ var la2=0, lo2=0; for(i=0;i<ring.length;i++){ la2+=ring[i][0]; lo2+=ring[i][1]; } c=[la2/ring.length, lo2/ring.length]; }
+    return c;
+  };
+  X.dentro = function(pt, ring){
+    var y=pt[0], x=pt[1], ins=false;
+    for(var i=0, j=ring.length-1; i<ring.length; j=i++){
+      var yi=ring[i][0], xi=ring[i][1], yj=ring[j][0], xj=ring[j][1];
+      if(((yi>y)!==(yj>y)) && (x < (xj-xi)*(y-yi)/(yj-yi)+xi)) ins=!ins;
+    }
+    return ins;
+  };
+  X.bbox = function(rings){
+    var b = { s:90, n:-90, w:180, e:-180 };
+    for(var r=0;r<rings.length;r++) for(var i=0;i<rings[r].length;i++){
+      var p = rings[r][i]; if(p[0]<b.s) b.s=p[0]; if(p[0]>b.n) b.n=p[0]; if(p[1]<b.w) b.w=p[1]; if(p[1]>b.e) b.e=p[1];
+    }
+    return b;
+  };
+  // Link para el contratista: Google Maps arma el recorrido hasta el lote.
+  X.linkComoLlegar = function(latlng){ return 'https://www.google.com/maps/dir/?api=1&destination='+latlng[0].toFixed(6)+','+latlng[1].toFixed(6); };
+  X.linkVer = function(latlng){ return 'https://www.google.com/maps/search/?api=1&query='+latlng[0].toFixed(6)+','+latlng[1].toFixed(6); };
+
+  /* ---------------- KML / KMZ ---------------- */
+  function hijos(el, tag){ var out=[], n=el.getElementsByTagName(tag); for(var i=0;i<n.length;i++) out.push(n[i]); return out; }
+  function texto(el){ return el ? String(el.textContent||'').replace(/\s+/g,' ').replace(/^\s+|\s+$/g,'') : ''; }
+  // Lee los polígonos de un KML. Ignora puntos y líneas. Devuelve [{nombre, ring, ha, carpeta}]
+  X.leerKML = function(txt){
+    var xml = new DOMParser().parseFromString(txt, 'text/xml');
+    if(xml.getElementsByTagName('parsererror').length) throw new Error('El archivo no es un KML válido.');
+    var pms = hijos(xml, 'Placemark'), out = [];
+    for(var i=0;i<pms.length;i++){
+      var pm = pms[i], polys = hijos(pm, 'Polygon');
+      if(!polys.length) continue;
+      var nm = '', nn = pm.getElementsByTagName('name');
+      for(var k=0;k<nn.length;k++){ if(nn[k].parentNode===pm){ nm = texto(nn[k]); break; } }
+      if(!nm){ var sd = hijos(pm,'SimpleData'); for(var s=0;s<sd.length;s++){ var at=(sd[s].getAttribute('name')||'').toLowerCase(); if(at==='lote'||at==='name'||at==='nombre'){ nm=texto(sd[s]); break; } } }
+      var carpeta = ''; var pa = pm.parentNode;
+      while(pa && pa.nodeType===1){ if(pa.tagName==='Folder'||pa.tagName==='Document'){ var fn=null; for(var c=0;c<pa.childNodes.length;c++){ if(pa.childNodes[c].tagName==='name'){ fn=pa.childNodes[c]; break; } } if(fn){ carpeta=texto(fn); break; } } pa = pa.parentNode; }
+      for(var p=0;p<polys.length;p++){
+        var ob = polys[p].getElementsByTagName('outerBoundaryIs')[0] || polys[p];
+        var co = ob.getElementsByTagName('coordinates')[0]; if(!co) continue;
+        var pts = String(co.textContent).replace(/^\s+|\s+$/g,'').split(/\s+/), ring = [];
+        for(var q=0;q<pts.length;q++){
+          var xy = pts[q].split(','); var lo = parseFloat(xy[0]), la = parseFloat(xy[1]);
+          if(!isNaN(la) && !isNaN(lo)) ring.push([Math.round(la*1e6)/1e6, Math.round(lo*1e6)/1e6]);
+        }
+        if(ring.length>3 && ring[0][0]===ring[ring.length-1][0] && ring[0][1]===ring[ring.length-1][1]) ring.pop();
+        if(ring.length<3) continue;
+        out.push({ nombre:nm || ('Polígono '+(out.length+1)), ring:ring, ha:Math.round(X.areaHa(ring)*10)/10, carpeta:carpeta });
+      }
+    }
+    return out;
+  };
+  // Lee un File (.kml o .kmz). cb(err, poligonos)
+  X.leerArchivo = function(file, cb){
+    var nom = (file.name||'').toLowerCase();
+    var rd = new FileReader();
+    if(/\.kmz$/.test(nom)){
+      X.cargarJSZip(function(ok){
+        if(!ok){ cb('No se pudo cargar el lector de KMZ (revisá la conexión a internet).'); return; }
+        rd.onload = function(e){
+          window.JSZip.loadAsync(e.target.result).then(function(zip){
+            var kmls = []; zip.forEach(function(path, f){ if(/\.kml$/i.test(path) && !f.dir) kmls.push(f); });
+            if(!kmls.length){ cb('El KMZ no tiene ningún KML adentro.'); return; }
+            var res = [], pend = kmls.length, fallo = null;
+            kmls.forEach(function(f){
+              f.async('text').then(function(t){ try{ res = res.concat(X.leerKML(t)); }catch(err){ fallo = err.message; } if(--pend===0) cb(fallo && !res.length ? fallo : null, res); },
+                                    function(){ if(--pend===0) cb(res.length?null:'No se pudo leer el KMZ.', res); });
+            });
+          }, function(){ cb('El archivo no es un KMZ válido.'); });
+        };
+        rd.readAsArrayBuffer(file);
+      });
+      return;
+    }
+    rd.onload = function(e){ try{ cb(null, X.leerKML(e.target.result)); }catch(err){ cb(err.message||String(err)); } };
+    rd.readAsText(file);
+  };
+
+  /* ---------------- polígonos únicos a partir de los lotes ---------------- */
+  // lotes: [{id, nombre, geo:[...], ...}] → [{id, nombre, ha, ring, lotes:[lote,…]}]
+  X.poligonosDeLotes = function(lotes){
+    var por = {}, orden = [];
+    for(var i=0;i<lotes.length;i++){
+      var g = lotes[i].geo || [];
+      for(var j=0;j<g.length;j++){
+        var sh = g[j]; if(!sh || !sh.ring) continue;
+        if(!por[sh.id]){ por[sh.id] = { id:sh.id, nombre:sh.nombre, ha:sh.ha, ring:sh.ring, lotes:[] }; orden.push(sh.id); }
+        por[sh.id].lotes.push(lotes[i]);
+      }
+    }
+    var out = []; for(var k=0;k<orden.length;k++) out.push(por[orden[k]]);
+    return out;
+  };
+
+  /* ---------------- mapa estático (para imprimir / descargar) ----------------
+     opts = { ancho, alto, poligonos:[{ring, fill, stroke, alpha, ancho, etiqueta, num}], marco:[rings para encuadrar] }
+     cb(dataURL, conFondo)  — si la imagen satelital no carga, igual dibuja los lotes sobre fondo liso. */
+  function lon2x(lon, z){ return (lon+180)/360*Math.pow(2,z)*256; }
+  function lat2y(lat, z){ var r=lat*Math.PI/180; return (1-Math.log(Math.tan(r)+1/Math.cos(r))/Math.PI)/2*Math.pow(2,z)*256; }
+  X.mapaEstatico = function(opts, cb){
+    var W = opts.ancho||1600, H = opts.alto||1000, pad = 60;
+    var b = X.bbox(opts.marco && opts.marco.length ? opts.marco : opts.poligonos.map(function(p){ return p.ring; }));
+    var z = 18;
+    while(z>3){
+      var w = lon2x(b.e,z)-lon2x(b.w,z), h = lat2y(b.s,z)-lat2y(b.n,z);
+      if(w <= W-2*pad && h <= H-2*pad) break;
+      z--;
+    }
+    var cx = (lon2x(b.w,z)+lon2x(b.e,z))/2, cy = (lat2y(b.n,z)+lat2y(b.s,z))/2;
+    var x0 = cx - W/2, y0 = cy - H/2;
+    var cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    var g = cv.getContext('2d');
+    g.fillStyle = '#DDE3D6'; g.fillRect(0,0,W,H);
+    var t0x = Math.floor(x0/256), t1x = Math.floor((x0+W)/256), t0y = Math.floor(y0/256), t1y = Math.floor((y0+H)/256);
+    var tiles = [], ok = 0, mal = 0, listo = false;
+    for(var tx=t0x; tx<=t1x; tx++) for(var ty=t0y; ty<=t1y; ty++) tiles.push([tx,ty]);
+    function terminar(){
+      if(listo) return; listo = true;
+      dibujarLotes(g, opts.poligonos, function(lat,lon){ return [lon2x(lon,z)-x0, lat2y(lat,z)-y0]; }, opts.escala);
+      g.textAlign = 'left';
+      // escala
+      var mpp = 156543.03392*Math.cos((b.n+b.s)/2*Math.PI/180)/Math.pow(2,z), m = [50,100,200,250,500,1000,2000,5000], L = 500;
+      for(var i=0;i<m.length;i++){ if(m[i]/mpp>=90){ L=m[i]; break; } }
+      var px = L/mpp; g.fillStyle='rgba(255,255,255,.85)'; g.fillRect(16,H-46,px+24,30);
+      g.fillStyle='#0F1923'; g.fillRect(28,H-26,px,4); g.font='600 15px DM Sans, Arial, sans-serif'; g.textBaseline='bottom';
+      g.fillText(L>=1000?(L/1000)+' km':L+' m', 28, H-30);
+      g.save(); g.translate(W-40, 46); g.fillStyle='rgba(255,255,255,.85)'; g.beginPath(); g.arc(0,0,22,0,7); g.fill();
+      g.fillStyle='#0F1923'; g.beginPath(); g.moveTo(0,-16); g.lineTo(7,6); g.lineTo(0,2); g.lineTo(-7,6); g.closePath(); g.fill();
+      g.font='700 12px DM Sans, Arial, sans-serif'; g.textAlign='center'; g.textBaseline='top'; g.fillText('N',0,8); g.restore();
+      if(opts.titulo) titulo(g, opts.titulo);
+      var url = null;
+      try{ url = cv.toDataURL('image/jpeg', 0.88); }catch(e){ url = null; }
+      if(!url){ // el canvas quedó "contaminado": se rehace sin fondo
+        var cv2 = document.createElement('canvas'); cv2.width=W; cv2.height=H; var g2=cv2.getContext('2d');
+        g2.fillStyle='#DDE3D6'; g2.fillRect(0,0,W,H);
+        dibujarLotes(g2, opts.poligonos, function(lat,lon){ return [lon2x(lon,z)-x0, lat2y(lat,z)-y0]; }, opts.escala);
+        if(opts.titulo) titulo(g2, opts.titulo);
+        cb(cv2.toDataURL('image/jpeg',0.9), false); return;
+      }
+      cb(url, ok>0 && mal===0);
+    }
+    if(opts.sinFondo || !tiles.length){ terminar(); return; }
+    var pend = tiles.length;
+    setTimeout(terminar, opts.espera || 9000);
+    tiles.forEach(function(t){
+      var im = new Image(); im.crossOrigin = 'anonymous';
+      im.onload = function(){ if(!listo){ try{ g.drawImage(im, t[0]*256-x0, t[1]*256-y0); ok++; }catch(e){ mal++; } } if(--pend===0) terminar(); };
+      im.onerror = function(){ mal++; if(--pend===0) terminar(); };
+      var n = Math.pow(2,z), xx = ((t[0]%n)+n)%n;
+      im.src = X.TILE_SAT.replace('{z}',z).replace('{y}',t[1]).replace('{x}',xx);
+    });
+  };
+  // Recuadro de título arriba a la izquierda: [línea principal, línea secundaria…]
+  function titulo(g, lineas){
+    g.save(); g.textAlign='left'; g.textBaseline='top';
+    var w = 0, i;
+    for(i=0;i<lineas.length;i++){ g.font = (i?'500 17px':'700 24px')+' DM Sans, Arial, sans-serif'; w = Math.max(w, g.measureText(lineas[i]).width); }
+    var h = 22 + 30 + (lineas.length-1)*23;
+    g.fillStyle='rgba(255,255,255,.92)'; g.fillRect(16,16,w+32,h);
+    g.fillStyle='#C8642D'; g.fillRect(16,16,6,h);
+    for(i=0;i<lineas.length;i++){ g.font=(i?'500 17px':'700 24px')+' DM Sans, Arial, sans-serif'; g.fillStyle=i?'#3A4654':'#0F1923'; g.fillText(lineas[i], 34, 27+(i?30+(i-1)*23:0)); }
+    g.restore();
+  }
+  function dibujarLotes(g, polys, proj, k){
+    var i, j; k = k || 1;
+    for(i=0;i<polys.length;i++){
+      var p = polys[i]; if(!p.ring) continue;
+      g.beginPath();
+      for(j=0;j<p.ring.length;j++){ var xy = proj(p.ring[j][0], p.ring[j][1]); if(j) g.lineTo(xy[0],xy[1]); else g.moveTo(xy[0],xy[1]); }
+      g.closePath();
+      if(p.fill){ g.globalAlpha = p.alpha==null ? .45 : p.alpha; g.fillStyle = p.fill; g.fill(); g.globalAlpha = 1; }
+      g.lineWidth = p.ancho || 2; g.strokeStyle = p.stroke || '#FFFFFF'; g.stroke();
+    }
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    for(i=0;i<polys.length;i++){
+      var q = polys[i]; if(!q.etiqueta && q.num==null) continue;
+      var c = X.centroide(q.ring), pt = proj(c[0], c[1]);
+      var dy = q.etiqueta ? 15*k : 0;
+      if(q.num!=null){
+        g.font = '700 '+Math.round(15*k)+'px DM Sans, Arial, sans-serif';
+        var tn = String(q.num), rw = Math.max(15*k, g.measureText(tn).width/2+8*k), rh = 15*k;
+        g.fillStyle = '#C8642D'; g.beginPath();
+        if(g.roundRect) g.roundRect(pt[0]-rw, pt[1]-dy-rh, rw*2, rh*2, rh); else g.arc(pt[0], pt[1]-dy, rh, 0, 7);
+        g.fill(); g.lineWidth = 2*k; g.strokeStyle = '#fff'; g.stroke();
+        g.fillStyle = '#fff'; g.fillText(tn, pt[0], pt[1]-dy+1);
+      }
+      if(q.etiqueta){
+        g.font = (q.num!=null?'700 ':'600 ')+Math.round((q.num!=null?15:12)*k)+'px DM Sans, Arial, sans-serif';
+        var ls = String(q.etiqueta).split('\n'), lh = 17*k, y = pt[1]+(q.num!=null?13*k:0)-(ls.length-1)*lh/2;
+        for(var m=0;m<ls.length;m++){
+          g.lineWidth = 4*k; g.strokeStyle = 'rgba(0,0,0,.75)'; g.strokeText(ls[m], pt[0], y+m*lh);
+          g.fillStyle = '#fff'; g.fillText(ls[m], pt[0], y+m*lh);
+        }
+      }
+    }
+  }
+
+  /* ---------------- mapa interactivo (Leaflet) ---------------- */
+  // Crea (o recrea) un mapa Leaflet satelital en el contenedor. Devuelve el mapa.
+  X.crearMapa = function(cont){
+    var L = window.L;
+    var m = L.map(cont, { zoomControl:true, attributionControl:true, preferCanvas:false, zoomSnap:0.25, zoomDelta:0.5 });
+    L.tileLayer(X.TILE_SAT, { maxZoom:19, maxNativeZoom:18, attribution:'Imágenes © Esri' }).addTo(m);
+    L.tileLayer(X.TILE_REF, { maxZoom:19, maxNativeZoom:18, opacity:.8 }).addTo(m);
+    return m;
+  };
+  X.etiquetaIcono = function(texto, num, clase){
+    return window.L.divIcon({ className:'pamap-lbl'+(clase?' '+clase:''), iconSize:null,
+      html:'<div class="pamap-in">'+(num!=null?'<span class="pamap-num">'+num+'</span>':'')+(texto?'<span class="pamap-txt">'+texto+'</span>':'')+'</div>' });
+  };
+  X.CSS = '.pamap-lbl{background:none;border:none;pointer-events:none}'+
+    '.pamap-in{position:absolute;left:0;top:0;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:2px;white-space:nowrap}'+
+    '.pamap-txt{font:600 11px "DM Sans",sans-serif;color:#fff;text-shadow:0 0 3px #000,0 0 3px #000,0 1px 2px #000;text-align:center;line-height:1.15}'+
+    '.pamap-num{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 5px;border-radius:11px;background:#C8642D;color:#fff;font:700 12px "DM Sans",sans-serif;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.4)}'+
+    '.pamap-lbl.tenue .pamap-txt{opacity:.75;font-weight:500}';
+  X.inyectarCSS = function(){ if(document.getElementById('pamap-css')) return; var s=document.createElement('style'); s.id='pamap-css'; s.textContent=X.CSS; document.head.appendChild(s); };
+
+  return X;
+})();
+
+var MAPA = null, MAPA_CAPA = null, MAPA_ENCUADRE = '', MAPA_SEL = null;
+// Clave de comparación de nombres: sin el código de campo, sin "lote" y sin espacios.
+function _kmlClave(nombre, campo){
+  var t = String(nombre||'').toLowerCase();
+  if(t.normalize) t = t.normalize('NFD').replace(/[̀-ͯ]/g,'');
+  t = t.replace(/\blote\b/g,' ').replace(/\d+[.,]?\d*\s*has?\b\.?/g,' ');
+  var c = String(campo||'').toLowerCase();
+  if(c) t = t.replace(new RegExp('^\\s*'+c.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b'), ' ');
+  return t.replace(/\s+/g,'');
+}
+var _KML_CALIF = /(loma|bajo|medio|norte|sur|este|oeste|cco|g|n|s)+$/;
+// Sugiere los lotes del campo para cada polígono del KML.
+function _kmlSugerir(polys, lotes, campo){
+  var claves = [], i, j;
+  for(i=0;i<lotes.length;i++) claves.push(_kmlClave(lotes[i].l, campo));
+  var exactos = {};
+  for(i=0;i<polys.length;i++){ var k = _kmlClave(polys[i].nombre, campo); for(j=0;j<lotes.length;j++) if(claves[j]===k) exactos[j]=true; }
+  for(i=0;i<polys.length;i++){
+    var kp = _kmlClave(polys[i].nombre, campo), sel = [];
+    for(j=0;j<lotes.length;j++){
+      var kl = claves[j];
+      if(kl===kp) sel.push(j);
+      else if(kp && kl.indexOf(kp)===0 && !/^\d/.test(kl.substr(kp.length)) && !exactos[j]) sel.push(j);
+    }
+    if(!sel.length){
+      var base = kp.replace(_KML_CALIF,'');
+      if(base && base!==kp) for(j=0;j<lotes.length;j++){
+        var kl2 = claves[j];
+        if(exactos[j]) continue;
+        if(kl2===base || (kl2.indexOf(base)===0 && /^cn/.test(kl2.substr(base.length)))) sel.push(j);
+      }
+    }
+    polys[i].lotes = sel.map(function(x){ return lotes[x]; });
+    polys[i].sugerido = sel.length>0;
+  }
+}
+var KML = null; // {campo, polys:[{nombre, ring, ha, lotes:[LOTE]}]}
+function _lotesDeCampo(c){ return LOTES.filter(function(l){ return l.c===c; }); }
+function abrirCargaKML(){
+  var cs = [], vistos = {}, i;
+  if(typeof PA!=='undefined' && PA.demo && CTX){ var pc = PA.demo.camposDeEmpresa(CTX.empresaActivaId)||[]; for(i=0;i<pc.length;i++){ cs.push(pc[i].nombre); vistos[pc[i].nombre]=true; } }
+  for(i=0;i<LOTES.length;i++) if(!vistos[LOTES[i].c]){ vistos[LOTES[i].c]=true; cs.push(LOTES[i].c); }
+  var sel = camposSeleccionados(), h = '';
+  for(i=0;i<cs.length;i++){
+    var n = _lotesDeCampo(cs[i]).filter(function(l){ return l._geo; }).length;
+    h += '<option value="'+cs[i]+'"'+(sel.length===1 && sel[0]===cs[i]?' selected':'')+'>'+cs[i]+(n?' (ya tiene mapa)':'')+'</option>';
+  }
+  document.getElementById('kmlCampo').innerHTML = h;
+  document.getElementById('kmlFile').value = '';
+  document.getElementById('kmlEstado').textContent = 'Elegí el campo y el archivo.';
+  document.getElementById('kmlTabla').innerHTML = '';
+  document.getElementById('kmlGuardar').disabled = true;
+  KML = null;
+  document.getElementById('modalKML').classList.add('on');
+}
+function cerrarCargaKML(){ document.getElementById('modalKML').classList.remove('on'); KML = null; }
+function kmlCambioCampo(){
+  if(!KML) return;
+  KML.campo = document.getElementById('kmlCampo').value;
+  _kmlSugerir(KML.polys, _lotesDeCampo(KML.campo), KML.campo);
+  pintarKML();
+}
+function kmlLeerArchivos(files){
+  if(!files || !files.length) return;
+  var est = document.getElementById('kmlEstado'), lista = [], pend = files.length, errores = [];
+  est.textContent = 'Leyendo…';
+  for(var i=0;i<files.length;i++){
+    (function(fl){
+      PAMAP.leerArchivo(fl, function(err, polys){
+        if(err) errores.push(fl.name+': '+err); else lista = lista.concat(polys||[]);
+        if(--pend===0){
+          if(!lista.length){ est.innerHTML = '<span class="kml-dif">No encontré polígonos en el archivo.</span> '+(errores.join(' · ')); return; }
+          var campo = document.getElementById('kmlCampo').value;
+          // Si el KML trae el código de otro campo en los nombres, se sugiere ese campo.
+          var opts = document.getElementById('kmlCampo').options, votos = {};
+          for(var q=0;q<lista.length;q++){ var pre = String(lista[q].nombre).split(/\s+/)[0]; for(var o=0;o<opts.length;o++) if(opts[o].value===pre) votos[pre]=(votos[pre]||0)+1; }
+          var mejor = campo, mv = 0; for(var v in votos) if(votos.hasOwnProperty(v) && votos[v]>mv){ mv=votos[v]; mejor=v; }
+          if(mejor!==campo){ document.getElementById('kmlCampo').value = mejor; campo = mejor; }
+          KML = { campo:campo, polys:lista };
+          _kmlSugerir(KML.polys, _lotesDeCampo(campo), campo);
+          pintarKML();
+          if(errores.length) est.innerHTML += ' <span class="kml-dif">'+errores.join(' · ')+'</span>';
+        }
+      });
+    })(files[i]);
+  }
+}
+function pintarKML(){
+  var est = document.getElementById('kmlEstado'), lotes = _lotesDeCampo(KML.campo), usados = {}, i, j;
+  for(i=0;i<KML.polys.length;i++) for(j=0;j<KML.polys[i].lotes.length;j++) usados[LOTES.indexOf(KML.polys[i].lotes[j])] = true;
+  var opts = '<option value="">+ lote</option>';
+  var ord = lotes.slice().sort(function(a,b){ return a.l.localeCompare(b.l,'es',{numeric:true}); });
+  for(i=0;i<ord.length;i++) opts += '<option value="'+LOTES.indexOf(ord[i])+'">'+ord[i].l+'</option>';
+  var h = '<div class="kml-tw"><table><thead><tr><th>Polígono del KML</th><th style="text-align:right">Ha del mapa</th><th>Lotes del padrón</th><th style="text-align:right">Ha padrón</th></tr></thead><tbody>';
+  var nSin = 0;
+  for(i=0;i<KML.polys.length;i++){
+    var p = KML.polys[i], chips = '', sup = 0;
+    for(j=0;j<p.lotes.length;j++){ sup += Number(p.lotes[j].s)||0; chips += '<span class="kml-chip">'+p.lotes[j].l+'<button title="Quitar" onclick="kmlQuitar('+i+','+j+')">×</button></span>'; }
+    if(!p.lotes.length) nSin++;
+    var dif = p.lotes.length && Math.abs(sup - p.ha) > Math.max(2, p.ha*0.12);
+    h += '<tr><td><b>'+escHtmlMapa(p.nombre)+'</b>'+(p.carpeta?'<div class="mapa-sin">'+escHtmlMapa(p.carpeta)+'</div>':'')+'</td>'+
+         '<td style="text-align:right">'+f(p.ha,1)+'</td>'+
+         '<td>'+chips+'<select class="kml-add" onchange="kmlAgregar('+i+',this.value)">'+opts+'</select>'+(p.sugerido && p.lotes.length?'<span class="kml-sug">sugerido</span>':'')+'</td>'+
+         '<td style="text-align:right"'+(dif?' class="kml-dif" title="La superficie del padrón difiere bastante de la del polígono"':'')+'>'+(p.lotes.length?f(sup,1):'—')+'</td></tr>';
+  }
+  h += '</tbody></table></div>';
+  var sinMapa = lotes.filter(function(l){ return !usados[LOTES.indexOf(l)]; }).map(function(l){ return l.l; });
+  h += '<div class="kml-pie">'+(nSin?'<span class="kml-dif">'+nSin+' polígono(s) sin lote asignado: no se guardan.</span> ':'')+
+       (sinMapa.length ? '<b>Lotes de '+KML.campo+' que quedan sin mapa ('+sinMapa.length+'):</b> '+sinMapa.join(', ') : 'Todos los lotes de '+KML.campo+' quedan con mapa.')+
+       '<br>Un polígono puede ser de varios lotes (por ejemplo, el lote agrícola y su parte de campo natural) y un lote puede tener varios polígonos.</div>';
+  document.getElementById('kmlTabla').innerHTML = h;
+  est.textContent = KML.polys.length+' polígonos leídos para el campo '+KML.campo+'. Revisá a qué lote va cada uno.';
+  document.getElementById('kmlGuardar').disabled = KML.polys.length===nSin;
+}
+function escHtmlMapa(t){ return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function kmlQuitar(i, j){ KML.polys[i].lotes.splice(j,1); KML.polys[i].sugerido=false; pintarKML(); }
+function kmlAgregar(i, idx){ if(idx==='') return; var l = LOTES[Number(idx)]; if(l && KML.polys[i].lotes.indexOf(l)<0) KML.polys[i].lotes.push(l); KML.polys[i].sugerido=false; pintarKML(); }
+function guardarKML(){
+  if(!KML) return;
+  var lotes = _lotesDeCampo(KML.campo), i, j, n = 0;
+  var tenian = lotes.filter(function(l){ return l._geo; }).length;
+  if(tenian && !confirm('El campo '+KML.campo+' ya tenía mapa en '+tenian+' lote(s). ¿Reemplazarlo por este?')) return;
+  for(i=0;i<lotes.length;i++) lotes[i]._geo = null;
+  var sello = Date.now().toString(36);
+  for(i=0;i<KML.polys.length;i++){
+    var p = KML.polys[i]; if(!p.lotes.length) continue;
+    var sh = { id:'geo_'+_slugId(KML.campo)+'_'+sello+'_'+i, nombre:p.nombre, ha:p.ha, ring:p.ring };
+    for(j=0;j<p.lotes.length;j++){ var L = p.lotes[j]; if(!L._geo) L._geo = []; L._geo.push(sh); }
+    n++;
+  }
+  cerrarCargaKML();
+  MAPA_ENCUADRE = '';
+  renderAll();
+  var bt = document.querySelector('.nav-btn[data-view="mapa"]'); if(state.view!=='mapa' && bt) setView('mapa', bt);
+}
+// Cultivo "principal" de un lote en la campaña (el de 1ª; si no hay, el primero).
+function _cultivoMapa(l, camp){
+  var as = actsDe(l, camp);
+  for(var i=0;i<as.length;i++) if(!as[i].seg) return as[i].c;
+  return as.length ? as[0].c : '';
+}
+function renderMapa(){
+  var camp = state.campania, cont = document.getElementById('mapaCanvas'), vacio = document.getElementById('mapaVacio');
+  document.getElementById('mapaTit').textContent = 'Mapa de lotes · campaña '+camp;
+  var enCampo = LOTES.filter(function(l){ return campoMatch(l); });
+  var conGeo = enCampo.filter(function(l){ return l._geo && l._geo.length; });
+  var sinGeo = enCampo.filter(function(l){ return !(l._geo && l._geo.length); });
+  document.getElementById('mapaSub').textContent = conGeo.length+' de '+enCampo.length+' lotes con mapa';
+  if(!conGeo.length){
+    vacio.style.display = '';
+    vacio.innerHTML = '<b>Todavía no hay mapa para '+(camposSeleccionados().length ? camposSeleccionados().join(', ') : 'estos campos')+'.</b>'+
+      'Cargá el KML o KMZ de cada campo (exportado de Google Earth, un polígono por lote).'+
+      '<button class="modal-ok" onclick="abrirCargaKML()">⬆ Cargar KML / KMZ</button>';
+    pintarLadoMapa([], sinGeo, camp);
+    return;
+  }
+  vacio.style.display = 'none';
+  if(!window.L){
+    vacio.style.display = ''; vacio.innerHTML = 'Cargando el mapa…';
+    PAMAP.cargarLeaflet(function(ok){ if(!ok){ vacio.innerHTML = '<b>No se pudo cargar el mapa.</b>Revisá la conexión a internet.'; return; } renderMapa(); });
+    return;
+  }
+  PAMAP.inyectarCSS();
+  if(!MAPA){
+    MAPA = PAMAP.crearMapa(cont); MAPA_CAPA = window.L.layerGroup().addTo(MAPA);
+    var zoomCls = function(){ var z = MAPA.getZoom(); cont.classList.toggle('lejos', z<13.75); cont.classList.toggle('medio', z>=13.75 && z<15); };
+    MAPA.on('zoomend', zoomCls); MAPA.whenReady(zoomCls);
+  }
+  setTimeout(function(){ if(MAPA) MAPA.invalidateSize(); }, 30);
+  MAPA_CAPA.clearLayers();
+  var visibles = {}, filtrados = lotesFiltrados();
+  for(var v=0; v<filtrados.length; v++) visibles[LOTES.indexOf(filtrados[v])] = true;
+  var polys = PAMAP.poligonosDeLotes(conGeo.map(function(l){ return { geo:l._geo, ref:l }; }));
+  var leyenda = {}, todos = [];
+  for(var i=0;i<polys.length;i++){
+    var p = polys[i], refs = p.lotes.map(function(x){ return x.ref; });
+    var vis = refs.some(function(r){ return visibles[LOTES.indexOf(r)]; });
+    var mayor = refs.slice().sort(function(a,b){ return (Number(b.s)||0)-(Number(a.s)||0); })[0];
+    var sig = _cultivoMapa(mayor, camp), col = sig ? cultColor(sig) : '#9AA5B1';
+    var pol = window.L.polygon(p.ring, { color: vis ? '#FFFFFF' : 'rgba(255,255,255,.45)', weight: vis ? 1.6 : 1,
+      fillColor: col, fillOpacity: vis ? 0.55 : 0.08 });
+    (function(pp, rr){ pol.on('click', function(){ MAPA_SEL = pp.id; pintarLadoMapa(polys, sinGeo, camp); }); })(p, refs);
+    pol.bindTooltip(refs.map(function(r){ return r.l; }).join(' · '), { sticky:true });
+    MAPA_CAPA.addLayer(pol);
+    if(vis){
+      var sgs = {}, sgl = []; for(var s0=0;s0<refs.length;s0++){ var sx=_cultivoMapa(refs[s0], camp); if(sx && !sgs[sx]){ sgs[sx]=true; sgl.push(sx); } }
+      var et = escHtmlMapa(refs.length===1 ? refs[0].l : p.nombre) + (sgl.length ? '<br>'+escHtmlMapa(sgl.join(' / ')) : '');
+      MAPA_CAPA.addLayer(window.L.marker(PAMAP.centroide(p.ring), { icon:PAMAP.etiquetaIcono(et), interactive:false, keyboard:false }));
+      for(var r2=0;r2<refs.length;r2++){
+        var sg = _cultivoMapa(refs[r2], camp) || '—';
+        if(!leyenda[sg]) leyenda[sg] = { ha:0, c: sg==='—' ? '#9AA5B1' : cultColor(sg) };
+        var as = actsDe(refs[r2], camp), ha1 = 0; for(var a=0;a<as.length;a++) if(!as[a].seg) ha1 += Number(as[a].ha)||0;
+        leyenda[sg].ha += ha1;
+      }
+    }
+    todos.push(p.ring);
+  }
+  var clave = camposSeleccionados().join('|')+'#'+conGeo.length;
+  if(clave!==MAPA_ENCUADRE){
+    MAPA_ENCUADRE = clave; var bb = PAMAP.bbox(todos);
+    var encuadrar = function(){ MAPA.invalidateSize(); MAPA.fitBounds([[bb.s,bb.w],[bb.n,bb.e]], { padding:[16,16] }); };
+    encuadrar(); setTimeout(encuadrar, 60);
+  }
+  pintarLadoMapa(polys, sinGeo, camp, leyenda);
+}
+function pintarLadoMapa(polys, sinGeo, camp, leyenda){
+  var h = '';
+  var sel = null; for(var i=0;i<polys.length;i++) if(polys[i].id===MAPA_SEL) sel = polys[i];
+  if(sel){
+    h += '<div class="mapa-blk"><div class="mapa-blk-t">Seleccionado · '+escHtmlMapa(sel.nombre)+' · '+f(sel.ha,1)+' ha en el mapa</div>';
+    for(var k=0;k<sel.lotes.length;k++){
+      var l = sel.lotes[k].ref, as = actsDe(l, camp), ant = antecesoresDeLote ? antecesoresDeLote(l) : [];
+      h += '<div class="mapa-sel-n">'+escHtmlMapa(l.l)+'</div>'+
+        '<div class="mapa-sel-r"><span>Sup. total</span><span>'+f(l.s,1)+' ha</span></div>'+
+        '<div class="mapa-sel-r"><span>Ambiente</span><span>'+escHtmlMapa(l.a||'—')+'</span></div>';
+      if(!as.length) h += '<div class="mapa-sel-r"><span>'+camp+'</span><span>sin actividad</span></div>';
+      for(var a=0;a<as.length;a++) h += '<div class="mapa-sel-r"><span>'+camp+' '+(as[a].seg?'2ª':'1ª')+'</span><span>'+escHtmlMapa(cultName(as[a].c))+' · '+f(as[a].ha,1)+' ha</span></div>';
+      if(ant && ant.length) h += '<div class="mapa-sel-r"><span>Antecesor</span><span>'+escHtmlMapa(ant.map(cultName).join(' / '))+'</span></div>';
+      var c = PAMAP.centroide(sel.ring);
+      h += '<div class="mapa-sel-r"><span>Ubicación</span><span><a href="'+PAMAP.linkVer(c)+'" target="_blank" rel="noopener">Google Maps ↗</a></span></div>';
+    }
+    h += '</div>';
+  }
+  if(leyenda){
+    var ks = Object.keys(leyenda).sort(function(a,b){ return leyenda[b].ha-leyenda[a].ha; });
+    h += '<div class="mapa-blk"><div class="mapa-blk-t">Cultivo de 1ª · '+camp+'</div>';
+    for(var j=0;j<ks.length;j++) h += '<div class="mapa-ley"><i style="background:'+leyenda[ks[j]].c+'"></i><span>'+escHtmlMapa(ks[j]==='—'?'Sin actividad':cultName(ks[j]))+'</span><em>'+f(leyenda[ks[j]].ha,0)+' ha</em></div>';
+    h += '</div>';
+  }
+  var porC = {}, ordC = [];
+  for(var q=0;q<sinGeo.length;q++){ var cq = sinGeo[q].c; if(!porC[cq]){ porC[cq]=[]; ordC.push(cq); } porC[cq].push(sinGeo[q].l); }
+  var conMapa = {}; for(var q2=0;q2<polys.length;q2++) for(var q3=0;q3<polys[q2].lotes.length;q3++) conMapa[polys[q2].lotes[q3].ref.c]=true;
+  var txtSin = '';
+  for(var q4=0;q4<ordC.length;q4++){
+    var cc = ordC[q4];
+    txtSin += '<div><b>'+escHtmlMapa(cc)+'</b> · '+(conMapa[cc] ? escHtmlMapa(porC[cc].join(', ')) : 'el campo no tiene mapa ('+porC[cc].length+' lotes)')+'</div>';
+  }
+  h += '<div class="mapa-blk"><div class="mapa-blk-t">Lotes sin mapa ('+sinGeo.length+')</div>'+
+       '<div class="mapa-sin">'+(sinGeo.length ? txtSin : 'Todos los lotes tienen mapa.')+'</div></div>';
+  if(!sel && polys.length) h = '<div class="mapa-blk mapa-sin">Tocá un lote en el mapa para ver su plan.</div>' + h;
+  document.getElementById('mapaSide').innerHTML = h;
 }
 
 // ────────────────────────────────────────────────────────────
@@ -5104,6 +5701,8 @@ function renderAll(){
     renderHistorico();
   } else if(state.view === 'maestros'){
     renderMaestros();
+  } else if(state.view === 'mapa'){
+    renderMapa();
   }
   
   var pill = document.getElementById('ctxPill');
