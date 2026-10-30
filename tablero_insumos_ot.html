@@ -1313,7 +1313,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
 </main>
 
 <footer>
-  <span>Puntal Agro · Insumos &amp; OT · Versión v2026-10-30 10:55 · BUILD 27</span>
+  <span>Puntal Agro · Insumos &amp; OT · Versión v2026-10-30 11:05 · BUILD 28</span>
   <span id="fts">—</span>
 </footer>
 
@@ -4987,37 +4987,46 @@ var PAMAP = (function(){
      · sin ring: cada clic en el mapa agrega un vértice.
      Devuelve {terminar(), cancelar(), ring()} */
   X.editor = function(mapa, ringIni, alTerminar){
+    // Solo se ven los puntos que se tocan (naranjas). Para agregar un vértice se toca la línea naranja.
+    // Si se arranca sin área (dibujar de cero), cada clic en el mapa agrega un punto al final.
     var L = window.L, ring = ringIni ? ringIni.map(function(p){ return [p[0],p[1]]; }) : [];
-    var capa = L.layerGroup().addTo(mapa), activo = true;
-    function icono(cls){ return L.divIcon({ className:'pamap-v '+cls, iconSize:[14,14], iconAnchor:[7,7] }); }
+    var dibujando = !ringIni, capa = L.layerGroup().addTo(mapa), activo = true, pol = null;
+    function icono(){ return L.divIcon({ className:'pamap-v', iconSize:[16,16], iconAnchor:[8,8] }); }
+    function insertarEn(latlng){
+      if(ring.length<3) return;
+      var pt = mapa.latLngToLayerPoint(latlng), mejor = 0, dmin = Infinity;
+      for(var i=0;i<ring.length;i++){
+        var a = mapa.latLngToLayerPoint(ring[i]), b = mapa.latLngToLayerPoint(ring[(i+1)%ring.length]);
+        var d = L.LineUtil.pointToSegmentDistance(pt, a, b);
+        if(d<dmin){ dmin = d; mejor = i; }
+      }
+      ring.splice(mejor+1, 0, [latlng.lat, latlng.lng]);
+      pintar(); avisar();
+    }
     function pintar(){
-      capa.clearLayers();
-      if(ring.length>=2) L.polygon(ring, { color:'#FF7A2F', weight:3, dashArray: ring.length<3?'4 4':null, fillColor:'#FF7A2F', fillOpacity:.22, interactive:false }).addTo(capa);
+      capa.clearLayers(); pol = null;
+      if(ring.length>=2){
+        pol = L.polygon(ring, { color:'#FF7A2F', weight:4, dashArray: ring.length<3?'4 4':null, fillColor:'#FF7A2F', fillOpacity:.2, interactive:ring.length>=3, bubblingMouseEvents:false }).addTo(capa);
+        pol.on('click', function(ev){ L.DomEvent.stopPropagation(ev); insertarEn(ev.latlng); });
+      }
       for(var i=0;i<ring.length;i++){
         (function(ix){
-          var m = L.marker(ring[ix], { draggable:true, icon:icono('pamap-vtx'), zIndexOffset:1000 }).addTo(capa);
-          m.on('drag', function(e){ ring[ix] = [e.latlng.lat, e.latlng.lng]; var pol = null; capa.eachLayer(function(l){ if(l instanceof L.Polygon) pol = l; }); if(pol) pol.setLatLngs(ring); });
-          m.on('dragend', pintar);
+          var m = L.marker(ring[ix], { draggable:true, icon:icono(), zIndexOffset:1000 }).addTo(capa);
+          m.on('drag', function(e){ ring[ix] = [e.latlng.lat, e.latlng.lng]; if(pol) pol.setLatLngs(ring); });
+          m.on('dragend', function(){ pintar(); avisar(); });
           m.on('contextmenu', function(){ if(ring.length>3){ ring.splice(ix,1); pintar(); avisar(); } });
         })(i);
-        if(ring.length>=3 || i<ring.length-1){
-          var j = (i+1)%ring.length; if(j===0 && ring.length<3) continue;
-          (function(ia, ja){
-            var mid = [(ring[ia][0]+ring[ja][0])/2, (ring[ia][1]+ring[ja][1])/2];
-            var mm = L.marker(mid, { icon:icono('pamap-mid'), zIndexOffset:900 }).addTo(capa);
-            mm.on('click', function(ev){ L.DomEvent.stopPropagation(ev); ring.splice(ia+1, 0, mid); pintar(); avisar(); });
-          })(i, j);
-        }
       }
     }
-    var onCambio = null; function avisar(){ if(onCambio) onCambio(ring); }
-    function clicMapa(e){ if(!activo) return; ring.push([e.latlng.lat, e.latlng.lng]); pintar(); avisar(); }
+    var onCambio = null; function avisar(){ if(onCambio) onCambio(ring, dibujando); }
+    function clicMapa(e){ if(!activo || !dibujando) return; ring.push([e.latlng.lat, e.latlng.lng]); pintar(); avisar(); }
     mapa.on('click', clicMapa);
     mapa.doubleClickZoom.disable();
     pintar();
     function limpiar(){ activo = false; mapa.off('click', clicMapa); mapa.doubleClickZoom.enable(); try{ mapa.removeLayer(capa); }catch(e){} }
     return {
       ring: function(){ return ring; },
+      dibujando: function(){ return dibujando; },
       alCambiar: function(fn){ onCambio = fn; },
       terminar: function(){ var r = ring.length>=3 ? ring.map(function(p){ return [Math.round(p[0]*1e6)/1e6, Math.round(p[1]*1e6)/1e6]; }) : null; limpiar(); if(alTerminar) alTerminar(r); },
       cancelar: function(){ limpiar(); if(alTerminar) alTerminar(undefined); }
@@ -5051,8 +5060,7 @@ var PAMAP = (function(){
     '.pamap-op{display:inline-flex;align-items:center;gap:6px;color:#7A8899;font-size:11px}.pamap-op input{width:90px;accent-color:#4A6533}.pamap-op b{font-weight:600;color:#475569;min-width:30px;font-variant-numeric:tabular-nums}'+
     '.pamap-ley{display:inline-flex;align-items:center;gap:6px;color:#7A8899;font-size:11px}.pamap-ley i{display:inline-block;width:110px;height:10px;border-radius:5px}'+
     '.pamap-est{color:#A84D1F;font-size:11.5px}'+
-    '.pamap-v{border-radius:50%;background:#FF7A2F;border:2.5px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.6);cursor:grab}'+
-    '.pamap-v.pamap-mid{background:rgba(255,255,255,.9);border:1.5px solid #FF7A2F;transform:scale(.65);cursor:copy}';
+    '.pamap-v{border-radius:50%;background:#FF7A2F;border:2.5px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.6);cursor:grab}';
   X.inyectarCSS = function(){ if(document.getElementById('pamap-css')) return; var s=document.createElement('style'); s.id='pamap-css'; s.textContent=X.CSS; document.head.appendChild(s); };
 
   return X;
@@ -5232,7 +5240,7 @@ function otEditarArea(loteId){
   }
   function pintarPanel(ring){
     panel.innerHTML = '<div class="otmap-ed-t">Marcando el área a trabajar en <b>'+esc(lo.nombre)+'</b> <span class="otmap-ed-ref">· punteado gris: el lote completo</span></div>'+
-      '<div class="otmap-ed-ay">'+(ring.length ? 'Arrastrá los puntos naranjas para mover el borde; tocá un punto blanco (mitad de un lado) para agregar un vértice; clic derecho en un punto naranja lo quita.' : 'Tocá el mapa para marcar cada vértice del área (mínimo 3).')+'</div>'+
+      '<div class="otmap-ed-ay">'+((OTMAPA_ED && OTMAPA_ED.dibujando()) ? 'Tocá el mapa para marcar cada punto del área (mínimo 3). Después podés arrastrarlos.' : 'Arrastrá los puntos naranjas para mover el borde · tocá la línea naranja para agregar un punto · clic derecho en un punto lo quita.')+'</div>'+
       '<div class="otmap-ed-acc"><button type="button" class="btn btn-sm btn-primary" onclick="otAreaTerminar()"'+(ring.length>=3?'':' disabled')+'>✓ Terminar</button>'+
       '<button type="button" class="btn btn-sm" onclick="otAreaDeCero()">Dibujar de cero</button>'+
       '<button type="button" class="btn btn-sm" onclick="otAreaCancelar()">Descartar dibujo</button></div>';
