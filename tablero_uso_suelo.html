@@ -842,6 +842,7 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
         <button class="btn-sm" onclick="abrirCargaKML()">⬆ Cargar KML / KMZ de un campo</button>
       </div>
     </div>
+    <div id="mapaBarra"></div>
     <div class="mapa-wrap">
       <div class="mapa-cv" id="mapaCanvas"><div class="mapa-vacio" id="mapaVacio"></div></div>
       <div class="mapa-side" id="mapaSide"></div>
@@ -1205,7 +1206,7 @@ tbody tr.act-add td.td-act{border-top:1px dashed #E8D5C6;padding-top:5px;padding
 
 <footer>
   <span>Puntal Agro · Plan de Uso de Suelo</span>
-  <span id="fts">Versión v2026-10-29 19:20 · BUILD 51</span>
+  <span id="fts">Versión v2026-10-30 10:30 · BUILD 52</span>
 </footer>
 
 <script>
@@ -1767,8 +1768,10 @@ var PAMAP = (function(){
     var t0x = Math.floor(x0/256), t1x = Math.floor((x0+W)/256), t0y = Math.floor(y0/256), t1y = Math.floor((y0+H)/256);
     var tiles = [], ok = 0, mal = 0, listo = false;
     for(var tx=t0x; tx<=t1x; tx++) for(var ty=t0y; ty<=t1y; ty++) tiles.push([tx,ty]);
+    var overlay = opts.overlay || null, ovImgs = [];
     function terminar(){
       if(listo) return; listo = true;
+      if(overlay){ g.globalAlpha = overlay.alpha==null ? .85 : overlay.alpha; for(var oi=0;oi<ovImgs.length;oi++){ try{ g.drawImage(ovImgs[oi][0], ovImgs[oi][1], ovImgs[oi][2]); }catch(e){} } g.globalAlpha = 1; }
       dibujarLotes(g, opts.poligonos, function(lat,lon){ return [lon2x(lon,z)-x0, lat2y(lat,z)-y0]; }, opts.escala);
       g.textAlign = 'left';
       // escala
@@ -1793,8 +1796,15 @@ var PAMAP = (function(){
       cb(url, ok>0 && mal===0);
     }
     if(opts.sinFondo || !tiles.length){ terminar(); return; }
-    var pend = tiles.length;
-    setTimeout(terminar, opts.espera || 9000);
+    var pend = tiles.length * (overlay ? 2 : 1);
+    setTimeout(terminar, opts.espera || (overlay ? 15000 : 9000));
+    if(overlay) tiles.forEach(function(t){
+      var im = new Image(); im.crossOrigin = 'anonymous';
+      im.onload = function(){ ovImgs.push([im, t[0]*256-x0, t[1]*256-y0]); if(--pend===0) terminar(); };
+      im.onerror = function(){ if(--pend===0) terminar(); };
+      var n2 = Math.pow(2,z), xx2 = ((t[0]%n2)+n2)%n2;
+      im.src = overlay.url.replace('{z}',z).replace('{y}',t[1]).replace('{x}',xx2);
+    });
     tiles.forEach(function(t){
       var im = new Image(); im.crossOrigin = 'anonymous';
       im.onload = function(){ if(!listo){ try{ g.drawImage(im, t[0]*256-x0, t[1]*256-y0); ok++; }catch(e){ mal++; } } if(--pend===0) terminar(); };
@@ -1848,6 +1858,159 @@ var PAMAP = (function(){
     }
   }
 
+  /* ---------------- Sentinel-2 (NDVI) sin cuenta ----------------
+     Catálogo público Earth Search (AWS Open Data) + TiTiler para dibujar el índice.
+     Servicios de uso libre: pueden andar lentos o no responder. */
+  X.STAC = 'https://earth-search.aws.element84.com/v1';
+  X.TITILER = 'https://titiler.xyz';
+  X.INDICES = {
+    ndvi:{ nombre:'NDVI', titulo:'NDVI · vigor', desde:'bajo', hasta:'alto', colores:['#a50026','#f46d43','#fee08b','#a6d96a','#1a9850'],
+           params:[['assets','nir'],['assets','red'],['expression','(b1-b2)/(b1+b2)'],['rescale','0,0.9'],['colormap_name','rdylgn']] },
+    ndmi:{ nombre:'NDMI', titulo:'NDMI · humedad', desde:'seco', hasta:'húmedo', colores:['#a50026','#f46d43','#ffffbf','#74add1','#313695'],
+           params:[['assets','nir'],['assets','swir16'],['expression','(b1-b2)/(b1+b2)'],['rescale','-0.4,0.6'],['colormap_name','rdylbu']] },
+    color:{ nombre:'Color real', params:[['assets','visual']] }
+  };
+  function xhr(met, url, body, cb){
+    var q = new XMLHttpRequest(); q.open(met, url, true); q.timeout = 25000;
+    if(body) q.setRequestHeader('Content-Type','application/json');
+    q.onload = function(){ if(q.status>=200 && q.status<300){ try{ cb(null, JSON.parse(q.responseText)); }catch(e){ cb('respuesta inválida'); } } else cb('HTTP '+q.status); };
+    q.onerror = function(){ cb('sin conexión'); }; q.ontimeout = function(){ cb('el servicio no respondió'); };
+    q.send(body ? JSON.stringify(body) : null);
+  }
+  // Fechas con imagen sobre el área (una por día, la de menos nubes). cb(err, [{id, fecha, nubes, href}])
+  X.buscarEscenas = function(bb, meses, nubes, cb){
+    var hasta = new Date(), desde = new Date(); desde.setMonth(desde.getMonth()-(meses||4));
+    function iso(d){ return d.toISOString().slice(0,10); }
+    xhr('POST', X.STAC+'/search', { collections:['sentinel-2-l2a'], bbox:[bb.w,bb.s,bb.e,bb.n],
+      datetime:iso(desde)+'T00:00:00Z/'+iso(hasta)+'T23:59:59Z', query:{'eo:cloud_cover':{lt:(nubes||30)}}, limit:100 }, function(err, data){
+      if(err){ cb(err); return; }
+      var por = {}, fs = (data && data.features) || [];
+      for(var i=0;i<fs.length;i++){
+        var p = fs[i].properties||{}, d = String(p.datetime||'').slice(0,10), cc = p['eo:cloud_cover'];
+        if(!d) continue;
+        if(!por[d] || (typeof cc==='number' && cc < por[d].nubes)) por[d] = { id:fs[i].id, fecha:d, nubes:(typeof cc==='number'?cc:null), href:X.STAC+'/collections/sentinel-2-l2a/items/'+fs[i].id };
+      }
+      var out = []; for(var k in por) if(por.hasOwnProperty(k)) out.push(por[k]);
+      out.sort(function(a,b){ return a.fecha<b.fecha?1:-1; });
+      cb(null, out);
+    });
+  };
+  // URL de teselas del índice para una escena. cb(err, plantillaUrl)
+  X.urlIndice = function(esc, indice, cb){
+    var cfg = X.INDICES[indice] || X.INDICES.ndvi, qs = 'url='+encodeURIComponent(esc.href);
+    for(var i=0;i<cfg.params.length;i++) qs += '&'+cfg.params[i][0]+'='+encodeURIComponent(cfg.params[i][1]);
+    xhr('GET', X.TITILER+'/stac/WebMercatorQuad/tilejson.json?'+qs+'&minzoom=8&maxzoom=16', null, function(err, tj){
+      if(err){ cb(err); return; }
+      if(!tj || !tj.tiles || !tj.tiles.length){ cb('sin imagen'); return; }
+      cb(null, tj.tiles[0]);
+    });
+  };
+  // Barra de imagen (Satelital / NDVI / NDMI / Color real + fecha + transparencia) sobre un mapa Leaflet.
+  // Devuelve un objeto con .estado() → {indice, escena, url, opacidad} (url null = satelital común).
+  X.barraImagen = function(cont, mapa, bbFn, alCambiar){
+    var est = { indice:'', escenas:null, escena:null, url:null, opacidad:.85, capa:null };
+    cont.className = 'pamap-barra';
+    function dibujar(){
+      var h = '<span class="pamap-b-lbl">Imagen</span><div class="pamap-seg">';
+      var ops = [['','Satelital'],['ndvi','NDVI'],['ndmi','Humedad'],['color','Color real (Sentinel)']];
+      for(var i=0;i<ops.length;i++) h += '<button type="button" data-i="'+ops[i][0]+'" class="'+(est.indice===ops[i][0]?'on':'')+'">'+ops[i][1]+'</button>';
+      h += '</div>';
+      if(est.indice){
+        h += '<select class="pamap-fecha">';
+        if(!est.escenas) h += '<option>Buscando fechas…</option>';
+        else if(!est.escenas.length) h += '<option>Sin imágenes con pocas nubes</option>';
+        else for(var j=0;j<est.escenas.length;j++){ var e = est.escenas[j], d = e.fecha.split('-'); h += '<option value="'+j+'"'+(est.escena===e?' selected':'')+'>'+d[2]+'/'+d[1]+'/'+d[0]+(e.nubes!=null?' · '+Math.round(e.nubes)+'% nubes':'')+'</option>'; }
+        h += '</select><label class="pamap-op">Transparencia <input type="range" min="30" max="100" value="'+Math.round(est.opacidad*100)+'"></label>';
+        var cfg = X.INDICES[est.indice];
+        if(cfg.colores) h += '<span class="pamap-ley"><span>'+cfg.desde+'</span><i style="background:linear-gradient(90deg,'+cfg.colores.join(',')+')"></i><span>'+cfg.hasta+'</span></span>';
+      }
+      h += '<span class="pamap-est"></span>';
+      cont.innerHTML = h;
+      var bs = cont.querySelectorAll('.pamap-seg button');
+      for(var k=0;k<bs.length;k++) bs[k].onclick = function(){ elegirIndice(this.getAttribute('data-i')); };
+      var sf = cont.querySelector('.pamap-fecha'); if(sf) sf.onchange = function(){ var e2 = est.escenas && est.escenas[Number(this.value)]; if(e2){ est.escena = e2; cargarCapa(); } };
+      var rg = cont.querySelector('.pamap-op input'); if(rg) rg.oninput = function(){ est.opacidad = Number(this.value)/100; if(est.capa) est.capa.setOpacity(est.opacidad); };
+    }
+    function estado(t){ var e = cont.querySelector('.pamap-est'); if(e) e.textContent = t||''; }
+    function quitarCapa(){ if(est.capa){ try{ mapa.removeLayer(est.capa); }catch(e){} est.capa = null; } est.url = null; }
+    function elegirIndice(ind){
+      est.indice = ind; quitarCapa();
+      if(!ind){ dibujar(); if(alCambiar) alCambiar(); return; }
+      if(est.escenas && est.escenas.length){ dibujar(); cargarCapa(); return; }
+      est.escenas = null; dibujar(); estado('Buscando imágenes Sentinel-2 de los últimos 4 meses…');
+      X.buscarEscenas(bbFn(), 4, 30, function(err, lista){
+        if(err){ est.escenas = []; dibujar(); estado('No se pudo consultar el catálogo de imágenes ('+err+'). Probá de nuevo en un rato.'); return; }
+        est.escenas = lista; est.escena = lista[0] || null; dibujar();
+        if(est.escena) cargarCapa(); else estado('No hay imágenes con menos de 30% de nubes en los últimos 4 meses.');
+      });
+    }
+    function cargarCapa(){
+      quitarCapa(); if(!est.escena) return;
+      estado('Preparando la imagen…');
+      var pedido = est.escena.id+'|'+est.indice;
+      X.urlIndice(est.escena, est.indice, function(err, url){
+        if(pedido !== (est.escena && est.escena.id+'|'+est.indice)) return;
+        if(err){ estado('El servicio de imágenes no respondió ('+err+'). Probá otra fecha o reintentá.'); return; }
+        est.url = url;
+        est.capa = window.L.tileLayer(url, { opacity:est.opacidad, crossOrigin:'anonymous', maxZoom:19, maxNativeZoom:16, minZoom:8, pane:'pamapIndice' }).addTo(mapa);
+        var fallas = 0;
+        est.capa.on('tileerror', function(){ if(++fallas===4) estado('Algunas partes de la imagen no cargaron. Probá otra fecha.'); });
+        est.capa.on('load', function(){ if(fallas<4) estado(''); });
+        if(alCambiar) alCambiar();
+      });
+    }
+    if(!mapa.getPane('pamapIndice')){ var pn = mapa.createPane('pamapIndice'); pn.style.zIndex = 350; }
+    dibujar();
+    return {
+      estado: function(){ return { indice:est.indice, escena:est.escena, url:est.url, opacidad:est.opacidad }; },
+      restaurar: function(prev){ if(prev && prev.indice){ est.indice = prev.indice; est.escenas = prev.escenas||null; est.escena = prev.escena||null; est.opacidad = prev.opacidad||.85; dibujar(); if(est.escena) cargarCapa(); else elegirIndice(prev.indice); } },
+      _est: est
+    };
+  };
+
+  /* ---------------- dibujo / edición de un polígono ----------------
+     X.editor(mapa, ringInicial|null, alTerminar(ring|null))
+     · con ring: se arrastran los vértices; clic en el punto medio de un lado agrega un vértice; clic derecho en un vértice lo quita.
+     · sin ring: cada clic en el mapa agrega un vértice.
+     Devuelve {terminar(), cancelar(), ring()} */
+  X.editor = function(mapa, ringIni, alTerminar){
+    var L = window.L, ring = ringIni ? ringIni.map(function(p){ return [p[0],p[1]]; }) : [];
+    var capa = L.layerGroup().addTo(mapa), activo = true;
+    function icono(cls){ return L.divIcon({ className:'pamap-v '+cls, iconSize:[14,14], iconAnchor:[7,7] }); }
+    function pintar(){
+      capa.clearLayers();
+      if(ring.length>=2) L.polygon(ring, { color:'#FFD54A', weight:2.5, dashArray: ring.length<3?'4 4':null, fillColor:'#FFD54A', fillOpacity:.18, interactive:false }).addTo(capa);
+      for(var i=0;i<ring.length;i++){
+        (function(ix){
+          var m = L.marker(ring[ix], { draggable:true, icon:icono('pamap-vtx'), zIndexOffset:1000 }).addTo(capa);
+          m.on('drag', function(e){ ring[ix] = [e.latlng.lat, e.latlng.lng]; var pol = null; capa.eachLayer(function(l){ if(l instanceof L.Polygon) pol = l; }); if(pol) pol.setLatLngs(ring); });
+          m.on('dragend', pintar);
+          m.on('contextmenu', function(){ if(ring.length>3){ ring.splice(ix,1); pintar(); avisar(); } });
+        })(i);
+        if(ring.length>=3 || i<ring.length-1){
+          var j = (i+1)%ring.length; if(j===0 && ring.length<3) continue;
+          (function(ia, ja){
+            var mid = [(ring[ia][0]+ring[ja][0])/2, (ring[ia][1]+ring[ja][1])/2];
+            var mm = L.marker(mid, { icon:icono('pamap-mid'), zIndexOffset:900 }).addTo(capa);
+            mm.on('click', function(ev){ L.DomEvent.stopPropagation(ev); ring.splice(ia+1, 0, mid); pintar(); avisar(); });
+          })(i, j);
+        }
+      }
+    }
+    var onCambio = null; function avisar(){ if(onCambio) onCambio(ring); }
+    function clicMapa(e){ if(!activo) return; ring.push([e.latlng.lat, e.latlng.lng]); pintar(); avisar(); }
+    mapa.on('click', clicMapa);
+    mapa.doubleClickZoom.disable();
+    pintar();
+    function limpiar(){ activo = false; mapa.off('click', clicMapa); mapa.doubleClickZoom.enable(); try{ mapa.removeLayer(capa); }catch(e){} }
+    return {
+      ring: function(){ return ring; },
+      alCambiar: function(fn){ onCambio = fn; },
+      terminar: function(){ var r = ring.length>=3 ? ring.map(function(p){ return [Math.round(p[0]*1e6)/1e6, Math.round(p[1]*1e6)/1e6]; }) : null; limpiar(); if(alTerminar) alTerminar(r); },
+      cancelar: function(){ limpiar(); if(alTerminar) alTerminar(undefined); }
+    };
+  };
+
   /* ---------------- mapa interactivo (Leaflet) ---------------- */
   // Crea (o recrea) un mapa Leaflet satelital en el contenedor. Devuelve el mapa.
   X.crearMapa = function(cont){
@@ -1865,7 +2028,18 @@ var PAMAP = (function(){
     '.pamap-in{position:absolute;left:0;top:0;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:2px;white-space:nowrap}'+
     '.pamap-txt{font:600 11px "DM Sans",sans-serif;color:#fff;text-shadow:0 0 3px #000,0 0 3px #000,0 1px 2px #000;text-align:center;line-height:1.15}'+
     '.pamap-num{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 5px;border-radius:11px;background:#C8642D;color:#fff;font:700 12px "DM Sans",sans-serif;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.4)}'+
-    '.pamap-lbl.tenue .pamap-txt{opacity:.75;font-weight:500}';
+    '.pamap-lbl.tenue .pamap-txt{opacity:.75;font-weight:500}'+
+    '.pamap-barra{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin:0 0 8px;font:12px "DM Sans",sans-serif}'+
+    '.pamap-b-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#7A8899}'+
+    '.pamap-seg{display:inline-flex;border:1px solid #D4DAE4;border-radius:8px;overflow:hidden}'+
+    '.pamap-seg button{font:500 12px "DM Sans",sans-serif;border:none;background:#fff;color:#475569;padding:6px 11px;cursor:pointer;border-right:1px solid #D4DAE4}'+
+    '.pamap-seg button:last-child{border-right:none}.pamap-seg button.on{background:#4A6533;color:#fff}'+
+    '.pamap-fecha{font:12px "DM Sans",sans-serif;border:1px solid #D4DAE4;border-radius:8px;padding:5px 8px;background:#fff}'+
+    '.pamap-op{display:inline-flex;align-items:center;gap:6px;color:#7A8899;font-size:11px}.pamap-op input{width:90px;accent-color:#4A6533}'+
+    '.pamap-ley{display:inline-flex;align-items:center;gap:6px;color:#7A8899;font-size:11px}.pamap-ley i{display:inline-block;width:110px;height:10px;border-radius:5px}'+
+    '.pamap-est{color:#A84D1F;font-size:11.5px}'+
+    '.pamap-v{border-radius:50%;background:#fff;border:2px solid #C8642D;box-shadow:0 1px 3px rgba(0,0,0,.5);cursor:grab}'+
+    '.pamap-v.pamap-mid{background:rgba(255,213,74,.85);border:1.5px solid #fff;transform:scale(.7);cursor:copy}';
   X.inyectarCSS = function(){ if(document.getElementById('pamap-css')) return; var s=document.createElement('style'); s.id='pamap-css'; s.textContent=X.CSS; document.head.appendChild(s); };
 
   return X;
@@ -2036,6 +2210,10 @@ function renderMapa(){
   PAMAP.inyectarCSS();
   if(!MAPA){
     MAPA = PAMAP.crearMapa(cont); MAPA_CAPA = window.L.layerGroup().addTo(MAPA);
+    PAMAP.barraImagen(document.getElementById('mapaBarra'), MAPA, function(){
+      var rs = []; for(var q=0;q<LOTES.length;q++) if(LOTES[q]._geo && campoMatch(LOTES[q])) for(var w=0;w<LOTES[q]._geo.length;w++) rs.push(LOTES[q]._geo[w].ring);
+      return PAMAP.bbox(rs);
+    });
     var zoomCls = function(){ var z = MAPA.getZoom(); cont.classList.toggle('lejos', z<13.75); cont.classList.toggle('medio', z>=13.75 && z<15); };
     MAPA.on('zoomend', zoomCls); MAPA.whenReady(zoomCls);
   }
