@@ -1,0 +1,2178 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Puntal Agro · Programa de Siembra y Fertilización</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F0F2F5;
+  --card:#fff;
+  --border:#E4E8EE;
+  --text:#0F1923;
+  --muted:#7A8899;
+  --radius:12px;
+  --sans:'DM Sans',sans-serif;
+  --verde:#4A6533;
+  --terra:#C8642D;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13px;-webkit-font-smoothing:antialiased}
+
+/* ── Header ───────────────────────────────────────────── */
+.header{background:var(--card);border-bottom:1px solid var(--border);padding:10px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.hlogo{width:34px;height:34px;border-radius:8px;background:var(--verde);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;flex:none}
+.htit{font-size:15px;font-weight:600;line-height:1.2}
+.hsub{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:500}
+.hspace{flex:1}
+.hsel{display:flex;align-items:center;gap:6px}
+.hsel label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-weight:500}
+
+/* ── Controles ────────────────────────────────────────── */
+select,input[type=text],input[type=number],input[type=date]{
+  font-family:var(--sans);font-size:12px;font-variant-numeric:tabular-nums;
+  padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;
+  background:var(--card);color:var(--text);outline:none;
+}
+select:focus,input:focus{background:#EFF6FF;border-color:#185FA5}
+input[type=number]{text-align:right}
+label.fl{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-weight:500;margin-bottom:3px}
+
+.btn{font-family:var(--sans);font-size:12px;font-weight:500;padding:5px 12px;border-radius:6px;cursor:pointer;border:1.5px solid var(--border);background:var(--card);color:#475569;transition:all .12s}
+.btn:hover{border-color:#CBD5E1;background:#FAFBFC}
+.btn-pri{background:var(--verde);border-color:var(--verde);color:#fff}
+.btn-pri:hover{background:#3D5429;border-color:#3D5429}
+.btn-dan{color:#991B1B;border-color:#FECACA}
+.btn-dan:hover{background:#FEF2F2;border-color:#FCA5A5}
+.btn-sm{font-size:11px;padding:3px 8px}
+.btn-ico{border:none;background:none;cursor:pointer;color:var(--muted);font-size:13px;padding:2px 4px;border-radius:4px;font-family:var(--sans)}
+.btn-ico:hover{background:#F0F2F5;color:var(--text)}
+
+/* ── Tabs ─────────────────────────────────────────────── */
+.tabs{background:var(--card);border-bottom:1px solid var(--border);padding:0 24px;display:flex;gap:2px;overflow-x:auto}
+.tab{padding:9px 14px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border:none;background:none;font-family:var(--sans);border-bottom:2px solid transparent;white-space:nowrap}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--verde);border-bottom-color:var(--verde);font-weight:600}
+
+/* ── Layout ───────────────────────────────────────────── */
+main{padding:16px 24px;display:flex;flex-direction:column;gap:12px}
+.view{display:none;flex-direction:column;gap:12px}
+.view.active{display:flex}
+.card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:12px}
+.chd{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px;flex-wrap:wrap}
+.ct{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+.cact{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.scroll{overflow-x:auto}
+
+/* ── Métricas ─────────────────────────────────────────── */
+.metrics{display:flex;gap:10px;flex-wrap:wrap}
+.mc{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);border-left:3px solid var(--border);padding:10px 16px;min-width:130px;flex:1}
+.mc-v{background:var(--verde)!important}
+.mc .mv{font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.2}
+.mc .ml{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-weight:500;margin-top:2px}
+.mc-t{border-left-color:var(--terra)}
+.mc-g{border-left-color:var(--verde)}
+
+/* ── Tablas ───────────────────────────────────────────── */
+table{width:100%;border-collapse:collapse}
+thead th{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;font-weight:500;padding:4px 5px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap}
+thead th.r{text-align:right}
+thead th.c{text-align:center}
+tbody td{padding:7px 6px;border-bottom:1px solid #F5F7FA;font-family:var(--sans);font-variant-numeric:tabular-nums;font-size:12px;white-space:nowrap}
+tbody td.r{text-align:right}
+tbody td.c{text-align:center}
+tbody tr:hover td{background:#FAFBFC}
+.tdname{font-weight:500;font-variant-numeric:normal}
+.grp td{background:#F5F7FA!important;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.3px;color:#475569}
+.sub td{background:#FCFDFE;font-size:11px;color:#475569}
+.sub td:first-child{padding-left:20px}
+.empty{padding:28px 12px;text-align:center;color:var(--muted);font-size:12px;line-height:1.7}
+
+/* ── Badges ───────────────────────────────────────────── */
+.bdg{display:inline-block;padding:1px 6px;border-radius:10px;font-size:10px;font-weight:600;font-family:var(--sans);font-variant-numeric:tabular-nums}
+.bg{background:#F0FDF4;color:#166534}
+.by{background:#FFFBEB;color:#92400E}
+.br{background:#FEF2F2;color:#991B1B}
+.bn{background:#F0F2F5;color:#7A8899}
+.bamb{background:#F0F2F5;color:#475569;font-weight:500}
+
+/* ── Modal ────────────────────────────────────────────── */
+.ovl{display:none;position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(15,25,35,.42);z-index:60;padding:24px;overflow-y:auto}
+.ovl.open{display:block}
+.mdl{background:var(--card);border-radius:var(--radius);max-width:880px;margin:0 auto;box-shadow:0 8px 32px rgba(15,25,35,.18)}
+.mdl-h{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.mdl-t{font-size:14px;font-weight:600}
+.mdl-b{padding:16px 18px}
+.mdl-f{padding:12px 18px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+.frow{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.fcol{flex:1;min-width:120px}
+.fcol input,.fcol select{width:100%}
+.fsec{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:16px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+.fsec:first-child{margin-top:0}
+.calc{background:#F5F7FA;border-radius:8px;padding:10px 12px;display:flex;gap:18px;flex-wrap:wrap}
+.calc .ci{min-width:72px}
+.calc .cv{font-size:14px;font-weight:600;font-variant-numeric:tabular-nums}
+.calc .cl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-weight:500}
+.warn{background:#FFFBEB;color:#92400E;border-radius:6px;padding:7px 10px;font-size:11px;margin-top:8px;display:none;line-height:1.5}
+.hint{font-size:11px;color:var(--muted);line-height:1.5;margin-top:6px}
+
+/* ── Picker de lotes ──────────────────────────────────── */
+.pick{max-height:220px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:4px}
+.pick-r{display:flex;align-items:center;gap:8px;padding:5px 7px;border-radius:5px;cursor:pointer;font-size:12px}
+.pick-r:hover{background:#FAFBFC}
+.pick-r input{margin:0;cursor:pointer}
+.pick-r .pn{font-weight:500;flex:1}
+.pick-r .ph{color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* ── Filtros ──────────────────────────────────────────── */
+.fbar{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}
+
+/* ── Footer ───────────────────────────────────────────── */
+footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;border-top:1px solid var(--border);margin-top:6px}
+
+/* ── Placeholder de etapa ─────────────────────────────── */
+.soon{padding:36px 16px;text-align:center;color:var(--muted);font-size:12px;line-height:1.8}
+.soon b{color:var(--text);display:block;font-size:13px;margin-bottom:6px}
+
+@media (max-width:768px){
+  .g2{grid-template-columns:1fr}
+  .header,.tabs,main,footer{padding-left:14px;padding-right:14px}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="hlogo">PA</div>
+  <div>
+    <div class="htit">Programa de Siembra y Fertilización</div>
+    <div class="hsub">Puntal Agro</div>
+  </div>
+  <div class="hspace"></div>
+  <div class="hsel" id="emp-wrap">
+    <label for="emp-sel">Empresa</label>
+    <select id="emp-sel" onchange="onCambioEmpresa()"></select>
+  </div>
+  <div class="hsel">
+    <label for="camp-sel">Campaña</label>
+    <select id="camp-sel" onchange="onCambioCampania()"></select>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" id="tb-lotes"  onclick="showTab('lotes',this)">Lotes de la campaña</button>
+  <button class="tab"        id="tb-siembra" onclick="showTab('siembra',this)">Siembra</button>
+  <button class="tab"        id="tb-fert"   onclick="showTab('fert',this)">Fertilización</button>
+  <button class="tab"        id="tb-semb"   onclick="showTab('semb',this)">Sembradoras</button>
+  <button class="tab"        id="tb-insumos" onclick="showTab('insumos',this)">Necesidad de insumos</button>
+  <button class="tab"        id="tb-cfg"    onclick="showTab('cfg',this)">Configuración</button>
+</div>
+
+<main>
+
+<!-- ═══════════ LOTES DE LA CAMPAÑA ═══════════ -->
+<div class="view active" id="v-lotes">
+  <div class="metrics" id="lot-metrics"></div>
+  <div class="card">
+    <div class="chd">
+      <div class="ct">Avance de la planificación</div>
+      <div class="cact">
+        <select id="lot-f-campo" onchange="renderLotes()"><option value="">Todos los campos</option></select>
+        <select id="lot-f-cult" onchange="renderLotes()"><option value="">Todos los cultivos</option></select>
+        <select id="lot-f-est" onchange="renderLotes()">
+          <option value="">Todos los estados</option>
+          <option value="falta">Falta programar</option>
+          <option value="listo">Programados</option>
+        </select>
+      </div>
+    </div>
+    <div class="scroll"><table>
+      <thead><tr>
+        <th>Campo</th><th>Lote</th><th class="r">Sup (ha)</th><th>Ambiente</th>
+        <th>Cultivo</th><th class="c">Siembra</th><th class="c">Fertilización</th><th></th>
+      </tr></thead>
+      <tbody id="tb-lot"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- ═══════════ SIEMBRA ═══════════ -->
+<div class="view" id="v-siembra">
+  <div class="metrics" id="sb-metrics"></div>
+  <div class="card">
+    <div class="chd">
+      <div class="ct">Programación de siembra</div>
+      <div class="cact">
+        <select id="sb-f-campo" onchange="renderSiembra()"><option value="">Todos los campos</option></select>
+        <select id="sb-f-cult" onchange="renderSiembra()"><option value="">Todos los cultivos</option></select>
+        <select id="sb-f-rango" onchange="renderSiembra()"><option value="">Todos los rangos</option></select>
+        <button class="btn" onclick="limpiarFiltrosSiembra()">Limpiar</button>
+        <button class="btn btn-pri" onclick="abrirSiembra(null)">+ Programar lote</button>
+      </div>
+    </div>
+    <div class="scroll"><table>
+      <thead><tr>
+        <th>Campo</th><th>Lote</th><th>Amb.</th><th class="r">Sup</th>
+        <th>Cultivo</th><th>Genotipo / Partida</th><th>Rango</th><th class="c">Orden</th>
+        <th class="r">D.E.S.</th><th class="r">Obj pl/m²</th><th class="r">VC%</th><th class="r">Pérd%</th>
+        <th class="r">sem/m lin.</th><th class="r">sem/m²</th><th class="r">Dens/ha</th><th class="r">Total</th>
+        <th>Curasemilla</th><th>Inoculante</th><th></th>
+      </tr></thead>
+      <tbody id="tb-sb"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- ═══════════ FERTILIZACIÓN (Etapa 2) ═══════════ -->
+<div class="view" id="v-fert">
+  <div class="card"><div class="soon">
+    <b>Fertilización — Etapa 2</b>
+    Acá van el análisis de suelo por lote, la recomendación por nutriente (P, S, K, N)
+    y las aplicaciones con su momento.<br>
+    Los parámetros de cálculo ya se cargan en <b>Configuración</b>.
+  </div></div>
+</div>
+
+<!-- ═══════════ SEMBRADORAS (Etapa 3) ═══════════ -->
+<div class="view" id="v-semb">
+  <div class="card"><div class="soon">
+    <b>Balance de sembradoras — Etapa 3</b>
+    Compara la capacidad de siembra contra las hectáreas programadas en cada rango de fechas.<br>
+    El parque de sembradoras ya se carga en <b>Configuración</b>.
+  </div></div>
+</div>
+
+<!-- ═══════════ INSUMOS (Etapa 3) ═══════════ -->
+<div class="view" id="v-insumos">
+  <div class="card"><div class="soon">
+    <b>Necesidad de insumos — Etapa 3</b>
+    Semilla, curasemillas, inoculantes y fertilizantes totalizados por producto y por momento,
+    con exportación a Excel y PDF.
+  </div></div>
+</div>
+
+<!-- ═══════════ CONFIGURACIÓN ═══════════ -->
+<div class="view" id="v-cfg">
+
+  <div class="card">
+    <div class="chd">
+      <div class="ct">Partidas de semilla</div>
+      <div class="cact">
+        <select id="pa-f-cult" onchange="renderPartidas()"><option value="">Todos los cultivos</option></select>
+        <button class="btn btn-pri" onclick="abrirPartida(null)">+ Agregar partida</button>
+      </div>
+    </div>
+    <div class="scroll"><table>
+      <thead><tr>
+        <th>Partida</th><th>Genotipo / Variedad</th><th>Cultivo</th><th>Unidad</th>
+        <th class="r">Sem/bolsa</th><th class="r">P1000 (g)</th><th class="r">Pureza %</th>
+        <th class="r">PG %</th><th class="r">PG cur. %</th><th class="r">Vigor %</th>
+        <th class="r">VC %</th><th>Curasemilla en test</th><th></th>
+      </tr></thead>
+      <tbody id="tb-pa"></tbody>
+    </table></div>
+    <div class="hint">VC (valor cultural) = PG × Pureza ÷ 100. Si cargás PG curado, se usa ese en lugar del PG sin curar.</div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="chd">
+        <div class="ct">Rangos de fecha de siembra</div>
+        <div class="cact">
+          <label class="fl" style="margin:0">Días por rango</label>
+          <input type="number" id="cfg-dias" style="width:56px" min="1" step="1" onchange="guardarDias()">
+          <button class="btn btn-sm" onclick="generarRangos()">Generar</button>
+          <button class="btn btn-sm btn-pri" onclick="abrirRango(null)">+</button>
+        </div>
+      </div>
+      <div class="scroll" style="max-height:300px;overflow-y:auto"><table>
+        <thead><tr><th>Rango</th><th>Desde</th><th>Hasta</th><th class="r">Días</th><th></th></tr></thead>
+        <tbody id="tb-ra"></tbody>
+      </table></div>
+      <div class="hint">"Generar" crea rangos consecutivos desde la fecha del primero, con la cantidad de días indicada.</div>
+    </div>
+
+    <div class="card">
+      <div class="chd">
+        <div class="ct">Parque de sembradoras</div>
+        <div class="cact"><button class="btn btn-sm btn-pri" onclick="abrirSembradora(null)">+ Agregar</button></div>
+      </div>
+      <div class="scroll" style="max-height:300px;overflow-y:auto"><table>
+        <thead><tr>
+          <th>Sembradora</th><th>Contratista</th><th>Cultivo</th>
+          <th class="r">Hileras</th><th class="r">e/hil (m)</th><th class="r">km/h</th>
+          <th class="r">ha/h</th><th></th>
+        </tr></thead>
+        <tbody id="tb-se"></tbody>
+      </table></div>
+      <div class="hint">Capacidad ha/h = hileras × distancia entre hileras × velocidad ÷ 10.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="chd"><div class="ct">Parámetros de fertilización</div></div>
+    <div class="frow">
+      <div class="fcol"><label class="fl">Factor P → P2O5</label><input type="number" id="cfg-pfac" step="0.001" onchange="guardarCfg()"></div>
+      <div class="fcol"><label class="fl">Aporte P fert. a suelo</label><input type="number" id="cfg-paporte" step="0.001" onchange="guardarCfg()"></div>
+      <div class="fcol"><label class="fl">Umbral S-SO4 (ppm)</label><input type="number" id="cfg-sppm" step="0.1" onchange="guardarCfg()"></div>
+      <div class="fcol"><label class="fl">Umbral MO (%)</label><input type="number" id="cfg-momax" step="0.1" onchange="guardarCfg()"></div>
+      <div class="fcol"><label class="fl">Dosis S (kg/ha)</label><input type="number" id="cfg-sdosis" step="1" onchange="guardarCfg()"></div>
+    </div>
+    <div class="frow">
+      <div class="fcol"><label class="fl">Factor K meq → ppm</label><input type="number" id="cfg-kfac" step="1" onchange="guardarCfg()"></div>
+      <div class="fcol"><label class="fl">Umbral K (ppm)</label><input type="number" id="cfg-kppm" step="1" onchange="guardarCfg()"></div>
+      <div class="fcol"><label class="fl">Dosis K2O (kg/ha)</label><input type="number" id="cfg-kdosis" step="1" onchange="guardarCfg()"></div>
+      <div class="fcol"><label class="fl">Horas por día</label><input type="number" id="cfg-horas" step="0.5" onchange="guardarCfg()"></div>
+      <div class="fcol"><label class="fl">% días efectivos</label><input type="number" id="cfg-efect" step="1" onchange="guardarCfg()"></div>
+    </div>
+    <div class="hint">
+      Valores del Excel. El factor P → P2O5 (2,293) convierte el P faltante del suelo en óxido a aplicar;
+      el aporte (0,437) es la fracción del P2O5 aplicado que se refleja como P disponible en el suelo.
+      La recomendación de S aplica solo si el suelo está por debajo de los dos umbrales a la vez.
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="chd">
+        <div class="ct">Coeficiente de recuperación de P por ambiente</div>
+      </div>
+      <div class="scroll" style="max-height:240px;overflow-y:auto"><table>
+        <thead><tr><th>Ambiente</th><th>Descripción</th><th class="r">Coef.</th></tr></thead>
+        <tbody id="tb-coefp"></tbody>
+      </table></div>
+      <div class="hint">En el Excel es 0,60 para todos los ambientes. Acá queda editable por ambiente.</div>
+    </div>
+
+    <div class="card">
+      <div class="chd">
+        <div class="ct">Umbral de fitotoxicidad de N en línea de siembra</div>
+      </div>
+      <div class="scroll" style="max-height:240px;overflow-y:auto"><table>
+        <thead><tr><th>Cultivo</th><th class="r">kg N/ha máx.</th></tr></thead>
+        <tbody id="tb-fito"></tbody>
+      </table></div>
+      <div class="hint">Si el N arrancador supera este valor, la Etapa 2 lo marca en rojo.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="chd"><div class="ct">Datos</div></div>
+    <div class="cact">
+      <button class="btn btn-dan" onclick="borrarTodo()">Borrar todos los datos de esta herramienta</button>
+    </div>
+    <div class="hint" id="cfg-migr"></div>
+  </div>
+
+</div>
+
+</main>
+
+<footer>
+  <div>Puntal Agro · Programa de Siembra y Fertilización</div>
+  <div id="fver"></div>
+</footer>
+
+<!-- ═══════════ MODAL ═══════════ -->
+<div class="ovl" id="ovl" onclick="if(event.target===this)cerrarModal()">
+  <div class="mdl">
+    <div class="mdl-h">
+      <div class="mdl-t" id="mdl-t">—</div>
+      <button class="btn-ico" onclick="cerrarModal()" style="font-size:18px">&times;</button>
+    </div>
+    <div class="mdl-b" id="mdl-b"></div>
+    <div class="mdl-f">
+      <button class="btn" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn btn-pri" id="mdl-ok" onclick="guardarModal()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script src="pa-core.js"></script>
+<script>
+/* ═══════════════════════════════════════════════════════════════════════
+   PROGRAMA DE SIEMBRA Y FERTILIZACIÓN — Puntal Agro
+   ES5 estricto: var / function. Sin let, const, arrow, template literals.
+
+   ETAPA 1 (este build): estructura, Configuración, Siembra, Lotes.
+   ETAPA 2: Fertilización.  ETAPA 3: Sembradoras y Necesidad de insumos.
+
+   Datos compartidos (SOLO LECTURA desde pa-core):
+     lotes, actividades (lote+cultivo+campaña), campos, cultivos/tipos de
+     actividad, insumos y unidades. Se crean en Plan de Uso y Maestros.
+   Datos propios de esta herramienta (localStorage, pendiente pa-core):
+     partidas, rangos, sembradoras, programación de siembra, análisis de
+     suelo y aplicaciones de fertilizante.  → ver handoff para Mariana.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+var BUILD = 1;
+var VERSION = 'v2026-10-30 17:15';
+
+/* ── Claves de almacenamiento ──────────────────────────────────────── */
+var K = {
+  partidas:    'pa_psf_partidas',
+  rangos:      'pa_psf_rangos',
+  sembradoras: 'pa_psf_sembradoras',
+  siembra:     'pa_psf_siembra',
+  fert:        'pa_psf_fert',
+  analisis:    'pa_psf_analisis',
+  cfg:         'pa_psf_cfg'
+};
+/* Claves de la versión anterior (ProgramaSiembra.html), para migrar una vez */
+var K_OLD = { genos:'edj_genos', rangos:'edj_rangos', prog:'edj_prog', ambs:'edj_ambs' };
+var MIGR_FLAG = 'pa_psf_migrado';
+
+/* ── Defaults de configuración (valores del Excel) ─────────────────── */
+function cfgDefault(){
+  return {
+    diasPorRango: 5,
+    pFactor:   2.293,   /* P faltante (ppm) → kg P2O5/ha */
+    pAporte:   0.437,   /* fracción del P2O5 aplicado que se ve como P disponible */
+    sSO4:      10,      /* umbral S-SO4 ppm 0-20 cm */
+    moMax:     2.3,     /* umbral MO % */
+    sDosis:    10,      /* kg S/ha recomendados */
+    kFactor:   390,     /* K meq/100g → ppm */
+    kPpm:      120,     /* umbral K ppm */
+    kDosis:    40,      /* kg K2O/ha recomendados */
+    znPpm:     1,       /* umbral Zn ppm 0-20 cm: por debajo se marca en rojo */
+    horasDia:  8,
+    efect:     80,      /* % de días efectivos de siembra */
+    coefP:     {},      /* por código de ambiente → coeficiente (default 0.6) */
+    fito:      {}       /* por nombre de cultivo → kg N/ha máx. en línea */
+  };
+}
+var COEF_P_DEFAULT = 0.6;
+/* Umbrales de fitotoxicidad del Excel, por nombre de cultivo */
+var FITO_EXCEL = {
+  'Trigo':15, 'Cebada':15, 'Avena':15, 'Colza':10,
+  'Soja 1ª':10, 'Soja 2ª':10,
+  'Maíz':15, 'Maíz 2ª':12, 'Maíz Tardío':12, 'Maíz Silo PE':15,
+  'Sorgo':12, 'Girasol':10, 'Vicia':12, 'Cultivo de cobertura':15
+};
+
+/* ── Estado ────────────────────────────────────────────────────────── */
+var DB  = { partidas:[], rangos:[], sembradoras:[], siembra:[], fert:[], analisis:[], cfg:cfgDefault() };
+var CTX = null;
+var CAMPANIA = '';
+var TAB = 'lotes';
+var MODAL = null;   /* {tipo, id, extra} */
+
+/* ═══════════════════════════════════════════════════════════════════
+   1. PERSISTENCIA
+   ═══════════════════════════════════════════════════════════════════ */
+
+function ld(k, def){
+  try{
+    var raw = localStorage.getItem(K[k]);
+    if(raw === null) return def;
+    var v = JSON.parse(raw);
+    return (v === null || v === undefined) ? def : v;
+  }catch(e){ return def; }
+}
+function sv(k){
+  try{ localStorage.setItem(K[k], JSON.stringify(DB[k])); }
+  catch(e){ console.error('No se pudo guardar '+k, e); }
+}
+function cargarDB(){
+  DB.partidas    = ld('partidas', []);
+  DB.rangos      = ld('rangos', []);
+  DB.sembradoras = ld('sembradoras', []);
+  DB.siembra     = ld('siembra', []);
+  DB.fert        = ld('fert', []);
+  DB.analisis    = ld('analisis', []);
+  var c = ld('cfg', null);
+  DB.cfg = c ? mergeCfg(c) : cfgDefault();
+}
+function mergeCfg(c){
+  var d = cfgDefault(), k;
+  for(k in d){ if(d.hasOwnProperty(k) && c[k] !== undefined && c[k] !== null) d[k] = c[k]; }
+  return d;
+}
+function uid(p){
+  return p + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+}
+
+/* ── Migración desde ProgramaSiembra.html (una sola vez) ───────────── */
+function migrar(){
+  var msg = document.getElementById('cfg-migr');
+  var hecho;
+  try{ hecho = localStorage.getItem(MIGR_FLAG); }catch(e){ hecho = '1'; }
+  if(hecho){
+    if(msg) msg.textContent = 'Los datos de la versión anterior ya fueron migrados.';
+    return;
+  }
+  var n = { partidas:0, rangos:0, siembra:0 };
+
+  /* Genotipos → Partidas */
+  var genos = leerVieja(K_OLD.genos);
+  var i, g, p;
+  for(i=0; i<genos.length; i++){
+    g = genos[i];
+    if(!g || !g.n) continue;
+    p = {
+      id: uid('pa'),
+      nombre: g.n, genotipo: g.n,
+      cultivo: g.c || '',
+      unidad: (g.u === 'Bolsa' ? 'Bolsa' : 'Kg'),
+      semBolsa: num(g.sb), p1000: num(g.p1000),
+      pureza: num(g.pur), pg: num(g.pg), pgCur: num(g.pgc),
+      vigor: num(g.vig), fungicida: g.fung || '',
+      nro: '', cantidad: null, lab: '', obs: g.obs || ''
+    };
+    DB.partidas.push(p); n.partidas++;
+  }
+
+  /* Rangos */
+  var rgs = leerVieja(K_OLD.rangos), r;
+  for(i=0; i<rgs.length; i++){
+    r = rgs[i];
+    if(!r) continue;
+    DB.rangos.push({ id:uid('ra'), cod:(r.c || r.cod || ('F'+(i+1))), desde:(r.d || r.desde || ''), hasta:(r.h || r.hasta || '') });
+    n.rangos++;
+  }
+
+  /* Programación → Siembra (un ambiente por fila: la fila vieja era por lote) */
+  var prog = leerVieja(K_OLD.prog), q, s;
+  for(i=0; i<prog.length; i++){
+    q = prog[i];
+    if(!q) continue;
+    s = {
+      id: uid('sb'),
+      campania: q.campania || q.camp || '',
+      loteId: q.loteId || '', campo: q.campo || '', lote: q.lote || q.loteNombre || '',
+      cultivo: q.especie || q.cultivo || '',
+      partidaNombre: q.geno || q.genotipo || '',
+      partidaId: '',
+      rangoCod: q.rango || '',
+      orden: num(q.orden), des: num(q.des), perd: num(q.perc || q.perd),
+      ambs: [{ amb:(q.amb || ''), ha:num(q.sup), objPl:num(q.obj) }],
+      curas: normIns(q.curas), inocs: normIns(q.inocs)
+    };
+    DB.siembra.push(s); n.siembra++;
+  }
+
+  if(n.partidas || n.rangos || n.siembra){
+    sv('partidas'); sv('rangos'); sv('siembra');
+  }
+  try{ localStorage.setItem(MIGR_FLAG, '1'); }catch(e){}
+
+  if(msg){
+    msg.textContent = (n.partidas || n.rangos || n.siembra)
+      ? ('Migrados desde la versión anterior: ' + n.partidas + ' partidas, ' + n.rangos + ' rangos, ' + n.siembra + ' lotes programados. Revisá que cada lote programado haya quedado vinculado a su partida.')
+      : 'No se encontraron datos de la versión anterior para migrar.';
+  }
+}
+function leerVieja(clave){
+  try{
+    var raw = localStorage.getItem(clave);
+    if(!raw) return [];
+    var v = JSON.parse(raw);
+    return (v && v.length) ? v : [];
+  }catch(e){ return []; }
+}
+function normIns(arr){
+  var out = [], i, x;
+  if(!arr || !arr.length) return out;
+  for(i=0; i<arr.length; i++){
+    x = arr[i];
+    if(!x || !x.n) continue;
+    out.push({ n:x.n, dosis:num(x.dosis), unit:(x.unit || '') });
+  }
+  return out;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   2. LECTURA DE pa-core (datos compartidos, solo lectura)
+   ═══════════════════════════════════════════════════════════════════ */
+
+function hayCore(){ return (typeof PA !== 'undefined' && PA.demo); }
+function empresaId(){ return CTX ? CTX.empresaActivaId : null; }
+
+function coreCampos(){
+  var eid = empresaId();
+  if(hayCore() && eid && PA.demo.camposDeEmpresa) return PA.demo.camposDeEmpresa(eid) || [];
+  return [];
+}
+function nombreCampo(campoId){
+  var cs = coreCampos(), i;
+  for(i=0; i<cs.length; i++){ if(cs[i].id === campoId) return cs[i].nombre || ''; }
+  return '';
+}
+/* Lotes normalizados: {id, nombre, campoId, campo, ha, amb} */
+function coreLotes(){
+  var eid = empresaId(), out = [], ls, i, l;
+  if(!(hayCore() && eid && PA.demo.listarLotes)) return out;
+  ls = PA.demo.listarLotes(eid, null) || [];
+  for(i=0; i<ls.length; i++){
+    l = ls[i];
+    out.push({
+      id: l.id, nombre: l.nombre, campoId: l.campoId,
+      campo: nombreCampo(l.campoId),
+      ha: (l.ha != null ? l.ha : 0),
+      amb: (l.ambiente || '')
+    });
+  }
+  return out;
+}
+function loteById(id){
+  var ls = coreLotes(), i;
+  for(i=0; i<ls.length; i++){ if(ls[i].id === id) return ls[i]; }
+  return null;
+}
+/* Cultivos = tipos de actividad de la empresa: {id, nombre, sigla} */
+function coreCultivos(){
+  var eid = empresaId(), out = [], ts, i;
+  if(!(hayCore() && eid && PA.demo.listarTiposActividad)) return out;
+  ts = PA.demo.listarTiposActividad(eid) || [];
+  for(i=0; i<ts.length; i++){ out.push({ id:ts[i].id, nombre:ts[i].nombre, sigla:ts[i].sigla || '' }); }
+  return out;
+}
+function cultivoNombrePorId(id){
+  var cs = coreCultivos(), i;
+  for(i=0; i<cs.length; i++){ if(cs[i].id === id) return cs[i].nombre; }
+  return '';
+}
+/* Actividades de la campaña: lote + cultivo + ha (creadas en Plan de Uso) */
+function coreActividades(campania){
+  var eid = empresaId();
+  if(!(hayCore() && eid && PA.demo.listarActividades)) return [];
+  return PA.demo.listarActividades(eid, campania || null) || [];
+}
+function coreCampanias(){
+  var out = [], vistos = {}, cs, i, as;
+  if(hayCore() && PA.demo.listarCampanias){
+    cs = PA.demo.listarCampanias() || [];
+    for(i=0; i<cs.length; i++){
+      var id = cs[i].id || cs[i].nombre || cs[i];
+      if(id && !vistos[id]){ vistos[id] = 1; out.push(id); }
+    }
+  }
+  if(!out.length){
+    as = coreActividades(null);
+    for(i=0; i<as.length; i++){
+      if(as[i].campaniaId && !vistos[as[i].campaniaId]){ vistos[as[i].campaniaId] = 1; out.push(as[i].campaniaId); }
+    }
+    out.sort();
+  }
+  /* sumar campañas que ya tengan programación cargada */
+  for(i=0; i<DB.siembra.length; i++){
+    if(DB.siembra[i].campania && !vistos[DB.siembra[i].campania]){
+      vistos[DB.siembra[i].campania] = 1; out.push(DB.siembra[i].campania);
+    }
+  }
+  return out;
+}
+/* Ambientes presentes en los lotes de la empresa */
+function coreAmbientes(){
+  var ls = coreLotes(), vistos = {}, out = [], i;
+  for(i=0; i<ls.length; i++){
+    if(ls[i].amb && !vistos[ls[i].amb]){ vistos[ls[i].amb] = 1; out.push(ls[i].amb); }
+  }
+  out.sort();
+  return out;
+}
+/* Insumos por tipo: {nombre, unidad} */
+function coreInsumos(tipo){
+  var eid = empresaId(), out = [], cat, i, x;
+  if(!(hayCore() && eid && PA.demo.listarInsumos)) return out;
+  cat = PA.demo.listarInsumos(eid) || [];
+  for(i=0; i<cat.length; i++){
+    x = cat[i];
+    if(x.tipo !== tipo) continue;
+    out.push({ nombre:x.nombre, unidad:unidadSigla(x.unidadId) });
+  }
+  return out;
+}
+function unidadSigla(unidadId){
+  var us, i;
+  if(hayCore() && unidadId && PA.demo.listarUnidades){
+    us = PA.demo.listarUnidades() || [];
+    for(i=0; i<us.length; i++){ if(us[i].id === unidadId) return us[i].sigla || us[i].nombre || ''; }
+  }
+  return '';
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   3. HELPERS
+   ═══════════════════════════════════════════════════════════════════ */
+
+function f(v, d){
+  d = d || 0;
+  if(v === null || v === undefined || v === '' || isNaN(Number(v))) return '—';
+  return Number(v).toLocaleString('es-AR', { minimumFractionDigits:d, maximumFractionDigits:d });
+}
+function fp(v){
+  if(v === null || v === undefined || v === '' || isNaN(Number(v))) return '—';
+  return Number(v).toFixed(1) + '%';
+}
+function num(v){
+  if(v === null || v === undefined || v === '') return null;
+  var n = Number(v);
+  return isNaN(n) ? null : n;
+}
+function esc(s){
+  if(s === null || s === undefined) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+/* Escapa para un string entre comillas simples dentro de un atributo HTML */
+function jsq(s){
+  if(s === null || s === undefined) return '';
+  return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+}
+function val(id){
+  var e = document.getElementById(id);
+  return e ? e.value : '';
+}
+function setVal(id, v){
+  var e = document.getElementById(id);
+  if(e) e.value = (v === null || v === undefined) ? '' : v;
+}
+function fmtFecha(s){
+  if(!s) return '—';
+  var p = String(s).split('-');
+  if(p.length !== 3) return s;
+  return p[2] + '/' + p[1] + '/' + p[0].slice(2);
+}
+function diasEntre(a, b){
+  if(!a || !b) return null;
+  var d1 = new Date(a + 'T00:00:00'), d2 = new Date(b + 'T00:00:00');
+  if(isNaN(d1) || isNaN(d2)) return null;
+  return Math.round((d2 - d1) / 86400000) + 1;
+}
+function sumarDias(s, n){
+  var d = new Date(s + 'T00:00:00');
+  if(isNaN(d)) return '';
+  d.setDate(d.getDate() + n);
+  var m = String(d.getMonth()+1); if(m.length<2) m = '0'+m;
+  var dd = String(d.getDate());   if(dd.length<2) dd = '0'+dd;
+  return d.getFullYear() + '-' + m + '-' + dd;
+}
+function opts(arr, sel, vacio){
+  var h = vacio ? ('<option value="">' + esc(vacio) + '</option>') : '', i, v, t;
+  for(i=0; i<arr.length; i++){
+    if(typeof arr[i] === 'object'){ v = arr[i].v; t = arr[i].t; }
+    else { v = arr[i]; t = arr[i]; }
+    h += '<option value="' + esc(v) + '"' + (String(v) === String(sel) ? ' selected' : '') + '>' + esc(t) + '</option>';
+  }
+  return h;
+}
+function llenarSelect(id, arr, vacio, sel){
+  var e = document.getElementById(id);
+  if(!e) return;
+  var prev = (sel !== undefined) ? sel : e.value;
+  e.innerHTML = opts(arr, prev, vacio);
+}
+function filaVacia(cols, texto){
+  return '<tr><td colspan="' + cols + '"><div class="empty">' + texto + '</div></td></tr>';
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   4. CÁLCULO DE DENSIDAD DE SIEMBRA
+   ───────────────────────────────────────────────────────────────────
+   Réplica de la hoja "Datos" del Excel:
+     VC            = PG × Pureza ÷ 100
+     sem/m²        = objetivo pl/m² ÷ (VC/100 × (1 − pérdida))
+     sem/m lineal  = sem/m² × D.E.S.
+     Dens kg/ha    = sem/m² × P1000 ÷ 100            (unidad Kg)
+     Dens bol/ha   = sem/m² × 10.000 ÷ sem por bolsa (unidad Bolsa)
+     Total         = Dens/ha × ha
+   Por ambiente (hoja "Hoja1" del Excel 26/27): cada ambiente del lote
+   tiene su objetivo propio; el valor del lote es el promedio ponderado
+   por superficie — SUMPRODUCT(ha, valor) / SUM(ha).
+   ═══════════════════════════════════════════════════════════════════ */
+
+function partidaById(id){
+  var i;
+  for(i=0; i<DB.partidas.length; i++){ if(DB.partidas[i].id === id) return DB.partidas[i]; }
+  return null;
+}
+function partidaPorNombre(n){
+  var i;
+  if(!n) return null;
+  for(i=0; i<DB.partidas.length; i++){
+    if(DB.partidas[i].nombre === n || DB.partidas[i].genotipo === n) return DB.partidas[i];
+  }
+  return null;
+}
+/* Valor cultural de una partida: usa PG curado si está cargado */
+function vcPartida(p){
+  if(!p) return null;
+  var pg = (p.pgCur !== null && p.pgCur !== undefined && p.pgCur !== '') ? Number(p.pgCur) : Number(p.pg);
+  var pur = Number(p.pureza);
+  if(!pg || !pur || isNaN(pg) || isNaN(pur)) return null;
+  return pg * pur / 100;
+}
+/* Unidad de la dosis según la partida */
+function unidadDens(p){
+  if(!p) return '';
+  return (p.unidad === 'Bolsa') ? 'bol' : 'kg';
+}
+/* Cálculo de un ambiente. Devuelve {ha, objPl, vc, semM2, semMl, densHa, total, avisos[]} */
+function calcAmb(a, p, des, perd){
+  var r = { ha:num(a.ha), objPl:num(a.objPl), vc:null, semM2:null, semMl:null, densHa:null, total:null, avisos:[] };
+  r.vc = vcPartida(p);
+  if(!r.objPl || !r.vc) return r;
+  var pe = (perd === null || perd === undefined) ? 0 : Number(perd);
+  if(pe >= 100){ r.avisos.push('La pérdida no puede ser 100% o más.'); return r; }
+  r.semM2 = r.objPl / ((r.vc / 100) * (1 - pe / 100));
+  if(des) r.semMl = r.semM2 * Number(des);
+  if(p.unidad === 'Bolsa'){
+    if(p.semBolsa) r.densHa = r.semM2 * 10000 / Number(p.semBolsa);
+    else r.avisos.push('Falta "sem/bolsa" en la partida ' + p.nombre + '.');
+  } else {
+    if(p.p1000) r.densHa = r.semM2 * Number(p.p1000) / 100;
+    else r.avisos.push('Falta "P1000" en la partida ' + p.nombre + '.');
+  }
+  if(r.densHa !== null && r.ha) r.total = r.densHa * r.ha;
+  if(r.semM2 > 800) r.avisos.push('Densidad muy alta (' + f(r.semM2,0) + ' sem/m²). Verificá los parámetros.');
+  return r;
+}
+/* Cálculo completo de una programación de siembra.
+   Devuelve {p, haTot, filas:[{amb,calc}], wSemM2, wSemMl, wDensHa, total, avisos[]} */
+function calcSiembra(s){
+  var p = s.partidaId ? partidaById(s.partidaId) : partidaPorNombre(s.partidaNombre);
+  var out = { p:p, haTot:0, filas:[], wSemM2:null, wSemMl:null, wDensHa:null, total:0, avisos:[] };
+  var ambs = (s.ambs && s.ambs.length) ? s.ambs : [];
+  var i, c, accHa = 0, accM2 = 0, accMl = 0, accHaDens = 0, accTot = 0, hayDens = false, j;
+
+  if(!p){ out.avisos.push('La partida de semilla no está cargada en Configuración.'); }
+
+  for(i=0; i<ambs.length; i++){
+    c = calcAmb(ambs[i], p, s.des, s.perd);
+    out.filas.push({ amb:ambs[i].amb || '', calc:c });
+    if(c.ha){ accHa += c.ha; }
+    if(c.ha && c.semM2 !== null){ accM2 += c.ha * c.semM2; }
+    if(c.ha && c.semMl !== null){ accMl += c.ha * c.semMl; }
+    if(c.ha && c.densHa !== null){ accHaDens += c.ha * c.densHa; hayDens = true; }
+    if(c.total !== null){ accTot += c.total; }
+    for(j=0; j<c.avisos.length; j++){
+      if(out.avisos.indexOf(c.avisos[j]) < 0) out.avisos.push(c.avisos[j]);
+    }
+  }
+  out.haTot = accHa;
+  if(accHa > 0){
+    out.wSemM2  = accM2 ? accM2 / accHa : null;
+    out.wSemMl  = accMl ? accMl / accHa : null;
+    out.wDensHa = hayDens ? accHaDens / accHa : null;
+  }
+  out.total = accTot;
+  return out;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   5. ESTADO DE PLANIFICACIÓN POR LOTE
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Superficie que Plan de Uso asigna a ese lote/cultivo en la campaña.
+   Sirve de control: la suma de los ambientes tiene que coincidir. */
+function haActividad(loteId, cultivo, campania){
+  var as = coreActividades(campania), i, l;
+  for(i=0; i<as.length; i++){
+    if(as[i].loteId !== loteId) continue;
+    if(cultivoNombrePorId(as[i].tipoActividadId) !== cultivo) continue;
+    if(as[i].ha != null) return as[i].ha;
+    l = loteById(loteId);
+    return l ? l.ha : null;
+  }
+  l = loteById(loteId);
+  return l ? l.ha : null;
+}
+/* Devuelve null si coincide; si no, {haRef, haAmbs, dif} */
+function difSuperficie(s, haAmbs){
+  var ref = haActividad(s.loteId, s.cultivo, s.campania);
+  if(ref === null || !ref) return null;
+  var dif = haAmbs - ref;
+  if(Math.abs(dif) < 0.05) return null;
+  return { haRef:ref, haAmbs:haAmbs, dif:dif };
+}
+
+function siembraDeLote(loteId, cultivo, campania){
+  var i, s;
+  for(i=0; i<DB.siembra.length; i++){
+    s = DB.siembra[i];
+    if(s.campania === campania && s.loteId === loteId && s.cultivo === cultivo) return s;
+  }
+  return null;
+}
+/* 'listo' | 'parcial' | 'nada' — avance de la PLANIFICACIÓN, no de la ejecución */
+function estadoSiembra(s){
+  if(!s) return { e:'nada', t:'Sin programar' };
+  var c = calcSiembra(s);
+  var faltan = [];
+  if(!c.p) faltan.push('partida');
+  if(!s.rangoCod) faltan.push('rango');
+  if(c.wDensHa === null) faltan.push('densidad');
+  if(faltan.length) return { e:'parcial', t:'Falta ' + faltan.join(', ') };
+  if(difSuperficie(s, c.haTot)) return { e:'parcial', t:'Revisar superficie' };
+  return { e:'listo', t:'Programada' };
+}
+function fertDeLote(loteId, cultivo, campania){
+  var i, x;
+  for(i=0; i<DB.fert.length; i++){
+    x = DB.fert[i];
+    if(x.campania === campania && x.loteId === loteId && x.cultivo === cultivo) return x;
+  }
+  return null;
+}
+function estadoFert(ft){
+  /* Etapa 2 completa esta lógica. Por ahora: cargada o no. */
+  if(!ft) return { e:'nada', t:'Sin programar' };
+  if(!ft.aplic || !ft.aplic.length) return { e:'parcial', t:'Sin aplicaciones' };
+  return { e:'listo', t:'Programada' };
+}
+function badgeEstado(st){
+  var cls = st.e === 'listo' ? 'bg' : (st.e === 'parcial' ? 'by' : 'bn');
+  return '<span class="bdg ' + cls + '">' + esc(st.t) + '</span>';
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   6. VISTA — LOTES DE LA CAMPAÑA
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Filas de la campaña: una por actividad (lote + cultivo) de Plan de Uso */
+function filasCampania(){
+  var as = coreActividades(CAMPANIA), out = [], i, a, l;
+  for(i=0; i<as.length; i++){
+    a = as[i];
+    l = loteById(a.loteId);
+    if(!l) continue;
+    out.push({
+      actId: a.id, loteId: a.loteId,
+      campo: l.campo, lote: l.nombre, amb: l.amb,
+      ha: (a.ha != null ? a.ha : l.ha),
+      cultivo: cultivoNombrePorId(a.tipoActividadId),
+      seg: !!a.seg
+    });
+  }
+  out.sort(function(x, y){
+    if(x.campo !== y.campo) return x.campo.localeCompare(y.campo);
+    if(x.lote !== y.lote) return x.lote.localeCompare(y.lote);
+    return (x.seg ? 1 : 0) - (y.seg ? 1 : 0);
+  });
+  return out;
+}
+
+function renderLotes(){
+  var filas = filasCampania();
+  var fCampo = val('lot-f-campo'), fCult = val('lot-f-cult'), fEst = val('lot-f-est');
+  var h = '', i, r, s, ft, stS, stF, mostradas = 0;
+  var haTot = 0, haProg = 0, nLotes = {}, nProg = 0;
+
+  for(i=0; i<filas.length; i++){
+    r = filas[i];
+    s = siembraDeLote(r.loteId, r.cultivo, CAMPANIA);
+    ft = fertDeLote(r.loteId, r.cultivo, CAMPANIA);
+    stS = estadoSiembra(s);
+    stF = estadoFert(ft);
+
+    haTot += (r.ha || 0);
+    nLotes[r.loteId] = 1;
+    if(stS.e === 'listo'){ haProg += (r.ha || 0); nProg++; }
+
+    if(fCampo && r.campo !== fCampo) continue;
+    if(fCult && r.cultivo !== fCult) continue;
+    if(fEst === 'falta' && stS.e === 'listo') continue;
+    if(fEst === 'listo' && stS.e !== 'listo') continue;
+
+    h += '<tr>'
+      + '<td class="tdname">' + esc(r.campo) + '</td>'
+      + '<td class="tdname">' + esc(r.lote) + (r.seg ? ' <span class="bdg bn">2ª</span>' : '') + '</td>'
+      + '<td class="r">' + f(r.ha, 1) + '</td>'
+      + '<td>' + (r.amb ? '<span class="bdg bamb">' + esc(r.amb) + '</span>' : '—') + '</td>'
+      + '<td class="tdname">' + esc(r.cultivo) + '</td>'
+      + '<td class="c">' + badgeEstado(stS) + '</td>'
+      + '<td class="c">' + badgeEstado(stF) + '</td>'
+      + '<td class="r">'
+      +   '<button class="btn btn-sm" onclick="programarDesdeLote(\'' + jsq(r.loteId) + '\',\'' + jsq(r.cultivo) + '\')">'
+      +   (s ? 'Editar siembra' : 'Programar') + '</button>'
+      + '</td>'
+      + '</tr>';
+    mostradas++;
+  }
+
+  var tb = document.getElementById('tb-lot');
+  if(!filas.length){
+    tb.innerHTML = filaVacia(8, !CAMPANIA
+      ? 'Elegí una campaña para ver sus lotes.'
+      : 'No hay actividades cargadas para esta campaña.<br>Los lotes y cultivos se crean en <b>Plan de Uso del Suelo</b>.');
+  } else if(!mostradas){
+    tb.innerHTML = filaVacia(8, 'Ningún lote cumple con los filtros aplicados.');
+  } else {
+    tb.innerHTML = h;
+  }
+
+  var cantLotes = 0, kk;
+  for(kk in nLotes){ if(nLotes.hasOwnProperty(kk)) cantLotes++; }
+  document.getElementById('lot-metrics').innerHTML =
+      mc('mc-g', f(haTot,1) + ' ha', 'Superficie de la campaña')
+    + mc('mc-g', String(cantLotes), 'Lotes')
+    + mc('mc-g', String(filas.length), 'Actividades (lote × cultivo)')
+    + mc('mc-t', f(haProg,1) + ' ha', 'Siembra programada')
+    + mc('mc-t', (filas.length ? fp(nProg / filas.length * 100) : '—'), 'Avance de siembra');
+
+  llenarSelect('lot-f-campo', listaCampos(filas), 'Todos los campos', fCampo);
+  llenarSelect('lot-f-cult',  listaCultivos(filas), 'Todos los cultivos', fCult);
+}
+function mc(cls, v, l){
+  return '<div class="mc ' + cls + '"><div class="mv">' + v + '</div><div class="ml">' + esc(l) + '</div></div>';
+}
+function listaCampos(filas){
+  var vistos = {}, out = [], i;
+  for(i=0; i<filas.length; i++){ if(filas[i].campo && !vistos[filas[i].campo]){ vistos[filas[i].campo]=1; out.push(filas[i].campo); } }
+  out.sort(); return out;
+}
+function listaCultivos(filas){
+  var vistos = {}, out = [], i;
+  for(i=0; i<filas.length; i++){ if(filas[i].cultivo && !vistos[filas[i].cultivo]){ vistos[filas[i].cultivo]=1; out.push(filas[i].cultivo); } }
+  out.sort(); return out;
+}
+function programarDesdeLote(loteId, cultivo){
+  var s = siembraDeLote(loteId, cultivo, CAMPANIA);
+  document.getElementById('tb-siembra').click();
+  if(s) abrirSiembra(s.id);
+  else abrirSiembra(null, { loteId:loteId, cultivo:cultivo });
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   7. VISTA — SIEMBRA
+   ═══════════════════════════════════════════════════════════════════ */
+
+function limpiarFiltrosSiembra(){
+  setVal('sb-f-campo',''); setVal('sb-f-cult',''); setVal('sb-f-rango','');
+  renderSiembra();
+}
+function rangoByCod(cod){
+  var i;
+  for(i=0; i<DB.rangos.length; i++){ if(DB.rangos[i].cod === cod) return DB.rangos[i]; }
+  return null;
+}
+function insLabel(arr){
+  var i, out = [];
+  if(!arr || !arr.length) return '—';
+  for(i=0; i<arr.length; i++){
+    out.push(esc(arr[i].n) + (arr[i].dosis ? ' ' + f(arr[i].dosis,2) + ' ' + esc(arr[i].unit || '') : ''));
+  }
+  return out.join('<br>');
+}
+
+function renderSiembra(){
+  var fCampo = val('sb-f-campo'), fCult = val('sb-f-cult'), fRango = val('sb-f-rango');
+  var lista = [], i, s;
+  for(i=0; i<DB.siembra.length; i++){
+    s = DB.siembra[i];
+    if(s.campania !== CAMPANIA) continue;
+    lista.push(s);
+  }
+  lista.sort(function(a, b){
+    var oa = (a.orden == null ? 9999 : a.orden), ob = (b.orden == null ? 9999 : b.orden);
+    if(oa !== ob) return oa - ob;
+    if((a.campo||'') !== (b.campo||'')) return (a.campo||'').localeCompare(b.campo||'');
+    return (a.lote||'').localeCompare(b.lote||'');
+  });
+
+  var h = '', c, j, fila, u, mostradas = 0;
+  var haTot = 0, totKg = 0, totBol = 0, avisos = [];
+
+  for(i=0; i<lista.length; i++){
+    s = lista[i];
+    c = calcSiembra(s);
+    haTot += c.haTot;
+    u = unidadDens(c.p);
+    if(u === 'bol') totBol += c.total; else totKg += c.total;
+    for(j=0; j<c.avisos.length; j++){ if(avisos.indexOf(c.avisos[j]) < 0) avisos.push(c.avisos[j]); }
+    var dsup = difSuperficie(s, c.haTot);
+    if(dsup){
+      var msgSup = s.lote + ': los ambientes suman ' + f(dsup.haAmbs,1) + ' ha y Plan de Uso le asigna '
+                 + f(dsup.haRef,1) + ' ha (' + (dsup.dif > 0 ? '+' : '') + f(dsup.dif,1) + ').';
+      if(avisos.indexOf(msgSup) < 0) avisos.push(msgSup);
+    }
+
+    if(fCampo && s.campo !== fCampo) continue;
+    if(fCult && s.cultivo !== fCult) continue;
+    if(fRango && s.rangoCod !== fRango) continue;
+    mostradas++;
+
+    var multi = c.filas.length > 1;
+    var rg = rangoByCod(s.rangoCod);
+    var rgTxt = s.rangoCod ? (esc(s.rangoCod) + (rg ? '<br><span style="color:var(--muted);font-size:10px">' + fmtFecha(rg.desde) + ' → ' + fmtFecha(rg.hasta) + '</span>' : '')) : '—';
+
+    /* Fila del lote: ponderada si hay varios ambientes */
+    h += '<tr>'
+      + '<td class="tdname">' + esc(s.campo) + '</td>'
+      + '<td class="tdname">' + esc(s.lote) + '</td>'
+      + '<td>' + (multi ? '<span class="bdg bamb">' + c.filas.length + ' amb.</span>'
+                        : (c.filas.length ? '<span class="bdg bamb">' + esc(c.filas[0].amb || '—') + '</span>' : '—')) + '</td>'
+      + '<td class="r">' + (dsup
+            ? '<span class="bdg by" title="Plan de Uso le asigna ' + f(dsup.haRef,1) + ' ha">' + f(c.haTot,1) + ' !</span>'
+            : f(c.haTot, 1)) + '</td>'
+      + '<td class="tdname">' + esc(s.cultivo) + '</td>'
+      + '<td class="tdname">' + (c.p ? esc(c.p.nombre) : '<span class="bdg br">sin partida</span>') + '</td>'
+      + '<td>' + rgTxt + '</td>'
+      + '<td class="c">' + (s.orden != null ? s.orden : '—') + '</td>'
+      + '<td class="r">' + f(s.des, 2) + '</td>'
+      + '<td class="r">' + (multi ? '<span style="color:var(--muted)">pond.</span>' : f(c.filas.length ? c.filas[0].calc.objPl : null, 0)) + '</td>'
+      + '<td class="r">' + f(vcPartida(c.p), 1) + '</td>'
+      + '<td class="r">' + f(s.perd, 0) + '</td>'
+      + '<td class="r">' + f(c.wSemMl, 2) + '</td>'
+      + '<td class="r">' + f(c.wSemM2, 1) + '</td>'
+      + '<td class="r">' + (c.wDensHa !== null ? f(c.wDensHa, u === 'bol' ? 2 : 1) + ' ' + u : '—') + '</td>'
+      + '<td class="r"><b>' + (c.total ? f(c.total, u === 'bol' ? 1 : 0) + ' ' + u : '—') + '</b></td>'
+      + '<td class="tdname" style="white-space:normal">' + insLabel(s.curas) + '</td>'
+      + '<td class="tdname" style="white-space:normal">' + insLabel(s.inocs) + '</td>'
+      + '<td class="r">'
+      +   '<button class="btn-ico" title="Editar" onclick="abrirSiembra(\'' + s.id + '\')">&#9998;</button>'
+      +   '<button class="btn-ico" title="Duplicar" onclick="duplicarSiembra(\'' + s.id + '\')">&#8599;</button>'
+      +   '<button class="btn-ico" title="Borrar" onclick="borrarSiembra(\'' + s.id + '\')">&times;</button>'
+      + '</td>'
+      + '</tr>';
+
+    /* Sub-filas por ambiente, cuando hay más de uno */
+    if(multi){
+      for(j=0; j<c.filas.length; j++){
+        fila = c.filas[j];
+        h += '<tr class="sub">'
+          + '<td></td><td></td>'
+          + '<td><span class="bdg bamb">' + esc(fila.amb || '—') + '</span></td>'
+          + '<td class="r">' + f(fila.calc.ha, 1) + '</td>'
+          + '<td></td><td></td><td></td><td></td><td></td>'
+          + '<td class="r">' + f(fila.calc.objPl, 0) + '</td>'
+          + '<td></td><td></td>'
+          + '<td class="r">' + f(fila.calc.semMl, 2) + '</td>'
+          + '<td class="r">' + f(fila.calc.semM2, 1) + '</td>'
+          + '<td class="r">' + (fila.calc.densHa !== null ? f(fila.calc.densHa, u === 'bol' ? 2 : 1) : '—') + '</td>'
+          + '<td class="r">' + (fila.calc.total !== null ? f(fila.calc.total, u === 'bol' ? 1 : 0) : '—') + '</td>'
+          + '<td></td><td></td><td></td>'
+          + '</tr>';
+      }
+    }
+  }
+
+  var tb = document.getElementById('tb-sb');
+  if(!lista.length){
+    tb.innerHTML = filaVacia(19, !CAMPANIA
+      ? 'Elegí una campaña para empezar.'
+      : 'Todavía no hay lotes programados en esta campaña.<br>Cargá tus <b>partidas</b> y <b>rangos</b> en Configuración, y después usá <b>“+ Programar lote”</b>.');
+  } else if(!mostradas){
+    tb.innerHTML = filaVacia(19, 'Ningún lote cumple con los filtros aplicados.');
+  } else {
+    tb.innerHTML = h;
+  }
+
+  document.getElementById('sb-metrics').innerHTML =
+      mc('mc-g', f(haTot,1) + ' ha', 'Hectáreas programadas')
+    + mc('mc-g', String(lista.length), 'Lotes programados')
+    + mc('mc-t', (totKg ? f(totKg,0) + ' kg' : '—'), 'Semilla en kilos')
+    + mc('mc-t', (totBol ? f(totBol,1) + ' bol' : '—'), 'Semilla en bolsas')
+    + mc(avisos.length ? 'mc-t' : 'mc-g', String(avisos.length), 'Avisos de cálculo');
+
+  llenarSelect('sb-f-campo', listaCamposSiembra(lista), 'Todos los campos', fCampo);
+  llenarSelect('sb-f-cult',  listaCultivosSiembra(lista), 'Todos los cultivos', fCult);
+  llenarSelect('sb-f-rango', codigosRango(), 'Todos los rangos', fRango);
+}
+function listaCamposSiembra(lista){
+  var vistos = {}, out = [], i;
+  for(i=0; i<lista.length; i++){ if(lista[i].campo && !vistos[lista[i].campo]){ vistos[lista[i].campo]=1; out.push(lista[i].campo); } }
+  out.sort(); return out;
+}
+function listaCultivosSiembra(lista){
+  var vistos = {}, out = [], i;
+  for(i=0; i<lista.length; i++){ if(lista[i].cultivo && !vistos[lista[i].cultivo]){ vistos[lista[i].cultivo]=1; out.push(lista[i].cultivo); } }
+  out.sort(); return out;
+}
+function codigosRango(){
+  var out = [], i;
+  for(i=0; i<DB.rangos.length; i++) out.push(DB.rangos[i].cod);
+  return out;
+}
+
+function duplicarSiembra(id){
+  var i, s, copia, j;
+  for(i=0; i<DB.siembra.length; i++){
+    if(DB.siembra[i].id !== id) continue;
+    s = DB.siembra[i];
+    copia = { id:uid('sb'), campania:s.campania, loteId:s.loteId, campo:s.campo, lote:s.lote,
+              cultivo:s.cultivo, partidaId:s.partidaId, partidaNombre:s.partidaNombre,
+              rangoCod:s.rangoCod, orden:s.orden, des:s.des, perd:s.perd, ambs:[], curas:[], inocs:[] };
+    for(j=0; j<s.ambs.length; j++){ copia.ambs.push({ amb:s.ambs[j].amb, ha:s.ambs[j].ha, objPl:s.ambs[j].objPl }); }
+    for(j=0; j<s.curas.length; j++){ copia.curas.push({ n:s.curas[j].n, dosis:s.curas[j].dosis, unit:s.curas[j].unit }); }
+    for(j=0; j<s.inocs.length; j++){ copia.inocs.push({ n:s.inocs[j].n, dosis:s.inocs[j].dosis, unit:s.inocs[j].unit }); }
+    DB.siembra.splice(i+1, 0, copia);
+    sv('siembra'); renderSiembra(); renderLotes();
+    return;
+  }
+}
+function borrarSiembra(id){
+  var s = null, i;
+  for(i=0; i<DB.siembra.length; i++){ if(DB.siembra[i].id === id){ s = DB.siembra[i]; break; } }
+  if(!s) return;
+  if(!confirm('¿Borrar la programación de ' + s.lote + ' — ' + s.cultivo + '?')) return;
+  DB.siembra.splice(i, 1);
+  sv('siembra'); renderSiembra(); renderLotes();
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   8. MODALES
+   ═══════════════════════════════════════════════════════════════════ */
+
+function abrirModalBase(titulo, cuerpo){
+  document.getElementById('mdl-t').textContent = titulo;
+  document.getElementById('mdl-b').innerHTML = cuerpo;
+  document.getElementById('ovl').classList.add('open');
+}
+function cerrarModal(){
+  document.getElementById('ovl').classList.remove('open');
+  MODAL = null;
+}
+function guardarModal(){
+  if(!MODAL) return;
+  if(MODAL.tipo === 'partida')     guardarPartida();
+  else if(MODAL.tipo === 'rango')  guardarRango();
+  else if(MODAL.tipo === 'semb')   guardarSembradora();
+  else if(MODAL.tipo === 'siembra') guardarSiembra();
+}
+
+/* ── 8.1 Partida de semilla ────────────────────────────────────────── */
+function abrirPartida(id){
+  var p = id ? partidaById(id) : null;
+  MODAL = { tipo:'partida', id:id };
+  var cultivos = coreCultivos(), lc = [], i;
+  for(i=0; i<cultivos.length; i++) lc.push(cultivos[i].nombre);
+
+  var h = ''
+    + '<div class="fsec">Identificación</div>'
+    + '<div class="frow">'
+    +   fcol('Genotipo / Variedad', '<input type="text" id="pa-geno" value="' + esc(p ? p.genotipo : '') + '" placeholder="DM Catalpa">')
+    +   fcol('N° de partida', '<input type="text" id="pa-nro" value="' + esc(p ? p.nro : '') + '" placeholder="1">')
+    +   fcol('Cultivo', '<select id="pa-cult">' + opts(lc, p ? p.cultivo : '', '— elegir —') + '</select>')
+    + '</div>'
+    + '<div class="frow">'
+    +   fcol('Unidad', '<select id="pa-unidad" onchange="togglePartidaUnidad()">'
+          + '<option value="Kg"' + (p && p.unidad === 'Kg' ? ' selected' : '') + '>Kg</option>'
+          + '<option value="Bolsa"' + (p && p.unidad === 'Bolsa' ? ' selected' : '') + '>Bolsa</option></select>')
+    +   fcol('Cantidad total', '<input type="number" id="pa-cant" step="0.01" value="' + (p && p.cantidad != null ? p.cantidad : '') + '">')
+    +   fcol('Laboratorio', '<input type="text" id="pa-lab" value="' + esc(p ? p.lab : '') + '">')
+    + '</div>'
+    + '<div class="fsec">Calidad</div>'
+    + '<div class="frow">'
+    +   fcol('P1000 (gramos)', '<input type="number" id="pa-p1000" step="0.1" value="' + (p && p.p1000 != null ? p.p1000 : '') + '" oninput="calcVCModal()">')
+    +   fcol('Semillas por bolsa', '<input type="number" id="pa-sb" step="1" value="' + (p && p.semBolsa != null ? p.semBolsa : '') + '" oninput="calcVCModal()">')
+    +   fcol('Pureza %', '<input type="number" id="pa-pur" step="0.1" value="' + (p && p.pureza != null ? p.pureza : '') + '" oninput="calcVCModal()">')
+    + '</div>'
+    + '<div class="frow">'
+    +   fcol('PG sin curar %', '<input type="number" id="pa-pg" step="0.1" value="' + (p && p.pg != null ? p.pg : '') + '" oninput="calcVCModal()">')
+    +   fcol('PG curado %', '<input type="number" id="pa-pgc" step="0.1" value="' + (p && p.pgCur != null ? p.pgCur : '') + '" oninput="calcVCModal()">')
+    +   fcol('Vigor %', '<input type="number" id="pa-vig" step="0.1" value="' + (p && p.vigor != null ? p.vigor : '') + '">')
+    + '</div>'
+    + '<div class="frow">'
+    +   fcol('Curasemilla usada en el test', '<input type="text" id="pa-fung" value="' + esc(p ? p.fungicida : '') + '">')
+    +   fcol('Observaciones', '<input type="text" id="pa-obs" value="' + esc(p ? p.obs : '') + '">')
+    + '</div>'
+    + '<div class="calc">'
+    +   '<div class="ci"><div class="cv" id="pa-vc">—</div><div class="cl">VC %</div></div>'
+    +   '<div class="ci" style="flex:1;min-width:220px"><div class="cl" style="margin-bottom:3px">Cómo se usa</div>'
+    +   '<div style="font-size:11px;color:var(--muted);line-height:1.5">El VC define cuántas semillas hay que poner para lograr el objetivo de plantas. '
+    +   'Con unidad <b>Kg</b> la dosis se calcula con el P1000; con unidad <b>Bolsa</b>, con las semillas por bolsa.</div></div>'
+    + '</div>';
+
+  abrirModalBase(id ? 'Editar partida' : 'Nueva partida de semilla', h);
+  calcVCModal();
+  togglePartidaUnidad();
+}
+function fcol(label, inner){
+  return '<div class="fcol"><label class="fl">' + esc(label) + '</label>' + inner + '</div>';
+}
+function togglePartidaUnidad(){
+  var u = val('pa-unidad');
+  var p1000 = document.getElementById('pa-p1000'), sb = document.getElementById('pa-sb');
+  if(!p1000 || !sb) return;
+  if(u === 'Bolsa'){ sb.parentNode.style.opacity = '1'; p1000.parentNode.style.opacity = '.45'; }
+  else { sb.parentNode.style.opacity = '.45'; p1000.parentNode.style.opacity = '1'; }
+}
+function calcVCModal(){
+  var pg = num(val('pa-pgc'));
+  if(pg === null) pg = num(val('pa-pg'));
+  var pur = num(val('pa-pur'));
+  var e = document.getElementById('pa-vc');
+  if(!e) return;
+  if(pg && pur){
+    var vc = pg * pur / 100;
+    e.textContent = vc.toFixed(1);
+    e.style.color = vc >= 85 ? '#166534' : (vc >= 70 ? '#92400E' : '#991B1B');
+  } else {
+    e.textContent = '—';
+    e.style.color = '';
+  }
+}
+function guardarPartida(){
+  var geno = val('pa-geno');
+  if(!geno){ alert('Falta el genotipo o variedad.'); return; }
+  var nro = val('pa-nro');
+  var p = MODAL.id ? partidaById(MODAL.id) : null;
+  var nuevo = !p;
+  if(nuevo){ p = { id:uid('pa') }; }
+  p.genotipo  = geno;
+  p.nro       = nro;
+  p.nombre    = nro ? (geno + '-' + nro) : geno;
+  p.cultivo   = val('pa-cult');
+  p.unidad    = val('pa-unidad');
+  p.cantidad  = num(val('pa-cant'));
+  p.lab       = val('pa-lab');
+  p.p1000     = num(val('pa-p1000'));
+  p.semBolsa  = num(val('pa-sb'));
+  p.pureza    = num(val('pa-pur'));
+  p.pg        = num(val('pa-pg'));
+  p.pgCur     = num(val('pa-pgc'));
+  p.vigor     = num(val('pa-vig'));
+  p.fungicida = val('pa-fung');
+  p.obs       = val('pa-obs');
+  if(nuevo) DB.partidas.push(p);
+  sv('partidas');
+  cerrarModal();
+  renderPartidas(); renderSiembra(); renderLotes();
+}
+function borrarPartida(id){
+  var p = partidaById(id), i, usos = 0;
+  if(!p) return;
+  for(i=0; i<DB.siembra.length; i++){ if(DB.siembra[i].partidaId === id) usos++; }
+  if(usos && !confirm('La partida ' + p.nombre + ' está usada en ' + usos + ' lote(s) programado(s). ¿Borrarla igual?')) return;
+  if(!usos && !confirm('¿Borrar la partida ' + p.nombre + '?')) return;
+  for(i=0; i<DB.partidas.length; i++){ if(DB.partidas[i].id === id){ DB.partidas.splice(i,1); break; } }
+  sv('partidas');
+  renderPartidas(); renderSiembra(); renderLotes();
+}
+function renderPartidas(){
+  var fCult = val('pa-f-cult'), h = '', i, p, vc, mostradas = 0;
+  for(i=0; i<DB.partidas.length; i++){
+    p = DB.partidas[i];
+    if(fCult && p.cultivo !== fCult) continue;
+    mostradas++;
+    vc = vcPartida(p);
+    h += '<tr>'
+      + '<td class="tdname"><b>' + esc(p.nombre) + '</b></td>'
+      + '<td class="tdname">' + esc(p.genotipo) + '</td>'
+      + '<td class="tdname">' + esc(p.cultivo || '—') + '</td>'
+      + '<td>' + esc(p.unidad) + '</td>'
+      + '<td class="r">' + f(p.semBolsa, 0) + '</td>'
+      + '<td class="r">' + f(p.p1000, 1) + '</td>'
+      + '<td class="r">' + f(p.pureza, 1) + '</td>'
+      + '<td class="r">' + f(p.pg, 1) + '</td>'
+      + '<td class="r">' + f(p.pgCur, 1) + '</td>'
+      + '<td class="r">' + f(p.vigor, 1) + '</td>'
+      + '<td class="r">' + (vc !== null ? '<span class="bdg ' + (vc>=85?'bg':(vc>=70?'by':'br')) + '">' + f(vc,1) + '</span>' : '—') + '</td>'
+      + '<td class="tdname">' + esc(p.fungicida || '—') + '</td>'
+      + '<td class="r">'
+      +   '<button class="btn-ico" title="Editar" onclick="abrirPartida(\'' + p.id + '\')">&#9998;</button>'
+      +   '<button class="btn-ico" title="Borrar" onclick="borrarPartida(\'' + p.id + '\')">&times;</button>'
+      + '</td></tr>';
+  }
+  var tb = document.getElementById('tb-pa');
+  if(!DB.partidas.length) tb.innerHTML = filaVacia(13, 'Todavía no cargaste partidas de semilla.');
+  else if(!mostradas) tb.innerHTML = filaVacia(13, 'Ninguna partida de ese cultivo.');
+  else tb.innerHTML = h;
+
+  var cultivos = coreCultivos(), lc = [], j;
+  for(j=0; j<cultivos.length; j++) lc.push(cultivos[j].nombre);
+  llenarSelect('pa-f-cult', lc, 'Todos los cultivos', fCult);
+}
+
+/* ── 8.2 Rangos de siembra ─────────────────────────────────────────── */
+function abrirRango(id){
+  var r = null, i;
+  if(id){ for(i=0; i<DB.rangos.length; i++){ if(DB.rangos[i].id === id){ r = DB.rangos[i]; break; } } }
+  MODAL = { tipo:'rango', id:id };
+  var h = '<div class="frow">'
+    + fcol('Código', '<input type="text" id="ra-cod" value="' + esc(r ? r.cod : ('F' + (DB.rangos.length+1))) + '">')
+    + fcol('Fecha mínima', '<input type="date" id="ra-desde" value="' + esc(r ? r.desde : '') + '">')
+    + fcol('Fecha máxima', '<input type="date" id="ra-hasta" value="' + esc(r ? r.hasta : '') + '">')
+    + '</div>'
+    + '<div class="hint">Los rangos son las ventanas de siembra. Cada lote programado se asigna a un rango, y el balance de sembradoras compara la demanda de cada ventana contra la capacidad disponible.</div>';
+  abrirModalBase(id ? 'Editar rango' : 'Nuevo rango de siembra', h);
+}
+function guardarRango(){
+  var cod = val('ra-cod'), desde = val('ra-desde'), hasta = val('ra-hasta');
+  if(!cod){ alert('Falta el código del rango.'); return; }
+  if(desde && hasta && desde > hasta){ alert('La fecha mínima es posterior a la máxima.'); return; }
+  var r = null, i;
+  if(MODAL.id){ for(i=0; i<DB.rangos.length; i++){ if(DB.rangos[i].id === MODAL.id){ r = DB.rangos[i]; break; } } }
+  for(i=0; i<DB.rangos.length; i++){
+    if(DB.rangos[i].cod === cod && DB.rangos[i] !== r){ alert('Ya existe un rango con el código ' + cod + '.'); return; }
+  }
+  if(!r){ r = { id:uid('ra') }; DB.rangos.push(r); }
+  r.cod = cod; r.desde = desde; r.hasta = hasta;
+  DB.rangos.sort(function(a,b){ return (a.desde||'').localeCompare(b.desde||''); });
+  sv('rangos');
+  cerrarModal();
+  renderRangos(); renderSiembra();
+}
+function borrarRango(id){
+  var i, r = null, usos = 0;
+  for(i=0; i<DB.rangos.length; i++){ if(DB.rangos[i].id === id){ r = DB.rangos[i]; break; } }
+  if(!r) return;
+  var j;
+  for(j=0; j<DB.siembra.length; j++){ if(DB.siembra[j].rangoCod === r.cod) usos++; }
+  if(!confirm('¿Borrar el rango ' + r.cod + '?' + (usos ? ' Hay ' + usos + ' lote(s) asignado(s) a este rango.' : ''))) return;
+  DB.rangos.splice(i, 1);
+  sv('rangos');
+  renderRangos(); renderSiembra();
+}
+function renderRangos(){
+  var h = '', i, r, d;
+  for(i=0; i<DB.rangos.length; i++){
+    r = DB.rangos[i];
+    d = diasEntre(r.desde, r.hasta);
+    h += '<tr>'
+      + '<td class="tdname"><b>' + esc(r.cod) + '</b></td>'
+      + '<td>' + fmtFecha(r.desde) + '</td>'
+      + '<td>' + fmtFecha(r.hasta) + '</td>'
+      + '<td class="r">' + f(d, 0) + '</td>'
+      + '<td class="r">'
+      +   '<button class="btn-ico" title="Editar" onclick="abrirRango(\'' + r.id + '\')">&#9998;</button>'
+      +   '<button class="btn-ico" title="Borrar" onclick="borrarRango(\'' + r.id + '\')">&times;</button>'
+      + '</td></tr>';
+  }
+  document.getElementById('tb-ra').innerHTML = DB.rangos.length ? h
+    : filaVacia(5, 'Sin rangos. Cargá el primero con su fecha y después usá “Generar”.');
+  setVal('cfg-dias', DB.cfg.diasPorRango);
+}
+function guardarDias(){
+  var n = num(val('cfg-dias'));
+  DB.cfg.diasPorRango = (n && n > 0) ? n : 5;
+  sv('cfg');
+  setVal('cfg-dias', DB.cfg.diasPorRango);
+}
+/* Genera rangos consecutivos desde el primero cargado (como la hoja Listas) */
+function generarRangos(){
+  if(!DB.rangos.length || !DB.rangos[0].desde){
+    alert('Cargá primero un rango con su fecha mínima, y después generá los siguientes.');
+    return;
+  }
+  var cuantos = prompt('¿Cuántos rangos querés generar en total?', '18');
+  if(cuantos === null) return;
+  var n = parseInt(cuantos, 10);
+  if(!n || n < 1){ alert('Cantidad no válida.'); return; }
+  if(!confirm('Esto reemplaza los rangos actuales por ' + n + ' rangos de ' + DB.cfg.diasPorRango + ' días, desde el ' + fmtFecha(DB.rangos[0].desde) + '. ¿Seguimos?')) return;
+
+  var base = DB.rangos[0].desde, dias = DB.cfg.diasPorRango, nuevos = [], i, desde, hasta;
+  for(i=0; i<n; i++){
+    desde = (i === 0) ? base : sumarDias(base, i * dias);
+    hasta = sumarDias(desde, dias - 1);
+    nuevos.push({ id:uid('ra'), cod:'F' + (i+1), desde:desde, hasta:hasta });
+  }
+  DB.rangos = nuevos;
+  sv('rangos');
+  renderRangos(); renderSiembra();
+}
+
+/* ── 8.3 Sembradoras ───────────────────────────────────────────────── */
+function sembradoraById(id){
+  var i;
+  for(i=0; i<DB.sembradoras.length; i++){ if(DB.sembradoras[i].id === id) return DB.sembradoras[i]; }
+  return null;
+}
+function capSembradora(s){
+  if(!s.hileras || !s.dist || !s.vel) return null;
+  return Number(s.hileras) * Number(s.dist) * Number(s.vel) / 10;
+}
+function abrirSembradora(id){
+  var s = id ? sembradoraById(id) : null;
+  MODAL = { tipo:'semb', id:id };
+  var cultivos = coreCultivos(), lc = ['Todos'], i;
+  for(i=0; i<cultivos.length; i++) lc.push(cultivos[i].nombre);
+
+  var h = ''
+    + '<div class="frow">'
+    +   fcol('Sembradora', '<input type="text" id="se-n" value="' + esc(s ? s.nombre : ('S' + (DB.sembradoras.length+1))) + '">')
+    +   fcol('Contratista', '<input type="text" id="se-c" value="' + esc(s ? s.contratista : '') + '">')
+    +   fcol('Cultivo', '<select id="se-cult">' + opts(lc, s ? s.cultivo : 'Todos', '') + '</select>')
+    + '</div>'
+    + '<div class="frow">'
+    +   fcol('N° de hileras', '<input type="number" id="se-hil" step="1" value="' + (s && s.hileras != null ? s.hileras : '') + '" oninput="calcCapModal()">')
+    +   fcol('Distancia e/hileras (m)', '<input type="number" id="se-dist" step="0.01" value="' + (s && s.dist != null ? s.dist : '') + '" oninput="calcCapModal()">')
+    +   fcol('Velocidad (km/h)', '<input type="number" id="se-vel" step="0.1" value="' + (s && s.vel != null ? s.vel : '') + '" oninput="calcCapModal()">')
+    + '</div>'
+    + '<div class="calc">'
+    +   '<div class="ci"><div class="cv" id="se-ancho">—</div><div class="cl">Ancho labor (m)</div></div>'
+    +   '<div class="ci"><div class="cv" id="se-cap">—</div><div class="cl">ha / hora</div></div>'
+    +   '<div class="ci"><div class="cv" id="se-capd">—</div><div class="cl">ha / día</div></div>'
+    + '</div>'
+    + '<div class="fsec">Rangos en los que está disponible</div>'
+    + '<div class="pick" id="se-rangos">' + pickRangos(s) + '</div>'
+    + '<div class="hint">ha/día usa las ' + DB.cfg.horasDia + ' horas por día y el ' + DB.cfg.efect + '% de días efectivos de Configuración.</div>';
+
+  abrirModalBase(id ? 'Editar sembradora' : 'Nueva sembradora', h);
+  calcCapModal();
+}
+function pickRangos(s){
+  var h = '', i, r, chk;
+  if(!DB.rangos.length) return '<div class="empty">Cargá primero los rangos de siembra.</div>';
+  for(i=0; i<DB.rangos.length; i++){
+    r = DB.rangos[i];
+    chk = (s && s.rangos && s.rangos[r.cod]) ? ' checked' : '';
+    h += '<label class="pick-r"><input type="checkbox" data-cod="' + esc(r.cod) + '"' + chk + '>'
+      + '<span class="pn">' + esc(r.cod) + '</span>'
+      + '<span class="ph">' + fmtFecha(r.desde) + ' → ' + fmtFecha(r.hasta) + '</span></label>';
+  }
+  return h;
+}
+function calcCapModal(){
+  var hil = num(val('se-hil')), dist = num(val('se-dist')), vel = num(val('se-vel'));
+  var ea = document.getElementById('se-ancho'), ec = document.getElementById('se-cap'), ed = document.getElementById('se-capd');
+  if(!ea) return;
+  if(hil && dist){ ea.textContent = f(hil * dist, 2); } else { ea.textContent = '—'; }
+  if(hil && dist && vel){
+    var cap = hil * dist * vel / 10;
+    ec.textContent = f(cap, 2);
+    ed.textContent = f(cap * DB.cfg.horasDia * (DB.cfg.efect / 100), 1);
+  } else { ec.textContent = '—'; ed.textContent = '—'; }
+}
+function guardarSembradora(){
+  var n = val('se-n');
+  if(!n){ alert('Falta el nombre de la sembradora.'); return; }
+  var s = MODAL.id ? sembradoraById(MODAL.id) : null;
+  var nuevo = !s;
+  if(nuevo) s = { id:uid('se') };
+  s.nombre      = n;
+  s.contratista = val('se-c');
+  s.cultivo     = val('se-cult');
+  s.hileras     = num(val('se-hil'));
+  s.dist        = num(val('se-dist'));
+  s.vel         = num(val('se-vel'));
+  s.rangos      = {};
+  var cont = document.getElementById('se-rangos');
+  var boxes = cont ? cont.querySelectorAll('input[type=checkbox]') : [];
+  var i;
+  for(i=0; i<boxes.length; i++){
+    if(boxes[i].checked) s.rangos[boxes[i].getAttribute('data-cod')] = true;
+  }
+  if(nuevo) DB.sembradoras.push(s);
+  sv('sembradoras');
+  cerrarModal();
+  renderSembradoras();
+}
+function borrarSembradora(id){
+  var s = sembradoraById(id), i;
+  if(!s || !confirm('¿Borrar la sembradora ' + s.nombre + '?')) return;
+  for(i=0; i<DB.sembradoras.length; i++){ if(DB.sembradoras[i].id === id){ DB.sembradoras.splice(i,1); break; } }
+  sv('sembradoras');
+  renderSembradoras();
+}
+function renderSembradoras(){
+  var h = '', i, s, cap;
+  for(i=0; i<DB.sembradoras.length; i++){
+    s = DB.sembradoras[i];
+    cap = capSembradora(s);
+    h += '<tr>'
+      + '<td class="tdname"><b>' + esc(s.nombre) + '</b></td>'
+      + '<td class="tdname">' + esc(s.contratista || '—') + '</td>'
+      + '<td class="tdname">' + esc(s.cultivo || 'Todos') + '</td>'
+      + '<td class="r">' + f(s.hileras, 0) + '</td>'
+      + '<td class="r">' + f(s.dist, 2) + '</td>'
+      + '<td class="r">' + f(s.vel, 1) + '</td>'
+      + '<td class="r">' + f(cap, 2) + '</td>'
+      + '<td class="r">'
+      +   '<button class="btn-ico" title="Editar" onclick="abrirSembradora(\'' + s.id + '\')">&#9998;</button>'
+      +   '<button class="btn-ico" title="Borrar" onclick="borrarSembradora(\'' + s.id + '\')">&times;</button>'
+      + '</td></tr>';
+  }
+  document.getElementById('tb-se').innerHTML = DB.sembradoras.length ? h
+    : filaVacia(8, 'Sin sembradoras cargadas. El balance de la Etapa 3 las necesita.');
+}
+
+/* ── 8.4 Programación de siembra ───────────────────────────────────── */
+function siembraById(id){
+  var i;
+  for(i=0; i<DB.siembra.length; i++){ if(DB.siembra[i].id === id) return DB.siembra[i]; }
+  return null;
+}
+function abrirSiembra(id, pre){
+  if(!CAMPANIA){ alert('Elegí primero una campaña.'); return; }
+  var s = id ? siembraById(id) : null;
+  MODAL = { tipo:'siembra', id:id, pre:pre || null };
+
+  var cultivos = coreCultivos(), lc = [], i;
+  for(i=0; i<cultivos.length; i++) lc.push(cultivos[i].nombre);
+  var cultSel = s ? s.cultivo : (pre && pre.cultivo ? pre.cultivo : '');
+
+  var h = ''
+    + '<div class="fsec">Lote y cultivo</div>'
+    + '<div class="frow">'
+    +   fcol('Cultivo', '<select id="sb-cult" onchange="onSiembraCultivo()">' + opts(lc, cultSel, '— elegir —') + '</select>')
+    +   fcol('Partida de semilla', '<select id="sb-partida" onchange="onSiembraPartida()"></select>')
+    +   fcol('Rango de siembra', '<select id="sb-rango">' + opts(rangoOpts(), s ? s.rangoCod : '', '— elegir —') + '</select>')
+    + '</div>'
+    + '<div class="frow">'
+    +   fcol('Orden de siembra', '<input type="number" id="sb-orden" step="1" min="1" value="' + (s && s.orden != null ? s.orden : '') + '">')
+    +   fcol('D.E.S. (m)', '<input type="number" id="sb-des" step="0.01" value="' + (s && s.des != null ? s.des : '') + '" oninput="recalcSiembraModal()">')
+    +   fcol('Coef. de pérdida %', '<input type="number" id="sb-perd" step="1" value="' + (s && s.perd != null ? s.perd : 0) + '" oninput="recalcSiembraModal()">')
+    + '</div>'
+    + '<div id="sb-lote-zona"></div>'
+    + '<div class="fsec">Ambientes y objetivo de plantas</div>'
+    + '<div id="sb-ambs"></div>'
+    + '<div class="calc" style="margin-top:10px">'
+    +   '<div class="ci"><div class="cv" id="sb-c-ha">—</div><div class="cl">ha totales</div></div>'
+    +   '<div class="ci"><div class="cv" id="sb-c-vc">—</div><div class="cl">VC %</div></div>'
+    +   '<div class="ci"><div class="cv" id="sb-c-m2">—</div><div class="cl">sem/m² pond.</div></div>'
+    +   '<div class="ci"><div class="cv" id="sb-c-ml">—</div><div class="cl">sem/m lineal</div></div>'
+    +   '<div class="ci"><div class="cv" id="sb-c-ha2">—</div><div class="cl" id="sb-c-ha2l">dosis/ha</div></div>'
+    +   '<div class="ci"><div class="cv" id="sb-c-tot">—</div><div class="cl" id="sb-c-totl">total</div></div>'
+    + '</div>'
+    + '<div class="warn" id="sb-warn"></div>'
+    + '<div class="fsec">Curasemillas</div>'
+    + '<div id="sb-curas"></div>'
+    + '<button class="btn btn-sm" onclick="addInsRow(\'curas\')" style="margin-top:6px">+ Agregar curasemilla</button>'
+    + '<div class="fsec">Inoculantes</div>'
+    + '<div id="sb-inocs"></div>'
+    + '<button class="btn btn-sm" onclick="addInsRow(\'inocs\')" style="margin-top:6px">+ Agregar inoculante</button>'
+    + '<div class="fsec">Fertilizante a la siembra</div>'
+    + '<div class="hint" style="margin-top:0">El fertilizante se carga una sola vez en <b>Fertilización</b> (Etapa 2), '
+    + 'con su momento de aplicación. Lo que caiga en el momento “siembra” aparece acá y es lo que se controla por fitotoxicidad. '
+    + 'Así el N del arrancador se descuenta del N a aplicar, como en la Hoja1 de tu Excel, y no se cuenta dos veces en la necesidad de insumos.</div>';
+
+  abrirModalBase(id ? 'Editar programación de siembra' : 'Programar lote', h);
+
+  /* Estado de trabajo del modal */
+  MODAL.lotesSel = {};
+  MODAL.ambs = [];
+  MODAL.curas = [];
+  MODAL.inocs = [];
+
+  if(s){
+    MODAL.lotesSel[s.loteId] = 1;
+    for(i=0; i<s.ambs.length; i++){ MODAL.ambs.push({ amb:s.ambs[i].amb, ha:s.ambs[i].ha, objPl:s.ambs[i].objPl }); }
+    for(i=0; i<s.curas.length; i++){ MODAL.curas.push({ n:s.curas[i].n, dosis:s.curas[i].dosis, unit:s.curas[i].unit }); }
+    for(i=0; i<s.inocs.length; i++){ MODAL.inocs.push({ n:s.inocs[i].n, dosis:s.inocs[i].dosis, unit:s.inocs[i].unit }); }
+  } else if(pre && pre.loteId){
+    MODAL.lotesSel[pre.loteId] = 1;
+  }
+
+  onSiembraCultivo(true);
+  renderInsRows('curas');
+  renderInsRows('inocs');
+}
+function rangoOpts(){
+  var out = [], i, r;
+  for(i=0; i<DB.rangos.length; i++){
+    r = DB.rangos[i];
+    out.push({ v:r.cod, t:r.cod + '  ' + fmtFecha(r.desde) + ' → ' + fmtFecha(r.hasta) });
+  }
+  return out;
+}
+/* Lotes de la campaña que tienen este cultivo (según Plan de Uso) */
+function lotesDelCultivo(cultivo){
+  var filas = filasCampania(), out = [], i;
+  for(i=0; i<filas.length; i++){ if(filas[i].cultivo === cultivo) out.push(filas[i]); }
+  return out;
+}
+function onSiembraCultivo(primera){
+  var cult = val('sb-cult');
+
+  /* Partidas del cultivo elegido */
+  var lp = [], i, p;
+  for(i=0; i<DB.partidas.length; i++){
+    p = DB.partidas[i];
+    if(cult && p.cultivo && p.cultivo !== cult) continue;
+    lp.push({ v:p.id, t:p.nombre + '  (' + p.unidad + ')' });
+  }
+  var s = MODAL.id ? siembraById(MODAL.id) : null;
+  var paSel = s ? (s.partidaId || (partidaPorNombre(s.partidaNombre) ? partidaPorNombre(s.partidaNombre).id : '')) : '';
+  llenarSelect('sb-partida', lp, lp.length ? '— elegir —' : 'No hay partidas de este cultivo', paSel);
+
+  /* Zona de lotes: en alta se eligen varios; en edición queda fijo */
+  var zona = document.getElementById('sb-lote-zona');
+  if(MODAL.id && s){
+    zona.innerHTML = '<div class="frow"><div class="fcol" style="flex:1">'
+      + '<label class="fl">Lote</label>'
+      + '<div style="padding:6px 0;font-weight:500">' + esc(s.campo) + ' · ' + esc(s.lote) + '</div></div></div>';
+  } else {
+    var disp = lotesDelCultivo(cult);
+    var h = '', j, r, chk, ya;
+    for(j=0; j<disp.length; j++){
+      r = disp[j];
+      ya = siembraDeLote(r.loteId, cult, CAMPANIA);
+      chk = MODAL.lotesSel[r.loteId] ? ' checked' : '';
+      h += '<label class="pick-r"><input type="checkbox" data-lote="' + esc(r.loteId) + '"' + chk
+        + (ya ? ' disabled' : '') + ' onchange="onToggleLote()">'
+        + '<span class="pn">' + esc(r.campo) + ' · ' + esc(r.lote) + '</span>'
+        + '<span class="ph">' + f(r.ha,1) + ' ha' + (r.amb ? ' · ' + esc(r.amb) : '') + '</span>'
+        + (ya ? '<span class="bdg bg">ya programado</span>' : '')
+        + '</label>';
+    }
+    zona.innerHTML = '<div class="fsec">Lotes</div>'
+      + '<div class="pick">' + (h || '<div class="empty">' + (cult ? 'Este cultivo no tiene lotes asignados en la campaña ' + esc(CAMPANIA) + '.<br>Asignalo en <b>Plan de Uso del Suelo</b>.' : 'Elegí un cultivo para ver sus lotes.') + '</div>') + '</div>'
+      + '<div class="hint">Podés programar varios lotes de una vez: se crea una programación por lote, con los mismos parámetros.</div>';
+  }
+
+  if(primera) sincronizarAmbs();
+  else { MODAL.ambs = []; sincronizarAmbs(); }
+}
+function onToggleLote(){
+  var cont = document.getElementById('sb-lote-zona');
+  var boxes = cont.querySelectorAll('input[data-lote]');
+  var i;
+  MODAL.lotesSel = {};
+  for(i=0; i<boxes.length; i++){
+    if(boxes[i].checked) MODAL.lotesSel[boxes[i].getAttribute('data-lote')] = 1;
+  }
+  sincronizarAmbs();
+}
+function onSiembraPartida(){ recalcSiembraModal(); }
+
+/* Arma las filas de ambiente. Con un solo lote elegido propone sus ambientes;
+   con varios, una fila única (el objetivo se aplica a todos por igual). */
+function sincronizarAmbs(){
+  var sel = [], k;
+  for(k in MODAL.lotesSel){ if(MODAL.lotesSel.hasOwnProperty(k)) sel.push(k); }
+
+  if(!MODAL.ambs.length){
+    if(sel.length === 1){
+      var l = loteById(sel[0]);
+      var r = null, filas = filasCampania(), i;
+      for(i=0; i<filas.length; i++){ if(filas[i].loteId === sel[0] && filas[i].cultivo === val('sb-cult')){ r = filas[i]; break; } }
+      MODAL.ambs = [{ amb:(l ? l.amb : ''), ha:(r ? r.ha : (l ? l.ha : null)), objPl:null }];
+    } else {
+      MODAL.ambs = [{ amb:'', ha:null, objPl:null }];
+    }
+  }
+  renderAmbRows();
+}
+function renderAmbRows(){
+  var cont = document.getElementById('sb-ambs');
+  if(!cont) return;
+  var sel = [], k;
+  for(k in MODAL.lotesSel){ if(MODAL.lotesSel.hasOwnProperty(k)) sel.push(k); }
+  var varios = sel.length > 1;
+  var ambDisp = coreAmbientes(), i, a;
+
+  var h = '<div class="scroll"><table><thead><tr>'
+    + '<th>Ambiente</th><th class="r">' + (varios ? 'Proporción %' : 'Hectáreas') + '</th>'
+    + '<th class="r">Objetivo pl/m²</th><th class="r">sem/m²</th><th class="r">Dosis/ha</th><th></th>'
+    + '</tr></thead><tbody>';
+
+  var p = val('sb-partida') ? partidaById(val('sb-partida')) : null;
+  var des = num(val('sb-des')), perd = num(val('sb-perd'));
+
+  for(i=0; i<MODAL.ambs.length; i++){
+    a = MODAL.ambs[i];
+    var c = calcAmb(a, p, des, perd);
+    h += '<tr>'
+      + '<td><select onchange="setAmb(' + i + ',\'amb\',this.value)" style="width:110px">'
+      +   opts(ambDisp, a.amb, '— sin ambiente —') + '</select></td>'
+      + '<td class="r"><input type="number" step="0.1" value="' + (a.ha != null ? a.ha : '') + '" '
+      +   'oninput="setAmb(' + i + ',\'ha\',this.value)" style="width:82px"></td>'
+      + '<td class="r"><input type="number" step="0.1" value="' + (a.objPl != null ? a.objPl : '') + '" '
+      +   'oninput="setAmb(' + i + ',\'objPl\',this.value)" style="width:82px"></td>'
+      + '<td class="r">' + f(c.semM2, 1) + '</td>'
+      + '<td class="r">' + (c.densHa !== null ? f(c.densHa, p && p.unidad === 'Bolsa' ? 2 : 1) : '—') + '</td>'
+      + '<td class="r">' + (MODAL.ambs.length > 1
+          ? '<button class="btn-ico" title="Quitar" onclick="delAmb(' + i + ')">&times;</button>' : '') + '</td>'
+      + '</tr>';
+  }
+  h += '</tbody></table></div>'
+    + '<button class="btn btn-sm" onclick="addAmb()" style="margin-top:6px">+ Agregar ambiente</button>'
+    + '<div class="hint">'
+    + (varios
+        ? 'Con varios lotes elegidos, las hectáreas de cada ambiente se toman como <b>proporción</b> y se aplican a la superficie de cada lote.'
+        : 'Si el lote tiene ambientes con distinto potencial, cargá una fila por ambiente con sus hectáreas y su objetivo. '
+          + 'El lote cierra con el promedio ponderado por superficie, igual que la Hoja1 de tu Excel.')
+    + '</div>';
+  cont.innerHTML = h;
+  recalcSiembraModal();
+}
+function setAmb(i, campo, v){
+  if(!MODAL.ambs[i]) return;
+  MODAL.ambs[i][campo] = (campo === 'amb') ? v : num(v);
+  recalcSiembraModal();
+}
+function addAmb(){
+  MODAL.ambs.push({ amb:'', ha:null, objPl:null });
+  renderAmbRows();
+}
+function delAmb(i){
+  MODAL.ambs.splice(i, 1);
+  renderAmbRows();
+}
+function recalcSiembraModal(){
+  if(!MODAL || MODAL.tipo !== 'siembra') return;
+  var p = val('sb-partida') ? partidaById(val('sb-partida')) : null;
+  var des = num(val('sb-des')), perd = num(val('sb-perd'));
+  var tmp = { partidaId:(p ? p.id : ''), partidaNombre:'', des:des, perd:perd, ambs:MODAL.ambs };
+  var c = calcSiembra(tmp);
+  var u = unidadDens(p);
+
+  setTxt('sb-c-ha',  f(c.haTot, 1));
+  setTxt('sb-c-vc',  f(vcPartida(p), 1));
+  setTxt('sb-c-m2',  f(c.wSemM2, 1));
+  setTxt('sb-c-ml',  f(c.wSemMl, 2));
+  setTxt('sb-c-ha2', c.wDensHa !== null ? f(c.wDensHa, u === 'bol' ? 2 : 1) : '—');
+  setTxt('sb-c-tot', c.total ? f(c.total, u === 'bol' ? 1 : 0) : '—');
+  setTxt('sb-c-ha2l', u === 'bol' ? 'bolsas/ha' : 'kg/ha');
+  setTxt('sb-c-totl', u === 'bol' ? 'bolsas totales' : 'kg totales');
+
+  /* Control de superficie: con un solo lote elegido, Σ ha de ambientes debe
+     coincidir con lo que Plan de Uso le asigna a ese lote/cultivo. */
+  var avisos = c.avisos.slice();
+  var sel = [], k;
+  for(k in MODAL.lotesSel){ if(MODAL.lotesSel.hasOwnProperty(k)) sel.push(k); }
+  if(sel.length === 1){
+    var ref = haActividad(sel[0], val('sb-cult'), CAMPANIA);
+    if(ref && Math.abs(c.haTot - ref) >= 0.05){
+      avisos.push('Los ambientes suman ' + f(c.haTot,1) + ' ha, pero Plan de Uso le asigna '
+        + f(ref,1) + ' ha a este lote (' + (c.haTot > ref ? '+' : '') + f(c.haTot - ref,1) + ' ha). '
+        + 'Si es a propósito, seguí; si no, corregí las hectáreas de cada ambiente.');
+    }
+  }
+  var w = document.getElementById('sb-warn');
+  if(w){
+    if(avisos.length){ w.innerHTML = avisos.join('<br>'); w.style.display = 'block'; }
+    else { w.style.display = 'none'; }
+  }
+  /* refresca las columnas calculadas de las filas de ambiente sin re-render total */
+  var cont = document.getElementById('sb-ambs');
+  if(cont){
+    var rows = cont.querySelectorAll('tbody tr'), i, tds;
+    for(i=0; i<rows.length && i<c.filas.length; i++){
+      tds = rows[i].querySelectorAll('td');
+      if(tds.length >= 5){
+        tds[3].textContent = f(c.filas[i].calc.semM2, 1);
+        tds[4].textContent = c.filas[i].calc.densHa !== null ? f(c.filas[i].calc.densHa, u === 'bol' ? 2 : 1) : '—';
+      }
+    }
+  }
+}
+function setTxt(id, v){
+  var e = document.getElementById(id);
+  if(e) e.textContent = v;
+}
+
+/* ── Filas de curasemillas / inoculantes ───────────────────────────── */
+function addInsRow(tipo){
+  MODAL[tipo].push({ n:'', dosis:null, unit:'' });
+  renderInsRows(tipo);
+}
+function delInsRow(tipo, i){
+  MODAL[tipo].splice(i, 1);
+  renderInsRows(tipo);
+}
+function setInsRow(tipo, i, campo, v){
+  if(!MODAL[tipo][i]) return;
+  MODAL[tipo][i][campo] = (campo === 'dosis') ? num(v) : v;
+  if(campo === 'n'){
+    var cat = coreInsumos(tipo === 'curas' ? 'Curasemilla' : 'Inoculante'), j;
+    for(j=0; j<cat.length; j++){
+      if(cat[j].nombre === v){ MODAL[tipo][i].unit = cat[j].unidad; renderInsRows(tipo); return; }
+    }
+  }
+}
+function renderInsRows(tipo){
+  var cont = document.getElementById('sb-' + tipo);
+  if(!cont) return;
+  var cat = coreInsumos(tipo === 'curas' ? 'Curasemilla' : 'Inoculante');
+  var lista = [], i;
+  for(i=0; i<cat.length; i++) lista.push(cat[i].nombre);
+
+  if(!MODAL[tipo].length){
+    cont.innerHTML = '<div class="hint" style="margin-top:0">Sin ' + (tipo === 'curas' ? 'curasemillas' : 'inoculantes') + '.'
+      + (lista.length ? '' : ' <b>No hay ' + (tipo === 'curas' ? 'curasemillas' : 'inoculantes') + ' cargados en Maestros.</b>') + '</div>';
+    return;
+  }
+  var h = '<div class="scroll"><table><thead><tr><th>Producto</th><th class="r">Dosis</th><th>Unidad</th><th></th></tr></thead><tbody>';
+  for(i=0; i<MODAL[tipo].length; i++){
+    h += '<tr>'
+      + '<td><select onchange="setInsRow(\'' + tipo + '\',' + i + ',\'n\',this.value)" style="min-width:180px">'
+      +   opts(lista, MODAL[tipo][i].n, '— elegir —') + '</select></td>'
+      + '<td class="r"><input type="number" step="0.001" value="' + (MODAL[tipo][i].dosis != null ? MODAL[tipo][i].dosis : '') + '" '
+      +   'oninput="setInsRow(\'' + tipo + '\',' + i + ',\'dosis\',this.value)" style="width:90px"></td>'
+      + '<td><input type="text" value="' + esc(MODAL[tipo][i].unit || '') + '" '
+      +   'oninput="setInsRow(\'' + tipo + '\',' + i + ',\'unit\',this.value)" style="width:140px" placeholder="lt/100 kg semilla"></td>'
+      + '<td class="r"><button class="btn-ico" onclick="delInsRow(\'' + tipo + '\',' + i + ')">&times;</button></td>'
+      + '</tr>';
+  }
+  h += '</tbody></table></div>';
+  cont.innerHTML = h;
+}
+
+/* ── Guardar programación ──────────────────────────────────────────── */
+function guardarSiembra(){
+  var cult = val('sb-cult');
+  if(!cult){ alert('Elegí el cultivo.'); return; }
+  var paId = val('sb-partida');
+  if(!paId){ alert('Elegí la partida de semilla.'); return; }
+  var des = num(val('sb-des')), perd = num(val('sb-perd'));
+  var rango = val('sb-rango'), orden = num(val('sb-orden'));
+
+  /* Validar ambientes */
+  var i, a, sinObj = 0, sumHa = 0;
+  for(i=0; i<MODAL.ambs.length; i++){
+    a = MODAL.ambs[i];
+    if(!a.objPl) sinObj++;
+    sumHa += (a.ha || 0);
+  }
+  if(sinObj){ alert('Falta el objetivo de plantas/m² en ' + sinObj + ' ambiente(s).'); return; }
+  if(!sumHa){ alert('Cargá las hectáreas de cada ambiente.'); return; }
+
+  var p = partidaById(paId);
+
+  if(MODAL.id){
+    /* ── Edición de un lote ── */
+    var s = siembraById(MODAL.id);
+    if(!s) return;
+    s.cultivo = cult; s.partidaId = paId; s.partidaNombre = p ? p.nombre : '';
+    s.rangoCod = rango; s.orden = orden; s.des = des; s.perd = perd;
+    s.ambs = clonAmbs(MODAL.ambs);
+    s.curas = clonIns(MODAL.curas);
+    s.inocs = clonIns(MODAL.inocs);
+    sv('siembra');
+  } else {
+    /* ── Alta: una programación por lote elegido ── */
+    var sel = [], k;
+    for(k in MODAL.lotesSel){ if(MODAL.lotesSel.hasOwnProperty(k)) sel.push(k); }
+    if(!sel.length){ alert('Elegí al menos un lote.'); return; }
+
+    var varios = sel.length > 1;
+    var filas = filasCampania(), j, l, r, ambs, haLote, prop;
+
+    for(i=0; i<sel.length; i++){
+      l = loteById(sel[i]);
+      if(!l) continue;
+      r = null;
+      for(j=0; j<filas.length; j++){ if(filas[j].loteId === sel[i] && filas[j].cultivo === cult){ r = filas[j]; break; } }
+      haLote = r ? r.ha : l.ha;
+
+      if(varios){
+        /* Las hectáreas cargadas se toman como proporción y se reparten */
+        ambs = [];
+        for(j=0; j<MODAL.ambs.length; j++){
+          prop = sumHa ? (MODAL.ambs[j].ha || 0) / sumHa : 0;
+          ambs.push({ amb:MODAL.ambs[j].amb || l.amb, ha:(haLote * prop), objPl:MODAL.ambs[j].objPl });
+        }
+      } else {
+        ambs = clonAmbs(MODAL.ambs);
+      }
+
+      DB.siembra.push({
+        id: uid('sb'),
+        campania: CAMPANIA,
+        loteId: sel[i], campo: l.campo, lote: l.nombre,
+        cultivo: cult,
+        partidaId: paId, partidaNombre: p ? p.nombre : '',
+        rangoCod: rango, orden: orden, des: des, perd: perd,
+        ambs: ambs,
+        curas: clonIns(MODAL.curas),
+        inocs: clonIns(MODAL.inocs)
+      });
+    }
+    sv('siembra');
+  }
+
+  cerrarModal();
+  renderSiembra(); renderLotes();
+}
+function clonAmbs(arr){
+  var out = [], i;
+  for(i=0; i<arr.length; i++){ out.push({ amb:arr[i].amb, ha:arr[i].ha, objPl:arr[i].objPl }); }
+  return out;
+}
+function clonIns(arr){
+  var out = [], i;
+  for(i=0; i<arr.length; i++){
+    if(!arr[i].n) continue;
+    out.push({ n:arr[i].n, dosis:arr[i].dosis, unit:arr[i].unit });
+  }
+  return out;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   9. CONFIGURACIÓN — parámetros, coef. P, fitotoxicidad
+   ═══════════════════════════════════════════════════════════════════ */
+
+function renderCfg(){
+  setVal('cfg-pfac',    DB.cfg.pFactor);
+  setVal('cfg-paporte', DB.cfg.pAporte);
+  setVal('cfg-sppm',    DB.cfg.sSO4);
+  setVal('cfg-momax',   DB.cfg.moMax);
+  setVal('cfg-sdosis',  DB.cfg.sDosis);
+  setVal('cfg-kfac',    DB.cfg.kFactor);
+  setVal('cfg-kppm',    DB.cfg.kPpm);
+  setVal('cfg-kdosis',  DB.cfg.kDosis);
+  setVal('cfg-horas',   DB.cfg.horasDia);
+  setVal('cfg-efect',   DB.cfg.efect);
+  renderCoefP();
+  renderFito();
+}
+function guardarCfg(){
+  DB.cfg.pFactor  = numOr(val('cfg-pfac'),    2.293);
+  DB.cfg.pAporte  = numOr(val('cfg-paporte'), 0.437);
+  DB.cfg.sSO4     = numOr(val('cfg-sppm'),    10);
+  DB.cfg.moMax    = numOr(val('cfg-momax'),   2.3);
+  DB.cfg.sDosis   = numOr(val('cfg-sdosis'),  10);
+  DB.cfg.kFactor  = numOr(val('cfg-kfac'),    390);
+  DB.cfg.kPpm     = numOr(val('cfg-kppm'),    120);
+  DB.cfg.kDosis   = numOr(val('cfg-kdosis'),  40);
+  DB.cfg.horasDia = numOr(val('cfg-horas'),   8);
+  DB.cfg.efect    = numOr(val('cfg-efect'),   80);
+  sv('cfg');
+}
+function numOr(v, d){
+  var n = num(v);
+  return (n === null) ? d : n;
+}
+function renderCoefP(){
+  var ambs = coreAmbientes(), h = '', i, c;
+  for(i=0; i<ambs.length; i++){
+    c = (DB.cfg.coefP[ambs[i]] !== undefined) ? DB.cfg.coefP[ambs[i]] : COEF_P_DEFAULT;
+    h += '<tr>'
+      + '<td class="tdname"><span class="bdg bamb">' + esc(ambs[i]) + '</span></td>'
+      + '<td class="tdname" style="color:var(--muted)">—</td>'
+      + '<td class="r"><input type="number" step="0.01" min="0" max="1" value="' + c + '" '
+      +   'data-amb="' + esc(ambs[i]) + '" onchange="setCoefP(this.getAttribute(\'data-amb\'),this.value)" style="width:72px"></td>'
+      + '</tr>';
+  }
+  document.getElementById('tb-coefp').innerHTML = ambs.length ? h
+    : filaVacia(3, 'Los ambientes vienen de los lotes de <b>Plan de Uso del Suelo</b>.');
+}
+function setCoefP(amb, v){
+  var n = num(v);
+  DB.cfg.coefP[amb] = (n === null) ? COEF_P_DEFAULT : n;
+  sv('cfg');
+}
+function renderFito(){
+  var cultivos = coreCultivos(), h = '', i, n, def;
+  for(i=0; i<cultivos.length; i++){
+    n = cultivos[i].nombre;
+    def = (DB.cfg.fito[n] !== undefined) ? DB.cfg.fito[n] : (FITO_EXCEL[n] !== undefined ? FITO_EXCEL[n] : '');
+    h += '<tr>'
+      + '<td class="tdname">' + esc(n) + '</td>'
+      + '<td class="r"><input type="number" step="1" min="0" value="' + def + '" '
+      +   'data-cult="' + esc(n) + '" onchange="setFito(this.getAttribute(\'data-cult\'),this.value)" style="width:72px"></td>'
+      + '</tr>';
+  }
+  document.getElementById('tb-fito').innerHTML = cultivos.length ? h
+    : filaVacia(2, 'Los cultivos vienen del padrón de <b>Maestros</b>.');
+}
+function setFito(cult, v){
+  var n = num(v);
+  if(n === null) delete DB.cfg.fito[cult];
+  else DB.cfg.fito[cult] = n;
+  sv('cfg');
+}
+function borrarTodo(){
+  if(!confirm('Esto borra TODO lo cargado en esta herramienta: partidas, rangos, sembradoras, programación de siembra, fertilización y análisis.\n\nLos lotes, cultivos e insumos NO se tocan (viven en Plan de Uso y Maestros).\n\n¿Seguimos?')) return;
+  if(!confirm('Última confirmación: no hay vuelta atrás. ¿Borrar todo?')) return;
+  var k;
+  for(k in K){ if(K.hasOwnProperty(k)){ try{ localStorage.removeItem(K[k]); }catch(e){} } }
+  try{ localStorage.removeItem(MIGR_FLAG); }catch(e){}
+  DB = { partidas:[], rangos:[], sembradoras:[], siembra:[], fert:[], analisis:[], cfg:cfgDefault() };
+  renderTodo();
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   10. NAVEGACIÓN Y ARRANQUE
+   ═══════════════════════════════════════════════════════════════════ */
+
+function showTab(t, btn){
+  TAB = t;
+  var vs = document.querySelectorAll('.view'), i;
+  for(i=0; i<vs.length; i++) vs[i].classList.remove('active');
+  var v = document.getElementById('v-' + t);
+  if(v) v.classList.add('active');
+  var ts = document.querySelectorAll('.tab');
+  for(i=0; i<ts.length; i++) ts[i].classList.remove('active');
+  if(btn) btn.classList.add('active');
+  else { var b = document.getElementById('tb-' + t); if(b) b.classList.add('active'); }
+}
+
+function renderTodo(){
+  try{ renderCampanias(); }catch(e){ console.error('renderCampanias', e); }
+  try{ renderPartidas(); }catch(e){ console.error('renderPartidas', e); }
+  try{ renderRangos(); }catch(e){ console.error('renderRangos', e); }
+  try{ renderSembradoras(); }catch(e){ console.error('renderSembradoras', e); }
+  try{ renderCfg(); }catch(e){ console.error('renderCfg', e); }
+  try{ renderSiembra(); }catch(e){ console.error('renderSiembra', e); }
+  try{ renderLotes(); }catch(e){ console.error('renderLotes', e); }
+}
+function renderCampanias(){
+  var cs = coreCampanias();
+  if(!CAMPANIA && cs.length){
+    if(hayCore() && PA.demo.campaniaActiva){
+      var ca = PA.demo.campaniaActiva();
+      if(ca && (ca.id || ca.nombre)) CAMPANIA = ca.id || ca.nombre;
+    }
+    if(!CAMPANIA || cs.indexOf(CAMPANIA) < 0) CAMPANIA = cs[cs.length - 1];
+  }
+  llenarSelect('camp-sel', cs, cs.length ? '' : '— sin campañas —', CAMPANIA);
+}
+function onCambioCampania(){
+  CAMPANIA = val('camp-sel');
+  renderSiembra(); renderLotes();
+}
+function poblarEmpresas(){
+  var sel = document.getElementById('emp-sel');
+  var wrap = document.getElementById('emp-wrap');
+  if(!sel) return;
+  sel.innerHTML = '';
+  if(CTX && CTX.empresasDisponibles && CTX.empresasDisponibles.length){
+    var es = CTX.empresasDisponibles, i, o;
+    for(i=0; i<es.length; i++){
+      o = document.createElement('option');
+      o.value = es[i].id;
+      o.textContent = es[i].razonSocial || es[i].nombre || es[i].id;
+      sel.appendChild(o);
+    }
+    sel.value = CTX.empresaActivaId;
+  } else {
+    if(wrap) wrap.style.display = 'none';
+  }
+}
+function onCambioEmpresa(){
+  var sel = document.getElementById('emp-sel');
+  if(hayCore() && CTX && sel && sel.value && PA.setEmpresaActiva){
+    PA.setEmpresaActiva(sel.value, function(err, ctx){
+      if(!err && ctx) CTX = ctx;
+      CAMPANIA = '';
+      renderTodo();
+    });
+  } else {
+    renderTodo();
+  }
+}
+
+function boot(){
+  document.getElementById('fver').textContent = 'Versión ' + VERSION + ' · BUILD ' + BUILD;
+  cargarDB();
+  migrar();
+
+  if(typeof PA !== 'undefined' && PA.init){
+    PA.init({}, function(){
+      var arrancar = function(){
+        if(PA.loadContext){
+          PA.loadContext(null, function(err, ctx){
+            if(!err && ctx) CTX = ctx;
+            poblarEmpresas();
+            renderTodo();
+          });
+        } else {
+          poblarEmpresas();
+          renderTodo();
+        }
+      };
+      if(PA.haySesion && PA.haySesion()) arrancar();
+      else if(PA.login) PA.login('eduardo@doneduardo.com', function(){ arrancar(); });
+      else arrancar();
+    });
+  } else {
+    var wrap = document.getElementById('emp-wrap');
+    if(wrap) wrap.style.display = 'none';
+    renderTodo();
+  }
+}
+
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+else boot();
+</script>
+</body>
+</html>
