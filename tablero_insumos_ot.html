@@ -1317,7 +1317,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
 </main>
 
 <footer>
-  <span>Puntal Agro · Insumos &amp; OT · Versión v2026-10-30 11:20 · BUILD 30</span>
+  <span>Puntal Agro · Insumos &amp; OT · Versión v2026-10-31 16:40 · BUILD 31</span>
   <span id="fts">—</span>
 </footer>
 
@@ -6457,7 +6457,7 @@ function renderTrabajosAplicados(){
       '</div>'+
       '<div class="dest-body">'+
         '<div class="tw"><table><thead><tr><th>'+(un?'Campo':'Lote')+'</th><th>Estado</th><th class="num">Superficie</th><th>Insumos · '+(un?'cantidad':'dosis')+'</th><th>Observaciones</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
-        (hayPend?'<div class="trb-apl-sub" style="margin-top:6px">Lo pendiente de este trabajo se registra en <strong>Registrar aplicación</strong> (ahí se carga lo realmente entregado y la superficie real).</div>':'')+
+        (hayPend?'<div class="trb-apl-sub" style="margin-top:6px">Lo pendiente de este trabajo se confirma en la ventana 4, <strong>Confirmar</strong> (ahí se carga lo realmente entregado y la superficie real).</div>':'')+
       '</div>'+
     '</div>';
   }
@@ -6530,7 +6530,7 @@ function corregirTanda(otId, tandaId){
   var nom=[]; for(var a=0;a<afect.length;a++) nom.push('• '+nombreLaborDeTrabajo(afect[a].trabajo)+' · '+nombreDestino(afect[a].destino));
   var enEdicion=(editOtId===otId);
   if(!confirm('¿Corregir la aplicación del '+fd(fApl)+'?\n\n'+nom.join('\n')+
-    '\n\nSe deshace (los insumos vuelven al stock) y se abre "Registrar aplicación" con los mismos datos cargados: fecha, superficie real, depósito, entregado y devoluciones. Cambiás lo que estaba mal y confirmás de nuevo.'+
+    '\n\nSe deshace (los insumos vuelven al stock) y se abre "Lo realizado" con los mismos datos cargados: fecha, superficie real, depósito, entregado y devoluciones. Cambiás lo que estaba mal y confirmás de nuevo.'+
     '\n\nHasta que confirmes, esos lotes quedan pendientes.'+(enEdicion?'\n\nLos cambios de la edición que no guardaste se descartan.':''))) return;
   // Datos de la tanda antes de deshacerla.
   var cr={otId:otId, fecha:fApl, destIds:{}, haReal:{}, consumos:{}}, reqK={};
@@ -6971,6 +6971,30 @@ function iniciarRegistro(otId){
     }
     aplicTmp.precargado=nPre;
   } else regSync();
+  // Corrección de una aplicación ("Corregir aplicación"): se precargan los datos que tenía la tanda
+  // deshecha (lotes, fecha, superficie real, depósitos, entregado y devoluciones).
+  var cr=correccionTmp;
+  if(cr && cr.otId===otId){
+    var nC=0;
+    for(var pc=0;pc<pend.length;pc++){
+      var idc=pend[pc].destino.id;
+      if(cr.destIds[idc]){ aplicTmp.est[idc]='si'; if(cr.haReal.hasOwnProperty(idc)) aplicTmp.haReal[idc]=cr.haReal[idc]; nC++; }
+      else aplicTmp.est[idc]='pend';
+    }
+    if(nC){
+      aplicTmp.fecha=cr.fecha||aplicTmp.fecha; aplicTmp.fechas={};
+      regSync();
+      aplicTmp.consumos={};
+      for(var kc in cr.consumos){ if(!cr.consumos.hasOwnProperty(kc)) continue;
+        var cc=cr.consumos[kc];
+        aplicTmp.consumos[kc]={depositoId:(getDepositoById(cc.depositoId)?cc.depositoId:''), devStock:cc.devStock, devBaja:cc.devBaja};
+        if(cc.entregadoOverride!==undefined) aplicTmp.consumos[kc].entregadoOverride=cc.entregadoOverride;
+      }
+      aplicTmp.correccion=cr.fecha||'-';
+      aplicTmp.precargado=nC;
+    }
+    correccionTmp=null;
+  }
   return true;
 }
 
