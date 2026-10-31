@@ -4,53 +4,99 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ingreso · Puntal Agro</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#F0F2F5;--card:#fff;--border:#E4E8EE;--text:#0F1923;--muted:#7A8899;--olive:#4A6533;--ochre:#A86A1F;--terra:#C8642D;--radius:12px;--mono:ui-monospace,SFMono-Regular,Menlo,monospace;--sans:'DM Sans',sans-serif;}
+/* Misma paleta y lenguaje que index.html (estética mosaico):
+   fondo verde salvia, tarjeta blanca, verde Puntal en títulos,
+   terracota solo en el rótulo de marca y los errores. */
+:root{
+  --pun:#2F4220; --olive:#4A6533; --olive-d:#3C5429; --ochre:#A86A1F; --terra:#C8642D;
+  --olive-t:#E7EDDF; --terra-t:#F8E7DB;
+  --bg:#E4ECDD; --card:#FFFFFF; --border:#D3DCC9; --line:#E6EBE0;
+  --text:#18221A; --muted:#6B7764; --soft:#9AA394; --hover:#F7F9F3;
+  --shadow:0 24px 48px -24px rgba(31,45,22,.30), 0 2px 8px rgba(31,45,22,.05);
+  --radius:16px; --sans:'DM Sans',system-ui,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:15px;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
-.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);width:100%;max-width:380px;overflow:hidden;box-shadow:0 8px 30px rgba(15,25,35,.08)}
-.top{background:var(--olive);padding:22px 24px;border-bottom:4px solid var(--terra);display:flex;align-items:center;gap:12px}
-.top .top-logo{width:42px;height:42px;flex-shrink:0;background:#fff;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:5px}
-.top .top-logo img{max-width:100%;max-height:100%;width:auto;height:auto;display:block}
-.top .logo-sub{font-size:11px;font-family:var(--sans);font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.9)}
-.top h1{font-size:18px;font-weight:700;letter-spacing:-.3px;margin-top:3px;color:#fff;line-height:1.2}
-.body{padding:22px 24px 24px}
-label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;margin-top:14px}
-label:first-child{margin-top:0}
-input{width:100%;border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:var(--sans);font-size:14px;color:var(--text)}
-input:focus{outline:none;border-color:var(--olive)}
-.btn{width:100%;margin-top:20px;background:var(--olive);color:#fff;border:none;border-radius:8px;padding:11px;font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background .12s}
-.btn:hover{background:#3c5429}
-.err{margin-top:14px;font-size:12.5px;color:var(--terra);min-height:16px}
-.hint{margin-top:18px;font-size:11px;color:var(--muted);line-height:1.5;border-top:1px solid var(--border);padding-top:14px}
-.hint code{font-family:var(--mono);background:var(--bg);padding:1px 5px;border-radius:4px}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:15px;line-height:1.45;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 16px;-webkit-font-smoothing:antialiased}
+:focus-visible{outline:2px solid var(--olive);outline-offset:2px}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);width:100%;max-width:400px;box-shadow:var(--shadow);padding:36px 34px 30px}
+
+.brand{display:flex;align-items:center;gap:14px;margin-bottom:28px}
+.brand img{height:52px;width:auto;display:block;flex-shrink:0}
+.logo-sub{font-size:10.5px;font-weight:600;letter-spacing:1.6px;text-transform:uppercase;color:var(--terra);margin-bottom:4px}
+h1{font-size:18px;font-weight:700;letter-spacing:-.35px;line-height:1.25;color:var(--pun)}
+
+.intro{font-size:13px;color:var(--muted);margin-bottom:22px;padding-top:22px;border-top:1px solid var(--line)}
+
+label{display:block;font-size:12px;font-weight:600;color:var(--text);margin-bottom:7px;margin-top:16px}
+.intro + label{margin-top:0}
+input{width:100%;height:46px;border:1px solid var(--border);border-radius:10px;padding:0 14px;font-family:var(--sans);font-size:14.5px;color:var(--text);background:var(--hover);transition:border-color .15s,box-shadow .15s,background .15s}
+input::placeholder{color:var(--soft)}
+input:hover{border-color:var(--soft)}
+input:focus{outline:none;border-color:var(--olive);background:#fff;box-shadow:0 0 0 3px var(--olive-t)}
+
+.pass-wrap{position:relative}
+.pass-wrap input{padding-right:46px}
+.eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:34px;height:34px;border:none;background:none;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--soft);transition:color .15s,background .15s}
+.eye:hover{color:var(--olive);background:var(--olive-t)}
+.eye svg{width:19px;height:19px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+.btn{width:100%;height:46px;margin-top:24px;background:var(--olive);color:#fff;border:none;border-radius:10px;font-family:var(--sans);font-size:14.5px;font-weight:600;letter-spacing:.1px;cursor:pointer;transition:background .15s,box-shadow .15s,transform .15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn svg{width:16px;height:16px;stroke:#fff;stroke-width:2.2;fill:none;transition:transform .15s}
+.btn:hover{background:var(--olive-d);box-shadow:0 8px 18px -10px rgba(47,66,32,.6)}
+.btn:hover svg{transform:translateX(2px)}
+.btn:active{transform:translateY(1px)}
+
+.err{margin-top:12px;font-size:12.5px;font-weight:500;color:var(--terra);min-height:18px}
+.err:not(:empty){background:var(--terra-t);border-radius:8px;padding:8px 12px}
+
+.hint{margin-top:16px;font-size:11.5px;color:var(--muted);line-height:1.6;background:var(--hover);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.hint strong{color:var(--text);font-weight:600}
+.hint code{font-family:var(--mono);font-size:11px;background:#fff;border:1px solid var(--line);padding:1px 5px;border-radius:4px}
+
+.ver{margin-top:18px;font-size:11px;color:var(--muted);opacity:.8}
+
+@media (max-width:440px){.card{padding:28px 22px 24px}.brand img{height:44px}h1{font-size:16.5px}}
 </style>
 </head>
 <body>
 
 <div class="card">
-  <div class="top">
-    <div class="top-logo"><img src="logo-iso.png" alt="Puntal Agro"></div>
+  <div class="brand">
+    <img src="logo-iso.png" alt="Puntal Agro">
     <div>
       <div class="logo-sub">Puntal Agro</div>
       <h1>Herramientas de Gestión y Tableros de Decisión</h1>
     </div>
   </div>
-  <div class="body">
-    <label for="email">Email</label>
-    <input id="email" type="email" placeholder="usuario@empresa.com" autocomplete="username" onkeydown="if(event.key==='Enter')entrar()">
-    <label for="pass">Contraseña</label>
+
+  <div class="intro">Ingresá con tu cuenta para continuar.</div>
+
+  <label for="email">Email</label>
+  <input id="email" type="email" placeholder="usuario@empresa.com" autocomplete="username" onkeydown="if(event.key==='Enter')entrar()">
+
+  <label for="pass">Contraseña</label>
+  <div class="pass-wrap">
     <input id="pass" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')entrar()">
-    <button class="btn" onclick="entrar()">Ingresar</button>
-    <div class="err" id="err"></div>
-    <div class="hint">
-      <strong>Modo demo</strong> — sin backend, la contraseña no se valida todavía.
-      Usuarios de prueba: <code>admin@puntal.com</code> (acceso total) ·
-      <code>maria@albor.com</code> (acceso parcial).
-    </div>
+    <button type="button" class="eye" id="eye" onclick="verPass()" aria-label="Mostrar contraseña" title="Mostrar contraseña">
+      <svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+    </button>
+  </div>
+
+  <button class="btn" onclick="entrar()">Ingresar <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+  <div class="err" id="err" role="alert"></div>
+
+  <div class="hint">
+    <strong>Modo demo</strong> — sin backend, la contraseña no se valida todavía.
+    Usuarios de prueba: <code>admin@puntal.com</code> (acceso total) ·
+    <code>maria@albor.com</code> (acceso parcial).
   </div>
 </div>
+
+<div class="ver">Versión v2026-10-31 12:10 · BUILD 1</div>
 
 <script src="pa-core.js"></script>
 <script>
@@ -58,6 +104,20 @@ PA.init({ modo: 'demo' }, function(){
   // si ya hay sesión, ir directo al menú
   if (PA.haySesion()) { location.href = 'index.html'; }
 });
+
+var OJO_ABIERTO = '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>';
+var OJO_CERRADO = '<path d="M3 3l18 18"/><path d="M10.6 5.1A10 10 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.2 4.1M6.6 6.6C3.8 8.3 2 12 2 12s3.5 7 10 7a9.7 9.7 0 0 0 5.4-1.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/>';
+
+function verPass(){
+  var p = document.getElementById('pass');
+  var b = document.getElementById('eye');
+  var mostrar = p.type === 'password';
+  p.type = mostrar ? 'text' : 'password';
+  b.querySelector('svg').innerHTML = mostrar ? OJO_CERRADO : OJO_ABIERTO;
+  var t = mostrar ? 'Ocultar contraseña' : 'Mostrar contraseña';
+  b.setAttribute('aria-label', t); b.setAttribute('title', t);
+}
+
 function entrar(){
   var email = document.getElementById('email').value.trim();
   var err = document.getElementById('err');
