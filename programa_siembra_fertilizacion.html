@@ -42,6 +42,7 @@ select,input[type=text],input[type=number],input[type=date]{padding:7px 9px}
 select:focus,input:focus{background:#F7FAF5;border-color:var(--verde);box-shadow:0 0 0 3px rgba(74,101,51,.10)}
 input[type=number]{text-align:right}
 input::placeholder{color:#B3BDC9}
+input.malo, input.malo:focus{border-color:#DC2626;background:#FEF2F2;box-shadow:0 0 0 3px rgba(220,38,38,.10)}
 /* Nivel 3 de jerarquía: nombre de campo. Subordinado a todo lo demás. */
 label.fl{display:block;font-size:10.5px;color:#8995A3;letter-spacing:.2px;font-weight:500;margin-bottom:5px}
 
@@ -54,6 +55,9 @@ label.fl{display:block;font-size:10.5px;color:#8995A3;letter-spacing:.2px;font-w
 .btn-sm{font-size:11px;padding:3px 8px}
 .btn-ico{border:none;background:none;cursor:pointer;color:var(--muted);font-size:13px;padding:2px 4px;border-radius:4px;font-family:var(--sans)}
 .btn-ico:hover{background:#F0F2F5;color:var(--text)}
+.btn-link{border:none;background:none;padding:0;cursor:pointer;font-family:var(--sans);font-size:11.5px;
+          font-weight:600;color:var(--verde);font-variant-numeric:tabular-nums;border-bottom:1px dashed #A9BE97}
+.btn-link:hover{color:#3D5429;border-bottom-color:var(--verde)}
 
 /* ── Tabs ─────────────────────────────────────────────── */
 .tabs{background:var(--card);border-bottom:1px solid var(--border);padding:0 24px;display:flex;gap:2px;overflow-x:auto}
@@ -109,6 +113,12 @@ tbody td.r{text-align:right}
 tbody td.c{text-align:center}
 tbody tr:hover td{background:#FAFBFC}
 .tdname{font-weight:500;font-variant-numeric:normal}
+/* Producto + dosis encolumnados dentro de una celda */
+table.mini{width:auto;border-collapse:collapse}
+table.mini td{padding:1px 0;border:none;font-size:11.5px;white-space:nowrap}
+table.mini .mp-n{font-weight:500;font-variant-numeric:normal;padding-right:10px}
+table.mini .mp-d{text-align:right;font-variant-numeric:tabular-nums;padding-right:3px}
+table.mini .mp-u{color:var(--muted);font-variant-numeric:normal}
 .grp td{background:#F5F7FA!important;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.3px;color:#475569}
 .sub td{background:#FCFDFE;font-size:11px;color:#475569}
 .sub td:first-child{padding-left:20px}
@@ -288,6 +298,8 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
         <select id="sb-f-cult" onchange="renderSiembra()"><option value="">Todos los cultivos</option></select>
         <select id="sb-f-rango" onchange="renderSiembra()"><option value="">Todos los rangos</option></select>
         <button class="btn" onclick="limpiarFiltrosSiembra()">Limpiar</button>
+        <button class="btn" onclick="exportarExcel('siembra')">Excel</button>
+        <button class="btn" onclick="exportarPDF('siembra')">PDF</button>
         <button class="btn btn-pri" onclick="abrirSiembra(null)">+ Programar lote</button>
       </div>
     </div>
@@ -303,7 +315,7 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
         </tr>
         <tr>
           <th>Campo</th><th>Lote</th><th>Amb.</th><th class="r">Sup</th>
-          <th class="gs">Cultivo</th><th>Genotipo / Partida</th><th>Rango</th><th class="c">Orden</th>
+          <th class="gs">Cultivo</th><th>Genotipo / Partida</th><th>Rango</th><th>Observación</th>
           <th class="r gs bd">D.E.S.</th><th class="r bd">Obj pl/m²</th><th class="r bd">VC%</th><th class="r bd">Pérd%</th>
           <th class="r gs">sem/m lin.</th><th class="r">sem/m²</th><th class="r">Dens/ha</th><th class="r">Total</th>
           <th class="gs bd">Curasemilla</th><th class="bd">Inoculante</th><th class="bd">Fert. a la siembra</th><th></th>
@@ -329,6 +341,8 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
           <option value="listo">Programados</option>
         </select>
         <button class="btn" onclick="limpiarFiltrosFert()">Limpiar</button>
+        <button class="btn" onclick="exportarExcel('fert')">Excel</button>
+        <button class="btn" onclick="exportarPDF('fert')">PDF</button>
         <button class="btn btn-pri" onclick="abrirFert(null)">+ Cargar fertilización</button>
       </div>
     </div>
@@ -354,9 +368,9 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
       <tbody id="tb-ft"></tbody>
     </table></div>
     <div class="hint">
-      Las celdas en <b>rojo</b> marcan un nutriente por debajo de lo recomendado o un zinc bajo el umbral;
-      en <b>ámbar</b>, el N en línea de siembra cerca del límite de fitotoxicidad.
-      El N del suelo estimado se muestra con un asterisco.
+      En <b>rojo</b>, un nutriente por debajo de lo recomendado o un zinc bajo el umbral.
+      En <b>ámbar</b>, el N en línea de siembra por encima del límite de fitotoxicidad del cultivo.
+      El asterisco en el N del suelo quiere decir que se estimó alguna capa.
     </div>
   </div>
 </div>
@@ -400,8 +414,8 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
         <select id="in-f-campo" onchange="renderInsumos()"><option value="">Todos los campos</option></select>
         <select id="in-f-cult" onchange="renderInsumos()"><option value="">Todos los cultivos</option></select>
         <button class="btn" onclick="limpiarFiltrosInsumos()">Limpiar</button>
-        <button class="btn" onclick="exportarExcel()">Descargar Excel</button>
-        <button class="btn" onclick="exportarPDF()">Descargar PDF</button>
+        <button class="btn" onclick="exportarExcel('insumos')">Descargar Excel</button>
+        <button class="btn" onclick="exportarPDF('insumos')">Descargar PDF</button>
       </div>
     </div>
     <div id="in-avisos"></div>
@@ -633,8 +647,8 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
      suelo y aplicaciones de fertilizante.  → ver handoff para Mariana.
    ═══════════════════════════════════════════════════════════════════════ */
 
-var BUILD = 8;
-var VERSION = 'v2026-10-30 19:07';
+var BUILD = 9;
+var VERSION = 'v2026-10-30 19:39';
 
 /* ── Claves de almacenamiento ──────────────────────────────────────── */
 var K = {
@@ -781,7 +795,7 @@ function migrar(){
       partidaNombre: q.geno || q.genotipo || '',
       partidaId: '',
       rangoCod: q.rango || '',
-      orden: num(q.orden), des: num(q.des), perd: num(q.perc || q.perd),
+      obs: (q.obs || ''), des: num(q.des), perd: num(q.perc || q.perd),
       ambs: [{ amb:(q.amb || ''), ha:num(q.sup), objPl:num(q.obj) }],
       curas: normIns(q.curas), inocs: normIns(q.inocs)
     };
@@ -957,6 +971,54 @@ function num(v){
   if(v === null || v === undefined || v === '') return null;
   var n = Number(v);
   return isNaN(n) ? null : n;
+}
+/* ── Validación de rangos ──────────────────────────────────────────
+   Las cantidades físicas no pueden ser negativas y los porcentajes
+   van de 0 a 100. El campo se marca al escribir y el guardado frena. */
+function fueraDeRango(inp){
+  if(inp.type !== 'number' || inp.value === '') return null;
+  var v = Number(inp.value);
+  if(isNaN(v)) return 'no es un número';
+  var mn = inp.getAttribute('min'), mx = inp.getAttribute('max');
+  if(mn !== null && v < Number(mn)) return (Number(mn) === 0) ? 'no puede ser negativo' : 'mínimo ' + mn;
+  if(mx !== null && v > Number(mx)) return 'máximo ' + mx;
+  return null;
+}
+function chequearCampo(inp){
+  var err = fueraDeRango(inp);
+  if(err){ if(inp.className.indexOf('malo') < 0) inp.className += ' malo'; }
+  else inp.className = inp.className.replace(/\s*malo/g, '');
+  return err;
+}
+/* Revisa todo el modal. Devuelve el primer problema o null. */
+function validarModal(){
+  var ins = document.querySelectorAll('#mdl-b input[type=number]'), i, err, prim = null;
+  for(i=0; i<ins.length; i++){
+    err = chequearCampo(ins[i]);
+    if(err && !prim) prim = { inp:ins[i], err:err };
+  }
+  if(!prim) return null;
+  var lab = etiquetaDe(prim.inp);
+  return (lab ? lab + ': ' : '') + prim.err + '.';
+}
+function etiquetaDe(inp){
+  var td, tabla, idx, ths, cont = inp.parentNode;
+  if(cont && cont.className && cont.className.indexOf('fcol') >= 0){
+    var l = cont.querySelector('label');
+    if(l) return l.textContent;
+  }
+  td = inp.parentNode;
+  while(td && td.tagName !== 'TD') td = td.parentNode;
+  if(td){
+    tabla = td; while(tabla && tabla.tagName !== 'TABLE') tabla = tabla.parentNode;
+    if(tabla){
+      idx = 0; var sib = td;
+      while(sib.previousElementSibling){ idx++; sib = sib.previousElementSibling; }
+      ths = tabla.querySelectorAll('thead th');
+      if(ths[idx]) return ths[idx].textContent;
+    }
+  }
+  return '';
 }
 function esc(s){
   if(s === null || s === undefined) return '';
@@ -1465,31 +1527,46 @@ function rangoByCod(cod){
    Se carga una sola vez allá; acá solo se muestra y se controla fitotoxicidad. */
 function fertSiembraLabel(s, avisos){
   var ft = fertDeLote(s.loteId, s.cultivo, s.campania);
-  if(!ft) return '<span style="color:var(--muted)">—</span>';
-  var c = calcFert(ft, ft.amb), i, out = [];
+  if(!ft) return '<span style="color:#C3CCD6">—</span>';
+  var c = calcFert(ft, ft.amb), i, items = [];
   for(i=0; i<c.lineas.length; i++){
     if(c.lineas[i].momento !== 'Siembra') continue;
-    out.push(esc(c.lineas[i].prod) + (c.lineas[i].kg !== null ? ' ' + f(c.lineas[i].kg,0) + ' kg' : ''));
+    items.push({ n:c.lineas[i].prod,
+                 d:(c.lineas[i].kg !== null ? f(c.lineas[i].kg,0) : ''), u:'kg' });
   }
-  if(!out.length) return '<span style="color:var(--muted)">—</span>';
-  var txt = out.join('<br>');
+  if(!items.length) return '<span style="color:#C3CCD6">—</span>';
+  var txt = listaProd(items);
   if(c.fitoMax !== null && c.nSiembra > c.fitoMax){
     var msg = s.lote + ': ' + f(c.nSiembra,1) + ' kg N/ha en línea de siembra supera el límite de '
             + f(c.fitoMax,0) + ' kg para ' + s.cultivo + '.';
     if(avisos && avisos.indexOf(msg) < 0) avisos.push(msg);
-    txt += '<br><span class="bdg br">N ' + f(c.nSiembra,1) + ' · fitotóxico</span>';
+    txt += '<div style="margin-top:3px"><span class="bdg br" title="' + esc(msg) + '">N '
+         + f(c.nSiembra,1) + ' · fitotóxico</span></div>';
   } else if(c.nSiembra){
-    txt += '<br><span class="bdg bn">N ' + f(c.nSiembra,1) + ' kg/ha</span>';
+    txt += '<div style="margin-top:3px"><span class="bdg bn">N ' + f(c.nSiembra,1) + ' kg/ha</span></div>';
   }
   return txt;
 }
-function insLabel(arr){
-  var i, out = [];
-  if(!arr || !arr.length) return '—';
-  for(i=0; i<arr.length; i++){
-    out.push(esc(arr[i].n) + (arr[i].dosis ? ' ' + f(arr[i].dosis,2) + ' ' + esc(arr[i].unit || '') : ''));
+/* Lista de producto + dosis en dos columnas, para que las cifras
+   queden alineadas cuando hay varios apilados. */
+function listaProd(items){
+  var i, h;
+  if(!items || !items.length) return '<span style="color:#C3CCD6">—</span>';
+  h = '<table class="mini">';
+  for(i=0; i<items.length; i++){
+    h += '<tr><td class="mp-n">' + esc(items[i].n) + '</td>'
+      +  '<td class="mp-d">' + (items[i].d || '') + '</td>'
+      +  '<td class="mp-u">' + esc(items[i].u || '') + '</td></tr>';
   }
-  return out.join('<br>');
+  return h + '</table>';
+}
+function insLabel(arr){
+  var i, items = [];
+  if(!arr || !arr.length) return '<span style="color:#C3CCD6">—</span>';
+  for(i=0; i<arr.length; i++){
+    items.push({ n:arr[i].n, d:(arr[i].dosis ? f(arr[i].dosis,2) : ''), u:(arr[i].unit || '') });
+  }
+  return listaProd(items);
 }
 
 function renderSiembra(){
@@ -1500,9 +1577,12 @@ function renderSiembra(){
     if(s.campania !== CAMPANIA) continue;
     lista.push(s);
   }
+  /* Por ventana de siembra, y dentro de cada una por campo y lote */
   lista.sort(function(a, b){
-    var oa = (a.orden == null ? 9999 : a.orden), ob = (b.orden == null ? 9999 : b.orden);
-    if(oa !== ob) return oa - ob;
+    var ra = rangoByCod(a.rangoCod), rb = rangoByCod(b.rangoCod);
+    var da = ra && ra.desde ? ra.desde : '9999-99-99';
+    var db = rb && rb.desde ? rb.desde : '9999-99-99';
+    if(da !== db) return da < db ? -1 : 1;
     if((a.campo||'') !== (b.campo||'')) return (a.campo||'').localeCompare(b.campo||'');
     return (a.lote||'').localeCompare(b.lote||'');
   });
@@ -1540,12 +1620,14 @@ function renderSiembra(){
       + '<td>' + (multi ? '<span class="bdg bamb">' + c.filas.length + ' amb.</span>'
                         : (c.filas.length ? '<span class="bdg bamb">' + esc(c.filas[0].amb || '—') + '</span>' : '—')) + '</td>'
       + '<td class="r">' + (dsup
-            ? '<span class="bdg by" title="Plan de Uso le asigna ' + f(dsup.haRef,1) + ' ha">' + f(c.haTot,1) + ' !</span>'
+            ? '<span class="bdg by" title="Plan de Uso le asigna ' + f(dsup.haRef,1) + ' ha a este lote">'
+              + f(c.haTot,1) + ' · no coincide</span>'
             : f(c.haTot, 1)) + '</td>'
       + '<td class="tdname gs">' + esc(s.cultivo) + '</td>'
       + '<td class="tdname">' + (c.p ? esc(c.p.nombre) : '<span class="bdg br">sin partida</span>') + '</td>'
       + '<td>' + rgTxt + '</td>'
-      + '<td class="c">' + (s.orden != null ? s.orden : '—') + '</td>'
+      + '<td class="tdname" style="max-width:150px;white-space:normal">'
+      +   (s.obs ? esc(s.obs) : '<span style="color:#B3BDC9">—</span>') + '</td>'
       + '<td class="r gs bd">' + f(s.des, 2) + '</td>'
       + '<td class="r bd">' + (multi ? '<span style="color:var(--muted)">pond.</span>' : f(c.filas.length ? c.filas[0].calc.objPl : null, 0)) + '</td>'
       + '<td class="r bd">' + f(vcPartida(c.p), 1) + '</td>'
@@ -1631,7 +1713,7 @@ function duplicarSiembra(id){
     s = DB.siembra[i];
     copia = { id:uid('sb'), campania:s.campania, loteId:s.loteId, campo:s.campo, lote:s.lote,
               cultivo:s.cultivo, partidaId:s.partidaId, partidaNombre:s.partidaNombre,
-              rangoCod:s.rangoCod, orden:s.orden, des:s.des, perd:s.perd, ambs:[], curas:[], inocs:[] };
+              rangoCod:s.rangoCod, obs:s.obs, des:s.des, perd:s.perd, ambs:[], curas:[], inocs:[] };
     for(j=0; j<s.ambs.length; j++){ copia.ambs.push({ amb:s.ambs[j].amb, ha:s.ambs[j].ha, objPl:s.ambs[j].objPl }); }
     for(j=0; j<s.curas.length; j++){ copia.curas.push({ n:s.curas[j].n, dosis:s.curas[j].dosis, unit:s.curas[j].unit }); }
     for(j=0; j<s.inocs.length; j++){ copia.inocs.push({ n:s.inocs[j].n, dosis:s.inocs[j].dosis, unit:s.inocs[j].unit }); }
@@ -1730,7 +1812,8 @@ function renderFert(){
         + tdNutri(c.rec.s,    c.apl.s,    'bd')
         + tdNutri(c.rec.k2o,  c.apl.k2o,  'bd')
         + '<td class="r bd">' + (fito
-            ? '<span class="bdg by" title="N en línea de siembra sobre el límite">' + f(c.apl.n,1) + ' !</span>'
+            ? '<span class="bdg by" title="' + f(c.nSiembra,1) + ' kg N/ha en línea de siembra, sobre el límite de '
+              + f(c.fitoMax,0) + ' kg para ' + esc(ft.cultivo) + '">' + f(c.apl.n,1) + ' · fitotóxico</span>'
             : (c.rec.n !== null && c.apl.n + 0.5 < c.rec.n
                 ? '<span class="bdg br">' + f(c.apl.n,1) + '</span>' : f(c.apl.n,1))) + '</td>'
         + '<td class="r gs">' + f(c.pAlcanz, 1) + '</td>'
@@ -1964,8 +2047,9 @@ function limpiarFiltrosInsumos(){
 }
 /* Junta todo lo programado de la campaña en totales por producto.
    Devuelve {semilla:[], cur:[], fert:[], avisos:[]} */
-function totalesInsumos(){
-  var fCampo = val('in-f-campo'), fCult = val('in-f-cult');
+function totalesInsumos(fl){
+  if(!fl) fl = filtrosDe('insumos');
+  var fCampo = fl.campo, fCult = fl.cult;
   var semilla = {}, cur = {}, fert = {}, avisos = [];
   var i, j, s, c, u, key, kgSem, bolsas, ha, lin, tot, ft, cf, l;
 
@@ -1974,6 +2058,7 @@ function totalesInsumos(){
     if(s.campania !== CAMPANIA) continue;
     if(fCampo && s.campo !== fCampo) continue;
     if(fCult && s.cultivo !== fCult) continue;
+    if(fl.rango && s.rangoCod !== fl.rango) continue;
     c = calcSiembra(s);
     ha = c.haTot;
     u = unidadDens(c.p);
@@ -2019,6 +2104,7 @@ function totalesInsumos(){
     if(ft.campania !== CAMPANIA) continue;
     if(fCampo && ft.campo !== fCampo) continue;
     if(fCult && ft.cultivo !== fCult) continue;
+    if(!loteEnRango(ft.loteId, ft.cultivo, fl)) continue;
     ha = haActividad(ft.loteId, ft.cultivo, ft.campania);
     if(!ha) continue;
     cf = calcFert(ft, ft.amb);
@@ -2073,7 +2159,8 @@ function renderInsumos(){
     h += '<tr><td>' + esc(x.tipo) + '</td><td class="tdname"><b>' + esc(x.prod) + '</b></td>'
       + '<td class="r">' + x.lotes + '</td><td class="r">' + f(x.ha,1) + '</td>'
       + '<td class="r"><b>' + f(x.cant, 2) + '</b>'
-      + (x.incompleto ? ' <span class="bdg by" title="Algún lote no tiene la semilla calculada">!</span>' : '') + '</td>'
+      + (x.incompleto ? '<div style="margin-top:2px"><span class="bdg by" '
+      + 'title="Algún lote no tiene la semilla calculada, así que falta sumar esa parte">falta calcular</span></div>' : '') + '</td>'
       + '<td>' + esc(x.unidad || '—') + '</td></tr>';
   }
   document.getElementById('tb-in-cur').innerHTML = h || filaVacia(6, 'Sin curasemillas ni inoculantes cargados.');
@@ -2108,6 +2195,100 @@ function renderInsumos(){
    7-quinquies. EXPORTACIONES
    ═══════════════════════════════════════════════════════════════════ */
 
+/* Los filtros de la pestaña desde la que se exporta.
+   Lo que baja es lo que estás viendo, no toda la campaña. */
+function filtrosDe(origen){
+  if(origen === 'siembra') return { campo:val('sb-f-campo'), cult:val('sb-f-cult'), rango:val('sb-f-rango'), est:'' };
+  if(origen === 'fert')    return { campo:val('ft-f-campo'), cult:val('ft-f-cult'), rango:'', est:val('ft-f-est') };
+  return { campo:val('in-f-campo'), cult:val('in-f-cult'), rango:'', est:'' };
+}
+function pasaFiltro(fl, campo, cultivo, rangoCod){
+  if(fl.campo && campo !== fl.campo) return false;
+  if(fl.cult && cultivo !== fl.cult) return false;
+  if(fl.rango && rangoCod !== fl.rango) return false;
+  return true;
+}
+/* El rango es un dato de la siembra. Cuando está filtrado, lo que entra
+   son los lotes cuya siembra cae en esa ventana — también en las hojas
+   de fertilización, que por sí mismas no tienen rango. */
+function loteEnRango(loteId, cultivo, fl){
+  if(!fl.rango) return true;
+  var sb = siembraDeLote(loteId, cultivo, CAMPANIA);
+  return !!(sb && sb.rangoCod === fl.rango);
+}
+function textoFiltros(fl){
+  var p = [];
+  if(fl.campo) p.push('Campo ' + fl.campo);
+  if(fl.cult) p.push(fl.cult);
+  if(fl.rango) p.push('Rango ' + fl.rango);
+  if(fl.est === 'falta') p.push('solo lo que falta programar');
+  if(fl.est === 'listo') p.push('solo lo programado');
+  return p.length ? p.join(' · ') : 'Sin filtros';
+}
+/* Siembra y fertilización de cada lote en una sola fila, con las
+   filas de ambiente debajo. Es la hoja que se lleva al campo. */
+function filasDetalleLote(fl){
+  var filas = filasCampania(), out = [], i, r, sb, ft, c, cf, j, l, aplic;
+  for(i=0; i<filas.length; i++){
+    r = filas[i];
+    if(fl.campo && r.campo !== fl.campo) continue;
+    if(fl.cult && r.cultivo !== fl.cult) continue;
+    if(!loteEnRango(r.loteId, r.cultivo, fl)) continue;
+    sb = siembraDeLote(r.loteId, r.cultivo, CAMPANIA);
+    ft = fertDeLote(r.loteId, r.cultivo, CAMPANIA);
+    if(fl.est === 'falta' && estadoFert(ft, r.amb).e === 'listo') continue;
+    if(fl.est === 'listo' && estadoFert(ft, r.amb).e !== 'listo') continue;
+    if(!sb && !ft) continue;
+
+    c = sb ? calcSiembra(sb) : null;
+    cf = ft ? calcFert(ft, ft.amb) : null;
+    aplic = [];
+    if(cf){
+      for(j=0; j<cf.lineas.length; j++){
+        l = cf.lineas[j];
+        if(!l.prod) continue;
+        aplic.push(l.prod + ' ' + f(l.kg, 0) + ' kg/ha (' + l.momento + ')');
+      }
+    }
+    var rg = sb ? rangoByCod(sb.rangoCod) : null;
+    out.push({
+      tipo:'lote', campo:r.campo, lote:r.lote, amb:r.amb, ha:r.ha, cultivo:r.cultivo,
+      partida: c && c.p ? c.p.nombre : '',
+      rango: sb ? (sb.rangoCod || '') : '',
+      desde: rg ? rg.desde : '', hasta: rg ? rg.hasta : '',
+      densHa: c ? c.wDensHa : null, unidad: c ? (unidadDens(c.p) === 'bol' ? 'bolsas/ha' : 'kg/ha') : '',
+      total: c ? c.total : null,
+      curas: sb ? textoIns(sb.curas) : '', inocs: sb ? textoIns(sb.inocs) : '',
+      obs: sb ? (sb.obs || '') : '',
+      nSuelo: cf ? cf.nSuelo.kg : null,
+      recP: cf ? cf.rec.p2o5 : null, recS: cf ? cf.rec.s : null,
+      recK: cf ? cf.rec.k2o : null, recN: cf ? cf.rec.n : null,
+      aplP: cf ? cf.apl.p2o5 : null, aplS: cf ? cf.apl.s : null,
+      aplK: cf ? cf.apl.k2o : null, aplN: cf ? cf.apl.n : null,
+      aplic: aplic.join(' | ')
+    });
+    if(c && c.filas.length > 1){
+      for(j=0; j<c.filas.length; j++){
+        out.push({ tipo:'amb', campo:'', lote:'', amb:c.filas[j].amb, ha:c.filas[j].calc.ha,
+          cultivo:'', partida:'', rango:'', desde:'', hasta:'',
+          objPl:c.filas[j].calc.objPl, densHa:c.filas[j].calc.densHa,
+          unidad:'', total:c.filas[j].calc.total, curas:'', inocs:'', obs:'',
+          nSuelo:null, recP:null, recS:null, recK:null, recN:null,
+          aplP:null, aplS:null, aplK:null, aplN:null, aplic:'' });
+      }
+    }
+  }
+  return out;
+}
+function textoIns(arr){
+  var i, o = [];
+  if(!arr) return '';
+  for(i=0; i<arr.length; i++){
+    o.push(arr[i].n + (arr[i].dosis ? ' ' + f(arr[i].dosis,2) + ' ' + (arr[i].unit || '') + ' ' + (arr[i].base || '') : ''));
+  }
+  return o.join(' | ');
+}
+
 function nombreArchivo(ext){
   var emp = '';
   if(CTX && CTX.empresasDisponibles){
@@ -2122,26 +2303,54 @@ function nombreArchivo(ext){
   var base = 'Programa ' + (emp ? emp + ' ' : '') + (CAMPANIA || '');
   return base.replace(/[^\w\sáéíóúñÁÉÍÓÚÑ-]/g, '').replace(/\s+/g, '_') + '.' + ext;
 }
-function exportarExcel(){
+function exportarExcel(origen){
   if(typeof XLSX === 'undefined'){
     alert('No se pudo cargar la librería de Excel. Revisá la conexión y volvé a intentar.');
     return;
   }
-  var t = totalesInsumos();
+  var fl = filtrosDe(origen || 'insumos');
+  var t = totalesInsumos(fl);
   var wb = XLSX.utils.book_new(), i, s, c, ft, cf, j, l, filas;
 
+  /* Hoja 0: qué se está mirando */
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
+    ['Programa de Siembra y Fertilización'],
+    ['Campaña', CAMPANIA || ''],
+    ['Filtros aplicados', textoFiltros(fl)],
+    ['Generado', new Date().toLocaleString('es-AR')],
+    ['Versión', VERSION + ' · BUILD ' + BUILD]
+  ]), 'Resumen');
+
+  /* Hoja: detalle por lote (siembra + fertilización juntas) */
+  var det = filasDetalleLote(fl);
+  filas = [['Campo','Lote','Ambiente','ha','Cultivo','Partida','Rango','Desde','Hasta',
+            'Obj pl/m²','Dosis/ha','Unidad','Semilla total','Curasemillas','Inoculantes','Observación',
+            'N suelo kg/ha','P2O5 recom.','S recom.','K2O recom.','N recom.',
+            'P2O5 aplic.','S aplic.','K2O aplic.','N aplic.','Aplicaciones']];
+  for(i=0; i<det.length; i++){
+    var d = det[i];
+    filas.push([d.campo, d.lote, d.amb || '', redondear(d.ha,2), d.cultivo, d.partida,
+      d.rango, d.desde, d.hasta, (d.objPl != null ? d.objPl : ''),
+      redondear(d.densHa,3), d.unidad, redondear(d.total,2),
+      d.curas, d.inocs, d.obs,
+      redondear(d.nSuelo,1), redondear(d.recP,2), redondear(d.recS,2), redondear(d.recK,2), redondear(d.recN,2),
+      redondear(d.aplP,2), redondear(d.aplS,2), redondear(d.aplK,2), redondear(d.aplN,2), d.aplic]);
+  }
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(filas), 'Detalle por lote');
+
   /* Hoja 1: Siembra */
-  filas = [['Campo','Lote','Ambiente','Sup (ha)','Cultivo','Partida','Rango','Desde','Hasta','Orden',
+  filas = [['Campo','Lote','Ambiente','Sup (ha)','Cultivo','Partida','Rango','Desde','Hasta','Observación',
             'D.E.S.','Obj pl/m²','VC %','Pérdida %','sem/m lineal','sem/m²','Dosis/ha','Unidad','Total']];
   for(i=0; i<DB.siembra.length; i++){
     s = DB.siembra[i];
     if(s.campania !== CAMPANIA) continue;
+    if(!pasaFiltro(fl, s.campo, s.cultivo, s.rangoCod)) continue;
     c = calcSiembra(s);
     var rg = rangoByCod(s.rangoCod);
     var k;
     for(k=0; k<c.filas.length; k++){
       filas.push([s.campo, s.lote, c.filas[k].amb || '', redondear(c.filas[k].calc.ha,2), s.cultivo,
-        c.p ? c.p.nombre : '', s.rangoCod || '', rg ? rg.desde : '', rg ? rg.hasta : '', s.orden,
+        c.p ? c.p.nombre : '', s.rangoCod || '', rg ? rg.desde : '', rg ? rg.hasta : '', s.obs || '',
         s.des, c.filas[k].calc.objPl, redondear(vcPartida(c.p),2), s.perd,
         redondear(c.filas[k].calc.semMl,2), redondear(c.filas[k].calc.semM2,2),
         redondear(c.filas[k].calc.densHa,3), unidadDens(c.p) === 'bol' ? 'bolsas/ha' : 'kg/ha',
@@ -2158,6 +2367,9 @@ function exportarExcel(){
   for(i=0; i<DB.fert.length; i++){
     ft = DB.fert[i];
     if(ft.campania !== CAMPANIA) continue;
+    if(fl.campo && ft.campo !== fl.campo) continue;
+    if(fl.cult && ft.cultivo !== fl.cult) continue;
+    if(!loteEnRango(ft.loteId, ft.cultivo, fl)) continue;
     cf = calcFert(ft, ft.amb);
     var a = ft.analisis || {}, o = ft.obj || {};
     filas.push([ft.campo, ft.lote, ft.amb || '', haActividad(ft.loteId, ft.cultivo, ft.campania), ft.cultivo,
@@ -2175,6 +2387,9 @@ function exportarExcel(){
   for(i=0; i<DB.fert.length; i++){
     ft = DB.fert[i];
     if(ft.campania !== CAMPANIA) continue;
+    if(fl.campo && ft.campo !== fl.campo) continue;
+    if(fl.cult && ft.cultivo !== fl.cult) continue;
+    if(!loteEnRango(ft.loteId, ft.cultivo, fl)) continue;
     cf = calcFert(ft, ft.amb);
     var haF = haActividad(ft.loteId, ft.cultivo, ft.campania);
     for(j=0; j<cf.lineas.length; j++){
@@ -2211,7 +2426,7 @@ function exportarExcel(){
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(filas), 'Necesidad insumos');
 
   /* Hoja 5: Balance de sembradoras */
-  var bal = filasBalance('');
+  var bal = filasBalance(fl.cult || '');
   filas = [['Rango','Desde','Hasta','Días','Sembradoras','ha/h','Capacidad ha','Cap. ha/día',
             'Programado ha','Balance ha','Cap. acumulada','Prog. acumulado']];
   for(i=0; i<bal.length; i++){
@@ -2230,71 +2445,99 @@ function redondear(v, d){
   var m = Math.pow(10, d);
   return Math.round(Number(v) * m) / m;
 }
-function exportarPDF(){
+function exportarPDF(origen){
   var J = (typeof window.jspdf !== 'undefined') ? window.jspdf.jsPDF : null;
   if(!J){
     alert('No se pudo cargar la librería de PDF. Revisá la conexión y volvé a intentar.');
     return;
   }
-  var t = totalesInsumos();
+  origen = origen || 'insumos';
+  var fl = filtrosDe(origen);
   var doc = new J({ orientation:'landscape', unit:'pt', format:'a4' });
-  var emp = '';
+  var emp = '', z;
   if(CTX && CTX.empresasDisponibles){
-    var z;
     for(z=0; z<CTX.empresasDisponibles.length; z++){
       if(CTX.empresasDisponibles[z].id === CTX.empresaActivaId){ emp = CTX.empresasDisponibles[z].razonSocial || ''; break; }
     }
   }
+  var titulo = (origen === 'insumos') ? 'Necesidad de insumos' : 'Detalle por lote';
   doc.setFontSize(15); doc.setTextColor(15,25,35);
-  doc.text('Necesidad de insumos', 40, 42);
-  doc.setFontSize(10); doc.setTextColor(122,136,153);
-  doc.text((emp ? emp + '  ·  ' : '') + 'Campaña ' + (CAMPANIA || '') + '  ·  Puntal Agro', 40, 58);
+  doc.text(titulo, 40, 42);
+  doc.setFontSize(9); doc.setTextColor(122,136,153);
+  doc.text((emp ? emp + '   ·   ' : '') + 'Campaña ' + (CAMPANIA || '') + '   ·   Puntal Agro', 40, 58);
+  doc.text(textoFiltros(fl), 40, 71);
 
-  var y = 78, i, body;
   var estilo = {
-    styles:{ font:'helvetica', fontSize:8, cellPadding:4 },
-    headStyles:{ fillColor:[74,101,51], textColor:255, fontSize:8 },
+    styles:{ font:'helvetica', fontSize:7.5, cellPadding:3.5, overflow:'linebreak' },
+    headStyles:{ fillColor:[74,101,51], textColor:255, fontSize:7.5 },
     alternateRowStyles:{ fillColor:[250,251,252] },
     margin:{ left:40, right:40 }
   };
+  var y = 88, i, body;
 
-  body = [];
-  for(i=0; i<t.semilla.length; i++){
-    body.push([t.semilla[i].cultivo, t.semilla[i].partida, String(t.semilla[i].lotes),
-      f(t.semilla[i].ha,1), f(t.semilla[i].cant, t.semilla[i].unidad === 'bolsas' ? 1 : 0), t.semilla[i].unidad]);
-  }
-  if(body.length){
-    doc.setFontSize(11); doc.setTextColor(15,25,35); doc.text('Semilla', 40, y); y += 6;
-    doc.autoTable(Object.assign({}, estilo, {
-      startY:y, head:[['Cultivo','Partida','Lotes','ha','Cantidad','Unidad']], body:body }));
-    y = doc.lastAutoTable.finalY + 22;
-  }
-
-  body = [];
-  for(i=0; i<t.cur.length; i++){
-    body.push([t.cur[i].tipo, t.cur[i].prod, String(t.cur[i].lotes), f(t.cur[i].ha,1),
-      f(t.cur[i].cant,2), t.cur[i].unidad || '']);
-  }
-  if(body.length){
-    if(y > 420){ doc.addPage(); y = 50; }
-    doc.setFontSize(11); doc.setTextColor(15,25,35); doc.text('Curasemillas e inoculantes', 40, y); y += 6;
-    doc.autoTable(Object.assign({}, estilo, {
-      startY:y, head:[['Tipo','Producto','Lotes','ha','Cantidad','Unidad']], body:body }));
-    y = doc.lastAutoTable.finalY + 22;
-  }
-
-  body = [];
-  for(i=0; i<t.fert.length; i++){
-    body.push([t.fert[i].prod, t.fert[i].momento, String(t.fert[i].lotes), f(t.fert[i].ha,1),
-      f(t.fert[i].kg,0), t.fert[i].sinDens ? '—' : f(t.fert[i].litros,0),
-      f(t.fert[i].n,0), f(t.fert[i].p2o5,0), f(t.fert[i].k2o,0), f(t.fert[i].s,0)]);
-  }
-  if(body.length){
-    if(y > 420){ doc.addPage(); y = 50; }
-    doc.setFontSize(11); doc.setTextColor(15,25,35); doc.text('Fertilizantes', 40, y); y += 6;
-    doc.autoTable(Object.assign({}, estilo, {
-      startY:y,
-      head:[['Fertilizante','Momento','Lotes','ha','kg','Litros','N','P2O5','K2O','S']], body:body }));
+  if(origen === 'insumos'){
+    var t = totalesInsumos(fl);
+    body = [];
+    for(i=0; i<t.semilla.length; i++){
+      body.push([t.semilla[i].cultivo, t.semilla[i].partida, String(t.semilla[i].lotes),
+        f(t.semilla[i].ha,1), f(t.semilla[i].cant, t.semilla[i].unidad === 'bolsas' ? 1 : 0), t.semilla[i].unidad]);
+    }
+    if(body.length){
+      doc.setFontSize(11); doc.setTextColor(15,25,35); doc.text('Semilla', 40, y); y += 6;
+      doc.autoTable(mezcla(estilo, { startY:y, head:[['Cultivo','Partida','Lotes','ha','Cantidad','Unidad']], body:body }));
+      y = doc.lastAutoTable.finalY + 22;
+    }
+    body = [];
+    for(i=0; i<t.cur.length; i++){
+      body.push([t.cur[i].tipo, t.cur[i].prod, String(t.cur[i].lotes), f(t.cur[i].ha,1),
+        f(t.cur[i].cant,2), t.cur[i].unidad || '']);
+    }
+    if(body.length){
+      if(y > 420){ doc.addPage(); y = 50; }
+      doc.setFontSize(11); doc.setTextColor(15,25,35); doc.text('Curasemillas e inoculantes', 40, y); y += 6;
+      doc.autoTable(mezcla(estilo, { startY:y, head:[['Tipo','Producto','Lotes','ha','Cantidad','Unidad']], body:body }));
+      y = doc.lastAutoTable.finalY + 22;
+    }
+    body = [];
+    for(i=0; i<t.fert.length; i++){
+      body.push([t.fert[i].prod, t.fert[i].momento, String(t.fert[i].lotes), f(t.fert[i].ha,1),
+        f(t.fert[i].kg,0), t.fert[i].sinDens ? '—' : f(t.fert[i].litros,0),
+        f(t.fert[i].n,0), f(t.fert[i].p2o5,0), f(t.fert[i].k2o,0), f(t.fert[i].s,0)]);
+    }
+    if(body.length){
+      if(y > 420){ doc.addPage(); y = 50; }
+      doc.setFontSize(11); doc.setTextColor(15,25,35); doc.text('Fertilizantes', 40, y); y += 6;
+      doc.autoTable(mezcla(estilo, {
+        startY:y, head:[['Fertilizante','Momento','Lotes','ha','kg','Litros','N','P2O5','K2O','S']], body:body }));
+    }
+  } else {
+    /* Detalle por lote: lo que se lleva al campo */
+    var det = filasDetalleLote(fl);
+    body = [];
+    for(i=0; i<det.length; i++){
+      var d = det[i];
+      if(d.tipo === 'amb'){
+        body.push(['', '   ' + (d.amb || ''), f(d.ha,1), '', '', '',
+          (d.densHa !== null ? f(d.densHa,1) : ''), (d.total !== null ? f(d.total,0) : ''), '', '', '']);
+      } else {
+        body.push([d.campo, d.lote + (d.amb ? '  (' + d.amb + ')' : ''), f(d.ha,1), d.cultivo, d.partida,
+          d.rango + (d.desde ? '  ' + fmtFecha(d.desde) + '→' + fmtFecha(d.hasta) : ''),
+          (d.densHa !== null ? f(d.densHa,1) : ''), (d.total !== null ? f(d.total,0) : ''),
+          d.curas, d.aplic, d.obs]);
+      }
+    }
+    if(!body.length){
+      doc.setFontSize(10); doc.setTextColor(122,136,153);
+      doc.text('No hay lotes que cumplan con los filtros aplicados.', 40, y + 10);
+    } else {
+      doc.autoTable(mezcla(estilo, {
+        startY:y,
+        head:[['Campo','Lote','ha','Cultivo','Partida','Rango','Dosis/ha','Semilla','Curasemillas','Fertilización','Obs.']],
+        body:body,
+        columnStyles:{ 2:{halign:'right'}, 6:{halign:'right'}, 7:{halign:'right'},
+                       8:{cellWidth:95}, 9:{cellWidth:150}, 10:{cellWidth:70} }
+      }));
+    }
   }
 
   var pgs = doc.internal.getNumberOfPages(), pg;
@@ -2304,7 +2547,14 @@ function exportarPDF(){
     doc.text('Puntal Agro · ' + VERSION + ' · BUILD ' + BUILD, 40, doc.internal.pageSize.getHeight() - 20);
     doc.text(pg + ' / ' + pgs, doc.internal.pageSize.getWidth() - 60, doc.internal.pageSize.getHeight() - 20);
   }
-  doc.save(nombreArchivo('pdf'));
+  doc.save(nombreArchivo(origen === 'insumos' ? 'pdf' : 'pdf'));
+}
+/* Object.assign no existe en ES5 */
+function mezcla(a, b){
+  var o = {}, k;
+  for(k in a){ if(a.hasOwnProperty(k)) o[k] = a[k]; }
+  for(k in b){ if(b.hasOwnProperty(k)) o[k] = b[k]; }
+  return o;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -2316,6 +2566,17 @@ function abrirModalBase(titulo, cuerpo){
   document.getElementById('mdl-b').innerHTML = cuerpo;
   document.getElementById('ovl').classList.add('open');
   prepararSecs();
+  prepararValidacion();
+}
+/* Un solo oyente para todo el modal: marca el campo apenas se escribe */
+function prepararValidacion(){
+  var b = document.getElementById('mdl-b');
+  if(!b || b.getAttribute('data-val')) return;
+  b.setAttribute('data-val', '1');
+  b.addEventListener('input', function(ev){
+    var t = ev.target;
+    if(t && t.tagName === 'INPUT' && t.type === 'number') chequearCampo(t);
+  }, false);
 }
 function cerrarModal(){
   document.getElementById('ovl').classList.remove('open');
@@ -2323,6 +2584,8 @@ function cerrarModal(){
 }
 function guardarModal(){
   if(!MODAL) return;
+  var mal = validarModal();
+  if(mal){ alert('Revisá este dato antes de guardar.\n\n' + mal); return; }
   if(MODAL.tipo === 'partida')     guardarPartida();
   else if(MODAL.tipo === 'rango')  guardarRango();
   else if(MODAL.tipo === 'semb')   guardarSembradora();
@@ -2349,19 +2612,19 @@ function abrirPartida(id){
     +   fcol('Unidad', '<select id="pa-unidad" onchange="togglePartidaUnidad()">'
           + '<option value="Kg"' + (p && p.unidad === 'Kg' ? ' selected' : '') + '>Kg</option>'
           + '<option value="Bolsa"' + (p && p.unidad === 'Bolsa' ? ' selected' : '') + '>Bolsa</option></select>')
-    +   fcol('Cantidad total', '<input type="number" id="pa-cant" step="0.01" value="' + (p && p.cantidad != null ? p.cantidad : '') + '">')
+    +   fcol('Cantidad total', '<input type="number" id="pa-cant" step="0.01" min="0" value="' + (p && p.cantidad != null ? p.cantidad : '') + '">')
     +   fcol('Laboratorio', '<input type="text" id="pa-lab" value="' + esc(p ? p.lab : '') + '">')
     + '</div>'
     + '<div class="fsec">Calidad</div>'
     + '<div class="frow">'
-    +   fcol('P1000 (gramos)', '<input type="number" id="pa-p1000" step="0.1" value="' + (p && p.p1000 != null ? p.p1000 : '') + '" oninput="calcVCModal()">')
-    +   fcol('Semillas por bolsa', '<input type="number" id="pa-sb" step="1" value="' + (p && p.semBolsa != null ? p.semBolsa : '') + '" oninput="calcVCModal()">')
-    +   fcol('Pureza %', '<input type="number" id="pa-pur" step="0.1" value="' + (p && p.pureza != null ? p.pureza : '') + '" oninput="calcVCModal()">')
+    +   fcol('P1000 (gramos)', '<input type="number" id="pa-p1000" step="0.1" min="0" value="' + (p && p.p1000 != null ? p.p1000 : '') + '" oninput="calcVCModal()">')
+    +   fcol('Semillas por bolsa', '<input type="number" id="pa-sb" step="1" min="0" value="' + (p && p.semBolsa != null ? p.semBolsa : '') + '" oninput="calcVCModal()">')
+    +   fcol('Pureza %', '<input type="number" id="pa-pur" step="0.1" min="0" max="100" value="' + (p && p.pureza != null ? p.pureza : '') + '" oninput="calcVCModal()">')
     + '</div>'
     + '<div class="frow">'
-    +   fcol('PG sin curar %', '<input type="number" id="pa-pg" step="0.1" value="' + (p && p.pg != null ? p.pg : '') + '" oninput="calcVCModal()">')
-    +   fcol('PG curado %', '<input type="number" id="pa-pgc" step="0.1" value="' + (p && p.pgCur != null ? p.pgCur : '') + '" oninput="calcVCModal()">')
-    +   fcol('Vigor %', '<input type="number" id="pa-vig" step="0.1" value="' + (p && p.vigor != null ? p.vigor : '') + '">')
+    +   fcol('PG sin curar %', '<input type="number" id="pa-pg" step="0.1" min="0" max="100" value="' + (p && p.pg != null ? p.pg : '') + '" oninput="calcVCModal()">')
+    +   fcol('PG curado %', '<input type="number" id="pa-pgc" step="0.1" min="0" max="100" value="' + (p && p.pgCur != null ? p.pgCur : '') + '" oninput="calcVCModal()">')
+    +   fcol('Vigor %', '<input type="number" id="pa-vig" step="0.1" min="0" max="100" value="' + (p && p.vigor != null ? p.vigor : '') + '">')
     + '</div>'
     + '<div class="frow">'
     +   fcol('Curasemilla usada en el test', '<input type="text" id="pa-fung" value="' + esc(p ? p.fungicida : '') + '">')
@@ -2586,9 +2849,9 @@ function abrirSembradora(id){
     +   fcol('Cultivo', '<select id="se-cult">' + opts(lc, s ? s.cultivo : 'Todos', '') + '</select>')
     + '</div>'
     + '<div class="frow">'
-    +   fcol('N° de hileras', '<input type="number" id="se-hil" step="1" value="' + (s && s.hileras != null ? s.hileras : '') + '" oninput="calcCapModal()">')
-    +   fcol('Distancia e/hileras (m)', '<input type="number" id="se-dist" step="0.01" value="' + (s && s.dist != null ? s.dist : '') + '" oninput="calcCapModal()">')
-    +   fcol('Velocidad (km/h)', '<input type="number" id="se-vel" step="0.1" value="' + (s && s.vel != null ? s.vel : '') + '" oninput="calcCapModal()">')
+    +   fcol('N° de hileras', '<input type="number" id="se-hil" step="1" min="0" value="' + (s && s.hileras != null ? s.hileras : '') + '" oninput="calcCapModal()">')
+    +   fcol('Distancia e/hileras (m)', '<input type="number" id="se-dist" step="0.01" min="0" value="' + (s && s.dist != null ? s.dist : '') + '" oninput="calcCapModal()">')
+    +   fcol('Velocidad (km/h)', '<input type="number" id="se-vel" step="0.1" min="0" value="' + (s && s.vel != null ? s.vel : '') + '" oninput="calcCapModal()">')
     + '</div>'
     + '<div class="calc">'
     +   '<div class="ci"><div class="cv" id="se-ancho">—</div><div class="cl">Ancho labor (m)</div></div>'
@@ -2702,9 +2965,13 @@ function abrirSiembra(id, pre){
     +   fcol('Rango de siembra', '<select id="sb-rango">' + opts(rangoOpts(), s ? s.rangoCod : '', '— elegir —') + '</select>')
     + '</div>'
     + '<div class="frow">'
-    +   fcol('Orden de siembra', '<input type="number" id="sb-orden" step="1" min="1" value="' + (s && s.orden != null ? s.orden : '') + '">')
-    +   fcol('D.E.S. (m)', '<input type="number" id="sb-des" step="0.01" value="' + (s && s.des != null ? s.des : '') + '" oninput="recalcSiembraModal()">')
-    +   fcol('Coef. de pérdida %', '<input type="number" id="sb-perd" step="1" value="' + (s && s.perd != null ? s.perd : 0) + '" oninput="recalcSiembraModal()">')
+    +   fcol('D.E.S. (m)', '<input type="number" id="sb-des" step="0.01" min="0" value="' + (s && s.des != null ? s.des : '') + '" oninput="recalcSiembraModal()">')
+    +   fcol('Coef. de pérdida %', '<input type="number" id="sb-perd" step="1" min="0" max="100" value="' + (s && s.perd != null ? s.perd : 0) + '" oninput="recalcSiembraModal()">')
+    + '</div>'
+    + '<div class="frow">'
+    +   '<div class="fcol" style="flex:1"><label class="fl">Observación</label>'
+    +     '<input type="text" id="sb-obs" value="' + esc(s ? (s.obs || '') : '') + '" '
+    +     'placeholder="Nota libre para este lote"></div>'
     + '</div>'
     + '</div>'
     + '<div id="sb-lote-zona"></div>'
@@ -2867,7 +3134,7 @@ function renderAmbRows(){
     h = '<div class="blk-t">Objetivo para los ' + sel.length + ' lotes elegidos</div>'
       + '<div class="frow" style="margin-bottom:0">'
       + '<div class="fcol"><label class="fl">Objetivo pl/m²</label>'
-      +   '<input type="number" step="0.1" value="' + (MODAL.ambs[0].objPl != null ? MODAL.ambs[0].objPl : '') + '" '
+      +   '<input type="number" step="0.1" min="0" value="' + (MODAL.ambs[0].objPl != null ? MODAL.ambs[0].objPl : '') + '" '
       +   'oninput="setAmb(0,\'objPl\',this.value)"></div>'
       + '<div class="fcol"><label class="fl">sem/m²</label>'
       +   '<div style="padding:6px 0;font-weight:600;font-variant-numeric:tabular-nums">' + f(cu.semM2, 1) + '</div></div>'
@@ -2896,9 +3163,9 @@ function renderAmbRows(){
     h += '<tr>'
       + '<td><select onchange="setAmb(' + i + ',\'amb\',this.value)" style="width:110px">'
       +   opts(ambDisp, a.amb, '— sin ambiente —') + '</select></td>'
-      + '<td class="r"><input type="number" step="0.1" value="' + (a.ha != null ? a.ha : '') + '" '
+      + '<td class="r"><input type="number" step="0.1" min="0" value="' + (a.ha != null ? a.ha : '') + '" '
       +   'oninput="setAmb(' + i + ',\'ha\',this.value)" style="width:82px"></td>'
-      + '<td class="r"><input type="number" step="0.1" value="' + (a.objPl != null ? a.objPl : '') + '" '
+      + '<td class="r"><input type="number" step="0.1" min="0" value="' + (a.objPl != null ? a.objPl : '') + '" '
       +   'oninput="setAmb(' + i + ',\'objPl\',this.value)" style="width:82px"></td>'
       + '<td class="r">' + f(c.semM2, 1) + '</td>'
       + '<td class="r">' + (c.densHa !== null ? f(c.densHa, p && p.unidad === 'Bolsa' ? 2 : 1) : '—') + '</td>'
@@ -3023,7 +3290,7 @@ function renderInsRows(tipo){
     h += '<tr>'
       + '<td><select onchange="setInsRow(\'' + tipo + '\',' + i + ',\'n\',this.value)" style="min-width:160px">'
       +   opts(lista, MODAL[tipo][i].n, '— elegir —') + '</select></td>'
-      + '<td class="r"><input type="number" step="0.001" value="' + (MODAL[tipo][i].dosis != null ? MODAL[tipo][i].dosis : '') + '" '
+      + '<td class="r"><input type="number" step="0.001" min="0" value="' + (MODAL[tipo][i].dosis != null ? MODAL[tipo][i].dosis : '') + '" '
       +   'oninput="setInsRow(\'' + tipo + '\',' + i + ',\'dosis\',this.value)" style="width:84px"></td>'
       + '<td><input type="text" value="' + esc(MODAL[tipo][i].unit || '') + '" '
       +   'oninput="setInsRow(\'' + tipo + '\',' + i + ',\'unit\',this.value)" style="width:70px" placeholder="lt"></td>'
@@ -3045,7 +3312,7 @@ function guardarSiembra(){
   var paId = val('sb-partida');
   if(!paId){ alert('Elegí la partida de semilla.'); return; }
   var des = num(val('sb-des')), perd = num(val('sb-perd'));
-  var rango = val('sb-rango'), orden = num(val('sb-orden'));
+  var rango = val('sb-rango'), obs = val('sb-obs');
 
   /* Validar ambientes */
   var i, a, sinObj = 0, sumHa = 0;
@@ -3066,7 +3333,7 @@ function guardarSiembra(){
     var s = siembraById(MODAL.id);
     if(!s) return;
     s.cultivo = cult; s.partidaId = paId; s.partidaNombre = p ? p.nombre : '';
-    s.rangoCod = rango; s.orden = orden; s.des = des; s.perd = perd;
+    s.rangoCod = rango; s.obs = obs; s.des = des; s.perd = perd;
     s.ambs = clonAmbs(MODAL.ambs);
     s.curas = clonIns(MODAL.curas);
     s.inocs = clonIns(MODAL.inocs);
@@ -3100,7 +3367,7 @@ function guardarSiembra(){
         loteId: sel[i], campo: l.campo, lote: l.nombre,
         cultivo: cult,
         partidaId: paId, partidaNombre: p ? p.nombre : '',
-        rangoCod: rango, orden: orden, des: des, perd: perd,
+        rangoCod: rango, obs: obs, des: des, perd: perd,
         ambs: ambs,
         curas: clonIns(MODAL.curas),
         inocs: clonIns(MODAL.inocs)
@@ -3186,11 +3453,11 @@ function abrirFertProd(id){
         : '')
     + '<div class="fsec">Grados</div>'
     + '<div class="frow">'
-    +   fcol('% N',    '<input type="number" id="fp-n1" step="0.1" value="' + (p && p.n    != null ? p.n    : '') + '">')
-    +   fcol('% P2O5', '<input type="number" id="fp-p"  step="0.1" value="' + (p && p.p2o5 != null ? p.p2o5 : '') + '">')
-    +   fcol('% K2O',  '<input type="number" id="fp-k"  step="0.1" value="' + (p && p.k2o  != null ? p.k2o  : '') + '">')
-    +   fcol('% S',    '<input type="number" id="fp-s"  step="0.1" value="' + (p && p.s    != null ? p.s    : '') + '">')
-    +   fcol('kg/litro', '<input type="number" id="fp-d" step="0.01" value="' + (p && p.dens != null ? p.dens : '') + '">')
+    +   fcol('% N',    '<input type="number" id="fp-n1" step="0.1" min="0" max="100" value="' + (p && p.n    != null ? p.n    : '') + '">')
+    +   fcol('% P2O5', '<input type="number" id="fp-p"  step="0.1" min="0" max="100" value="' + (p && p.p2o5 != null ? p.p2o5 : '') + '">')
+    +   fcol('% K2O',  '<input type="number" id="fp-k"  step="0.1" min="0" max="100" value="' + (p && p.k2o  != null ? p.k2o  : '') + '">')
+    +   fcol('% S',    '<input type="number" id="fp-s"  step="0.1" min="0" max="100" value="' + (p && p.s    != null ? p.s    : '') + '">')
+    +   fcol('kg/litro', '<input type="number" id="fp-d" step="0.01" min="0" value="' + (p && p.dens != null ? p.dens : '') + '">')
     + '</div>'
     + '<div class="hint">Los grados van en porcentaje, como vienen en la bolsa: MAP es 11 de N y 52 de P2O5. '
     + 'El kg/litro solo para líquidos (UAN ronda 1,32).</div>';
@@ -3289,22 +3556,22 @@ function abrirFert(id, pre){
     +   '<span class="fsub">Lo que informó el laboratorio. Las capas de N que falten se estiman.</span></div>'
     + '<div class="blk">'
     + '<div class="frow">'
-    +   fcol('M.O. %',        '<input type="number" id="ft-mo"   step="0.01" value="' + (a.mo    != null ? a.mo    : '') + '" oninput="recalcFertModal()">')
-    +   fcol('P ppm (0-20)',  '<input type="number" id="ft-p"    step="0.1"  value="' + (a.pPpm  != null ? a.pPpm  : '') + '" oninput="recalcFertModal()">')
-    +   fcol('S-SO4 ppm',     '<input type="number" id="ft-s"    step="0.1"  value="' + (a.sPpm  != null ? a.sPpm  : '') + '" oninput="recalcFertModal()">')
-    +   fcol('K meq/100g',    '<input type="number" id="ft-k"    step="0.01" value="' + (a.kMeq  != null ? a.kMeq  : '') + '" oninput="recalcFertModal()">')
-    +   fcol('Zn ppm',        '<input type="number" id="ft-zn"   step="0.01" value="' + (a.znPpm != null ? a.znPpm : '') + '" oninput="recalcFertModal()">')
+    +   fcol('M.O. %',        '<input type="number" id="ft-mo"   step="0.01" min="0" value="' + (a.mo    != null ? a.mo    : '') + '" oninput="recalcFertModal()">')
+    +   fcol('P ppm (0-20)',  '<input type="number" id="ft-p"    step="0.1" min="0"  value="' + (a.pPpm  != null ? a.pPpm  : '') + '" oninput="recalcFertModal()">')
+    +   fcol('S-SO4 ppm',     '<input type="number" id="ft-s"    step="0.1" min="0"  value="' + (a.sPpm  != null ? a.sPpm  : '') + '" oninput="recalcFertModal()">')
+    +   fcol('K meq/100g',    '<input type="number" id="ft-k"    step="0.01" min="0" value="' + (a.kMeq  != null ? a.kMeq  : '') + '" oninput="recalcFertModal()">')
+    +   fcol('Zn ppm',        '<input type="number" id="ft-zn"   step="0.01" min="0" value="' + (a.znPpm != null ? a.znPpm : '') + '" oninput="recalcFertModal()">')
     + '</div>'
     + '<div class="frow">'
-    +   fcol('pH 0-20',  '<input type="number" id="ft-ph20" step="0.1" value="' + (a.ph20 != null ? a.ph20 : '') + '">')
-    +   fcol('pH 20-40', '<input type="number" id="ft-ph40" step="0.1" value="' + (a.ph40 != null ? a.ph40 : '') + '">')
-    +   fcol('pH 40-60', '<input type="number" id="ft-ph60" step="0.1" value="' + (a.ph60 != null ? a.ph60 : '') + '">')
+    +   fcol('pH 0-20',  '<input type="number" id="ft-ph20" step="0.1" min="0" value="' + (a.ph20 != null ? a.ph20 : '') + '">')
+    +   fcol('pH 20-40', '<input type="number" id="ft-ph40" step="0.1" min="0" value="' + (a.ph40 != null ? a.ph40 : '') + '">')
+    +   fcol('pH 40-60', '<input type="number" id="ft-ph60" step="0.1" min="0" value="' + (a.ph60 != null ? a.ph60 : '') + '">')
     +   '<div class="fcol"></div><div class="fcol"></div>'
     + '</div>'
     + '<div class="frow">'
-    +   fcol('N 0-20 (ppm)',  '<input type="number" id="ft-n20" step="0.1" value="' + (a.n20 != null ? a.n20 : '') + '" oninput="recalcFertModal()">')
-    +   fcol('N 20-40 (ppm)', '<input type="number" id="ft-n40" step="0.1" value="' + (a.n40 != null ? a.n40 : '') + '" oninput="recalcFertModal()" placeholder="se estima">')
-    +   fcol('N 40-60 (ppm)', '<input type="number" id="ft-n60" step="0.1" value="' + (a.n60 != null ? a.n60 : '') + '" oninput="recalcFertModal()" placeholder="se estima">')
+    +   fcol('N 0-20 (ppm)',  '<input type="number" id="ft-n20" step="0.1" min="0" value="' + (a.n20 != null ? a.n20 : '') + '" oninput="recalcFertModal()">')
+    +   fcol('N 20-40 (ppm)', '<input type="number" id="ft-n40" step="0.1" min="0" value="' + (a.n40 != null ? a.n40 : '') + '" oninput="recalcFertModal()" placeholder="se estima">')
+    +   fcol('N 40-60 (ppm)', '<input type="number" id="ft-n60" step="0.1" min="0" value="' + (a.n60 != null ? a.n60 : '') + '" oninput="recalcFertModal()" placeholder="se estima">')
     +   fcol('Informado como', '<select id="ft-nforma" onchange="recalcFertModal()">'
           + '<option value="No3"' + (a.nForma === 'No3' || !a.nForma ? ' selected' : '') + '>NO3 (nitrato)</option>'
           + '<option value="N-no3"' + (a.nForma === 'N-no3' ? ' selected' : '') + '>N-NO3 (nitrógeno)</option></select>')
@@ -3318,8 +3585,8 @@ function abrirFert(id, pre){
     +   '<span class="fsub">A qué nivel de P y de N querés llegar en este lote.</span></div>'
     + '<div class="blk">'
     + '<div class="frow">'
-    +   fcol('P objetivo (ppm)',   '<input type="number" id="ft-pobj" step="0.1" value="' + (o.pObj != null ? o.pObj : '') + '" oninput="recalcFertModal()">')
-    +   fcol('N objetivo (kg/ha)', '<input type="number" id="ft-nobj" step="1"   value="' + (o.nObj != null ? o.nObj : '') + '" oninput="recalcFertModal()">')
+    +   fcol('P objetivo (ppm)',   '<input type="number" id="ft-pobj" step="0.1" min="0" value="' + (o.pObj != null ? o.pObj : '') + '" oninput="recalcFertModal()">')
+    +   fcol('N objetivo (kg/ha)', '<input type="number" id="ft-nobj" step="1" min="0"   value="' + (o.nObj != null ? o.nObj : '') + '" oninput="recalcFertModal()">')
     +   '<div class="fcol" style="flex:2"><label class="fl">Coeficiente de recuperación de P</label>'
     +     '<div style="padding:6px 0;font-variant-numeric:tabular-nums" id="ft-coef">—</div></div>'
     + '</div>'
@@ -3459,8 +3726,17 @@ function recalcFertModal(){
 function pintarAportes(c){
   var cont = document.getElementById('ft-aplic');
   if(!cont) return;
-  var rows = cont.querySelectorAll('tbody tr'), i, td, l;
+  var rows = cont.querySelectorAll('tbody tr'), i, td, l, ts, sug;
   for(i=0; i<rows.length && i<c.lineas.length; i++){
+    /* Sugerencia: cuánto haría falta de este producto y para qué nutriente */
+    ts = rows[i].querySelector('.ap-sug');
+    if(ts){
+      sug = dosisSugerida(i);
+      if(!sug) ts.innerHTML = '<span style="color:#C3CCD6">—</span>';
+      else ts.innerHTML = '<button class="btn-link" onclick="usarSugerida(' + i + ')" '
+        + 'title="Usar esta dosis">' + f(sug.dosis, 1) + ' ' + sug.unidad + '</button>'
+        + '<div style="font-size:10px;color:#A8B2BD;margin-top:1px">cubre ' + sug.et + '</div>';
+    }
     td = rows[i].querySelector('.ap-ap');
     if(!td) continue;
     l = c.lineas[i];
@@ -3484,7 +3760,72 @@ function delAplic(i){
 function setAplic(i, campo, v){
   if(!MODAL.aplic[i]) return;
   MODAL.aplic[i][campo] = (campo === 'dosis') ? num(v) : v;
+  if(campo === 'prod' && v) proponerDosis(i);
   recalcFertModal();
+}
+/* ── Dosis sugerida al elegir la fuente ──────────────────────────────
+   Como en el Excel (dosis = nutriente a aplicar ÷ grado de la fuente),
+   pero acá las aplicaciones son lista libre y ningún producto declara
+   de qué nutriente es. Entonces: miro lo que FALTA de cada nutriente
+   sin contar esta línea, calculo cuánto haría falta de este producto
+   para cubrir cada uno, y propongo el menor — que es el producto
+   cumpliendo su papel sin pasarse con el resto.
+   Devuelve {kg, nutriente} o null. */
+function dosisSugerida(i){
+  var ap = MODAL.aplic[i];
+  if(!ap || !ap.prod) return null;
+  var prod = fertProdByNombre(ap.prod);
+  if(!prod) return null;
+
+  /* Faltante de cada nutriente ignorando esta línea */
+  var copia = [], j;
+  for(j=0; j<MODAL.aplic.length; j++){
+    copia.push((j === i)
+      ? { prod:ap.prod, momento:ap.momento, dosis:null, unidad:ap.unidad }
+      : MODAL.aplic[j]);
+  }
+  var base = ftDesdeModal();
+  base.aplic = copia;
+  var c = calcFert(base, base.amb);
+
+  var nutr = [
+    { k:'n',    g:prod.n,    rec:c.rec.n,    apl:c.apl.n,    et:'el N' },
+    { k:'p2o5', g:prod.p2o5, rec:c.rec.p2o5, apl:c.apl.p2o5, et:'el P2O5' },
+    { k:'k2o',  g:prod.k2o,  rec:c.rec.k2o,  apl:c.apl.k2o,  et:'el K2O' },
+    { k:'s',    g:prod.s,    rec:c.rec.s,    apl:c.apl.s,    et:'el S' }
+  ];
+  var mejor = null, falta, kg;
+  for(j=0; j<nutr.length; j++){
+    if(!nutr[j].g || nutr[j].rec === null) continue;
+    falta = nutr[j].rec - nutr[j].apl;
+    if(falta <= 0.5) continue;
+    kg = falta / (Number(nutr[j].g) / 100);
+    if(mejor === null || kg < mejor.kg) mejor = { kg:kg, et:nutr[j].et };
+  }
+  if(!mejor) return null;
+
+  /* Si la línea se carga en litros, la sugerencia también */
+  if(ap.unidad === 'l/ha'){
+    if(!prod.dens) return null;
+    return { dosis: mejor.kg / Number(prod.dens), unidad:'l/ha', et:mejor.et };
+  }
+  return { dosis: mejor.kg, unidad:'kg/ha', et:mejor.et };
+}
+/* Completa la dosis si está vacía; si ya hay un valor, no lo pisa. */
+function proponerDosis(i){
+  var sug = dosisSugerida(i);
+  if(!sug) return;
+  if(MODAL.aplic[i].dosis === null || MODAL.aplic[i].dosis === undefined){
+    MODAL.aplic[i].dosis = Math.round(sug.dosis * 10) / 10;
+    renderAplicRows();
+  }
+}
+/* Pone la sugerencia en la línea cuando el usuario la pide */
+function usarSugerida(i){
+  var sug = dosisSugerida(i);
+  if(!sug) return;
+  MODAL.aplic[i].dosis = Math.round(sug.dosis * 10) / 10;
+  renderAplicRows();
 }
 function renderAplicRows(){
   var cont = document.getElementById('ft-aplic');
@@ -3502,7 +3843,8 @@ function renderAplicRows(){
     return;
   }
   var h = '<div class="scroll"><table><thead><tr>'
-    + '<th>Fertilizante</th><th>Momento</th><th class="r">Dosis</th><th>Unidad</th><th>Aporta kg/ha</th><th></th>'
+    + '<th>Fertilizante</th><th>Momento</th><th class="r">Dosis</th><th>Unidad</th>'
+    + '<th>Sugerida</th><th>Aporta kg/ha</th><th></th>'
     + '</tr></thead><tbody>';
   for(i=0; i<MODAL.aplic.length; i++){
     h += '<tr>'
@@ -3510,10 +3852,11 @@ function renderAplicRows(){
       +   opts(lista, MODAL.aplic[i].prod, '— elegir —') + '</select></td>'
       + '<td><select onchange="setAplic(' + i + ',\'momento\',this.value)" style="width:120px">'
       +   opts(MOMENTOS, MODAL.aplic[i].momento, '') + '</select></td>'
-      + '<td class="r"><input type="number" step="0.1" value="' + (MODAL.aplic[i].dosis != null ? MODAL.aplic[i].dosis : '') + '" '
+      + '<td class="r"><input type="number" step="0.1" min="0" value="' + (MODAL.aplic[i].dosis != null ? MODAL.aplic[i].dosis : '') + '" '
       +   'oninput="setAplic(' + i + ',\'dosis\',this.value)" style="width:84px"></td>'
       + '<td><select onchange="setAplic(' + i + ',\'unidad\',this.value)" style="width:82px">'
       +   opts(['kg/ha','l/ha'], MODAL.aplic[i].unidad || 'kg/ha', '') + '</select></td>'
+      + '<td class="ap-sug" style="font-size:11px;color:var(--muted)">—</td>'
       + '<td class="ap-ap" style="font-size:11px;color:var(--muted)">—</td>'
       + '<td class="r"><button class="btn-ico" onclick="delAplic(' + i + ')">&times;</button></td>'
       + '</tr>';
@@ -3685,9 +4028,16 @@ function cerradas(){
   if(!DB.cfg.cerradas) DB.cfg.cerradas = {};
   return DB.cfg.cerradas;
 }
-function marcarCerrado(clave, cerrado){
+/* Las secciones del formulario arrancan CERRADAS, para ver de una qué hay.
+   Las tarjetas de las vistas arrancan abiertas. Después manda lo último que
+   dejó el usuario, que se guarda explícitamente (0 abierto / 1 cerrado). */
+function arrancaCerrado(clave){
   var c = cerradas();
-  if(cerrado) c[clave] = 1; else delete c[clave];
+  if(c[clave] !== undefined) return !!c[clave];
+  return clave.indexOf('sec:') === 0;
+}
+function marcarCerrado(clave, cerrado){
+  cerradas()[clave] = cerrado ? 1 : 0;
   sv('cfg');
 }
 function textoSec(el){
@@ -3713,7 +4063,7 @@ function prepararSecs(){
     el.className += ' cl';
     el.insertBefore(chevron(), el.firstChild);
     el.onclick = function(){ togSec(this); };
-    if(cerradas()[clave]) el.className += ' cerrado';
+    if(arrancaCerrado(clave)) el.className += ' cerrado';
   }
 }
 function chevron(){
@@ -3739,7 +4089,7 @@ function prepararTarjetas(){
     el.className += ' cl';
     el.appendChild(chevron());
     el.onclick = function(){ togCard(this); };
-    if(cerradas()[clave]) card.className += ' cerrado';
+    if(arrancaCerrado(clave)) card.className += ' cerrado';
   }
 }
 function togCard(el){
