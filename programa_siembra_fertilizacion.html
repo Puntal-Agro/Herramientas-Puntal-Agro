@@ -125,9 +125,8 @@ tbody tr.amb .amb-n::before{content:'';position:absolute;left:5px;top:50%;width:
 /* Jerarquía del número: el resultado pesa, el intermedio no */
 td.dato{color:#7A8899}
 td.res{font-weight:600;color:var(--text)}
-/* Nutriente: aplicado arriba, recomendado abajo */
-.nu-a{font-weight:600;line-height:1.3}
-.nu-r{font-size:10px;color:#A8B2BD;line-height:1.3;margin-top:1px}
+/* Nutriente: solo lo aplicado; el recomendado va en el globito */
+td.nu{font-weight:600;cursor:help}
 
 /* Interruptor de detalle por ambiente */
 .tog-amb{border:1px solid #DDE3EA;background:var(--card);border-radius:10px;padding:1px 7px;
@@ -363,7 +362,7 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
       <tbody id="tb-ft"></tbody>
     </table></div>
     <div class="hint">
-      Cada nutriente muestra <b>lo aplicado</b> y abajo, en gris, lo recomendado.
+      Cada nutriente muestra <b>lo aplicado</b>. Pasá por encima para ver lo recomendado y cuánto falta.
       En <b>rojo</b>, cuando no llega; en <b>ámbar</b>, cuando el N en línea de siembra pasa el límite
       de fitotoxicidad del cultivo. El asterisco en el N del suelo quiere decir que se estimó alguna capa.
     </div>
@@ -642,8 +641,8 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
      suelo y aplicaciones de fertilizante.  → ver handoff para Mariana.
    ═══════════════════════════════════════════════════════════════════════ */
 
-var BUILD = 10;
-var VERSION = 'v2026-10-31 16:47';
+var BUILD = 11;
+var VERSION = 'v2026-11-01 17:34';
 
 /* ── Claves de almacenamiento ──────────────────────────────────────── */
 var K = {
@@ -1613,7 +1612,9 @@ var CAMPO_CERRADO = {};
 function togCampo(k, campo){
   var clave = k + ':' + campo;
   CAMPO_CERRADO[clave] = !CAMPO_CERRADO[clave];
-  if(k === 'sb') renderSiembra(); else renderFert();
+  if(k === 'sb') renderSiembra();
+  else if(k === 'ft') renderFert();
+  else renderLotes();
 }
 function campoAbierto(k, campo){ return !CAMPO_CERRADO[k + ':' + campo]; }
 function filaCampo(k, campo, cols, resumen){
@@ -1854,14 +1855,22 @@ function fertById(id){
 }
 /* Celda de nutriente aplicado, en rojo si no llega a lo recomendado */
 
-/* Celda de nutriente: lo aplicado arriba, lo recomendado abajo en gris.
-   La comparación queda junta en vez de a ocho columnas de distancia. */
+/* Celda de nutriente: en la tabla va solo lo aplicado. El rojo avisa
+   cuando no llega; el recomendado y cuánto falta están en el globito,
+   que es donde no ensucian la lectura. */
 function celdaNutri(rec, apl, extra){
   var falta = (rec !== null && apl + 0.5 < rec);
-  var arriba = (falta ? '<span class="bdg br">' + f(apl,1) + '</span>' : f(apl, 1));
-  if(extra) arriba = extra;
-  return '<td class="r"><div class="nu-a">' + arriba + '</div>'
-       + '<div class="nu-r">' + (rec === null ? '—' : f(rec, 1)) + '</div></td>';
+  var tip;
+  if(rec === null) tip = 'Aplicado ' + f(apl,1) + ' kg/ha · sin recomendación calculada';
+  else if(falta) tip = 'Aplicado ' + f(apl,1) + ' · recomendado ' + f(rec,1)
+                     + ' · faltan ' + f(rec - apl,1) + ' kg/ha';
+  else if(apl > rec + 0.5) tip = 'Aplicado ' + f(apl,1) + ' · recomendado ' + f(rec,1)
+                     + ' · ' + f(apl - rec,1) + ' kg/ha de más';
+  else tip = 'Aplicado ' + f(apl,1) + ' · recomendado ' + f(rec,1) + ' kg/ha · cubierto';
+
+  var dentro = extra ? extra
+    : (falta ? '<span class="bdg br">' + f(apl,1) + '</span>' : f(apl, 1));
+  return '<td class="r nu" title="' + esc(tip) + '">' + dentro + '</td>';
 }
 
 function renderFert(){
