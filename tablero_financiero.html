@@ -520,6 +520,18 @@ footer{padding:14px 24px 22px;display:flex;justify-content:space-between;color:v
       <div class="legrow" id="exLeg"></div>
       <div class="cw" style="height:320px"><canvas id="chEx"></canvas></div>
     </div>
+    <div class="card">
+      <div class="chd"><div><div class="ct">Disponibilidad de granos desglosada</div><div class="cs" id="exbSub"></div></div>
+        <div class="noprint"><button class="inst-btn" id="exbT" onclick="setExU('t')">Toneladas</button> <button class="inst-btn" id="exbV" onclick="setExU('v')">Valor</button></div></div>
+      <div class="mrow noprint" id="exbSel" style="margin-top:0;border-top:none;padding-top:0"></div>
+      <div class="legrow" id="exbLeg" style="margin-top:8px"></div>
+      <div class="cw" style="height:300px"><canvas id="chExB"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="chd"><div><div class="ct" id="exbTit"></div><div class="cs">Por cultivo · las partes se descuentan en este orden: comprometido, entregado a fijar, reservas</div></div></div>
+      <div class="scroll"><table id="exbTbl"></table></div>
+      <div class="note" id="exbNote"></div>
+    </div>
   </div>
 
   <div id="tab-insu" class="tabc">
@@ -571,7 +583,7 @@ footer{padding:14px 24px 22px;display:flex;justify-content:space-between;color:v
 
 <footer>
   <span>Puntal Agro · Herramientas para la toma de decisiones</span>
-  <span>Versión v2026-10-29 09:15 · BUILD 67 · Datos leídos: <span id="fts">—</span></span>
+  <span>Versión v2026-11-02 17:15 · BUILD 72 · Datos leídos: <span id="fts">—</span></span>
 </footer>
 
 <div id="dropOv"><div class="drop2">
@@ -955,8 +967,12 @@ function parseWorkbook(wb,fname){
       for(var hk2 in H)o[hk2]=S.v(rr,H[hk2]);out.push(o);}
     return out;}
   function mIdx(x){var k=key(x);for(var q=0;q<12;q++)if(key(D.meses[q])===k)return q;return -1;}
-  D.vg=regs(VGs,'Grano').map(function(o){return {n:o.n,m:mIdx(o['mes cobro']),ton:nz(o.ton),usd:nz(o['u$s/ton bruto']),ars:nz(o['$ brutos']),est:norm(o['estado operacion']),prop:norm(o.propiedad),obs:norm(o.observaciones)};});
+  D.vg=regs(VGs,'Grano').map(function(o){return {n:o.n,id:norm(o['id. contrato']).replace(/\.0+$/,''),ment:mIdx(o['mes entrega']),m:mIdx(o['mes cobro']),ton:nz(o.ton),usd:nz(o['u$s/ton bruto']),ars:nz(o['$ brutos']),est:norm(o['estado operacion']),prop:norm(o.propiedad),obs:norm(o.observaciones)};});
   D.vh=regs(VHs,'Categoría').map(function(o){return {n:o.n,m:mIdx(o['mes cobro']),cab:nz(o.cabezas),kgc:nz(o['kg/cab en destino']),pkg:nz(o['$/kg']),ars:nz(o['$ total bruto']),est:norm(o['estado operacion']),obs:norm(o.observaciones)};});
+  (function(){var ne=D.vg.filter(function(x){return !key(x.est)&&x.ton>0;});
+    if(ne.length)W.push('VentasGranos: hay '+ne.length+' operaci'+(ne.length>1?'ones':'ón')+' sin "Estado operación" ('+ne.slice(0,6).map(function(x){return x.n+' '+f(x.ton,0)+' t'+(x.ment>=0?' '+D.meses[x.ment]:'');}).join(', ')+(ne.length>6?'…':'')+'). Conviene completarlo.');})();
+  (function(){var sf=D.vg.filter(function(x){return /^entr\.? ?fwd/.test(key(x.est))&&x.ment<0&&x.ton>0;});
+    if(sf.length)W.push('VentasGranos: hay '+sf.length+' forward'+(sf.length>1?'s':'')+' sin mes de entrega ('+sf.map(function(x){return x.n+' '+f(x.ton,0)+' t';}).join(', ')+'). La planilla no los descuenta de la existencia; el tablero los toma como comprometidos.');})();
   /* la planilla puede filtrar las ventas de granos por "Propiedad": se detecta cuál cierra con el flujo */
   (function(){var tot=function(L){var a=zeros(12);L.forEach(function(x){if(x.m>=0)a[x.m]+=x.ars;});return a;};
     var ok=function(a){for(var q=0;q<12;q++)if(Math.abs(a[q]-D.ing.granos[q])>1)return false;return true;};
@@ -1415,6 +1431,66 @@ function renderExCards(V,s0){
       '<div class="mth" style="font-size:14px">'+(Math.abs(m.v0)>0.5?mny(m.v0):'—')+'</div></div>';n++;});
   var er=document.getElementById('exRow');er.innerHTML=h;er.style.gridTemplateColumns='repeat('+Math.max(n,1)+',minmax(0,1fr))';
 }
+/* desglose de la existencia de un mes: comprometido / entregado a fijar / reservas del ejercicio / libre */
+var EXB_C={lib:'#E0A526',comp:'#C8642D',fij:'#B9A27A',res:'#4A6533'};
+function exBreak(V,m){var map={},ord=[],U=STATE.cur==='USD';
+  V.list.forEach(function(D){D.granos.forEach(function(g){if(g.unidad==='un')return;
+    var n=g.nombre,o=map[n];if(!o){o=map[n]={n:n,ex:0,comp:0,fij:0,res:0,lib:0,exc:0,v:{}};ord.push(n);}
+    var ex=Math.max(g.ton[m]||0,0),pr=g.ton[m]>0.5?g.exArs[m]/g.ton[m]:((g.pre[m]||0)*D.tc[m]);if(U)pr=pr/D.tc[m];
+    /* a fijar: cada contrato (ID. Contrato) se descuenta con sus fijaciones = otras operaciones del mismo grano y mismo ID, ya entregadas a ese mes */
+    var VG=(D.vg||[]).filter(function(x){return key(x.n)===key(n)&&x.ton>0;}),isF=function(x){return /^entr\.? ?a fijar/.test(key(x.est));};
+    var fids={};VG.forEach(function(x){if(isF(x)&&x.id)fids[x.id]=1;});
+    var pend=0,fij=0,byId={};
+    VG.forEach(function(x){var e=key(x.est);
+      if(isF(x)){if(x.ment<0||x.ment<=m){if(x.id)byId[x.id]=(byId[x.id]||0)+x.ton;else fij+=x.ton;}else pend+=x.ton;return;}
+      if(x.id&&fids[x.id]){if(x.ment<0||x.ment<=m)byId[x.id]=(byId[x.id]||0)-x.ton;return;}   /* fijación */
+      if(/^entr\.? ?fwd/.test(e)){if(x.ment<0||x.ment>m)pend+=x.ton;}
+      else if(/^realizado/.test(e)){if(x.ment>m)pend+=x.ton;}});
+    for(var kk in byId)fij+=Math.max(0,byId[kk]);
+    var resF=0;for(var q=m+1;q<12;q++)resF+=Math.max(g.resv[q]||0,0);
+    var c=Math.min(ex,pend),fj=Math.min(ex-c,fij),rs=Math.min(ex-c-fj,resF),lb=ex-c-fj-rs;
+    o.ex+=ex;o.comp+=c;o.fij+=fj;o.res+=rs;o.lib+=lb;o.exc+=Math.max(0,pend-c);
+    o.v.ex=(o.v.ex||0)+ex*pr;o.v.comp=(o.v.comp||0)+c*pr;o.v.fij=(o.v.fij||0)+fj*pr;o.v.res=(o.v.res||0)+rs*pr;o.v.lib=(o.v.lib||0)+lb*pr;});});
+  return ord.map(function(n){return map[n];}).filter(function(o){return o.ex>0.5||o.exc>0.5;});}
+function setExbG(g){STATE.exbG=g;renderExB(curView());}
+function renderExB(V){
+  var s0=S0(V),T=STATE.exU==='t';
+  /* mismo selector que el gráfico de arriba: los dos siempre muestran lo mismo */
+  document.getElementById('exbT').className='inst-btn'+(T?' active':'');document.getElementById('exbV').className='inst-btn'+(!T?' active':'');document.getElementById('exbV').textContent='Valor '+sym();
+  var lab=V.meses.slice(s0),sel=STATE.exM-s0,K=[['lib','Libre para vender'],['comp','Comprometido (vendido sin entregar)'],['fij','Entregado a fijar'],['res','Reservas del ejercicio (uso propio)']];
+  var per=[];for(var m=s0;m<12;m++)per.push(exBreak(V,m));
+  /* en toneladas se mira de a una especie; en valor puede ser el total */
+  var crops=[];per.forEach(function(L){L.forEach(function(o){if(o.ex>0.5&&crops.indexOf(o.n)<0)crops.push(o.n);});});
+  if(STATE.exbG==null)STATE.exbG='all';
+  if(STATE.exbG!=='all'&&crops.indexOf(STATE.exbG)<0)STATE.exbG='all';
+  if(T&&STATE.exbG==='all')STATE.exbG=crops[0]||'all';
+  var G=STATE.exbG;
+  document.getElementById('exbSel').innerHTML='<span class="lbl">Grano</span> '+(T?'':'<button class="inst-btn'+(G==='all'?' active':'')+'" onclick="setExbG(\'all\')">Todos</button> ')+
+    crops.map(function(n,i){return '<button class="inst-btn'+(G===n?' active':'')+'" onclick="setExbG(\''+esc(n).replace(/'/g,"\\'")+'\')">'+esc(n)+'</button>';}).join(' ')+
+    (T?' <span class="cs" style="margin-left:6px">en toneladas se ve de a un grano · para ver todos juntos pasá a Valor</span>':'');
+  var tot=function(L,k){return sum(L.filter(function(o){return G==='all'||o.n===G;}).map(function(o){return T?o[k]:(o.v[k]||0);}));};
+  var ds=K.map(function(k){var c=EXB_C[k[0]];return {label:k[1],data:per.map(function(L){return tot(L,k[0]);}),backgroundColor:lab.map(function(x,j){return j===sel?c:c+'99';}),borderRadius:2,maxBarThickness:40};});
+  document.getElementById('exbLeg').innerHTML=K.map(function(k){return '<span><i class="sw" style="background:'+EXB_C[k[0]]+'"></i> '+k[1]+'</span>';}).join('');
+  document.getElementById('exbSub').textContent='Existencia de cada mes separada en lo que ya tiene destino y lo que queda libre · '+(T?'toneladas de '+G:'valor al precio estimado de cada mes'+(G==='all'?' · todos los granos':' · '+G))+' · tocá un mes para ver el detalle';
+  mk('chExB',{type:'bar',data:{labels:lab,datasets:ds},options:(function(){var o=chartBase();o.scales.x.stacked=true;o.scales.y.stacked=true;o.interaction={mode:'index',intersect:false};
+    if(T)o.scales.y.ticks.callback=function(v){return f(v,0)+' t';};
+    o.plugins.tooltip.callbacks.label=function(c){return Math.abs(c.raw)>0.5?' '+c.dataset.label+': '+(T?f(c.raw,0)+' t':mny(c.raw)):null;};
+    o.onClick=function(e,els){if(els&&els.length){STATE.exM=s0+els[0].index;setTimeout(function(){renderEx(curView());},0);}};
+    o.onHover=function(e,els){e.native.target.style.cursor=els&&els.length?'pointer':'default';};return o;})()});
+  /* tabla del mes elegido */
+  var L=(per[sel]||[]).filter(function(o){return o.ex>0.5;}),fm=function(o,k){var v=T?o[k]:(o.v[k]||0);return Math.abs(v)<0.5?'–':(T?f(v,0)+' t':mny(v));};
+  document.getElementById('exbTit').textContent='Disponibilidad en '+mesAnio(V.list[0],STATE.exM);
+  var h='<thead><tr><th>Cultivo</th><th>Existencia</th><th>Comprometido</th><th>Entregado a fijar</th><th>Reservas del ejercicio</th><th>Libre para vender</th><th>% libre</th></tr></thead><tbody>',ex2=0;
+  L.forEach(function(o){var pl=o.ex?o.lib/o.ex:0;
+    h+='<tr><td class="tdname">'+esc(o.n)+'</td><td>'+fm(o,'ex')+'</td><td style="color:'+EXB_C.comp+'">'+fm(o,'comp')+'</td><td>'+fm(o,'fij')+'</td><td>'+fm(o,'res')+'</td><td style="font-weight:600">'+fm(o,'lib')+'</td><td>'+(o.ex?fpc(pl,0):'–')+'</td></tr>';
+    if(o.exc>0.5)ex2+=1;});
+  if(L.length&&!T){var S=function(k){return T?sum(L.map(function(o){return o[k];})):sum(L.map(function(o){return o.v[k]||0;}));},fx=function(v){return Math.abs(v)<0.5?'–':(T?f(v,0)+' t':mny(v));},se=S('ex');
+    h+='<tr class="tr-key"><td class="tdname">Total</td><td>'+fx(se)+'</td><td>'+fx(S('comp'))+'</td><td>'+fx(S('fij'))+'</td><td>'+fx(S('res'))+'</td><td>'+fx(S('lib'))+'</td><td>'+(se?fpc(S('lib')/se,0):'–')+'</td></tr>';}
+  document.getElementById('exbTbl').innerHTML=L.length?h+'</tbody>':'<tbody><tr><td class="tdname">Sin existencia de granos en este mes.</td></tr></tbody>';
+  var nt=(per[sel]||[]).filter(function(o){return o.exc>0.5;}).map(function(o){return o.n+' '+f(o.exc,0)+' t';});
+  document.getElementById('exbNote').textContent='Comprometido: forwards y ventas realizadas que todavía no se entregaron. Entregado a fijar: entregado, con precio abierto (a cada contrato se le descuentan sus fijaciones, por ID. Contrato). Reservas: uso propio de los meses siguientes hasta el cierre del ejercicio.'+
+    (nt.length?' Vendido de cosecha futura (más que la existencia del mes): '+nt.join(', ')+'.':'');
+}
 function renderEx(V){
   var s0=S0(V);if(STATE.exM==null||STATE.exM<s0)STATE.exM=s0;
   renderExCards(V,STATE.exM);
@@ -1430,12 +1506,13 @@ function renderEx(V){
     ds.push({label:n.replace(' (Un)',''),data:a,backgroundColor:lab.map(function(x,j){return j===sel?c:c+'99';}),borderRadius:2,maxBarThickness:40});
     leg+='<span><i class="sw" style="background:'+c+'"></i> '+esc(n.replace(' (Un)',''))+'</span>';});
   document.getElementById('exLeg').innerHTML=leg;
-  document.getElementById('exSub').textContent=(T?'En toneladas (sin rollos)':'Valor al precio estimado de cada mes')+' · tocá un mes para ver sus existencias arriba';
-  mk('chEx',{type:'bar',data:{labels:lab,datasets:ds},options:(function(){var o=chartBase();o.scales.x.stacked=true;o.scales.y.stacked=true;o.interaction={mode:'index',intersect:false};
+  document.getElementById('exSub').textContent=(T?'En toneladas, un grano al lado del otro (sin rollos)':'Valor al precio estimado de cada mes, apilado')+' · tocá un mes para ver sus existencias arriba';
+  mk('chEx',{type:'bar',data:{labels:lab,datasets:ds},options:(function(){var o=chartBase();o.scales.x.stacked=!T;o.scales.y.stacked=!T;o.interaction={mode:'index',intersect:false};
     if(T)o.scales.y.ticks.callback=function(v){return f(v,0)+' t';};
     o.plugins.tooltip.callbacks.label=function(c){return ' '+c.dataset.label+': '+(T?f(c.raw,0)+' t':mny(c.raw));};
     o.onClick=function(e,els){if(els&&els.length){STATE.exM=s0+els[0].index;setTimeout(function(){renderEx(curView());},0);}};
     o.onHover=function(e,els){e.native.target.style.cursor=els&&els.length?'pointer':'default';};return o;})()});
+  renderExB(V);
 }
 function renderSupTbl(V){
   var box=document.getElementById('supDet'),k=STATE.supK;
@@ -1854,16 +1931,16 @@ function renderIngDet(V,s0,per){
   document.getElementById('ingDetTit').innerHTML='Operaciones de '+(G?'granos':'hacienda')+' proyectadas para <span style="color:'+(G?'#A67C1F':'#A84D1F')+'">cobrar '+esc(cuando)+'</span>';
   var h='<thead><tr><th>Mes</th><th style="text-align:left">'+(G?'Grano':'Categoría')+'</th>'+(G?'<th>Toneladas</th><th>U$S/t</th>':'<th>Cabezas</th><th>Kg/cab</th><th>$/kg</th>')+'<th>Monto</th><th style="text-align:left">Estado</th><th style="text-align:left">Observación</th></tr></thead><tbody>';
   var grp={},ord=[],T=0,TQ=0;
-  L.forEach(function(x){if(!grp[x.m]){grp[x.m]={q:0,a:0,rows:[]};ord.push(x.m);}var q=G?x.ton:x.cab;grp[x.m].q+=q;grp[x.m].a+=x.amt;grp[x.m].rows.push(x);T+=x.amt;TQ+=q;});
+  var SP={};L.forEach(function(x){if(!grp[x.m]){grp[x.m]={q:0,a:0,rows:[],sp:{}};ord.push(x.m);}var q=G?x.ton:x.cab;grp[x.m].q+=q;grp[x.m].sp[key(x.n)]=1;SP[key(x.n)]=1;grp[x.m].a+=x.amt;grp[x.m].rows.push(x);T+=x.amt;TQ+=q;});
   ord.forEach(function(mi){var g=grp[mi],kc=k+'|'+mi,cl=!!STATE.ingColl[kc];
-    h+='<tr class="tr-mes clkr" onclick="togIngM(\''+kc+'\')"><td class="tdname"><span class="car">'+(cl?'▸':'▾')+'</span> '+esc(mesAnio(V.list[0],mi))+'</td><td class="tdname" style="font-weight:400;color:#64748B">'+g.rows.length+' operaci'+(g.rows.length===1?'ón':'ones')+'</td><td>'+f(g.q,0)+'</td>'+(G?'<td></td>':'<td></td><td></td>')+'<td>'+mny(g.a)+'</td><td></td><td></td></tr>';
+    h+='<tr class="tr-mes clkr" onclick="togIngM(\''+kc+'\')"><td class="tdname"><span class="car">'+(cl?'▸':'▾')+'</span> '+esc(mesAnio(V.list[0],mi))+'</td><td class="tdname" style="font-weight:400;color:#64748B">'+g.rows.length+' operaci'+(g.rows.length===1?'ón':'ones')+'</td><td>'+(G&&Object.keys(g.sp).length>1?'–':f(g.q,0))+'</td>'+(G?'<td></td>':'<td></td><td></td>')+'<td>'+mny(g.a)+'</td><td></td><td></td></tr>';
     if(cl)return;
     g.rows.forEach(function(x){var q=G?x.ton:x.cab;
       h+='<tr><td class="tdname" style="padding-left:26px;font-weight:400;color:#64748B">'+M[x.m]+'</td><td class="tdname">'+esc(x.n)+(multi?' <span class="cs">'+esc(x.emp)+'</span>':'')+'</td><td>'+f(q,0)+'</td>'+
         (G?'<td>'+(x.usd?f(x.usd,0):'—')+'</td>':'<td>'+(x.kgc?f(x.kgc,0):'—')+'</td><td>'+(x.pkg?f(x.pkg,0):'—')+'</td>')+
         '<td style="font-weight:600">'+mny(x.amt)+'</td><td class="tdname" style="font-weight:400">'+estPill(x.est)+'</td>'+
         '<td class="tdname" style="font-weight:400;color:#7A8899;max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="'+esc(x.obs)+'">'+esc(x.obs)+'</td></tr>';});});
-  if(ord.length>1)h+='<tr class="tr-key"><td class="tdname">Total '+per+'</td><td></td><td>'+f(TQ,0)+'</td>'+(G?'<td></td>':'<td></td><td></td>')+'<td>'+mny(T)+'</td><td></td><td></td></tr>';
+  if(ord.length>1)h+='<tr class="tr-key"><td class="tdname">Total '+per+'</td><td></td><td>'+(G&&Object.keys(SP).length>1?'–':f(TQ,0))+'</td>'+(G?'<td></td>':'<td></td><td></td>')+'<td>'+mny(T)+'</td><td></td><td></td></tr>';
   h+='</tbody>';
   var allCl=ord.length&&ord.every(function(mi){return STATE.ingColl[k+'|'+mi];});
   var lk=function(js,t){return '<a href="#" style="color:var(--verde);font-weight:600;margin-right:14px" onclick="'+js+';return false;">'+t+'</a>';},sub='';
