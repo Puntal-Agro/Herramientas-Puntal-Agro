@@ -598,14 +598,15 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
       <div class="ct">Importar desde tus Excel<span class="ln"></span></div>
       <div class="cact">
         <label class="btn btn-pri" style="margin:0">
-          Elegir archivo…
-          <input type="file" id="imp-file" accept=".xls,.xlsx" style="display:none" onchange="leerExcel(this)">
+          Elegir archivos…
+          <input type="file" id="imp-file" accept=".xls,.xlsx" multiple style="display:none" onchange="leerExcel(this)">
         </label>
       </div>
     </div>
     <div id="imp-zona"></div>
     <div class="hint">
-      Levanta el <b>Programa de Siembra</b> o el <b>Programa de Fertilización</b> y trae lo que tengan cargado:
+      Podés elegir los dos archivos juntos. Levanta el <b>Programa de Siembra</b> y el
+      <b>Programa de Fertilización</b> y trae lo que tengan cargado:
       partidas, rangos, sembradoras, la programación por lote, los fertilizantes con sus grados,
       los ambientes con su coeficiente y los umbrales. Antes de guardar nada te muestra qué encontró
       y qué lotes no pudo atar a Plan de Uso.
@@ -665,8 +666,8 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
      suelo y aplicaciones de fertilizante.  → ver handoff para Mariana.
    ═══════════════════════════════════════════════════════════════════════ */
 
-var BUILD = 12;
-var VERSION = 'v2026-11-02 08:03';
+var BUILD = 13;
+var VERSION = 'v2026-11-02 08:49';
 
 /* ── Claves de almacenamiento ──────────────────────────────────────── */
 var K = {
@@ -2811,44 +2812,64 @@ function fechaExcel(v){
 function hojaMatriz(wb, nombre){
   return wb.Sheets[nombre] || null;
 }
+/* La campaña del archivo vive en la portada (Inicio!D6) */
+function campaniaDelLibro(wb){
+  var ini = hojaMatriz(wb, 'Inicio');
+  if(!ini) return '';
+  var v = celT(ini, 6, 'D');
+  return v || '';
+}
 
 function leerExcel(inp){
   if(!inp.files || !inp.files.length) return;
   if(typeof XLSX === 'undefined'){
     alert('No se pudo cargar la librería de Excel. Revisá la conexión y volvé a intentar.');
-    return;
+    inp.value = ''; return;
   }
   if(!CAMPANIA){ alert('Elegí primero la campaña a la que querés importar.'); inp.value = ''; return; }
-  var archivo = inp.files[0];
+  var archivos = [], i;
+  for(i=0; i<inp.files.length; i++) archivos.push(inp.files[i]);
+  inp.value = '';
+  IMPORT = [];
+  pintarImport('<div class="hint">Leyendo ' + archivos.length
+    + (archivos.length === 1 ? ' archivo…' : ' archivos…') + '</div>');
+  leerSiguiente(archivos, 0);
+}
+/* Sin promesas: se encadena un archivo tras otro con callback */
+function leerSiguiente(archivos, idx){
+  if(idx >= archivos.length){ pintarImport(vistaPreviaImport(IMPORT)); return; }
   var fr = new FileReader();
   fr.onload = function(ev){
-    var wb;
-    try{ wb = XLSX.read(new Uint8Array(ev.target.result), { type:'array' }); }
-    catch(e){
-      pintarImport('<div class="warn" style="display:block">No se pudo abrir el archivo. '
-        + 'Revisá que sea el Excel de Siembra o de Fertilización.</div>');
-      return;
-    }
-    var hojas = wb.SheetNames.join('|');
-    if(hojas.indexOf('Datos') < 0){
-      pintarImport('<div class="warn" style="display:block">Este archivo no tiene hoja <b>Datos</b>, '
-        + 'así que no es el Programa de Siembra ni el de Fertilización.<br>Hojas encontradas: '
-        + esc(wb.SheetNames.join(', ')) + '</div>');
-      return;
-    }
-    var tipo = (hojas.indexOf('Partidas') >= 0 && hojas.indexOf('Sembradoras') >= 0) ? 'siembra'
-             : (hojas.indexOf('Necesidad fertilizantes') >= 0 ? 'fert' : '');
-    if(!tipo){
-      pintarImport('<div class="warn" style="display:block">No reconozco este archivo. '
-        + 'El Programa de Siembra tiene las hojas Partidas y Sembradoras; '
-        + 'el de Fertilización tiene Necesidad fertilizantes.</div>');
-      return;
-    }
-    IMPORT = (tipo === 'siembra') ? leerSiembraXls(wb, archivo.name) : leerFertXls(wb, archivo.name);
-    pintarImport(vistaPreviaImport(IMPORT));
+    IMPORT.push(parsearLibro(ev.target.result, archivos[idx].name));
+    leerSiguiente(archivos, idx + 1);
   };
-  fr.readAsArrayBuffer(archivo);
-  inp.value = '';
+  fr.onerror = function(){
+    IMPORT.push({ tipo:'error', archivo:archivos[idx].name, msg:'No se pudo leer el archivo.' });
+    leerSiguiente(archivos, idx + 1);
+  };
+  fr.readAsArrayBuffer(archivos[idx]);
+}
+function parsearLibro(buf, nombre){
+  var wb;
+  try{ wb = XLSX.read(new Uint8Array(buf), { type:'array' }); }
+  catch(e){
+    return { tipo:'error', archivo:nombre,
+             msg:'No se pudo abrir. Revisá que sea el Excel de Siembra o de Fertilización.' };
+  }
+  var hojas = wb.SheetNames.join('|');
+  if(hojas.indexOf('Datos') < 0){
+    return { tipo:'error', archivo:nombre,
+             msg:'No tiene hoja Datos, así que no es ninguno de los dos programas. Hojas: '
+                 + wb.SheetNames.join(', ') };
+  }
+  var tipo = (hojas.indexOf('Partidas') >= 0 && hojas.indexOf('Sembradoras') >= 0) ? 'siembra'
+           : (hojas.indexOf('Necesidad fertilizantes') >= 0 ? 'fert' : '');
+  if(!tipo){
+    return { tipo:'error', archivo:nombre,
+             msg:'No lo reconozco. El de Siembra tiene las hojas Partidas y Sembradoras; '
+                 + 'el de Fertilización tiene Necesidad fertilizantes.' };
+  }
+  return (tipo === 'siembra') ? leerSiembraXls(wb, nombre) : leerFertXls(wb, nombre);
 }
 function pintarImport(html){
   var z = document.getElementById('imp-zona');
@@ -2860,6 +2881,8 @@ function leerSiembraXls(wb, nombre){
   var R = { tipo:'siembra', archivo:nombre, partidas:[], rangos:[], sembradoras:[], siembra:[],
             ambs:[], diasRango:null, sinLote:[], notas:[] };
   var i, j;
+  R.campaniaXls = campaniaDelLibro(wb);
+  R.empresaXls  = celT(hojaMatriz(wb, 'Inicio'), 2, 'B');
 
   /* Listas: rangos de fecha y días por rango */
   var L = hojaMatriz(wb, 'Listas');
@@ -2993,6 +3016,8 @@ function leerFertXls(wb, nombre){
   var R = { tipo:'fert', archivo:nombre, fertProd:[], coefP:{}, fito:{}, umbrales:{},
             fert:[], sinLote:[], notas:[] };
   var i;
+  R.campaniaXls = campaniaDelLibro(wb);
+  R.empresaXls  = celT(hojaMatriz(wb, 'Inicio'), 2, 'B');
   var L = hojaMatriz(wb, 'Listas');
   if(L){
     /* Fertilizantes y sus grados */
@@ -3076,68 +3101,122 @@ function agregarAplic(aps, prod, dosis, momento){
 }
 
 /* ── Vista previa ─────────────────────────────────────────────────── */
-function vistaPreviaImport(R){
-  if(!R) return '';
-  var h = '<div class="blk" style="margin-top:4px">';
-  h += '<div class="blk-t">' + esc(R.archivo) + ' — Programa de '
-     + (R.tipo === 'siembra' ? 'Siembra' : 'Fertilización') + '</div>';
+var IMP_CAMP = '';   /* campaña elegida como destino */
 
-  var fs = [];
-  if(R.tipo === 'siembra'){
-    fs.push(['Partidas de semilla', R.partidas.length]);
-    fs.push(['Rangos de fecha', R.rangos.length]);
-    fs.push(['Sembradoras', R.sembradoras.length]);
-    fs.push(['Lotes programados', R.siembra.length]);
-  } else {
-    fs.push(['Fertilizantes con grados', R.fertProd.length]);
-    fs.push(['Ambientes con coeficiente', contar(R.coefP)]);
-    fs.push(['Umbrales de fitotoxicidad', contar(R.fito)]);
-    fs.push(['Lotes con análisis', R.fert.length]);
-  }
-  h += '<div class="calc" style="margin-top:0">';
-  var i;
-  for(i=0; i<fs.length; i++){
-    h += '<div class="ci"><div class="cv">' + fs[i][1] + '</div><div class="cl">' + esc(fs[i][0]) + '</div></div>';
-  }
-  h += '</div>';
+function vistaPreviaImport(lista){
+  if(!lista || !lista.length) return '';
+  var h = '', i, R, hayAlgo = false;
 
-  if(R.sinLote.length){
-    var vistos = {}, unicos = [], k;
-    for(i=0; i<R.sinLote.length; i++){
-      if(!vistos[R.sinLote[i]]){ vistos[R.sinLote[i]] = 1; unicos.push(R.sinLote[i]); }
+  /* Campaña propuesta: la que dice el archivo si existe en la lista */
+  var camps = coreCampanias(), prop = '';
+  for(i=0; i<lista.length; i++){
+    var cx = lista[i].campaniaXls;
+    if(cx && indiceEn(camps, cx) >= 0){ prop = cx; break; }
+  }
+  IMP_CAMP = prop || CAMPANIA;
+
+  for(i=0; i<lista.length; i++){
+    R = lista[i];
+    h += '<div class="blk" style="margin-top:' + (i ? '10px' : '4px') + '">';
+    if(R.tipo === 'error'){
+      h += '<div class="blk-t">' + esc(R.archivo) + '</div>'
+        + '<div class="warn" style="display:block;margin-top:0">' + esc(R.msg) + '</div></div>';
+      continue;
     }
-    h += '<div class="warn" style="display:block"><b>' + unicos.length
-      + (unicos.length === 1 ? ' lote no está' : ' lotes no están') + ' en Plan de Uso</b><br>'
-      + esc(unicos.join(' · ')) + '<br>'
-      + 'Esas filas no se pueden importar: creá esos lotes en Plan de Uso y volvé a traer el archivo.</div>';
-  }
-  if(R.sinCultivo && R.sinCultivo.length){
-    h += '<div class="warn" style="display:block"><b>' + R.sinCultivo.length
-      + (R.sinCultivo.length === 1 ? ' cultivo del Excel no está' : ' cultivos del Excel no están')
-      + ' en el padrón de Maestros</b><br>' + esc(R.sinCultivo.join(' · ')) + '<br>'
-      + 'Esos lotes se importan igual, pero hasta que los nombres coincidan no se van a cruzar con '
-      + 'Plan de Uso: en Lotes de la campaña van a figurar como sin programar. '
-      + 'Lo más rápido es renombrarlos en Maestros.</div>';
-  }
-  for(i=0; i<R.notas.length; i++){
-    h += '<div class="hint">' + esc(R.notas[i]) + '</div>';
+    hayAlgo = true;
+    h += '<div class="blk-t">' + esc(R.archivo) + ' — Programa de '
+       + (R.tipo === 'siembra' ? 'Siembra' : 'Fertilización')
+       + (R.empresaXls ? '  ·  ' + esc(R.empresaXls) : '')
+       + (R.campaniaXls ? '  ·  campaña ' + esc(R.campaniaXls) : '') + '</div>';
+
+    var fs = [];
+    if(R.tipo === 'siembra'){
+      fs.push(['Partidas de semilla', R.partidas.length]);
+      fs.push(['Rangos de fecha', R.rangos.length]);
+      fs.push(['Sembradoras', R.sembradoras.length]);
+      fs.push(['Lotes programados', R.siembra.length]);
+    } else {
+      fs.push(['Fertilizantes con grados', R.fertProd.length]);
+      fs.push(['Ambientes con coeficiente', contar(R.coefP)]);
+      fs.push(['Umbrales de fitotoxicidad', contar(R.fito)]);
+      fs.push(['Lotes con análisis', R.fert.length]);
+    }
+    h += '<div class="calc" style="margin-top:0">';
+    var j;
+    for(j=0; j<fs.length; j++){
+      h += '<div class="ci"><div class="cv">' + fs[j][1] + '</div><div class="cl">' + esc(fs[j][0]) + '</div></div>';
+    }
+    h += '</div>';
+
+    if(R.sinLote.length){
+      var vistos = {}, unicos = [], k;
+      for(k=0; k<R.sinLote.length; k++){
+        if(!vistos[R.sinLote[k]]){ vistos[R.sinLote[k]] = 1; unicos.push(R.sinLote[k]); }
+      }
+      h += '<div class="warn" style="display:block"><b>' + unicos.length
+        + (unicos.length === 1 ? ' lote no está' : ' lotes no están') + ' en Plan de Uso</b><br>'
+        + esc(unicos.join(' · ')) + '<br>'
+        + 'Esas filas no se pueden importar: creá esos lotes en Plan de Uso y volvé a traer el archivo.</div>';
+    }
+    if(R.sinCultivo && R.sinCultivo.length){
+      h += '<div class="warn" style="display:block"><b>' + R.sinCultivo.length
+        + (R.sinCultivo.length === 1 ? ' cultivo del Excel no está' : ' cultivos del Excel no están')
+        + ' en el padrón de Maestros</b><br>' + esc(R.sinCultivo.join(' · ')) + '<br>'
+        + 'Esos lotes se importan igual, pero hasta que los nombres coincidan no se van a cruzar con '
+        + 'Plan de Uso: en Lotes de la campaña van a figurar como sin programar. '
+        + 'Lo más rápido es renombrarlos en Maestros.</div>';
+    }
+    for(j=0; j<R.notas.length; j++){
+      h += '<div class="hint">' + esc(R.notas[j]) + '</div>';
+    }
+    h += '</div>';
   }
 
-  var puede = (R.tipo === 'siembra')
-    ? (R.partidas.length || R.rangos.length || R.sembradoras.length || R.siembra.length)
-    : (R.fertProd.length || contar(R.coefP) || R.fert.length);
-  if(!puede){
-    h += '<div class="hint">No hay nada para importar en este archivo.</div></div>';
+  if(!hayAlgo){
+    h += '<div class="hint" style="margin-top:10px">No hay nada para importar.</div>';
     return h;
   }
-  h += '<div class="hint">Las tablas maestras se suman sin pisar lo que ya tengas con el mismo nombre. '
-    + 'Lo que entra a la campaña <b>' + esc(CAMPANIA) + '</b> podés sumarlo o reemplazarlo.</div>'
+
+  /* ── Destino ── */
+  var distintas = [], vistasC = {};
+  for(i=0; i<lista.length; i++){
+    var c2 = lista[i].campaniaXls;
+    if(c2 && !vistasC[c2]){ vistasC[c2] = 1; distintas.push(c2); }
+  }
+  h += '<div class="blk" style="margin-top:10px">'
+    + '<div class="blk-t">¿A qué campaña van estos datos?</div>'
+    + '<div class="frow" style="margin-bottom:0"><div class="fcol" style="max-width:220px">'
+    + '<select id="imp-camp" onchange="IMP_CAMP=this.value">'
+    + opts(camps, IMP_CAMP, camps.length ? '' : '— sin campañas —') + '</select></div>'
+    + '<div class="fcol" style="flex:2"></div></div>';
+
+  if(distintas.length > 1){
+    h += '<div class="warn" style="display:block">Los archivos elegidos traen campañas distintas ('
+      + esc(distintas.join(' y ')) + '). Todo va a entrar a la que elijas acá arriba. '
+      + 'Si querés separarlas, importá de a un archivo por vez.</div>';
+  } else if(distintas.length === 1 && indiceEn(camps, distintas[0]) < 0){
+    h += '<div class="warn" style="display:block">El archivo dice campaña <b>' + esc(distintas[0])
+      + '</b>, que no existe en la lista. Creala en Maestros si querés mantenerla separada, '
+      + 'o elegí otra acá arriba.</div>';
+  } else if(distintas.length === 1 && distintas[0] !== CAMPANIA){
+    h += '<div class="hint">El archivo es de la campaña <b>' + esc(distintas[0])
+      + '</b> y arriba tenés seleccionada <b>' + esc(CAMPANIA) + '</b>. '
+      + 'Propongo la del archivo.</div>';
+  }
+
+  h += '<div class="hint">Las tablas maestras (partidas, rangos, fertilizantes, ambientes y umbrales) '
+    + 'no dependen de la campaña y se suman sin pisar lo que ya tengas con el mismo nombre.</div>'
     + '<div class="cact" style="margin-top:12px">'
     + '<button class="btn btn-pri" onclick="aplicarImport(\'sumar\')">Importar y sumar</button>'
     + '<button class="btn" onclick="aplicarImport(\'reemplazar\')">Importar y reemplazar la campaña</button>'
     + '<button class="btn" onclick="cancelarImport()">Cancelar</button>'
     + '</div></div>';
   return h;
+}
+function indiceEn(arr, v){
+  var i;
+  for(i=0; i<arr.length; i++){ if(String(arr[i]) === String(v)) return i; }
+  return -1;
 }
 function contar(o){
   var n = 0, k;
@@ -3148,92 +3227,123 @@ function cancelarImport(){ IMPORT = null; pintarImport(''); }
 
 /* ── Aplicar ──────────────────────────────────────────────────────── */
 function aplicarImport(modo){
-  if(!IMPORT) return;
-  var R = IMPORT, i, resumen = [];
+  if(!IMPORT || !IMPORT.length) return;
+  var destino = IMP_CAMP || CAMPANIA;
+  if(!destino){ alert('Elegí a qué campaña importar.'); return; }
+  var i, k, L = IMPORT;
+  var tot = { partidas:0, rangos:0, sembradoras:0, siembra:0, fertProd:0, coefP:0, fito:0, fert:0 };
+  var huboSiembra = false, huboFert = false, sinLote = false;
 
+  for(i=0; i<L.length; i++){
+    if(L[i].tipo === 'siembra') huboSiembra = true;
+    if(L[i].tipo === 'fert') huboFert = true;
+    if(L[i].sinLote && L[i].sinLote.length) sinLote = true;
+  }
+
+  /* Reemplazar vacía solo la campaña destino, y solo de lo que se importa */
   if(modo === 'reemplazar'){
-    var queda = [], arr = (R.tipo === 'siembra') ? DB.siembra : DB.fert, j;
-    for(j=0; j<arr.length; j++){ if(arr[j].campania !== CAMPANIA) queda.push(arr[j]); }
-    if(R.tipo === 'siembra'){ DB.siembra = queda; } else { DB.fert = queda; }
+    var queda, j;
+    if(huboSiembra){
+      queda = [];
+      for(j=0; j<DB.siembra.length; j++){ if(DB.siembra[j].campania !== destino) queda.push(DB.siembra[j]); }
+      DB.siembra = queda;
+    }
+    if(huboFert){
+      queda = [];
+      for(j=0; j<DB.fert.length; j++){ if(DB.fert[j].campania !== destino) queda.push(DB.fert[j]); }
+      DB.fert = queda;
+    }
   }
 
-  if(R.tipo === 'siembra'){
-    for(i=0; i<R.partidas.length; i++){
-      if(partidaPorNombre(R.partidas[i].nombre)) continue;
-      DB.partidas.push(R.partidas[i]); resumen.push(0);
-    }
-    var nPa = resumen.length; resumen = [];
-    for(i=0; i<R.rangos.length; i++){
-      if(rangoByCod(R.rangos[i].cod)) continue;
-      DB.rangos.push({ id:uid('ra'), cod:R.rangos[i].cod, desde:R.rangos[i].desde, hasta:R.rangos[i].hasta });
-      resumen.push(0);
-    }
-    var nRa = resumen.length; resumen = [];
-    for(i=0; i<R.sembradoras.length; i++){ DB.sembradoras.push(R.sembradoras[i]); resumen.push(0); }
-    var nSe = resumen.length;
-    if(R.diasRango) DB.cfg.diasPorRango = R.diasRango;
-
-    var nSb = 0;
-    for(i=0; i<R.siembra.length; i++){
-      var x = R.siembra[i];
-      if(!x.loteId) continue;
-      var pa = partidaPorNombre(x.partidaNombre);
-      DB.siembra.push({
-        id: uid('sb'), campania: CAMPANIA,
-        loteId: x.loteId, campo: x.campo, lote: x.lote, cultivo: x.cultivo,
-        partidaId: pa ? pa.id : '', partidaNombre: x.partidaNombre,
-        rangoCod: x.rangoCod, obs: x.obs, des: x.des, perd: x.perd,
-        ambs: clonAmbs(x.ambs), curas: clonIns(x.curas), inocs: clonIns(x.inocs)
-      });
-      nSb++;
-    }
-    DB.rangos.sort(function(a,b){ return (a.desde||'').localeCompare(b.desde||''); });
-    sv('partidas'); sv('rangos'); sv('sembradoras'); sv('siembra'); sv('cfg');
-    IMPORT = null;
-    renderTodo();
-    pintarImport('<div class="warn" style="display:block;background:#F2F6EE;border-color:#DDE7D3;color:#3D5429">'
-      + '<b>Listo.</b> Entraron ' + nPa + ' partidas, ' + nRa + ' rangos, ' + nSe + ' sembradoras y '
-      + nSb + ' lotes programados en la campaña ' + esc(CAMPANIA) + '.'
-      + (R.sinLote.length ? '<br>Quedaron afuera los lotes que no están en Plan de Uso.' : '') + '</div>');
-    return;
+  for(i=0; i<L.length; i++){
+    var R = L[i];
+    if(R.tipo === 'siembra') aplicarSiembraXls(R, destino, tot);
+    else if(R.tipo === 'fert') aplicarFertXls(R, destino, tot);
   }
 
-  /* Fertilización */
-  var nFp = 0;
+  DB.rangos.sort(function(a,b){ return (a.desde||'').localeCompare(b.desde||''); });
+  sv('partidas'); sv('rangos'); sv('sembradoras'); sv('siembra');
+  sv('fertProd'); sv('fert'); sv('cfg');
+
+  /* Si se importó a otra campaña, pasar a verla */
+  if(destino !== CAMPANIA){
+    CAMPANIA = destino;
+    setVal('camp-sel', destino);
+  }
+  IMPORT = null;
+  renderTodo();
+
+  var p = [];
+  if(tot.partidas)    p.push(tot.partidas + ' partidas');
+  if(tot.rangos)      p.push(tot.rangos + ' rangos');
+  if(tot.sembradoras) p.push(tot.sembradoras + ' sembradoras');
+  if(tot.siembra)     p.push(tot.siembra + ' lotes programados');
+  if(tot.fertProd)    p.push(tot.fertProd + ' fertilizantes');
+  if(tot.coefP)       p.push(tot.coefP + ' coeficientes de ambiente');
+  if(tot.fito)        p.push(tot.fito + ' umbrales de fitotoxicidad');
+  if(tot.fert)        p.push(tot.fert + ' lotes con análisis');
+  pintarImport('<div class="warn" style="display:block;background:#F2F6EE;border-color:#DDE7D3;color:#3D5429">'
+    + '<b>Listo.</b> ' + (p.length ? 'Entraron ' + p.join(', ') + '.' : 'No había nada nuevo para sumar.')
+    + ' Campaña <b>' + esc(destino) + '</b>.'
+    + (sinLote ? '<br>Quedaron afuera los lotes que no están en Plan de Uso.' : '') + '</div>');
+}
+
+function aplicarSiembraXls(R, destino, tot){
+  var i;
+  for(i=0; i<R.partidas.length; i++){
+    if(partidaPorNombre(R.partidas[i].nombre)) continue;
+    DB.partidas.push(R.partidas[i]); tot.partidas++;
+  }
+  for(i=0; i<R.rangos.length; i++){
+    if(rangoByCod(R.rangos[i].cod)) continue;
+    DB.rangos.push({ id:uid('ra'), cod:R.rangos[i].cod, desde:R.rangos[i].desde, hasta:R.rangos[i].hasta });
+    tot.rangos++;
+  }
+  for(i=0; i<R.sembradoras.length; i++){ DB.sembradoras.push(R.sembradoras[i]); tot.sembradoras++; }
+  if(R.diasRango) DB.cfg.diasPorRango = R.diasRango;
+
+  for(i=0; i<R.siembra.length; i++){
+    var x = R.siembra[i];
+    if(!x.loteId) continue;
+    var pa = partidaPorNombre(x.partidaNombre);
+    DB.siembra.push({
+      id: uid('sb'), campania: destino,
+      loteId: x.loteId, campo: x.campo, lote: x.lote, cultivo: x.cultivo,
+      partidaId: pa ? pa.id : '', partidaNombre: x.partidaNombre,
+      rangoCod: x.rangoCod, obs: x.obs, des: x.des, perd: x.perd,
+      ambs: clonAmbs(x.ambs), curas: clonIns(x.curas), inocs: clonIns(x.inocs)
+    });
+    tot.siembra++;
+  }
+}
+
+function aplicarFertXls(R, destino, tot){
+  var i, k;
   for(i=0; i<R.fertProd.length; i++){
     if(fertProdByNombre(R.fertProd[i].nombre)) continue;
-    DB.fertProd.push(R.fertProd[i]); nFp++;
+    DB.fertProd.push(R.fertProd[i]); tot.fertProd++;
   }
-  var k, nCo = 0, nFi = 0;
-  for(k in R.coefP){ if(R.coefP.hasOwnProperty(k)){ DB.cfg.coefP[k] = R.coefP[k]; nCo++; } }
-  for(k in R.fito){ if(R.fito.hasOwnProperty(k)){ DB.cfg.fito[k] = R.fito[k]; nFi++; } }
+  for(k in R.coefP){ if(R.coefP.hasOwnProperty(k)){ DB.cfg.coefP[k] = R.coefP[k]; tot.coefP++; } }
+  for(k in R.fito){ if(R.fito.hasOwnProperty(k)){ DB.cfg.fito[k] = R.fito[k]; tot.fito++; } }
   if(R.umbrales){
-    if(R.umbrales.sSO4   !== null) DB.cfg.sSO4   = R.umbrales.sSO4;
-    if(R.umbrales.moMax  !== null) DB.cfg.moMax  = R.umbrales.moMax;
-    if(R.umbrales.sDosis !== null) DB.cfg.sDosis = R.umbrales.sDosis;
-    if(R.umbrales.kPpm   !== null) DB.cfg.kPpm   = R.umbrales.kPpm;
-    if(R.umbrales.kDosis !== null) DB.cfg.kDosis = R.umbrales.kDosis;
+    if(R.umbrales.sSO4   !== null && R.umbrales.sSO4   !== undefined) DB.cfg.sSO4   = R.umbrales.sSO4;
+    if(R.umbrales.moMax  !== null && R.umbrales.moMax  !== undefined) DB.cfg.moMax  = R.umbrales.moMax;
+    if(R.umbrales.sDosis !== null && R.umbrales.sDosis !== undefined) DB.cfg.sDosis = R.umbrales.sDosis;
+    if(R.umbrales.kPpm   !== null && R.umbrales.kPpm   !== undefined) DB.cfg.kPpm   = R.umbrales.kPpm;
+    if(R.umbrales.kDosis !== null && R.umbrales.kDosis !== undefined) DB.cfg.kDosis = R.umbrales.kDosis;
   }
-  var nFt = 0;
   for(i=0; i<R.fert.length; i++){
     var y = R.fert[i];
     if(!y.loteId) continue;
     DB.fert.push({
-      id: uid('ft'), campania: CAMPANIA,
+      id: uid('ft'), campania: destino,
       loteId: y.loteId, campo: y.campo, lote: y.lote, amb: y.amb, cultivo: y.cultivo,
       analisis: clonAnalisis(y.analisis),
       obj: { pObj:y.obj.pObj, nObj:y.obj.nObj },
       aplic: y.aplic
     });
-    nFt++;
+    tot.fert++;
   }
-  sv('fertProd'); sv('cfg'); sv('fert');
-  IMPORT = null;
-  renderTodo();
-  pintarImport('<div class="warn" style="display:block;background:#F2F6EE;border-color:#DDE7D3;color:#3D5429">'
-    + '<b>Listo.</b> Entraron ' + nFp + ' fertilizantes, ' + nCo + ' coeficientes de ambiente, '
-    + nFi + ' umbrales de fitotoxicidad y ' + nFt + ' lotes con análisis.'
-    + (R.sinLote.length ? '<br>Quedaron afuera los lotes que no están en Plan de Uso.' : '') + '</div>');
 }
 
 /* ═══════════════════════════════════════════════════════════════════
