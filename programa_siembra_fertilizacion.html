@@ -85,6 +85,13 @@ main{padding:16px 24px;display:flex;flex-direction:column;gap:12px}
 .cact{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding-top:1px}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .scroll{overflow-x:auto}
+/* Tablas largas: el encabezado queda a la vista mientras se baja */
+.scroll-fijo{overflow:auto;max-height:calc(100vh - 272px);min-height:220px}
+.scroll-fijo thead th{position:sticky;top:0;z-index:3;background:var(--card);
+                      box-shadow:inset 0 -1.5px 0 var(--border)}
+.scroll-fijo thead th{border-bottom:none}
+/* La fila de campo también se mantiene, debajo del encabezado */
+.scroll-fijo tbody tr.campo td{position:sticky;top:30px;z-index:2}
 
 /* ── Métricas ─────────────────────────────────────────── */
 .metrics{display:flex;gap:10px;flex-wrap:wrap}
@@ -100,6 +107,13 @@ main{padding:16px 24px;display:flex;flex-direction:column;gap:12px}
 /* ── Tablas ───────────────────────────────────────────── */
 table{width:100%;border-collapse:collapse}
 thead th{font-size:10px;color:#8995A3;text-transform:uppercase;letter-spacing:.4px;font-weight:600;padding:7px 6px;border-bottom:1.5px solid var(--border);text-align:left;white-space:nowrap}
+/* Qué significa cada número de una columna compuesta */
+thead th .thsub{display:block;font-size:9.5px;font-weight:500;color:#AEB7C2;
+                text-transform:none;letter-spacing:0;margin-top:1px}
+/* La campaña a la que pertenece lo que muestra la tarjeta */
+.ct-camp{font-size:10.5px;font-weight:600;color:var(--terracota);background:#FBF2EC;
+         border-radius:9px;padding:1px 8px;margin-left:9px;letter-spacing:.2px;
+         text-transform:none;vertical-align:1px}
 thead th.r{text-align:right}
 thead th.c{text-align:center}
 /* Una sola línea divisoria donde cambia la naturaleza del dato */
@@ -151,7 +165,7 @@ td.nu{font-weight:600;cursor:help}
 /* Aplicaciones de fertilizante: qué, cuánto por ha y cuánto para el lote */
 table.mini .mp-t{font-weight:600;padding-left:8px}
 table.mini .mp-m{color:#99A3AE;font-variant-numeric:normal;white-space:nowrap;
-                 padding-left:9px;width:1%;font-size:10.5px}
+                 padding-left:9px;font-size:10.5px}
 
 /* Interruptor de detalle por ambiente */
 .tog-amb{border:1px solid #DDE3EA;background:var(--card);border-radius:10px;padding:1px 7px;
@@ -172,11 +186,11 @@ tbody td.r{text-align:right}
 tbody td.c{text-align:center}
 .tdname{font-weight:500;font-variant-numeric:normal}
 /* Producto + dosis en dos columnas, alineadas entre renglones */
-table.mini{width:100%;border-collapse:collapse;table-layout:auto}
+table.mini{width:auto;border-collapse:collapse;table-layout:auto}
 table.mini td{padding:1px 0;border:none!important;background:none!important;font-size:11.5px;line-height:1.45}
-table.mini .mp-n{font-weight:500;font-variant-numeric:normal;padding-right:10px;white-space:nowrap}
-table.mini .mp-d{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;width:1%}
-table.mini .mp-u{color:#99A3AE;font-variant-numeric:normal;white-space:nowrap;width:1%;padding-left:3px}
+table.mini .mp-n{font-weight:500;font-variant-numeric:normal;padding-right:14px;white-space:nowrap}
+table.mini .mp-d{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+table.mini .mp-u{color:#99A3AE;font-variant-numeric:normal;white-space:nowrap;padding-left:3px}
 .grp td{background:#F5F7FA!important;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.3px;color:#475569}
 .sub td{background:#FCFDFE;font-size:11px;color:#475569}
 .sub td:first-child{padding-left:20px}
@@ -354,7 +368,7 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
         <button class="btn btn-pri" onclick="abrirSiembra(null)">+ Programar lote</button>
       </div>
     </div>
-    <div class="scroll"><table>
+    <div class="scroll scroll-fijo"><table>
       <thead><tr id="th-sb"></tr></thead>
       <tbody id="tb-sb"></tbody>
     </table></div>
@@ -382,7 +396,7 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
         <button class="btn btn-pri" onclick="abrirFert(null)">+ Cargar fertilización</button>
       </div>
     </div>
-    <div class="scroll"><table>
+    <div class="scroll scroll-fijo"><table>
       <thead><tr id="th-ft"></tr></thead>
       <tbody id="tb-ft"></tbody>
     </table></div>
@@ -505,7 +519,7 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
   <div class="g2">
     <div class="card">
       <div class="chd">
-        <div class="ct">Rangos de fecha de siembra<span class="ln"></span></div>
+        <div class="ct">Rangos de fecha de siembra<span class="ct-camp" id="ct-ra-camp"></span><span class="ln"></span></div>
         <div class="cact">
           <label class="fl" style="margin:0">Días por rango</label>
           <input type="number" id="cfg-dias" style="width:56px" min="1" step="1" onchange="guardarDias()">
@@ -518,12 +532,13 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
         <thead><tr><th>Rango</th><th>Desde</th><th>Hasta</th><th class="r">Días</th><th></th></tr></thead>
         <tbody id="tb-ra"></tbody>
       </table></div>
-      <div class="hint">"Generar" crea rangos consecutivos desde la fecha del primero, con la cantidad de días indicada.</div>
+      <div class="hint">Los rangos son <b>de esta campaña</b>: cada una lleva sus propias fechas.
+        "Generar" crea rangos consecutivos desde la fecha del primero, con la cantidad de días indicada.</div>
     </div>
 
     <div class="card">
       <div class="chd">
-        <div class="ct">Parque de sembradoras<span class="ln"></span></div>
+        <div class="ct">Parque de sembradoras<span class="ct-camp" id="ct-se-camp"></span><span class="ln"></span></div>
         <div class="cact">
           <button class="btn btn-sm" onclick="copiarDeCampania('sembradoras')">Copiar de otra campaña</button>
           <button class="btn btn-sm btn-pri" onclick="abrirSembradora(null)">+ Agregar</button>
@@ -543,6 +558,7 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
         <div class="fcol" style="flex:2"></div>
       </div>
       <div class="hint">
+        El parque es <b>de esta campaña</b>: lo que cargues acá no se mezcla con las otras.<br>
         Capacidad ha/h = hileras × distancia entre hileras × velocidad ÷ 10.<br>
         Las horas por día y el % de días efectivos salen de la hoja Sembradoras de tu Excel (8 h y 80%).
         El balance de la Etapa 3 los usa así: ha/h × horas por día × días del rango × % efectivos.
@@ -704,8 +720,8 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
      suelo y aplicaciones de fertilizante.  → ver handoff para Mariana.
    ═══════════════════════════════════════════════════════════════════════ */
 
-var BUILD = 16;
-var VERSION = 'v2026-11-02 12:43';
+var BUILD = 17;
+var VERSION = 'v2026-11-02 13:10';
 
 /* ── Claves de almacenamiento ──────────────────────────────────────── */
 var K = {
@@ -1017,6 +1033,10 @@ function unidadSigla(unidadId){
    3. HELPERS
    ═══════════════════════════════════════════════════════════════════ */
 
+function setTexto(id, txt){
+  var e = document.getElementById(id);
+  if(e) e.textContent = txt;
+}
 function f(v, d){
   d = d || 0;
   if(v === null || v === undefined || v === '' || isNaN(Number(v))) return '—';
@@ -1655,6 +1675,33 @@ function sellarCampania(){
   if(n){ sv('rangos'); sv('sembradoras'); }
   return n;
 }
+/* Año de arranque de una campaña a partir de su código: '26-27' → 2026.
+   Si el código no tiene esa forma, devuelve null y no se corrige nada. */
+function anioCampania(cod){
+  var m = String(cod || '').match(/(\d{2,4})/);
+  if(!m) return null;
+  var n = Number(m[1]);
+  if(isNaN(n)) return null;
+  return (n < 100) ? (2000 + n) : n;
+}
+/* Cuántos años hay que correr las fechas al pasar de una campaña a otra */
+function saltoAnios(origen, destino){
+  var a = anioCampania(origen), b = anioCampania(destino);
+  if(a === null || b === null) return 0;
+  return b - a;
+}
+/* Corre una fecha ISO n años, sin salirse del mes (29/2 → 28/2) */
+function correrAnios(iso, n){
+  if(!iso || !n) return iso;
+  var p = String(iso).split('-');
+  if(p.length !== 3) return iso;
+  var y = Number(p[0]) + n, mes = Number(p[1]), dia = Number(p[2]);
+  if(isNaN(y) || isNaN(mes) || isNaN(dia)) return iso;
+  var ult = new Date(y, mes, 0).getDate();
+  if(dia > ult) dia = ult;
+  return y + '-' + (mes < 10 ? '0' : '') + mes + '-' + (dia < 10 ? '0' : '') + dia;
+}
+
 /* Trae los rangos o el parque de otra campaña, para no recargar a mano */
 function copiarDeCampania(que){
   var cs = coreCampanias(), otras = [], i;
@@ -1667,14 +1714,29 @@ function copiarDeCampania(que){
   var n = 0, j;
   if(que === 'rangos'){
     var rs = rangosDeCampania(origen);
+    /* Las fechas se corren tantos años como haya entre las dos campañas:
+       de 25-26 a 26-27, un año. El día y el mes se respetan. */
+    var salto = saltoAnios(origen, CAMPANIA);
     for(i=0; i<rs.length; i++){
       if(rangoByCod(rs[i].cod)) continue;
-      DB.rangos.push({ id:uid('ra'), campania:CAMPANIA, cod:rs[i].cod, desde:rs[i].desde, hasta:rs[i].hasta });
+      DB.rangos.push({ id:uid('ra'), campania:CAMPANIA, cod:rs[i].cod,
+                       desde:correrAnios(rs[i].desde, salto),
+                       hasta:correrAnios(rs[i].hasta, salto) });
       n++;
     }
     sv('rangos'); renderRangos(); renderSiembra(); renderBalance();
-    alert(n ? ('Se copiaron ' + n + ' rangos de ' + origen + '. Acordate de corregirles las fechas.')
-            : 'No había rangos nuevos para copiar.');
+    if(!n){
+      alert('No había rangos nuevos para copiar.');
+    } else if(salto){
+      alert('Se copiaron ' + n + ' rangos de ' + origen + ', con las fechas corridas '
+          + Math.abs(salto) + (Math.abs(salto) === 1 ? ' año' : ' años')
+          + (salto > 0 ? ' hacia adelante' : ' hacia atrás') + '.\n\n'
+          + 'Revisalas igual: el calendario de siembra puede moverse unos días de un año al otro.');
+    } else {
+      alert('Se copiaron ' + n + ' rangos de ' + origen + '.\n\n'
+          + 'No pude deducir cuántos años correr las fechas a partir de los nombres de las campañas, '
+          + 'así que quedaron tal cual: corregilas a mano.');
+    }
   } else {
     var ss = sembradorasDeCampania(origen), rg;
     for(i=0; i<ss.length; i++){
@@ -2114,7 +2176,8 @@ function renderFert(){
 
   /* ── Encabezado ── */
   var cols = ['<th>Lote</th>', '<th>Amb.</th>', '<th class="r">Sup</th>', '<th class="gs">Cultivo</th>',
-              '<th class="gs">Fertilización</th>'];
+              '<th class="gs">Fertilización'
+              +   '<span class="thsub">producto · dosis · total del lote · momento</span></th>'];
   if(verAn){
     cols.push('<th class="r gs">MO%</th>', '<th class="r">P ppm</th>', '<th class="r">S ppm</th>',
               '<th class="r">K ppm</th>', '<th class="r">Zn ppm</th>', '<th class="r">N suelo</th>');
@@ -3813,6 +3876,7 @@ function borrarRango(id){
 }
 function renderRangos(){
   var rs = rangosDeCampania(), h = '', i, r, d;
+  setTexto('ct-ra-camp', CAMPANIA ? ('campaña ' + CAMPANIA) : '');
   for(i=0; i<rs.length; i++){
     r = rs[i];
     d = diasEntre(r.desde, r.hasta);
@@ -3960,6 +4024,7 @@ function borrarSembradora(id){
 }
 function renderSembradoras(){
   var ss = sembradorasDeCampania(), h = '', i, s, cap;
+  setTexto('ct-se-camp', CAMPANIA ? ('campaña ' + CAMPANIA) : '');
   for(i=0; i<ss.length; i++){
     s = ss[i];
     cap = capSembradora(s);
@@ -5170,6 +5235,10 @@ function renderCampanias(){
 }
 function onCambioCampania(){
   CAMPANIA = val('camp-sel');
+  /* Rangos y sembradoras son de la campaña: hay que redibujarlos acá,
+     si no la pantalla sigue mostrando los de la campaña anterior. */
+  sellarCampania();
+  renderRangos(); renderSembradoras();
   renderSiembra(); renderFert(); renderBalance(); renderInsumos(); renderLotes();
 }
 function poblarEmpresas(){
