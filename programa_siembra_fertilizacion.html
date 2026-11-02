@@ -162,10 +162,12 @@ td.mal::after, td.ojo::after{content:' !';font-size:10px;opacity:.65}
              font-weight:600;margin-top:2px;letter-spacing:.2px}
 /* Nutriente: solo lo aplicado; el recomendado va en el globito */
 td.nu{font-weight:600;cursor:help}
-/* Aplicaciones de fertilizante: qué, cuánto por ha y cuánto para el lote */
-table.mini .mp-t{font-weight:600;padding-left:8px}
-table.mini .mp-m{color:#99A3AE;font-variant-numeric:normal;white-space:nowrap;
-                 padding-left:9px;font-size:10.5px}
+/* Aplicaciones de fertilizante, en columnas: una línea por producto
+   en cada una, alineadas entre sí */
+td.ap div{line-height:1.6;white-space:nowrap}
+td.ap-n div{font-weight:500}
+td.ap-t div{font-weight:600}
+td.ap-m div{color:#8995A3;font-variant-numeric:normal}
 
 /* Interruptor de detalle por ambiente */
 .tog-amb{border:1px solid #DDE3EA;background:var(--card);border-radius:10px;padding:1px 7px;
@@ -401,9 +403,9 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
       <tbody id="tb-ft"></tbody>
     </table></div>
     <div class="hint">
-      <b>Fertilización</b> es lo que se aplica: el producto, la dosis por hectárea y los kilos de
-      ese producto que necesita el lote entero. El total por producto de toda la campaña, que es el
-      que sirve para pedir, está en <b>Necesidad de insumos</b>. Cada nutriente muestra <b>lo aplicado</b> por hectárea; pasá por encima
+      <b>Fertilizante, dosis y total del lote</b> es lo que se aplica. Si hay más de un producto,
+      cada uno lleva su línea y las columnas se leen en paralelo. El total por producto de toda la
+      campaña, que es el que sirve para pedir, está en <b>Necesidad de insumos</b>. Cada nutriente muestra <b>lo aplicado</b> por hectárea; pasá por encima
       para ver lo recomendado y cuánto falta. <b>N lograble</b> es el N del suelo más el aplicado: se marca
       en rojo cuando se aparta del objetivo del lote más del porcentaje fijado en Configuración.
       El <b>ámbar</b> avisa que el N en línea de siembra pasa el límite de fitotoxicidad del cultivo.
@@ -720,8 +722,8 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
      suelo y aplicaciones de fertilizante.  → ver handoff para Mariana.
    ═══════════════════════════════════════════════════════════════════════ */
 
-var BUILD = 17;
-var VERSION = 'v2026-11-02 13:10';
+var BUILD = 18;
+var VERSION = 'v2026-11-02 15:29';
 
 /* ── Claves de almacenamiento ──────────────────────────────────────── */
 var K = {
@@ -1787,25 +1789,29 @@ function listaProd(items){
   }
   return h + '</table>';
 }
-/* Qué fertilizante se aplica, cuánto por hectárea y cuánto para todo el lote.
-   Es el dato que se quiere ver de una: producto y dosis. */
-function aplicLabel(c, ha){
-  if(!c || !c.lineas.length) return '<span style="color:#C3CCD6">—</span>';
-  /* Sin fila de total: sumar kilos de productos distintos no significa nada.
-     El total por producto, que sí sirve para pedir, está en Necesidad de insumos. */
-  var i, L, kgL;
-  var h = '<table class="mini">';
+/* Qué fertilizante se aplica, cuánto por hectárea y cuánto para todo el
+   lote, en columnas de verdad. Devuelve las cuatro celdas de la fila:
+   si hay varios productos, cada columna apila una línea por producto y
+   las líneas se alinean entre sí. */
+function celdasAplic(c, ha){
+  var vacia = '<span style="color:#C3CCD6">—</span>';
+  if(!c || !c.lineas.length){
+    return '<td class="gs ap">' + vacia + '</td><td class="r ap">' + vacia + '</td>'
+         + '<td class="r ap">' + vacia + '</td><td class="ap">' + vacia + '</td>';
+  }
+  var i, L, kgL, prod = '', dos = '', tot = '', mom = '';
   for(i=0; i<c.lineas.length; i++){
     L = c.lineas[i];
     kgL = (L.kg !== null && ha) ? L.kg * ha : null;
-    h += '<tr><td class="mp-n">' + esc(L.prod || '—') + '</td>'
-      +  '<td class="mp-d">' + (L.kg !== null ? f(L.kg,0) : '?') + '</td>'
-      +  '<td class="mp-u">kg/ha</td>'
-      +  '<td class="mp-d mp-t">' + (kgL !== null ? f(kgL,0) : '—') + '</td>'
-      +  '<td class="mp-u">kg</td>'
-      +  '<td class="mp-m">' + esc(L.momento || '') + '</td></tr>';
+    prod += '<div>' + esc(L.prod || '—') + '</div>';
+    dos  += '<div>' + (L.kg !== null ? f(L.kg,0) : '?') + '</div>';
+    tot  += '<div>' + (kgL !== null ? f(kgL,0) : '—') + '</div>';
+    mom  += '<div>' + esc(L.momento || '—') + '</div>';
   }
-  return h + '</table>';
+  return '<td class="gs ap ap-n">' + prod + '</td>'
+       + '<td class="r ap">'       + dos  + '</td>'
+       + '<td class="r ap ap-t">'  + tot  + '</td>'
+       + '<td class="ap ap-m">'    + mom  + '</td>';
 }
 
 /* Lo que se logra con lo aplicado, contra el objetivo del lote. */
@@ -2176,8 +2182,10 @@ function renderFert(){
 
   /* ── Encabezado ── */
   var cols = ['<th>Lote</th>', '<th>Amb.</th>', '<th class="r">Sup</th>', '<th class="gs">Cultivo</th>',
-              '<th class="gs">Fertilización'
-              +   '<span class="thsub">producto · dosis · total del lote · momento</span></th>'];
+              '<th class="gs">Fertilizante</th>',
+              '<th class="r">Dosis<span class="thsub">kg/ha</span></th>',
+              '<th class="r">Total lote<span class="thsub">kg</span></th>',
+              '<th>Momento</th>'];
   if(verAn){
     cols.push('<th class="r gs">MO%</th>', '<th class="r">P ppm</th>', '<th class="r">S ppm</th>',
               '<th class="r">K ppm</th>', '<th class="r">Zn ppm</th>', '<th class="r">N suelo</th>');
@@ -2225,7 +2233,7 @@ function renderFert(){
       h += '<td colspan="' + (nCols - 5) + '" class="gs" style="color:#8995A3">Sin fertilización cargada</td>';
     } else {
       /* Lo primero: qué fertilizante y cuánto, por hectárea y para el lote */
-      h += '<td class="gs ins">' + aplicLabel(c, r.ha) + '</td>';
+      h += celdasAplic(c, r.ha);
       if(verAn){
         h += '<td class="r dato gs">' + f(a.mo, 2) + '</td>'
           + '<td class="r dato">' + f(a.pPpm, 1) + '</td>'
