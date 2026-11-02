@@ -50,6 +50,11 @@ label.fl{display:block;font-size:10.5px;color:#8995A3;letter-spacing:.2px;font-w
 .btn:hover{border-color:#CBD5E1;background:#FAFBFC}
 .btn-pri{background:var(--verde);border-color:var(--verde);color:#fff}
 .btn-on{background:#EDF2E7;border-color:#B9CCA6;color:var(--verde);font-weight:600}
+.pill{padding:4px 13px;border-radius:20px;font-size:11.5px;font-weight:500;cursor:pointer;
+      border:1.5px solid var(--border);background:var(--bg);color:var(--muted);
+      transition:all .12s;font-family:var(--sans)}
+.pill:hover{border-color:#C3CCD6;color:var(--text)}
+.pill.on{background:#EDF2E7;border-color:var(--verde);color:var(--verde);font-weight:600}
 .btn-pri:hover{background:#3D5429;border-color:#3D5429}
 .btn-dan{color:#991B1B;border-color:#FECACA}
 .btn-dan:hover{background:#FEF2F2;border-color:#FCA5A5}
@@ -130,8 +135,25 @@ tbody tr.amb .amb-n::before{content:'';position:absolute;left:5px;top:50%;width:
 /* Jerarquía del número: el resultado pesa, el intermedio no */
 td.dato{color:#7A8899}
 td.res{font-weight:600;color:var(--text)}
+/* Un número con problema se PINTA; no se envuelve en una pastilla,
+   porque eso lo saca de la columna y rompe la alineación. */
+td.mal{color:#B91C1C;font-weight:600;cursor:help}
+td.ojo{color:#A1660F;font-weight:600;cursor:help}
+td.mal::after, td.ojo::after{content:' !';font-size:10px;opacity:.65}
+/* Fertilizante de siembra por encima del límite de fitotoxicidad */
+.fito{cursor:help}
+.fito table.mini td{color:#B91C1C}
+.fito table.mini .mp-n{font-weight:600}
+.fito::after{content:'fitotóxico';display:block;font-size:10px;color:#B91C1C;
+             font-weight:600;margin-top:2px;letter-spacing:.2px}
 /* Nutriente: solo lo aplicado; el recomendado va en el globito */
 td.nu{font-weight:600;cursor:help}
+/* Aplicaciones de fertilizante: qué, cuánto por ha y cuánto para el lote */
+table.mini .mp-t{font-weight:600;padding-left:8px}
+table.mini .mp-m{color:#99A3AE;font-variant-numeric:normal;white-space:nowrap;
+                 padding-left:9px;width:1%;font-size:10.5px}
+table.mini tr.mp-tot td{border-top:1px solid #E7ECF2!important;padding-top:3px}
+table.mini tr.mp-tot .mp-n{color:#8995A3;font-size:10.5px;text-transform:uppercase;letter-spacing:.3px}
 
 /* Interruptor de detalle por ambiente */
 .tog-amb{border:1px solid #DDE3EA;background:var(--card);border-radius:10px;padding:1px 7px;
@@ -367,9 +389,13 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
       <tbody id="tb-ft"></tbody>
     </table></div>
     <div class="hint">
-      Cada nutriente muestra <b>lo aplicado</b>. Pasá por encima para ver lo recomendado y cuánto falta.
-      En <b>rojo</b>, cuando no llega; en <b>ámbar</b>, cuando el N en línea de siembra pasa el límite
-      de fitotoxicidad del cultivo. El asterisco en el N del suelo quiere decir que se estimó alguna capa.
+      <b>Fertilización</b> es lo que se aplica: el producto, la dosis por hectárea y los kilos que
+      necesita el lote entero. Cada nutriente muestra <b>lo aplicado</b> por hectárea; pasá por encima
+      para ver lo recomendado y cuánto falta. <b>N lograble</b> es el N del suelo más el aplicado: se marca
+      en rojo cuando se aparta del objetivo del lote más del porcentaje fijado en Configuración.
+      El <b>ámbar</b> avisa que el N en línea de siembra pasa el límite de fitotoxicidad del cultivo.
+      Con <b>Ver análisis</b> aparecen los resultados del suelo, el N del suelo y el P lograble;
+      el asterisco en el N del suelo quiere decir que se estimó alguna capa.
     </div>
   </div>
 </div>
@@ -422,7 +448,10 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
 
   <div class="g2">
     <div class="card">
-      <div class="chd"><div class="ct">Semilla por partida<span class="ln"></span></div></div>
+      <div class="chd">
+        <div class="ct">Semilla por partida<span class="ln"></span></div>
+      </div>
+      <div class="fbar" id="in-sem-pills" style="margin-bottom:12px"></div>
       <div class="scroll"><table>
         <thead><tr><th>Cultivo</th><th>Partida</th><th class="r">Lotes</th><th class="r">ha</th><th class="r">Cantidad</th><th>Unidad</th></tr></thead>
         <tbody id="tb-in-sem"></tbody>
@@ -482,6 +511,7 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
           <label class="fl" style="margin:0">Días por rango</label>
           <input type="number" id="cfg-dias" style="width:56px" min="1" step="1" onchange="guardarDias()">
           <button class="btn btn-sm" onclick="generarRangos()">Generar</button>
+          <button class="btn btn-sm" onclick="copiarDeCampania('rangos')">Copiar de otra campaña</button>
           <button class="btn btn-sm btn-pri" onclick="abrirRango(null)">+</button>
         </div>
       </div>
@@ -495,7 +525,10 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
     <div class="card">
       <div class="chd">
         <div class="ct">Parque de sembradoras<span class="ln"></span></div>
-        <div class="cact"><button class="btn btn-sm btn-pri" onclick="abrirSembradora(null)">+ Agregar</button></div>
+        <div class="cact">
+          <button class="btn btn-sm" onclick="copiarDeCampania('sembradoras')">Copiar de otra campaña</button>
+          <button class="btn btn-sm btn-pri" onclick="abrirSembradora(null)">+ Agregar</button>
+        </div>
       </div>
       <div class="scroll" style="max-height:300px;overflow-y:auto"><table>
         <thead><tr>
@@ -558,11 +591,17 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
       <div class="fcol"><label class="fl">Factor N ppm → kg/ha</label><input type="number" id="cfg-nfac" step="0.001" onchange="guardarCfg()"></div>
       <div class="fcol"><label class="fl">Relación N / NO3</label><input type="number" id="cfg-nratio" step="0.001" onchange="guardarCfg()"></div>
     </div>
+    <div class="frow">
+      <div class="fcol"><label class="fl">Desvío tolerado del objetivo (%)</label><input type="number" id="cfg-tolobj" step="1" min="0" onchange="guardarCfg()"></div>
+      <div class="fcol"></div><div class="fcol"></div><div class="fcol"></div><div class="fcol"></div><div class="fcol"></div>
+    </div>
     <div class="hint">
       Valores del Excel. El factor P → P2O5 (2,293) convierte el P faltante del suelo en óxido a aplicar;
       el aporte (0,437) es la fracción del P2O5 aplicado que se refleja como P disponible en el suelo.
       La recomendación de S aplica solo si el suelo está por debajo de los dos umbrales a la vez.
       El zinc, igual que en tu Excel, se mide y se marca en rojo por debajo del umbral, sin dosis calculada.<br>
+      El <b>desvío tolerado</b> es cuánto puede apartarse lo lograble del objetivo del lote sin que se marque:
+      con 10&nbsp;%, un objetivo de 190 kg N/ha no se marca entre 171 y 209.<br>
       El N del suelo sale de sumar las tres capas en ppm y multiplicar por el factor. Si el laboratorio lo informa
       como <b>N-NO3</b> (nitrógeno), el factor se divide por la relación N/NO3; si lo informa como <b>NO3</b> (nitrato),
       se usa tal cual. Es el mismo criterio de tu Excel.
@@ -666,8 +705,8 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
      suelo y aplicaciones de fertilizante.  → ver handoff para Mariana.
    ═══════════════════════════════════════════════════════════════════════ */
 
-var BUILD = 13;
-var VERSION = 'v2026-11-02 08:49';
+var BUILD = 15;
+var VERSION = 'v2026-11-02 12:21';
 
 /* ── Claves de almacenamiento ──────────────────────────────────────── */
 var K = {
@@ -697,6 +736,7 @@ function cfgDefault(){
     kPpm:      120,     /* umbral K ppm */
     kDosis:    40,      /* kg K2O/ha recomendados */
     znPpm:     1,       /* umbral Zn ppm 0-20 cm: por debajo se marca en rojo */
+    tolObj:    10,      /* % de desvío tolerado entre lo lograble y el objetivo del lote */
     nFactor:   0.56,    /* Σ ppm de las 3 capas → kg N/ha, informado como NO3 */
     nRatio:    0.226,   /* relación N/NO3 (14/62): si viene como N-NO3, el factor se divide por esto */
     horasDia:  8,
@@ -797,7 +837,8 @@ function migrar(){
   for(i=0; i<rgs.length; i++){
     r = rgs[i];
     if(!r) continue;
-    DB.rangos.push({ id:uid('ra'), cod:(r.c || r.cod || ('F'+(i+1))), desde:(r.d || r.desde || ''), hasta:(r.h || r.hasta || '') });
+    DB.rangos.push({ id:uid('ra'), campania:(CAMPANIA || ''), cod:(r.c || r.cod || ('F'+(i+1))),
+                     desde:(r.d || r.desde || ''), hasta:(r.h || r.hasta || '') });
     n.rangos++;
   }
 
@@ -1580,10 +1621,75 @@ function limpiarFiltrosSiembra(){
   setVal('sb-f-campo',''); setVal('sb-f-cult',''); setVal('sb-f-rango','');
   renderSiembra();
 }
-function rangoByCod(cod){
-  var i;
-  for(i=0; i<DB.rangos.length; i++){ if(DB.rangos[i].cod === cod) return DB.rangos[i]; }
+/* ── Rangos y sembradoras viven DENTRO de una campaña ───────────────
+   El F1 de 25-26 no es el F1 de 26-27: tienen fechas distintas. Y el
+   parque contratado tampoco es el mismo. Todo se filtra por campaña. */
+function rangosDeCampania(camp){
+  var out = [], i;
+  camp = camp || CAMPANIA;
+  for(i=0; i<DB.rangos.length; i++){ if(DB.rangos[i].campania === camp) out.push(DB.rangos[i]); }
+  out.sort(function(a,b){ return (a.desde||'').localeCompare(b.desde||''); });
+  return out;
+}
+function sembradorasDeCampania(camp){
+  var out = [], i;
+  camp = camp || CAMPANIA;
+  for(i=0; i<DB.sembradoras.length; i++){ if(DB.sembradoras[i].campania === camp) out.push(DB.sembradoras[i]); }
+  return out;
+}
+function rangoByCod(cod, camp){
+  var rs = rangosDeCampania(camp), i;
+  for(i=0; i<rs.length; i++){ if(rs[i].cod === cod) return rs[i]; }
   return null;
+}
+/* Lo cargado antes de esta versión no tenía campaña: se le asigna la
+   activa una sola vez, para no dejarlo huérfano. */
+function sellarCampania(){
+  var i, n = 0;
+  if(!CAMPANIA) return 0;
+  for(i=0; i<DB.rangos.length; i++){
+    if(!DB.rangos[i].campania){ DB.rangos[i].campania = CAMPANIA; n++; }
+  }
+  for(i=0; i<DB.sembradoras.length; i++){
+    if(!DB.sembradoras[i].campania){ DB.sembradoras[i].campania = CAMPANIA; n++; }
+  }
+  if(n){ sv('rangos'); sv('sembradoras'); }
+  return n;
+}
+/* Trae los rangos o el parque de otra campaña, para no recargar a mano */
+function copiarDeCampania(que){
+  var cs = coreCampanias(), otras = [], i;
+  for(i=0; i<cs.length; i++){ if(cs[i] !== CAMPANIA) otras.push(cs[i]); }
+  if(!otras.length){ alert('No hay otra campaña de dónde copiar.'); return; }
+  var origen = prompt('¿De qué campaña querés copiar ' + (que === 'rangos' ? 'los rangos' : 'las sembradoras')
+    + '?\n\nDisponibles: ' + otras.join(', '), otras[otras.length - 1]);
+  if(!origen) return;
+  if(indiceEn(cs, origen) < 0){ alert('La campaña ' + origen + ' no existe.'); return; }
+  var n = 0, j;
+  if(que === 'rangos'){
+    var rs = rangosDeCampania(origen);
+    for(i=0; i<rs.length; i++){
+      if(rangoByCod(rs[i].cod)) continue;
+      DB.rangos.push({ id:uid('ra'), campania:CAMPANIA, cod:rs[i].cod, desde:rs[i].desde, hasta:rs[i].hasta });
+      n++;
+    }
+    sv('rangos'); renderRangos(); renderSiembra(); renderBalance();
+    alert(n ? ('Se copiaron ' + n + ' rangos de ' + origen + '. Acordate de corregirles las fechas.')
+            : 'No había rangos nuevos para copiar.');
+  } else {
+    var ss = sembradorasDeCampania(origen), rg;
+    for(i=0; i<ss.length; i++){
+      rg = {};
+      for(j in ss[i].rangos){ if(ss[i].rangos.hasOwnProperty(j)) rg[j] = true; }
+      DB.sembradoras.push({ id:uid('se'), campania:CAMPANIA, nombre:ss[i].nombre,
+        contratista:ss[i].contratista, cultivo:ss[i].cultivo, hileras:ss[i].hileras,
+        dist:ss[i].dist, vel:ss[i].vel, rangos:rg });
+      n++;
+    }
+    sv('sembradoras'); renderSembradoras(); renderBalance();
+    alert(n ? ('Se copiaron ' + n + ' sembradoras de ' + origen + '.')
+            : 'No había sembradoras para copiar.');
+  }
 }
 /* Fertilizante del momento "Siembra", leído de la pestaña de Fertilización.
    Se carga una sola vez allá; acá solo se muestra y se controla fitotoxicidad. */
@@ -1597,17 +1703,15 @@ function fertSiembraLabel(s, avisos){
                  d:(c.lineas[i].kg !== null ? f(c.lineas[i].kg,0) : ''), u:'kg' });
   }
   if(!items.length) return '<span style="color:#C3CCD6">—</span>';
-  var txt = listaProd(items);
+  /* Solo el fertilizante y su dosis. El N aportado se ve en la pestaña
+     de Fertilización; acá únicamente se avisa si es fitotóxico. */
   if(c.fitoMax !== null && c.nSiembra > c.fitoMax){
     var msg = s.lote + ': ' + f(c.nSiembra,1) + ' kg N/ha en línea de siembra supera el límite de '
             + f(c.fitoMax,0) + ' kg para ' + s.cultivo + '.';
     if(avisos && avisos.indexOf(msg) < 0) avisos.push(msg);
-    txt += '<div style="margin-top:3px"><span class="bdg br" title="' + esc(msg) + '">N '
-         + f(c.nSiembra,1) + ' · fitotóxico</span></div>';
-  } else if(c.nSiembra){
-    txt += '<div style="margin-top:3px"><span class="bdg bn">N ' + f(c.nSiembra,1) + ' kg/ha</span></div>';
+    return '<div class="fito" title="' + esc(msg) + '">' + listaProd(items) + '</div>';
   }
-  return txt;
+  return listaProd(items);
 }
 /* Lista de producto + dosis en dos columnas, para que las cifras
    queden alineadas cuando hay varios apilados. */
@@ -1622,6 +1726,59 @@ function listaProd(items){
   }
   return h + '</table>';
 }
+/* Qué fertilizante se aplica, cuánto por hectárea y cuánto para todo el lote.
+   Es el dato que se quiere ver de una: producto y dosis. */
+function aplicLabel(c, ha){
+  if(!c || !c.lineas.length) return '<span style="color:#C3CCD6">—</span>';
+  var i, L, kgL, totKg = 0, falta = false;
+  var h = '<table class="mini">';
+  for(i=0; i<c.lineas.length; i++){
+    L = c.lineas[i];
+    kgL = (L.kg !== null && ha) ? L.kg * ha : null;
+    if(kgL !== null) totKg += kgL; else falta = true;
+    h += '<tr><td class="mp-n">' + esc(L.prod || '—') + '</td>'
+      +  '<td class="mp-d">' + (L.kg !== null ? f(L.kg,0) : '?') + '</td>'
+      +  '<td class="mp-u">kg/ha</td>'
+      +  '<td class="mp-d mp-t">' + (kgL !== null ? f(kgL,0) : '—') + '</td>'
+      +  '<td class="mp-u">kg</td>'
+      +  '<td class="mp-m">' + esc(L.momento || '') + '</td></tr>';
+  }
+  if(c.lineas.length > 1 && !falta){
+    h += '<tr class="mp-tot"><td class="mp-n">Total</td>'
+      +  '<td class="mp-d"></td><td class="mp-u"></td>'
+      +  '<td class="mp-d mp-t">' + f(totKg,0) + '</td>'
+      +  '<td class="mp-u">kg</td><td class="mp-m"></td></tr>';
+  }
+  return h + '</table>';
+}
+
+/* Lo que se logra con lo aplicado, contra el objetivo del lote. */
+function celdaLograble(alc, obj, suelo, apl, unid, dec){
+  if(alc === null) return '<td class="r" style="color:#C3CCD6" '
+    + 'title="Falta el análisis de suelo para saber de dónde se parte">—</td>';
+  var tip = 'Suelo ' + f(suelo,dec) + ' + aplicado ' + f(apl,dec) + ' = ' + f(alc,dec) + ' ' + unid;
+  var cls = 'r nu';
+  if(obj !== null && obj > 0){
+    /* Se marca cuando el desvío contra el objetivo pasa el % configurado,
+       tanto por defecto como por exceso. */
+    var tolPct = Number(DB.cfg.tolObj);
+    if(isNaN(tolPct) || tolPct < 0) tolPct = 10;
+    var desv = (alc - obj) / obj * 100;
+    tip += '  ·  objetivo ' + f(obj,dec) + ' ' + unid
+         + ' (' + (desv >= 0 ? '+' : '') + f(desv,1) + ' %)';
+    if(Math.abs(desv) > tolPct){
+      cls += ' mal';
+      tip += desv < 0
+        ? ' · faltan ' + f(obj - alc, dec) + ' ' + unid
+        : ' · ' + f(alc - obj, dec) + ' ' + unid + ' de más';
+      tip += ', fuera del ' + f(tolPct,0) + ' % tolerado';
+    }
+  } else {
+    tip += '  ·  sin objetivo cargado';
+  }
+  return '<td class="' + cls + '" title="' + esc(tip) + '">' + f(alc,dec) + '</td>';
+}
+
 function insLabel(arr){
   var i, items = [];
   if(!arr || !arr.length) return '<span style="color:#C3CCD6">—</span>';
@@ -1778,11 +1935,11 @@ function renderSiembra(){
           ? '<button class="tog-amb' + (abierto ? ' abierto' : '') + '" onclick="togAmb(\'' + s.id + '\')">'
             + '<span class="c">&#9654;</span>' + c.filas.length + ' amb.</button>'
           : (c.filas.length && c.filas[0].amb ? '<span class="bdg bamb">' + esc(c.filas[0].amb) + '</span>' : '—')) + '</td>'
-      + '<td class="r">' + ((dsup2 && primera)
-          ? '<span class="bdg by" title="Las partidas de este lote suman ' + f(dsup2.haAmbs,1)
-            + ' ha y Plan de Uso le asigna ' + f(dsup2.haRef,1) + ' ha">'
-            + f(c.haTot,1) + ' · revisar</span>'
-          : f(c.haTot, 1)) + '</td>'
+      + ((dsup2 && primera)
+          ? '<td class="r ojo" title="Las partidas de este lote suman ' + f(dsup2.haAmbs,1)
+            + ' ha y Plan de Uso le asigna ' + f(dsup2.haRef,1) + ' ha ('
+            + (dsup2.dif > 0 ? '+' : '') + f(dsup2.dif,1) + ')">' + f(c.haTot,1) + '</td>'
+          : '<td class="r">' + f(c.haTot, 1) + '</td>')
       + '<td class="tdname gs">' + esc(s.cultivo) + '</td>'
       + '<td class="tdname">' + (c.p ? esc(c.p.nombre) : '<span class="bdg br">sin partida</span>') + '</td>'
       + '<td>' + rangoChip(s.rangoCod) + '</td>';
@@ -1869,8 +2026,8 @@ function listaCultivosSiembra(lista){
   out.sort(); return out;
 }
 function codigosRango(){
-  var out = [], i;
-  for(i=0; i<DB.rangos.length; i++) out.push(DB.rangos[i].cod);
+  var rs = rangosDeCampania(), out = [], i;
+  for(i=0; i<rs.length; i++) out.push(rs[i].cod);
   return out;
 }
 
@@ -1917,7 +2074,7 @@ function fertById(id){
 /* Celda de nutriente: en la tabla va solo lo aplicado. El rojo avisa
    cuando no llega; el recomendado y cuánto falta están en el globito,
    que es donde no ensucian la lectura. */
-function celdaNutri(rec, apl, extra){
+function celdaNutri(rec, apl, avisoExtra){
   var falta = (rec !== null && apl + 0.5 < rec);
   var tip;
   if(rec === null) tip = 'Aplicado ' + f(apl,1) + ' kg/ha · sin recomendación calculada';
@@ -1927,9 +2084,11 @@ function celdaNutri(rec, apl, extra){
                      + ' · ' + f(apl - rec,1) + ' kg/ha de más';
   else tip = 'Aplicado ' + f(apl,1) + ' · recomendado ' + f(rec,1) + ' kg/ha · cubierto';
 
-  var dentro = extra ? extra
-    : (falta ? '<span class="bdg br">' + f(apl,1) + '</span>' : f(apl, 1));
-  return '<td class="r nu" title="' + esc(tip) + '">' + dentro + '</td>';
+  /* El color va en la celda; el número queda limpio y alineado */
+  var cls = 'r nu';
+  if(avisoExtra){ cls += ' ojo'; tip = avisoExtra + '  ·  ' + tip; }
+  else if(falta) cls += ' mal';
+  return '<td class="' + cls + '" title="' + esc(tip) + '">' + f(apl, 1) + '</td>';
 }
 
 function renderFert(){
@@ -1937,7 +2096,7 @@ function renderFert(){
   var fCampo = val('ft-f-campo'), fCult = val('ft-f-cult'), fEst = val('ft-f-est');
   var verAn = !!vista('ftCalc');
   var i, r, ft, c, st;
-  var haCub = 0, haTot = 0, nAvisos = 0, totN = 0, totP = 0;
+  var haCub = 0, haTot = 0, nAvisos = 0, totN = 0, totP = 0, totKg = 0;
   var visibles = [];
 
   for(i=0; i<filas.length; i++){
@@ -1947,7 +2106,14 @@ function renderFert(){
     haTot += (r.ha || 0);
     if(st.e === 'listo') haCub += (r.ha || 0);
     c = ft ? calcFert(ft, r.amb) : null;
-    if(c){ nAvisos += c.avisos.length; totN += c.apl.n * (r.ha || 0); totP += c.apl.p2o5 * (r.ha || 0); }
+    if(c){
+      nAvisos += c.avisos.length;
+      totN += c.apl.n * (r.ha || 0);
+      totP += c.apl.p2o5 * (r.ha || 0);
+      for(var q=0; q<c.lineas.length; q++){
+        if(c.lineas[q].kg !== null) totKg += c.lineas[q].kg * (r.ha || 0);
+      }
+    }
     if(fCampo && r.campo !== fCampo) continue;
     if(fCult && r.cultivo !== fCult) continue;
     if(fEst === 'falta' && st.e === 'listo') continue;
@@ -1956,14 +2122,16 @@ function renderFert(){
   }
 
   /* ── Encabezado ── */
-  var cols = ['<th>Lote</th>', '<th>Amb.</th>', '<th class="r">Sup</th>', '<th class="gs">Cultivo</th>'];
+  var cols = ['<th>Lote</th>', '<th>Amb.</th>', '<th class="r">Sup</th>', '<th class="gs">Cultivo</th>',
+              '<th class="gs">Fertilización</th>'];
   if(verAn){
     cols.push('<th class="r gs">MO%</th>', '<th class="r">P ppm</th>', '<th class="r">S ppm</th>',
-              '<th class="r">K ppm</th>', '<th class="r">Zn ppm</th>');
+              '<th class="r">K ppm</th>', '<th class="r">Zn ppm</th>', '<th class="r">N suelo</th>');
   }
-  cols.push('<th class="r gs">N suelo</th>',
-            '<th class="r gs">P2O5</th>', '<th class="r">S</th>', '<th class="r">K2O</th>', '<th class="r">N</th>',
-            '<th class="gs"></th>');
+  cols.push('<th class="r gs">P2O5</th>', '<th class="r">S</th>', '<th class="r">K2O</th>', '<th class="r">N</th>',
+            '<th class="r gs">N lograble</th>');
+  if(verAn) cols.push('<th class="r">P lograble</th>');
+  cols.push('<th class="gs"></th>');
   document.getElementById('th-ft').innerHTML = cols.join('');
   var nCols = cols.length;
 
@@ -2000,27 +2168,38 @@ function renderFert(){
       + '<td class="tdname gs">' + esc(r.cultivo) + '</td>';
 
     if(!ft){
-      h += '<td colspan="' + (nCols - 5) + '" class="gs" style="color:#8995A3">Sin análisis cargado</td>';
+      h += '<td colspan="' + (nCols - 5) + '" class="gs" style="color:#8995A3">Sin fertilización cargada</td>';
     } else {
+      /* Lo primero: qué fertilizante y cuánto, por hectárea y para el lote */
+      h += '<td class="gs ins">' + aplicLabel(c, r.ha) + '</td>';
       if(verAn){
         h += '<td class="r dato gs">' + f(a.mo, 2) + '</td>'
           + '<td class="r dato">' + f(a.pPpm, 1) + '</td>'
           + '<td class="r dato">' + f(a.sPpm, 1) + '</td>'
           + '<td class="r dato">' + f(c.kPpm, 0) + '</td>'
-          + '<td class="r">' + (zn === null ? '<span class="dato">—</span>' : (znBajo
-              ? '<span class="bdg br">' + f(zn,2) + '</span>' : '<span class="dato">' + f(zn,2) + '</span>')) + '</td>';
+          + (zn === null ? '<td class="r dato">—</td>'
+             : (znBajo
+                ? '<td class="r mal" title="Zinc por debajo del umbral de ' + f(DB.cfg.znPpm,2) + ' ppm">'
+                  + f(zn,2) + '</td>'
+                : '<td class="r dato">' + f(zn,2) + '</td>'))
+          + '<td class="r dato">' + (c.nSuelo.kg !== null
+              ? f(c.nSuelo.kg,0) + (c.nSuelo.estimado
+                  ? '<span title="Incluye capas estimadas" style="color:#A86A1F">*</span>' : '')
+              : '—') + '</td>';
       }
-      h += '<td class="r gs">' + (c.nSuelo.kg !== null
-            ? f(c.nSuelo.kg,0) + (c.nSuelo.estimado
-                ? '<span title="Incluye capas estimadas" style="color:#A86A1F">*</span>' : '')
-            : '—') + '</td>'
-        + celdaNutri(c.rec.p2o5, c.apl.p2o5).replace('<td class="r">', '<td class="r gs">')
+      h += celdaNutri(c.rec.p2o5, c.apl.p2o5).replace('<td class="r">', '<td class="r gs">')
         + celdaNutri(c.rec.s,    c.apl.s)
         + celdaNutri(c.rec.k2o,  c.apl.k2o)
-        + celdaNutri(c.rec.n,    c.apl.n, fito
-            ? '<span class="bdg by" title="' + f(c.nSiembra,1) + ' kg N/ha en línea de siembra, sobre el límite de '
-              + f(c.fitoMax,0) + ' kg para ' + esc(ft.cultivo) + '">' + f(c.apl.n,1) + ' · fitotóx.</span>'
-            : null);
+        + celdaNutri(c.rec.n, c.apl.n, fito
+            ? ('Fitotoxicidad: ' + f(c.nSiembra,1) + ' kg N/ha en línea de siembra, sobre el límite de '
+               + f(c.fitoMax,0) + ' kg para ' + ft.cultivo)
+            : null)
+        + celdaLograble(c.nAlcanz, num((ft.obj || {}).nObj), c.nSuelo.kg, c.apl.n, 'kg N/ha', 0)
+            .replace('<td class="r nu', '<td class="gs r nu');
+      if(verAn){
+        h += celdaLograble(c.pAlcanz, num((ft.obj || {}).pObj), num(a.pPpm),
+               (c.pAlcanz !== null ? c.pAlcanz - num(a.pPpm) : 0), 'ppm P', 2);
+      }
     }
     h += '<td class="r gs">'
       + '<button class="btn btn-sm" onclick="abrirFertLote(\'' + jsq(r.loteId) + '\',\'' + jsq(r.cultivo) + '\')">'
@@ -2046,6 +2225,7 @@ function renderFert(){
   document.getElementById('ft-metrics').innerHTML =
       mc('mc-g', f(haCub,1) + ' ha', 'Con todo cubierto')
     + mc('mc-g', (haTot ? fp(haCub / haTot * 100) : '—'), 'Avance')
+    + mc('mc-t', (totKg ? f(totKg,0) + ' kg' : '—'), 'Fertilizante de la campaña')
     + mc('mc-t', (totN ? f(totN,0) + ' kg' : '—'), 'N total de la campaña')
     + mc('mc-t', (totP ? f(totP,0) + ' kg' : '—'), 'P2O5 total de la campaña')
     + mc(nAvisos ? 'mc-t' : 'mc-g', String(nAvisos), 'Avisos');
@@ -2080,9 +2260,9 @@ function borrarFert(id){
 var CHART_BAL = null;
 
 function sembradorasDeRango(cod, cultivo){
-  var out = [], i, s;
-  for(i=0; i<DB.sembradoras.length; i++){
-    s = DB.sembradoras[i];
+  var ss = sembradorasDeCampania(), out = [], i, s;
+  for(i=0; i<ss.length; i++){
+    s = ss[i];
     if(!s.rangos || !s.rangos[cod]) continue;
     if(cultivo && s.cultivo && s.cultivo !== 'Todos' && s.cultivo !== cultivo) continue;
     out.push(s);
@@ -2096,8 +2276,9 @@ function filasBalance(cultivo){
   var efect = (Number(DB.cfg.efect) || 0) / 100;
   var accCap = 0, accDem = 0;
 
-  for(i=0; i<DB.rangos.length; i++){
-    r = DB.rangos[i];
+  var rangos = rangosDeCampania();
+  for(i=0; i<rangos.length; i++){
+    r = rangos[i];
     ss = sembradorasDeRango(r.cod, cultivo);
     capH = 0;
     for(j=0; j<ss.length; j++){ capH += (capSembradora(ss[j]) || 0); }
@@ -2165,9 +2346,9 @@ function renderBalance(){
   }
 
   var tb = document.getElementById('tb-bal');
-  if(!DB.rangos.length){
+  if(!rangosDeCampania().length){
     tb.innerHTML = filaVacia(13, 'Cargá los rangos de fecha en <b>Configuración</b> para ver el balance.');
-  } else if(!DB.sembradoras.length){
+  } else if(!sembradorasDeCampania().length){
     tb.innerHTML = filaVacia(13, 'Cargá el parque de sembradoras en <b>Configuración</b>:<br>sin capacidad no hay balance posible.');
   } else {
     tb.innerHTML = h;
@@ -2344,19 +2525,64 @@ function aOrdenado(obj){
   return out;
 }
 
+/* Filtro propio de la tabla de semilla: varios cultivos a la vez.
+   Afecta solo a esa tabla, no a las de curasemillas ni fertilizantes. */
+var IN_CULT = {};
+function togCultSem(c){
+  if(IN_CULT[c]) delete IN_CULT[c]; else IN_CULT[c] = 1;
+  renderInsumos();
+}
+function limpiarCultSem(){ IN_CULT = {}; renderInsumos(); }
+function hayCultSel(){
+  var k;
+  for(k in IN_CULT){ if(IN_CULT.hasOwnProperty(k)) return true; }
+  return false;
+}
+
 function renderInsumos(){
   var t = totalesInsumos(), h, i, x;
 
-  /* Semilla */
-  h = '';
+  /* Semilla, con su filtro de cultivos */
+  var cults = [], vistos = {};
   for(i=0; i<t.semilla.length; i++){
     x = t.semilla[i];
+    if(x.cultivo && !vistos[x.cultivo]){ vistos[x.cultivo] = 1; cults.push(x.cultivo); }
+  }
+  cults.sort();
+  var ph = '';
+  for(i=0; i<cults.length; i++){
+    ph += '<button class="pill' + (IN_CULT[cults[i]] ? ' on' : '') + '" '
+       +  'onclick="togCultSem(\'' + jsq(cults[i]) + '\')">' + esc(cults[i]) + '</button>';
+  }
+  if(cults.length && hayCultSel()){
+    ph += '<button class="pill" onclick="limpiarCultSem()" style="color:#99A3AE">Ver todos</button>';
+  }
+  var pz = document.getElementById('in-sem-pills');
+  if(pz) pz.innerHTML = ph;
+
+  h = '';
+  var haSem = 0, cantKg = 0, cantBol = 0;
+  for(i=0; i<t.semilla.length; i++){
+    x = t.semilla[i];
+    if(hayCultSel() && !IN_CULT[x.cultivo]) continue;
+    haSem += x.ha;
+    if(x.unidad === 'bolsas') cantBol += x.cant; else cantKg += x.cant;
     h += '<tr><td class="tdname">' + esc(x.cultivo) + '</td><td class="tdname"><b>' + esc(x.partida) + '</b></td>'
       + '<td class="r">' + x.lotes + '</td><td class="r">' + f(x.ha,1) + '</td>'
-      + '<td class="r"><b>' + f(x.cant, x.unidad === 'bolsas' ? 1 : 0) + '</b></td>'
+      + '<td class="r res">' + f(x.cant, x.unidad === 'bolsas' ? 1 : 0) + '</td>'
       + '<td>' + esc(x.unidad) + '</td></tr>';
   }
-  document.getElementById('tb-in-sem').innerHTML = h || filaVacia(6, 'Sin siembra programada en esta campaña.');
+  if(h && (cantKg || cantBol)){
+    h += '<tr class="campo"><td colspan="3"><span class="campo-n" style="cursor:default">Total'
+      + (hayCultSel() ? ' de lo filtrado' : '') + '</span></td>'
+      + '<td class="r">' + f(haSem,1) + '</td>'
+      + '<td class="r res">' + (cantKg ? f(cantKg,0) : f(cantBol,1)) + '</td>'
+      + '<td>' + (cantKg ? 'kg' : 'bolsas') + (cantKg && cantBol ? ' + ' + f(cantBol,1) + ' bolsas' : '') + '</td></tr>';
+  }
+  document.getElementById('tb-in-sem').innerHTML = h
+    || filaVacia(6, hayCultSel()
+        ? 'Ningún cultivo de los elegidos tiene semilla programada.'
+        : 'Sin siembra programada en esta campaña.');
 
   /* Curasemillas e inoculantes */
   h = '';
@@ -2364,9 +2590,10 @@ function renderInsumos(){
     x = t.cur[i];
     h += '<tr><td>' + esc(x.tipo) + '</td><td class="tdname"><b>' + esc(x.prod) + '</b></td>'
       + '<td class="r">' + x.lotes + '</td><td class="r">' + f(x.ha,1) + '</td>'
-      + '<td class="r"><b>' + f(x.cant, 2) + '</b>'
-      + (x.incompleto ? '<div style="margin-top:2px"><span class="bdg by" '
-      + 'title="Algún lote no tiene la semilla calculada, así que falta sumar esa parte">falta calcular</span></div>' : '') + '</td>'
+      + (x.incompleto
+          ? '<td class="r ojo" title="Algún lote no tiene la semilla calculada, así que falta sumar esa parte">'
+            + f(x.cant, 2) + '</td>'
+          : '<td class="r res">' + f(x.cant, 2) + '</td>')
       + '<td>' + esc(x.unidad || '—') + '</td></tr>';
   }
   document.getElementById('tb-in-cur').innerHTML = h || filaVacia(6, 'Sin curasemillas ni inoculantes cargados.');
@@ -2830,7 +3057,9 @@ function leerExcel(inp){
   var archivos = [], i;
   for(i=0; i<inp.files.length; i++) archivos.push(inp.files[i]);
   inp.value = '';
-  IMPORT = [];
+  /* Se SUMAN a lo ya leído: así se pueden juntar archivos de carpetas
+     distintas y confirmar todo de una sola vez. */
+  if(!IMPORT) IMPORT = [];
   pintarImport('<div class="hint">Leyendo ' + archivos.length
     + (archivos.length === 1 ? ' archivo…' : ' archivos…') + '</div>');
   leerSiguiente(archivos, 0);
@@ -2840,7 +3069,10 @@ function leerSiguiente(archivos, idx){
   if(idx >= archivos.length){ pintarImport(vistaPreviaImport(IMPORT)); return; }
   var fr = new FileReader();
   fr.onload = function(ev){
-    IMPORT.push(parsearLibro(ev.target.result, archivos[idx].name));
+    var nom = archivos[idx].name, k, repe = false;
+    for(k=0; k<IMPORT.length; k++){ if(IMPORT[k].archivo === nom) repe = true; }
+    if(repe) IMPORT.push({ tipo:'error', archivo:nom, msg:'Ya lo habías agregado; se ignora esta copia.' });
+    else IMPORT.push(parsearLibro(ev.target.result, nom));
     leerSiguiente(archivos, idx + 1);
   };
   fr.onerror = function(){
@@ -3119,7 +3351,9 @@ function vistaPreviaImport(lista){
     R = lista[i];
     h += '<div class="blk" style="margin-top:' + (i ? '10px' : '4px') + '">';
     if(R.tipo === 'error'){
-      h += '<div class="blk-t">' + esc(R.archivo) + '</div>'
+      h += '<div class="blk-t">' + esc(R.archivo)
+        + '<button class="btn-ico" style="float:right" title="Quitar de la lista" '
+        + 'onclick="quitarImport(' + i + ')">&times;</button></div>'
         + '<div class="warn" style="display:block;margin-top:0">' + esc(R.msg) + '</div></div>';
       continue;
     }
@@ -3127,7 +3361,9 @@ function vistaPreviaImport(lista){
     h += '<div class="blk-t">' + esc(R.archivo) + ' — Programa de '
        + (R.tipo === 'siembra' ? 'Siembra' : 'Fertilización')
        + (R.empresaXls ? '  ·  ' + esc(R.empresaXls) : '')
-       + (R.campaniaXls ? '  ·  campaña ' + esc(R.campaniaXls) : '') + '</div>';
+       + (R.campaniaXls ? '  ·  campaña ' + esc(R.campaniaXls) : '')
+       + '<button class="btn-ico" style="float:right" title="Quitar de la lista" '
+       + 'onclick="quitarImport(' + i + ')">&times;</button></div>';
 
     var fs = [];
     if(R.tipo === 'siembra'){
@@ -3209,8 +3445,11 @@ function vistaPreviaImport(lista){
     + '<div class="cact" style="margin-top:12px">'
     + '<button class="btn btn-pri" onclick="aplicarImport(\'sumar\')">Importar y sumar</button>'
     + '<button class="btn" onclick="aplicarImport(\'reemplazar\')">Importar y reemplazar la campaña</button>'
+    + '<button class="btn" onclick="document.getElementById(\'imp-file\').click()">+ Agregar otro archivo</button>'
     + '<button class="btn" onclick="cancelarImport()">Cancelar</button>'
-    + '</div></div>';
+    + '</div>'
+    + '<div class="hint">Si los archivos están en carpetas distintas, agregalos de a uno con '
+    + '"+ Agregar otro archivo" y confirmá al final.</div></div>';
   return h;
 }
 function indiceEn(arr, v){
@@ -3224,6 +3463,12 @@ function contar(o){
   return n;
 }
 function cancelarImport(){ IMPORT = null; pintarImport(''); }
+function quitarImport(i){
+  if(!IMPORT) return;
+  IMPORT.splice(i, 1);
+  if(!IMPORT.length){ cancelarImport(); return; }
+  pintarImport(vistaPreviaImport(IMPORT));
+}
 
 /* ── Aplicar ──────────────────────────────────────────────────────── */
 function aplicarImport(modo){
@@ -3295,11 +3540,15 @@ function aplicarSiembraXls(R, destino, tot){
     DB.partidas.push(R.partidas[i]); tot.partidas++;
   }
   for(i=0; i<R.rangos.length; i++){
-    if(rangoByCod(R.rangos[i].cod)) continue;
-    DB.rangos.push({ id:uid('ra'), cod:R.rangos[i].cod, desde:R.rangos[i].desde, hasta:R.rangos[i].hasta });
+    if(rangoByCod(R.rangos[i].cod, destino)) continue;
+    DB.rangos.push({ id:uid('ra'), campania:destino, cod:R.rangos[i].cod,
+                     desde:R.rangos[i].desde, hasta:R.rangos[i].hasta });
     tot.rangos++;
   }
-  for(i=0; i<R.sembradoras.length; i++){ DB.sembradoras.push(R.sembradoras[i]); tot.sembradoras++; }
+  for(i=0; i<R.sembradoras.length; i++){
+    R.sembradoras[i].campania = destino;
+    DB.sembradoras.push(R.sembradoras[i]); tot.sembradoras++;
+  }
   if(R.diasRango) DB.cfg.diasPorRango = R.diasRango;
 
   for(i=0; i<R.siembra.length; i++){
@@ -3546,10 +3795,13 @@ function guardarRango(){
   if(desde && hasta && desde > hasta){ alert('La fecha mínima es posterior a la máxima.'); return; }
   var r = null, i;
   if(MODAL.id){ for(i=0; i<DB.rangos.length; i++){ if(DB.rangos[i].id === MODAL.id){ r = DB.rangos[i]; break; } } }
-  for(i=0; i<DB.rangos.length; i++){
-    if(DB.rangos[i].cod === cod && DB.rangos[i] !== r){ alert('Ya existe un rango con el código ' + cod + '.'); return; }
+  var mismos = rangosDeCampania();
+  for(i=0; i<mismos.length; i++){
+    if(mismos[i].cod === cod && mismos[i] !== r){
+      alert('La campaña ' + CAMPANIA + ' ya tiene un rango con el código ' + cod + '.'); return;
+    }
   }
-  if(!r){ r = { id:uid('ra') }; DB.rangos.push(r); }
+  if(!r){ r = { id:uid('ra'), campania:CAMPANIA }; DB.rangos.push(r); }
   r.cod = cod; r.desde = desde; r.hasta = hasta;
   DB.rangos.sort(function(a,b){ return (a.desde||'').localeCompare(b.desde||''); });
   sv('rangos');
@@ -3561,16 +3813,18 @@ function borrarRango(id){
   for(i=0; i<DB.rangos.length; i++){ if(DB.rangos[i].id === id){ r = DB.rangos[i]; break; } }
   if(!r) return;
   var j;
-  for(j=0; j<DB.siembra.length; j++){ if(DB.siembra[j].rangoCod === r.cod) usos++; }
+  for(j=0; j<DB.siembra.length; j++){
+    if(DB.siembra[j].campania === CAMPANIA && DB.siembra[j].rangoCod === r.cod) usos++;
+  }
   if(!confirm('¿Borrar el rango ' + r.cod + '?' + (usos ? ' Hay ' + usos + ' lote(s) asignado(s) a este rango.' : ''))) return;
   DB.rangos.splice(i, 1);
   sv('rangos');
   renderRangos(); renderSiembra(); renderBalance();
 }
 function renderRangos(){
-  var h = '', i, r, d;
-  for(i=0; i<DB.rangos.length; i++){
-    r = DB.rangos[i];
+  var rs = rangosDeCampania(), h = '', i, r, d;
+  for(i=0; i<rs.length; i++){
+    r = rs[i];
     d = diasEntre(r.desde, r.hasta);
     h += '<tr>'
       + '<td class="tdname"><b>' + esc(r.cod) + '</b></td>'
@@ -3582,8 +3836,9 @@ function renderRangos(){
       +   '<button class="btn-ico" title="Borrar" onclick="borrarRango(\'' + r.id + '\')">&times;</button>'
       + '</td></tr>';
   }
-  document.getElementById('tb-ra').innerHTML = DB.rangos.length ? h
-    : filaVacia(5, 'Sin rangos. Cargá el primero con su fecha y después usá “Generar”.');
+  document.getElementById('tb-ra').innerHTML = rs.length ? h
+    : filaVacia(5, 'La campaña <b>' + esc(CAMPANIA || '—') + '</b> todavía no tiene rangos.<br>'
+      + 'Cargá el primero con su fecha y usá “Generar”, o copialos de otra campaña.');
   setVal('cfg-dias', DB.cfg.diasPorRango);
 }
 function guardarDias(){
@@ -3594,7 +3849,9 @@ function guardarDias(){
 }
 /* Genera rangos consecutivos desde el primero cargado (como la hoja Listas) */
 function generarRangos(){
-  if(!DB.rangos.length || !DB.rangos[0].desde){
+  if(!CAMPANIA){ alert('Elegí primero una campaña.'); return; }
+  var rsc = rangosDeCampania();
+  if(!rsc.length || !rsc[0].desde){
     alert('Cargá primero un rango con su fecha mínima, y después generá los siguientes.');
     return;
   }
@@ -3602,13 +3859,16 @@ function generarRangos(){
   if(cuantos === null) return;
   var n = parseInt(cuantos, 10);
   if(!n || n < 1){ alert('Cantidad no válida.'); return; }
-  if(!confirm('Esto reemplaza los rangos actuales por ' + n + ' rangos de ' + DB.cfg.diasPorRango + ' días, desde el ' + fmtFecha(DB.rangos[0].desde) + '. ¿Seguimos?')) return;
+  if(!confirm('Esto reemplaza los rangos de la campaña ' + CAMPANIA + ' por ' + n + ' rangos de '
+    + DB.cfg.diasPorRango + ' días, desde el ' + fmtFecha(rsc[0].desde)
+    + '.\nLas otras campañas no se tocan. ¿Seguimos?')) return;
 
-  var base = DB.rangos[0].desde, dias = DB.cfg.diasPorRango, nuevos = [], i, desde, hasta;
+  var base = rsc[0].desde, dias = DB.cfg.diasPorRango, nuevos = [], i, desde, hasta;
+  for(i=0; i<DB.rangos.length; i++){ if(DB.rangos[i].campania !== CAMPANIA) nuevos.push(DB.rangos[i]); }
   for(i=0; i<n; i++){
     desde = (i === 0) ? base : sumarDias(base, i * dias);
     hasta = sumarDias(desde, dias - 1);
-    nuevos.push({ id:uid('ra'), cod:'F' + (i+1), desde:desde, hasta:hasta });
+    nuevos.push({ id:uid('ra'), campania:CAMPANIA, cod:'F' + (i+1), desde:desde, hasta:hasta });
   }
   DB.rangos = nuevos;
   sv('rangos');
@@ -3655,10 +3915,10 @@ function abrirSembradora(id){
   calcCapModal();
 }
 function pickRangos(s){
-  var h = '', i, r, chk;
-  if(!DB.rangos.length) return '<div class="empty">Cargá primero los rangos de siembra.</div>';
-  for(i=0; i<DB.rangos.length; i++){
-    r = DB.rangos[i];
+  var rs = rangosDeCampania(), h = '', i, r, chk;
+  if(!rs.length) return '<div class="empty">Esta campaña no tiene rangos de siembra cargados.</div>';
+  for(i=0; i<rs.length; i++){
+    r = rs[i];
     chk = (s && s.rangos && s.rangos[r.cod]) ? ' checked' : '';
     h += '<label class="pick-r"><input type="checkbox" data-cod="' + esc(r.cod) + '"' + chk + '>'
       + '<span class="pn">' + esc(r.cod) + '</span>'
@@ -3682,7 +3942,7 @@ function guardarSembradora(){
   if(!n){ alert('Falta el nombre de la sembradora.'); return; }
   var s = MODAL.id ? sembradoraById(MODAL.id) : null;
   var nuevo = !s;
-  if(nuevo) s = { id:uid('se') };
+  if(nuevo) s = { id:uid('se'), campania:CAMPANIA };
   s.nombre      = n;
   s.contratista = val('se-c');
   s.cultivo     = val('se-cult');
@@ -3709,9 +3969,9 @@ function borrarSembradora(id){
   renderSembradoras(); renderBalance();
 }
 function renderSembradoras(){
-  var h = '', i, s, cap;
-  for(i=0; i<DB.sembradoras.length; i++){
-    s = DB.sembradoras[i];
+  var ss = sembradorasDeCampania(), h = '', i, s, cap;
+  for(i=0; i<ss.length; i++){
+    s = ss[i];
     cap = capSembradora(s);
     h += '<tr>'
       + '<td class="tdname"><b>' + esc(s.nombre) + '</b></td>'
@@ -3726,8 +3986,9 @@ function renderSembradoras(){
       +   '<button class="btn-ico" title="Borrar" onclick="borrarSembradora(\'' + s.id + '\')">&times;</button>'
       + '</td></tr>';
   }
-  document.getElementById('tb-se').innerHTML = DB.sembradoras.length ? h
-    : filaVacia(8, 'Sin sembradoras cargadas. El balance de la Etapa 3 las necesita.');
+  document.getElementById('tb-se').innerHTML = ss.length ? h
+    : filaVacia(8, 'La campaña <b>' + esc(CAMPANIA || '—') + '</b> no tiene sembradoras cargadas.<br>'
+      + 'Sin parque no hay balance: cargalas acá o copialas de otra campaña.');
 }
 
 /* ── 8.4 Programación de siembra ───────────────────────────────────── */
@@ -3812,9 +4073,9 @@ function abrirSiembra(id, pre){
   renderInsRows('inocs');
 }
 function rangoOpts(){
-  var out = [], i, r;
-  for(i=0; i<DB.rangos.length; i++){
-    r = DB.rangos[i];
+  var rs = rangosDeCampania(), out = [], i, r;
+  for(i=0; i<rs.length; i++){
+    r = rs[i];
     out.push({ v:r.cod, t:r.cod + '  ' + fmtFecha(r.desde) + ' → ' + fmtFecha(r.hasta) });
   }
   return out;
@@ -4732,6 +4993,7 @@ function renderCfg(){
   setVal('cfg-kppm',    DB.cfg.kPpm);
   setVal('cfg-kdosis',  DB.cfg.kDosis);
   setVal('cfg-znppm',   DB.cfg.znPpm);
+  setVal('cfg-tolobj',  DB.cfg.tolObj);
   setVal('cfg-nfac',    DB.cfg.nFactor);
   setVal('cfg-nratio',  DB.cfg.nRatio);
   setVal('cfg-horas',   DB.cfg.horasDia);
@@ -4750,6 +5012,7 @@ function guardarCfg(){
   DB.cfg.kPpm     = numOr(val('cfg-kppm'),    120);
   DB.cfg.kDosis   = numOr(val('cfg-kdosis'),  40);
   DB.cfg.znPpm    = numOr(val('cfg-znppm'),   1);
+  DB.cfg.tolObj   = numOr(val('cfg-tolobj'),  10);
   DB.cfg.nFactor  = numOr(val('cfg-nfac'),    0.56);
   DB.cfg.nRatio   = numOr(val('cfg-nratio'),  0.226);
   DB.cfg.horasDia = numOr(val('cfg-horas'),   8);
@@ -4893,6 +5156,7 @@ function showTab(t, btn){
 
 function renderTodo(){
   try{ renderCampanias(); }catch(e){ console.error('renderCampanias', e); }
+  try{ sellarCampania(); }catch(e){ console.error('sellarCampania', e); }
   try{ renderPartidas(); }catch(e){ console.error('renderPartidas', e); }
   try{ renderRangos(); }catch(e){ console.error('renderRangos', e); }
   try{ renderSembradoras(); }catch(e){ console.error('renderSembradoras', e); }
