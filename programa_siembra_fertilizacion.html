@@ -152,8 +152,6 @@ td.nu{font-weight:600;cursor:help}
 table.mini .mp-t{font-weight:600;padding-left:8px}
 table.mini .mp-m{color:#99A3AE;font-variant-numeric:normal;white-space:nowrap;
                  padding-left:9px;width:1%;font-size:10.5px}
-table.mini tr.mp-tot td{border-top:1px solid #E7ECF2!important;padding-top:3px}
-table.mini tr.mp-tot .mp-n{color:#8995A3;font-size:10.5px;text-transform:uppercase;letter-spacing:.3px}
 
 /* Interruptor de detalle por ambiente */
 .tog-amb{border:1px solid #DDE3EA;background:var(--card);border-radius:10px;padding:1px 7px;
@@ -389,8 +387,9 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
       <tbody id="tb-ft"></tbody>
     </table></div>
     <div class="hint">
-      <b>Fertilización</b> es lo que se aplica: el producto, la dosis por hectárea y los kilos que
-      necesita el lote entero. Cada nutriente muestra <b>lo aplicado</b> por hectárea; pasá por encima
+      <b>Fertilización</b> es lo que se aplica: el producto, la dosis por hectárea y los kilos de
+      ese producto que necesita el lote entero. El total por producto de toda la campaña, que es el
+      que sirve para pedir, está en <b>Necesidad de insumos</b>. Cada nutriente muestra <b>lo aplicado</b> por hectárea; pasá por encima
       para ver lo recomendado y cuánto falta. <b>N lograble</b> es el N del suelo más el aplicado: se marca
       en rojo cuando se aparta del objetivo del lote más del porcentaje fijado en Configuración.
       El <b>ámbar</b> avisa que el N en línea de siembra pasa el límite de fitotoxicidad del cultivo.
@@ -705,8 +704,8 @@ footer{padding:14px 24px 22px;color:var(--muted);font-size:10px;display:flex;jus
      suelo y aplicaciones de fertilizante.  → ver handoff para Mariana.
    ═══════════════════════════════════════════════════════════════════════ */
 
-var BUILD = 15;
-var VERSION = 'v2026-11-02 12:21';
+var BUILD = 16;
+var VERSION = 'v2026-11-02 12:43';
 
 /* ── Claves de almacenamiento ──────────────────────────────────────── */
 var K = {
@@ -1730,24 +1729,19 @@ function listaProd(items){
    Es el dato que se quiere ver de una: producto y dosis. */
 function aplicLabel(c, ha){
   if(!c || !c.lineas.length) return '<span style="color:#C3CCD6">—</span>';
-  var i, L, kgL, totKg = 0, falta = false;
+  /* Sin fila de total: sumar kilos de productos distintos no significa nada.
+     El total por producto, que sí sirve para pedir, está en Necesidad de insumos. */
+  var i, L, kgL;
   var h = '<table class="mini">';
   for(i=0; i<c.lineas.length; i++){
     L = c.lineas[i];
     kgL = (L.kg !== null && ha) ? L.kg * ha : null;
-    if(kgL !== null) totKg += kgL; else falta = true;
     h += '<tr><td class="mp-n">' + esc(L.prod || '—') + '</td>'
       +  '<td class="mp-d">' + (L.kg !== null ? f(L.kg,0) : '?') + '</td>'
       +  '<td class="mp-u">kg/ha</td>'
       +  '<td class="mp-d mp-t">' + (kgL !== null ? f(kgL,0) : '—') + '</td>'
       +  '<td class="mp-u">kg</td>'
       +  '<td class="mp-m">' + esc(L.momento || '') + '</td></tr>';
-  }
-  if(c.lineas.length > 1 && !falta){
-    h += '<tr class="mp-tot"><td class="mp-n">Total</td>'
-      +  '<td class="mp-d"></td><td class="mp-u"></td>'
-      +  '<td class="mp-d mp-t">' + f(totKg,0) + '</td>'
-      +  '<td class="mp-u">kg</td><td class="mp-m"></td></tr>';
   }
   return h + '</table>';
 }
@@ -2096,7 +2090,7 @@ function renderFert(){
   var fCampo = val('ft-f-campo'), fCult = val('ft-f-cult'), fEst = val('ft-f-est');
   var verAn = !!vista('ftCalc');
   var i, r, ft, c, st;
-  var haCub = 0, haTot = 0, nAvisos = 0, totN = 0, totP = 0, totKg = 0;
+  var haCub = 0, haTot = 0, nAvisos = 0, totN = 0, totP = 0;
   var visibles = [];
 
   for(i=0; i<filas.length; i++){
@@ -2110,9 +2104,6 @@ function renderFert(){
       nAvisos += c.avisos.length;
       totN += c.apl.n * (r.ha || 0);
       totP += c.apl.p2o5 * (r.ha || 0);
-      for(var q=0; q<c.lineas.length; q++){
-        if(c.lineas[q].kg !== null) totKg += c.lineas[q].kg * (r.ha || 0);
-      }
     }
     if(fCampo && r.campo !== fCampo) continue;
     if(fCult && r.cultivo !== fCult) continue;
@@ -2225,7 +2216,6 @@ function renderFert(){
   document.getElementById('ft-metrics').innerHTML =
       mc('mc-g', f(haCub,1) + ' ha', 'Con todo cubierto')
     + mc('mc-g', (haTot ? fp(haCub / haTot * 100) : '—'), 'Avance')
-    + mc('mc-t', (totKg ? f(totKg,0) + ' kg' : '—'), 'Fertilizante de la campaña')
     + mc('mc-t', (totN ? f(totN,0) + ' kg' : '—'), 'N total de la campaña')
     + mc('mc-t', (totP ? f(totP,0) + ' kg' : '—'), 'P2O5 total de la campaña')
     + mc(nAvisos ? 'mc-t' : 'mc-g', String(nAvisos), 'Avisos');
