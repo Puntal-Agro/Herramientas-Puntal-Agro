@@ -528,7 +528,7 @@ footer{padding:14px 24px 22px;display:flex;justify-content:space-between;color:v
       <div class="cw" style="height:300px"><canvas id="chExB"></canvas></div>
     </div>
     <div class="card">
-      <div class="chd"><div><div class="ct" id="exbTit"></div><div class="cs">Por cultivo · las partes se descuentan en este orden: comprometido, entregado a fijar, reservas</div></div></div>
+      <div class="chd"><div><div class="ct" id="exbTit"></div><div class="cs">Por cultivo · se descuenta en este orden: reservas, comprometido, entregado a fijar</div></div></div>
       <div class="scroll"><table id="exbTbl"></table></div>
       <div class="note" id="exbNote"></div>
     </div>
@@ -583,7 +583,7 @@ footer{padding:14px 24px 22px;display:flex;justify-content:space-between;color:v
 
 <footer>
   <span>Puntal Agro · Herramientas para la toma de decisiones</span>
-  <span>Versión v2026-11-02 17:15 · BUILD 72 · Datos leídos: <span id="fts">—</span></span>
+  <span>Versión v2026-11-03 17:20 · BUILD 73 · Datos leídos: <span id="fts">—</span></span>
 </footer>
 
 <div id="dropOv"><div class="drop2">
@@ -967,7 +967,7 @@ function parseWorkbook(wb,fname){
       for(var hk2 in H)o[hk2]=S.v(rr,H[hk2]);out.push(o);}
     return out;}
   function mIdx(x){var k=key(x);for(var q=0;q<12;q++)if(key(D.meses[q])===k)return q;return -1;}
-  D.vg=regs(VGs,'Grano').map(function(o){return {n:o.n,id:norm(o['id. contrato']).replace(/\.0+$/,''),ment:mIdx(o['mes entrega']),m:mIdx(o['mes cobro']),ton:nz(o.ton),usd:nz(o['u$s/ton bruto']),ars:nz(o['$ brutos']),est:norm(o['estado operacion']),prop:norm(o.propiedad),obs:norm(o.observaciones)};});
+  D.vg=regs(VGs,'Grano').map(function(o){var pe=o['pendiente de entrega tn'];return {n:o.n,pe:isNum(pe)?pe:null,id:norm(o['id. contrato']).replace(/\.0+$/,''),ment:mIdx(o['mes entrega']),m:mIdx(o['mes cobro']),ton:nz(o.ton),usd:nz(o['u$s/ton bruto']),ars:nz(o['$ brutos']),est:norm(o['estado operacion']),prop:norm(o.propiedad),obs:norm(o.observaciones)};});
   D.vh=regs(VHs,'Categoría').map(function(o){return {n:o.n,m:mIdx(o['mes cobro']),cab:nz(o.cabezas),kgc:nz(o['kg/cab en destino']),pkg:nz(o['$/kg']),ars:nz(o['$ total bruto']),est:norm(o['estado operacion']),obs:norm(o.observaciones)};});
   (function(){var ne=D.vg.filter(function(x){return !key(x.est)&&x.ton>0;});
     if(ne.length)W.push('VentasGranos: hay '+ne.length+' operaci'+(ne.length>1?'ones':'ón')+' sin "Estado operación" ('+ne.slice(0,6).map(function(x){return x.n+' '+f(x.ton,0)+' t'+(x.ment>=0?' '+D.meses[x.ment]:'');}).join(', ')+(ne.length>6?'…':'')+'). Conviene completarlo.');})();
@@ -993,6 +993,9 @@ function parseWorkbook(wb,fname){
   D.defStart=0;
   var mp=key(D.mesPresup),ix=-1;for(i=0;i<12;i++)if(key(D.meses[i])===mp)ix=i;
   if(ix>=0)D.defStart=ix;else{for(i=0;i<12;i++)if(!D.closed[i]){D.defStart=i;break;}}
+  D.hasPe=getSheet(wb,['VentasGranos']).ok&&!!findCell(getSheet(wb,['VentasGranos']),'Pendiente de entrega tn',{r1:80});
+  (function(){if(!D.hasPe)return;var mp=D.defStart,sf=D.vg.filter(function(x){var e=key(x.est);return x.ton>0&&x.pe==null&&(/^entr\.? ?fwd/.test(e)||/^realizado/.test(e))&&(x.ment<0||x.ment>mp);});
+    if(sf.length)W.push('VentasGranos: '+sf.length+' venta'+(sf.length>1?'s':'')+' con entrega futura sin "Pendiente de entrega tn" ('+sf.slice(0,5).map(function(x){return x.n+' '+f(x.ton,0)+' t'+(x.ment>=0?' '+D.meses[x.ment]:'');}).join(', ')+'). El tablero toma las toneladas completas como comprometidas.');})();
   /* --- insumos pendientes de compra (ExistInsumos) --- */
   D.ins=[];
   (function(){var EI=getSheet(wb,['ExistInsumos']);if(!EI.ok)return;
@@ -1437,19 +1440,21 @@ function exBreak(V,m){var map={},ord=[],U=STATE.cur==='USD';
   V.list.forEach(function(D){D.granos.forEach(function(g){if(g.unidad==='un')return;
     var n=g.nombre,o=map[n];if(!o){o=map[n]={n:n,ex:0,comp:0,fij:0,res:0,lib:0,exc:0,v:{}};ord.push(n);}
     var ex=Math.max(g.ton[m]||0,0),pr=g.ton[m]>0.5?g.exArs[m]/g.ton[m]:((g.pre[m]||0)*D.tc[m]);if(U)pr=pr/D.tc[m];
-    /* a fijar: cada contrato (ID. Contrato) se descuenta con sus fijaciones = otras operaciones del mismo grano y mismo ID, ya entregadas a ese mes */
     var VG=(D.vg||[]).filter(function(x){return key(x.n)===key(n)&&x.ton>0;}),isF=function(x){return /^entr\.? ?a fijar/.test(key(x.est));};
     var fids={};VG.forEach(function(x){if(isF(x)&&x.id)fids[x.id]=1;});
-    var pend=0,fij=0,byId={};
+    /* comprometido pendiente de entrega: columna "Pendiente de entrega tn"; sin dato, una venta con entrega futura cuenta completa */
+    var comp=0,fijT=0,byId={},pendId={};
     VG.forEach(function(x){var e=key(x.est);
-      if(isF(x)){if(x.ment<0||x.ment<=m){if(x.id)byId[x.id]=(byId[x.id]||0)+x.ton;else fij+=x.ton;}else pend+=x.ton;return;}
-      if(x.id&&fids[x.id]){if(x.ment<0||x.ment<=m)byId[x.id]=(byId[x.id]||0)-x.ton;return;}   /* fijación */
-      if(/^entr\.? ?fwd/.test(e)){if(x.ment<0||x.ment>m)pend+=x.ton;}
-      else if(/^realizado/.test(e)){if(x.ment>m)pend+=x.ton;}});
-    for(var kk in byId)fij+=Math.max(0,byId[kk]);
+      if(isF(x)){var pe=x.pe!=null?Math.min(x.pe,x.ton):((x.ment<0||x.ment<=m)?0:x.ton);
+        comp+=pe;if(x.id){byId[x.id]=(byId[x.id]||0)+x.ton;pendId[x.id]=(pendId[x.id]||0)+pe;}else fijT+=x.ton-pe;return;}
+      if(x.id&&fids[x.id]){if(x.ment<0||x.ment<=m)byId[x.id]=(byId[x.id]||0)-x.ton;return;}   /* fijación de un contrato a fijar */
+      if((/^entr\.? ?fwd/.test(e)||/^realizado/.test(e))&&(x.ment<0||x.ment>m))comp+=x.pe!=null?Math.min(x.pe,x.ton):x.ton;});
+    /* entregado a fijar sin vender = entregado (toneladas − pendiente de entrega) − fijaciones registradas con el mismo ID */
+    for(var kk in byId)fijT+=Math.max(0,byId[kk]-(pendId[kk]||0));
     var resF=0;for(var q=m+1;q<12;q++)resF+=Math.max(g.resv[q]||0,0);
-    var c=Math.min(ex,pend),fj=Math.min(ex-c,fij),rs=Math.min(ex-c-fj,resF),lb=ex-c-fj-rs;
-    o.ex+=ex;o.comp+=c;o.fij+=fj;o.res+=rs;o.lib+=lb;o.exc+=Math.max(0,pend-c);
+    /* orden del cuadro: reservas, comprometido, a fijar; lo que no entra en la existencia se informa como faltante */
+    var rs=Math.min(ex,resF),c=Math.min(ex-rs,comp),fj=Math.min(ex-rs-c,fijT),lb=ex-rs-c-fj;
+    o.ex+=ex;o.res+=rs;o.comp+=c;o.fij+=fj;o.lib+=lb;o.exc+=Math.max(0,resF+comp+fijT-ex);
     o.v.ex=(o.v.ex||0)+ex*pr;o.v.comp=(o.v.comp||0)+c*pr;o.v.fij=(o.v.fij||0)+fj*pr;o.v.res=(o.v.res||0)+rs*pr;o.v.lib=(o.v.lib||0)+lb*pr;});});
   return ord.map(function(n){return map[n];}).filter(function(o){return o.ex>0.5||o.exc>0.5;});}
 function setExbG(g){STATE.exbG=g;renderExB(curView());}
@@ -1457,7 +1462,7 @@ function renderExB(V){
   var s0=S0(V),T=STATE.exU==='t';
   /* mismo selector que el gráfico de arriba: los dos siempre muestran lo mismo */
   document.getElementById('exbT').className='inst-btn'+(T?' active':'');document.getElementById('exbV').className='inst-btn'+(!T?' active':'');document.getElementById('exbV').textContent='Valor '+sym();
-  var lab=V.meses.slice(s0),sel=STATE.exM-s0,K=[['lib','Libre para vender'],['comp','Comprometido (vendido sin entregar)'],['fij','Entregado a fijar'],['res','Reservas del ejercicio (uso propio)']];
+  var lab=V.meses.slice(s0),sel=STATE.exM-s0,K=[['lib','Disponible para vender'],['fij','Entregado a fijar sin vender'],['comp','Comprometido pendiente de entrega'],['res','Reservas (desde el mes siguiente)']];
   var per=[];for(var m=s0;m<12;m++)per.push(exBreak(V,m));
   /* en toneladas se mira de a una especie; en valor puede ser el total */
   var crops=[];per.forEach(function(L){L.forEach(function(o){if(o.ex>0.5&&crops.indexOf(o.n)<0)crops.push(o.n);});});
@@ -1480,16 +1485,14 @@ function renderExB(V){
   /* tabla del mes elegido */
   var L=(per[sel]||[]).filter(function(o){return o.ex>0.5;}),fm=function(o,k){var v=T?o[k]:(o.v[k]||0);return Math.abs(v)<0.5?'–':(T?f(v,0)+' t':mny(v));};
   document.getElementById('exbTit').textContent='Disponibilidad en '+mesAnio(V.list[0],STATE.exM);
-  var h='<thead><tr><th>Cultivo</th><th>Existencia</th><th>Comprometido</th><th>Entregado a fijar</th><th>Reservas del ejercicio</th><th>Libre para vender</th><th>% libre</th></tr></thead><tbody>',ex2=0;
-  L.forEach(function(o){var pl=o.ex?o.lib/o.ex:0;
-    h+='<tr><td class="tdname">'+esc(o.n)+'</td><td>'+fm(o,'ex')+'</td><td style="color:'+EXB_C.comp+'">'+fm(o,'comp')+'</td><td>'+fm(o,'fij')+'</td><td>'+fm(o,'res')+'</td><td style="font-weight:600">'+fm(o,'lib')+'</td><td>'+(o.ex?fpc(pl,0):'–')+'</td></tr>';
-    if(o.exc>0.5)ex2+=1;});
-  if(L.length&&!T){var S=function(k){return T?sum(L.map(function(o){return o[k];})):sum(L.map(function(o){return o.v[k]||0;}));},fx=function(v){return Math.abs(v)<0.5?'–':(T?f(v,0)+' t':mny(v));},se=S('ex');
-    h+='<tr class="tr-key"><td class="tdname">Total</td><td>'+fx(se)+'</td><td>'+fx(S('comp'))+'</td><td>'+fx(S('fij'))+'</td><td>'+fx(S('res'))+'</td><td>'+fx(S('lib'))+'</td><td>'+(se?fpc(S('lib')/se,0):'–')+'</td></tr>';}
+  var h='<thead><tr><th>Cultivo</th><th>Existencia total</th><th>Reservas (desde el mes siguiente)</th><th>Comprometido pendiente de entrega</th><th>Entregado a fijar sin vender</th><th>Disponible para vender</th></tr></thead><tbody>';
+  L.forEach(function(o){h+='<tr><td class="tdname">'+esc(o.n)+'</td><td style="font-weight:600">'+fm(o,'ex')+'</td><td>'+fm(o,'res')+'</td><td style="color:'+EXB_C.comp+'">'+fm(o,'comp')+'</td><td>'+fm(o,'fij')+'</td><td style="font-weight:700">'+fm(o,'lib')+'</td></tr>';});
+  if(L.length&&!T){var S=function(k){return sum(L.map(function(o){return o.v[k]||0;}));},fx=function(v){return Math.abs(v)<0.5?'–':mny(v);};
+    h+='<tr class="tr-key"><td class="tdname">Total</td><td>'+fx(S('ex'))+'</td><td>'+fx(S('res'))+'</td><td>'+fx(S('comp'))+'</td><td>'+fx(S('fij'))+'</td><td>'+fx(S('lib'))+'</td></tr>';}
   document.getElementById('exbTbl').innerHTML=L.length?h+'</tbody>':'<tbody><tr><td class="tdname">Sin existencia de granos en este mes.</td></tr></tbody>';
   var nt=(per[sel]||[]).filter(function(o){return o.exc>0.5;}).map(function(o){return o.n+' '+f(o.exc,0)+' t';});
-  document.getElementById('exbNote').textContent='Comprometido: forwards y ventas realizadas que todavía no se entregaron. Entregado a fijar: entregado, con precio abierto (a cada contrato se le descuentan sus fijaciones, por ID. Contrato). Reservas: uso propio de los meses siguientes hasta el cierre del ejercicio.'+
-    (nt.length?' Vendido de cosecha futura (más que la existencia del mes): '+nt.join(', ')+'.':'');
+  document.getElementById('exbNote').textContent='Reservas: uso propio desde el mes siguiente hasta el cierre del ejercicio. Comprometido: lo que falta entregar (columna "Pendiente de entrega tn" de VentasGranos). Entregado a fijar sin vender: lo entregado a fijar menos las fijaciones registradas con el mismo ID. Contrato.'+
+    (nt.length?' Faltante: reservas y compromisos superan la existencia del mes en '+nt.join(', ')+'.':'');
 }
 function renderEx(V){
   var s0=S0(V);if(STATE.exM==null||STATE.exM<s0)STATE.exM=s0;
