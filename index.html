@@ -337,6 +337,18 @@ table, .num, .cnt, input[type=number]{font-variant-numeric:tabular-nums}
           <span class="t-desc">Órdenes de trabajo, stock e insumos aplicados.</span>
         </a>
 
+        <!-- Registro de Pastoreos: SIN data-tool hasta que pa-core tenga el id
+             'registro_pastoreos' en HERRAMIENTAS_PROPIAS (handoff Mariana). Con
+             data-tool y sin el id, PA.can la ocultaría para todos, incluso admin.
+             Cuando esté el alta: agregar data-tool="registro_pastoreos". -->
+        <a class="tool" href="registro_pastoreos.html" title="Registro de pastoreos por potrero: entradas y salidas de hacienda, suplementación, existencias por rodeo y categoría, y estimación de la materia seca cosechada por recurso forrajero.">
+          <span class="t-ico"><svg viewBox="0 0 24 24"><path d="M3 20h18"/><path d="M5 20c0-4 1-7 2-9M9 20c0-5 1-9 3-12M14 20c0-4 1-7 3-9M19 20c0-3 0-5-1-7"/></svg></span>
+          <svg class="t-go" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          <span class="t-cat">Ganadería</span>
+          <span class="t-name">Registro de Pastoreos</span>
+          <span class="t-desc">Pastoreos por potrero, suplementación y materia seca cosechada.</span>
+        </a>
+
         <a class="tool" data-tool="exist_prod_ganadera" href="exist_prod_ganadera.html" title="Existencias de hacienda por negocio, rodeo y categoría. Movimientos, conciliación de stock y seguimiento de cabezas y kilos.">
           <span class="t-ico"><svg viewBox="0 0 24 24"><path d="M3 21V10l9-6 9 6v11z"/><path d="M9 21v-6h6v6"/></svg></span>
           <svg class="t-go" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
@@ -589,7 +601,7 @@ PA.init({ modo:'demo' }, function(){
     aplicarCtx(ctx);
     desdeHash();
   });
-  document.getElementById('fts2').textContent = 'Versión v2026-10-30 20:00 · BUILD 17';
+  document.getElementById('fts2').textContent = 'Versión v2026-11-09 18:03 · BUILD 18';
 });
 </script>
 
