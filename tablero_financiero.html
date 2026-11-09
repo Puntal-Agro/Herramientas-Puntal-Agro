@@ -318,6 +318,12 @@ footer{padding:14px 24px 22px;display:flex;justify-content:space-between;color:v
   .layout{grid-template-columns:1fr}
   .scroll{overflow:visible}
 }
+.exbTg{display:inline-block;width:13px;height:13px;line-height:11px;font-size:11px;text-align:center;border:1px solid #9AAE86;border-radius:3px;color:#4A6533;margin-right:7px;vertical-align:1px}
+.clkr:hover .exbTg{background:#EEF3E8}
+#exbTbl tr.exbSub td{font-size:11.5px;color:#64748B;padding-top:3px;padding-bottom:3px;background:#FAFBF8;border-top:none}
+#exbTbl tr.exbSub td.tdname{padding-left:30px;white-space:nowrap}
+#exbTbl th{white-space:normal;vertical-align:bottom}
+#exbTbl tr.exbSub.st td{color:#334155;font-weight:600;border-top:1px solid #E2E8DA}
 </style>
 </head>
 <body>
@@ -528,7 +534,7 @@ footer{padding:14px 24px 22px;display:flex;justify-content:space-between;color:v
       <div class="cw" style="height:300px"><canvas id="chExB"></canvas></div>
     </div>
     <div class="card">
-      <div class="chd"><div><div class="ct" id="exbTit"></div><div class="cs">Por cultivo · se descuenta en este orden: reservas, comprometido, entregado a fijar</div></div></div>
+      <div class="chd"><div><div class="ct" id="exbTit"></div><div class="cs">Por cultivo, en toneladas y en valor · lo que hay en el campo, lo que ya tiene destino y lo que queda para vender (en rojo si da negativo)</div></div></div>
       <div class="scroll"><table id="exbTbl"></table></div>
       <div class="note" id="exbNote"></div>
     </div>
@@ -583,7 +589,7 @@ footer{padding:14px 24px 22px;display:flex;justify-content:space-between;color:v
 
 <footer>
   <span>Puntal Agro · Herramientas para la toma de decisiones</span>
-  <span>Versión v2026-11-03 17:20 · BUILD 73 · Datos leídos: <span id="fts">—</span></span>
+  <span>Versión v2026-11-09 17:55 · BUILD 81 · Datos leídos: <span id="fts">—</span></span>
 </footer>
 
 <div id="dropOv"><div class="drop2">
@@ -1427,7 +1433,7 @@ function renderExCards(V,s0){
   var map={},order=[],U=STATE.cur==='USD';
   V.list.forEach(function(D){D.granos.forEach(function(g){
     if(!map[g.nombre]){map[g.nombre]={n:g.nombre,u:g.unidad,t0:0,v0:0,t1:0,v1:0};order.push(g.nombre);}
-    var m=map[g.nombre];m.t0+=g.ton[s0];m.t1+=g.ton[11];m.v0+=U?g.exArs[s0]/D.tc[s0]:g.exArs[s0];m.v1+=U?g.exArs[11]/D.tc[11]:g.exArs[11];});});
+    var m=map[g.nombre];m.t0+=g.ton[s0];m.t1+=g.ton[11];m.v0+=U?exV(g,D,s0)/D.tc[s0]:exV(g,D,s0);m.v1+=U?exV(g,D,11)/D.tc[11]:exV(g,D,11);});});
   var h='',n=0;
   order.forEach(function(nm,i){var m=map[nm];if(Math.abs(m.t0)<0.5&&Math.abs(m.t1)<0.5)return;var u=m.u==='un'?' un':' t';
     h+='<div class="stat'+(m.t0<-0.5?' alert':'')+'" style="border-left-color:'+grColor(nm,i)+';padding:10px 12px"><div class="k">'+esc(nm.replace(' (Un)',''))+' · '+esc(V.meses[s0])+'</div><div class="kv" style="font-size:18px">'+f(m.t0,0)+u+'</div>'+
@@ -1436,10 +1442,14 @@ function renderExCards(V,s0){
 }
 /* desglose de la existencia de un mes: comprometido / entregado a fijar / reservas del ejercicio / libre */
 var EXB_C={lib:'#E0A526',comp:'#C8642D',fij:'#B9A27A',res:'#4A6533'};
+/* valor de la existencia sin el corte en cero de la planilla: si las toneladas dan negativas, se muestran a precio estimado */
+function exV(g,D,q){var t=g.ton[q]||0,v=g.exArs[q]||0;return (t<-0.5&&Math.abs(v)<0.5)?t*(g.pre[q]||0)*(D.tc[q]||0):v;}
 function exBreak(V,m){var map={},ord=[],U=STATE.cur==='USD';
   V.list.forEach(function(D){D.granos.forEach(function(g){if(g.unidad==='un')return;
-    var n=g.nombre,o=map[n];if(!o){o=map[n]={n:n,ex:0,comp:0,fij:0,res:0,lib:0,exc:0,v:{}};ord.push(n);}
-    var ex=Math.max(g.ton[m]||0,0),pr=g.ton[m]>0.5?g.exArs[m]/g.ton[m]:((g.pre[m]||0)*D.tc[m]);if(U)pr=pr/D.tc[m];
+    var n=g.nombre,o=map[n];if(!o){o=map[n]={n:n,ex:0,comp:0,fij:0,res:0,lib:0,exc:0,v:{},ant:0,prod:0,resM:0,vent:0};ord.push(n);}
+    /* composición de la existencia del mes (como la calcula Exist.Granos) */
+    o.ant+=m>0?(g.ton[m-1]||0):(g.ini||0);o.prod+=g.prod[m]||0;o.resM+=g.resv[m]||0;o.vent+=g.vent[m]||0;
+    var ex=g.ton[m]||0,pr=Math.abs(g.ton[m])>0.5?g.exArs[m]/g.ton[m]:((g.pre[m]||0)*D.tc[m]);if(!(pr>0))pr=(g.pre[m]||0)*D.tc[m];if(U)pr=pr/D.tc[m];
     var VG=(D.vg||[]).filter(function(x){return key(x.n)===key(n)&&x.ton>0;}),isF=function(x){return /^entr\.? ?a fijar/.test(key(x.est));};
     var fids={};VG.forEach(function(x){if(isF(x)&&x.id)fids[x.id]=1;});
     /* comprometido pendiente de entrega: columna "Pendiente de entrega tn"; sin dato, una venta con entrega futura cuenta completa */
@@ -1451,21 +1461,26 @@ function exBreak(V,m){var map={},ord=[],U=STATE.cur==='USD';
       if((/^entr\.? ?fwd/.test(e)||/^realizado/.test(e))&&(x.ment<0||x.ment>m))comp+=x.pe!=null?Math.min(x.pe,x.ton):x.ton;});
     /* entregado a fijar sin vender = entregado (toneladas − pendiente de entrega) − fijaciones registradas con el mismo ID */
     for(var kk in byId)fijT+=Math.max(0,byId[kk]-(pendId[kk]||0));
-    var resF=0;for(var q=m+1;q<12;q++)resF+=Math.max(g.resv[q]||0,0);
+    /* reservas desde el mes siguiente hasta la próxima cosecha de ese cultivo, incluido el mes de cosecha (seguro por si se necesita antes de cosechar); si no hay otra cosecha en el ejercicio, hasta el cierre */
+    var resF=0;for(var q=m+1;q<12;q++){resF+=Math.max(g.resv[q]||0,0);if((g.prod[q]||0)>0.5)break;}
     /* orden del cuadro: reservas, comprometido, a fijar; lo que no entra en la existencia se informa como faltante */
-    var rs=Math.min(ex,resF),c=Math.min(ex-rs,comp),fj=Math.min(ex-rs-c,fijT),lb=ex-rs-c-fj;
-    o.ex+=ex;o.res+=rs;o.comp+=c;o.fij+=fj;o.lib+=lb;o.exc+=Math.max(0,resF+comp+fijT-ex);
-    o.v.ex=(o.v.ex||0)+ex*pr;o.v.comp=(o.v.comp||0)+c*pr;o.v.fij=(o.v.fij||0)+fj*pr;o.v.res=(o.v.res||0)+rs*pr;o.v.lib=(o.v.lib||0)+lb*pr;});});
-  return ord.map(function(n){return map[n];}).filter(function(o){return o.ex>0.5||o.exc>0.5;});}
+    /* sin topes: cada parte con su valor completo; si no alcanza, el disponible da negativo */
+    var rs=resF,c=comp,fj=fijT,lb=ex-rs-c-fj;
+    /* físico en el campo = existencia de la planilla − lo entregado a fijar sin vender (ya está en el acopio) */
+    var fis=ex-fj,tot=lb+fj;
+    o.ex+=ex;o.fis=(o.fis||0)+fis;o.tot=(o.tot||0)+tot;o.res+=rs;o.comp+=c;o.fij+=fj;o.lib+=lb;
+    o.v.ex=(o.v.ex||0)+ex*pr;o.v.fis=(o.v.fis||0)+fis*pr;o.v.tot=(o.v.tot||0)+tot*pr;o.v.comp=(o.v.comp||0)+c*pr;o.v.fij=(o.v.fij||0)+fj*pr;o.v.res=(o.v.res||0)+rs*pr;o.v.lib=(o.v.lib||0)+lb*pr;});});
+  return ord.map(function(n){return map[n];}).filter(function(o){return Math.abs(o.ex)>0.5||o.res>0.5||o.comp>0.5||o.fij>0.5;});}
+function togExbO(n){STATE.exbOpen=STATE.exbOpen||{};STATE.exbOpen[n]=!STATE.exbOpen[n];renderExB(curView());}
 function setExbG(g){STATE.exbG=g;renderExB(curView());}
 function renderExB(V){
   var s0=S0(V),T=STATE.exU==='t';
   /* mismo selector que el gráfico de arriba: los dos siempre muestran lo mismo */
   document.getElementById('exbT').className='inst-btn'+(T?' active':'');document.getElementById('exbV').className='inst-btn'+(!T?' active':'');document.getElementById('exbV').textContent='Valor '+sym();
-  var lab=V.meses.slice(s0),sel=STATE.exM-s0,K=[['lib','Disponible para vender'],['fij','Entregado a fijar sin vender'],['comp','Comprometido pendiente de entrega'],['res','Reservas (desde el mes siguiente)']];
+  var lab=V.meses.slice(s0),sel=STATE.exM-s0,K=[['lib','Disponible para vender (en el campo)'],['res','Reservas hasta la próxima cosecha'],['comp','Comprometido pendiente de entrega'],['fij','Entregado a fijar sin vender (en el acopio)']];
   var per=[];for(var m=s0;m<12;m++)per.push(exBreak(V,m));
   /* en toneladas se mira de a una especie; en valor puede ser el total */
-  var crops=[];per.forEach(function(L){L.forEach(function(o){if(o.ex>0.5&&crops.indexOf(o.n)<0)crops.push(o.n);});});
+  var crops=[];per.forEach(function(L){L.forEach(function(o){if((Math.abs(o.ex)>0.5||o.lib<-0.5)&&crops.indexOf(o.n)<0)crops.push(o.n);});});
   if(STATE.exbG==null)STATE.exbG='all';
   if(STATE.exbG!=='all'&&crops.indexOf(STATE.exbG)<0)STATE.exbG='all';
   if(T&&STATE.exbG==='all')STATE.exbG=crops[0]||'all';
@@ -1483,16 +1498,28 @@ function renderExB(V){
     o.onClick=function(e,els){if(els&&els.length){STATE.exM=s0+els[0].index;setTimeout(function(){renderEx(curView());},0);}};
     o.onHover=function(e,els){e.native.target.style.cursor=els&&els.length?'pointer':'default';};return o;})()});
   /* tabla del mes elegido */
-  var L=(per[sel]||[]).filter(function(o){return o.ex>0.5;}),fm=function(o,k){var v=T?o[k]:(o.v[k]||0);return Math.abs(v)<0.5?'–':(T?f(v,0)+' t':mny(v));};
+  var L=per[sel]||[],fm=function(o,k){var v=T?o[k]:(o.v[k]||0);return Math.abs(v)<0.5?'–':(T?f(v,0)+' t':mny(v));};
   document.getElementById('exbTit').textContent='Disponibilidad en '+mesAnio(V.list[0],STATE.exM);
-  var h='<thead><tr><th>Cultivo</th><th>Existencia total</th><th>Reservas (desde el mes siguiente)</th><th>Comprometido pendiente de entrega</th><th>Entregado a fijar sin vender</th><th>Disponible para vender</th></tr></thead><tbody>';
-  L.forEach(function(o){h+='<tr><td class="tdname">'+esc(o.n)+'</td><td style="font-weight:600">'+fm(o,'ex')+'</td><td>'+fm(o,'res')+'</td><td style="color:'+EXB_C.comp+'">'+fm(o,'comp')+'</td><td>'+fm(o,'fij')+'</td><td style="font-weight:700">'+fm(o,'lib')+'</td></tr>';});
-  if(L.length&&!T){var S=function(k){return sum(L.map(function(o){return o.v[k]||0;}));},fx=function(v){return Math.abs(v)<0.5?'–':mny(v);};
-    h+='<tr class="tr-key"><td class="tdname">Total</td><td>'+fx(S('ex'))+'</td><td>'+fx(S('res'))+'</td><td>'+fx(S('comp'))+'</td><td>'+fx(S('fij'))+'</td><td>'+fx(S('lib'))+'</td></tr>';}
+  /* la tabla muestra siempre toneladas y valor */
+  var tq=function(o,k){var v=o[k];return Math.abs(v)<0.5?'–':f(v,0)+' t';},tv=function(o,k){var v=o.v[k]||0;return Math.abs(v)<0.5?'':mny(v);};
+  var cel=function(o,k,st){var neg=o[k]<-0.5;return '<td style="'+(st||'')+(neg?';color:var(--neg)':'')+'">'+tq(o,k)+'<div style="font-size:11px;font-weight:400;color:'+(neg?'var(--neg)':'#64748B')+'">'+tv(o,k)+'</div></td>';};
+  var sep='border-left:2px solid #D5DFC8;';
+  var h='<thead><tr class="g"><th></th><th colspan="4" style="text-align:center;color:#4A6533">En el campo</th><th style="text-align:center;color:#8A5A2B;'+sep+'">En el acopio</th><th style="text-align:center;'+sep+'"></th></tr>'+
+    '<tr><th>Cultivo</th><th>Existencia física</th><th>− Comprometido pendiente de entrega</th><th>− Reservas hasta la próxima cosecha</th><th>= Disponible para vender</th><th style="'+sep+'">Entregado a fijar sin vender</th><th style="'+sep+'">Total para vender o fijar</th></tr></thead><tbody>';
+  STATE.exbOpen=STATE.exbOpen||{};
+  L.forEach(function(o){var op=!!STATE.exbOpen[o.n],kq=esc(o.n).replace(/'/g,"\\'");
+    h+='<tr><td class="tdname clkr" title="Ver cómo se compone la existencia" onclick="togExbO(\''+kq+'\')" style="cursor:pointer"><span class="exbTg">'+(op?'−':'+')+'</span>'+esc(o.n)+'</td>'+cel(o,'fis','font-weight:600')+
+      cel(o,'comp','color:'+EXB_C.comp)+cel(o,'res')+cel(o,'lib','font-weight:600')+cel(o,'fij',sep)+cel(o,'tot',sep+'font-weight:700;background:#F5F7F2')+'</tr>';
+    if(op){var M2=V.list[0].meses,mm=STATE.exM,
+      rw=function(t,v,st){return '<tr class="exbSub'+(st?' '+st:'')+'"><td class="tdname">'+t+'</td><td>'+(Math.abs(v)<0.5?'–':(v<0?'−':'')+f(Math.abs(v),0)+' t')+'</td><td></td><td></td><td></td><td style="'+sep+'"></td><td style="'+sep+'"></td></tr>';};
+      h+=rw(mm>0?'Cierre de '+M2[mm-1]:'Existencia inicial',o.ant)+rw('+ Producción',o.prod)+rw('− Reservas usadas',o.resM)+rw('− Ventas entregadas',o.vent)+
+        rw('= Existencia total',o.ex,'st')+rw('− A fijar (en el acopio)',o.fij)+rw('= Existencia en el campo',o.fis,'st');}});
+  if(L.length){var S=function(k){return sum(L.map(function(o){return o.v[k]||0;}));},fx=function(v){return Math.abs(v)<0.5?'–':mny(v);},ng=function(v){return v<-0.5?' style="color:var(--neg)"':'';};
+    h+='<tr class="tr-key"><td class="tdname">Total en '+sym()+'</td><td>'+fx(S('fis'))+'</td><td>'+fx(S('comp'))+'</td><td>'+fx(S('res'))+'</td><td'+ng(S('lib'))+'>'+fx(S('lib'))+'</td><td style="'+sep+'">'+fx(S('fij'))+'</td><td style="'+sep+(S('tot')<-0.5?'color:var(--neg)':'')+'">'+fx(S('tot'))+'</td></tr>';}
   document.getElementById('exbTbl').innerHTML=L.length?h+'</tbody>':'<tbody><tr><td class="tdname">Sin existencia de granos en este mes.</td></tr></tbody>';
-  var nt=(per[sel]||[]).filter(function(o){return o.exc>0.5;}).map(function(o){return o.n+' '+f(o.exc,0)+' t';});
-  document.getElementById('exbNote').textContent='Reservas: uso propio desde el mes siguiente hasta el cierre del ejercicio. Comprometido: lo que falta entregar (columna "Pendiente de entrega tn" de VentasGranos). Entregado a fijar sin vender: lo entregado a fijar menos las fijaciones registradas con el mismo ID. Contrato.'+
-    (nt.length?' Faltante: reservas y compromisos superan la existencia del mes en '+nt.join(', ')+'.':'');
+  var nt=L.filter(function(o){return o.lib<-0.5;}).map(function(o){return o.n;});
+  document.getElementById('exbNote').textContent='Existencia física: lo que está en el campo (existencia total menos lo entregado a fijar que ya está en el acopio). Comprometido: vendido y pendiente de entrega (columna "Pendiente de entrega tn"). Reservas: uso propio desde el mes siguiente hasta la próxima cosecha, incluido el mes de cosecha. Entregado a fijar sin vender: en el acopio, se convierte en plata al fijar el precio. Total para vender o fijar = disponible en el campo + entregado a fijar sin vender.'+
+    (nt.length?' Disponible negativo ('+nt.join(', ')+'): compromisos y reservas superan la existencia física del mes.':'');
 }
 function renderEx(V){
   var s0=S0(V);if(STATE.exM==null||STATE.exM<s0)STATE.exM=s0;
@@ -1504,7 +1531,7 @@ function renderEx(V){
   var map={},order=[];
   V.list.forEach(function(D){D.granos.forEach(function(g){if(T&&g.unidad==='un')return;
     if(!map[g.nombre]){map[g.nombre]=zeros(12);order.push(g.nombre);}
-    for(var q=0;q<12;q++)map[g.nombre][q]+=T?g.ton[q]:(STATE.cur==='USD'?g.exArs[q]/D.tc[q]:g.exArs[q]);});});
+    for(var q=0;q<12;q++)map[g.nombre][q]+=T?g.ton[q]:(STATE.cur==='USD'?exV(g,D,q)/D.tc[q]:exV(g,D,q));});});
   order.forEach(function(n,i){var a=map[n].slice(s0);if(!sum(a.map(Math.abs)))return;var c=grColor(n,i);
     ds.push({label:n.replace(' (Un)',''),data:a,backgroundColor:lab.map(function(x,j){return j===sel?c:c+'99';}),borderRadius:2,maxBarThickness:40});
     leg+='<span><i class="sw" style="background:'+c+'"></i> '+esc(n.replace(' (Un)',''))+'</span>';});
