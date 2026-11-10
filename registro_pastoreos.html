@@ -6,6 +6,7 @@
 <title>Registro de Pastoreos · Puntal Agro</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="pa-core.js"></script>
 <style>
 /* Layout: header + barra de secciones (estilo Puntal) + una card de trabajo por sección */
@@ -133,7 +134,7 @@ footer{border-top:1px solid var(--border);background:var(--card);font-size:11px;
 </main>
 <footer class="gut">
   <span>Registro de Pastoreos · Puntal Agro</span>
-  <span>Versión v2026-11-10 15:35 · BUILD 59</span>
+  <span>Versión v2026-11-10 16:25 · BUILD 60</span>
 </footer>
 <script>
 /* ============================================================
@@ -157,6 +158,7 @@ footer{border-top:1px solid var(--border);background:var(--card);font-size:11px;
    Convención: campaña ganadera julio-junio, asignada por fecha de inicio del pastoreo.
    BUILD 58: recurso forrajero por lote editable (Plan de Uso por defecto + corrección manual), como la superficie ganadera.
    BUILD 59: categorías de hacienda generales del sistema; solo Puntal (admin_general) las crea o modifica.
+   BUILD 60: botón Exportar Excel (SheetJS): baja las tablas de la sección activa tal como se ven, con filtros.
    ============================================================ */
 var TOOL_ID='registro_pastoreos'; /* id de la herramienta en pa-core (HERRAMIENTAS_PROPIAS) */
 /* Permiso por herramienta. Si pa-core todavía no tiene dado de alta TOOL_ID, se chequea solo el
@@ -437,6 +439,7 @@ function renderHeader(){var es=CTX.empresasDisponibles||[],h='<label class="hsel
   for(i=0;i<es.length;i++)h+='<option value="'+es[i].id+'"'+(es[i].id===EMP?' selected':'')+'>'+esc(es[i].razonSocial||es[i].id)+'</option>';
   h+='</select></label><label class="hsel">Campaña <select id="h_camp" onchange="cambiarCampania(this.value)">'+campOptions(CAMP)+'</select></label>'+
     '<span class="role">'+esc(CTX.usuario.nombre)+' · '+(CAN_ADM?'Administrar':CAN?'Cargar':'Solo lectura')+'</span>'+
+    '<button class="btn pri" onclick="exportarExcel()" title="Baja a Excel las tablas de la sección que estás viendo, con los filtros aplicados">Exportar Excel</button>'+
     '<a class="btn hmenu" href="index.html#ges">← Menú</a>';
   document.getElementById('hright').innerHTML=h;}
 var KEEP_POS=false; /* conservar scroll y foco al editar una celda */
@@ -479,6 +482,32 @@ function usos(){var u={rec:{},pot:{},cat:{},ing:{},rac:{},rod:{}},gs=vals(S.past
   return u;}
 function dFmt(t){var s=ds(t);return s.substr(8,2)+'/'+s.substr(5,2)+'/'+s.substr(2,2);}
 function v(id){var e=document.getElementById(id);return e?e.value.replace(/^\s+|\s+$/g,''):'';}
+/* ---------- EXPORTAR A EXCEL: las tablas de la sección activa, tal como se ven (con filtros) ---------- */
+function xlsCelda(td){var s=td.querySelector('select');var t=s?(s.options[s.selectedIndex]?s.options[s.selectedIndex].text:''):(td.innerText||td.textContent||'');
+  t=String(t).replace(/\s+/g,' ').replace(/^\s|\s$/g,'').replace(/^[\u25BE\u25B8\u25BC\u25BA]\s*/,'');if(t==='—')return '';
+  var num=/^-?[\d.]+(,\d+)?%?$/.test(t)&&(/(^|\s)r(\s|$)/.test(td.className)||/^-?\d/.test(t));
+  if(num){var pc=t.charAt(t.length-1)==='%',v=parseAR(pc?t.slice(0,-1):t);if(v!==null)return pc?v/100:v;}
+  return t;}
+function xlsEnc(th){var t='';for(var i=0;i<th.childNodes.length;i++){var n=th.childNodes[i];if(n.nodeType===3)t+=n.nodeValue;else if(n.tagName!=='SELECT'&&n.tagName!=='BR')t+=(n.innerText||n.textContent||'');}
+  return t.replace(/\s+/g,' ').replace(/^\s|\s$/g,'');}
+function xlsNombre(t,usados){var n=String(t||'Tabla').replace(/[\\\/\?\*\[\]:]/g,' ').replace(/\s+/g,' ').replace(/^\s|\s$/g,'').substr(0,28)||'Tabla',b=n,k=2;
+  while(usados[n.toLowerCase()]){n=b.substr(0,26)+' '+k;k++;}usados[n.toLowerCase()]=1;return n;}
+function exportarExcel(){
+  if(typeof XLSX==='undefined'){alert('No se cargó la librería de Excel. Verificá la conexión a internet y recargá la página.');return;}
+  var main=document.getElementById('main'),tabs=main?main.querySelectorAll('table'):[],wb=XLSX.utils.book_new(),usados={},n=0,i,j,k,secc='';
+  for(i=0;i<TABS.length;i++)if(TABS[i][0]===tab)secc=TABS[i][1];
+  var info=[['Registro de Pastoreos · Puntal Agro'],[],['Empresa',empName()],['Campaña',campName(CAMP)],['Sección',secc],['Exportado',new Date().toLocaleString('es-AR')],['Usuario',CTX.usuario.nombre],[],['Se exporta lo que se ve en pantalla, con los filtros aplicados.']];
+  var wsI=XLSX.utils.aoa_to_sheet(info);wsI['!cols']=[{wch:12},{wch:50}];XLSX.utils.book_append_sheet(wb,wsI,xlsNombre('Info',usados));
+  for(i=0;i<tabs.length;i++){var tb=tabs[i],aoa=[],card=tb.closest?tb.closest('.card'):null,ct=card?card.querySelector('.ct'):null,tit=(ct?ct.textContent:secc).replace(/\s*·\s*[\d.]+\s*$/,'');
+    var ths=tb.querySelectorAll('thead tr');for(j=0;j<ths.length;j++){var fila=[],cs=ths[j].children;for(k=0;k<cs.length;k++){fila.push(xlsEnc(cs[k]));for(var c2=1;c2<(cs[k].colSpan||1);c2++)fila.push('');}aoa.push(fila);}
+    var trs=tb.querySelectorAll('tbody tr');for(j=0;j<trs.length;j++){if(trs[j].querySelector('.empty'))continue;var fr=[],tds=trs[j].children;
+      for(k=0;k<tds.length;k++){fr.push(xlsCelda(tds[k]));for(var c3=1;c3<(tds[k].colSpan||1);c3++)fr.push('');}aoa.push(fr);}
+    if(aoa.length<=ths.length)continue;
+    var ws=XLSX.utils.aoa_to_sheet(aoa),cols=[];for(j=0;j<aoa.length;j++)for(k=0;k<aoa[j].length;k++){var L=String(aoa[j][k]).length;if(!cols[k]||cols[k].wch<L)cols[k]={wch:Math.min(Math.max(L,8),45)};}
+    ws['!cols']=cols;XLSX.utils.book_append_sheet(wb,ws,xlsNombre(tit,usados));n++;}
+  if(!n){alert('La sección “'+secc+'” no tiene tablas con datos para exportar.');return;}
+  var limpio=function(s){return String(s||'').replace(/[^\wÁÉÍÓÚÑáéíóúñ-]+/g,'_').replace(/^_+|_+$/g,'').substr(0,40);};
+  XLSX.writeFile(wb,'Pastoreos_'+limpio(secc)+'_'+limpio(empName())+'_'+limpio(campName(CAMP))+'_'+hoy()+'.xlsx');}
 function say(t,err){msg=t;msgErr=!!err;render();}
 
 /* ---------- LOTES (se leen de pa-core) ---------- */
