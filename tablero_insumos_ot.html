@@ -189,6 +189,12 @@ tbody tr:hover td{background:#FAFBFC}
 .col-na{color:#C7CDD6;text-align:center}
 /* Dato faltante que tiene consecuencias (ej: consumo sin imputar, no llega a Costos). */
 .pc-mark{color:#9A4A16;font-weight:700}
+.mb-sec-tot td{font-weight:700!important;color:#2F4220}
+.mb-sec-tot td.num{font-size:13px;text-transform:none;letter-spacing:0}
+.pc-sec td{background:#4A6533!important;color:#fff;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:7px 10px!important}
+.pc-grp td{background:#E3EBD9!important;color:#2F4220;font-size:12.5px;font-weight:700;padding:6px 10px 6px 14px!important;border-top:1px solid #C9D6BB;border-bottom:1px solid #C9D6BB}
+.pc-grp td span{font-weight:400;color:#5B6B4E;font-size:11.5px;margin-left:6px}
+.pc-row td.tdname{padding-left:22px}
 .pc-mod td{background:#FCF4EC}
 .pc-mod td input.inp-num{border-color:var(--terra)}
 .bdg-falta{display:inline-block;padding:1px 7px;border-radius:9px;font-size:10px;font-weight:600;background:#FDF0E6;color:#9A4A16;border:1px solid #F0C9A8;white-space:nowrap;cursor:help}
@@ -413,16 +419,16 @@ tbody tr:hover td{background:#FAFBFC}
    En pantalla está oculto; al imprimir es lo ÚNICO que se ve. */
 #otPrint{display:none}
 .pr-doc{font-family:var(--sans);color:#000;font-size:11pt}
-.pr-hd{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #000;padding-bottom:6px;margin-bottom:10px;gap:14px}
+.pr-hd{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:14px;gap:14px}
 .pr-num-ot{font-size:15pt;font-weight:700;letter-spacing:.5px}
 .pr-emp{font-size:10pt;color:#444}
 .pr-hd-r{text-align:right;font-size:9.5pt;line-height:1.7}
 .pr-l{color:#666;font-size:8pt;text-transform:uppercase;letter-spacing:.5px;margin-right:3px}
-.pr-obs-gral{border:1px solid #999;padding:5px 8px;margin-bottom:10px;font-size:9.5pt;background:#F7F7F7}
+.pr-obs-gral{border:1px solid #999;padding:7px 10px;margin-bottom:14px;font-size:9.5pt;background:#F7F7F7;line-height:1.4}
 .pr-obs-l{font-weight:600;font-size:8.5pt;text-transform:uppercase;color:#555;letter-spacing:.4px}
 /* Bloque de un lote: no se parte entre páginas */
-.pr-lote{border:1.5px solid #000;margin-bottom:9px;page-break-inside:avoid;break-inside:avoid}
-.pr-lote-hd{display:flex;justify-content:space-between;align-items:center;background:#EAEDE6;border-bottom:1px solid #000;padding:5px 8px;gap:12px}
+.pr-lote{border:1.5px solid #000;margin-bottom:14px;page-break-inside:avoid;break-inside:avoid}
+.pr-lote-hd{display:flex;justify-content:space-between;align-items:center;background:#EAEDE6;border-bottom:1px solid #000;padding:8px 10px;gap:12px}
 .pr-lote-tit{font-size:11.5pt;font-weight:700}
 .pr-lote-campo{font-weight:400;color:#555;font-size:9pt}
 .pr-supapl{display:flex;align-items:center;gap:5px;font-size:8pt;font-weight:600;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
@@ -436,15 +442,15 @@ tbody tr:hover td{background:#FAFBFC}
 /* Una tabla por lote: la LABOR es una fila (en negrita, sobre fondo gris) y sus
    insumos van indentados debajo. Así se lee "qué hay que hacer" y "con qué". */
 .pr-tbl-lote{margin:0}
-.pr-fila-labor td{background:#F1F3EE;border-top:1px solid #999;border-bottom:1px solid #DDD;padding-top:4px;padding-bottom:4px}
+.pr-fila-labor td{background:#F1F3EE;border-top:1px solid #999;border-bottom:1px solid #DDD;padding-top:8px;padding-bottom:8px}
 .pr-lote .pr-tbl-lote tbody tr:first-child td{border-top:none}
 .pr-lab{font-weight:700;text-transform:uppercase;font-size:9.5pt;letter-spacing:.3px}
 .pr-lab-tipo{font-weight:400;text-transform:none;color:#666;font-size:8pt;margin-left:6px;letter-spacing:0}
 .pr-lab-tipo::before{content:'· '}
 .pr-vacio-ins{color:#999;font-style:italic;font-size:8.5pt}
 .pr-tbl{width:100%;border-collapse:collapse;font-size:9.5pt;table-layout:fixed}
-.pr-tbl th{text-align:left;font-size:7.5pt;text-transform:uppercase;letter-spacing:.3px;color:#555;border-bottom:1px solid #999;padding:3px 8px;font-weight:600}
-.pr-tbl td{border-bottom:1px solid #E4E4E4;padding:3px 8px}
+.pr-tbl th{text-align:left;font-size:7.5pt;text-transform:uppercase;letter-spacing:.3px;color:#555;border-bottom:1px solid #999;padding:6px 8px 5px;font-weight:600;vertical-align:bottom;line-height:1.25}
+.pr-tbl td{border-bottom:1px solid #E4E4E4;padding:8px 8px;vertical-align:middle;line-height:1.3}
 .pr-tbl tr:last-child td{border-bottom:none}
 /* Aire contra el marco del bloque: sin esto los números quedan pegados al borde
    y el encabezado se ve corrido respecto de sus valores. */
@@ -466,18 +472,19 @@ tbody tr:hover td{background:#FAFBFC}
 .pr-un{color:#666}
 .pr-num{text-align:right;font-family:var(--mono);white-space:nowrap}
 .pr-vacio{color:#999;font-style:italic;text-align:center;padding:5px}
-.pr-obs{padding:4px 8px;font-size:9pt;border-top:1px solid #DDD;background:#FAFAFA}
+.pr-obs{padding:9px 10px;font-size:9pt;border-top:1px solid #DDD;background:#FAFAFA}
 .pr-linea{display:inline-block;border-bottom:1px solid #999;min-width:280px;height:12px}
 /* Totales de la orden: lo que se retira del depósito */
-.pr-tot{border:1.5px solid #000;margin-top:26px;page-break-inside:avoid;break-inside:avoid}
+.pr-tot{border:1.5px solid #000;margin-top:20px;page-break-inside:avoid;break-inside:avoid}
+.pr-cierre{page-break-inside:avoid;break-inside:avoid}
 .pr-tot-tit{background:#EAEDE6;border-bottom:1px solid #000;padding:6px 8px;font-size:10.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.3px;text-align:center}
 .pr-tot .pr-tbl{padding:0 8px}
 .pr-tot .pr-tbl th{padding-top:5px}
-.pr-tot .pr-tbl td{padding:5px 4px}
+.pr-tot .pr-tbl td{padding:9px 6px}
 .pr-box-th{text-align:center}
 .pr-box-td{text-align:center}
 .pr-box-td .pr-box{width:78px;height:30px}
-.pr-firmas{display:flex;gap:26px;margin-top:26px;page-break-inside:avoid}
+.pr-firmas{display:flex;gap:26px;margin-top:30px;page-break-inside:avoid;break-inside:avoid}
 .pr-firma{flex:1;font-size:8pt;color:#555;text-align:center;text-transform:uppercase;letter-spacing:.4px}
 .pr-firma-l{border-bottom:1px solid #000;height:34px;margin-bottom:3px}
 
@@ -618,6 +625,16 @@ tbody tr:hover td{background:#FAFBFC}
 .otv3-tbl td,.otv3-tbl th{vertical-align:middle}
 .otv-vacio{padding:26px 16px;text-align:center;color:var(--muted);font-size:13px}
 .addlote-cult{width:100%;font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#3B5226;margin:6px 0 2px}
+.addlote-grp{width:100%;border:1px solid var(--border);border-radius:8px;margin:0 0 6px;background:var(--card)}
+.addlote-grp>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;margin:0;padding:7px 10px;user-select:none}
+.addlote-grp>summary::-webkit-details-marker{display:none}
+.addlote-grp>summary:hover{background:#F4F6F1;border-radius:8px}
+.addlote-car{display:inline-block;transition:transform .15s;color:var(--muted)}
+.addlote-grp[open] .addlote-car{transform:rotate(90deg)}
+.addlote-info{font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);font-size:11px}
+.addlote-sel{font-weight:600;text-transform:none;letter-spacing:0;color:#9A4A16;font-size:11px}
+.addlote-todos{margin-left:auto;font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:#4A6533}
+.addlote-chips{display:flex;flex-wrap:wrap;gap:6px;padding:4px 10px 10px}
 .real-tbl td{vertical-align:top}
 .real-tbl tr.real-grp td{border-top:1px solid var(--border)}
 .real-tbl tr.real-sub td{border-top:1px dashed #E7EAE2}
@@ -713,8 +730,60 @@ body:not([data-tab="maestros"]) .btn-reset-gl{display:none!important}
 .otmap-cv.lejos .pamap-txt{display:none}
 @media print{.toast{display:none!important}}
 .pr-mapa-pag{break-before:page;page-break-before:always;margin-top:0}
+.imp-opc{display:flex;gap:10px;flex-wrap:wrap}
+/* Costos: tarjeta de cálculo (precios + moneda) */
+.cost-calc{border-left:4px solid #4A6533}
+.cost-calc-row{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+.cost-calc-g{display:flex;align-items:center;gap:10px;padding-left:22px;border-left:1px solid var(--border)}
+.cost-calc-l{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.seg{display:inline-flex;border:1.5px solid #4A6533;border-radius:8px;overflow:hidden}
+.seg button{border:0;background:var(--card);color:#4A6533;font-family:var(--sans);font-size:12.5px;font-weight:600;padding:6px 14px;cursor:pointer}
+.seg button+button{border-left:1.5px solid #4A6533}
+.seg button.on{background:#4A6533;color:#fff}
+.cost-cfg-btn{font-size:12.5px;padding:6px 12px;border-color:#4A6533;color:#3B5226;font-weight:600}
+#costPCAviso .banner-info,#costPCAviso .banner-warn{margin:12px 0 0!important}
+@media (max-width:760px){.cost-calc-g{padding-left:0;border-left:0}}
+.ins-con-cat{display:flex;gap:4px;align-items:center}
+.ins-con-cat .sel-cat{width:auto;max-width:130px;flex:0 0 auto;font-size:11.5px;color:var(--muted)}
+.ins-con-cat select:last-child{flex:1;min-width:0}
+/* Confirmar: avance + zonas confirmado / falta (BUILD 32) */
+.cf-avance{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:16px;padding:12px 14px;border:1px solid var(--border);border-radius:10px;background:#FBFCFA;margin:4px 0 14px}
+.cf-av-txt{display:flex;flex-direction:column;gap:2px;font-size:14px}
+.cf-av-txt span{font-size:12px;color:var(--muted)}
+.cf-bar{height:10px;border-radius:6px;background:#F3E3CF;overflow:hidden}
+.cf-bar i{display:block;height:100%;background:#4A6533;border-radius:6px}
+.cf-chips{display:flex;gap:6px}
+.cf-chip{font-size:12px;font-weight:600;padding:3px 10px;border-radius:12px;white-space:nowrap}
+.cf-chip.ok{background:#E3EBD9;color:#3B5226}
+.cf-chip.pend{background:#F7E1C4;color:#8A4A10}
+.cf-zona{border:1px solid var(--border);border-radius:10px;margin:0 0 14px;overflow:hidden;background:var(--card)}
+.cf-zona-hd{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;list-style:none}
+.cf-zona-hd::-webkit-details-marker{display:none}
+.cf-ic{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;font-size:13px;font-weight:700}
+.cf-tit{font-size:14px;font-weight:600}
+.cf-cnt{font-size:12px;font-weight:600}
+.cf-lotes{font-size:12px;color:var(--muted)}
+.cf-ver{margin-left:auto;font-size:12px;color:#4A6533}
+.cf-zona-bd{padding:4px 14px 12px}
+.cf-falta{border:1.5px solid #E0A458;border-left:5px solid #C8642D}
+.cf-falta>.cf-zona-hd{background:#FDF3E6;border-bottom:1px solid #F0D6B4}
+.cf-falta .cf-ic{background:#F7E1C4}
+.cf-falta .cf-tit,.cf-falta .cf-cnt{color:#8A4A10}
+.cf-ok{border-left:5px solid #4A6533}
+.cf-ok>.cf-zona-hd{background:#F1F5EC;cursor:pointer}
+.cf-ok[open]>.cf-zona-hd{border-bottom:1px solid #DCE5D2}
+.cf-ok .cf-ic{background:#4A6533;color:#fff}
+.cf-ok .cf-tit,.cf-ok .cf-cnt{color:#3B5226}
+.cf-ok[open] .cf-ver{display:none}
+@media (max-width:760px){.cf-avance{grid-template-columns:1fr}}
+.imp-opc-b{flex:1;min-width:180px;text-align:left;border:1.5px solid var(--border);border-radius:10px;background:var(--card);padding:12px 14px;cursor:pointer;font-family:var(--sans);display:flex;flex-direction:column;gap:4px}
+.imp-opc-b b{font-size:14px;color:var(--text)}
+.imp-opc-b span{font-size:11.5px;color:var(--muted)}
+.imp-opc-b:hover{border-color:#4A6533;background:#F4F6F1}
+.imp-opc-b.on{border-color:#4A6533;box-shadow:0 0 0 2px rgba(74,101,51,.15)}
+.pr-mapa-tbl td{line-height:1.35}
 .pr-mapa-img{display:block;width:100%;border:0.5px solid #888;margin:3mm 0 4mm}
-.pr-mapa-tbl td{padding:1.6mm 2mm;border-bottom:0.5px solid #bbb;font-size:9.5pt;vertical-align:top}
+.pr-mapa-tbl td{padding:2.6mm 2mm;border-bottom:0.5px solid #bbb;font-size:9.5pt;vertical-align:top}
 .pr-mapa-tbl th{text-align:left;font-size:8pt;text-transform:uppercase;letter-spacing:.3px;border-bottom:1px solid #000;padding:1.4mm 2mm}
 .pr-mapa-tbl a{color:#000}
 .pr-mapa-n{display:inline-block;min-width:6mm;text-align:center;border-radius:3mm;background:#C8642D;color:#fff;font-weight:700;padding:0.3mm 1mm;-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -786,7 +855,8 @@ body:not([data-tab="maestros"]) .btn-reset-gl{display:none!important}
 /* Ventana de fechas del stock */
 .stk-win{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px;font-size:12px}
 .stk-win label{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em}
-.stk-win input[type=date]{font-size:12px}
+.stk-win input[type=date]{font-family:var(--mono);font-size:12px;color:var(--text);border:1px solid var(--border);border-radius:6px;padding:5px 8px;background:var(--card)}
+.stk-win input[type=date]:focus{outline:none;border-color:#4A6533;background:#F0F4EC}
 .stk-win-lbl{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
 /* Permisos: ocultar acciones según nivel */
 body.nivel-ver .need-cargar, body.nivel-ver .need-admin, body.nivel-cargar .need-admin{display:none!important}
@@ -1260,18 +1330,31 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
         <input type="date" id="costDesde" onchange="renderCostos()" title="Desde">
         <input type="date" id="costHasta" onchange="renderCostos()" title="Hasta">
         <button class="btn btn-sm" onclick="clearCostFilters()">Limpiar filtros</button>
-        <button class="btn btn-sm" id="costCfgBtn" onclick="openPreciosCosto()" title="Precios solo para calcular costos: no cambian el stock, el cierre ni lo que se factura en Labores">⚙ Configurar precios para costos</button>
-        <span id="costPrecSel" style="display:inline-flex;align-items:center;gap:4px;margin-left:auto">
-          <span style="font-size:11px;color:var(--muted)">Precios:</span>
-          <button class="pill" id="costPrecStock" onclick="setCostPrecios('stock')" title="Insumos al precio del stock y labores con la tarifa de las OT">de stock</button>
-          <button class="pill on" id="costPrecCfg" onclick="setCostPrecios('cfg')" title="Con los precios configurados para costos (donde no hay, el de stock)">para costos</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUILD 32: cómo se calcula (precios y moneda), separado de los filtros -->
+  <div class="card cost-calc">
+    <div class="cost-calc-row">
+      <span class="ct-lg">Cálculo</span>
+      <div class="cost-calc-g">
+        <span class="cost-calc-l">Precios</span>
+        <span class="seg">
+          <button id="costPrecStock" onclick="setCostPrecios('stock')" title="Insumos al precio del stock y labores con la tarifa de las OT">De stock</button>
+          <button class="on" id="costPrecCfg" onclick="setCostPrecios('cfg')" title="Con los precios configurados para costos (donde no hay, el de stock)">Para costos</button>
         </span>
-        <span style="display:inline-flex;align-items:center;gap:4px">
-          <button class="pill on" id="costMonARS" onclick="setCostMoneda('ARS')">$</button>
-          <button class="pill" id="costMonUSD" onclick="setCostMoneda('USD')">U$S</button>
+        <button class="btn btn-sm cost-cfg-btn" id="costCfgBtn" onclick="openPreciosCosto()" title="Precios solo para calcular costos: no cambian el stock, el cierre ni lo que se factura en Labores">⚙ Configurar precios para costos</button>
+      </div>
+      <div class="cost-calc-g">
+        <span class="cost-calc-l">Moneda</span>
+        <span class="seg">
+          <button class="on" id="costMonARS" onclick="setCostMoneda('ARS')">$</button>
+          <button id="costMonUSD" onclick="setCostMoneda('USD')">U$S</button>
         </span>
       </div>
     </div>
+    <div id="costPCAviso"></div>
   </div>
 
   <div class="card">
@@ -1333,7 +1416,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
 </main>
 
 <footer>
-  <span>Puntal Agro · Insumos &amp; OT · Versión v2026-11-10 16:45 · BUILD 32</span>
+  <span>Puntal Agro · Insumos &amp; OT · Versión v2026-11-11 10:05 · BUILD 33</span>
   <span id="fts">—</span>
 </footer>
 
@@ -3259,7 +3342,8 @@ function renderCierreStockPaso2(){
     '<div class="banner-info" style="margin-bottom:10px"><strong>Cómo funciona el precio.</strong> '+esc(TXT_PRECIO)+' El valor sugerido es el promedio vigente al '+fd(t.corte)+'; si lo cambiás, queda fijado a mano para todo el insumo.</div>'+
     '<p style="font-size:12px;color:#3B5226;margin-bottom:12px"><strong>'+nAj+'</strong> ajuste'+(nAj===1?'':'s')+' a registrar · Valor contado: '+(partes.length?partes.join(' + '):'—')+'</p>'+
     '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:8px;font-size:12px"><span style="color:var(--muted)">¿Apareció un insumo que no figura?</span>'+
-      '<select id="cs_addIns" class="inp" style="width:auto;max-width:240px">'+opcionesInsumoAgrupadas('', '— Insumo —')+'</select>'+
+      '<span class="ins-con-cat">'+selCatInsumo(window.csCat||'', 'window.csCat=this.value;byId(\'cs_addIns\').innerHTML=opcionesInsumoAgrupadas(\'\', \'— Insumo —\', this.value)')+
+      '<select id="cs_addIns" class="inp" style="width:auto;max-width:240px">'+opcionesInsumoAgrupadas('', '— Insumo —', window.csCat||'')+'</select></span>'+
       '<select id="cs_addDep" class="inp" style="width:auto">'+depositoOptions('')+'</select>'+
       '<button class="btn btn-sm" onclick="cierreAgregarFila()">+ Agregar fila</button></div>'+
     '<div class="tw tw-scroll" style="max-height:400px;overflow-y:auto"><table><thead><tr><th>Insumo</th><th>Un.</th><th>Depósito</th><th class="num">Real a la fecha</th><th class="num">Conteo</th><th class="num">Dif.</th><th class="num">Precio cierre</th><th>Origen</th><th>Mon.</th><th class="num">Valor</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
@@ -3350,7 +3434,16 @@ function populateMovSelects(){
   if(!movLineasTmp.length) movLineasTmp=[nuevaMovLinea()];
   renderMovLineas();
 }
-function insumoOptions(selId){ return opcionesInsumoAgrupadas(selId, '— Insumo —'); }
+function insumoOptions(selId, cat){ return opcionesInsumoAgrupadas(selId, '— Insumo —', cat); }
+// BUILD 32: categoría antes del insumo, para filtrar la lista. ln._cat guarda la elegida;
+// si no hay, se toma la del insumo ya elegido.
+function catDeLinea(ln){ if(ln && ln._cat!==undefined) return ln._cat; var x=ln?getInsumo(ln.insumoId):null; return x?(x.cat||''):''; }
+function selCatInsumo(cat, onchg){
+  var o='<option value="">Categoría…</option>';
+  for(var i=0;i<state.catInsumos.length;i++) o+='<option value="'+esc(state.catInsumos[i])+'"'+(state.catInsumos[i]===cat?' selected':'')+'>'+esc(state.catInsumos[i])+'</option>';
+  return '<select class="inp sel-cat" title="Categoría: filtra la lista de insumos" onchange="'+onchg+'">'+o+'</select>';
+}
+function catAlElegir(ln, insId){ var x=getInsumo(insId); if(x) ln._cat=x.cat||''; }
 function depositoOptions(selId, conVacio){
   var h = conVacio===false ? '' : '<option value="">—</option>';
   for(var k=0;k<state.depositos.length;k++){ var d=state.depositos[k];
@@ -3368,7 +3461,7 @@ function removeMovLinea(idx){ movLineasTmp.splice(idx,1); if(!movLineasTmp.lengt
 function syncMovLinea(idx, campo, val){
   var ln=movLineasTmp[idx]; if(!ln) return;
   ln[campo]=val;
-  if(campo==='insumoId'){
+  if(campo==='insumoId'){ catAlElegir(ln, val);
     // Sugerencias del insumo: su moneda y su depósito habitual.
     var ins=getInsumo(val);
     if(ins){ ln.moneda=ins.moneda||'ARS'; if(!ln.destinoId && ins.depositoId) ln.destinoId=ins.depositoId; if(!ln.origenId && ins.depositoId) ln.origenId=ins.depositoId; }
@@ -3390,7 +3483,7 @@ function renderMovLineas(){
   for(var i=0;i<movLineasTmp.length;i++){
     var ln=movLineasTmp[i], ins=getInsumo(ln.insumoId);
     rows+='<tr>'+
-      '<td><select onchange="syncMovLinea('+i+',\'insumoId\',this.value);renderMovLineas()" class="inp">'+insumoOptions(ln.insumoId)+'</select></td>'+
+      '<td><div class="ins-con-cat">'+selCatInsumo(catDeLinea(ln), 'movLineasTmp['+i+']._cat=this.value;renderMovLineas()')+'<select onchange="syncMovLinea('+i+',\'insumoId\',this.value);renderMovLineas()" class="inp">'+insumoOptions(ln.insumoId, catDeLinea(ln))+'</select></div></td>'+
       '<td><input type="number" step="0.01" min="0" value="'+(ln.cant!==''?ln.cant:'')+'" oninput="syncMovLinea('+i+',\'cant\',this.value)" class="inp-num"></td>'+
       '<td style="color:var(--muted);font-size:12px">'+(ins?esc(ins.un):'—')+'</td>'+
       '<td class="mcol-origen" style="display:'+(showO?'':'none')+'"><select onchange="syncMovLinea('+i+',\'origenId\',this.value)" class="inp">'+depositoOptions(ln.origenId)+'</select></td>'+
@@ -3907,8 +4000,10 @@ function updateTrbHa(ti, di, val){
 function updateTrbObs(ti, di, val){
   trabajosTmp[ti].destinos[di].obs=val;
 }
+function updateTrbLineaCat(ti, di, li, val){ trabajosTmp[ti].destinos[di].lineas[li]._cat=val; renderTrabajos(); }
+function updateCurLineaCat(di, li, val){ destinosTmp[di].lineas[li]._cat=val; renderDestinos(); }
 function updateTrbLineaInsumo(ti, di, li, val){
-  var ln=trabajosTmp[ti].destinos[di].lineas[li]; ln.insumoId=val; ln.depositoId=depDefaultDeInsumo(val);
+  var ln=trabajosTmp[ti].destinos[di].lineas[li]; ln.insumoId=val; ln.depositoId=depDefaultDeInsumo(val); catAlElegir(ln, val);
   renderTrabajos();
 }
 function updateTrbLineaDosis(ti, di, li, val){
@@ -3962,9 +4057,10 @@ function filasLotesInsumos(dests, ti){
       if(!ln){
         rows+='<td colspan="7" class="empty" style="'+borde+'">— sin insumos —</td>';
       } else {
-        var optIns=opcionesInsumoAgrupadas(ln.insumoId, '— Elegir insumo —');
+        var catLn=catDeLinea(ln);
+        var optIns=opcionesInsumoAgrupadas(ln.insumoId, '— Elegir insumo —', catLn);
         var bt=(l===0?' style="'+borde+'"':'');
-        rows+='<td'+bt+'><select class="inp" style="min-width:170px" onchange="update'+pref+'LineaInsumo('+argT+d+','+l+',this.value)">'+optIns+'</select></td>'+
+        rows+='<td'+bt+'><div class="ins-con-cat" style="min-width:280px">'+selCatInsumo(catLn, 'update'+pref+'LineaCat('+argT+d+','+l+',this.value)')+'<select class="inp" onchange="update'+pref+'LineaInsumo('+argT+d+','+l+',this.value)">'+optIns+'</select></div></td>'+
               '<td'+bt+'>'+(ins?esc(ins.un):'—')+'</td>'+
               '<td class="num"'+bt+'><input type="number" step="0.001" min="0" value="'+ln.dosis+'" onchange="update'+pref+'LineaDosis('+argT+d+','+l+',this.value)" class="inp-num" style="width:80px"></td>'+
               '<td class="num"'+bt+'><strong>'+f(reqTot,2)+'</strong></td>'+
@@ -4298,7 +4394,7 @@ function updateCurHa(di, val){
 }
 function updateCurObs(di, val){ destinosTmp[di].obs=val; }
 function updateCurLineaInsumo(di, li, val){
-  var ln=destinosTmp[di].lineas[li]; ln.insumoId=val; ln.depositoId=depSugerido(val);
+  var ln=destinosTmp[di].lineas[li]; ln.insumoId=val; ln.depositoId=depSugerido(val); catAlElegir(ln, val);
   renderDestinos();
 }
 function updateCurLineaDosis(di, li, val){
@@ -4647,7 +4743,7 @@ function buildOtPrint(o){
     (o.obs?'<div class="pr-obs-gral"><span class="pr-obs-l">Observaciones generales:</span> '+esc(o.obs)+'</div>':'')+
     '<div class="pr-obs-gral"><span class="pr-obs-l">Orden de mezclado:</span> los insumos de cada labor están listados en el orden en que van al tanque (columna "Orden tanque"), según su formulación.'+(hayFormulaciones()?'':' <em>Atención: no hay formulaciones cargadas en Maestros; el orden es alfabético.</em>')+'</div>'+
     bloques+
-    '<div class="pr-tot">'+
+    '<div class="pr-cierre"><div class="pr-tot">'+
       '<div class="pr-tot-tit">Total de insumos de la orden</div>'+
       '<table class="pr-tbl">'+
         '<colgroup><col><col style="width:52px"><col style="width:124px"><col style="width:104px"><col style="width:104px"></colgroup>'+
@@ -4659,7 +4755,7 @@ function buildOtPrint(o){
       '<div class="pr-firma"><div class="pr-firma-l"></div>Fecha de aplicación</div>'+
       '<div class="pr-firma"><div class="pr-firma-l"></div>Firma del operario</div>'+
       '<div class="pr-firma"><div class="pr-firma-l"></div>Firma del responsable</div>'+
-    '</div>'+
+    '</div></div>'+
     // Pie propio (se repite en cada hoja): el del navegador (URL, fecha, título) no se imprime.
     '<div class="pr-pie"><span>Puntal Agro · '+esc((root.espacios[root.activoId]&&root.espacios[root.activoId].nombre)||'')+'</span><span>OT #'+o.num+' · impresa el '+fd(todayISO())+'</span></div>'+
   '</div>';
@@ -5208,7 +5304,7 @@ function htmlMapaOT(trs, o){
   }
   h += '</tbody></table></div>';
   if(!hayEdit && lst.some(function(x){ return x.mapaLote; })) h += '<p class="trb-apl-sub" style="margin-top:6px">Para marcar en el mapa qué parte de un lote se trabaja, la OT tiene que estar <b>pendiente</b> (con lotes sin confirmar).</p>';
-  if(hayEdit) h += '<p class="trb-apl-sub" style="margin-top:6px">Con <b>Marcar área</b> dibujás sobre el mapa la parte del lote que se trabaja en esta orden (por ejemplo, sobre el NDVI), para que el contratista sepa dónde va. Es solo el dibujo: las hectáreas son las que cargaste en la OT. El mapa del lote en Plan de Uso no cambia.</p>';
+  if(hayEdit) h += '<p class="trb-apl-sub" style="margin-top:6px">Tocá un lote de la orden en el mapa (o el botón de la tabla) para marcar o editar su área. Con <b>Marcar área</b> dibujás sobre el mapa la parte del lote que se trabaja en esta orden (por ejemplo, sobre el NDVI), para que el contratista sepa dónde va. Es solo el dibujo: las hectáreas son las que cargaste en la OT. El mapa del lote en Plan de Uso no cambia.</p>';
   if(conMapa<lst.length) h += '<p class="trb-apl-sub" style="margin-top:6px">'+(lst.length-conMapa)+' lote(s) de la orden no tienen mapa: se cargan en Plan de Uso → Mapa.</p>';
   return h+'</div>';
 }
@@ -5229,7 +5325,14 @@ function otMapaPintar(trs){
       else if(p.enOt) estilo = { color:'#FFFFFF', weight:2.2, fillColor:p.color, fillOpacity:.6 };
       else if(p.recortado) estilo = { color:'#FFFFFF', weight:1.8, dashArray:'6 5', fillColor:'#FFFFFF', fillOpacity:.04 };
       else estilo = { color:'rgba(255,255,255,.6)', weight:1, fillColor:'#FFFFFF', fillOpacity:.04 };
-      var pl = L.polygon(p.ring, estilo).bindTooltip(p.etiqueta+(p.area?' · área de esta OT':''), { sticky:true }).addTo(OTMAPA);
+      // BUILD 32: tocar un lote de la orden en el mapa abre la edición de su área (si la OT lo permite).
+      var loteEd = null;
+      if(p.enOt || p.area){ for(var le=0;le<(p.loteIds||[]).length;le++){ var lid=p.loteIds[le]; for(var lx=0;lx<lst.length;lx++){ if(lst[lx].lote.id===lid && lst[lx].mapaLote && otAreaEditable(lid)){ loteEd=lid; break; } } if(loteEd) break; } }
+      var pl = L.polygon(p.ring, estilo).bindTooltip(p.etiqueta+(p.area?' · área de esta OT':'')+(loteEd?'<br><span style="font-size:11px;opacity:.85">Tocá para '+(p.area||otTieneArea(loteEd)?'editar':'marcar')+' el área a trabajar</span>':''), { sticky:true }).addTo(OTMAPA);
+      if(loteEd){
+        var elP = pl.getElement && pl.getElement(); if(elP) elP.style.cursor='pointer';
+        (function(id){ pl.on('click', function(ev){ if(ev && ev.originalEvent) L.DomEvent.stopPropagation(ev); if(!OTMAPA_ED) otEditarArea(id); }); })(loteEd);
+      }
       pl._fillBase = estilo.fillOpacity; pl._loteIds = p.loteIds||[]; pl._esArea = !!p.area; capasLote.push(pl);
       if(p.enOt){ pl._marca = null; }
       if(p.enOt) pl._marca = L.marker(PAMAP.centroide(p.ring), { icon:PAMAP.etiquetaIcono(esc(p.etiqueta), p.num), interactive:false, keyboard:false }).addTo(OTMAPA);
@@ -5266,6 +5369,7 @@ function _destinosDeLote(loteId){
   for(var t=0;t<trabajosTmp.length;t++) for(var d=0;d<(trabajosTmp[t].destinos||[]).length;d++){ var de = trabajosTmp[t].destinos[d]; if(de.loteId===loteId && de.estadoLote!=='Aplicado') out.push(de); }
   return out;
 }
+function otTieneArea(loteId){ var ds=_destinosDeLote(loteId); return !!(ds.length && ds[0].geoOt && ds[0].geoOt.ring); }
 function otEditarArea(loteId){
   if(!OTMAPA || OTMAPA_ED) return;
   var lo = getLoteById(loteId); if(!lo || !lo.geo || !lo.geo.length) return;
@@ -5323,6 +5427,11 @@ function otQuitarArea(loteId){
 function imagenMapaOT(trs, o, ancho, alto, cb, escala){
   var lst = lotesMapaDeTrabajos(trs), polys = poligonosMapaOT(lst);
   if(!lst.some(function(x){ return x.centro; })){ cb(null, lst); return; }
+  // BUILD 32: un lote dibujado en varias partes lleva el número y el nombre una sola vez, en la parte más grande.
+  function areaRing(r){ var s=0; for(var k=0;k<r.length;k++){ var a=r[k], b=r[(k+1)%r.length]; s+=a[0]*b[1]-b[0]*a[1]; } return Math.abs(s/2); }
+  var mejor = {};
+  for(var q=0;q<polys.length;q++){ var pq=polys[q]; if(!pq.num || !(pq.area || pq.enOt)) continue; var aq=areaRing(pq.ring||[]); if(!mejor[pq.num] || aq>mejor[pq.num].a) mejor[pq.num]={i:q, a:aq}; }
+  for(var q2=0;q2<polys.length;q2++){ var p2=polys[q2]; if(p2.num && mejor[p2.num] && mejor[p2.num].i!==q2){ var cp={}; for(var kk in p2){ if(p2.hasOwnProperty(kk)) cp[kk]=p2[kk]; } cp.num=null; cp.etiqueta=''; polys[q2]=cp; } }
   var dib = [], marco = [];
   for(var i=0;i<polys.length;i++){
     var p = polys[i];
@@ -5366,13 +5475,30 @@ function htmlHojaMapaOT(o, url, lst){
     (hayArea?'<p style="font-size:8.5pt;margin:-2mm 0 3mm">Área pintada: lo que se trabaja en esta orden. Borde blanco punteado: resto del lote (no se trabaja).</p>':'')+
     '<table class="pr-tbl pr-mapa-tbl"><colgroup><col style="width:10mm"><col style="width:50mm"><col><col style="width:26mm"></colgroup>'+
       '<thead><tr><th>N°</th><th>Lote</th><th>Cultivo · labor</th><th style="text-align:right">Sup.</th></tr></thead><tbody>'+filas+'</tbody></table>'+
-    '<div class="pr-pie"><span>Puntal Agro · '+esc(emp)+'</span><span>OT #'+o.num+' · mapa · impresa el '+fd(todayISO())+'</span></div>'+
   '</div>';
 }
 
 // Arma el documento en el contenedor de impresión y dispara el diálogo del navegador.
-function imprimirOT(otId){
+// BUILD 32: si los lotes tienen mapa, se elige imprimir con o sin la hoja del mapa.
+var otImpConMapa=true;
+function imprimirOT(otId, conMapa){
   var o=getOtById(otId); if(!o) return;
+  if(conMapa===undefined){
+    var lst0=lotesMapaDeTrabajos(o.trabajos||[]);
+    if(lst0.some(function(x){ return x.centro; })){
+      var mc=byId('modalContent'); mc.className='modal';
+      mc.innerHTML='<h3>🖨 Imprimir OT #'+o.num+'</h3>'+
+        '<p style="font-size:13px;margin-bottom:12px">¿Agregar al final la hoja con el mapa de los lotes?</p>'+
+        '<div class="imp-opc">'+
+          '<button type="button" class="imp-opc-b'+(otImpConMapa?' on':'')+'" onclick="otImpConMapa=true;closeModal();imprimirOT(\''+o.id+'\',true)"><b>Con mapa</b><span>La orden + una hoja con el mapa y la lista de lotes</span></button>'+
+          '<button type="button" class="imp-opc-b'+(otImpConMapa?'':' on')+'" onclick="otImpConMapa=false;closeModal();imprimirOT(\''+o.id+'\',false)"><b>Sin mapa</b><span>Solo la orden</span></button>'+
+        '</div>'+
+        '<div class="fact"><button class="btn" onclick="closeModal()">Cancelar</button></div>';
+      byId('modalBg').classList.add('on');
+      return;
+    }
+    conMapa=false;
+  }
   var cont=byId('otPrint'); if(!cont) return;
   // Se imprime lo guardado: si en pantalla hay cambios sin guardar, primero se guardan.
   if(otPant.id===otId && otPant.modo==='editar' && otHayCambios()){
@@ -5384,7 +5510,7 @@ function imprimirOT(otId){
   cont.innerHTML=buildOtPrint(o);
   if(!o.impresa && puede('cargar')){ o.impresa=true; save(); }
   var lstM = lotesMapaDeTrabajos(o.trabajos||[]);
-  if(!lstM.some(function(x){ return x.centro; })){ window.print(); return; }
+  if(!conMapa || !lstM.some(function(x){ return x.centro; })){ setTimeout(function(){ window.print(); }, 50); return; }
   toast('Preparando el mapa para imprimir…');
   imagenMapaOT(o.trabajos||[], o, 1500, 960, function(url, lst){
     if(url){
@@ -6165,7 +6291,7 @@ function otrSet(campo, val){
 
 function otrLin(i, campo, val){
   var ln=otrTmp.lineas[i]; ln[campo]=val;
-  if(campo==='insumoId'){ ln.depositoId=depDefaultDeInsumo(val); }
+  if(campo==='insumoId'){ ln.depositoId=depDefaultDeInsumo(val); catAlElegir(ln, val); }
   if(campo!=='cant') renderOtRapida();
 }
 
@@ -6203,7 +6329,7 @@ function renderOtRapida(){
     var ln=t.lineas[i], ins=getInsumo(ln.insumoId);
     var hay = ins && ln.depositoId ? stockDe(ins.id, ln.depositoId, {desde:'', hasta:t.fecha||''}).real : null;
     var dosis = (!un && ins && Number(ln.cant)>0 && Number(t.ha)>0) ? f(Number(ln.cant)/Number(t.ha),3)+' '+esc(ins.un)+'/ha' : '';
-    rows+='<tr><td><select class="inp" style="min-width:220px" onchange="otrLin('+i+',\'insumoId\',this.value)">'+insumoOptions(ln.insumoId)+'</select></td>'+
+    rows+='<tr><td><div class="ins-con-cat" style="min-width:320px">'+selCatInsumo(catDeLinea(ln), 'otrTmp.lineas['+i+']._cat=this.value;renderOtRapida()')+'<select class="inp" onchange="otrLin('+i+',\'insumoId\',this.value)">'+insumoOptions(ln.insumoId, catDeLinea(ln))+'</select></div></td>'+
       '<td class="num"><input type="number" step="0.01" min="0" class="inp-num" style="width:110px" value="'+(ln.cant||'')+'" oninput="otrLin('+i+',\'cant\',this.value)" onchange="renderOtRapida()" placeholder="total usado"></td>'+
       '<td>'+(ins?esc(ins.un):'—')+'</td>'+
       '<td class="num" style="font-size:11px;color:var(--muted)">'+dosis+'</td>'+
@@ -6985,8 +7111,19 @@ function htmlRealizado(o){
     }
     items.push(it);
   }
-  return '<div class="chd" style="margin-top:4px"><span class="ct">Confirmado · '+apl.length+(apl.length===1?' labor':' labores')+'</span></div>'+tablaRealizado(items, '');
+  return tablaRealizado(items, '');
 }
+// BUILD 32: resumen de avance de la OT (confirmado vs. falta) para leer de un golpe de vista.
+function avanceOT(o){
+  var p=destinosDeOt(o), r={nA:0, nP:0, haA:0, haP:0, lotesA:[], lotesP:[]};
+  for(var i=0;i<p.length;i++){
+    var de=p[i].destino, nom=(esUN(de)?(de.cultivo+' · '+getCampoNombre(de.campoId)):nombreDestino(de));
+    if(de.estadoLote==='Aplicado'){ r.nA++; r.haA+=haRealDe(de); if(r.lotesA.indexOf(nom)<0) r.lotesA.push(nom); }
+    else { r.nP++; r.haP+=Number(de.ha)||0; if(r.lotesP.indexOf(nom)<0) r.lotesP.push(nom); }
+  }
+  return r;
+}
+function listaCorta(arr, max){ return arr.length<=max ? arr.join(', ') : arr.slice(0,max).join(', ')+' y '+(arr.length-max)+' más'; }
 /* ===== Registrar lo realizado: asistente en 3 pasos =====
    Usa aplicTmp (el mismo estado que el cálculo de prorrateo): lotesSel = lo marcado "Se hizo". */
 
@@ -7146,7 +7283,7 @@ function renderRegistro(){
           : '<td colspan="2" class="trb-apl-sub">'+(e==='no'?'Sale de la orden: deja de estar comprometida.':'Sigue en la orden para registrarla más adelante.')+'</td>')+
         '</tr>';
     }
-    cuerpo='<div class="reg-ayuda">Por defecto está todo en <strong>Se hizo</strong>. Cambiá a <strong>Queda pendiente</strong> lo que todavía no se hizo, o a <strong>No se hace</strong> lo que ya no se va a hacer.</div>'+
+    cuerpo=
       '<div class="reg-fecha-row"><div class="fld"><label>Fecha de aplicación (para todos)</label><input type="date" value="'+aplicTmp.fecha+'"'+(fb?' min="'+addDias(fb,1)+'"':'')+' onchange="regSetFechaGral(this.value)"></div>'+
         '<span class="trb-apl-sub" style="padding-bottom:9px">Si algún lote se hizo otro día, cambiale la fecha en su fila.'+(fb?' Stock cerrado al '+fd(fb)+': la fecha tiene que ser posterior.':'')+'</span>'+
         '<span style="flex:1"></span><button type="button" class="btn btn-sm" onclick="regTodos(\'si\')">Marcar todo «Se hizo»</button></div>'+
@@ -7690,15 +7827,40 @@ function htmlVentanaRealizado(o){
   if(!o) return head+'<div class="otv-vacio">Primero emití la orden.</div></div>';
   var puedeC=puede('cargar'), est=o.estado, cuerpo='';
   var tabla = otTieneAplicados(o) ? htmlRealizado(o) : '';
+  var av = avanceOT(o), tot = av.nA+av.nP;
   if(est==='Cancelada') cuerpo='<div class="otv-vacio">La orden está cancelada.'+(puedeC?' Para volver a usarla, tocá «Reactivar OT» arriba.':'')+'</div>';
   else if((est==='Pendiente' || est==='Parcial') && puedeC){
     if(otPant.modo==='editar' && otHayCambios()){
       cuerpo='<div class="banner-warn" style="margin:6px 0">Hay cambios sin guardar en la orden (ventanas 1 a 3). Para confirmar la OT, primero guardalos o descartalos.'+
         '<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn btn-primary btn-barra" onclick="otGuardarYSeguir()">Guardar cambios y seguir</button><button type="button" class="btn btn-barra" onclick="otDescartar()">Descartar cambios</button></div></div>';
-    } else cuerpo=(tabla?'<div class="ct" style="margin:14px 0 6px">Falta confirmar</div>':'')+'<div id="otRegBox" class="otreg"></div>';
+    } else cuerpo='<div class="cf-zona cf-falta">'+
+        '<div class="cf-zona-hd"><span class="cf-ic">⏳</span><span class="cf-tit">Falta confirmar</span>'+
+          '<span class="cf-cnt">'+av.nP+(av.nP===1?' labor':' labores')+' · '+f(av.haP,1)+' ha</span>'+
+          '<span class="cf-lotes">'+esc(listaCorta(av.lotesP,4))+'</span></div>'+
+        '<div class="cf-zona-bd"><div id="otRegBox" class="otreg"></div></div></div>';
   } else if(!tabla) cuerpo='<div class="otv-vacio">Todavía no se confirmó nada.'+(puedeC?'':' (Tu usuario es de consulta.)')+'</div>';
+  // Barra de avance arriba de todo
+  var resumen='';
+  if(tot && est!=='Cancelada'){
+    var pct=Math.round(av.nA*100/tot);
+    resumen='<div class="cf-avance">'+
+      '<div class="cf-av-txt"><strong>'+(av.nP? av.nA+' de '+tot+' labores confirmadas' : 'Todo confirmado')+'</strong>'+
+        '<span>'+f(av.haA,1)+' ha confirmadas'+(av.nP?' · faltan '+f(av.haP,1)+' ha':'')+'</span></div>'+
+      '<div class="cf-bar"><i style="width:'+pct+'%"></i></div>'+
+      '<div class="cf-chips"><span class="cf-chip ok">✓ '+av.nA+' confirmada'+(av.nA===1?'':'s')+'</span>'+(av.nP?'<span class="cf-chip pend">⏳ '+av.nP+' falta'+(av.nP===1?'':'n')+'</span>':'')+'</div>'+
+    '</div>';
+  }
+  // Lo confirmado: plegado si todavía falta confirmar algo (se abre para ver el detalle)
+  var zonaOk='';
+  if(tabla){
+    zonaOk='<details class="cf-zona cf-ok"'+(av.nP?'':' open')+'>'+
+      '<summary class="cf-zona-hd"><span class="cf-ic">✓</span><span class="cf-tit">Ya confirmado</span>'+
+        '<span class="cf-cnt">'+av.nA+(av.nA===1?' labor':' labores')+' · '+f(av.haA,1)+' ha</span>'+
+        '<span class="cf-lotes">'+esc(listaCorta(av.lotesA,4))+'</span><span class="cf-ver">ver detalle ▾</span></summary>'+
+      '<div class="cf-zona-bd">'+tabla+'</div></details>';
+  }
   var pie='';
-  return head+tabla+cuerpo+pie+'</div>';
+  return head+resumen+(av.nP ? cuerpo+zonaOk : zonaOk+cuerpo)+pie+'</div>';
 }
 
 // Prepara (o retoma) la carga de lo realizado dentro de la ventana 4.
@@ -7796,25 +7958,48 @@ function conservarDatosLabores(ex, nuevos){
 // y en "+ Agregar lote". yaEsta(loteId, cultivo) = ya está en el trabajo (se muestra tildado, gris).
 function htmlChipsLotes(camp, fCult, fCampo, yaEsta){
   var cults=cultivosDeCampania(camp), html='', hay=false, conPlan={};
+  // BUILD 32: cada cultivo es un grupo plegable, cerrado por defecto (se abre solo si hay un
+  // filtro de cultivo). El encabezado muestra cuántos lotes y ha tiene, y cuántos van tildados.
   for(var c=0;c<cults.length;c++){
     var cult=cults[c]; if(fCult && cult!==fCult) continue;
-    var lotes=lotesDeCultivo(camp, cult), g='';
+    var lotes=lotesDeCultivo(camp, cult), g='', nG=0, haG=0, nYa=0;
     for(var l=0;l<lotes.length;l++){
       var lo=lotes[l]; conPlan[lo.id]=true; if(fCampo && lo.campoId!==fCampo) continue;
       var ya=yaEsta(lo.id, cult);
+      nG++; haG+=haNetaDe(camp, lo.id, cult); if(ya) nYa++;
       g+='<label class="lote-chk'+(ya?' dest-ya':'')+'"><input type="checkbox" value="'+lo.id+'" data-cult="'+esc(cult)+'"'+(ya?' checked disabled':'')+'> '+
         esc(lo.nombre)+' <span style="color:var(--muted)">('+f(haNetaDe(camp, lo.id, cult),1)+' ha'+(fCampo?'':' · '+esc(getCampoNombre(lo.campoId)))+')</span>'+(ya?' ✓':'')+'</label>';
     }
-    if(g){ hay=true; html+='<div class="addlote-cult">'+esc(cult)+'</div>'+g; }
+    if(g){ hay=true; html+=grupoLotesHtml(cult, nG, haG, nYa, g, !!fCult); }
   }
   // Con un campo elegido (y sin filtro de cultivo), los lotes sin cultivo en el plan se ven en gris.
   if(fCampo && !fCult){
     var sp='';
     for(var z=0;z<state.lotes.length;z++){ var lz=state.lotes[z]; if(lz.campoId!==fCampo) continue;
       if(!actividadesDe(camp, lz.id).length) sp+='<label class="lote-chk dest-ya" title="Sin cultivo en el plan de uso de la campaña"><input type="checkbox" disabled> '+esc(lz.nombre)+' <span style="color:var(--muted)">sin cultivo en el plan</span></label>'; }
-    if(sp){ hay=true; html+='<div class="addlote-cult">Sin cultivo en el plan</div>'+sp; }
+    if(sp){ hay=true; html+=grupoLotesHtml('Sin cultivo en el plan', 0, 0, 0, sp, false, true); }
   }
   return {html:html, hay:hay};
+}
+function grupoLotesHtml(titulo, n, ha, nYa, chips, abierto, sinPlan){
+  return '<details class="addlote-grp"'+(abierto?' open':'')+' onchange="lotesGrpCuenta(this)">'+
+    '<summary class="addlote-cult"><span class="addlote-car">▸</span> '+esc(titulo)+
+      (sinPlan?'':' <span class="addlote-info">'+n+' lote'+(n===1?'':'s')+' · '+f(ha,1)+' ha'+(nYa?' · '+nYa+' ya en el trabajo':'')+'</span>')+
+      '<span class="addlote-sel"></span>'+
+      (sinPlan?'':'<a href="#" class="addlote-todos" onclick="lotesGrpTodos(event,this)">tildar todos</a>')+
+    '</summary><div class="addlote-chips">'+chips+'</div></details>';
+}
+function lotesGrpCuenta(det){
+  var n=det.querySelectorAll('input[type=checkbox]:checked:not(:disabled)').length, s=det.querySelector('.addlote-sel');
+  if(s) s.textContent = n ? n+' tildado'+(n===1?'':'s') : '';
+}
+function lotesGrpTodos(ev, a){
+  ev.preventDefault(); ev.stopPropagation();
+  var det=a.closest('details'), cks=det.querySelectorAll('input[type=checkbox]:not(:disabled)'), todos=true;
+  for(var i=0;i<cks.length;i++) if(!cks[i].checked){ todos=false; break; }
+  for(var j=0;j<cks.length;j++) cks[j].checked=!todos;
+  a.textContent = todos ? 'tildar todos' : 'destildar todos';
+  det.open=true; lotesGrpCuenta(det);
 }
 
 
@@ -9220,7 +9405,8 @@ function renderCostos(){
   for(var oc=0;oc<ordenCat.length;oc++){ if(catTot[ordenCat[oc]]) catKeys.push(ordenCat[oc]); }
   for(var ck in catTot){ if(catTot.hasOwnProperty(ck) && catKeys.indexOf(ck)<0) catKeys.push(ck); }
   var filtroDet = function(x){ return (filtroUN ? x.un : !x.un) && !x.fuera; };
-  var rowsMB='<tr class="mb-sub"><td colspan="4">Insumos</td></tr>';
+  // BUILD 32: el total de insumos y de labores va en la fila de cada sección (arriba, a la vista).
+  var rowsMB='<tr class="mb-sub mb-sec-tot"><td class="tdname">Insumos</td><td class="num">'+fHa(totIns)+'</td><td class="num">'+fMM(totIns)+'</td><td class="num">'+pct(totIns)+'</td></tr>';
   for(var ic=0;ic<catKeys.length;ic++){
     var cat2=catKeys[ic], cv=catTot[cat2], detKey='cat::'+cat2, abierto=!!costExpand[detKey];
     rowsMB+='<tr class="mb-row" onclick="toggleCostDet(\''+detKey.replace(/'/g,"\\'")+'\')" style="cursor:pointer">'+
@@ -9228,8 +9414,7 @@ function renderCostos(){
       '<td class="num">'+fHa(cv)+'</td><td class="num">'+fMM(cv)+'</td><td class="num">'+pct(cv)+'</td></tr>';
     if(abierto) rowsMB+=detalleAgrupado(detalle, (function(cc){ return function(x){ return filtroDet(x) && x.tipo==='insumo' && x.cat===cc; }; })(cat2), monVis, 'insumo');
   }
-  rowsMB+='<tr class="mb-subtotal"><td class="tdname"><strong>Subtotal insumos</strong></td><td class="num"><strong>'+fHa(totIns)+'</strong></td><td class="num"><strong>'+fMM(totIns)+'</strong></td><td class="num">'+pct(totIns)+'</td></tr>';
-  rowsMB+='<tr class="mb-sub"><td colspan="4">Labores</td></tr>';
+  rowsMB+='<tr class="mb-sub mb-sec-tot"><td class="tdname">Labores</td><td class="num">'+fHa(totLab)+'</td><td class="num">'+fMM(totLab)+'</td><td class="num">'+pct(totLab)+'</td></tr>';
   var abLP=!!costExpand['lab::LP'], abLC=!!costExpand['lab::LC'];
   rowsMB+='<tr class="mb-row" onclick="toggleCostDet(\'lab::LP\')" style="cursor:pointer"><td class="tdname"><span class="mb-caret">'+(abLP?'▾':'▸')+'</span> Labores propias</td>'+
     '<td class="num">'+fHa(labProp)+'</td><td class="num">'+fMM(labProp)+'</td><td class="num">'+pct(labProp)+'</td></tr>';
@@ -9237,7 +9422,6 @@ function renderCostos(){
   rowsMB+='<tr class="mb-row" onclick="toggleCostDet(\'lab::LC\')" style="cursor:pointer"><td class="tdname"><span class="mb-caret">'+(abLC?'▾':'▸')+'</span> Labores contratadas</td>'+
     '<td class="num">'+fHa(labContr)+'</td><td class="num">'+fMM(labContr)+'</td><td class="num">'+pct(labContr)+'</td></tr>';
   if(abLC) rowsMB+=detalleAgrupado(detalle, function(x){ return filtroDet(x) && x.tipo==='labor' && x.laborClase==='LC'; }, monVis, 'subact');
-  rowsMB+='<tr class="mb-subtotal"><td class="tdname"><strong>Subtotal labores</strong></td><td class="num"><strong>'+fHa(totLab)+'</strong></td><td class="num"><strong>'+fMM(totLab)+'</strong></td><td class="num">'+pct(totLab)+'</td></tr>';
   if(hayFuera){
     var abF=!!costExpand['fuera'];
     rowsMB+='<tr class="mb-row mb-fuera" onclick="toggleCostDet(\'fuera\')" style="cursor:pointer" title="Labores de lotes que cambiaron de cultivo en el plan de uso y se dejaron como gasto del cultivo original. Suman al total, no al costo por ha."><td class="tdname"><span class="mb-caret">'+(abF?'▾':'▸')+'</span> Gastos de cultivos que no se hicieron <span class="mb-fuera-sub">lotes que cambiaron de cultivo · no entran en el costo por ha</span></td>'+
@@ -9286,9 +9470,8 @@ function renderCostos(){
   if(bPS&&bPC){ if(usarPC){bPC.classList.add('on');bPS.classList.remove('on');} else {bPS.classList.add('on');bPC.classList.remove('on');} }
   var bCfg=byId('costCfgBtn'); if(bCfg) bCfg.innerHTML='⚙ Configurar precios para costos'+(nCfg?' <span class="bdg by">'+nCfg+'</span>':'');
   var aPC=byId('costPCAviso');
-  if(!aPC){ aPC=document.createElement('div'); aPC.id='costPCAviso'; var kpE=byId('costKpis'); kpE.parentNode.insertBefore(aPC, kpE); }
   aPC.innerHTML = nCfg ? (usarPC
-      ? '<div class="banner-info" style="margin-bottom:10px">Costos calculados con <strong>'+nCfg+' precio'+(nCfg===1?'':'s')+' para costos</strong> de la campaña '+esc(getCampaniaNombre(fcampania)||fcampania)+(nUsaPC?'':' (ninguno se usa con estos filtros)')+'. Las líneas que los usan llevan ✎. No cambian el stock, el cierre ni la facturación de Labores. <a href="#" onclick="setCostPrecios(\'stock\');return false">Ver con precios de stock</a></div>'
+      ? '<div class="banner-info" style="margin-bottom:10px">Costos calculados con <strong>'+nCfg+' precio'+(nCfg===1?'':'s')+' para costos</strong> de la campaña '+esc(getCampaniaNombre(fcampania)||fcampania)+(nUsaPC?'':' (ninguno se usa con estos filtros)')+'. No cambian el stock, el cierre ni la facturación de Labores. <a href="#" onclick="setCostPrecios(\'stock\');return false">Ver con precios de stock</a></div>'
       : '<div class="banner-warn" style="margin-bottom:10px">Viendo los costos con <strong>precios de stock</strong>: los '+nCfg+' precios para costos de esta campaña no se aplican. <a href="#" onclick="setCostPrecios(\'cfg\');return false">Volver a precios para costos</a></div>')
     : '';
   var bAr=byId('costMonARS'), bUs=byId('costMonUSD');
@@ -9305,7 +9488,6 @@ function detalleRows(detalle, filtro, monVis, full){
     var x=detalle[i];
     if(!filtro(x)) continue;
     var precioTxt = x.precio>0 ? (x.monedaOrig==='USD'?'U$S ':'$ ')+f(x.precio,2) : (x.sinPrecio?'<span style="color:var(--bad)">sin precio</span>':'—');
-    if(x.pc) precioTxt='<span class="pc-mark" title="Precio para costos (configurado en Costos)">✎</span> '+precioTxt;
     if(full){
       html+='<tr>'+
         '<td>'+fd(x.fecha)+'</td><td class="tdname">'+esc(x.campo)+'</td><td class="tdname">'+esc(x.lote)+'</td>'+
@@ -9352,10 +9534,13 @@ function openPreciosCosto(){
   renderPreciosCosto();
 }
 function renderPreciosCosto(){
-  var t=pcTmp, rows='', gAnt='', nMod=0, edit=puede('cargar');
+  var t=pcTmp, rows='', gAnt='', tAnt='', nMod=0, edit=puede('cargar');
+  // Cuántos ítems hay por grupo (para el encabezado)
+  var nGr={}; for(var ng=0;ng<t.filas.length;ng++){ var kg=t.filas[ng].tipo+'|'+t.filas[ng].grupo; nGr[kg]=(nGr[kg]||0)+1; }
   for(var i=0;i<t.filas.length;i++){
     var r=t.filas[i];
-    if(r.grupo!==gAnt){ rows+='<tr class="mb-sub"><td colspan="8">'+(r.tipo==='ins'?'Insumos · ':'')+esc(r.grupo)+'</td></tr>'; gAnt=r.grupo; }
+    if(r.tipo!==tAnt){ rows+='<tr class="pc-sec"><td colspan="8">'+(r.tipo==='ins'?'Insumos':'Labores')+'</td></tr>'; tAnt=r.tipo; gAnt=''; }
+    if(r.grupo!==gAnt){ var nG=nGr[r.tipo+'|'+r.grupo]; rows+='<tr class="pc-grp"><td colspan="8">'+esc(r.tipo==='ins'?r.grupo:r.grupo.replace(/^Labores /,'').replace(/^./,function(c){return c.toUpperCase();}))+' <span>'+nG+(r.tipo==='ins'?(nG===1?' insumo':' insumos'):(nG===1?' labor':' labores'))+'</span></td></tr>'; gAnt=r.grupo; }
     var mod=r.p!=null;
     if(mod) nMod++;
     var refTxt = r.ref!=null ? (r.refMon==='USD'?'U$S ':'$ ')+f(r.ref,2) : '<span style="color:var(--muted)">'+esc(r.refNota||'—')+'</span>';
@@ -9363,7 +9548,7 @@ function renderPreciosCosto(){
     var dif='—';
     if(mod && r.ref>0 && r.m===r.refMon){ var dp=(r.p/r.ref-1)*100; dif='<span style="color:'+(dp>0.05?'var(--bad)':(dp<-0.05?'#3B5226':'var(--muted)'))+'">'+(dp>0?'+':'')+f(dp,1)+'%</span>'; }
     else if(mod && r.ref>0) dif='<span style="font-size:10px;color:var(--muted)" title="Distinta moneda que el precio de stock">otra moneda</span>';
-    rows+='<tr class="'+(mod?'pc-mod':'')+'"><td class="tdname">'+esc(r.nombre)+(mod?' <span class="bdg by">modificado</span>':'')+'</td><td>'+esc(r.un)+'</td>'+
+    rows+='<tr class="pc-row'+(mod?' pc-mod':'')+'"><td class="tdname">'+esc(r.nombre)+(mod?' <span class="bdg by">modificado</span>':'')+'</td><td>'+esc(r.un)+'</td>'+
       '<td class="num">'+f(r.cant,2)+'</td><td class="num">'+refTxt+'</td>'+
       '<td class="num"><input type="number" step="0.01" min="0" class="inp-num" style="width:100px" placeholder="—"'+(edit?'':' disabled')+' value="'+(mod?r.p:'')+'" onchange="pcSet('+i+',this.value)"></td>'+
       '<td><select class="inp" style="width:auto"'+(edit?'':' disabled')+' onchange="pcMon('+i+',this.value)"><option value="ARS"'+(r.m!=='USD'?' selected':'')+'>$</option><option value="USD"'+(r.m==='USD'?' selected':'')+'>U$S</option></select></td>'+
@@ -9419,7 +9604,7 @@ function detalleAgrupado(detalle, filtro, monVis, modo){
   for(var q=0;q<orden.length;q++){
     var v=grupos[orden[q]];
     var costoTxt=(monVis==='USD'?'U$S ':'$ ')+Number(v.v).toLocaleString('es-AR',{minimumFractionDigits:0,maximumFractionDigits:0})+(v.falta?' '+svBadge():'');
-    html+='<tr class="mb-det"><td class="tdname" style="padding-left:24px">'+(v.pc?'<span class="pc-mark" title="Usa precio para costos">✎</span> ':'')+esc(v.label)+(v.sinPrecio?' <span style="color:#C07A30;font-size:10px">(sin precio)</span>':'')+' <span style="color:var(--muted);font-size:10px">· '+f(v.cant,2)+(v.un?' '+esc(v.un):'')+'</span></td>'+
+    html+='<tr class="mb-det"><td class="tdname" style="padding-left:24px">'+esc(v.label)+(v.sinPrecio?' <span style="color:#C07A30;font-size:10px">(sin precio)</span>':'')+' <span style="color:var(--muted);font-size:10px">· '+f(v.cant,2)+(v.un?' '+esc(v.un):'')+'</span></td>'+
       '<td class="num"></td><td class="num">'+costoTxt+'</td><td class="num"></td></tr>';
   }
   return html;
