@@ -189,11 +189,21 @@ tbody tr:hover td{background:#FAFBFC}
 .col-na{color:#C7CDD6;text-align:center}
 /* Dato faltante que tiene consecuencias (ej: consumo sin imputar, no llega a Costos). */
 .pc-mark{color:#9A4A16;font-weight:700}
-/* Barra de descarga: igual en todas las solapas (BUILD 35) */
-.exp-bar{display:inline-flex;gap:6px;margin-left:auto;padding-left:10px;border-left:1px solid var(--border)}
-.btn.btn-exp{font-weight:600;color:#3B5226;border-color:#B9CCA6;background:#fff;white-space:nowrap}
-.btn.btn-exp:hover:not(:disabled){background:#F1F5EC;border-color:#4A6533}
-.btn.btn-exp:disabled{opacity:.4;cursor:not-allowed}
+/* Barras de herramientas: todos los controles del mismo alto y tamaño de letra (BUILD 36) */
+.tools input, .tools select, .stk-win input[type=date]{height:32px;box-sizing:border-box;font-size:12.5px;padding-top:0;padding-bottom:0}
+.seg{height:32px;box-sizing:border-box}
+.seg button{height:100%}
+.tools .btn, .stk-win .btn, .cons-hd-tools .btn, .cost-calc-row .btn{height:32px;box-sizing:border-box;font-size:12px;padding:0 12px;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.stk-win label{font-size:11px}
+/* Barra de descarga: igual en todas las solapas */
+.exp-bar{display:inline-flex;gap:6px;margin-left:auto;padding-left:12px;border-left:1px solid var(--border)}
+/* Lugar fijo: arriba a la derecha de la tarjeta de filtros, en la línea del título; los filtros van debajo */
+.chd-exp{flex-wrap:nowrap}
+.chd-exp .exp-bar{flex:0 0 auto}
+.tools.filtros-row{margin:0 0 6px}
+.tools .btn.btn-exp, .btn.btn-exp{height:32px;font-size:12.5px;font-weight:600;color:#fff;background:#4A6533;border:1px solid #4A6533;padding:0 14px;white-space:nowrap}
+.btn.btn-exp:hover:not(:disabled){background:#3B5226;border-color:#3B5226}
+.btn.btn-exp:disabled{background:#fff;color:var(--muted);border-color:var(--border);cursor:not-allowed;opacity:.7}
 .ins-todos-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
 .ins-todos-lotes{margin-top:10px}
 .ins-todos-lotes-hd{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);margin-bottom:4px}
@@ -229,9 +239,7 @@ select.dep-falta{border-color:#E0A458!important;background:#FDF6EC!important;col
 .cons-pend-tot{display:block;font-size:10.5px;font-weight:600;color:#9A4A16}
 .cons-tbl td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
 .cons-grp-cat{font-weight:400;font-size:11px;color:#5B6B4E;background:#fff;border:1px solid #C9D6BB;border-radius:10px;padding:0 7px;margin-left:4px}
-.cons-grp.cons-pend td{background:#FBEEDC}
-tr.cons-pend td{background:#FDF6EC!important}
-tr.cons-labor.cons-pend td{background:#FBEEDC!important}
+/* Lo pendiente se marca con la etiqueta «Pendiente», sin pintar el fondo de la fila */
 .cons-det td{font-size:12px}
 .cons-labor td{background:#F4F6F1;border-top:1px solid #C9D3BC;padding-top:7px;padding-bottom:7px}
 .cons-ot-sep td{border-top:2px solid var(--green)!important}
@@ -548,13 +556,11 @@ tr.cons-labor.cons-pend td{background:#FBEEDC!important}
 .trb-apl-sub{font-size:11px;color:var(--muted)}
 .corr-banner .btn{margin-left:6px}
 /* Historia del lote */
-.hist-it.hist-pend{background:#FDF6EC;border-bottom-style:dashed}
-.hist-it.hist-pend .hist-f{border-right-color:#E0A458}
-.hist-it.hist-pend .hist-d{color:#9A4A16}
+/* Pendientes de la historia: solo la etiqueta «Pendiente», sin fondo */
 .bdg-pend{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:600;background:#F7E1C4;color:#8A4A10;border:1px solid #E8C08E;vertical-align:1px}
 .hist-pend-txt{color:#9A4A16;font-weight:600}
 .hist-leyenda{font-size:11.5px;color:var(--muted);margin:4px 0 2px;display:flex;align-items:center;gap:6px}
-.hist-sw{display:inline-block;width:14px;height:10px;background:#FDF6EC;border:1px solid #E0A458;border-radius:2px}
+.hist-sw{display:none}
 .hist-filtros{max-width:900px}
 .hist-cab{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:flex-end;border-bottom:2px solid #4A6533;padding:6px 0 12px;margin:8px 0 6px}
 .hist-cab-lote{font-size:22px;font-weight:600;color:var(--text);line-height:1.2}
@@ -972,6 +978,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
       <div class="tools">
         <button class="btn btn-sm need-admin" id="stockCierreBtn" onclick="openCierreStock()" title="Conciliar el conteo físico a una fecha, fijar precios y cerrar el stock">📋 Cerrar stock</button>
         <button class="btn btn-sm btn-danger need-admin" id="stockAnularBtn" onclick="anularUltimoCierre()" title="Anula el último cierre de stock y sus ajustes" style="display:none">↺ Anular último cierre</button>
+        <span class="exp-bar"><button class="btn btn-sm btn-exp" id="exp_stock_xlsx" onclick="exportarVista('stock','xlsx')" title="Bajar a Excel lo que se ve, con los filtros puestos">⬇ Excel</button><button class="btn btn-sm btn-exp" id="exp_stock_pdf" onclick="exportarVista('stock','pdf')" title="Bajar a PDF lo que se ve, con los filtros puestos">⬇ PDF</button></span>
       </div>
     </div>
     <div class="stk-win">
@@ -984,7 +991,6 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
       <button class="btn btn-sm" onclick="setStkWin('','')" title="Todos los movimientos, incluso los de fecha futura">Todo</button>
     </div>
     <div class="chd" style="margin-top:8px">
-      <span></span>
       <div class="tools">
         <input type="text" id="stockSearch" placeholder="Buscar insumo…" oninput="renderStock()" style="width:160px">
         <select id="stockCampoFilter" onchange="renderStock()"><option value="">Todos los campos</option></select>
@@ -999,7 +1005,6 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
         </select>
         <button class="btn btn-sm" onclick="toggleStockExpandAll()" title="Expandir o colapsar el detalle por depósito de todos los insumos">⇅ Expandir / Colapsar todo</button>
         <button class="btn btn-sm" id="stockClearBtn" onclick="clearStockFilters()">Limpiar filtros</button>
-        <span class="exp-bar"><button class="btn btn-sm btn-exp" id="exp_stock_xlsx" onclick="exportarVista('stock','xlsx')" title="Bajar a Excel lo que se ve, con los filtros puestos">⬇ Excel</button><button class="btn btn-sm btn-exp" id="exp_stock_pdf" onclick="exportarVista('stock','pdf')" title="Bajar a PDF lo que se ve, con los filtros puestos">⬇ PDF</button></span>
       </div>
     </div>
   </div>
@@ -1052,9 +1057,11 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
   </div>
 
   <div class="card">
-    <div class="chd">
+    <div class="chd chd-exp">
       <span class="ct-lg">Historial de movimientos</span><span class="camp-bdg" id="movCount"></span>
-      <div class="tools">
+      <span class="exp-bar"><button class="btn btn-sm btn-exp" id="exp_movtos_xlsx" onclick="exportarVista('movtos','xlsx')" title="Bajar a Excel lo que se ve, con los filtros puestos">⬇ Excel</button><button class="btn btn-sm btn-exp" id="exp_movtos_pdf" onclick="exportarVista('movtos','pdf')" title="Bajar a PDF lo que se ve, con los filtros puestos">⬇ PDF</button></span>
+    </div>
+    <div class="tools filtros-row">
         <input type="text" id="movSearch" placeholder="Buscar…" oninput="renderMovtos()" style="width:140px">
         <select id="movCampoFilter" onchange="renderMovtos()"><option value="">Todos los campos</option></select>
         <select id="movDepOrigFilter" onchange="renderMovtos()" title="Depósito de origen"><option value="">Origen: todos</option></select>
@@ -1066,9 +1073,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
         <input type="date" id="movDesde" onchange="renderMovtos()" title="Desde">
         <input type="date" id="movHasta" onchange="renderMovtos()" title="Hasta">
         <button class="btn btn-sm" id="movClearBtn" onclick="clearMovFilters()">Limpiar filtros</button>
-        <span class="exp-bar"><button class="btn btn-sm btn-exp" id="exp_movtos_xlsx" onclick="exportarVista('movtos','xlsx')" title="Bajar a Excel lo que se ve, con los filtros puestos">⬇ Excel</button><button class="btn btn-sm btn-exp" id="exp_movtos_pdf" onclick="exportarVista('movtos','pdf')" title="Bajar a PDF lo que se ve, con los filtros puestos">⬇ PDF</button></span>
       </div>
-    </div>
     <div class="tw tw-scroll" style="max-height:480px;overflow-y:auto">
       <table>
         <thead><tr>
@@ -1090,9 +1095,11 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
     </div>
 
     <div class="card">
-      <div class="chd">
+      <div class="chd chd-exp">
         <span class="ct-lg">Órdenes emitidas</span><span class="camp-bdg" id="campBdgOt"></span>
-        <div class="tools">
+      <span class="exp-bar"><button class="btn btn-sm btn-exp" id="exp_ot_xlsx" onclick="exportarVista('ot','xlsx')" title="Bajar a Excel lo que se ve, con los filtros puestos">⬇ Excel</button><button class="btn btn-sm btn-exp" id="exp_ot_pdf" onclick="exportarVista('ot','pdf')" title="Bajar a PDF lo que se ve, con los filtros puestos">⬇ PDF</button></span>
+    </div>
+    <div class="tools filtros-row">
           <input type="text" id="otSearch" placeholder="Buscar…" oninput="renderOtList()" style="width:140px">
           <select id="otCampoFilter" onchange="renderOtList()"><option value="">Todos los campos</option></select>
           <select id="otLoteFilter" onchange="renderOtList()"><option value="">Todos los lotes</option></select>
@@ -1107,9 +1114,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
           <input type="date" id="otDesde" onchange="renderOtList()" title="Desde">
           <input type="date" id="otHasta" onchange="renderOtList()" title="Hasta">
           <button class="btn btn-sm" id="otClearBtn" onclick="clearOtFilters()">Limpiar filtros</button>
-          <span class="exp-bar"><button class="btn btn-sm btn-exp" id="exp_ot_xlsx" onclick="exportarVista('ot','xlsx')" title="Bajar a Excel lo que se ve, con los filtros puestos">⬇ Excel</button><button class="btn btn-sm btn-exp" id="exp_ot_pdf" onclick="exportarVista('ot','pdf')" title="Bajar a PDF lo que se ve, con los filtros puestos">⬇ PDF</button></span>
         </div>
-      </div>
       <div id="otList"></div>
     </div>
   </div>
@@ -1256,9 +1261,11 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
   <div class="kpis" id="consKpis"></div>
 
   <div class="card">
-    <div class="chd">
+    <div class="chd chd-exp">
       <span class="ct-lg">Filtros</span>
-      <div class="tools">
+      <span class="exp-bar"><button class="btn btn-sm btn-exp" id="exp_consumos_xlsx" onclick="exportarVista('consumos','xlsx')" title="Bajar a Excel lo que se ve, con los filtros puestos">⬇ Excel</button><button class="btn btn-sm btn-exp" id="exp_consumos_pdf" onclick="exportarVista('consumos','pdf')" title="Bajar a PDF lo que se ve, con los filtros puestos">⬇ PDF</button></span>
+    </div>
+    <div class="tools filtros-row">
         <input type="text" id="consSearch" placeholder="Buscar…" oninput="renderConsumos()" style="width:130px">
         <select id="consCampoFilter" onchange="renderConsumos()"><option value="">Todos los campos</option></select>
         <select id="consLoteFilter" onchange="renderConsumos()"><option value="">Todos los lotes</option></select>
@@ -1275,7 +1282,6 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
           <button class="btn btn-sm" onclick="clearConsFilters()">Limpiar filtros</button>
         </span>
       </div>
-    </div>
   </div>
 
   <div class="card">
@@ -1290,7 +1296,6 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
         </span>
         <label class="cons-pend-chk" title="Muestra también lo planificado de las OT pendientes (en naranja). No suma a los consumos reales."><input type="checkbox" id="consPend" onchange="renderConsumos()"> Incluir pendientes</label>
         <button class="btn btn-sm" onclick="consExpandirTodo()" id="consExpBtn">Expandir todo</button>
-<span class="exp-bar"><button class="btn btn-sm btn-exp" id="exp_consumos_xlsx" onclick="exportarVista('consumos','xlsx')" title="Bajar a Excel lo que se ve, con los filtros puestos">⬇ Excel</button><button class="btn btn-sm btn-exp" id="exp_consumos_pdf" onclick="exportarVista('consumos','pdf')" title="Bajar a PDF lo que se ve, con los filtros puestos">⬇ PDF</button></span>
       </div>
     </div>
     <div class="ct" id="consInsHint" style="margin:0 0 6px"></div>
@@ -1308,9 +1313,11 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
   <div class="kpis" id="contrKpis"></div>
 
   <div class="card">
-    <div class="chd">
+    <div class="chd chd-exp">
       <span class="ct-lg">Filtros</span>
-      <div class="tools">
+      <span class="exp-bar"><button class="btn btn-sm btn-exp" id="exp_labores_xlsx" onclick="exportarVista('labores','xlsx')" title="Bajar a Excel lo que se ve, con los filtros puestos">⬇ Excel</button><button class="btn btn-sm btn-exp" id="exp_labores_pdf" onclick="exportarVista('labores','pdf')" title="Bajar a PDF lo que se ve, con los filtros puestos">⬇ PDF</button></span>
+    </div>
+    <div class="tools filtros-row">
         <input type="text" id="contrSearch" placeholder="Buscar…" oninput="renderContratistas()" style="width:130px">
         <select id="contrContrFilter" onchange="renderContratistas()"><option value="">Todos los contratistas</option></select>
         <select id="contrTipoFilter" onchange="renderContratistas()"><option value="">Propio + contratado</option><option value="LP">Solo propio</option><option value="LC">Solo contratado</option></select>
@@ -1324,7 +1331,6 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
         <input type="date" id="contrHasta" onchange="renderContratistas()" title="Hasta">
         <button class="btn btn-sm" id="contrClearBtn" onclick="clearContrFilters()">Limpiar filtros</button>
       </div>
-    </div>
   </div>
 
   <div class="card">
@@ -1335,7 +1341,6 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
         <div id="contrFiltrosActivos" class="titulo-filtros"></div>
       </div>
       <div class="tools">
-<span class="exp-bar"><button class="btn btn-sm btn-exp" id="exp_labores_xlsx" onclick="exportarVista('labores','xlsx')" title="Bajar a Excel lo que se ve, con los filtros puestos">⬇ Excel</button><button class="btn btn-sm btn-exp" id="exp_labores_pdf" onclick="exportarVista('labores','pdf')" title="Bajar a PDF lo que se ve, con los filtros puestos">⬇ PDF</button></span>
       </div>
     </div>
     <div id="contrGrafico" style="display:none"></div>
@@ -1361,9 +1366,11 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
   <div class="kpis" id="costKpis"></div>
 
   <div class="card">
-    <div class="chd">
+    <div class="chd chd-exp">
       <span class="ct-lg">Filtros</span>
-      <div class="tools">
+      <span class="exp-bar"><button class="btn btn-sm btn-exp" id="exp_costos_xlsx" onclick="exportarVista('costos','xlsx')" title="Bajar a Excel lo que se ve, con los filtros puestos">⬇ Excel</button><button class="btn btn-sm btn-exp" id="exp_costos_pdf" onclick="exportarVista('costos','pdf')" title="Bajar a PDF lo que se ve, con los filtros puestos">⬇ PDF</button></span>
+    </div>
+    <div class="tools filtros-row">
         <select id="costCampoFilter" onchange="renderCostos()"><option value="">Todos los campos</option></select>
         <select id="costLoteFilter" onchange="renderCostos()"><option value="">Todos los lotes</option></select>
         <select id="costAmbienteFilter" onchange="renderCostos()"><option value="">Todos los ambientes</option></select>
@@ -1373,7 +1380,6 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
         <input type="date" id="costHasta" onchange="renderCostos()" title="Hasta">
         <button class="btn btn-sm" onclick="clearCostFilters()">Limpiar filtros</button>
       </div>
-    </div>
   </div>
 
   <!-- BUILD 32: cómo se calcula (precios y moneda), separado de los filtros -->
@@ -1403,9 +1409,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
     <div class="chd">
       <span class="ct-lg" id="costTitulo">Resumen de costos</span>
       <span style="font-size:11px;color:var(--muted)">Clic en una fila para ver el detalle</span>
-      <div class="tools" style="margin-left:auto">
-        <span class="exp-bar"><button class="btn btn-sm btn-exp" id="exp_costos_xlsx" onclick="exportarVista('costos','xlsx')" title="Bajar a Excel lo que se ve, con los filtros puestos">⬇ Excel</button><button class="btn btn-sm btn-exp" id="exp_costos_pdf" onclick="exportarVista('costos','pdf')" title="Bajar a PDF lo que se ve, con los filtros puestos">⬇ PDF</button></span>
-      </div>
+
     </div>
     <div class="tw">
       <table class="mb-table">
@@ -1461,7 +1465,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
 </main>
 
 <footer>
-  <span>Puntal Agro · Insumos &amp; OT · Versión v2026-11-11 15:50 · BUILD 35</span>
+  <span>Puntal Agro · Insumos &amp; OT · Versión v2026-11-11 16:06 · BUILD 37</span>
   <span id="fts">—</span>
 </footer>
 
@@ -7022,7 +7026,7 @@ function renderHistoriaLote(){
           '<div><span>Labores</span>'+(regs.length-nPend)+' aplicada'+((regs.length-nPend)===1?'':'s')+(nPend?' · <span class="hist-pend-txt">'+nPend+' pendiente'+(nPend===1?'':'s')+'</span>':'')+'</div>'+
         '</div>'+
       '</div>';
-    if(nPend) cuerpo+='<div class="hist-leyenda"><span class="hist-sw"></span> Pendiente de aplicar: fecha de emisión de la OT, con la dosis y la superficie planificadas.</div>';
+    if(nPend) cuerpo+='<div class="hist-leyenda"><span class="bdg-pend">Pendiente</span> de aplicar: fecha de emisión de la OT, con la dosis y la superficie planificadas.</div>';
     if(!regs.length) cuerpo+='<p class="empty" style="padding:24px 10px">No hay labores en este lote'+(t.campania?' en la campaña '+esc(cab.campania):'')+'.</p>';
     else {
       var tl='', campAnt=null;
@@ -7179,8 +7183,7 @@ function dibujarHistoriaLote(doc, loteId, regs, campania){
       var contH=Math.max(lab.length*LH, rea.length*LH+LH, altP);
       var alto=contH+(obs.length?obs.length*LH+1.5:0)+3;
       if(y+alto>H-M-8) nuevaHoja();
-      if(x.pend){ doc.setFillColor(PEND[0],PEND[1],PEND[2]); doc.rect(M, y, W-2*M, alto, 'F'); doc.setFillColor(224,164,88); doc.rect(M, y, 1.2, alto, 'F'); }
-      else if(par){ doc.setFillColor(FONDO[0],FONDO[1],FONDO[2]); doc.rect(M, y, W-2*M, alto, 'F'); }
+      if(par){ doc.setFillColor(FONDO[0],FONDO[1],FONDO[2]); doc.rect(M, y, W-2*M, alto, 'F'); }
       par=!par;
       var yt=y+4.3;
       doc.setFont('helvetica','bold'); doc.setTextColor(30,30,30);
@@ -8749,14 +8752,14 @@ function renderConsumos(){
     if(vista==='insumo'){
       // Por insumo: los totales del insumo van en sus columnas (sup., dosis promedio, cantidad, unidad)
       rows+='<tr class="cons-grp'+(ab?' open':'')+(G.soloPend?' cons-pend':'')+'"'+onc+'>'+
-        '<td colspan="7">'+car+'<strong>'+G.titHtml+'</strong><span class="cons-grp-sub">'+G.n+(G.n===1?' aplicación':' aplicaciones')+(G.nP?' · '+G.nP+' pendiente'+(G.nP===1?'':'s'):'')+'</span></td>'+
+        '<td colspan="7">'+car+(G.soloPend?'<span class="bdg-pend">Pendiente</span> ':'')+'<strong>'+G.titHtml+'</strong><span class="cons-grp-sub">'+G.n+(G.n===1?' aplicación':' aplicaciones')+(G.nP?' · '+G.nP+' pendiente'+(G.nP===1?'':'s'):'')+'</span></td>'+
         '<td class="num">'+(G.ha>0?f(G.ha,1):'—')+'</td>'+
         '<td class="num">'+(G.ha>0?fmtDosis(G.tot/G.ha):'—')+'</td>'+
         '<td class="num"><strong>'+f(G.tot,2)+'</strong>'+(G.nP?'<span class="cons-pend-tot">+ '+f(G.totP,2)+' pend.</span>':'')+'</td>'+
         '<td>'+esc(G.un)+'</td></tr>';
     } else {
       rows+='<tr class="cons-grp'+(ab?' open':'')+(G.soloPend?' cons-pend':'')+'"'+onc+'>'+
-        '<td colspan="'+nCol+'">'+car+'<strong>'+G.titHtml+'</strong><span class="cons-grp-sub">'+G.subHtml+'</span></td></tr>';
+        '<td colspan="'+nCol+'">'+car+(G.soloPend?'<span class="bdg-pend">Pendiente</span> ':'')+'<strong>'+G.titHtml+'</strong><span class="cons-grp-sub">'+G.subHtml+'</span></td></tr>';
     }
     if(ab) rows+=filasGrupoConsumos(G, vista);
   }
@@ -8938,9 +8941,8 @@ function pdfConsumosAgrupado(gs, vista, camp){
     for(var k=0;k<cols.length;k++){ var tx=doc.splitTextToSize(pdfTxt(vals[k]==null?'':String(vals[k])), cols[k].w-3); partes.push(tx); alto=Math.max(alto, tx.length*LH); }
     alto+=2.6;
     salto(alto);
-    if(opt.pend){ doc.setFillColor(PEND[0],PEND[1],PEND[2]); doc.rect(M,y,W-2*M,alto,'F'); }
-    else if(opt.fondo){ doc.setFillColor(244,246,241); doc.rect(M,y,W-2*M,alto,'F'); }
-    doc.setTextColor(opt.pend?PENDTX[0]:30, opt.pend?PENDTX[1]:30, opt.pend?PENDTX[2]:30);
+    if(opt.fondo){ doc.setFillColor(244,246,241); doc.rect(M,y,W-2*M,alto,'F'); }
+    doc.setTextColor(30,30,30);
     for(var k2=0;k2<cols.length;k2++){
       var xx = cols[k2].r ? xs[k2]+cols[k2].w-1.5 : xs[k2]+1.5+(opt.sangria&&k2===opt.sangria.col?4:0);
       if(cols[k2].r) doc.text(partes[k2], xx, y+4.2, {align:'right'}); else doc.text(partes[k2], xx, y+4.2);
@@ -8959,11 +8961,11 @@ function pdfConsumosAgrupado(gs, vista, camp){
     y+=altoG;
     if(vista==='insumo'){
       for(var i=0;i<G.filas.length;i++){ var x=G.filas[i], r=x.r;
-        fila([fd(r.fecha), '#'+r.otNum, r.loteNom+' · '+r.campoNom+' · '+(r.cultivo||'-')+(r.pend?' (pendiente)':''), r.labor, f(r.ha,1), fmtDosis(x.pr.dosis), (r.pend?'~ ':'')+f(x.pr.total,2)+' '+x.pr.un], {pend:r.pend});
+        fila([fd(r.fecha), '#'+r.otNum, (r.pend?'PENDIENTE · ':'')+r.loteNom+' · '+r.campoNom+' · '+(r.cultivo||'-'), r.labor, f(r.ha,1), fmtDosis(x.pr.dosis), (r.pend?'~ ':'')+f(x.pr.total,2)+' '+x.pr.un], {pend:r.pend});
       }
     } else {
       for(var j=0;j<G.regs.length;j++){ var r2=G.regs[j];
-        fila([r2.loteNom+' · '+r2.campoNom+' · '+(r2.cultivo||'-')+(r2.pend?' (pendiente)':''), fd(r2.fecha), r2.labor+' · '+r2.realizo, f(r2.ha,1), '', ''], {bold:true, fondo:!r2.pend, pend:r2.pend});
+        fila([(r2.pend?'PENDIENTE · ':'')+r2.loteNom+' · '+r2.campoNom+' · '+(r2.cultivo||'-'), fd(r2.fecha), r2.labor+' · '+r2.realizo, f(r2.ha,1), '', ''], {bold:true, fondo:true, pend:r2.pend});
         for(var p=0;p<r2.prods.length;p++){ var pr=r2.prods[p];
           fila(['', '', pr.nombre, '', fmtDosis(pr.dosis)+(r2.esU?'':' '+pr.un+'/ha'), (r2.pend?'~ ':'')+f(pr.total,2)+' '+pr.un], {pend:r2.pend, sangria:{col:2}});
         }
