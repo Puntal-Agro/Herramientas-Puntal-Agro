@@ -189,6 +189,11 @@ tbody tr:hover td{background:#FAFBFC}
 .col-na{color:#C7CDD6;text-align:center}
 /* Dato faltante que tiene consecuencias (ej: consumo sin imputar, no llega a Costos). */
 .pc-mark{color:#9A4A16;font-weight:700}
+/* Barra de descarga: igual en todas las solapas (BUILD 35) */
+.exp-bar{display:inline-flex;gap:6px;margin-left:auto;padding-left:10px;border-left:1px solid var(--border)}
+.btn.btn-exp{font-weight:600;color:#3B5226;border-color:#B9CCA6;background:#fff;white-space:nowrap}
+.btn.btn-exp:hover:not(:disabled){background:#F1F5EC;border-color:#4A6533}
+.btn.btn-exp:disabled{opacity:.4;cursor:not-allowed}
 .ins-todos-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
 .ins-todos-lotes{margin-top:10px}
 .ins-todos-lotes-hd{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);margin-bottom:4px}
@@ -220,6 +225,9 @@ select.dep-falta{border-color:#E0A458!important;background:#FDF6EC!important;col
 .cons-grp.open td{background:#DCE6D0}
 .cons-car{display:inline-block;width:12px;color:#5B6B4E}
 .cons-grp-sub{font-weight:400;color:#5B6B4E;font-size:12px;margin-left:10px}
+.cons-grp td.num{font-variant-numeric:tabular-nums;color:#2F4220}
+.cons-pend-tot{display:block;font-size:10.5px;font-weight:600;color:#9A4A16}
+.cons-tbl td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
 .cons-grp-cat{font-weight:400;font-size:11px;color:#5B6B4E;background:#fff;border:1px solid #C9D6BB;border-radius:10px;padding:0 7px;margin-left:4px}
 .cons-grp.cons-pend td{background:#FBEEDC}
 tr.cons-pend td{background:#FDF6EC!important}
@@ -935,7 +943,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
       <span class="ws-sel-lbl">Campaña:</span>
       <select id="campaniaDefSel" onchange="setCampaniaFiltro(this.value)" title="Filtra las vistas por campaña. En Movimientos y Stock no aplica: el stock es por depósito y fecha, no por campaña."></select>
     </div>
-    <button class="btn" onclick="exportExcel()">Exportar Excel</button>
+    <button class="btn" onclick="exportExcel()" title="Toda la información de la empresa (stock, movimientos, OT, maestros) en un Excel, como respaldo">⬇ Excel completo</button>
   </div>
 </header>
 
@@ -991,6 +999,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
         </select>
         <button class="btn btn-sm" onclick="toggleStockExpandAll()" title="Expandir o colapsar el detalle por depósito de todos los insumos">⇅ Expandir / Colapsar todo</button>
         <button class="btn btn-sm" id="stockClearBtn" onclick="clearStockFilters()">Limpiar filtros</button>
+        <span class="exp-bar"><button class="btn btn-sm btn-exp" id="exp_stock_xlsx" onclick="exportarVista('stock','xlsx')" title="Bajar a Excel lo que se ve, con los filtros puestos">⬇ Excel</button><button class="btn btn-sm btn-exp" id="exp_stock_pdf" onclick="exportarVista('stock','pdf')" title="Bajar a PDF lo que se ve, con los filtros puestos">⬇ PDF</button></span>
       </div>
     </div>
   </div>
@@ -1057,6 +1066,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
         <input type="date" id="movDesde" onchange="renderMovtos()" title="Desde">
         <input type="date" id="movHasta" onchange="renderMovtos()" title="Hasta">
         <button class="btn btn-sm" id="movClearBtn" onclick="clearMovFilters()">Limpiar filtros</button>
+        <span class="exp-bar"><button class="btn btn-sm btn-exp" id="exp_movtos_xlsx" onclick="exportarVista('movtos','xlsx')" title="Bajar a Excel lo que se ve, con los filtros puestos">⬇ Excel</button><button class="btn btn-sm btn-exp" id="exp_movtos_pdf" onclick="exportarVista('movtos','pdf')" title="Bajar a PDF lo que se ve, con los filtros puestos">⬇ PDF</button></span>
       </div>
     </div>
     <div class="tw tw-scroll" style="max-height:480px;overflow-y:auto">
@@ -1097,6 +1107,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
           <input type="date" id="otDesde" onchange="renderOtList()" title="Desde">
           <input type="date" id="otHasta" onchange="renderOtList()" title="Hasta">
           <button class="btn btn-sm" id="otClearBtn" onclick="clearOtFilters()">Limpiar filtros</button>
+          <span class="exp-bar"><button class="btn btn-sm btn-exp" id="exp_ot_xlsx" onclick="exportarVista('ot','xlsx')" title="Bajar a Excel lo que se ve, con los filtros puestos">⬇ Excel</button><button class="btn btn-sm btn-exp" id="exp_ot_pdf" onclick="exportarVista('ot','pdf')" title="Bajar a PDF lo que se ve, con los filtros puestos">⬇ PDF</button></span>
         </div>
       </div>
       <div id="otList"></div>
@@ -1279,7 +1290,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
         </span>
         <label class="cons-pend-chk" title="Muestra también lo planificado de las OT pendientes (en naranja). No suma a los consumos reales."><input type="checkbox" id="consPend" onchange="renderConsumos()"> Incluir pendientes</label>
         <button class="btn btn-sm" onclick="consExpandirTodo()" id="consExpBtn">Expandir todo</button>
-        <button class="btn btn-primary btn-barra" onclick="descargarPdfConsumos()" title="PDF de lo que se ve: la vista elegida con los filtros puestos">📄 PDF de esta vista</button>
+<span class="exp-bar"><button class="btn btn-sm btn-exp" id="exp_consumos_xlsx" onclick="exportarVista('consumos','xlsx')" title="Bajar a Excel lo que se ve, con los filtros puestos">⬇ Excel</button><button class="btn btn-sm btn-exp" id="exp_consumos_pdf" onclick="exportarVista('consumos','pdf')" title="Bajar a PDF lo que se ve, con los filtros puestos">⬇ PDF</button></span>
       </div>
     </div>
     <div class="ct" id="consInsHint" style="margin:0 0 6px"></div>
@@ -1324,7 +1335,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
         <div id="contrFiltrosActivos" class="titulo-filtros"></div>
       </div>
       <div class="tools">
-        <button class="btn btn-primary btn-barra" onclick="descargarPdfLabores()" title="Resumen y detalle de lo que se ve, con lo facturado, pagado y adeudado">📄 Reporte (PDF)</button>
+<span class="exp-bar"><button class="btn btn-sm btn-exp" id="exp_labores_xlsx" onclick="exportarVista('labores','xlsx')" title="Bajar a Excel lo que se ve, con los filtros puestos">⬇ Excel</button><button class="btn btn-sm btn-exp" id="exp_labores_pdf" onclick="exportarVista('labores','pdf')" title="Bajar a PDF lo que se ve, con los filtros puestos">⬇ PDF</button></span>
       </div>
     </div>
     <div id="contrGrafico" style="display:none"></div>
@@ -1393,8 +1404,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
       <span class="ct-lg" id="costTitulo">Resumen de costos</span>
       <span style="font-size:11px;color:var(--muted)">Clic en una fila para ver el detalle</span>
       <div class="tools" style="margin-left:auto">
-        <button class="btn btn-sm" onclick="exportCostosExcel()" title="Resumen y detalle, con los filtros, la moneda y los precios elegidos">⬇ Excel</button>
-        <button class="btn btn-primary btn-barra" onclick="descargarPdfCostos()" title="Resumen y detalle, con los filtros, la moneda y los precios elegidos">📄 PDF</button>
+        <span class="exp-bar"><button class="btn btn-sm btn-exp" id="exp_costos_xlsx" onclick="exportarVista('costos','xlsx')" title="Bajar a Excel lo que se ve, con los filtros puestos">⬇ Excel</button><button class="btn btn-sm btn-exp" id="exp_costos_pdf" onclick="exportarVista('costos','pdf')" title="Bajar a PDF lo que se ve, con los filtros puestos">⬇ PDF</button></span>
       </div>
     </div>
     <div class="tw">
@@ -1451,7 +1461,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
 </main>
 
 <footer>
-  <span>Puntal Agro · Insumos &amp; OT · Versión v2026-11-11 15:20 · BUILD 34</span>
+  <span>Puntal Agro · Insumos &amp; OT · Versión v2026-11-11 15:50 · BUILD 35</span>
   <span id="fts">—</span>
 </footer>
 
@@ -3278,6 +3288,7 @@ function renderStock(){
   if(S.posteriores>0) avisos+='<div class="banner-info">'+S.posteriores+' movimiento'+(S.posteriores===1?'':'s')+' con fecha posterior al '+fd(stkWin.hasta)+' no '+(S.posteriores===1?'entra':'entran')+' en esta vista.</div>';
   byId('stockAvisos').innerHTML=avisos+renderAjustesVentana();
   byId('stockBloques').innerHTML = bloques || '<div class="card"><p class="empty" style="padding:20px;text-align:center">Sin stock para mostrar con la ventana y los filtros aplicados.</p></div>';
+  window.expStock=filtrados; expEstado('stock', filtrados.length>0);
   var C=comprometido();
   byId('stockKpis').innerHTML=
     '<div class="kpi kpi-neutral"><div class="kpi-lbl">Insumos</div><div class="kpi-val">'+tot.n+'</div></div>'+
@@ -3618,7 +3629,7 @@ function renderMovtos(){
   var fCat=byId('movCatFilter').value, fIns=byId('movInsFilter').value;
   var lista=state.movtos.slice();
   lista.sort(function(a,b){ return (movFecha(b)||'').localeCompare(movFecha(a)||''); });
-  var rows='', n=0;
+  var rows='', n=0, expM=[];
   for(var i=0;i<lista.length;i++){
     var m=lista[i], ins=getInsumo(m.insumoId), cab=compDe(m);
     // Movimientos que solo tocan depósitos de campos sin permiso: no se muestran.
@@ -3666,6 +3677,7 @@ function renderMovtos(){
     else if(fb && fechaM<=fb) accion='<span class="bdg bn" title="Fecha cerrada por el cierre de stock al '+fd(fb)+'">cerrado</span>';
     else accion='<button class="btn btn-sm" onclick="openMovEditModal(\''+m.comprobanteId+'\')" title="Editar comprobante">✎</button> <button class="btn btn-sm btn-danger" onclick="delMov(\''+m.comprobanteId+'\')" title="Eliminar comprobante">✕</button>';
     n++;
+    expM.push([fechaM, esAuto?('OT #'+((cab&&cab.refOtNum)||'')):((compTipoTxt?compTipoTxt+' ':'')+compNro), ins?ins.nombre:'', ins?ins.un:'', (t&&t.signo===-1?-1:1)*(Number(m.cant)||0), Number(m.precio)>0?Number(m.precio):'', Number(m.precio)>0?(m.moneda==='USD'?'U$S':'$'):'', tipoM, oNom||'', dNom||'', obsCell==='—'?'':obsCell]);
     if(n>MOV_MAX_FILAS) continue;   // se cuentan todas, se dibujan las más recientes
     rows+='<tr'+(esAuto?' style="background:rgba(15,25,35,.015)"':'')+'>'+
       '<td>'+fd(fechaM)+'</td><td>'+compTxt+'</td>'+
@@ -3679,6 +3691,7 @@ function renderMovtos(){
   if(n>MOV_MAX_FILAS) rows+='<tr><td colspan="11" class="empty">Se muestran las '+MOV_MAX_FILAS+' más recientes de '+n+'. Usá los filtros (fechas, insumo, depósito) para ver el resto.</td></tr>';
   byId('movBody').innerHTML=rows || '<tr><td colspan="11" class="empty">Sin movimientos para los filtros aplicados.</td></tr>';
   var cnt=byId('movCount'); if(cnt) cnt.textContent=n ? n+' línea'+(n===1?'':'s') : '';
+  window.expMovtos=expM; expEstado('movtos', expM.length>0);
   marcarFiltrosActivos(['movSearch','movCampoFilter','movDepOrigFilter','movDepDestFilter','movCatFilter','movInsFilter','movTipoFilter','movOrigenFilter','movDesde','movHasta'],'movClearBtn');
 }
 function getProveedorNombre(id){ var ps=state.proveedores||[]; for(var i=0;i<ps.length;i++) if(ps[i].id===id) return ps[i].nombre; return ''; }
@@ -4667,7 +4680,7 @@ function renderOtList(){
   var fcampania=state.campaniaActivaId||'';
   var fd1=byId('otDesde').value, fh=byId('otHasta').value;
   var sorted=state.ots.slice().sort(function(a,b){ return b.num-a.num; });
-  var rows='', puedeC=puede('cargar');
+  var rows='', puedeC=puede('cargar'), expO=[];
   for(var i=0;i<sorted.length;i++){
     var o=sorted[i];
     var pares=destinosDeOt(o);
@@ -4700,6 +4713,7 @@ function renderOtList(){
     var hayLP=false, hayLC=false;
     for(var tt=0;tt<(o.trabajos||[]).length;tt++){ if(o.trabajos[tt].laborTipo==='LC') hayLC=true; else hayLP=true; }
     var tipoTxt = (hayLP&&hayLC) ? 'Mixta' : (hayLC?'Contratada':'Propia');
+    expO.push(['#'+o.num+(o.rapida?' (rápida)':''), o.fecha||'', getCampaniaNombre(o.campaniaId)||'', labelLaboresDeOt(o), cultTxt, campoNoms.join(', '), tipoTxt, contratistasDeOt(o), lotesNom.length+(unList.length?' + '+unList.length+' UN':''), haDeOt(o), o.estado==='Aplicada'?'Confirmada':o.estado, o.obs||'']);
     rows+='<tr class="otl-row" onclick="abrirOT(\''+o.id+'\')">'+
       '<td class="otl-num">OT #'+o.num+(o.rapida?' <span class="bdg bn" title="Registrada con OT rápida (labor ya realizada)">rápida</span>':'')+'</td>'+
       '<td class="otl-act"><span class="otl-act-cult">'+esc(labelLaboresDeOt(o))+'</span> <span class="otl-act-campo">· '+esc(cultTxt)+' · '+esc(campoNoms.join(', '))+'</span></td>'+
@@ -4722,6 +4736,7 @@ function renderOtList(){
       '</tr></thead><tbody>'+rows+'</tbody></table></div>'
     : '<div class="empty" style="padding:20px;text-align:center">Sin órdenes para los filtros aplicados.</div>';
   marcarFiltrosActivos(['otSearch','otCampoFilter','otLoteFilter','otActFilter','otEstadoFilter','otDesde','otHasta'],'otClearBtn');
+  window.expOts=expO; expEstado('ot', expO.length>0);
   ajustarScrollHoriz();
 }
 // Superficie de la OT: cada lote cuenta UNA vez aunque tenga varias labores.
@@ -8719,7 +8734,7 @@ function renderConsumos(){
     }
   }
   regs.sort(function(a,b){ if(a.fecha!==b.fecha) return a.fecha<b.fecha?-1:1; return a.otNum-b.otNum; });
-  window.consRegs=regs;
+  window.consRegs=regs; expEstado('consumos', regs.length>0);
 
   var vista=window.consVista||'lote';
   var grupos=gruposConsumos(regs, vista);
@@ -8727,15 +8742,26 @@ function renderConsumos(){
   ['ot','lote','insumo'].forEach(function(v){ var b=byId(v==='ot'?'consVerOT':(v==='lote'?'consVerLote':'consVerIns')); if(b) b.classList.toggle('on', v===vista); });
   var tit=byId('consTitulo'); if(tit) tit.textContent='Consumos por '+(vista==='ot'?'OT':(vista==='lote'?'lote':'insumo'));
   byId('consThead').innerHTML=theadConsumos(vista);
-  var rows='', todosAb=true;
+  var rows='', todosAb=true, nCol=colsConsumos(vista);
   for(var g=0;g<grupos.length;g++){
     var G=grupos[g], ab=!!consExp[vista+'::'+G.key]; if(!ab) todosAb=false;
-    rows+='<tr class="cons-grp'+(ab?' open':'')+(G.soloPend?' cons-pend':'')+'" onclick="toggleConsGrupo(\''+esc(vista+'::'+G.key).replace(/'/g,"\\'")+'\')">'+
-      '<td colspan="8"><span class="cons-car">'+(ab?'▾':'▸')+'</span> <strong>'+G.titHtml+'</strong><span class="cons-grp-sub">'+G.subHtml+'</span></td></tr>';
+    var onc=' onclick="toggleConsGrupo(\''+esc(vista+'::'+G.key).replace(/'/g,"\\'")+'\')"', car='<span class="cons-car">'+(ab?'▾':'▸')+'</span> ';
+    if(vista==='insumo'){
+      // Por insumo: los totales del insumo van en sus columnas (sup., dosis promedio, cantidad, unidad)
+      rows+='<tr class="cons-grp'+(ab?' open':'')+(G.soloPend?' cons-pend':'')+'"'+onc+'>'+
+        '<td colspan="7">'+car+'<strong>'+G.titHtml+'</strong><span class="cons-grp-sub">'+G.n+(G.n===1?' aplicación':' aplicaciones')+(G.nP?' · '+G.nP+' pendiente'+(G.nP===1?'':'s'):'')+'</span></td>'+
+        '<td class="num">'+(G.ha>0?f(G.ha,1):'—')+'</td>'+
+        '<td class="num">'+(G.ha>0?fmtDosis(G.tot/G.ha):'—')+'</td>'+
+        '<td class="num"><strong>'+f(G.tot,2)+'</strong>'+(G.nP?'<span class="cons-pend-tot">+ '+f(G.totP,2)+' pend.</span>':'')+'</td>'+
+        '<td>'+esc(G.un)+'</td></tr>';
+    } else {
+      rows+='<tr class="cons-grp'+(ab?' open':'')+(G.soloPend?' cons-pend':'')+'"'+onc+'>'+
+        '<td colspan="'+nCol+'">'+car+'<strong>'+G.titHtml+'</strong><span class="cons-grp-sub">'+G.subHtml+'</span></td></tr>';
+    }
     if(ab) rows+=filasGrupoConsumos(G, vista);
   }
   var eb=byId('consExpBtn'); if(eb) eb.textContent = (grupos.length && todosAb) ? 'Plegar todo' : 'Expandir todo';
-  byId('consLoteBody').innerHTML=rows || '<tr><td colspan="8" class="empty">Sin consumos registrados para los filtros aplicados.</td></tr>';
+  byId('consLoteBody').innerHTML=rows || '<tr><td colspan="'+nCol+'" class="empty">Sin consumos registrados para los filtros aplicados.</td></tr>';
 
   // Total del insumo filtrado (solo lo real)
   var hint='';
@@ -8816,9 +8842,10 @@ function gruposConsumos(regs, vista){
   else out.sort(function(a,b){ var ca=a.r0.campoNom, cb=b.r0.campoNom; if(ca!==cb) return ca.localeCompare(cb); return a.tit.localeCompare(b.tit, 'es', {numeric:true}); });
   return out;
 }
+function colsConsumos(vista){ return vista==='insumo' ? 11 : (vista==='ot' ? 10 : 8); }
 function theadConsumos(vista){
-  if(vista==='insumo') return '<tr><th>Fecha</th><th>OT</th><th>Lote · Campo · Cultivo</th><th>Labor</th><th class="num">Sup.</th><th class="num">Dosis</th><th class="num">Cantidad</th><th>Un.</th></tr>';
-  if(vista==='ot') return '<tr><th>Lote · Campo · Cultivo</th><th>Fecha apl.</th><th>Labor / Insumo</th><th class="num">Sup.</th><th>Un.</th><th>Banda</th><th class="num">Dosis</th><th class="num">Cantidad</th></tr>';
+  if(vista==='insumo') return '<tr><th>Fecha</th><th>OT</th><th>Campo</th><th>Lote</th><th>Cultivo</th><th>Labor</th><th>Realizó</th><th class="num">Sup. (ha)</th><th class="num">Dosis/ha</th><th class="num">Cantidad</th><th>Un.</th></tr>';
+  if(vista==='ot') return '<tr><th>Lote</th><th>Campo</th><th>Cultivo</th><th>Fecha apl.</th><th>Labor / Insumo</th><th class="num">Sup.</th><th>Un.</th><th>Banda</th><th class="num">Dosis</th><th class="num">Cantidad</th></tr>';
   return '<tr><th>Fecha</th><th>OT</th><th>Labor / Insumo</th><th class="num">Sup.</th><th>Un.</th><th>Banda</th><th class="num">Dosis</th><th class="num">Cantidad</th></tr>';
 }
 function tagPend(r){ return r.pend?'<span class="bdg-pend">Pendiente</span> ':''; }
@@ -8827,14 +8854,14 @@ function filasGrupoConsumos(G, vista){
   if(vista==='insumo'){
     for(i=0;i<G.filas.length;i++){ var x=G.filas[i], r=x.r;
       h+='<tr class="cons-det'+(r.pend?' cons-pend':'')+'"><td>'+esc(fd(r.fecha))+'</td><td><span class="cons-ot-num">#'+r.otNum+'</span></td>'+
-        '<td class="tdname">'+tagPend(r)+'<strong>'+esc(r.loteNom)+'</strong><span class="cons-campo">'+esc(r.campoNom)+' · '+esc(r.cultivo||'—')+'</span></td>'+
-        '<td class="tdname">'+esc(r.labor)+'<span class="cons-campo">'+esc(r.realizo)+'</span></td>'+
+        '<td>'+esc(r.campoNom)+'</td><td class="tdname">'+tagPend(r)+'<strong>'+esc(r.loteNom)+'</strong></td><td>'+esc(r.cultivo||'—')+'</td>'+
+        '<td class="tdname">'+esc(r.labor)+'</td><td>'+esc(r.realizo)+'</td>'+
         '<td class="num">'+f(r.ha,1)+'</td><td class="num">'+fmtDosis(x.pr.dosis)+'</td><td class="num"><strong>'+(r.pend?'≈ ':'')+f(x.pr.total,2)+'</strong></td><td>'+esc(x.pr.un)+'</td></tr>';
     }
     return h;
   }
   for(i=0;i<G.regs.length;i++){ var r2=G.regs[i];
-    var c1 = vista==='ot' ? '<td class="tdname">'+tagPend(r2)+'<strong>'+esc(r2.loteNom)+'</strong><span class="cons-campo">'+esc(r2.campoNom)+' · '+esc(r2.cultivo||'—')+'</span></td><td>'+esc(fd(r2.fecha))+(r2.pend?'<span class="cons-campo">emisión</span>':'')+'</td>'
+    var c1 = vista==='ot' ? '<td class="tdname">'+tagPend(r2)+'<strong>'+esc(r2.loteNom)+'</strong></td><td>'+esc(r2.campoNom)+'</td><td>'+esc(r2.cultivo||'—')+'</td><td>'+esc(fd(r2.fecha))+(r2.pend?'<span class="cons-campo">emisión</span>':'')+'</td>'
                           : '<td>'+tagPend(r2)+esc(fd(r2.fecha))+'</td><td><span class="cons-ot-num">#'+r2.otNum+'</span></td>';
     h+='<tr class="cons-labor'+(r2.pend?' cons-pend':'')+'">'+c1+
       '<td class="tdname"><strong>'+esc(r2.labor)+'</strong><span class="bdg '+(r2.tipo==='LP'?'bg':'bv')+'" style="margin-left:6px">'+(r2.tipo==='LP'?'Propia':'Contratada')+'</span>'+
@@ -8842,7 +8869,7 @@ function filasGrupoConsumos(G, vista){
         (r2.obs?'<span class="cons-campo">'+esc(r2.obs)+'</span>':'')+'</td>'+
       '<td class="num">'+f(r2.ha,1)+'</td><td>'+(r2.esU?'unid.':'ha')+'</td><td></td><td class="num" style="color:var(--muted)">—</td><td class="num"><strong>'+f(r2.ha,2)+'</strong></td></tr>';
     for(var p=0;p<r2.prods.length;p++){ var pr=r2.prods[p];
-      h+='<tr class="cons-ins'+(r2.pend?' cons-pend':'')+'"><td></td><td></td><td class="tdname cons-ins-nom">'+esc(pr.nombre)+'</td><td></td><td>'+esc(pr.un)+'</td><td>'+badgeBanda(pr.banda)+'</td>'+
+      h+='<tr class="cons-ins'+(r2.pend?' cons-pend':'')+'">'+(vista==='ot'?'<td></td><td></td><td></td><td></td>':'<td></td><td></td>')+'<td class="tdname cons-ins-nom">'+esc(pr.nombre)+'</td><td></td><td>'+esc(pr.un)+'</td><td>'+badgeBanda(pr.banda)+'</td>'+
         '<td class="num">'+fmtDosis(pr.dosis)+'</td><td class="num"><strong>'+(r2.pend?'≈ ':'')+f(pr.total,2)+'</strong></td></tr>';
     }
   }
@@ -9238,6 +9265,7 @@ function renderContratistas(){
   }
   totPend=totImporteLC-totFact;   // solo lo contratado se factura
   byId('contrBody').innerHTML=rows || '<tr><td colspan="16" class="empty">Sin labores para los filtros aplicados.</td></tr>';
+  expEstado('labores', !!rows);
 
   // KPIs
   var totHaPend=totHaTot-totHaApl;
@@ -9566,7 +9594,7 @@ function renderCostos(){
     var uc0=byId('costUNCard'); if(uc0) uc0.style.display='none';
     var ac0=byId('costAvisoCard'); if(ac0) ac0.style.display='none';
     var t0=byId('costTitulo'); if(t0) t0.textContent='Resumen de costos';
-    var aP0=byId('costPCAviso'); if(aP0) aP0.innerHTML=''; window.costUsados={ins:{}, lab:{}}; window.costExp=null;
+    var aP0=byId('costPCAviso'); if(aP0) aP0.innerHTML=''; window.costUsados={ins:{}, lab:{}}; window.costExp=null; expEstado('costos', false);
     return;
   }
   var monVis = (window.costMoneda==='USD') ? 'USD' : 'ARS';
@@ -9747,6 +9775,7 @@ function renderCostos(){
     F.push({t:'total', c:(filtroUN?'Costo '+fcult:'Costo directo'), ha:ph(totCult), tot:v(totGen), pct:100, falta:fl(totGen)});
     var det=[]; for(var d=0;d<detalle.length;d++){ var x=detalle[d]; if(!((filtroUN ? x.un : !x.un) || x.fuera)) continue; det.push(x); }
     det.sort(function(a,b){ if(a.tipo!==b.tipo) return a.tipo==='insumo'?-1:1; var ga=a.tipo==='insumo'?catKeys.indexOf(a.cat):(a.laborClase==='LP'?0:1), gb=b.tipo==='insumo'?catKeys.indexOf(b.cat):(b.laborClase==='LP'?0:1); if(ga!==gb) return ga-gb; return (a.fecha||'')<(b.fecha||'')?-1:1; });
+    expEstado('costos', !!hayAlgo);
     window.costExp={campania:fcampania, moneda:monVis, haBase:haBase, filas:F, detalle:det, preciosCosto:usarPC && contarPreciosCosto(PC)>0, filtroUN:filtroUN};
   })();
   var tit=byId('costTitulo');
@@ -10194,6 +10223,113 @@ function closeModal(){ byId('modalBg').classList.remove('on'); }
 /* ================================================================
    EXPORT EXCEL
 ================================================================ */
+
+/* ===== Descargas: mismas en todas las solapas (BUILD 35) =====
+   Cada solapa tiene la misma barra «⬇ Excel · ⬇ PDF» al final de las herramientas de su tabla.
+   Bajan lo que se ve, con los filtros puestos. Si no hay datos, los botones quedan deshabilitados. */
+function expEstado(v, hay){ ['xlsx','pdf'].forEach(function(t){ var b=byId('exp_'+v+'_'+t); if(b) b.disabled=!hay; }); }
+function exportarVista(v, tipo){
+  if(v==='costos') return tipo==='pdf' ? descargarPdfCostos() : exportCostosExcel();
+  if(v==='consumos' && tipo==='pdf') return descargarPdfConsumos();
+  if(v==='labores' && tipo==='pdf') return descargarPdfLabores();
+  var D=datosExport(v);
+  if(!D || !D.filas.length){ alert('No hay datos para bajar con estos filtros.'); return; }
+  if(tipo==='xlsx') return excelGenerico(D);
+  cargarScript(JSPDF_URL, function(){ return !!(window.jspdf && window.jspdf.jsPDF); }, function(ok){
+    if(!ok){ alert('No se pudo cargar el generador de PDF. Revisá la conexión y probá de nuevo.'); return; }
+    pdfGenerico(D).save(nombreExport(D.titulo, 'pdf'));
+  });
+}
+function nombreExport(tit, ext){
+  var emp=(root.espacios[root.activoId]&&root.espacios[root.activoId].nombre)||'';
+  return (tit+' '+emp+' '+fd(todayISO())).replace(/[^A-Za-z0-9áéíóúñÁÉÍÓÚÑ_-]+/g,'_')+'.'+ext;
+}
+// Datos de cada solapa: {titulo, filtros, cols:[{t, num, dec, w}], filas:[[...] | {g:'grupo'}], apaisado}
+function datosExport(v){
+  var D=null, i, j;
+  if(v==='stock'){
+    var S=window.expStock||[], dw=stkWin||{};
+    D={titulo:'Stock de insumos', filtros:['Ventana: '+(dw.desde?fd(dw.desde):'inicio')+' al '+(dw.hasta?fd(dw.hasta):'hoy')].concat(textoFiltrosIds([['stockSearch','Búsqueda'],['stockCampoFilter','Campo'],['stockCatFilter','Categoría'],['stockDepFilter','Depósito'],['stockEstadoFilter','Estado']])),
+      cols:[{t:'Insumo',w:46},{t:'Categoría',w:28},{t:'Un.',w:12},{t:'Depósito',w:38},{t:'Inicial',num:1,w:20},{t:'Entradas',num:1,w:20},{t:'Salidas',num:1,w:20},{t:'Real',num:1,w:20},{t:'Comprom.',num:1,w:20},{t:'Disponible',num:1,w:22},{t:'Estado',w:24}], filas:[], apaisado:true};
+    for(i=0;i<S.length;i++){ var y=S[i], multi=y.filas.length>1;
+      D.filas.push({vals:[y.ins.nombre, y.ins.cat||'', y.ins.un||'', multi?'Todos ('+y.filas.length+')':getDepNombre(y.filas[0].depId), y.t.ini, y.t.ent, y.t.sal, y.t.real, y.t.comp, y.t.disp, y.e.t+((y.depsProb||[]).length?' · falta en '+y.depsProb.length+' dep.':'')], bold:multi});
+      if(multi) for(j=0;j<y.filas.length;j++){ var z=y.filas[j]; D.filas.push({vals:['', '', '', '   '+getDepNombre(z.depId), z.s.ini, z.s.ent, z.s.sal, z.s.real, z.s.comp, z.s.disp, z.e.t], sub:true}); }
+    }
+  } else if(v==='movtos'){
+    D={titulo:'Movimientos de insumos', filtros:textoFiltrosIds([['movSearch','Búsqueda'],['movCampoFilter','Campo'],['movDepOrigFilter','Origen'],['movDepDestFilter','Destino'],['movCatFilter','Categoría'],['movInsFilter','Insumo'],['movTipoFilter','Tipo'],['movOrigenFilter','Origen del registro'],['movDesde','Desde'],['movHasta','Hasta']]),
+      cols:[{t:'Fecha',w:18,fecha:1},{t:'Comprobante',w:30},{t:'Insumo',w:44},{t:'Un.',w:10},{t:'Cantidad',num:1,w:22},{t:'Precio',num:1,w:20},{t:'Mon.',w:10},{t:'Tipo',w:28},{t:'Origen',w:30},{t:'Destino',w:30},{t:'Observaciones',w:31}], filas:[], apaisado:true};
+    var M=window.expMovtos||[]; for(i=0;i<M.length;i++) D.filas.push({vals:M[i]});
+  } else if(v==='ot'){
+    D={titulo:'Órdenes de trabajo', filtros:['Campaña: '+(getCampaniaNombre(state.campaniaActivaId)||'todas')].concat(textoFiltrosIds([['otSearch','Búsqueda'],['otCampoFilter','Campo'],['otLoteFilter','Lote'],['otActFilter','Cultivo'],['otEstadoFilter','Estado'],['otDesde','Desde'],['otHasta','Hasta']])),
+      cols:[{t:'OT',w:18},{t:'Fecha',w:18,fecha:1},{t:'Campaña',w:16},{t:'Labores',w:42},{t:'Cultivos',w:30},{t:'Campos',w:26},{t:'Tipo',w:18},{t:'Contratista',w:30},{t:'Lotes',w:14},{t:'Ha',num:1,dec:1,w:16},{t:'Estado',w:20},{t:'Obs.',w:25}], filas:[], apaisado:true};
+    var O=window.expOts||[]; for(i=0;i<O.length;i++) D.filas.push({vals:O[i]});
+  } else if(v==='consumos'){
+    var R2=window.consRegs||[];
+    D={titulo:'Consumos', filtros:['Campaña: '+(getCampaniaNombre(state.campaniaActivaId)||'todas')].concat(textoFiltrosConsumos()),
+      cols:[{t:'Fecha',fecha:1},{t:'OT'},{t:'Campo'},{t:'Lote'},{t:'Cultivo'},{t:'Labor'},{t:'Realizó'},{t:'Sup. (ha)',num:1,dec:1},{t:'Categoría'},{t:'Insumo'},{t:'Un.'},{t:'Dosis',num:1,dec:3},{t:'Cantidad',num:1},{t:'Estado'}], filas:[]};
+    for(i=0;i<R2.length;i++){ var r=R2[i];
+      if(!r.prods.length) D.filas.push({vals:[r.fecha, '#'+r.otNum, r.campoNom, r.loteNom, r.cultivo, r.labor, r.realizo, r.ha, '', '', '', '', '', r.pend?'Pendiente':'Aplicado']});
+      for(j=0;j<r.prods.length;j++){ var pr=r.prods[j]; D.filas.push({vals:[r.fecha, '#'+r.otNum, r.campoNom, r.loteNom, r.cultivo, r.labor, r.realizo, r.ha, pr.cat, pr.nombre, pr.un, pr.dosis==null?'':pr.dosis, pr.total, r.pend?'Pendiente (planificado)':'Aplicado']}); }
+    }
+  } else if(v==='labores'){
+    var L=contrAplicarSel(contrFilasFiltradas());
+    D={titulo:'Labores', filtros:['Campaña: '+(getCampaniaNombre(state.campaniaActivaId)||'todas')],
+      cols:[{t:'OT'},{t:'Fecha',fecha:1},{t:'Labor'},{t:'Tipo'},{t:'Contratista'},{t:'Campos'},{t:'Cultivos'},{t:'Ha OT',num:1,dec:1},{t:'Ha aplicadas',num:1,dec:1},{t:'Tarifa',num:1},{t:'Importe',num:1},{t:'Facturación'},{t:'Facturado',num:1},{t:'Pagado',num:1},{t:'Adeudado',num:1}], filas:[]};
+    for(i=0;i<L.length;i++){ var x=L[i];
+      D.filas.push({vals:['#'+x.o.num, x.o.fecha||'', x.laborNom, x.esPropio?'Propia':'Contratada', x.esPropio?'Propia':(x.contrNom||''), [].concat(x.camposNom||[]).join(', '), [].concat(x.cultNom||[]).join(', '), x.haTot, x.haApl, x.tarifa||'', x.importe||0, x.esPropio?'':(x.trabajo.estadoFact||'Sin facturar'), x.esPropio?'':(x.facturado||0), x.esPropio?'':(x.pagado||0), x.esPropio?'':(x.adeudado||0)]}); }
+  }
+  return D;
+}
+function excelGenerico(D){
+  if(typeof XLSX==='undefined'){ alert('No se pudo cargar la librería de Excel. Revisá la conexión y recargá la página.'); return; }
+  var emp=(root.espacios[root.activoId]&&root.espacios[root.activoId].nombre)||'';
+  var aoa=[[D.titulo+(emp?' · '+emp:'')], ['Filtros: '+(D.filtros.length?D.filtros.join(' · '):'sin filtros')], ['Generado: '+fd(todayISO())], [], D.cols.map(function(c){ return c.t; })];
+  for(var i=0;i<D.filas.length;i++){
+    aoa.push(D.filas[i].vals.map(function(v, k){ var c=D.cols[k]; if(c.fecha && v) return fd(v); if(c.num && typeof v==='number') return Math.round(v*1000)/1000; return v; }));
+  }
+  var ws=XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols']=D.cols.map(function(c){ return {wch: c.num?12:Math.max(10, Math.min(40, (c.w||20)*0.7))}; });
+  var wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, D.titulo.slice(0,31));
+  XLSX.writeFile(wb, nombreExport(D.titulo, 'xlsx'));
+}
+function pdfGenerico(D){
+  var J=window.jspdf.jsPDF, ap=!!D.apaisado, doc=new J({unit:'mm', format:'a4', orientation:ap?'landscape':'portrait'});
+  var W=ap?297:210, H=ap?210:297, M=12, y=M, LH=4.1;
+  var VERDE=[74,101,51], GRIS=[110,110,110], FONDO=[243,246,239], LINEA=[210,215,205];
+  var emp=(root.espacios[root.activoId]&&root.espacios[root.activoId].nombre)||'';
+  var tot=0, k; for(k=0;k<D.cols.length;k++) tot+=(D.cols[k].w||20);
+  var esc2=(W-2*M)/tot, xs=[], x0=M, ws=[];
+  for(k=0;k<D.cols.length;k++){ ws.push((D.cols[k].w||20)*esc2); xs.push(x0); x0+=ws[k]; }
+  function txtCelda(v, c){ if(v===''||v==null) return ''; if(c.fecha) return fd(v); if(c.num && typeof v==='number') return f(v, c.dec!=null?c.dec:2); return String(v); }
+  function encab(){
+    doc.setFillColor(VERDE[0],VERDE[1],VERDE[2]); doc.rect(M,y,W-2*M,7,'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(7.8); doc.setTextColor(255,255,255);
+    for(var q=0;q<D.cols.length;q++){ if(D.cols[q].num) doc.text(pdfTxt(D.cols[q].t), xs[q]+ws[q]-1.5, y+4.7, {align:'right'}); else doc.text(pdfTxt(D.cols[q].t), xs[q]+1.5, y+4.7); }
+    y+=7;
+  }
+  doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(VERDE[0],VERDE[1],VERDE[2]); doc.text('PUNTAL AGRO', M, y+3);
+  doc.setFont('helvetica','normal'); doc.setTextColor(GRIS[0],GRIS[1],GRIS[2]); doc.text(pdfTxt(emp), W-M, y+3, {align:'right'});
+  y+=10; doc.setFont('helvetica','bold'); doc.setFontSize(15); doc.setTextColor(30,30,30); doc.text(pdfTxt(D.titulo), M, y); y+=5.5;
+  doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(GRIS[0],GRIS[1],GRIS[2]);
+  var fl=doc.splitTextToSize(pdfTxt(D.filtros.length?D.filtros.join(' · '):'Sin filtros'), W-2*M); doc.text(fl, M, y); y+=fl.length*4+2;
+  doc.setDrawColor(LINEA[0],LINEA[1],LINEA[2]); doc.setLineWidth(0.3); doc.line(M,y,W-M,y); y+=4;
+  encab();
+  for(var i=0;i<D.filas.length;i++){
+    var F=D.filas[i], partes=[], alto=LH;
+    doc.setFont('helvetica', F.bold?'bold':'normal'); doc.setFontSize(F.sub?7.6:8);
+    for(k=0;k<D.cols.length;k++){ var t=doc.splitTextToSize(pdfTxt(txtCelda(F.vals[k], D.cols[k])), ws[k]-3); partes.push(t); alto=Math.max(alto, t.length*LH); }
+    alto+=2.6;
+    if(y+alto>H-M-8){ doc.addPage(); y=M; encab(); doc.setFont('helvetica', F.bold?'bold':'normal'); doc.setFontSize(F.sub?7.6:8); }
+    if(F.bold){ doc.setFillColor(FONDO[0],FONDO[1],FONDO[2]); doc.rect(M,y,W-2*M,alto,'F'); }
+    doc.setTextColor(F.sub?90:30, F.sub?90:30, F.sub?90:30);
+    for(k=0;k<D.cols.length;k++){ if(D.cols[k].num) doc.text(partes[k], xs[k]+ws[k]-1.5, y+4, {align:'right'}); else doc.text(partes[k], xs[k]+1.5, y+4); }
+    y+=alto; doc.setDrawColor(232,234,228); doc.setLineWidth(0.15); doc.line(M,y,W-M,y);
+  }
+  var n=doc.getNumberOfPages();
+  for(var pg=1;pg<=n;pg++){ doc.setPage(pg); doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(GRIS[0],GRIS[1],GRIS[2]);
+    doc.text(pdfTxt('Puntal Agro · '+D.titulo+' · generado el '+fd(todayISO())), M, H-6); doc.text('Página '+pg+' de '+n, W-M, H-6, {align:'right'}); }
+  return doc;
+}
 
 /* ===== Costos: bajar a Excel o PDF (BUILD 33) ===== */
 function textoFiltrosIds(ids){
