@@ -186,7 +186,7 @@ footer{border-top:1px solid var(--border);background:var(--card);padding:10px 24
 </main>
 
 <footer>
-  <span>Puntal Agro · Carga de datos · Versión v2026-10-29 15:30 · BUILD 1</span>
+  <span>Puntal Agro · Carga de datos · Versión v2026-11-10 16:45 · BUILD 2</span>
   <span id="fts"></span>
 </footer>
 
@@ -484,6 +484,15 @@ var IMP = (function(){
         lote:txt(Fc[k.lote]), sub:txt(Fc[k.sub]), insumo:insc, un:txt(Fc[k.un]), dosis:num(Fc[k.dosis]), ha:num(Fc[k.ha]),
         cant:num(Fc[k.cant]), fechaApl:fechaISO(Fc[k.fApl]), cantApl:num(Fc[k.cApl]), haApl:num(Fc[k.hApl]),
         dosisApl:num(Fc[k.dApl]), fact:!!txt(Fc[k.fact]) && txt(Fc[k.fact])!=='0', obs:k.obs>=0?txt(Fc[k.obs]):'' });
+    }
+    // OT anuladas: si en cualquier fila de la OT las observaciones dicen "anulado"/"anulada"
+    // (mayúsculas o minúsculas, con o sin tilde), la OT entera no se importa.
+    var anul = {}, nAnulFil = 0;
+    for(var ra=0; ra<res.otFilas.length; ra++){ if(/anulad[oa]/.test(norm(res.otFilas[ra].obs))) anul[res.otFilas[ra].nro] = true; }
+    res.otAnuladas = Object.keys(anul).map(Number).sort(function(a,b){ return a-b; });
+    if(res.otAnuladas.length){
+      res.otFilas = res.otFilas.filter(function(x){ if(anul[x.nro]){ nAnulFil++; return false; } return true; });
+      aviso(res.avisos,'info','Órdenes de trabajo',res.otAnuladas.length+' OT dicen "anulado" en observaciones y no se importaron ('+nAnulFil+' filas): #'+res.otAnuladas.join(', #')+'.');
     }
     if(!res.campania) aviso(res.avisos,'warn','Registros','No encontré la campaña en la Carátula.');
     return res;
@@ -790,7 +799,8 @@ var IMP = (function(){
             obs:(mv.destino||'Consumo')+' (importado: en el Excel era un consumo sin OT)'+(mv.obs?' · '+mv.obs:'') });
           movtos.push({ id:uidL('mv'), comprobanteId:cA.id, insumoId:insId, cant:mv.cant, origenId:asegurarDep(mv.origen), destinoId:'' });
           nConsSinOT++;
-          if(nroOT) aviso(inf.avisos,'warn','Movimientos','Fila '+mv.fila+': consumo con OT '+nroOT+' que no está en ConsumosLotes; se cargó como ajuste (-).');
+          if(nroOT && (reg.otAnuladas||[]).indexOf(nroOT)>=0) aviso(inf.avisos,'warn','Movimientos','Fila '+mv.fila+': consumo de la OT '+nroOT+', que está anulada; como el insumo salió del depósito, se cargó como ajuste (-) para que el stock coincida con el Excel.');
+          else if(nroOT) aviso(inf.avisos,'warn','Movimientos','Fila '+mv.fila+': consumo con OT '+nroOT+' que no está en ConsumosLotes; se cargó como ajuste (-).');
           continue;
         }
         if(nmv==='compra'){
@@ -935,7 +945,9 @@ var IMP = (function(){
         var trs = [];
         for(i=0;i<trabajos.length;i++){
           var t2 = trabajos[i];
-          t2.estadoFact = t2._fact===0 ? 'Sin facturar' : (t2._fact===t2._n ? 'Facturado' : 'Parcial');
+          // Facturación: solo Facturado (todas las filas con FACT) o Sin facturar (por defecto).
+          t2.estadoFact = (t2._n>0 && t2._fact===t2._n) ? 'Facturado' : 'Sin facturar';
+          if(t2._fact>0 && t2._fact<t2._n) aviso(inf.avisos,'info','Órdenes de trabajo','OT '+nro+' · '+(t2.laborTipo==='LC'?'contratada':'propia')+': solo una parte de las filas tiene FACT; quedó "Sin facturar".');
           delete t2._fact; delete t2._n;
           if(t2.destinos.length) trs.push(t2);
         }
@@ -1037,7 +1049,7 @@ var IMP = (function(){
       inf.resumen.push({ g:'Labores e insumos', k:'Insumos', v:R.insumos.length+' ('+nIni+' saldos de stock inicial al '+fmtFecha(fIni)+')' });
       inf.resumen.push({ g:'Labores e insumos', k:'Depósitos', v:R.depositos.length+' ('+R.depositos.filter(function(d){return d.campoId;}).length+' en campos, '+R.terceros.length+' en terceros)' });
       inf.resumen.push({ g:'Labores e insumos', k:'Movimientos', v:nMov['Compra']+' compras · '+nMov['Traslado']+' traslados · '+(nMov['Ajuste inventario (+)']+nMov['Ajuste inventario (-)']+nConsSinOT)+' ajustes' });
-      inf.resumen.push({ g:'Labores e insumos', k:'Órdenes de trabajo', v:ots.length+' OT (#'+(ordenNro[0]||'')+' a #'+maxNro+') · '+nApl+' aplicadas, '+nPar+' parciales, '+(ots.length-nApl-nPar)+' pendientes' });
+      inf.resumen.push({ g:'Labores e insumos', k:'Órdenes de trabajo', v:ots.length+' OT (#'+(ordenNro[0]||'')+' a #'+maxNro+') · '+nApl+' aplicadas, '+nPar+' parciales, '+(ots.length-nApl-nPar)+' pendientes'+((reg.otAnuladas||[]).length?' · '+reg.otAnuladas.length+' anuladas no importadas':'') });
       inf.resumen.push({ g:'Labores e insumos', k:'Lotes en OT', v:nDest+' (de esos, '+nAplic+' aplicados) · '+nLineas+' líneas de insumo' + (fpN ? ' · '+fpN+' fuera del plan' : '') });
       if(R.labores.length) aviso(inf.avisos,'info','Maestros','Labores nuevas agregadas al catálogo: '+R.labores.map(function(l){return l.nombre;}).join(', ')+'.');
       if(R.unidades.length) aviso(inf.avisos,'info','Maestros','Unidades nuevas agregadas: '+R.unidades.map(function(u){return u.sigla;}).join(', ')+'.');
@@ -1228,7 +1240,7 @@ function pintarResumenArchivo(cual){
     h = '<b>'+esc(L.empresa||'(sin nombre de empresa)')+'</b><br>'+L.lotes.length+' lotes en '+nc+' campos: '+esc(cl.join(', '))+'<br>'+nAct+' actividades · campañas '+esc(L.campanias.join(', '));
   } else {
     var ots = {}; for(var j=0;j<L.otFilas.length;j++) ots[L.otFilas[j].nro]=true;
-    h = '<b>'+esc(L.empresa||'(sin nombre de empresa)')+'</b> · campaña <b>'+esc(L.campania||'?')+'</b><br>'+L.insumos.length+' insumos · '+L.depositosStock.length+' depósitos · '+L.movs.length+' movimientos<br>'+Object.keys(ots).length+' órdenes de trabajo ('+L.otFilas.length+' filas)';
+    h = '<b>'+esc(L.empresa||'(sin nombre de empresa)')+'</b> · campaña <b>'+esc(L.campania||'?')+'</b><br>'+L.insumos.length+' insumos · '+L.depositosStock.length+' depósitos · '+L.movs.length+' movimientos<br>'+Object.keys(ots).length+' órdenes de trabajo ('+L.otFilas.length+' filas)'+((L.otAnuladas||[]).length?' · '+L.otAnuladas.length+' anuladas (no se importan)':'');
   }
   h += '<label class="chk" style="margin-top:6px"><input type="checkbox" '+(USAR[cual]?'checked':'')+' onchange="USAR[\''+cual+'\']=this.checked;reanalizar()"> Importar esta parte</label>';
   byId(cual==='plan'?'resPlan':'resReg').innerHTML = h;
