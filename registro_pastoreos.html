@@ -17,16 +17,6 @@
   --ok-t:#3B6D11;--ok-b:#F0FDF4;--warn-t:#92400E;--warn-b:#FFFBEB;--bad-t:#A84D1F;--bad-b:#FEF2F2;
   --radius:12px;--sans:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#12171C;--card:#1A2128;--border:#2A333D;--text:#E6EBF0;--muted:#8D9AAA;--sub:#AAB6C3;
-  --bar:#1F2730;--ctl:#3A4552;--row:#202931;--hover:#1E262E;
-  --verde:#6E8F4E;--verde-t:#fff;--naranja:#D97A45;--edit:#22331F;--edit-f:#2A4126;
-  --ok-t:#9BC77A;--ok-b:#1F2E1C;--warn-t:#E3B66A;--warn-b:#33291A;--bad-t:#E89273;--bad-b:#3A231C;color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#12171C;--card:#1A2128;--border:#2A333D;--text:#E6EBF0;--muted:#8D9AAA;--sub:#AAB6C3;
-  --bar:#1F2730;--ctl:#3A4552;--row:#202931;--hover:#1E262E;
-  --verde:#6E8F4E;--verde-t:#fff;--naranja:#D97A45;--edit:#22331F;--edit-f:#2A4126;
-  --ok-t:#9BC77A;--ok-b:#1F2E1C;--warn-t:#E3B66A;--warn-b:#33291A;--bad-t:#E89273;--bad-b:#3A231C;color-scheme:dark}
 *{box-sizing:border-box}
 body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14px;margin:0}
 .gut{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
@@ -75,10 +65,11 @@ thead th{vertical-align:bottom}
 .tl-k{width:82px;flex:none;text-align:right;font-size:12px;font-variant-numeric:tabular-nums;padding-left:6px}
 .tl-head{border-bottom:1px solid var(--border);min-height:30px}.tl-head .tl-n,.tl-head .tl-k{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-weight:600;white-space:normal;line-height:1.2}
 .tl-head .tl-t{background:none;height:20px}.tl-m{position:absolute;top:2px;font-size:10px;color:var(--muted);border-left:1px solid var(--border);padding-left:2px;white-space:nowrap}
-.tl-b{position:absolute;top:0;bottom:0;border-radius:2px;cursor:pointer;opacity:.9}.tl-b:hover{opacity:1;outline:1px solid var(--text)}
+.tl-b{position:absolute;top:0;bottom:0;border-radius:2px;cursor:pointer;opacity:.9}
+.tl-g{position:absolute;top:0;bottom:0;cursor:help}.tl-g:hover{background:rgba(15,25,35,.12);border-radius:2px}.tl-b:hover{opacity:1;outline:1px solid var(--text)}
 .tl-ab{background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.35) 0 3px,transparent 3px 6px)!important}
 .defmov{grid-column:1/-1;font-size:12px;color:var(--text);background:#EEF2E8;border-left:3px solid var(--verde);border-radius:4px;padding:6px 10px;line-height:1.45}
-select.fcol{margin-top:4px;width:100%;min-width:90px;font:inherit;font-size:12px;text-transform:none;letter-spacing:0;color:var(--text);padding:3px 4px;border:1px solid var(--border);border-radius:6px;background:var(--card)}
+select.fcol,input.fcol{margin-top:4px;width:100%;min-width:90px;font:inherit;font-size:12px;text-transform:none;letter-spacing:0;color:var(--text);padding:3px 4px;border:1px solid var(--border);border-radius:6px;background:var(--card)}
 table{width:100%;border-collapse:collapse}
 thead th{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;font-weight:500;padding:5px 6px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap;background:var(--card);position:sticky;top:0;z-index:1}
 thead th.r,td.r{text-align:right}
@@ -134,7 +125,7 @@ footer{border-top:1px solid var(--border);background:var(--card);font-size:11px;
 </main>
 <footer class="gut">
   <span>Registro de Pastoreos · Puntal Agro</span>
-  <span>Versión v2026-11-10 16:25 · BUILD 60</span>
+  <span>Versión v2026-11-18 08:41 · BUILD 72</span>
 </footer>
 <script>
 /* ============================================================
@@ -151,6 +142,7 @@ footer{border-top:1px solid var(--border);background:var(--card);font-size:11px;
        gan_tasas       tasa de crecimiento bruta actual estimada por recurso
        gan_cfg         coeficientes y parámetros por empresa
        gan_pendientes  entregas históricas sin pastoreo asignado
+       gan_reservas    confección de reservas (rollos y fardos) por lote
    Todo registro propio lleva empresaId y campaniaId, y loteId/campoId/tipoActividadId/insumoId de pa-core.
    BUILD 57 (integración al sistema): arranque con login (sin sesión demo automática), permiso por
    herramienta (TOOL_ID, fail-open mientras pa-core no lo tenga), botón al menú, y el histórico de
@@ -158,6 +150,19 @@ footer{border-top:1px solid var(--border);background:var(--card);font-size:11px;
    Convención: campaña ganadera julio-junio, asignada por fecha de inicio del pastoreo.
    BUILD 58: recurso forrajero por lote editable (Plan de Uso por defecto + corrección manual), como la superficie ganadera.
    BUILD 59: categorías de hacienda generales del sistema; solo Puntal (admin_general) las crea o modifica.
+   BUILD 72 (integración): sin modo oscuro (siempre claro, como el resto del sistema); las categorías de hacienda se administran en Maestros
+   (catálogo general, solo admin_general) y acá quedan en solo lectura; el respaldo solo suma categorías si lo restaura Puntal.
+   BUILD 71: las listas de rodeo de Pastoreos (iniciar y movimientos) muestran Unidad de negocio - Rodeo.
+   BUILD 70: el resumen de Resultado Corral muestra el Rodeo - Categoría de cada corral.
+   BUILD 69: Resultado Cosecha de pasto abre el segundo renglón de Sección; Resultado Corral suma Fecha inicio, filtro por tipo, campaña Todas y consolidado por tipo (Total Inicio / Total Recría) con detalle.
+   BUILD 68: solapas renombradas (Lotes y Corrales inicio y recría; Unidades negocio - Rodeo - Categoría; Resultado Cosecha de pasto) y solapa nueva Resultado Corral inicio y recría (bloques 1-3 del Excel de corrales).
+   BUILD 67: corrales de inicio y recría (gan_corrales): se dan de alta en Lotes, reciben pases y entregas como un lote, 100 % suplementación; quedan fuera de Cosecha y de la línea de tiempo; control de consumo estimado vs suplemento entregado.
+   BUILD 66: el campo Socio queda siempre visible en la unidad de negocio (habilitado solo si es capitalizada).
+   BUILD 65: unidades de negocio con Tenencia (Propia/Capitalizada) y Socio (obligatorio si es capitalizada); el rótulo de la unidad suma la tenencia y el socio.
+   BUILD 64: línea de tiempo: los tramos de descanso muestran días y fechas al pasar el cursor.
+   BUILD 63: Reservas: formulario en una línea (superficie entre recurso y tipo) y filtros debajo de cada columna.
+   BUILD 62: solapa Reservas (rollos y fardos, gan_reservas); su MS se suma a la cosecha del recurso del lote en el mes de confección.
+   BUILD 61: recurso forrajero actual por lote y campaña = último elegido (al iniciar, en pases que abren pastoreo o corrigiendo en Lotes); si no, Plan de Uso. Entradas y salidas muestran el recurso fijo del pastoreo; los pases eligen recurso destino por fila.
    BUILD 60: botón Exportar Excel (SheetJS): baja las tablas de la sección activa tal como se ven, con filtros.
    ============================================================ */
 var TOOL_ID='registro_pastoreos'; /* id de la herramienta en pa-core (HERRAMIENTAS_PROPIAS) */
@@ -167,7 +172,7 @@ function toolRegistrada(){try{if(typeof PA.demo.herramientasPropias!=='function'
 /* Categorías de hacienda: catálogo GENERAL del sistema (igual para todas las empresas).
    Solo el equipo Puntal (admin_general) las crea o modifica. Si vienen de pa-core, acá son solo lectura. */
 function esPuntal(){return !!(CTX&&CTX.usuario&&CTX.usuario.rol==='admin_general');}
-function catEditable(){return !CATS_PA&&esPuntal();}
+function catEditable(){return false;} /* BUILD 72: el ABM está en Maestros (solapa Categorías de hacienda) */
 function puede(nivel){return toolRegistrada()?PA.can(nivel,{herramienta:TOOL_ID}):PA.can(nivel);}
 function f(v,d){ d=d||0; if(v==null||isNaN(Number(v))) return '—';
   return Number(v).toLocaleString('es-AR',{minimumFractionDigits:d,maximumFractionDigits:d});
@@ -316,7 +321,7 @@ function arrancar(empId){
     CTX=ctx;EMP=ctx.empresaActivaId;CAN=puede('cargar');CAN_ADM=puede('administrar');
     if(!puede('ver')){setBoot('No tenés habilitado el Registro de Pastoreos para esta empresa. Pedile acceso al administrador o cambiá de empresa desde el menú.');renderHeader();return;}
     cargarCatalogos();cargarPropios();SEL=null;ACT=null;FORM=null;editId=null;editNew=false;render();});}
-function cambiarEmpresa(id){RAC=null;RODF=null;NEGF=null;PA.setEmpresaActiva(id,function(err){if(err){msg=String(err);msgErr=true;return render();}arrancar(id);});}
+function cambiarEmpresa(id){RAC=null;RODF=null;NEGF=null;RESF=null;CORF=null;PA.setEmpresaActiva(id,function(err){if(err){msg=String(err);msgErr=true;return render();}arrancar(id);});}
 function cambiarCampania(id){CAMP=id;CALC=null;render();}
 function cargarCatalogos(){var i,x;
   S.campos={};var cs=PA.demo.camposDeEmpresa(EMP);for(i=0;i<cs.length;i++)S.campos[cs[i].id]=cs[i];
@@ -344,9 +349,14 @@ function cargarPropios(){var i,a;
     if(pm!==null)S.insMs[ik]=pm;}
   /* unidades de negocio: de pa-core si existe la función; si no, catálogo local con “Campo” por defecto */
   var ng;if(typeof PA.demo.listarNegocios==='function'){ng=PA.demo.listarNegocios(EMP)||[];NEG_PA=true;}
-  else{NEG_PA=false;ng=deEmp(lsGet('gan_negocios',[]));if(!ng.length){var n0={id:uid('neg'),empresaId:EMP,nombre:'Campo',activo:true};var an=lsGet('gan_negocios',[]);an.push(n0);lsSet('gan_negocios',an);ng=[n0];}}
+  else{NEG_PA=false;ng=deEmp(lsGet('gan_negocios',[]));if(!ng.length){var n0={id:uid('neg'),empresaId:EMP,nombre:'Campo',activo:true};var an=lsGet('gan_negocios',[]);an.push(n0);lsSet('gan_negocios',an);ng=[n0];}
+    var mg=false,an2=lsGet('gan_negocios',[]);for(i=0;i<an2.length;i++)if(an2[i].empresaId===EMP&&!an2[i].tenencia){an2[i].tenencia='propia';mg=true;}if(mg){lsSet('gan_negocios',an2);ng=deEmp(an2);}}
   S.negocios={};var neg0=null;for(i=0;i<ng.length;i++){S.negocios[ng[i].id]=ng[i];if(!neg0&&ng[i].activo!==false)neg0=ng[i].id;}
+  /* corrales: de pa-core si existe la función; si no, catálogo propio gan_corrales */
+  var cr;if(typeof PA.demo.listarCorrales==='function'){cr=PA.demo.listarCorrales(EMP)||[];COR_PA=true;}else{COR_PA=false;cr=deEmp(lsGet('gan_corrales',[]));}
+  S.corrales={};for(i=0;i<cr.length;i++){var xc=clone(cr[i]);xc.esCorral=true;xc.activo=cr[i].activo!==false;S.corrales[xc.id]=xc;}
   S.rodeos={};a=deEmp(lsGet('gan_rodeos',[]));for(i=0;i<a.length;i++){S.rodeos[a[i].id]=a[i];if(!a[i].negocioId||!S.negocios[a[i].negocioId])a[i].negocioId=neg0;} /* rodeos del BUILD 19 sin unidad de negocio */
+  S.reservas={};a=deEmp(lsGet('gan_reservas',[]));for(i=0;i<a.length;i++)S.reservas[a[i].id]=a[i];
   S.raciones={};a=deEmp(lsGet('gan_raciones',[]));for(i=0;i<a.length;i++)S.raciones[a[i].id]=a[i];
   S.sup={};a=deEmp(lsGet('gan_superficie',[]));for(i=0;i<a.length;i++)S.sup[a[i].campaniaId+'|'+a[i].loteId]=a[i].ganadera;
   S.recMan={};a=deEmp(lsGet('gan_recurso',[]));for(i=0;i<a.length;i++)S.recMan[a[i].campaniaId+'|'+a[i].loteId]=a[i].tipoActividadId;
@@ -357,7 +367,7 @@ function cargarPropios(){var i,a;
 /* escrituras: siempre sobre la lista completa de todas las empresas, filtrando la activa */
 function upsert(key,rec,match){var all=lsGet(key,[]),done=false;for(var i=0;i<all.length;i++){if(match(all[i])){all[i]=rec;done=true;break;}}if(!done)all.push(rec);var ok=lsSet(key,all);cargarPropios();return ok;}
 function removeWhere(key,match){var all=lsGet(key,[]),out=[];for(var i=0;i<all.length;i++)if(!match(all[i]))out.push(all[i]);var ok=lsSet(key,out);cargarPropios();return ok;}
-function savePast(id,doc){var d=clone(doc);d.id=id||uid('gp');d.empresaId=EMP;if(!d.campaniaId)d.campaniaId=campExiste(campDeFecha(iniOf(d)||hoy()))?campDeFecha(iniOf(d)||hoy()):CAMP;var L=S.lotes[d.loteId];if(L)d.campoId=L.campoId;
+function savePast(id,doc){var d=clone(doc);d.id=id||uid('gp');d.empresaId=EMP;if(!d.campaniaId)d.campaniaId=campExiste(campDeFecha(iniOf(d)||hoy()))?campDeFecha(iniOf(d)||hoy()):CAMP;var L=LT(d.loteId);if(L)d.campoId=L.campoId;
   return upsert('gan_pastoreos',d,function(x){return x.id===d.id;})?d.id:null;}
 function delPast(id){return removeWhere('gan_pastoreos',function(x){return x.id===id;});}
 function saveCfg(c){var d=clone(c);d.empresaId=EMP;return upsert('gan_cfg',d,function(x){return x.empresaId===EMP;});}
@@ -367,8 +377,11 @@ function saveInsMs(insId,pct){if(pct===null)return removeWhere('gan_insumos_ms',
 function saveSup(loteId,v){var m=function(x){return x.empresaId===EMP&&x.campaniaId===CAMP&&x.loteId===loteId;};
   if(v===null)return removeWhere('gan_superficie',m);return upsert('gan_superficie',{empresaId:EMP,campaniaId:CAMP,loteId:loteId,ganadera:v},m);}
 /* recurso forrajero corregido a mano por lote y campaña (Plan de Uso no cambia) */
-function saveRecMan(loteId,tid){var m=function(x){return x.empresaId===EMP&&x.campaniaId===CAMP&&x.loteId===loteId;};
-  if(!tid)return removeWhere('gan_recurso',m);return upsert('gan_recurso',{empresaId:EMP,campaniaId:CAMP,loteId:loteId,tipoActividadId:tid},m);}
+function saveRecMan(loteId,tid,camp){camp=camp||CAMP;var m=function(x){return x.empresaId===EMP&&x.campaniaId===camp&&x.loteId===loteId;};
+  if(!tid)return removeWhere('gan_recurso',m);return upsert('gan_recurso',{empresaId:EMP,campaniaId:camp,loteId:loteId,tipoActividadId:tid},m);}
+/* recurso actual del lote en la campaña = último elegido (al iniciar un pastoreo, en un pase o corrigiendo en Lotes); si coincide con el Plan de Uso no se guarda corrección */
+function setRecLote(loteId,camp,tid){if(!tid||esCor(loteId))return true;return saveRecMan(loteId,tid===recPU(loteId,camp)?null:tid,camp);}
+function campDest(fecha,def){var c=campDeFecha(fecha||hoy());return campExiste(c)?c:def;}
 function saveTasa(tid,v){var m=function(x){return x.empresaId===EMP&&x.tipoActividadId===tid;};
   if(v===null)return removeWhere('gan_tasas',m);return upsert('gan_tasas',{empresaId:EMP,tipoActividadId:tid,tcb:v,fecha:hoy()},m);}
 function saveNeg(r){return upsert('gan_negocios',r,function(x){return x.id===r.id;});}
@@ -387,10 +400,16 @@ function campName(id){for(var i=0;i<S.campanias.length;i++)if(S.campanias[i].id=
 /* % MS de una entrega (pctMS; compatibilidad con registros viejos que guardaban humedad) y kg MS */
 function pctOf(s){return typeof s.pctMS==='number'?s.pctMS:(typeof s.humedad==='number'?(1-s.humedad)*100:null);}
 function kgMsOf(s){var p=pctOf(s);return s.kgTC!=null&&p!=null?s.kgTC*p/100:null;}
+/* corrales: se buscan junto con los lotes por id (LT); no tienen superficie ni recurso forrajero */
+var COR_PA=false,CORF=null,TIPOS_COR={inicio:'Inicio',recria:'Recría'};
+function LT(id){return S.lotes[id]||(S.corrales&&S.corrales[id])||null;}
+function esCor(id){return !!(id&&S.corrales&&S.corrales[id]);}
+function gCor(g){return !!g&&(!!g.corralId||esCor(g.loteId));}
+function recG(g){if(gCor(g)){var c=S.corrales[g.corralId||g.loteId];return '<span class="bdg bn">Corral'+(c&&TIPOS_COR[c.tipo]?' · '+TIPOS_COR[c.tipo]:'')+'</span>';}return rDot(g.tipoActividadId)+esc(rName(g.tipoActividadId));}
 function lotesOf(g){return g.loteIds&&g.loteIds.length?g.loteIds:[g.loteId];}
 function inG(g,pid){var l=lotesOf(g);for(var i=0;i<l.length;i++)if(l[i]===pid)return true;return false;}
-function gName(g){var l=lotesOf(g),o=[];for(var i=0;i<l.length;i++)o.push(S.lotes[l[i]]?S.lotes[l[i]].nombre:'(lote no encontrado)');return o.join(' + ');}
-function gHa(g){var l=lotesOf(g),t=0;for(var i=0;i<l.length;i++){var L=S.lotes[l[i]];if(!L||!L.ha)return null;t+=L.ha;}return t;}
+function gName(g){var l=lotesOf(g),o=[];for(var i=0;i<l.length;i++)o.push(LT(l[i])?LT(l[i]).nombre:'(lote no encontrado)');return o.join(' + ');}
+function gHa(g){var l=lotesOf(g),t=0;for(var i=0;i<l.length;i++){var L=LT(l[i]);if(!L||!L.ha)return null;t+=L.ha;}return t;}
 function gKey(g){return lotesOf(g).join('+');}
 function actsDe(loteId,camp){var o=[];for(var i=0;i<S.acts.length;i++){var a=S.acts[i];if(a.loteId===loteId&&a.campaniaId===camp)o.push(a);}return o;}
 function esGan(tid){var t=S.tipos[tid];return !!t&&t.actividad==='GAN';}
@@ -401,7 +420,7 @@ function recPU(loteId,camp){var as=actsDe(loteId,camp),i;for(i=0;i<as.length;i++
 function actOptions(loteId,camp,sel2){var as=actsDe(loteId,camp),h='',seen={},i;
   if(!as.length&&!sel2)return '<option value="">Sin actividad en el Plan de Uso</option>';
   for(i=0;i<as.length;i++){var t=as[i].tipoActividadId;if(seen[t])continue;seen[t]=1;h+='<option value="'+t+'"'+(t===sel2?' selected':'')+'>'+esc(rName(t))+(esGan(t)?'':' (AGR)')+'</option>';}
-  var mn=recMan(loteId,camp);if(mn&&!seen[mn]){seen[mn]=1;h+='<option value="'+mn+'"'+(mn===sel2?' selected':'')+'>'+esc(rName(mn))+' (corregido en Lotes)</option>';}
+  var mn=recMan(loteId,camp);if(mn&&!seen[mn]){seen[mn]=1;h+='<option value="'+mn+'"'+(mn===sel2?' selected':'')+'>'+esc(rName(mn))+' (último elegido)</option>';}
   var ot=byName(vals(S.tipos)),og='';for(i=0;i<ot.length;i++){var t2=ot[i].id;if(seen[t2]||ot[i].activo===false&&t2!==sel2)continue;seen[t2]=1;og+='<option value="'+t2+'"'+(t2===sel2?' selected':'')+'>'+esc(ot[i].nombre)+(esGan(t2)?'':' (AGR)')+'</option>';}
   if(og)h+='<optgroup label="Otros recursos">'+og+'</optgroup>';
   return h;}
@@ -421,19 +440,24 @@ function calc(){if(CALC)return CALC;BYG={};
     for(j=0;j<(g.supl||[]).length;j++){var s=g.supl[j];
       supl.push([s.fecha,p.nombre,g.num,suplName(s),s.kgTC,kgMsOf(s)]);}}
   var R=buildPastoreos({pots:vals(pots),supl:supl});calcPastoreos(R.list);
-  for(i=0;i<gs.length;i++)if(!gs[i].tipoActividadId){R.alerts.push({nv:'aviso',h:gName(gs[i]),n:gName(gs[i]),p:gs[i].num,t:'Sin recurso: el lote no tiene actividad en el Plan de Uso para la campaña '+campName(gs[i].campaniaId)+'. Cuando esté cargada, usá “Cambiar recurso”.'});}
+  for(i=0;i<gs.length;i++)if(!gs[i].tipoActividadId&&!gCor(gs[i])){R.alerts.push({nv:'aviso',h:gName(gs[i]),n:gName(gs[i]),p:gs[i].num,t:'Sin recurso: el lote no tiene actividad en el Plan de Uso para la campaña '+campName(gs[i].campaniaId)+'. Cuando esté cargada, usá “Cambiar recurso”.'});}
   for(i=0;i<R.list.length;i++){var o=R.list[i];if(o.adFuera)R.alerts.push({nv:'error',h:o.h,n:o.n,p:o.p,t:'ADPV fuera de rango ('+f(o.AD,2)+' kg/día): revisá las pesadas'});}
   var lk={};for(i=0;i<R.list.length;i++){lk[R.list[i].n+'|'+R.list[i].p]=R.list[i].gid;BYG[R.list[i].gid]=R.list[i];}
+  /* corrales: todo el consumo es suplemento; la diferencia con lo entregado no es pasto */
+  var corN={};for(i=0;i<R.list.length;i++){var oc=R.list[i],gc=S.pastoreos[oc.gid];if(!gCor(gc))continue;corN[oc.n]=1;oc.corral=true;oc.past=null;oc.msha=null;
+    oc.dif=oc.ms!=null?oc.supl-oc.ms:null;
+    if(oc.dif!=null&&oc.dif<0)R.alerts.push({nv:'aviso',h:oc.h,n:oc.n,p:oc.p,t:'Corral: el suplemento entregado ('+f(oc.supl)+' kg MS) es menor que el consumo estimado ('+f(oc.ms)+' kg MS). Revisá si faltan entregas o si el consumo fue menor a '+f(COEF.kgEV)+' kg MS/EV/día.'});}
+  R.alerts=R.alerts.filter(function(x){return !(corN[x.n]&&/^Lote sin superficie/.test(x.t));});
   for(i=0;i<R.alerts.length;i++)R.alerts[i].gid=lk[R.alerts[i].n+'|'+R.alerts[i].p]||null;
   CALC=R;return R;}
 
 /* ---------- navegación ---------- */
-var TABS=[['lotes','Lotes'],['recursos','Recursos forrajeros'],['ingredientes','Ingredientes'],['categorias','Categorías'],['existencias','Existencias'],['pastoreos','Pastoreos'],['suplementacion','Suplementación'],['cosecha','Cosecha'],['campo','Parámetros y respaldo'],['historico','Alertas e histórico']];
-function setTab(t){RAC=null;RODF=null;NEGF=null;tab=t;SEL=null;ACT=null;FORM=null;editId=null;editNew=false;q='';msg='';delArm=false;try{location.hash=t;}catch(e){}render();}
+var TABS=[['lotes','Lotes y Corrales inicio y recría'],['recursos','Recursos forrajeros'],['ingredientes','Ingredientes'],['categorias','Unidades negocio - Rodeo - Categoría'],['existencias','Existencias'],['pastoreos','Pastoreos'],['suplementacion','Suplementación'],['reservas','Reservas'],['cosecha','Resultado Cosecha de pasto'],['rescorral','Resultado Corral inicio y recría'],['campo','Parámetros y respaldo'],['historico','Alertas e histórico']];
+function setTab(t){RAC=null;RODF=null;NEGF=null;RESF=null;CORF=null;tab=t;SEL=null;ACT=null;FORM=null;editId=null;editNew=false;q='';msg='';delArm=false;try{location.hash=t;}catch(e){}render();}
 window.addEventListener('hashchange',function(){var h=(location.hash||'').replace('#','');if(h&&h!==tab){tab=h;editId=null;editNew=false;render();}});
 function renderTabs(){var cnt={lotes:vals(S.lotes).length,categorias:vals(S.categorias).length,historico:vals(S.pastoreos).length};
   var h='<span class="inst-lbl">Sección:</span>';
-  for(var i=0;i<TABS.length;i++){var t=TABS[i];h+='<button class="inst-btn'+(tab===t[0]?' active':'')+'" onclick="setTab(\''+t[0]+'\')">'+t[1]+(cnt[t[0]]!=null?'<span class="n">'+f(cnt[t[0]])+'</span>':'')+'</button>';}
+  for(var i=0;i<TABS.length;i++){var t=TABS[i];if(t[0]==='cosecha')h+='<span style="flex-basis:100%;height:0"></span>';h+='<button class="inst-btn'+(tab===t[0]?' active':'')+'" onclick="setTab(\''+t[0]+'\')">'+t[1]+(cnt[t[0]]!=null?'<span class="n">'+f(cnt[t[0]])+'</span>':'')+'</button>';}
   document.getElementById('tabs').innerHTML=h;}
 function renderHeader(){var es=CTX.empresasDisponibles||[],h='<label class="hsel">Empresa <select id="h_emp" onchange="cambiarEmpresa(this.value)">',i;
   for(i=0;i<es.length;i++)h+='<option value="'+es[i].id+'"'+(es[i].id===EMP?' selected':'')+'>'+esc(es[i].razonSocial||es[i].id)+'</option>';
@@ -452,7 +476,7 @@ function render(){if(!CTX)return;
   if(!vals(S.lotes).length&&tab!=='categorias'&&tab!=='campo'&&tab!=='historico')h+='<div class="card"><div class="empty">La empresa activa no tiene lotes en el sistema. Los lotes se crean en Plan de Uso del Suelo; cuando estén, aparecen acá.</div></div>';
   if(tab==='pastoreos')h+=viewPastoreos();else if(tab==='existencias')h+=viewExistencias();else if(tab==='suplementacion')h+=viewSupl();
   else if(tab==='lotes')h+=viewPotreros();else if(tab==='recursos')h+=viewRecursos();else if(tab==='categorias')h+=viewNegocios()+viewRodeos()+viewSimple('categorias');
-  else if(tab==='ingredientes')h+=viewIngredientes()+viewRaciones();else if(tab==='campo')h+=viewCampo()+viewRespaldo();else if(tab==='cosecha')h+=viewCosecha();else h+=viewHistorico();
+  else if(tab==='ingredientes')h+=viewIngredientes()+viewRaciones();else if(tab==='campo')h+=viewCampo()+viewRespaldo();else if(tab==='cosecha')h+=viewCosecha();else if(tab==='rescorral')h+=viewResCorral();else if(tab==='reservas')h+=viewReservas();else h+=viewHistorico();
   document.getElementById('main').innerHTML=h;
   if(tab==='cosecha')drawCosecha();
   if(kp){var ne=document.querySelectorAll('#main .scroll-y');for(j=0;j<ne.length&&j<sc.length;j++)ne[j].scrollTop=sc[j];window.scrollTo(0,sy);
@@ -524,11 +548,11 @@ function ganCell(p){var m=ganMan(p.id),s=ganSug(p.id),txt='Plan de Uso: '+(s?'S�
   return '<select id="gan_'+p.id+'" aria-label="Superficie ganadera actual" onclick="event.stopPropagation()" onchange="setGan(\''+p.id+'\',this.value)"'+(m!==null?' style="background:var(--warn-b)"':'')+'>'+
     '<option value=""'+(m===null?' selected':'')+(hac&&!s&&m!==null?dis:'')+'>'+txt+'</option><option value="1"'+(m===true?' selected':'')+'>Sí (manual)</option><option value="0"'+(m===false?' selected':'')+(hac&&m!==false?dis:'')+'>No (manual)</option></select>';}
 function recCell(p){var m=recMan(p.id,CAMP),pu=recPU(p.id,CAMP),ef=m||pu;
-  if(!CAN)return (ef?rDot(ef)+esc(rName(ef)):'<span class="bdg bn">Sin actividad</span>')+(m?' <span class="msg">manual</span>':'');
+  if(!CAN)return (ef?rDot(ef)+esc(rName(ef)):'<span class="bdg bn">Sin actividad</span>')+(m?' <span class="msg">último elegido</span>':'');
   var h='<select id="rec_'+p.id+'" aria-label="Recurso forrajero" onclick="event.stopPropagation()" onchange="setRec(\''+p.id+'\',this.value)"'+(m?' style="background:var(--warn-b)"':'')+'>'+
     '<option value=""'+(m?'':' selected')+'>Plan de Uso: '+(pu?esc(rName(pu)):'sin actividad')+'</option>';
   var ts=byName(vals(S.tipos)),gan='',agr='';
-  for(var i=0;i<ts.length;i++){var t=ts[i];if(t.activo===false&&t.id!==m)continue;var o='<option value="'+t.id+'"'+(t.id===m?' selected':'')+'>'+esc(t.nombre)+' (manual)</option>';if(esGan(t.id))gan+=o;else agr+=o;}
+  for(var i=0;i<ts.length;i++){var t=ts[i];if(t.activo===false&&t.id!==m)continue;var o='<option value="'+t.id+'"'+(t.id===m?' selected':'')+'>'+esc(t.nombre)+(t.id===m?' (último elegido)':'')+'</option>';if(esGan(t.id))gan+=o;else agr+=o;}
   return h+(gan?'<optgroup label="Ganaderos">'+gan+'</optgroup>':'')+(agr?'<optgroup label="Agrícolas">'+agr+'</optgroup>':'')+'</select>';}
 function setRec(id,val){if(!CAN)return;KEEP_POS=true;
   if(val&&val===recPU(id,CAMP))val=''; /* elegir lo mismo que Plan de Uso = sin corrección */
@@ -563,7 +587,8 @@ function ganTabla(gan,full,tc){var rl=gan.rl,i,h='',nc=4+(full?1:0)+(tc?1:0);
     h+='<tr class="tr-ref"><td>Total'+(tc?' · ponderado por superficie':'')+'</td><td class="r">'+f(gan.n-gan.sinHa)+'</td><td class="r">'+f(gan.ha,2)+'</td><td class="r">100,0%</td>'+(full?'<td class="r">'+f(gan.hac,2)+'</td>':'')+
       (tc?'<td class="r">'+f(tp.v,1)+(tp.nS&&tp.v!==null?' <span class="bdg by" title="Falta cargar '+tp.nS+' recursos ('+f(tp.haS,2)+' ha)">parcial</span>':'')+'</td>':'')+'</tr>';}
   return h+'</tbody></table></div>';}
-function viewPotreros(){var ps=byName(vals(S.lotes)),u=usos(),i,d=hoy();
+function viewPotreros(){return viewPotreros0()+viewCorrales();}
+function viewPotreros0(){var ps=byName(vals(S.lotes)),u=usos(),i,d=hoy();
   var gan=ganInfo();
   function mc(l,v2,u2){return '<div class="mc"><div class="mc-lbl">'+l+'</div><div class="mc-val">'+v2+(u2?'<span class="mc-unit">'+u2+'</span>':'')+'</div></div>';}
   var h='<div class="card"><div class="chd"><span class="ct">Superficie ganadera actual · campaña '+esc(campName(CAMP))+'</span></div>';
@@ -598,6 +623,48 @@ function viewPotreros(){var ps=byName(vals(S.lotes)),u=usos(),i,d=hoy();
   h+='<tr class="tr-ref"><td>Total filtrado · '+f(n)+' lotes</td><td></td><td class="r">'+f(tot,2)+'</td><td colspan="7"></td></tr></tbody></table></div>';
   return h+'<div class="pnote">Los lotes y su superficie vienen del sistema y no se editan acá. El recurso forrajero y la superficie ganadera toman por defecto lo que dice el Plan de Uso para la campaña y se pueden corregir a mano por lote (celda amarilla); la corrección vale solo en esta herramienta y el Plan de Uso no cambia. Los pastoreos nuevos del lote toman el recurso corregido; los ya cargados conservan el suyo (se cambia desde el pastoreo). Último inicio se muestra en los lotes con hacienda y último fin en los libres; Días es ocupación o descanso según el caso.</div></div>';}
 
+/* ---------- CORRALES (gan_corrales, BUILD 67) ----------
+   Corrales de inicio y recría: reciben hacienda (iniciar, pases, entradas y salidas) y entregas como un lote.
+   No tienen superficie ni recurso forrajero: la alimentación es 100 % suplemento y quedan fuera de la cosecha. */
+function saveCor(r){return upsert('gan_corrales',r,function(x){return x.id===r.id;});}
+function corUsos(id){var n=0,gs=vals(S.pastoreos);for(var i=0;i<gs.length;i++)if(inG(gs[i],id)||gs[i].corralId===id)n++;return n;}
+function corErr(t){CORF.err=t;render();}
+function nuevoCor(){if(!CAN)return;var cs=vals(S.campos);CORF={id:null,nombre:'',campoId:cs.length===1?cs[0].id:'',tipo:'',cap:'',activo:true,obs:'',err:''};render();var e=document.getElementById('cor_nom');if(e)e.focus();}
+function editCor(id){if(!CAN||COR_PA)return;var c=S.corrales[id];if(!c)return;CORF={id:id,nombre:c.nombre,campoId:c.campoId||'',tipo:c.tipo||'',cap:c.capacidad!=null?String(c.capacidad):'',activo:c.activo!==false,obs:c.obs||'',err:''};render();}
+function viewCorrales(){var xs=vals(S.corrales).sort(function(a,b){var x=campoName(a.campoId).localeCompare(campoName(b.campoId),'es');return x||(a.nombre||'').localeCompare(b.nombre||'','es');}),i,ed=CAN&&!COR_PA,d=hoy();
+  var h='<div class="card" style="margin-top:12px"><div class="chd"><span class="ct">Corrales de inicio y recría <span style="font-weight:400">· '+f(xs.length)+'</span></span><div class="tools">'+(ed&&!CORF?'<button class="btn pri" onclick="nuevoCor()">+ Nuevo corral</button>':'')+'</div></div>';
+  if(CORF){var C=CORF,co='<option value="">Elegí</option>',cs=byName(vals(S.campos));for(i=0;i<cs.length;i++)co+='<option value="'+cs[i].id+'"'+(C.campoId===cs[i].id?' selected':'')+'>'+esc(cs[i].nombre)+'</option>';
+    var to='<option value="">Elegí</option>';for(var k in TIPOS_COR)to+='<option value="'+k+'"'+(C.tipo===k?' selected':'')+'>'+TIPOS_COR[k]+'</option>';
+    var enUso=C.id?corUsos(C.id):0;
+    h+='<div class="form"><label class="wide" style="text-transform:none;font-size:12px;color:var(--text);font-weight:600">'+(C.id?'Editar corral':'Nuevo corral')+'</label>'+
+      '<label>Nombre<input class="ed" id="cor_nom" maxlength="40" value="'+esc(C.nombre)+'" oninput="CORF.nombre=this.value"></label>'+
+      '<label>Campo<select class="ed" onchange="CORF.campoId=this.value"'+(enUso?' disabled title="Tiene pastoreos: no se puede cambiar de campo"':'')+'>'+co+'</select></label>'+
+      '<label>Tipo<select class="ed" onchange="CORF.tipo=this.value">'+to+'</select></label>'+
+      '<label>Capacidad (cabezas)<input class="ed" inputmode="numeric" placeholder="Opcional" value="'+esc(C.cap)+'" oninput="CORF.cap=this.value"></label>'+
+      (C.id?'<label>Estado<select class="ed" onchange="CORF.activo=this.value===\'1\'"><option value="1"'+(C.activo?' selected':'')+'>Activo</option><option value="0"'+(C.activo?'':' selected')+'>De baja</option></select></label>':'')+
+      '<label class="wide">Observaciones<input class="ed" value="'+esc(C.obs)+'" oninput="CORF.obs=this.value"></label>'+
+      '<div class="form-actions"><button class="btn pri" onclick="guardarCor()">Guardar</button><button class="btn" onclick="CORF=null;render()">Cancelar</button>'+
+      (C.id&&CAN_ADM&&!enUso?(C.del?'<button class="btn warn" onclick="borrarCor()">Confirmar eliminación</button>':'<button class="btn warn" onclick="CORF.del=true;render()">Eliminar</button>'):'')+
+      (C.err?'<span class="msg err">'+esc(C.err)+'</span>':'')+'</div></div>';}
+  h+='<div class="tw"><table><thead><tr><th>Corral</th><th>Campo</th><th>Tipo</th><th class="r">Capacidad (cab)</th><th class="r">Cabezas hoy</th><th class="r">Ocupación</th><th class="r">Pastoreos</th><th>Estado</th></tr></thead><tbody>';
+  for(i=0;i<xs.length;i++){var x=xs[i],og=openOf(x.id),cab=og?totSt(stockOf(og.movs,d).st).cab:0,oc=x.capacidad?cab/x.capacidad*100:null;
+    h+='<tr class="'+(ed?'click ':'')+(x.activo!==false?'':'off ')+(CORF&&CORF.id===x.id?'sel':'')+'"'+(ed?' onclick="editCor(\''+x.id+'\')"':'')+'><td class="tdname">'+esc(x.nombre)+'</td><td>'+esc(campoName(x.campoId))+'</td><td>'+esc(TIPOS_COR[x.tipo]||'—')+'</td><td class="r">'+f(x.capacidad)+'</td>'+
+      '<td class="r">'+(og?'<a href="#" onclick="event.stopPropagation();verPast(\''+og.id+'\');return false">'+f(cab)+'</a>':'0')+'</td><td class="r">'+(oc==null?'—':'<span'+(oc>100?' style="color:var(--bad-t);font-weight:600"':'')+'>'+f(oc)+' %</span>')+'</td><td class="r">'+f(corUsos(x.id))+'</td>'+
+      '<td>'+(x.activo!==false?(og?'<span class="bdg by">Con hacienda</span>':'<span class="bdg bg">Activo</span>'):'<span class="bdg bn">De baja</span>')+'</td></tr>';}
+  if(!xs.length)h+='<tr><td colspan="8"><div class="empty">Todavía no hay corrales. Creá uno con “+ Nuevo corral”.</div></td></tr>';
+  return h+'</tbody></table></div><div class="pnote">'+(COR_PA?'Los corrales vienen del sistema. ':'Catálogo propio de esta herramienta (anotado en la ficha de integración). ')+'Un corral se usa como un lote más en Pastoreos (iniciar, entradas, salidas y pases) y en Suplementación, pero no tiene superficie ni recurso forrajero: toda la alimentación es suplemento y no entra en la cosecha de pasto. Ocupación = cabezas hoy ÷ capacidad.</div></div>';}
+function guardarCor(){if(!CAN||COR_PA||!CORF)return;var C=CORF,nom=(C.nombre||'').replace(/^\s+|\s+$/g,'').replace(/\s+/g,' '),i,xs=vals(S.corrales),ls=vals(S.lotes);
+  if(!nom)return corErr('Escribí un nombre.');if(!C.campoId||!S.campos[C.campoId])return corErr('Elegí el campo.');if(!TIPOS_COR[C.tipo])return corErr('Elegí el tipo (Inicio o Recría).');
+  var cap=null;if(String(C.cap||'').replace(/\s/g,'')!==''){cap=num(C.cap);if(cap===null||cap<=0||Math.round(cap)!==cap)return corErr('La capacidad tiene que ser un número entero de cabezas mayor que cero (o dejala vacía).');}
+  for(i=0;i<xs.length;i++)if(xs[i].id!==C.id&&(xs[i].nombre||'').toLowerCase()===nom.toLowerCase())return corErr('Ya existe el corral “'+nom+'”.');
+  for(i=0;i<ls.length;i++)if((ls[i].nombre||'').toLowerCase()===nom.toLowerCase())return corErr('“'+nom+'” es el nombre de un lote: elegí otro para no confundirlos.');
+  var old=C.id?lsGet('gan_corrales',[]).filter(function(x){return x.id===C.id;})[0]:null,r=old?clone(old):{id:uid('cor'),creado:new Date().toISOString()};
+  if(C.id&&corUsos(C.id)&&old&&old.campoId!==C.campoId)return corErr('El corral tiene pastoreos: no se puede cambiar de campo.');
+  r.empresaId=EMP;r.campoId=C.campoId;r.nombre=nom;r.tipo=C.tipo;if(cap!=null)r.capacidad=cap;else delete r.capacidad;r.activo=C.id?!!C.activo:true;r.obs=C.obs||'';r.actualizado=new Date().toISOString();
+  if(!saveCor(r))return corErr(LS_ERR);CORF=null;render();}
+function borrarCor(){if(!CAN_ADM||COR_PA||!CORF||!CORF.id)return;var id=CORF.id;if(corUsos(id))return corErr('Tiene pastoreos: dalo de baja en lugar de eliminarlo.');
+  if(!removeWhere('gan_corrales',function(x){return x.id===id;}))return corErr(LS_ERR);CORF=null;render();}
+
 /* ---------- RECURSOS (tipos de actividad, solo lectura) ---------- */
 function viewRecursos(){var rs=byName(vals(S.tipos)),u=usos(),i,lc={};
   for(i=0;i<S.acts.length;i++)if(S.acts[i].campaniaId===CAMP)lc[S.acts[i].tipoActividadId]=(lc[S.acts[i].tipoActividadId]||0)+1;
@@ -614,7 +681,7 @@ function viewSimple(col){if(!catEditable()){editNew=false;editId=null;}var xs=va
   h+='<div class="tw scroll-y"><table><thead><tr><th>Categoría</th><th class="r">Movimientos</th><th>Estado</th></tr></thead><tbody>';
   for(i=0;i<xs.length;i++){var x=xs[i];if(!match(x.nombre))continue;
     h+='<tr class="'+(catEditable()?'click ':'')+(x.activo?'':'off ')+(editId===x.id?'sel':'')+'"'+(catEditable()?' onclick="editar(\''+x.id+'\')"':'')+'><td class="tdname">'+esc(x.nombre)+'</td><td class="r">'+f(u.cat[x.id]||0)+'</td><td>'+(x.activo?'<span class="bdg bg">Activa</span>':'<span class="bdg bn">De baja</span>')+'</td></tr>';}
-  return h+'</tbody></table></div><div class="pnote">Catálogo general del sistema: las mismas categorías para todas las empresas. Solo el equipo Puntal las crea o modifica'+(CATS_PA?' (desde Maestros)':'')+'; si necesitás una categoría nueva, pedila a Puntal.</div></div>';}
+  return h+'</tbody></table></div><div class="pnote">Catálogo general del sistema: las mismas categorías para todas las empresas. Se administran en Maestros y solo el equipo Puntal las crea o modifica'+(esPuntal()?' (<a href="maestros.html">ir a Maestros</a>)':'; si necesitás una categoría nueva, pedila a Puntal')+'.</div></div>';}
 function guardar(){if(!CAN||!catEditable())return;var name=v('f_nombre');if(!name)return say('Escribí un nombre.',true);
   var xs=vals(S.categorias);for(var i=0;i<xs.length;i++)if(xs[i].id!==editId&&(xs[i].nombre||'').toLowerCase()===name.toLowerCase())return say('Ya existe “'+name+'”.',true);
   var c=editId?clone(S.categorias[editId]):{id:uid('cat'),orden:xs.length+1};c.nombre=name;c.activo=v('f_act')!=='0';
@@ -715,7 +782,7 @@ function viewCampo(){var c=S.cfg,k=c.coef||{},dis=CAN?'':' disabled';
     (CAN?'<div class="form-actions"><button class="btn pri" onclick="guardarCampo()">Guardar</button><button class="btn" onclick="restaurarCoef()">↺ Restaurar valores del Excel</button>'+msgHtml()+'</div>':'')+
     '</div><div class="pnote">EV/cab = a + b·P + c·ADPV + d·P·ADPV, con P = peso promedio ponderado (kg/cab) y ADPV = (kg salida − kg entrada) / días / cab. Cosecha total = EV × días × consumo por EV. Un ADPV fuera del rango válido se toma como error de pesada y el pastoreo no suma. El consumo % del peso vivo se usa en el requerimiento de forraje de Existencias.</div></div>';}
 /* ---------- RESPALDO de los datos propios (gan_*) de la empresa activa ---------- */
-var BK_KEYS=['gan_pastoreos','gan_insumos_ms','gan_superficie','gan_recurso','gan_tasas','gan_cfg','gan_pendientes','gan_raciones','gan_rodeos','gan_negocios'],BK=null;
+var BK_KEYS=['gan_pastoreos','gan_insumos_ms','gan_superficie','gan_recurso','gan_tasas','gan_cfg','gan_pendientes','gan_raciones','gan_rodeos','gan_negocios','gan_reservas','gan_corrales'],BK=null;
 function viewRespaldo(){if(!CAN_ADM)return '';var n=vals(S.pastoreos).length,h='<div class="card"><div class="chd"><span class="ct">Respaldo de datos · '+esc(empName())+'</span></div>';
   h+='<div class="msg" style="margin-bottom:10px">Los datos de esta herramienta se guardan solo en este navegador. Descargá un respaldo con frecuencia; con él podés pasar los datos a otra computadora o recuperarlos si se borra el navegador.</div>';
   h+='<div class="tools"><button class="btn pri" onclick="descargarRespaldo()">Descargar respaldo</button><label class="btn" for="bk_file" style="display:inline-block">Restaurar respaldo…</label><input type="file" id="bk_file" accept=".json,application/json" style="display:none" onchange="leerRespaldo(this)"><span class="msg">'+f(n)+' pastoreos en este navegador</span></div>';
@@ -741,7 +808,7 @@ function restaurarRespaldo(){if(!CAN_ADM||!BK||!BK.data)return;var d=BK.data.dat
   for(i=0;i<BK_KEYS.length;i++){k=BK_KEYS[i];var otros=[],all=lsGet(k,[]);for(j=0;j<all.length;j++)if(all[j].empresaId!==EMP)otros.push(all[j]);
     var nuevos=d[k]||[];for(j=0;j<nuevos.length;j++)if(nuevos[j].empresaId===EMP)otros.push(nuevos[j]);if(!lsSet(k,otros))ok=false;}
   if(d.gan_categorias&&d.gan_categorias.length){var cs=lsGet('gan_categorias',[]),idx={};for(j=0;j<cs.length;j++)idx[cs[j].id]=j;
-    for(j=0;j<d.gan_categorias.length;j++){var c=d.gan_categorias[j];if(idx.hasOwnProperty(c.id)){if(esPuntal())cs[idx[c.id]]=c;}else cs.push(c);} /* solo Puntal pisa categorías existentes */if(!lsSet('gan_categorias',cs))ok=false;}
+    for(j=0;j<d.gan_categorias.length;j++){var c=d.gan_categorias[j];if(!esPuntal())continue;if(idx.hasOwnProperty(c.id))cs[idx[c.id]]=c;else cs.push(c);} /* categorías: catálogo general, solo Puntal las agrega o pisa */if(!lsSet('gan_categorias',cs))ok=false;}
   cargarPropios();BK=ok?{ok:'Respaldo restaurado: '+vals(S.pastoreos).length+' pastoreos.'}:{err:LS_ERR};render();}
 function empName(){var es=CTX.empresasDisponibles||[];for(var i=0;i<es.length;i++)if(es[i].id===EMP)return es[i].razonSocial;return EMP;}
 function guardarCampo(){if(!CAN)return;var c=clone(S.cfg),k={},ks=['kgEV','a','b','c','d'];
@@ -777,7 +844,7 @@ function pad2(n){return (n<10?'0':'')+n;}
 function hoy(){var d=new Date();return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());}
 function newId(){return 'm'+Date.now().toString(36)+Math.floor(Math.random()*1e6).toString(36);}
 function cName(id){var c=S.categorias[id];return c?c.nombre:'?';}
-function pName(id){var p=S.lotes[id];return p?p.nombre:'?';}
+function pName(id){var p=LT(id);return p?p.nombre:'?';}
 function tipoLbl(m){return (TIPOS[m.tipo]?TIPOS[m.tipo].n:m.tipo)+(m.cierra&&m.tipo!=='fin'?' · cierre':'');}
 function sgn(m){return TIPOS[m.tipo]?TIPOS[m.tipo].s:'';}
 function fFecha(s){return s?dFmt(pd(s)):'—';}
@@ -787,7 +854,10 @@ function catOptions(sel,soloCon){var cs=vals(S.categorias).sort(function(a,b){re
     h+='<option value="'+cs[i].id+'"'+(cs[i].id===sel?' selected':'')+'>'+esc(cs[i].nombre)+(soloCon?' ('+f(soloCon[cs[i].id].cab)+' cab)':'')+'</option>';}return h;}
 function potOptions(sel,excluir){var ps=byName(vals(S.lotes)),h='<option value="">Elegí</option>';
   for(var i=0;i<ps.length;i++){if(!ps[i].activo||ps[i].id===excluir)continue;var og=openOf(ps[i].id);
-    h+='<option value="'+ps[i].id+'"'+(ps[i].id===sel?' selected':'')+'>'+esc(ps[i].nombre)+(og?' · con hacienda':'')+'</option>';}return h;}
+    h+='<option value="'+ps[i].id+'"'+(ps[i].id===sel?' selected':'')+'>'+esc(ps[i].nombre)+(og?' · con hacienda':'')+'</option>';}
+  var cs=byName(vals(S.corrales||{})),oc='';for(i=0;i<cs.length;i++){if((!cs[i].activo&&cs[i].id!==sel)||cs[i].id===excluir)continue;var oc2=openOf(cs[i].id);
+    oc+='<option value="'+cs[i].id+'"'+(cs[i].id===sel?' selected':'')+'>'+esc(cs[i].nombre)+' (corral)'+(oc2?' · con hacienda':'')+'</option>';}
+  if(oc)h+='<optgroup label="Corrales">'+oc+'</optgroup>';return h;}
 
 /* ---- estado de un pastoreo ---- */
 function sortMovs(movs){var a=[];for(var i=0;i<movs.length;i++)a.push({m:movs[i],i:i});
@@ -840,58 +910,60 @@ function viewPastoreos(){if(SEL){if(S.pastoreos[SEL])return viewDetalle(S.pastor
   if(ACT==='iniciar')h+=formIniciar();
   h+='<div class="card"><div class="chd"><span class="ct">En curso · '+f(abiertos.length)+'</span></div>';
   h+='<div class="tw"><table><thead><tr><th>Lote</th><th class="r">Superficie (ha)</th><th>Recurso</th><th class="r">#</th><th>Inicio</th><th class="r">Días</th><th>Hacienda</th><th class="r">Cabezas</th><th class="r">kg/cab</th><th class="r">Cab/ha</th><th class="r">kg MS supl. entregados</th><th>Estado</th></tr></thead><tbody>';
-  for(i=0;i<abiertos.length;i++){var a=abiertos[i],p={nombre:gName(a.g),ha:gHa(a.g)},ini=iniOf(a.g),o=BYG[a.g.id],desc=[];
+  for(i=0;i<abiertos.length;i++){var a=abiertos[i],p={nombre:gName(a.g),ha:gHa(a.g),cor:gCor(a.g)},ini=iniOf(a.g),o=BYG[a.g.id],desc=[];
     for(var c in a.st)desc.push(f(a.st[c].cab)+' '+esc(cName(c)));
-    h+='<tr class="click" onclick="verPast(\''+a.g.id+'\')"><td class="tdname">'+esc(p.nombre||'?')+'</td><td class="r">'+haCell(p)+'</td><td>'+rDot(a.g.tipoActividadId)+esc(rName(a.g.tipoActividadId))+'</td><td class="r">'+a.g.num+'</td><td>'+fFecha(ini)+'</td><td class="r">'+(ini?f(diasEntre(ini,hoy())):'—')+'</td>'+
+    h+='<tr class="click" onclick="verPast(\''+a.g.id+'\')"><td class="tdname">'+esc(p.nombre||'?')+'</td><td class="r">'+haCell(p)+'</td><td>'+recG(a.g)+'</td><td class="r">'+a.g.num+'</td><td>'+fFecha(ini)+'</td><td class="r">'+(ini?f(diasEntre(ini,hoy())):'—')+'</td>'+
       '<td style="white-space:normal">'+(desc.join(' · ')||'—')+'</td><td class="r">'+f(a.t.cab)+'</td><td class="r">'+f(a.t.cab?a.t.kg/a.t.cab:null)+'</td><td class="r">'+(p.ha?f(a.t.cab/p.ha,1):'—')+'</td><td class="r">'+fSupl(a.g)+'</td>'+
       '<td>'+(o&&o.err.length?'<span class="bdg br">Error</span>':(a.t.cab<=0?'<span class="bdg by">Sin hacienda</span>':'<span class="bdg by">En curso</span>'))+'</td></tr>';}
   if(!abiertos.length)h+='<tr><td colspan="12"><div class="empty">No hay pastoreos en curso. Usá “+ Iniciar pastoreo” para registrar una entrada de hacienda.</div></td></tr>';
   h+='</tbody></table></div><div class="pnote">Hacé clic en un pastoreo para agregar o retirar hacienda, hacer un pase a otro lote o cerrarlo.</div></div>';
   // todos
   var rows=[];for(i=0;i<gs.length;i++){var g2=gs[i],o2=BYG[g2.id],e=!o2?'err':(o2.err.length||o2.adFuera)?'err':o2.abierto?'abierto':'ok';
-    if(!pasaFP(g2,false))continue;if(PF.pot&&!inG(g2,PF.pot))continue;if(PF.est&&PF.est!=='todos'&&e!==PF.est)continue;if(!match(gName(g2)+' '+rName(g2.tipoActividadId)+' #'+g2.num))continue;rows.push({g:g2,o:o2,e:e});}
+    if(!pasaFP(g2,false))continue;if(PF.pot==='__l'){if(gCor(g2))continue;}else if(PF.pot==='__c'){if(!gCor(g2))continue;}else if(PF.pot&&!inG(g2,PF.pot))continue;if(PF.est&&PF.est!=='todos'&&e!==PF.est)continue;if(!match(gName(g2)+' '+rName(g2.tipoActividadId)+' #'+g2.num))continue;rows.push({g:g2,o:o2,e:e});}
   rows.sort(function(a,b){return (iniOf(b.g)||'')<(iniOf(a.g)||'')?-1:(iniOf(b.g)||'')>(iniOf(a.g)||'')?1:0;});
-  var po='<option value="">Todos</option>',ps=byName(vals(S.lotes));for(i=0;i<ps.length;i++)po+='<option value="'+ps[i].id+'"'+(PF.pot===ps[i].id?' selected':'')+'>'+esc(ps[i].nombre)+'</option>';
+  var po='<option value="">Todos</option><option value="__l"'+(PF.pot==='__l'?' selected':'')+'>Solo lotes</option><option value="__c"'+(PF.pot==='__c'?' selected':'')+'>Solo corrales</option><optgroup label="Lotes">',ps=byName(vals(S.lotes));for(i=0;i<ps.length;i++)po+='<option value="'+ps[i].id+'"'+(PF.pot===ps[i].id?' selected':'')+'>'+esc(ps[i].nombre)+'</option>';
+  po+='</optgroup>';var pcs=byName(vals(S.corrales));if(pcs.length){po+='<optgroup label="Corrales">';for(i=0;i<pcs.length;i++)po+='<option value="'+pcs[i].id+'"'+(PF.pot===pcs[i].id?' selected':'')+'>'+esc(pcs[i].nombre)+'</option>';po+='</optgroup>';}
   var ro2='<option value="">Todos</option>',rr=(function(){var u={},o=[];for(var j=0;j<gs.length;j++)if(gs[j].tipoActividadId&&S.tipos[gs[j].tipoActividadId]&&!u[gs[j].tipoActividadId]){u[gs[j].tipoActividadId]=1;o.push(S.tipos[gs[j].tipoActividadId]);}return byName(o);})();for(i=0;i<rr.length;i++)ro2+='<option value="'+rr[i].id+'"'+(PF.rec===rr[i].id?' selected':'')+'>'+esc(rr[i].nombre)+'</option>';
   var eo=[['todos','Todos'],['abierto','En curso'],['ok','Cerrados y calculados'],['err','Con error']],es='';for(i=0;i<eo.length;i++)es+='<option value="'+eo[i][0]+'"'+(PF.est===eo[i][0]?' selected':'')+'>'+eo[i][1]+'</option>';
   h+='<div class="card"><div class="chd"><span class="ct">Registro de pastoreos · '+f(rows.length)+'</span><div class="tools"><input type="search" id="q" placeholder="Buscar" value="'+esc(q)+'" oninput="setQ(this.value)"></div></div>';
-  h+='<div class="tw scroll-y"><table><thead><tr><th>Lote'+fcol('pf_pot','PF.pot',po)+'</th><th class="r">Superficie (ha)</th><th>Recurso</th><th class="r">#</th><th>Inicio</th><th>Fin</th><th class="r">Días</th><th class="r">Cab. pond.</th><th class="r">kg MS supl. entregados</th><th class="r">kg MS pasto</th><th class="r">kg MS pasto/ha</th><th>Campaña</th><th>Estado'+fcol('pf_est','PF.est',es)+'</th></tr></thead><tbody>';
+  h+='<div class="tw scroll-y"><table><thead><tr><th>Lote o corral'+fcol('pf_pot','PF.pot',po)+'</th><th class="r">Superficie (ha)</th><th>Recurso</th><th class="r">#</th><th>Inicio</th><th>Fin</th><th class="r">Días</th><th class="r">Cab. pond.</th><th class="r">kg MS supl. entregados</th><th class="r">kg MS pasto</th><th class="r">kg MS pasto/ha</th><th>Campaña</th><th>Estado'+fcol('pf_est','PF.est',es)+'</th></tr></thead><tbody>';
   for(i=0;i<rows.length;i++){var r=rows[i],ok=r.e==='ok';
-    var pr={nombre:gName(r.g),ha:gHa(r.g)};
-    h+='<tr class="click" onclick="verPast(\''+r.g.id+'\')"><td class="tdname">'+esc(gName(r.g))+'</td><td class="r">'+haCell(pr)+'</td><td>'+rDot(r.g.tipoActividadId)+esc(rName(r.g.tipoActividadId))+'</td><td class="r">'+r.g.num+'</td><td>'+fFecha(iniOf(r.g))+'</td><td>'+fFecha(finOf(r.g))+'</td>'+
+    var pr={nombre:gName(r.g),ha:gHa(r.g),cor:gCor(r.g)};
+    h+='<tr class="click" onclick="verPast(\''+r.g.id+'\')"><td class="tdname">'+esc(gName(r.g))+'</td><td class="r">'+haCell(pr)+'</td><td>'+recG(r.g)+'</td><td class="r">'+r.g.num+'</td><td>'+fFecha(iniOf(r.g))+'</td><td>'+fFecha(finOf(r.g))+'</td>'+
       '<td class="r">'+(ok?f(r.o.T):'—')+'</td><td class="r">'+(ok?f(r.o.V):'—')+'</td><td class="r">'+fSupl(r.g)+'</td><td class="r">'+(ok?f(r.o.past):'—')+'</td><td class="r">'+(ok&&pr.ha?f(r.o.past/pr.ha):'—')+'</td><td>'+esc(campName(r.g.campaniaId))+'</td><td>'+estBadge(r.e)+'</td></tr>';}
   if(!rows.length)h+='<tr><td colspan="13"><div class="empty">Ningún pastoreo coincide con los filtros.</div></td></tr>';
   var tms=0,tms2=0,thas={},tsp=0;for(i=0;i<rows.length;i++){var rr=rows[i],pp={ha:gHa(rr.g)};tsp+=suplMs(rr.g);if(rr.e!=='ok')continue;tms+=rr.o.past;if(pp.ha){tms2+=rr.o.past;var ll=lotesOf(rr.g);for(var z=0;z<ll.length;z++)thas[ll[z]]=S.lotes[ll[z]].ha;}}
   var tha=0;for(var kk in thas)tha+=thas[kk];
   if(rows.length)h+='<tr class="tr-ref"><td>Total calculados</td><td class="r">'+f(tha,2)+'</td><td colspan="6"></td><td class="r">'+f(tsp)+'</td><td class="r">'+f(tms)+'</td><td class="r">'+(tha?f(tms2/tha):'—')+'</td><td colspan="2"></td></tr>';
   return h+'</tbody></table></div><div class="pnote">kg MS pasto/ha = cosecha de pasto del pastoreo ÷ superficie del lote. En el total, cada lote suma su superficie una sola vez aunque tenga varios pastoreos: el valor es la cosecha acumulada por hectárea de los lotes filtrados.</div></div>';}
-function haCell(p){return p&&p.ha?f(p.ha,2):'<span class="bdg by" title="Cargá la superficie en la solapa Lotes">Falta</span>';}
+function haCell(p){if(p&&p.cor)return '—';return p&&p.ha?f(p.ha,2):'<span class="bdg by" title="Cargá la superficie en la solapa Lotes">Falta</span>';}
 function estBadge(e){return e==='ok'?'<span class="bdg bg">Calculado</span>':e==='abierto'?'<span class="bdg by">En curso</span>':'<span class="bdg br">Error</span>';}
 
 /* ---- iniciar ---- */
 function nuevoIniciar(){setAct('iniciar',{loteId:'',extra:[],fecha:hoy(),campaniaId:CAMP,tipoActividadId:'',lotes:[{rod:'',cat:'',cab:'',kg:''}]});}
-function lotesHtml(){var cid=FORM.loteId&&S.lotes[FORM.loteId]?S.lotes[FORM.loteId].campoId:'';
+function lotesHtml(){var cid=FORM.loteId&&LT(FORM.loteId)?LT(FORM.loteId).campoId:'';
   var h='<div class="wide tw" style="grid-column:1/-1"><table><thead><tr><th>Rodeo</th><th>Categoría</th><th class="r">Cabezas</th><th class="r">kg/cab (pesada de entrada)</th><th></th></tr></thead><tbody>';
   for(var i=0;i<FORM.lotes.length;i++){var l=FORM.lotes[i];
     h+='<tr><td><select class="ed" aria-label="Rodeo" onchange="FORM.lotes['+i+'].rod=this.value"'+(cid?'':' disabled')+'>'+(cid?rodOptions(cid,l.rod):'<option>Elegí el lote</option>')+'</select></td><td><select class="ed" aria-label="Categoría" onchange="FORM.lotes['+i+'].cat=this.value">'+catOptions(l.cat)+'</select></td><td class="r"><input class="ed" inputmode="numeric" style="width:90px;text-align:right" value="'+esc(l.cab)+'" oninput="FORM.lotes['+i+'].cab=this.value"></td>'+
       '<td class="r"><input class="ed" inputmode="decimal" style="width:110px;text-align:right" value="'+esc(l.kg)+'" oninput="FORM.lotes['+i+'].kg=this.value"></td><td>'+(FORM.lotes.length>1?'<button class="btn" onclick="FORM.lotes.splice('+i+',1);render()">Quitar</button>':'')+'</td></tr>';}
   return h+'</tbody></table><button class="btn" style="margin-top:6px" onclick="FORM.lotes.push({rod:FORM.lotes[FORM.lotes.length-1].rod||\'\',cat:\'\',cab:\'\',kg:\'\'});render()">+ Agregar categoría</button></div>';}
-function extraHtml(){var h='',i,P=S.lotes[FORM.loteId];if(!FORM.loteId)return '';
+function extraHtml(){var h='',i,P=S.lotes[FORM.loteId];if(!FORM.loteId||esCor(FORM.loteId))return '';
   for(i=0;i<FORM.extra.length;i++)h+='<span class="bdg bn" style="margin-right:4px">'+esc(pName(FORM.extra[i]))+' · '+f(S.lotes[FORM.extra[i]]?S.lotes[FORM.extra[i]].ha:null,1)+' ha <a href="#" onclick="FORM.extra.splice('+i+',1);render();return false">Quitar</a></span>';
   var o='<option value="">+ Sumar otro lote al mismo pastoreo</option>',ls=byName(vals(S.lotes));
   for(i=0;i<ls.length;i++){var L=ls[i];if(L.id===FORM.loteId||FORM.extra.indexOf(L.id)>=0||openOf(L.id)||(P&&L.campoId!==P.campoId))continue;o+='<option value="'+L.id+'">'+esc(L.nombre)+'</option>';}
   return '<div class="wide" style="grid-column:1/-1;display:flex;gap:6px;align-items:center;flex-wrap:wrap">'+h+'<select class="ed" onchange="if(this.value){FORM.extra.push(this.value);render();}">'+o+'</select><span class="msg">Lotes del mismo campo que se pastorean juntos'+(FORM.extra.length?': superficie total '+f(gHa({loteIds:[FORM.loteId].concat(FORM.extra)}),2)+' ha':'')+'</span></div>';}
-function formIniciar(){var p=S.lotes[FORM.loteId],og=FORM.loteId?openOf(FORM.loteId):null;
+function formIniciar(){var p=LT(FORM.loteId),og=FORM.loteId?openOf(FORM.loteId):null;
   if(!FORM.campManual){var cf=campDeFecha(FORM.fecha||hoy());if(campExiste(cf))FORM.campaniaId=cf;}
   if(p&&(!FORM.tipoActividadId||FORM.recLote!==FORM.loteId+'|'+FORM.campaniaId)){FORM.tipoActividadId=recDe(FORM.loteId,FORM.campaniaId)||'';FORM.recLote=FORM.loteId+'|'+FORM.campaniaId;}
+  var cor=esCor(FORM.loteId);
   return '<div class="card"><div class="chd"><span class="ct">Iniciar pastoreo</span></div><div class="form">'+
-    '<label>Lote'+sel('loteId',potOptions(FORM.loteId))+'</label><label>Fecha de entrada<input class="ed" type="date" value="'+esc(FORM.fecha)+'" onchange="FORM.fecha=this.value;render()"></label>'+extraHtml()+
+    '<label>Lote o corral'+sel('loteId',potOptions(FORM.loteId))+'</label><label>Fecha de entrada<input class="ed" type="date" value="'+esc(FORM.fecha)+'" onchange="FORM.fecha=this.value;render()"></label>'+extraHtml()+
     '<label>Campaña<select class="ed" onchange="FORM.campaniaId=this.value;FORM.campManual=true;render()">'+campOptions(FORM.campaniaId)+'</select></label>'+
-    '<label>Recurso forrajero (Plan de Uso)'+(FORM.loteId?sel('tipoActividadId',actOptions(FORM.loteId,FORM.campaniaId,FORM.tipoActividadId)):'<select class="ed" disabled><option>Elegí el lote</option></select>')+'</label>'+
-    (FORM.loteId&&!actsDe(FORM.loteId,FORM.campaniaId).length?'<div class="wide msg err" style="grid-column:1/-1">'+esc(pName(FORM.loteId))+' no tiene actividad cargada en el Plan de Uso para la campaña '+esc(campName(FORM.campaniaId))+'. Pedí que la carguen para poder registrar el pastoreo.</div>':'')+
+    (cor?'<label>Recurso forrajero<input class="ed" disabled value="No aplica: corral (100 % suplementación)"></label>':'<label>Recurso forrajero'+(FORM.loteId?sel('tipoActividadId',actOptions(FORM.loteId,FORM.campaniaId,FORM.tipoActividadId)):'<select class="ed" disabled><option>Elegí el lote</option></select>')+'</label>')+
+    (FORM.loteId&&!cor&&!actsDe(FORM.loteId,FORM.campaniaId).length?'<div class="wide msg err" style="grid-column:1/-1">'+esc(pName(FORM.loteId))+' no tiene actividad cargada en el Plan de Uso para la campaña '+esc(campName(FORM.campaniaId))+'. Pedí que la carguen para poder registrar el pastoreo.</div>':'')+
     (og?'<div class="wide msg err" style="grid-column:1/-1">'+esc(pName(FORM.loteId))+' ya tiene un pastoreo en curso (#'+og.num+'). Para sumar hacienda usá “Agregar hacienda” en ese pastoreo.</div>':'')+
     lotesHtml()+'<div class="form-actions"><button class="btn pri" onclick="guardarIniciar()">Iniciar pastoreo</button><button class="btn" onclick="cerrarAct()">Cancelar</button>'+formMsg()+'</div></div></div>';}
-function leerLotes(){var out=[],cid=S.lotes[FORM.loteId]?S.lotes[FORM.loteId].campoId:'';for(var i=0;i<FORM.lotes.length;i++){var l=FORM.lotes[i];if(!l.cat&&!l.cab&&!l.kg)continue;
+function leerLotes(){var out=[],cid=LT(FORM.loteId)?LT(FORM.loteId).campoId:'';for(var i=0;i<FORM.lotes.length;i++){var l=FORM.lotes[i];if(!l.cat&&!l.cab&&!l.kg)continue;
     var cab=num(l.cab),kg=num(l.kg);if(!l.cat)return 'Elegí la categoría en la fila '+(i+1)+'.';
     if(!l.rod&&rodReq(cid))return 'Elegí el rodeo en la fila '+(i+1)+'.';
     if(cab===null||cab<=0||Math.round(cab)!==cab)return 'Las cabezas de '+cName(l.cat)+' tienen que ser un número entero mayor que cero.';
@@ -900,18 +972,21 @@ function leerLotes(){var out=[],cid=S.lotes[FORM.loteId]?S.lotes[FORM.loteId].ca
   if(!out.length)return 'Cargá al menos una categoría con cabezas y pesada.';return out;}
 function nextNum(pid){var n=0,gs=vals(S.pastoreos);for(var i=0;i<gs.length;i++)if(gs[i].loteId===pid&&gs[i].num>n)n=gs[i].num;return n+1;}
 function guardarIniciar(){if(!CAN||FORM.busy)return;
-  if(!FORM.loteId)return ferr('Elegí el lote.');if(openOf(FORM.loteId))return ferr('Ese lote ya tiene un pastoreo en curso.');
+  if(!FORM.loteId)return ferr('Elegí el lote o corral.');if(openOf(FORM.loteId))return ferr(pName(FORM.loteId)+' ya tiene un pastoreo en curso.');
   if(!okFecha(FORM.fecha))return ferr('La fecha tiene que ser válida y no posterior a hoy.');
   if(!FORM.campaniaId)return ferr('Elegí la campaña.');
-  if(!FORM.tipoActividadId)FORM.tipoActividadId=recDe(FORM.loteId,FORM.campaniaId)||'';
-  if(!FORM.tipoActividadId)return ferr('El lote no tiene actividad en el Plan de Uso para la campaña '+campName(FORM.campaniaId)+'.');
+  var cor=esCor(FORM.loteId);if(cor)FORM.tipoActividadId='';
+  if(!FORM.tipoActividadId&&!cor)FORM.tipoActividadId=recDe(FORM.loteId,FORM.campaniaId)||'';
+  if(!FORM.tipoActividadId&&!cor)return ferr('El lote no tiene actividad en el Plan de Uso para la campaña '+campName(FORM.campaniaId)+'.');
   var ls=leerLotes();if(typeof ls==='string')return ferr(ls);
   var todos=[FORM.loteId].concat(FORM.extra||[]),k;
   for(k=0;k<todos.length;k++){if(k&&openOf(todos[k]))return ferr(pName(todos[k])+' ya tiene un pastoreo en curso.');
     var last=lastFin(todos[k]);if(last&&FORM.fecha<last)return ferr('El último pastoreo de '+pName(todos[k])+' terminó el '+fFecha(last)+'. La entrada no puede ser anterior.');}
   var movs=[];for(var i=0;i<ls.length;i++)movs.push(conRod({id:newId(),fecha:FORM.fecha,tipo:'inicio',categoriaId:ls[i].cat,cab:ls[i].cab,kg:ls[i].kg,obs:''},ls[i].rod));
-  var doc={campaniaId:FORM.campaniaId,loteId:FORM.loteId,loteIds:todos.length>1?todos:null,num:nextNum(FORM.loteId),tipoActividadId:FORM.tipoActividadId,movs:movs,supl:[],creado:new Date().toISOString()};
-  var nid=savePast(null,doc);if(!nid)return ferr(LS_ERR);ACT=null;FORM=null;SEL=nid;render();}
+  var doc={campaniaId:FORM.campaniaId,loteId:FORM.loteId,loteIds:todos.length>1?todos:null,num:nextNum(FORM.loteId),tipoActividadId:FORM.tipoActividadId||null,movs:movs,supl:[],creado:new Date().toISOString()};if(cor)doc.corralId=FORM.loteId;
+  var nid=savePast(null,doc);if(!nid)return ferr(LS_ERR);
+  for(k=0;k<todos.length;k++)setRecLote(todos[k],FORM.campaniaId,FORM.tipoActividadId); /* pasa a ser el recurso actual del lote */
+  ACT=null;FORM=null;SEL=nid;render();}
 function lastFin(pid){var gs=vals(S.pastoreos),t=null;for(var i=0;i<gs.length;i++){if(!inG(gs[i],pid))continue;var x=finOf(gs[i]);if(x&&(t===null||x>t))t=x;}return t;}
 
 /* ===================== DETALLE ===================== */
@@ -920,16 +995,20 @@ function viewDetalle(g){calc();var o=BYG[g.id],p={nombre:gName(g),ha:gHa(g)},cer
   var st=stockOf(g.movs||[],cerrado?null:hoy()).st,t=totSt(st),stR=stockRC(g.movs||[],cerrado?null:hoy()).st;
   var h='<div class="card"><div class="chd"><span class="ct"><button class="btn pri" onclick="volver()">← Volver</button>&nbsp; <span style="font-size:18px;font-weight:700;text-transform:none;letter-spacing:0;color:var(--text);vertical-align:middle">'+esc(p.nombre||'?')+'</span> · pastoreo #'+g.num+'</span>'+estBadge(e)+'</div>';
   h+='<div class="metrics" style="margin-bottom:10px">'+
-    mini('Campaña',esc(campName(g.campaniaId)))+mini('Recurso',rDot(g.tipoActividadId)+esc(rName(g.tipoActividadId)))+mini('Inicio',fFecha(ini))+mini('Fin',cerrado?fFecha(fin):'En curso')+
-    mini('Días',o&&o.T!=null?f(o.T):(ini?f(diasEntre(ini,hoy())):'—'))+mini('Superficie',p.ha?f(p.ha,2)+' ha':'—')+
-    (e==='ok'?mini('Cabezas ponderadas',f(o.V))+mini('kg/cab promedio',f(o.X))+mini('ADPV',f(o.AD,2)+' kg/día')+mini('MS total',f(o.ms)+' kg')+mini('MS pasto',f(o.past)+' kg')+mini('kg MS/ha',f(o.msha)):
+    mini('Campaña',esc(campName(g.campaniaId)))+mini('Recurso',recG(g))+mini('Inicio',fFecha(ini))+mini('Fin',cerrado?fFecha(fin):'En curso')+
+    mini('Días',o&&o.T!=null?f(o.T):(ini?f(diasEntre(ini,hoy())):'—'))+(gCor(g)?'':mini('Superficie',p.ha?f(p.ha,2)+' ha':'—'))+
+    (e==='ok'&&gCor(g)?mini('Cabezas ponderadas',f(o.V))+mini('kg/cab promedio',f(o.X))+mini('ADPV',f(o.AD,2)+' kg/día')+mini('Consumo estimado',f(o.ms)+' kg MS')+mini('Entregado − consumo',(o.dif>0?'+':'')+f(o.dif)+' kg MS'):
+     e==='ok'?mini('Cabezas ponderadas',f(o.V))+mini('kg/cab promedio',f(o.X))+mini('ADPV',f(o.AD,2)+' kg/día')+mini('MS total',f(o.ms)+' kg')+mini('MS pasto',f(o.past)+' kg')+mini('kg MS/ha',f(o.msha)):
+     gCor(g)?mini('Hacienda actual',f(t.cab)+' cab')+mini('Peso vivo',f(t.kg)+' kg')+mini('Consumo diario estimado',f(t.kg*S.cfg.consumoPV)+' kg MS/día'):
      mini('Hacienda actual',f(t.cab)+' cab')+mini('Peso vivo',f(t.kg)+' kg'))+mini('Suplemento entregado',f(suplMs(g))+' kg MS')+'</div>';
   if(o&&(o.err.length||o.adFuera)){var ms=o.err.slice();if(o.adFuera)ms.push('ADPV fuera de rango ('+f(o.AD,2)+' kg/día): revisá las pesadas');
     h+='<div class="pnote" style="background:var(--bad-b);color:var(--bad-t);margin:0 0 10px">'+esc(ms.join(' · '))+'</div>';}
+  if(gCor(g)){var cnote=e==='ok'?'Corral: toda la alimentación es suplemento. Consumo estimado = EV × cabezas·día × '+f(COEF.kgEV)+' kg MS/EV/día (mismo método que la cosecha). '+(o.dif<0?'<b>Lo entregado es menor que lo estimado:</b> revisá si faltan entregas o si el consumo real fue menor.':'Lo entregado cubre el consumo estimado.')+' La diferencia no se cuenta como pasto.':'Corral: toda la alimentación es suplemento. Mientras está en curso se muestra el consumo diario estimado con el consumo en % del peso vivo de Existencias ('+f(S.cfg.consumoPV*100,1)+' %). Al cerrarlo se compara el consumo estimado del período con el suplemento entregado.';
+    h+='<div class="pnote" style="margin:0 0 10px'+(e==='ok'&&o.dif<0?';background:var(--warn-b,#FBF1DC);color:var(--warn-t,#7A5A12)':'')+'">'+cnote+'</div>';}
   if(g.origen)h+='<div class="msg" style="margin-bottom:8px">Importado del Excel: hoja '+esc(g.origen)+'.</div>';
   if(CAN){h+='<div class="tools" style="margin-bottom:10px">';
     if(!cerrado)h+='<button class="'+bAct('agregar')+'" onclick="abrirMov(\'agregar\')">Entradas hacienda</button><button class="'+bAct('retirar')+'" onclick="abrirMov(\'retirar\')">Salidas hacienda</button><button class="'+bAct('categoria')+'" onclick="abrirCambio()">Cambios de categoría</button>';
-    h+='<button class="'+bAct('recurso')+'" onclick="setAct(\'recurso\',{tipoActividadId:\''+(g.tipoActividadId||'')+'\'})">Cambiar recurso</button><button class="'+bAct('rodeo')+'" onclick="setAct(\'rodeo\',{rod:\'\'})">Asignar rodeo</button></div>';}
+    h+=(gCor(g)?'':'<button class="'+bAct('recurso')+'" onclick="setAct(\'recurso\',{tipoActividadId:\''+(g.tipoActividadId||'')+'\'})">Cambiar recurso</button>')+'<button class="'+bAct('rodeo')+'" onclick="setAct(\'rodeo\',{rod:\'\'})">Asignar rodeo</button></div>';}
   if(ACT==='agregar'||ACT==='retirar'||ACT==='pase')h+=formMov(g);
   if(ACT==='categoria')h+=formCambio(g);
   if(ACT==='cerrar')h+=formCerrar(g);
@@ -937,7 +1016,7 @@ function viewDetalle(g){calc();var o=BYG[g.id],p={nombre:gName(g),ha:gHa(g)},cer
   if(ACT==='rodeo')h+='<div class="form">'+rodLoteHtml(g)+'<label>Rodeo'+sel('rod',rodOptions(campoDeG(g),FORM.rod,'Elegí',rodsEnLote(g)))+'</label><div class="msg" style="grid-column:1/-1">Se asigna a los '+f((g.movs||[]).length)+' movimientos de este pastoreo y reemplaza el rodeo que tuvieran.</div><div class="form-actions"><button class="btn pri" onclick="guardarRodeoG()">Asignar</button><button class="btn" onclick="cerrarAct()">Cancelar</button>'+formMsg()+'</div></div>';
   if(ACT&&ACT.indexOf('edit:')===0)h+=formEditMov(g,ACT.substr(5));
   // stock actual
-  if(!cerrado){h+='<div class="chd" style="margin-top:6px"><span class="ct" style="font-size:15px;font-weight:700;color:var(--text)">Hacienda en el lote hoy</span></div><div class="tw"><table><thead><tr><th>Rodeo</th><th>Categoría</th><th class="r">Cabezas</th><th class="r">kg/cab (entrada)</th><th class="r">kg totales</th></tr></thead><tbody>';
+  if(!cerrado){h+='<div class="chd" style="margin-top:6px"><span class="ct" style="font-size:15px;font-weight:700;color:var(--text)">Hacienda en el '+(gCor(g)?'corral':'lote')+' hoy</span></div><div class="tw"><table><thead><tr><th>Rodeo</th><th>Categoría</th><th class="r">Cabezas</th><th class="r">kg/cab (entrada)</th><th class="r">kg totales</th></tr></thead><tbody>';
     var any=false,rks=rcKeys(stR);for(var ri=0;ri<rks.length;ri++){var c=rks[ri];any=true;h+='<tr><td>'+esc(rodName(rcRod(c)))+'</td><td class="tdname">'+esc(cName(rcCat(c)))+'</td><td class="r">'+f(stR[c].cab)+'</td><td class="r">'+f(kgProm(stR,c))+'</td><td class="r">'+f(stR[c].cab*(kgProm(stR,c)||0))+'</td></tr>';}
     if(!any)h+='<tr><td colspan="5"><div class="empty">No queda hacienda. Cerrá el pastoreo con la fecha de la última salida.</div></td></tr>';
     h+='</tbody></table></div>';}
@@ -961,12 +1040,12 @@ function abrirMov(k){if(k!=='agregar')return abrirSalida(k);var d={fecha:hoy(),t
 function tipoOpts(list,sel2){var h='';for(var i=0;i<list.length;i++)h+='<option value="'+list[i]+'"'+(list[i]===sel2?' selected':'')+'>'+TIPOS[list[i]].n+'</option>';return h;}
 function formMov(g){if(ACT!=='agregar')return formSalida(g);var st=stockRC(g.movs,FORM.fecha||hoy()).st,tit=ACT==='agregar'?'Entradas hacienda':ACT==='retirar'?'Salidas hacienda':'Pase a otro lote';
   if(ACT!=='agregar'&&FORM.rc&&!FORM.kgTouched&&kgProm(st,FORM.rc))FORM.kg=String(Math.round(kgProm(st,FORM.rc)));
-  var h='<div class="form form-c"><label class="wide" style="text-transform:none;font-size:12px;color:var(--text);font-weight:600">'+tit+'</label>'+rodLoteHtml(g)+
+  var h='<div class="form form-c"><label class="wide" style="text-transform:none;font-size:12px;color:var(--text);font-weight:600">'+tit+'</label>'+recPastHtml(g)+rodLoteHtml(g)+
     '<label>Fecha'+inp('fecha','date')+'</label>';
   if(ACT==='agregar'&&FORM.tipo==='nac'){var oj=catOrejano(),rl=rodsEnLote(g),ro='<option value="">Elegí</option>',rk=[],x;for(x in rl)rk.push(x);
     rk.sort(function(a,b){if(!a)return 1;if(!b)return -1;return rodName(a).localeCompare(rodName(b),'es');});
     if(FORM.rodN==null){if(rl.hasOwnProperty(FORM.rod||'')&&FORM.rod)FORM.rodN=FORM.rod;else if(rk.length===1)FORM.rodN=rk[0];}
-    for(var ri=0;ri<rk.length;ri++)ro+='<option value="'+rk[ri]+'"'+(FORM.rodN===rk[ri]?' selected':'')+'>'+esc(rodName(rk[ri]))+' ('+f(rl[rk[ri]])+' cab)</option>';
+    for(var ri=0;ri<rk.length;ri++)ro+='<option value="'+rk[ri]+'"'+(FORM.rodN===rk[ri]?' selected':'')+'>'+esc(rodLbl(rk[ri]))+' ('+f(rl[rk[ri]])+' cab)</option>';
     if(oj)FORM.cat=oj;
     h+='<label>Movimiento'+sel('tipo',tipoOpts(TIPOS_E_NUEVA,FORM.tipo))+'</label><label>Rodeo'+sel('rodN',ro)+'</label>'+
       '<label>Categoría<select class="ed" disabled><option>'+esc(oj?cName(oj):'Sin categoría Orejano')+'</option></select></label>';
@@ -1010,13 +1089,14 @@ function guardarMov(){if(!CAN||FORM.busy||!S.pastoreos[SEL])return;var g=clone(S
   var gid=SEL;if(!savePast(gid,g))return ferr(LS_ERR);
   if(dest&&!savePast(dest.id,dest.doc))return ferr(LS_ERR+' La salida se guardó: cargá la entrada en el destino a mano.');ACT=null;FORM=null;render();}
 /* prepara la entrada en el lote destino: se suma al pastoreo en curso o inicia uno nuevo */
-function prepDestino(pid,fecha,items,desde,camp){var od=openOf(pid),movs=[],i;
+function prepDestino(pid,fecha,items,desde,camp,recSel){var od=openOf(pid),movs=[],i;
   if(od){var di=iniOf(od);if(di&&fecha<di)return 'El pastoreo en curso de '+pName(pid)+' empezó el '+fFecha(di)+'. El pase no puede ser anterior.';
     var d=clone(od),id=d.id;delete d.id;for(i=0;i<items.length;i++)d.movs.push(conRod({id:newId(),fecha:fecha,tipo:'pase_e',categoriaId:items[i].cat,cab:items[i].cab,kg:items[i].kg,obs:'Pase desde '+desde},items[i].rod));
     return {id:id,doc:d};}
   var lf=lastFin(pid);if(lf&&fecha<lf)return 'El último pastoreo de '+pName(pid)+' terminó el '+fFecha(lf)+'. El pase no puede ser anterior.';
   for(i=0;i<items.length;i++)movs.push(conRod({id:newId(),fecha:fecha,tipo:'inicio',categoriaId:items[i].cat,cab:items[i].cab,kg:items[i].kg,obs:'Pase desde '+desde},items[i].rod));
-  var tid=recDe(pid,camp);if(!tid)return pName(pid)+' no tiene actividad en el Plan de Uso para la campaña '+campName(camp)+'.';
+  if(esCor(pid))return {id:null,doc:{campaniaId:camp,loteId:pid,corralId:pid,num:nextNum(pid),tipoActividadId:null,movs:movs,supl:[],creado:new Date().toISOString()}};
+  var tid=recSel||recDe(pid,camp);if(!tid)return pName(pid)+' no tiene actividad en el Plan de Uso para la campaña '+campName(camp)+'.';
   return {id:null,doc:{campaniaId:camp,loteId:pid,num:nextNum(pid),tipoActividadId:tid,movs:movs,supl:[],creado:new Date().toISOString()}};}
 
 /* ---- cerrar ---- */
@@ -1076,7 +1156,10 @@ function borrarMov(id){if(!CAN_ADM)return;var g=clone(S.pastoreos[SEL]),out=[],c
   for(i=0;i<g.movs.length;i++)if(g.movs[i].id!==id&&!(cid&&g.movs[i].cambioId===cid))out.push(g.movs[i]);g.movs=out;delete g.id;
   var chk=stockRC(g.movs,null);if(chk.neg)return ferr('Sin ese movimiento quedarían '+f(chk.neg.cab)+' cabezas de '+rcName(chk.neg.cat)+' el '+fFecha(chk.neg.fecha)+'.');
   if(!savePast(SEL,g))return ferr(LS_ERR);ACT=null;FORM=null;render();}
-function guardarRecurso(){if(!CAN)return;var g=clone(S.pastoreos[SEL]);if(!FORM.tipoActividadId)return ferr('Elegí el recurso.');g.tipoActividadId=FORM.tipoActividadId;if(!savePast(SEL,g))return ferr(LS_ERR);ACT=null;FORM=null;render();}
+function guardarRecurso(){if(!CAN)return;var g=clone(S.pastoreos[SEL]);if(!FORM.tipoActividadId)return ferr('Elegí el recurso.');g.tipoActividadId=FORM.tipoActividadId;if(!savePast(SEL,g))return ferr(LS_ERR);
+  var ls=lotesOf(g),gi=iniOf(g),j,x,gs=vals(S.pastoreos);for(j=0;j<ls.length;j++){var ult=true;for(x=0;x<gs.length;x++){var o=gs[x];if(o.id!==SEL&&o.campaniaId===g.campaniaId&&lotesOf(o).indexOf(ls[j])>=0&&(iniOf(o)||'')>(gi||''))ult=false;}
+    if(ult)setRecLote(ls[j],g.campaniaId,g.tipoActividadId);}
+  ACT=null;FORM=null;render();}
 
 /* ---- dividir: pasar movimientos seleccionados a un pastoreo nuevo ---- */
 function moverMovs(){if(!CAN)return;var g=clone(S.pastoreos[SEL]),keep=[],mov=[],i;
@@ -1098,16 +1181,17 @@ function guardarEf(v){if(!CAN)return;var x=parseAR(v),c=clone(S.cfg);
   msg='';if(!saveCfg(c)){msg=LS_ERR;msgErr=true;}render();}
 function guardarCpv(v){if(!CAN)return;var x=parseAR(v),c=clone(S.cfg);if(x===null||x<=0||x>10){msg='El consumo tiene que estar entre 0,1 y 10 % del peso vivo.';msgErr=true;return render();}
   c.consumoPV=x/100;msg='';if(!saveCfg(c)){msg=LS_ERR;msgErr=true;}render();}
-function viewExistencias(){calc();var ps=byName(vals(S.lotes)),i,rows=[],porCat={},tc=0,tk=0,tev=0,d=hoy(),gsx;
+function viewExistencias(){calc();var ps=byName(vals(S.lotes)),i,rows=[],porCat={},tc=0,tk=0,tev=0,tcC=0,tkC=0,tevC=0,d=hoy(),gsx,hayCor=vals(S.corrales).length>0;
   gsx=vals(S.pastoreos);for(i=0;i<gsx.length;i++){var g=gsx[i];if(isClosed(g)||!(g.movs||[]).length)continue;var p={nombre:gName(g),ha:gHa(g)};
-    var st=stockOf(g.movs,d).st,t=totSt(st);if(t.cab<=0)continue;var ev=evStock(st);rows.push({p:p,g:g,st:st,t:t,ev:ev});tc+=t.cab;tk+=t.kg;tev+=ev;
+    var st=stockOf(g.movs,d).st,t=totSt(st);if(t.cab<=0)continue;var ev=evStock(st);p.cor=gCor(g);rows.push({p:p,g:g,st:st,t:t,ev:ev});tc+=t.cab;tk+=t.kg;tev+=ev;if(p.cor){tcC+=t.cab;tkC+=t.kg;tevC+=ev;}
     for(var c in st){if(!porCat[c])porCat[c]={cab:0,kg:0,ev:0,pot:0};var P=kgProm(st,c)||0;porCat[c].cab+=st[c].cab;porCat[c].kg+=st[c].cab*P;porCat[c].ev+=P?st[c].cab*evCab(P,0):0;porCat[c].pot++;}}
   rows.sort(function(a,b){return a.p.nombre.localeCompare(b.p.nombre,'es');});var G=ganInfo();
   function mc(l,v,u2,hl){return '<div class="mc"'+(hl?'':' style="border-left-color:var(--border)"')+'><div class="mc-lbl">'+l+'</div><div class="mc-val">'+v+(u2?'<span class="mc-unit">'+u2+'</span>':'')+'</div></div>';}
   var h='<h2 style="font-size:22px;font-weight:700;margin:4px 0 12px;color:var(--text)">Situación a la fecha '+d.substr(8,2)+'/'+d.substr(5,2)+'/'+d.substr(0,4)+'</h2><div class="g2"><div style="display:flex;flex-direction:column;gap:12px;min-width:0">';
   h+=arbolExist(gsx,d);
   /* requerimiento de forraje */
-  var cargaKg=G.ha?tk/G.ha:null,ef=S.cfg&&S.cfg.efPastoreo!=null?S.cfg.efPastoreo:null;
+  var tkL=tk-tkC,tcL=tc-tcC,tevL=tev-tevC,consC=tkC*S.cfg.consumoPV; /* la carga y el requerimiento de forraje son solo de la hacienda en lotes; los corrales van aparte */
+  var cargaKg=G.ha?tkL/G.ha:null,ef=S.cfg&&S.cfg.efPastoreo!=null?S.cfg.efPastoreo:null;
   var tcn=cargaKg!=null?cargaKg*S.cfg.consumoPV:null,tcb=tcn!=null&&ef?tcn/(ef/100):null;
   var TP=tcPond(G),bal=tcb!=null&&TP.v!=null?TP.v-tcb:null;
   /* necesidad de suplementación: el suplemento no tiene pérdidas de pastoreo, por eso el déficit bruto se pasa a consumido con la eficiencia */
@@ -1121,21 +1205,23 @@ function viewExistencias(){calc();var ps=byName(vals(S.lotes)),i,rows=[],porCat=
     '<tr class="tr-ref"><td>Tasa de crecimiento bruta requerida <span class="msg" style="font-weight:400">(neta ÷ eficiencia)</span></td><td class="r">'+f(tcb,1)+' kg MS/ha/día</td></tr>'+
     '<tr><td>Tasa de crecimiento bruta actual ponderada <span class="msg">(recursos de la superficie ganadera)</span></td><td class="r">'+f(TP.v,1)+' kg MS/ha/día'+(TP.nS&&TP.v!==null?' <span class="bdg by">parcial</span>':'')+'</td></tr>'+
     '<tr><td>Balance <span class="msg">(actual − requerida bruta)</span></td><td class="r" style="font-weight:600;color:'+(bal===null?'var(--muted)':bal>=0?'var(--ok-t)':'var(--bad-t)')+'">'+(bal===null?'—':(bal>0?'+':'')+f(bal,1)+' kg MS/ha/día')+'</td></tr>'+
-    '<tr><td>Consumo diario del rodeo <span class="msg">(kg vivos × consumo)</span></td><td class="r">'+f(tk*S.cfg.consumoPV)+' kg MS/día</td></tr>'+
+    '<tr><td>Consumo diario del rodeo'+(hayCor?' en lotes':'')+' <span class="msg">(kg vivos × consumo)</span></td><td class="r">'+f(tkL*S.cfg.consumoPV)+' kg MS/día</td></tr>'+
     '<tr><td>Déficit de crecimiento bruto <span class="msg">((requerida bruta − actual ponderada) × ha ganaderas; 0 si sobra)</span></td><td class="r">'+(defB===null?'—':f(defB)+' kg MS/día'+parc)+'</td></tr>'+
-    '<tr class="tr-ref"><td>Necesidad de suplementación <span class="msg" style="font-weight:400">(déficit bruto × eficiencia)</span></td><td class="r">'+(necS===null?'—':f(necS)+' kg MS/día'+parc)+'</td></tr>'+
+    '<tr class="tr-ref"><td>Necesidad de suplementación'+(hayCor?' en lotes':'')+' <span class="msg" style="font-weight:400">(déficit bruto × eficiencia)</span></td><td class="r">'+(necS===null?'—':f(necS)+' kg MS/día'+parc)+'</td></tr>'+
+    (hayCor?'<tr><td>Consumo diario en corrales <span class="msg">(kg vivos × consumo; 100 % suplemento)</span></td><td class="r">'+f(consC)+' kg MS/día</td></tr>'+
+      '<tr class="tr-ref"><td>Necesidad de suplementación total <span class="msg" style="font-weight:400">(lotes + corrales)</span></td><td class="r">'+(necS===null?'—':f(necS+consC)+' kg MS/día'+parc)+'</td></tr>':'')+
     '</tbody></table></div><div class="pnote">La tasa neta es el forraje que tiene que crecer por hectárea y por día para sostener la carga actual con el consumo en % del peso vivo indicado. La bruta suma lo que se pierde por pisoteo, senescencia y rechazo: se compara con la tasa de crecimiento del recurso. El déficit bruto es el crecimiento que falta en toda la superficie ganadera; la necesidad de suplementación lo pasa a forraje consumido (el suplemento no tiene pérdidas de pastoreo) y es comparable con los kg MS de suplemento entregados.'+(ef==null?' Cargá la eficiencia de pastoreo para calcular la tasa bruta.':'')+(msg?' '+esc(msg):'')+'</div></div>';
   h+='</div>';
   /* superficie ganadera y carga */
   h+='<div class="card"><div class="chd"><span class="ct">Superficie ganadera actual y carga</span><button class="btn" onclick="setTab(\'lotes\')">Corregir en Lotes</button></div>'+
-    '<div class="metrics" style="margin-bottom:12px;grid-template-columns:repeat(auto-fill,minmax(130px,1fr))">'+mc('Superficie ganadera',f(G.ha,2),'ha',true)+mc('Carga',G.ha?f(tk/G.ha):'—','kg/ha',true)+mc('Carga',G.ha?f(tev/G.ha,2):'—','EV/ha',true)+mc('Cabezas/ha',G.ha?f(tc/G.ha,2):'—')+'</div>'+
-    ganTabla(G,false,true)+'<div class="pnote">Carga = hacienda total en pastoreo ÷ superficie ganadera actual (campaña '+esc(campName(CAMP))+'). La tasa de crecimiento bruta actual de cada recurso es un valor estimado que cargás vos (celdas verdes); el total la pondera por la superficie de cada recurso.'+(TP.nS&&TP.v!==null?' Es parcial: falta cargar '+TP.nS+' recursos ('+f(TP.haS,2)+' ha).':'')+(G.fuera?' Hay '+f(G.fuera)+' cabezas en lotes que no están marcados como superficie ganadera: igual suman a la carga.':'')+(G.man?' '+G.man+' lotes corregidos a mano.':'')+'</div></div>';
+    '<div class="metrics" style="margin-bottom:12px;grid-template-columns:repeat(auto-fill,minmax(130px,1fr))">'+mc('Superficie ganadera',f(G.ha,2),'ha',true)+mc('Carga',G.ha?f(tkL/G.ha):'—','kg/ha',true)+mc('Carga',G.ha?f(tevL/G.ha,2):'—','EV/ha',true)+mc('Cabezas/ha',G.ha?f(tcL/G.ha,2):'—')+'</div>'+
+    ganTabla(G,false,true)+'<div class="pnote">Carga = hacienda en pastoreo en lotes'+(tcC?' (sin las '+f(tcC)+' cabezas en corrales)':'')+' ÷ superficie ganadera actual (campaña '+esc(campName(CAMP))+'). La tasa de crecimiento bruta actual de cada recurso es un valor estimado que cargás vos (celdas verdes); el total la pondera por la superficie de cada recurso.'+(TP.nS&&TP.v!==null?' Es parcial: falta cargar '+TP.nS+' recursos ('+f(TP.haS,2)+' ha).':'')+(G.fuera?' Hay '+f(G.fuera)+' cabezas en lotes que no están marcados como superficie ganadera: igual suman a la carga.':'')+(G.man?' '+G.man+' lotes corregidos a mano.':'')+'</div></div>';
   h+='</div>';
   /* hacienda por lote */
-  h+='<div class="card"><div class="chd"><span class="ct">Hacienda por lote al '+fFecha(d)+'</span><span class="msg">'+f(rows.length)+' lotes ocupados · '+f(tc)+' cabezas · '+f(tk)+' kg · '+f(tev,1)+' EV</span></div>';
+  h+='<div class="card"><div class="chd"><span class="ct">Hacienda por lote'+(hayCor?' y corral':'')+' al '+fFecha(d)+'</span><span class="msg">'+f(rows.length)+(hayCor?' lotes y corrales ocupados':' lotes ocupados')+' · '+f(tc)+' cabezas · '+f(tk)+' kg · '+f(tev,1)+' EV</span></div>';
   h+='<div class="tw"><table><thead><tr><th>Lote</th><th class="r">Superficie (ha)</th><th>Recurso</th><th class="r">Días de ocupación</th><th>Hacienda</th><th class="r">Cabezas</th><th class="r">kg vivos</th><th class="r">EV</th><th class="r">kg/ha</th><th class="r">EV/ha</th></tr></thead><tbody>';
   for(i=0;i<rows.length;i++){var r=rows[i],desc=[];for(var c2 in r.st)desc.push(f(r.st[c2].cab)+' '+esc(cName(c2)));var ini=iniOf(r.g);
-    h+='<tr class="click" onclick="verPast(\''+r.g.id+'\')"><td class="tdname">'+esc(r.p.nombre)+'</td><td class="r">'+haCell(r.p)+'</td><td>'+rDot(r.g.tipoActividadId)+esc(rName(r.g.tipoActividadId))+'</td><td class="r">'+(ini?f(diasEntre(ini,d)):'—')+'</td><td style="white-space:normal">'+desc.join(' · ')+'</td>'+
+    h+='<tr class="click" onclick="verPast(\''+r.g.id+'\')"><td class="tdname">'+esc(r.p.nombre)+'</td><td class="r">'+haCell(r.p)+'</td><td>'+recG(r.g)+'</td><td class="r">'+(ini?f(diasEntre(ini,d)):'—')+'</td><td style="white-space:normal">'+desc.join(' · ')+'</td>'+
       '<td class="r">'+f(r.t.cab)+'</td><td class="r">'+f(r.t.kg)+'</td><td class="r">'+f(r.ev,1)+'</td><td class="r">'+(r.p.ha?f(r.t.kg/r.p.ha):'—')+'</td><td class="r">'+(r.p.ha?f(r.ev/r.p.ha,2):'—')+'</td></tr>';}
   if(!rows.length)h+='<tr><td colspan="10"><div class="empty">No hay hacienda registrada en ningún lote.</div></td></tr>';
   h+='<tr class="tr-ref"><td colspan="5">Total</td><td class="r">'+f(tc)+'</td><td class="r">'+f(tk)+'</td><td class="r">'+f(tev,1)+'</td><td colspan="2"></td></tr></tbody></table></div>';
@@ -1148,21 +1234,27 @@ function fSupl(g){var t=suplMs(g);return t?f(t):'—';}
 /* ===================== RODEOS (gan_rodeos; unidad de negocio = campo de pa-core) ===================== */
 var RODF=null,NEGF=null,NEG_PA=false,XLV=3,XOPEN={};
 function rodName(id){if(!id)return 'Sin rodeo';var r=S.rodeos[id];return r?r.nombre:'?';}
-function campoDeG(g){var L=g&&S.lotes[g.loteId];return L?L.campoId:'';}
-function negName(id){var n=S.negocios[id];return n?n.nombre:'Sin unidad de negocio';}
+/* rótulo para listas de elección: Unidad de negocio - Rodeo */
+function rodLbl(id){if(!id)return 'Sin rodeo';var r=S.rodeos[id];return r?(r.negocioId?negName(r.negocioId)+' - ':'')+r.nombre:'?';}
+function byRodLbl(a){return a.slice().sort(function(x,y){return rodLbl(x.id).localeCompare(rodLbl(y.id),'es',{numeric:true});});}
+function campoDeG(g){var L=g&&LT(g.loteId);return L?L.campoId:'';}
+var TENENCIAS={propia:'Propia',capitalizada:'Capitalizada'};
+function negLbl(n){if(!n)return 'Sin unidad de negocio';var t=TENENCIAS[n.tenencia];return n.nombre+(t?' '+t:'')+(n.tenencia==='capitalizada'&&n.socio?' · '+n.socio:'');}
+function negName(id){return negLbl(S.negocios[id]);}
 /* rodeos activos de la empresa (el parámetro de campo quedó por compatibilidad: los rodeos no dependen del campo) */
 function rodeosCampo(cid){var o=[],rs=vals(S.rodeos);for(var i=0;i<rs.length;i++)if(rs[i].activo!==false)o.push(rs[i]);return byName(o);}
 function rodReq(cid){return rodeosCampo().length>0;}
-function rodOptions(cid,sel2,vacio,enLote,lblLote){var rs=rodeosCampo(cid),h='<option value="">'+(vacio||(rs.length?'Elegí':'Sin rodeo'))+'</option>',hay=false,a='',b='';
-  for(var i=0;i<rs.length;i++){if(rs[i].id===sel2)hay=true;var o='<option value="'+rs[i].id+'"'+(rs[i].id===sel2?' selected':'')+'>'+esc(rs[i].nombre)+(enLote&&enLote[rs[i].id]?' ('+f(enLote[rs[i].id])+' cab)':'')+'</option>';
+function rodOptions(cid,sel2,vacio,enLote,lblLote){var rs=byRodLbl(rodeosCampo(cid)),h='<option value="">'+(vacio||(rs.length?'Elegí':'Sin rodeo'))+'</option>',hay=false,a='',b='';
+  for(var i=0;i<rs.length;i++){if(rs[i].id===sel2)hay=true;var o='<option value="'+rs[i].id+'"'+(rs[i].id===sel2?' selected':'')+'>'+esc(rodLbl(rs[i].id))+(enLote&&enLote[rs[i].id]?' ('+f(enLote[rs[i].id])+' cab)':'')+'</option>';
     if(enLote&&enLote[rs[i].id])a+=o;else b+=o;}
   if(enLote&&a)h+='<optgroup label="'+(lblLote||'En el lote')+'">'+a+'</optgroup>'+(b?'<optgroup label="Otros rodeos">'+b+'</optgroup>':'');else h+=b;
-  if(sel2&&!hay)h+='<option value="'+sel2+'" selected>'+esc(rodName(sel2))+'</option>';return h;}
+  if(sel2&&!hay)h+='<option value="'+sel2+'" selected>'+esc(rodLbl(sel2))+'</option>';return h;}
 /* botón de acción del detalle: verde solo el que tiene el formulario abierto */
 var B_ACT=['agregar','retirar','categoria','recurso','rodeo']; /* “Cerrar pastoreo” se reemplazó por Salidas (se cierra solo al quedar sin hacienda) */
 function bAct(k){var otro=B_ACT.indexOf(ACT)>0;return 'btn'+(ACT===k||(k==='agregar'&&!otro)?' pri':'');} /* Agregar hacienda pintado por defecto */
 /* rodeos con hacienda hoy en el pastoreo: {rodeoId: cabezas}; '' = sin rodeo */
 function rodsEnLote(g){var o={},st=stockRC((g&&g.movs)||[],hoy()).st;for(var c in st){if(st[c].cab<=0)continue;var r=rcRod(c);o[r]=(o[r]||0)+st[c].cab;}return o;}
+function recPastHtml(g){return '<div class="msg" style="grid-column:1/-1">Recurso forrajero del pastoreo: <b>'+esc(g.tipoActividadId?rName(g.tipoActividadId):'sin recurso')+'</b> (se define al iniciar el pastoreo; si está mal, usá “Cambiar recurso”).</div>';}
 function rodLoteHtml(g){var o=rodsEnLote(g),ks=[],k,i,t=[];for(k in o)ks.push(k);
   ks.sort(function(a,b){if(!a)return 1;if(!b)return -1;return rodName(a).localeCompare(rodName(b),'es');});
   for(i=0;i<ks.length;i++)t.push(esc(rodName(ks[i]))+' '+f(o[ks[i]])+' cab');
@@ -1222,7 +1314,7 @@ function hayX(){for(var k in XOPEN)return true;return false;}
 function cabPorRodeo(){var o={},gs=vals(S.pastoreos),d=hoy();for(var i=0;i<gs.length;i++){var g=gs[i];if(isClosed(g))continue;var st=stockRC(g.movs||[],d).st;for(var c in st){var r=rcRod(c);if(r)o[r]=(o[r]||0)+st[c].cab;}}return o;}
 function viewRodeos(){var u=usos(),cab=cabPorRodeo(),xs=vals(S.rodeos).sort(function(a,b){var x=negName(a.negocioId).localeCompare(negName(b.negocioId),'es');return x||(a.nombre||'').localeCompare(b.nombre||'','es');}),i;
   var h='<div class="card"><div class="chd"><span class="ct">Rodeos <span style="font-weight:400">· '+f(xs.length)+'</span></span><div class="tools">'+(CAN&&!RODF?'<button class="btn pri" onclick="nuevoRod()">+ Nuevo rodeo</button>':'')+'</div></div>';
-  if(RODF){var R=RODF,co='<option value="">Elegí</option>',ns=byName(vals(S.negocios));for(var ni=0;ni<ns.length;ni++)if(ns[ni].activo!==false||ns[ni].id===R.negocioId)co+='<option value="'+ns[ni].id+'"'+(R.negocioId===ns[ni].id?' selected':'')+'>'+esc(ns[ni].nombre)+'</option>';
+  if(RODF){var R=RODF,co='<option value="">Elegí</option>',ns=vals(S.negocios).sort(function(a,b){return negLbl(a).localeCompare(negLbl(b),'es');});for(var ni=0;ni<ns.length;ni++)if(ns[ni].activo!==false||ns[ni].id===R.negocioId)co+='<option value="'+ns[ni].id+'"'+(R.negocioId===ns[ni].id?' selected':'')+'>'+esc(negLbl(ns[ni]))+'</option>';
     h+='<div class="form"><label class="wide" style="text-transform:none;font-size:12px;color:var(--text);font-weight:600">'+(R.id?'Editar rodeo':'Nuevo rodeo')+'</label>'+
       '<label>Nombre<input class="ed" id="rod_nom" maxlength="40" value="'+esc(R.nombre)+'" oninput="RODF.nombre=this.value"></label>'+
       '<label>Unidad de negocio<select class="ed" onchange="RODF.negocioId=this.value">'+co+'</select></label>'+
@@ -1249,18 +1341,23 @@ function borrarRod(){if(!CAN_ADM||!RODF||!RODF.id)return;if(usos().rod[RODF.id])
 
 /* ---- unidades de negocio (gan_negocios, fallback local; con “Campo” por defecto) ---- */
 function viewNegocios(){var xs=byName(vals(S.negocios)),rc={},rs=vals(S.rodeos),i;for(i=0;i<rs.length;i++)rc[rs[i].negocioId]=(rc[rs[i].negocioId]||0)+1;
-  var ed=CAN&&!NEG_PA,h='<div class="card"><div class="chd"><span class="ct">Unidades de negocio <span style="font-weight:400">· '+f(xs.length)+'</span></span><div class="tools">'+(ed&&!NEGF?'<button class="btn" onclick="NEGF={id:null,nombre:\'\',activo:true,err:\'\'};render()">+ Nueva unidad</button>':'')+'</div></div>';
+  var ed=CAN&&!NEG_PA,h='<div class="card"><div class="chd"><span class="ct">Unidades de negocio <span style="font-weight:400">· '+f(xs.length)+'</span></span><div class="tools">'+(ed&&!NEGF?'<button class="btn" onclick="NEGF={id:null,nombre:\'\',tenencia:\'\',socio:\'\',activo:true,err:\'\'};render()">+ Nueva unidad</button>':'')+'</div></div>';
   if(NEGF){var N=NEGF;h+='<div class="form"><label>Nombre<input class="ed" id="neg_nom" maxlength="40" value="'+esc(N.nombre)+'" oninput="NEGF.nombre=this.value"></label>'+
+    '<label>Tenencia<select class="ed" onchange="NEGF.tenencia=this.value;if(this.value!==\'capitalizada\')NEGF.socio=\'\';render();var e=document.getElementById(\'neg_soc\');if(e)e.focus()"><option value="">Elegí</option><option value="propia"'+(N.tenencia==='propia'?' selected':'')+'>Propia</option><option value="capitalizada"'+(N.tenencia==='capitalizada'?' selected':'')+'>Capitalizada</option></select></label>'+
+    '<label>Socio'+(N.tenencia==='capitalizada'?'<input class="ed" id="neg_soc" maxlength="60" placeholder="Obligatorio" value="'+esc(N.socio||'')+'" oninput="NEGF.socio=this.value">':'<input class="ed" disabled placeholder="Solo si es capitalizada">')+'</label>'+
     (N.id?'<label>Estado<select class="ed" onchange="NEGF.activo=this.value===\'1\'"><option value="1"'+(N.activo?' selected':'')+'>Activa</option><option value="0"'+(N.activo?'':' selected')+'>De baja</option></select></label>':'')+
     '<div class="form-actions"><button class="btn pri" onclick="guardarNeg()">Guardar</button><button class="btn" onclick="NEGF=null;render()">Cancelar</button>'+
     (N.id&&CAN_ADM&&!rc[N.id]?(N.del?'<button class="btn warn" onclick="borrarNeg()">Confirmar eliminación</button>':'<button class="btn warn" onclick="NEGF.del=true;render()">Eliminar</button>'):'')+(N.err?'<span class="msg err">'+esc(N.err)+'</span>':'')+'</div></div>';}
-  h+='<div class="tw"><table><thead><tr><th>Unidad de negocio</th><th class="r">Rodeos</th><th>Estado</th></tr></thead><tbody>';
-  for(i=0;i<xs.length;i++){var x=xs[i];h+='<tr class="'+(ed?'click ':'')+(x.activo!==false?'':'off ')+(NEGF&&NEGF.id===x.id?'sel':'')+'"'+(ed?' onclick="NEGF={id:\''+x.id+'\',nombre:S.negocios[\''+x.id+'\'].nombre,activo:S.negocios[\''+x.id+'\'].activo!==false,err:\'\'};render()"':'')+'><td class="tdname">'+esc(x.nombre)+'</td><td class="r">'+f(rc[x.id]||0)+'</td><td>'+(x.activo!==false?'<span class="bdg bg">Activa</span>':'<span class="bdg bn">De baja</span>')+'</td></tr>';}
+  h+='<div class="tw"><table><thead><tr><th>Unidad de negocio</th><th>Tenencia</th><th>Socio</th><th class="r">Rodeos</th><th>Estado</th></tr></thead><tbody>';
+  for(i=0;i<xs.length;i++){var x=xs[i];h+='<tr class="'+(ed?'click ':'')+(x.activo!==false?'':'off ')+(NEGF&&NEGF.id===x.id?'sel':'')+'"'+(ed?' onclick="NEGF={id:\''+x.id+'\',nombre:S.negocios[\''+x.id+'\'].nombre,tenencia:S.negocios[\''+x.id+'\'].tenencia||\'\',socio:S.negocios[\''+x.id+'\'].socio||\'\',activo:S.negocios[\''+x.id+'\'].activo!==false,err:\'\'};render()"':'')+'><td class="tdname">'+esc(x.nombre)+'</td><td>'+esc(TENENCIAS[x.tenencia]||'—')+'</td><td>'+esc(x.tenencia==='capitalizada'?(x.socio||''):'')+'</td><td class="r">'+f(rc[x.id]||0)+'</td><td>'+(x.activo!==false?'<span class="bdg bg">Activa</span>':'<span class="bdg bn">De baja</span>')+'</td></tr>';}
   return h+'</tbody></table></div><div class="pnote">'+(NEG_PA?'Las unidades de negocio vienen del sistema.':'Catálogo propio de esta herramienta mientras el sistema no tenga unidades de negocio (anotado en la ficha de integración).')+'</div></div>';}
 function negErr(t){NEGF.err=t;render();}
 function guardarNeg(){if(!CAN||NEG_PA||!NEGF)return;var N=NEGF,nom=(N.nombre||'').replace(/^\s+|\s+$/g,''),xs=vals(S.negocios),i;if(!nom)return negErr('Escribí un nombre.');
-  for(i=0;i<xs.length;i++)if(xs[i].id!==N.id&&(xs[i].nombre||'').toLowerCase()===nom.toLowerCase())return negErr('Ya existe “'+nom+'”.');
-  var r=N.id?clone(S.negocios[N.id]):{id:uid('neg')};r.empresaId=EMP;r.nombre=nom;r.activo=N.id?!!N.activo:true;if(!saveNeg(r))return negErr(LS_ERR);NEGF=null;render();}
+  var ten=N.tenencia||'',soc=ten==='capitalizada'?(N.socio||'').replace(/^\s+|\s+$/g,'').replace(/\s+/g,' '):'';
+  if(!TENENCIAS[ten])return negErr('Elegí la tenencia.');if(ten==='capitalizada'&&!soc)return negErr('Escribí el socio: es obligatorio en una unidad capitalizada.');
+  var cand={nombre:nom,tenencia:ten,socio:soc};
+  for(i=0;i<xs.length;i++)if(xs[i].id!==N.id&&negLbl(xs[i]).toLowerCase()===negLbl(cand).toLowerCase())return negErr('Ya existe “'+negLbl(cand)+'”.');
+  var r=N.id?clone(S.negocios[N.id]):{id:uid('neg')};r.empresaId=EMP;r.nombre=nom;r.tenencia=ten;if(soc)r.socio=soc;else delete r.socio;r.activo=N.id?!!N.activo:true;if(!saveNeg(r))return negErr(LS_ERR);NEGF=null;render();}
 function borrarNeg(){if(!CAN_ADM||NEG_PA||!NEGF||!NEGF.id)return;var id=NEGF.id,rs=vals(S.rodeos);for(var i=0;i<rs.length;i++)if(rs[i].negocioId===id)return negErr('Tiene rodeos: dala de baja en lugar de eliminarla.');
   if(!removeWhere('gan_negocios',function(x){return x.id===id;}))return negErr(LS_ERR);NEGF=null;render();}
 
@@ -1273,23 +1370,24 @@ function formSalida(g){var st=stockRC(g.movs,FORM.fecha||hoy()).st,ks=[],k,esPO=
   /* Los dos pases cargan la entrada en el lote destino. “Pase salida” (pase_s): sale una parte. “Pase a otro lote” (pase_otro, se guarda como pase_s): sale el total. */
   if(esPO)for(k in FORM.rows)FORM.rows[k].cab=st[k]&&st[k].cab>0?String(st[k].cab):'';
   for(k in FORM.rows)ks.push(k);ks=rcKeys((function(){var o={};for(var i=0;i<ks.length;i++)o[ks[i]]=1;return o;})());
-  var h='<div class="form"><label class="wide" style="text-transform:none;font-size:12px;color:var(--text);font-weight:600">Salidas hacienda</label>'+
+  var h='<div class="form"><label class="wide" style="text-transform:none;font-size:12px;color:var(--text);font-weight:600">Salidas hacienda</label>'+recPastHtml(g)+
     '<label>Fecha<input class="ed" type="date" value="'+esc(FORM.fecha)+'" onchange="salFecha(this.value)"></label>'+
     '<label>Movimiento'+sel('tipo',tipoOpts(TIPOS_S.concat(['pase_s']),FORM.tipo)+'<option value="pase_otro"'+(esPO?' selected':'')+'>Pase a otro lote</option>')+'</label>'+
     (esP?'<label>Lote destino (todas las filas)<select class="ed" onchange="salDestTodas(this.value)">'+potOptions(FORM.destino||'',g.loteId)+'</select></label>':'')+defMov(FORM.tipo);
   if(!ks.length)return h+'<div class="msg" style="grid-column:1/-1">El lote no tiene hacienda a esa fecha. Si el pastoreo terminó, cerralo con “Cerrar sin hacienda”: se registra el fin del pastoreo en la fecha elegida.</div>'+
     '<div class="form-actions"><button class="btn pri" onclick="cerrarSinHac()">Cerrar sin hacienda</button><button class="btn" onclick="cerrarAct()">Cancelar</button>'+formMsg()+'</div></div>';
   if(!esP)h+='<div style="grid-column:1/-1"><button class="btn" onclick="salTodas()">Sale toda la hacienda</button></div>';
-  h+='<div class="tw" style="grid-column:1/-1"><table><thead><tr><th>Rodeo</th><th>Categoría</th><th class="r">En el lote</th><th class="r">kg/cab entrada</th>'+(esP?'<th>Lote destino</th><th>Rodeo destino</th>':'')+'<th class="r">Cabezas que salen</th><th class="r">kg/cab '+(esP?'pesada':'salida')+'</th>'+(DS_S[FORM.tipo]?'<th class="r">kg/cab destino</th><th class="r">% desbaste</th>':'')+'</tr></thead><tbody>';
+  h+='<div class="tw" style="grid-column:1/-1"><table><thead><tr><th>Rodeo</th><th>Categoría</th><th class="r">En el lote</th><th class="r">kg/cab entrada</th>'+(esP?'<th>Lote destino</th><th>Rodeo destino</th><th>Recurso destino</th>':'')+'<th class="r">Cabezas que salen</th><th class="r">kg/cab '+(esP?'pesada':'salida')+'</th>'+(DS_S[FORM.tipo]?'<th class="r">kg/cab destino</th><th class="r">% desbaste</th>':'')+'</tr></thead><tbody>';
   for(var i=0;i<ks.length;i++){k=ks[i];var r=FORM.rows[k],q=st[k]||{cab:0},kq='FORM.rows[\''+k+'\']';
     h+='<tr><td>'+esc(rodName(rcRod(k)))+'</td><td class="tdname">'+esc(cName(rcCat(k)))+'</td><td class="r">'+f(q.cab)+'</td><td class="r">'+f(kgProm(st,k))+'</td>';
-    if(esP)h+='<td><select class="ed" aria-label="Lote destino" onchange="'+kq+'.lote=this.value;'+kq+'.rodD=null;render()">'+potOptions(r.lote||'',g.loteId)+'</select>'+
+    if(esP)h+='<td><select class="ed" aria-label="Lote destino" onchange="'+kq+'.lote=this.value;'+kq+'.rodD=null;'+kq+'.recD=null;render()">'+potOptions(r.lote||'',g.loteId)+'</select>'+
       (r.lote?'<div class="msg" style="font-size:11px">'+(openOf(r.lote)?'En curso #'+openOf(r.lote).num:'Pastoreo nuevo')+'</div>':'')+'</td>'+
-      '<td><select class="ed" aria-label="Rodeo destino" onchange="'+kq+'.rodD=this.value"'+(r.lote?'':' disabled')+'>'+(r.lote?rodDestOptions(rcRod(k),r.rodD!=null?r.rodD:rcRod(k),rodsEnLote(openOf(r.lote))):'<option>Elegí el lote</option>')+'</select></td>';
+      '<td><select class="ed" aria-label="Rodeo destino" onchange="'+kq+'.rodD=this.value"'+(r.lote?'':' disabled')+'>'+(r.lote?rodDestOptions(rcRod(k),r.rodD!=null?r.rodD:rcRod(k),rodsEnLote(openOf(r.lote))):'<option>Elegí el lote</option>')+'</select></td>'+
+      '<td>'+recDestCelda(r,kq)+'</td>';
     h+='<td class="r"><input class="ed" inputmode="numeric" aria-label="Cabezas que salen" style="width:90px;text-align:right" value="'+esc(r.cab)+'"'+(esPO?' readonly title="Pase a otro lote: sale toda la hacienda"':' oninput="'+kq+'.cab=this.value"')+'></td>'+
       '<td class="r"><input class="ed" inputmode="decimal" aria-label="kg por cabeza" style="width:90px;text-align:right" value="'+esc(r.kg)+'" oninput="'+kq+'.kg=this.value;dsFila(\''+k+'\','+i+')"></td>'+
       (DS_S[FORM.tipo]?'<td class="r"><input class="ed" inputmode="decimal" aria-label="kg por cabeza en destino" style="width:90px;text-align:right" value="'+esc(r.kgD||'')+'" oninput="'+kq+'.kgD=this.value;dsFila(\''+k+'\','+i+')"></td><td class="r" id="ds_'+i+'">'+dsTxt(FORM.tipo,r.kg,r.kgD)+'</td>':'')+'</tr>';}
-  if(!ks.length)h+='<tr><td colspan="'+(esP?8:DS_S[FORM.tipo]?8:6)+'"><div class="empty">No hay hacienda en el lote a esa fecha.</div></td></tr>';
+  if(!ks.length)h+='<tr><td colspan="'+(esP?9:DS_S[FORM.tipo]?8:6)+'"><div class="empty">No hay hacienda en el lote a esa fecha.</div></td></tr>';
   h+='</tbody></table><div class="msg" style="margin-top:4px">'+(FORM.tipo==='pase_s'?'Pase salida: sale una parte de la hacienda; en el lote tiene que quedar hacienda. La entrada se carga sola en cada lote destino con el rodeo elegido. ':esPO?'Pase a otro lote: sale toda la hacienda (las cabezas no se pueden cambiar) y el pastoreo se cierra. Cada fila puede ir a un lote y rodeo distinto; la entrada se carga sola en cada destino. ':'')+'Cargá las cabezas solo en las categorías que salen. El kg/cab viene con la pesada de entrada: cambialo si pesaste'+(FORM.tipo==='mort'?' (en mortandad se puede dejar vacío)':'')+'. Si sale toda la hacienda, el pastoreo se cierra.</div></div>'+
     '<label class="wide">Observaciones'+inp('obs')+'</label>';
   if(FORM.adWarn)h+='<div class="msg err" style="grid-column:1/-1">'+esc(FORM.adWarn)+' <button class="btn warn" onclick="FORM.confAd=true;guardarSalida()">Guardar igual</button></div>';
@@ -1303,7 +1401,7 @@ function cerrarSinHac(){if(!CAN||!S.pastoreos[SEL])return;var g=clone(S.pastoreo
   if(totSt(stockOf(g.movs,null).st).cab>0)return ferr('El lote todavía tiene hacienda: cargá la salida.');
   g.movs.push({id:newId(),fecha:FORM.fecha,tipo:'fin',categoriaId:u?u.categoriaId:'',cab:0,kg:0,obs:'Cierre sin hacienda',cierra:true});
   if(!savePast(SEL,g))return ferr(LS_ERR);ACT=null;FORM=null;render();}
-function salDestTodas(v){FORM.destino=v;for(var k in FORM.rows){FORM.rows[k].lote=v;FORM.rows[k].rodD=null;}render();}
+function salDestTodas(v){FORM.destino=v;for(var k in FORM.rows){FORM.rows[k].lote=v;FORM.rows[k].rodD=null;FORM.rows[k].recD=null;}render();}
 function guardarSalida(){if(!CAN||FORM.busy||!S.pastoreos[SEL])return;var g=clone(S.pastoreos[SEL]),ini=iniOf(g),esPO=FORM.tipo==='pase_otro',tipo=esPO?'pase_s':FORM.tipo,esP=tipo==='pase_s',esPase=esP,i,k;
   if(!okFecha(FORM.fecha))return ferr('La fecha tiene que ser válida y no posterior a hoy.');
   if(ini&&FORM.fecha<ini)return ferr('La fecha no puede ser anterior al inicio del pastoreo ('+fFecha(ini)+').');
@@ -1318,7 +1416,8 @@ function guardarSalida(){if(!CAN||FORM.busy||!S.pastoreos[SEL])return;var g=clon
     var kgD=null;if(DS_S[tipo]){kgD=num(r.kgD);if(kgD===null||kgD<=0||kgD>1200)return ferr('Cargá la pesada en destino de '+nm+' (entre 1 y 1.200).');
       var dw=dsAviso(tipo,kg,kgD,nm);if(dw&&!FORM.confDs){FORM.dsWarn=dw;return render();}}
     var rdX=lote?(r.rodD!=null?r.rodD:rcRod(k)):'';if(rdX&&!mismoNeg(rcRod(k),rdX))return ferr('El rodeo destino de '+nm+' es de otra unidad de negocio: los pases son dentro de la misma unidad (usá Traslado salida).');
-    items.push({cat:rcCat(k),rod:rcRod(k),rodD:rdX,lote:lote,cab:cab,kg:kg,kgD:kgD});}
+    var rcX='';if(lote&&!openOf(lote)&&!esCor(lote)){rcX=r.recD||recDe(lote,campDest(FORM.fecha,g.campaniaId))||'';if(!rcX)return ferr('Elegí el recurso forrajero de '+pName(lote)+'.');}
+    items.push({cat:rcCat(k),rod:rcRod(k),rodD:rdX,lote:lote,cab:cab,kg:kg,kgD:kgD,recD:rcX});}
   if(!items.length)return ferr('Cargá las cabezas de al menos una categoría.');
   var nuevos=[];
   for(i=0;i<items.length;i++){var it=items[i],m=conRod({id:newId(),fecha:FORM.fecha,tipo:tipo,categoriaId:it.cat,cab:it.cab,kg:it.kg,obs:(it.lote?'Pase a '+pName(it.lote)+(it.rodD?' ('+rodName(it.rodD)+')':'')+(FORM.obs?' · ':''):'')+(FORM.obs||'')},it.rod);
@@ -1333,10 +1432,14 @@ function guardarSalida(){if(!CAN||FORM.busy||!S.pastoreos[SEL])return;var g=clon
   g.movs=movs;
   if(nuevos[0].cierra&&!FORM.confAd){var ev=evalG(g);if(ev&&ev.AD!=null&&(ev.AD<ADPV_MIN||ev.AD>ADPV_MAX)){FORM.adWarn='Con estas pesadas el ADPV del pastoreo da '+f(ev.AD,2)+' kg/día, fuera del rango válido. Revisá los kg/cab.';return render();}}
   /* pase a otro lote: una entrada por lote destino, con el rodeo elegido en cada fila */
-  var dests=[];if(esPase){var porL={},ord=[];for(i=0;i<items.length;i++){var L=items[i].lote;if(!porL[L]){porL[L]=[];ord.push(L);}porL[L].push({cat:items[i].cat,rod:items[i].rodD,cab:items[i].cab,kg:items[i].kg});}
-    for(i=0;i<ord.length;i++){var d=prepDestino(ord[i],FORM.fecha,porL[ord[i]],gName(g),g.campaniaId);if(typeof d==='string')return ferr(pName(ord[i])+': '+d);dests.push(d);}}
+  var dests=[],recL={};if(esPase){var porL={},ord=[];for(i=0;i<items.length;i++){var L=items[i].lote;if(!porL[L]){porL[L]=[];ord.push(L);}
+      if(items[i].recD){if(recL[L]&&recL[L]!==items[i].recD)return ferr('Las filas que van a '+pName(L)+' tienen distinto recurso destino: tiene que ser uno solo.');recL[L]=items[i].recD;}
+      porL[L].push({cat:items[i].cat,rod:items[i].rodD,cab:items[i].cab,kg:items[i].kg});}
+    for(i=0;i<ord.length;i++){var d=prepDestino(ord[i],FORM.fecha,porL[ord[i]],gName(g),campDest(FORM.fecha,g.campaniaId),recL[ord[i]]);if(typeof d==='string')return ferr(pName(ord[i])+': '+d);dests.push(d);}}
   var gid=SEL;if(!savePast(gid,g))return ferr(LS_ERR);
-  for(i=0;i<dests.length;i++)if(!savePast(dests[i].id,dests[i].doc))return ferr(LS_ERR+' La salida se guardó: cargá la entrada en '+pName(dests[i].doc.loteId)+' a mano.');ACT=null;FORM=null;render();}
+  for(i=0;i<dests.length;i++){if(!savePast(dests[i].id,dests[i].doc))return ferr(LS_ERR+' La salida se guardó: cargá la entrada en '+pName(dests[i].doc.loteId)+' a mano.');
+    if(!dests[i].id)setRecLote(dests[i].doc.loteId,dests[i].doc.campaniaId,dests[i].doc.tipoActividadId);} /* pastoreo nuevo en el destino: su recurso pasa a ser el actual del lote */
+  ACT=null;FORM=null;render();}
 
 /* ===================== CAMBIOS DE CATEGORÍA ===================== */
 /* Cada cambio = salida (cat_s) de la categoría actual + entrada (cat_e) a la nueva, con el mismo rodeo, fecha, cabezas y kg/cab.
@@ -1396,13 +1499,13 @@ function guardarEditCambio(g,m,cab,kg){var p=parDe(g,m);
 
 /* lista “Rodeo destino” del pase: mantener el actual · rodeos pastoreando en el destino · otros rodeos */
 function mismoNeg(a,b){var A=S.rodeos[a],B=S.rodeos[b];if(!A||!B)return true;return (A.negocioId||'')===(B.negocioId||'');} /* pases: solo dentro de la misma unidad de negocio */
-function rodDestOptions(act,sel2,enDest){var h='',i,rs=rodeosCampo().filter(function(r){return mismoNeg(act,r.id);}),pg='',og='',hay=false;
+function rodDestOptions(act,sel2,enDest){var h='',i,rs=byRodLbl(rodeosCampo().filter(function(r){return mismoNeg(act,r.id);})),pg='',og='',hay=false;
   function op(v,t){return '<option value="'+v+'"'+(v===sel2?' selected':'')+'>'+t+'</option>';}
-  h+=op(act,'Mantener: '+esc(rodName(act))+(act&&enDest&&enDest[act]?' (pastoreando ahí, '+f(enDest[act])+' cab)':''));
-  for(var k in enDest){if(!k||k===act||!mismoNeg(act,k))continue;hay=true;pg+=op(k,esc(rodName(k))+' ('+f(enDest[k])+' cab)');}
+  h+=op(act,'Mantener: '+esc(rodLbl(act))+(act&&enDest&&enDest[act]?' (pastoreando ahí, '+f(enDest[act])+' cab)':''));
+  for(var k in enDest){if(!k||k===act||!mismoNeg(act,k))continue;hay=true;pg+=op(k,esc(rodLbl(k))+' ('+f(enDest[k])+' cab)');}
   if(act&&enDest&&enDest[act])hay=true;
   h+='<optgroup label="Pastoreando en el lote destino">'+(pg||'<option disabled>'+(hay?'Solo el rodeo actual':'Sin rodeos pastoreando')+'</option>')+'</optgroup>';
-  for(i=0;i<rs.length;i++){var id=rs[i].id;if(id===act||(enDest&&enDest[id]))continue;og+=op(id,esc(rs[i].nombre));}
+  for(i=0;i<rs.length;i++){var id=rs[i].id;if(id===act||(enDest&&enDest[id]))continue;og+=op(id,esc(rodLbl(id)));}
   if(og)h+='<optgroup label="Otros rodeos">'+og+'</optgroup>';
   if(sel2&&sel2!==act&&!(enDest&&enDest[sel2])&&og.indexOf('value="'+sel2+'"')<0)h+=op(sel2,esc(rodName(sel2)));
   return h;}
@@ -1493,6 +1596,7 @@ function viewSupl(){var gs=vals(S.pastoreos),all=[],i,j;
   if(bPend||(CAN&&ACT!=='nuevaSupl'))h+='<div class="tools" style="justify-content:flex-end;margin-bottom:10px">'+bPend+(CAN&&ACT!=='nuevaSupl'?'<button class="btn pri" onclick="nuevaSupl()">+ Cargar entrega</button>':'')+'</div>';
   /* registro */
   var po='<option value="">Todos</option>',ps=byName(vals(S.lotes));for(i=0;i<ps.length;i++)po+='<option value="'+ps[i].id+'"'+(SF.pot===ps[i].id?' selected':'')+'>'+esc(ps[i].nombre)+'</option>';
+  var scs=byName(vals(S.corrales));if(scs.length){po+='<optgroup label="Corrales">';for(i=0;i<scs.length;i++)po+='<option value="'+scs[i].id+'"'+(SF.pot===scs[i].id?' selected':'')+'>'+esc(scs[i].nombre)+'</option>';po+='</optgroup>';}
   var io='<option value="">Todos</option>',is2=byName(vals(S.insumos)),rs2=byName(vals(S.raciones)),io2='';for(i=0;i<is2.length;i++)io2+='<option value="'+is2[i].id+'"'+(SF.ing===is2[i].id?' selected':'')+'>'+esc(is2[i].nombre)+'</option>';
   io+='<optgroup label="Ingredientes">'+io2+'</optgroup>';io2='';for(i=0;i<rs2.length;i++)io2+='<option value="r:'+rs2[i].id+'"'+(SF.ing==='r:'+rs2[i].id?' selected':'')+'>'+esc(rs2[i].nombre)+'</option>';if(io2)io+='<optgroup label="Raciones">'+io2+'</optgroup>';
   var rows=[];for(i=0;i<all.length;i++){var a=all[i];if(SF.pot&&!inG(a.g,SF.pot))continue;if(SF.ing&&suplKey(a.s)!==SF.ing)continue;if(SF.desde&&a.s.fecha<SF.desde)continue;if(SF.hasta&&a.s.fecha>SF.hasta)continue;if(!match((a.s.remito||'')+' '+suplName(a.s)+' '+gName(a.g)+' '+(a.s.obs||'')))continue;rows.push(a);}
@@ -1529,7 +1633,7 @@ function formNuevaSupl(){var dest=FORM.pot&&FORM.fecha?pastEn(FORM.pot,FORM.fech
     '<button class="btn" style="margin-top:6px" onclick="FORM.lineas.push({ing:\'\',kg:\'\'});render()">+ Agregar suplemento</button></div>';
   return '<div class="card"><div class="chd"><span class="ct">Cargar entrega de suplementos</span></div><div class="form">'+
     '<label>Fecha<input class="ed" type="date" value="'+esc(FORM.fecha)+'" onchange="FORM.fecha=this.value;render()"></label>'+
-    '<label>Lote'+sel('pot',potOptions(FORM.pot))+'</label><label>Remito interno'+inp('rem','text','',' maxlength="30"')+'</label><label class="wide">Observaciones'+inp('obs')+'</label>'+lh+
+    '<label>Lote o corral'+sel('pot',potOptions(FORM.pot))+'</label><label>Remito interno'+inp('rem','text','',' maxlength="30"')+'</label><label class="wide">Observaciones'+inp('obs')+'</label>'+lh+
     (prev?'<div class="msg" style="grid-column:1/-1">'+prev+'</div>':'')+
     '<div class="form-actions"><button class="btn pri" onclick="guardarNuevaSupl(false)">Guardar</button><button class="btn" onclick="guardarNuevaSupl(true)">Guardar y cargar otra</button><button class="btn" onclick="cerrarAct()">Cancelar</button>'+formMsg()+'</div></div></div>';}
 function guardarNuevaSupl(otra){if(!CAN||FORM.busy)return;if(!FORM.pot)return ferr('Elegí el lote.');
@@ -1603,12 +1707,13 @@ var PAL_REC=['#4A6533','#8BA05E','#6E8B8F','#D9B26F','#9C7A4E','#B9C99A','#55707
 function campDeMes(ym2){var y=+ym2.substr(0,4),m=+ym2.substr(5,2),a=m>=7?y:y-1;function dd(n){n=n%100;return (n<10?'0':'')+n;}return dd(a)+'-'+dd(a+1);}
 function mesesCamp(c){var a=2000+(+c.substr(0,2)),o=[];for(var i=0;i<12;i++){var mm=MES_CAMP[i];o.push((i<6?a:a+1)+'-'+mm);}return o;}
 function colorRec(){var ts=[],k,o={};for(k in S.tipos)if(esGan(k))ts.push(S.tipos[k]);ts=byName(ts);for(var i=0;i<ts.length;i++)o[ts[i].id]=PAL_REC[i%PAL_REC.length];o['']='#A0A8B0';return o;}
-function campoDeLote(id){var L=S.lotes[id];return L?L.campoId:'';}
+function campoDeLote(id){var L=LT(id);return L?L.campoId:'';}
 /* superficie ganadera por recurso en una campaña (respeta el filtro de campo) */
 function haRecCamp(c){var o={},ps=vals(S.lotes);for(var i=0;i<ps.length;i++){var p=ps[i];if(!p.ha)continue;if(CF.campo&&p.campoId!==CF.campo)continue;
   var as=actsDe(p.id,c),r=null;for(var j=0;j<as.length;j++)if(esGan(as[j].tipoActividadId)){r=as[j].tipoActividadId;break;}if(!r)continue;o[r]=(o[r]||0)+p.ha;}return o;}
 function datosCosecha(){calc();var gs=vals(S.pastoreos),D={mes:{},supMes:{},lot:{},cnt:{ok:0,curso:0,err:0},camps:{},porCampMes:{}},i,k;
   for(i=0;i<gs.length;i++){var g=gs[i],o=BYG[g.id],rec=g.tipoActividadId||'';
+    if(gCor(g))continue; /* corrales: fuera de la cosecha */
     if(CF.campo&&campoDeLote(g.loteId)!==CF.campo)continue;if(CF.rec&&rec!==CF.rec)continue;
     var enC=g.campaniaId===CF.camp;
     if(!o||o.err.length||o.adFuera){if(enC)D.cnt.err++;continue;}
@@ -1621,7 +1726,90 @@ function datosCosecha(){calc();var gs=vals(S.pastoreos),D={mes:{},supMes:{},lot:
       var lk2=gKey(g);if(!D.lot[lk2])D.lot[lk2]={g:g,rec:rec,past:0,sup:0,n:{},dias:0};D.lot[lk2].sup+=v;}
     if(toca){D.cnt.ok++;var L2=D.lot[gKey(g)];if(L2){L2.n[g.id]=1;var ms2=mesesCamp(CF.camp),ini=ms2[0]+'-01',fin=ms2[11]+'-30';
       for(var t=0;t<o.iv.length;t++){var v2=o.iv[t];if(!v2.cab)continue;for(var dd=0;dd<v2.d;dd++){var ds2=ds(v2.t0+dd*DAY);if(ds2>=ini&&ds2<=fin)L2.dias++;}}}}}
+  /* reservas: se suman al recurso del lote en el mes de confección */
+  D.res={};D.resMes={};var rs=vals(S.reservas);
+  for(i=0;i<rs.length;i++){var x=rs[i],rr=x.tipoActividadId||'',mk=(x.fecha||'').substr(0,7);if(!mk)continue;
+    if(CF.campo&&x.campoId!==CF.campo)continue;if(CF.rec&&rr!==CF.rec)continue;var kv=resMs(x),cc=campDeMes(mk);D.camps[cc]=1;
+    if(!D.porCampMes[cc])D.porCampMes[cc]={};D.porCampMes[cc][mk]=(D.porCampMes[cc][mk]||0)+kv;if(cc!==CF.camp)continue;
+    if(!D.res[rr])D.res[rr]={};D.res[rr][mk]=(D.res[rr][mk]||0)+kv;D.resMes[mk]=(D.resMes[mk]||0)+kv;
+    var lk3=x.loteId;if(!D.lot[lk3])D.lot[lk3]={g:null,lote:x.loteId,rec:rr,past:0,sup:0,n:{},dias:0};D.lot[lk3].res=(D.lot[lk3].res||0)+kv;}
   return D;}
+/* ---------- RESULTADO CORRAL INICIO Y RECRÍA (BUILD 68) ----------
+   Réplica de los bloques 1-3 de la solapa Resultados del Excel de corrales, por corral y campaña (suma todos sus ciclos).
+   Entradas: inicio, pase_e, tras_e, compra, nac (peso = pesada de entrada en el corral).
+   Salidas: fin, pase_s, tras_s, venta, cesion (origen = pesada en el corral; destino = kgDestino, o la del corral si no hay).
+   Los cambios de categoría (cat_s/cat_e) no cuentan: salen y entran con los mismos kg. Sin desperdicio de ración.
+   La producción, el ADPV, la conversión y el consumo por cabeza se calculan solo con el corral vacío. */
+var RCF={camp:null,campo:'',tipo:'',sel:''};
+var RC_E={inicio:1,pase_e:1,tras_e:1,compra:1,nac:1},RC_S={fin:1,pase_s:1,tras_s:1,venta:1,cesion:1};
+function nn(v){return typeof v==='number'?(isFinite(v)?v:null):num(v);}
+function dNum(d){var p=String(d).split('-');return Date.UTC(+p[0],+p[1]-1,+p[2])/86400000;}
+function dStr(n){var x=new Date(Math.round(n)*86400000);return x.getUTCFullYear()+'-'+('0'+(x.getUTCMonth()+1)).slice(-2)+'-'+('0'+x.getUTCDate()).slice(-2);}
+function rcGs(cid,camp){return vals(S.pastoreos).filter(function(g){return gCor(g)&&(g.corralId||g.loteId)===cid&&(!camp||g.campaniaId===camp);});}
+function resCorral(cid,camp){return resGs(rcGs(cid,camp));}
+function resGs(gs,nCor){var i,j;
+  var R={ciclos:gs.length,nCor:nCor||1,abierto:false,fIni:null,rc:{},cE:0,dE:0,kE:0,cS:0,dS:0,kSo:0,kSd:0,sinD:0,cM:0,ing:{},tc:0,ms:0};
+  for(i=0;i<gs.length;i++){var g=gs[i];if(!isClosed(g))R.abierto=true;
+    for(j=0;j<(g.movs||[]).length;j++){var m=g.movs[j],c=nn(m.cab)||0,kg=nn(m.kg);if(!c)continue;
+      if(RC_E[m.tipo]||m.tipo==='cat_e')R.rc[(m.rodeoId?rodName(m.rodeoId):'Sin rodeo')+' - '+cName(m.categoriaId)]=1;
+      if(RC_E[m.tipo]){if(!R.fIni||m.fecha<R.fIni)R.fIni=m.fecha;R.cE+=c;R.dE+=c*dNum(m.fecha);R.kE+=c*(kg||0);}
+      else if(RC_S[m.tipo]){R.cS+=c;R.dS+=c*dNum(m.fecha);R.kSo+=c*(kg||0);var kd=nn(m.kgDestino);if(kd)R.kSd+=c*kd;else{R.kSd+=c*(kg||0);R.sinD+=c;}}
+      else if(m.tipo==='mort')R.cM+=c;}
+    for(j=0;j<(g.supl||[]).length;j++){var s=g.supl[j],t=nn(s.kgTC)||0,pm=pctOf(s)||0;
+      if(s.racionId&&s.comp&&s.comp.length){for(var q=0;q<s.comp.length;q++){var cp=s.comp[q],tq=t*(nn(cp.pctIncl)||0)/100;rcIng(R,'i:'+cp.insumoId,S.insumos[cp.insumoId]?S.insumos[cp.insumoId].nombre:'?',tq,tq*(nn(cp.pctMS)||0)/100);}}
+      else rcIng(R,s.racionId?'r:'+s.racionId:'i:'+s.insumoId,s.racionId?suplName(s):(S.insumos[s.insumoId]?S.insumos[s.insumoId].nombre:'?'),t,t*pm/100);}}
+  var T={};R.T=T;T.fmE=R.cE?R.dE/R.cE:null;T.pE=R.cE?R.kE/R.cE:null;T.fmS=R.cS?R.dS/R.cS:null;T.pSo=R.cS?R.kSo/R.cS:null;T.pSd=R.cS?R.kSd/R.cS:null;
+  T.desb=T.pSo?1-T.pSd/T.pSo:null;T.mort=R.cE?R.cM/R.cE:null;
+  R.ok=!R.abierto&&R.cE>0&&R.cS>0&&T.fmS>T.fmE;
+  if(R.ok){T.dur=T.fmS-T.fmE;T.prod=T.pSd*R.cS-T.pE*R.cE;T.prodCab=T.prod/R.cE;T.adpv=T.prodCab/T.dur;T.efic=T.prodCab/((T.pE+T.pSd)/2);
+    T.convTC=T.prod?R.tc/T.prod:null;T.convMS=T.prod?R.ms/T.prod:null;var cp2=(R.cE+R.cS)/2;
+    T.c1=R.tc/cp2/T.dur;T.c2=R.ms/cp2/T.dur;T.c3=T.c1*T.dur;T.c4=T.c2*T.dur;T.c5=R.ms/((R.cE*T.pE+R.cS*T.pSd)/2)/T.dur;
+    if(!R.tc){T.convTC=T.convMS=T.c1=T.c2=T.c3=T.c4=T.c5=null;} /* sin entregas cargadas: no se muestra 0 */}
+  return R;}
+function rcIng(R,k,n,tc,ms){if(!R.ing[k])R.ing[k]={n:n,tc:0,ms:0};R.ing[k].tc+=tc;R.ing[k].ms+=ms;R.tc+=tc;R.ms+=ms;}
+function viewResCorral(){if(RCF.camp===null)RCF.camp=CAMP;var i,k,cl=camOpts(),co='<option value=""'+(RCF.camp===''?' selected':'')+'>Todas</option>';for(i=0;i<cl.length;i++)co+='<option value="'+cl[i]+'"'+(RCF.camp===cl[i]?' selected':'')+'>'+esc(campName(cl[i]))+'</option>';
+  var fo='<option value="">Todos</option>';for(k in S.campos)fo+='<option value="'+k+'"'+(RCF.campo===k?' selected':'')+'>'+esc(S.campos[k].nombre)+'</option>';
+  function fs(lbl,code,opts){return '<label class="fr">'+lbl+' <select onchange="'+code+'=this.value;RCF.sel=\'\';render()">'+opts+'</select></label>';}
+  var to='<option value="">Todos</option>';for(k in TIPOS_COR)to+='<option value="'+k+'"'+(RCF.tipo===k?' selected':'')+'>'+TIPOS_COR[k]+'</option>';
+  var cs=vals(S.corrales).filter(function(c){return (!RCF.campo||c.campoId===RCF.campo)&&(!RCF.tipo||c.tipo===RCF.tipo);}).sort(function(a,b){return (a.nombre||'').localeCompare(b.nombre||'','es',{numeric:true});}),rows=[];
+  var tg={};for(i=0;i<cs.length;i++){var gs1=rcGs(cs[i].id,RCF.camp),R=resGs(gs1);if(!R.ciclos)continue;rows.push({c:cs[i],R:R});
+    var tk=cs[i].tipo||'';if(!tg[tk])tg[tk]={gs:[],n:0,nAb:0};if(R.abierto)tg[tk].nAb++;else{tg[tk].gs=tg[tk].gs.concat(gs1);tg[tk].n++;}}
+  var tots=[],tks=['inicio','recria',''];for(i=0;i<tks.length;i++){var q=tg[tks[i]];if(!q)continue;var RT=resGs(q.gs,q.n);RT.nAb=q.nAb;tots.push({c:{id:'__t_'+(tks[i]||'x'),nombre:'Total '+(TIPOS_COR[tks[i]]||'sin tipo'),tipo:tks[i],tot:true},R:RT});}
+  var h='<div class="card"><div class="chd"><span class="ct">Resultado corrales de inicio y recría · '+(RCF.camp?'campaña '+esc(campName(RCF.camp)):'todas las campañas')+'</span><div class="tools">'+fs('Campaña','RCF.camp',co)+fs('Campo','RCF.campo',fo)+fs('Tipo','RCF.tipo',to)+'</div></div>';
+  h+='<div class="tw"><table><thead><tr><th>Corral</th><th>Tipo</th><th>Rodeo - Categoría</th><th>Estado</th><th>Fecha inicio</th><th class="r">Ciclos</th><th class="r">Cab. entradas</th><th class="r">Peso entrada</th><th class="r">Cab. salidas</th><th class="r">Peso salida destino</th><th class="r">Mortandad</th><th class="r">Días</th><th class="r">ADPV</th><th class="r">Conversión</th><th class="r">Consumo</th><th class="r">Consumo</th></tr>'+
+    '<tr class="sub"><th></th><th></th><th></th><th></th><th></th><th></th><th class="r">cab</th><th class="r">kg/cab</th><th class="r">cab</th><th class="r">kg/cab</th><th class="r">%</th><th class="r"></th><th class="r">kg/cab/día</th><th class="r">kg MS/kg carne</th><th class="r">kg MS/cab/día</th><th class="r">MS % PV</th></tr></thead><tbody>';
+  function filaR(r){var T=r.R.T,ok=r.R.ok,tot=r.c.tot;
+    return '<tr class="click'+(tot?' tr-ref':'')+(RCF.sel===r.c.id?' sel':'')+'" onclick="RCF.sel=RCF.sel===\''+r.c.id+'\'?\'\':\''+r.c.id+'\';render()"><td class="tdname">'+esc(r.c.nombre)+'</td><td>'+(tot?f(r.R.nCor)+' corral'+(r.R.nCor===1?'':'es')+' vacío'+(r.R.nCor===1?'':'s'):esc(TIPOS_COR[r.c.tipo]||'—'))+'</td><td style="font-size:12px;line-height:1.35">'+(tot?'':Object.keys(r.R.rc).sort().map(esc).join('<br>')||'—')+'</td><td>'+(tot?(r.R.nAb?'<span class="msg">'+f(r.R.nAb)+' con hacienda, fuera del total</span>':''):r.R.abierto?'<span class="bdg by">Con hacienda</span>':'<span class="bdg bg">Vacío</span>')+'</td><td>'+(tot?'':(r.R.fIni?fFecha(r.R.fIni):'—'))+'</td><td class="r">'+f(r.R.ciclos)+'</td>'+
+      '<td class="r">'+f(r.R.cE)+'</td><td class="r">'+f(T.pE)+'</td><td class="r">'+f(r.R.cS)+'</td><td class="r">'+f(T.pSd)+(r.R.sinD?' *':'')+'</td><td class="r">'+(T.mort==null?'—':f(T.mort*100,1))+'</td>'+
+      '<td class="r">'+(ok?f(T.dur):'—')+'</td><td class="r">'+(ok?f(T.adpv,3):'—')+'</td><td class="r">'+(ok&&T.convMS!=null?f(T.convMS,2):'—')+'</td><td class="r">'+(ok&&T.c2!=null?f(T.c2,2):'—')+'</td><td class="r">'+(ok&&T.c5!=null?f(T.c5*100,2):'—')+'</td></tr>';}
+  for(i=0;i<rows.length;i++)h+=filaR(rows[i]);
+  for(i=0;i<tots.length;i++)h+=filaR(tots[i]);
+  if(!rows.length)h+='<tr><td colspan="16"><div class="empty">No hay corrales con hacienda'+(RCF.camp?' en la campaña '+esc(campName(RCF.camp)):'')+'.</div></td></tr>';
+  h+='</tbody></table></div><div class="pnote">Tocá un corral para ver el detalle. Se suman todos los ciclos del corral en la campaña; cada ciclo pertenece a la campaña en que arrancó, aunque termine en la siguiente. Los totales por tipo suman cabezas, kilos, fechas y entregas de los corrales vacíos y recalculan los indicadores; los corrales con hacienda quedan fuera del total. Producción, ADPV, conversión y consumo por cabeza se calculan con el corral vacío (salió todo lo que entró); con hacienda adentro quedan en blanco. * Hay salidas sin pesada en destino: se usó la pesada en el corral. No incluye desperdicio de ración ni resultado económico.</div></div>';
+  var sel=null,all=rows.concat(tots);for(i=0;i<all.length;i++)if(all[i].c.id===RCF.sel)sel=all[i];
+  if(sel)h+=rcDetalle(sel.c,sel.R);
+  return h;}
+function rcDetalle(c,R){var T=R.T,ok=R.ok,i;
+  function fila(n,u,v){return '<tr><td>'+n+'</td><td class="msg">'+u+'</td><td class="r">'+v+'</td></tr>';}
+  function vo(v,d){return ok&&v!=null&&isFinite(v)?f(v,d):'—';}
+  function tb(t,body){return '<div class="card" style="margin:0"><div class="chd"><span class="ct">'+t+'</span></div><div class="tw"><table><thead><tr><th>Concepto</th><th>Unidad</th><th class="r">Valor</th></tr></thead><tbody>'+body+'</tbody></table></div></div>';}
+  var p1=fila('Cabezas entradas','cab',f(R.cE))+fila('Fecha media entrada','fecha',T.fmE!=null?fFecha(dStr(T.fmE)):'—')+fila('Peso de entrada','kg/cab',f(T.pE))+
+    fila('Cabezas salidas','cab',f(R.cS))+fila('Fecha media salida','fecha',T.fmS!=null?fFecha(dStr(T.fmS)):'—')+fila('Peso salida origen','kg/cab',f(T.pSo))+fila('Peso salida destino','kg/cab',f(T.pSd)+(R.sinD?' *':''))+
+    fila('Desbaste','%',T.desb==null?'—':f(T.desb*100,1))+fila('Mortandad','cab',f(R.cM))+fila('Mortandad','%',T.mort==null?'—':f(T.mort*100,1));
+  var p2=fila('A.D.P.V.','kg/cab/día',vo(T.adpv,3))+fila('Eficiencia del stock','%',ok?f(T.efic*100,1):'—')+fila('Duración del engorde','días',vo(T.dur))+
+    fila('Producción de carne','kg/cab',vo(T.prodCab,1))+fila('Producción de carne','kg',vo(T.prod))+fila('Eficiencia de conversión','kg TC/kg carne',vo(T.convTC,2))+fila('Eficiencia de conversión','kg MS/kg carne',vo(T.convMS,2))+
+    fila('Consumo 1','kg TC/cab/día',vo(T.c1,2))+fila('Consumo 2','kg MS/cab/día',vo(T.c2,2))+fila('Consumo 3','kg TC/cab/ciclo',vo(T.c3))+fila('Consumo 4','kg MS/cab/ciclo',vo(T.c4))+fila('Consumo 5','MS % PV',ok&&T.c5!=null?f(T.c5*100,2):'—');
+  var ks=Object.keys(R.ing).sort(function(a,b){return R.ing[b].tc-R.ing[a].tc;}),p3='';
+  for(i=0;i<ks.length;i++){var x=R.ing[ks[i]];p3+='<tr><td>'+esc(x.n)+'</td><td class="r">'+f(x.tc)+'</td><td class="r">'+f(x.ms)+'</td><td class="r">'+(R.tc?f(x.tc/R.tc*100,1):'—')+'</td><td class="r">'+(R.ms?f(x.ms/R.ms*100,1):'—')+'</td></tr>';}
+  if(!ks.length)p3='<tr><td colspan="5"><div class="empty">No hay entregas cargadas en este corral.</div></td></tr>';
+  else p3+='<tr class="tr-ref"><td>Total</td><td class="r">'+f(R.tc)+'</td><td class="r">'+f(R.ms)+'</td><td class="r">100,0</td><td class="r">100,0</td></tr>';
+  var h='<div style="margin-top:12px"><div class="ct" style="font-size:16px;font-weight:700;color:var(--text);text-transform:none;letter-spacing:0;margin:0 0 8px">'+esc(c.nombre)+(c.tot?' · '+f(R.nCor)+' corral'+(R.nCor===1?'':'es')+' vacío'+(R.nCor===1?'':'s')+(RCF.campo?' · '+esc(campoName(RCF.campo)):''):' · '+esc(TIPOS_COR[c.tipo]||'')+' · '+esc(campoName(c.campoId)))+' · '+(RCF.camp?'campaña '+esc(campName(RCF.camp)):'todas las campañas')+'</div>'+
+    (c.tot?'<div class="pnote" style="margin:0 0 10px">Consolidado: suma cabezas, kilos, fechas ponderadas y entregas de los corrales vacíos del tipo y recalcula los indicadores (no es un promedio de resultados). La duración equivale al promedio de las duraciones ponderado por cabezas.'+(R.nAb?' Quedan fuera '+f(R.nAb)+' corral'+(R.nAb===1?'':'es')+' con hacienda.':'')+'</div>':'')+
+    (R.abierto?'<div class="pnote" style="margin:0 0 10px">El corral todavía tiene hacienda: los datos técnicos quedan en blanco hasta que salga todo lo que entró. La alimentación muestra lo entregado hasta hoy.</div>':'')+
+    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:12px">'+tb('1 · Producción',p1)+tb('2 · Datos técnicos',p2)+'</div>'+
+    '<div class="card" style="margin-top:12px"><div class="chd"><span class="ct">3 · Alimentación</span></div><div class="tw"><table><thead><tr><th>Ingrediente</th><th class="r">kg tal cual</th><th class="r">kg MS</th><th class="r">% tal cual</th><th class="r">% MS</th></tr></thead><tbody>'+p3+'</tbody></table></div>'+
+    '<div class="pnote">Las raciones se abren en sus ingredientes según la composición copiada al cargar la entrega. Producción de carne = peso salida destino × cabezas salidas − peso de entrada × cabezas entradas. Desbaste = 1 − destino ÷ origen. Eficiencia del stock = producción por cabeza ÷ promedio de los pesos de entrada y salida. Consumo por cabeza sobre el promedio de cabezas entradas y salidas.</div></div></div>';
+  return h;}
 function camOpts(){var cs={},i,gs=vals(S.pastoreos);for(i=0;i<gs.length;i++)if(gs[i].campaniaId)cs[gs[i].campaniaId]=1;cs[CAMP]=1;var l=[];for(var k in cs)l.push(k);l.sort();return l;}
 function viewCosecha(){if(!CF.camp)CF.camp=CAMP;var D=datosCosecha(),COL=colorRec(),ms=mesesCamp(CF.camp),HA=haRecCamp(CF.camp),i,k,r;
   var cl=camOpts(),co='';for(i=0;i<cl.length;i++)co+='<option value="'+cl[i]+'"'+(CF.camp===cl[i]?' selected':'')+'>'+esc(campName(cl[i]))+'</option>';
@@ -1632,41 +1820,42 @@ function viewCosecha(){if(!CF.camp)CF.camp=CAMP;var D=datosCosecha(),COL=colorRe
     fs('Campaña','CF.camp',co)+fs('Campo','CF.campo',fo)+fs('Recurso','CF.rec',ro)+
     '<span class="seg"><button class="btn'+(CF.uni==='ms'?' pri':'')+'" onclick="CF.uni=\'ms\';render()">kg MS</button><button class="btn'+(CF.uni==='ha'?' pri':'')+'" onclick="CF.uni=\'ha\';render()">kg MS/ha</button></span></div></div>';
   /* totales */
-  var tP=0,tS=0,porRec={},haT=0;for(r in D.mes){porRec[r]=0;for(k in D.mes[r]){porRec[r]+=D.mes[r][k];tP+=D.mes[r][k];}}for(k in D.supMes)tS+=D.supMes[k];
-  var recs={};for(r in HA)if(!CF.rec||r===CF.rec){recs[r]=1;haT+=HA[r];}for(r in porRec)recs[r]=1;
+  var tP=0,tS=0,tR=0,porRec={},haT=0;for(r in D.mes){porRec[r]=0;for(k in D.mes[r]){porRec[r]+=D.mes[r][k];tP+=D.mes[r][k];}}for(k in D.supMes)tS+=D.supMes[k];for(k in D.resMes)tR+=D.resMes[k];
+  var recs={};for(r in HA)if(!CF.rec||r===CF.rec){recs[r]=1;haT+=HA[r];}for(r in porRec)recs[r]=1;for(r in D.res)recs[r]=1;var tT=tP+tR;
   function mc(l,v,u){return '<div class="mc"><div class="mc-lbl">'+l+'</div><div class="mc-val">'+v+(u?'<span class="mc-unit">'+u+'</span>':'')+'</div></div>';}
-  h+='<div class="metrics">'+mc('Pasto cosechado (neto)',f(tP),'kg MS')+mc('Pasto por ha ganadera',haT?f(tP/haT):'—','kg MS/ha')+mc('Suplemento entregado',f(tS),'kg MS')+
+  h+='<div class="metrics">'+mc('Pasto cosechado por hacienda (neto)',f(tP),'kg MS')+mc('Reservas',f(tR),'kg MS')+mc('Cosecha total',f(tT),'kg MS')+mc('Cosecha por ha ganadera',haT?f(tT/haT):'—','kg MS/ha')+mc('Suplemento entregado',f(tS),'kg MS')+
     mc('Suplemento sobre el consumo',tP+tS?f(tS/(tP+tS)*100,1):'—','%')+
     '<div class="mc" style="border-left-color:var(--border)"><div class="mc-lbl">Pastoreos de la campaña</div><div style="font-size:13px;line-height:1.5"><b>'+f(D.cnt.ok)+'</b> calculados · '+f(D.cnt.curso)+' en curso · '+
     (D.cnt.err?'<a href="#historico" onclick="setTab(\'historico\');return false" style="color:var(--bad-t)">'+f(D.cnt.err)+' con error</a>':'0 con error')+'</div></div></div>';
-  if(!tP&&!tS)h+='<div class="empty">No hay pastoreos cerrados con cosecha calculada en '+esc(campName(CF.camp))+(D.cnt.curso?' ('+f(D.cnt.curso)+' en curso: suman cuando cierran)':'')+'.</div>';
+  if(!tP&&!tS&&!tR)h+='<div class="empty">No hay pastoreos cerrados con cosecha calculada ni reservas en '+esc(campName(CF.camp))+(D.cnt.curso?' ('+f(D.cnt.curso)+' en curso: suman cuando cierran)':'')+'.</div>';
   h+='</div>';
   /* gráficos */
-  h+='<div class="g2"><div class="card"><div class="chd"><span class="ct">Pasto cosechado por mes y recurso (kg MS neta)</span></div><div style="position:relative;height:300px"><canvas id="ch_mes"></canvas></div><div id="lg_mes" class="lgd"></div></div>'+
+  h+='<div class="g2"><div class="card"><div class="chd"><span class="ct">Cosecha por mes: pasto por recurso y reservas (kg MS neta)</span></div><div style="position:relative;height:300px"><canvas id="ch_mes"></canvas></div><div id="lg_mes" class="lgd"></div></div>'+
     '<div class="card"><div class="chd"><span class="ct">kg MS neta/ha por recurso</span></div><div style="position:relative;height:300px"><canvas id="ch_ha"></canvas></div></div></div>';
   /* tabla mes × recurso */
   var rk=[];for(r in recs)rk.push(r);rk.sort(function(a,b){return rName(a).localeCompare(rName(b),'es');});
   var u=CF.uni==='ha';
-  h+='<div class="card"><div class="chd"><span class="ct">Pasto por mes y recurso · '+(u?'kg MS/ha':'kg MS')+'</span></div><div class="tw"><table><thead><tr><th>Recurso</th><th class="r">ha ganaderas</th>';
+  h+='<div class="card"><div class="chd"><span class="ct">Cosecha por mes y recurso (pasto + reservas) · '+(u?'kg MS/ha':'kg MS')+'</span></div><div class="tw"><table><thead><tr><th>Recurso</th><th class="r">ha ganaderas</th>';
   for(i=0;i<12;i++)h+='<th class="r">'+mesLbl(ms[i])+'</th>';h+='<th class="r">Total</th></tr></thead><tbody>';
   var colT={};
   for(var x=0;x<rk.length;x++){r=rk[x];var ha=HA[r]||0,tr=0;h+='<tr><td class="tdname"><span class="dot" style="background:'+COL[r]+'"></span>'+esc(r?rName(r):'Sin recurso')+'</td><td class="r">'+f(ha||null,1)+'</td>';
-    for(i=0;i<12;i++){var v=D.mes[r]&&D.mes[r][ms[i]]||0;tr+=v;colT[ms[i]]=(colT[ms[i]]||0)+v;h+='<td class="r">'+(v?(u?(ha?f(v/ha):'—'):f(v)):'')+'</td>';}
+    for(i=0;i<12;i++){var v=(D.mes[r]&&D.mes[r][ms[i]]||0)+(D.res[r]&&D.res[r][ms[i]]||0);tr+=v;colT[ms[i]]=(colT[ms[i]]||0)+v;h+='<td class="r">'+(v?(u?(ha?f(v/ha):'—'):f(v)):'')+'</td>';}
     h+='<td class="r"><b>'+(tr?(u?(ha?f(tr/ha):'—'):f(tr)):'—')+'</b></td></tr>';}
   if(!rk.length)h+='<tr><td colspan="15"><div class="empty">Sin datos.</div></td></tr>';
   h+='<tr class="tr-ref"><td>Total</td><td class="r">'+f(haT||null,1)+'</td>';for(i=0;i<12;i++){var c2=colT[ms[i]]||0;h+='<td class="r">'+(c2?(u?(haT?f(c2/haT):'—'):f(c2)):'')+'</td>';}
-  h+='<td class="r">'+(tP?(u?(haT?f(tP/haT):'—'):f(tP)):'—')+'</td></tr>';
+  h+='<td class="r">'+(tT?(u?(haT?f(tT/haT):'—'):f(tT)):'—')+'</td></tr>';
+  if(tR){h+='<tr><td class="msg">de las cuales, reservas</td><td></td>';for(i=0;i<12;i++){var rv=D.resMes[ms[i]]||0;h+='<td class="r msg">'+(rv?(u?(haT?f(rv/haT):'—'):f(rv)):'')+'</td>';}h+='<td class="r msg">'+(u?(haT?f(tR/haT):'—'):f(tR))+'</td></tr>';}
   h+='<tr><td class="msg">Suplemento (kg MS)</td><td></td>';for(i=0;i<12;i++)h+='<td class="r msg">'+(D.supMes[ms[i]]?f(D.supMes[ms[i]]):'')+'</td>';h+='<td class="r msg">'+(tS?f(tS):'—')+'</td></tr>';
-  h+='</tbody></table></div><div class="pnote"><b>Los kg MS son de cosecha neta:</b> el forraje que consumió la hacienda (EV × cabezas·día × 10 kg MS/EV/día − suplemento). No contemplan la eficiencia de pastoreo; la producción bruta del recurso sería kg MS neta ÷ eficiencia. La cosecha de cada pastoreo cerrado se reparte por mes según cabezas·día. kg MS/ha = pasto ÷ superficie ganadera del recurso en la campaña (lotes con ese recurso en el Plan de Uso). Los pastoreos en curso no suman hasta cerrar; los que tienen error o ADPV fuera de rango no suman (ver Alertas).</div></div>';
+  h+='</tbody></table></div><div class="pnote"><b>Los kg MS son de cosecha neta:</b> el forraje que consumió la hacienda (EV × cabezas·día × 10 kg MS/EV/día − suplemento). No contemplan la eficiencia de pastoreo; la producción bruta del recurso sería kg MS neta ÷ eficiencia. La cosecha de cada pastoreo cerrado se reparte por mes según cabezas·día. Las reservas (rollos y fardos) se suman al recurso del lote en el mes de confección. kg MS/ha = pasto ÷ superficie ganadera del recurso en la campaña (lotes con ese recurso en el Plan de Uso). Los pastoreos en curso no suman hasta cerrar; los que tienen error o ADPV fuera de rango no suman (ver Alertas).</div></div>';
   /* acumulado por campaña (debajo de la tabla mes × recurso) */
   h+='<div class="card"><div class="chd"><span class="ct">Pasto acumulado por campaña ('+(CF.uni==='ha'?'kg MS neta/ha ganadera':'kg MS neta')+', julio → junio)</span></div><div style="position:relative;height:260px"><canvas id="ch_cmp"></canvas></div>'+
     '<div class="pnote">Usá el botón kg MS / kg MS/ha de arriba para cambiar la unidad. En kg MS/ha, cada campaña se divide por su propia superficie ganadera (con los filtros de campo y recurso).</div></div>';
   /* tabla por lote */
-  var ll=[];for(k in D.lot)ll.push(D.lot[k]);ll.sort(function(a,b){return b.past-a.past;});
-  h+='<div class="card"><div class="chd"><span class="ct">Por lote · '+f(ll.length)+'</span></div><div class="tw scroll-y"><table><thead><tr><th>Lote</th><th>Campo</th><th>Recurso</th><th class="r">ha</th><th class="r">Pastoreos</th><th class="r">Días</th><th class="r">kg MS pasto</th><th class="r">kg MS/ha</th><th class="r">kg MS supl.</th></tr></thead><tbody>';
-  for(i=0;i<ll.length;i++){var L=ll[i],gh=gHa(L.g),np=0;for(k in L.n)np++;
-    h+='<tr class="click" onclick="tab=\'pastoreos\';verPast(\''+L.g.id+'\')"><td class="tdname">'+esc(gName(L.g))+'</td><td>'+esc(campoName(campoDeLote(L.g.loteId)))+'</td><td><span class="dot" style="background:'+COL[L.rec]+'"></span>'+esc(L.rec?rName(L.rec):'Sin recurso')+'</td><td class="r">'+f(gh,1)+'</td><td class="r">'+f(np)+'</td><td class="r">'+f(L.dias)+'</td><td class="r">'+f(L.past)+'</td><td class="r">'+(gh?f(L.past/gh):'—')+'</td><td class="r">'+(L.sup?f(L.sup):'')+'</td></tr>';}
-  if(!ll.length)h+='<tr><td colspan="9"><div class="empty">Sin datos.</div></td></tr>';
+  var ll=[];for(k in D.lot)ll.push(D.lot[k]);ll.sort(function(a,b){return (b.past+(b.res||0))-(a.past+(a.res||0));});
+  h+='<div class="card"><div class="chd"><span class="ct">Por lote · '+f(ll.length)+'</span></div><div class="tw scroll-y"><table><thead><tr><th>Lote</th><th>Campo</th><th>Recurso</th><th class="r">ha</th><th class="r">Pastoreos</th><th class="r">Días</th><th class="r">kg MS pasto</th><th class="r">kg MS reservas</th><th class="r">kg MS/ha</th><th class="r">kg MS supl.</th></tr></thead><tbody>';
+  for(i=0;i<ll.length;i++){var L=ll[i],lid=L.g?L.g.loteId:L.lote,gh=L.g?gHa(L.g):(S.lotes[lid]?S.lotes[lid].ha:null),np=0,tl=L.past+(L.res||0);for(k in L.n)np++;
+    h+='<tr'+(L.g?' class="click" onclick="tab=\'pastoreos\';verPast(\''+L.g.id+'\')"':'')+'><td class="tdname">'+esc(L.g?gName(L.g):pName(lid))+'</td><td>'+esc(campoName(campoDeLote(lid)))+'</td><td><span class="dot" style="background:'+COL[L.rec]+'"></span>'+esc(L.rec?rName(L.rec):'Sin recurso')+'</td><td class="r">'+f(gh,1)+'</td><td class="r">'+f(np)+'</td><td class="r">'+f(L.dias)+'</td><td class="r">'+(L.past?f(L.past):'')+'</td><td class="r">'+(L.res?f(L.res):'')+'</td><td class="r">'+(gh?f(tl/gh):'—')+'</td><td class="r">'+(L.sup?f(L.sup):'')+'</td></tr>';}
+  if(!ll.length)h+='<tr><td colspan="10"><div class="empty">Sin datos.</div></td></tr>';
   h+='</tbody></table></div></div>';
   COS_D={D:D,COL:COL,ms:ms,HA:HA,rk:rk};
   return h;}
@@ -1682,6 +1871,8 @@ function drawCosecha(){for(var i=0;i<CHC.length;i++){try{CHC[i].destroy();}catch
     dsets.push({type:'bar',label:r?rName(r):'Sin recurso',data:dt,backgroundColor:COL[r],stack:'p',borderWidth:0,order:2});
     lg+='<span class="leg"><span class="dot" style="background:'+COL[r]+'"></span>'+esc(r?rName(r):'Sin recurso')+'</span>';}
   var sd=[],hayS=false;for(j=0;j<12;j++){var sv=D.supMes[ms[j]]||null;if(sv)hayS=true;sd.push(sv);}
+  var rsd=[],hayR=false;for(j=0;j<12;j++){var rv2=D.resMes[ms[j]]||0;if(rv2)hayR=true;rsd.push(rv2);}
+  if(hayR){dsets.push({type:'bar',label:'Reservas',data:rsd,backgroundColor:'#7A6A55',stack:'p',borderWidth:0,order:2});lg+='<span class="leg"><span class="dot" style="background:#7A6A55"></span>Reservas</span>';}
   if(hayS){dsets.push({type:'line',label:'Suplemento',data:sd,borderColor:'#C8642D',backgroundColor:'#C8642D',pointRadius:3,borderWidth:2,spanGaps:false,order:0}); /* order menor = se dibuja adelante de las barras */
     lg+='<span class="leg"><span style="display:inline-block;width:14px;height:2px;background:#C8642D;vertical-align:middle;margin-right:4px"></span>Suplemento</span>';}
   var tt={callbacks:{label:function(c){return ' '+c.dataset.label+': '+nAR(c.parsed.y)+' kg MS';}}};
@@ -1689,7 +1880,7 @@ function drawCosecha(){for(var i=0;i<CHC.length;i++){try{CHC[i].destroy();}catch
   var c1=document.getElementById('ch_mes');if(c1)CHC.push(new Chart(c1,{type:'bar',data:{labels:labels,datasets:dsets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:tt},scales:{x:{stacked:true,grid:{display:false}},y:yax}}}));
   var lgE=document.getElementById('lg_mes');if(lgE)lgE.innerHTML=lg;
   /* kg MS/ha por recurso */
-  var hl=[],hv=[],hc=[];for(x=0;x<rk.length;x++){r=rk[x];var tot=0;for(var k in (D.mes[r]||{}))tot+=D.mes[r][k];if(!HA[r]||!tot)continue;hl.push(r?rName(r):'Sin recurso');hv.push(tot/HA[r]);hc.push(COL[r]);}
+  var hl=[],hv=[],hc=[];for(x=0;x<rk.length;x++){r=rk[x];var tot=0;for(var k in (D.mes[r]||{}))tot+=D.mes[r][k];for(k in (D.res[r]||{}))tot+=D.res[r][k];if(!HA[r]||!tot)continue;hl.push(r?rName(r):'Sin recurso');hv.push(tot/HA[r]);hc.push(COL[r]);}
   var c2=document.getElementById('ch_ha');if(c2)CHC.push(new Chart(c2,{type:'bar',data:{labels:hl,datasets:[{label:'kg MS/ha',data:hv,backgroundColor:hc,borderWidth:0}]},
     options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' '+nAR(c.parsed.x)+' kg MS/ha';}}}},scales:{x:{ticks:{callback:function(v){return nAR(v);}},grid:{color:'rgba(0,0,0,0.05)'}},y:{grid:{display:false}}}}}));
   /* comparativo acumulado por campaña */
@@ -1710,9 +1901,9 @@ function rangoTL(){var h2=TL.hasta||hoy(),d2=TL.desde||addDias(h2,-365);return [
 function campRango(c){var a=2000+(+c.substr(0,2));return [a+'-07-01',(a+1)+'-06-30'];}
 function setCampTL(c){TL.camp=c;if(c){var r=campRango(c);TL.desde=r[0];TL.hasta=r[1]>hoy()?hoy():r[1];}else{TL.desde='';TL.hasta='';}render();}
 function pasaFP(g,soloRango){var ls=lotesOf(g),ok=false,j;
-  if(TL.campo){for(j=0;j<ls.length;j++)if(S.lotes[ls[j]]&&S.lotes[ls[j]].campoId===TL.campo)ok=true;if(!ok)return false;}
+  if(TL.campo){for(j=0;j<ls.length;j++)if(LT(ls[j])&&LT(ls[j]).campoId===TL.campo)ok=true;if(!ok)return false;}
   if(TL.rec&&g.tipoActividadId!==TL.rec)return false;
-  if(TL.gan){ok=false;for(j=0;j<ls.length;j++)if(ganEf(ls[j]))ok=true;if(!ok)return false;}
+  if(TL.gan&&!gCor(g)){ok=false;for(j=0;j<ls.length;j++)if(ganEf(ls[j]))ok=true;if(!ok)return false;}
   if(TL.desde||TL.hasta){var ini=iniOf(g);if(!ini)return false;var fin=isClosed(g)?(finOf(g)||ini):hoy();if(TL.desde&&fin<TL.desde)return false;if(TL.hasta&&ini>TL.hasta)return false;}
   return true;}
 function barraFP(tl){var k,i,rg=tl?rangoTL():[TL.desde,TL.hasta];
@@ -1745,10 +1936,15 @@ function viewTimeline(){var rg=rangoTL();calc();
     for(x=0;x<tr.length;x++){var t=tr[x],a2=Math.max(t.a,d0),b2=Math.min(t.b,d1);for(var dd=a2;dd<=b2;dd++)occ[dd-d0]=1;
       var col=COL[t.g.tipoActividadId||'']||'#4A6533',ab=!isClosed(t.g),tit=gName(t.g)+' · pastoreo #'+t.g.num+' · '+fFecha(ds(t.a*DAY))+' → '+(ab?'en curso':fFecha(ds(t.b*DAY)))+' · '+(t.b-t.a+1)+' días'+(t.o&&t.o.V?' · '+f(t.o.V)+' cab promedio':'')+' · '+rName(t.g.tipoActividadId);
       bars+='<span class="tl-b'+(ab?' tl-ab':'')+'" onclick="tab=\'pastoreos\';verPast(\''+t.g.id+'\')" title="'+esc(tit)+'" style="left:'+((a2-d0)/N*100)+'%;width:'+Math.max((b2-a2+1)/N*100,0.3)+'%;background:'+col+'"></span>';}
-    var np=0,run=0,maxD=0;for(x=0;x<N;x++){if(occ[x]){np++;run=0;}else{run++;if(run>maxD)maxD=run;}}var nd=N-np;tP+=np;tD+=nd;
-    h+='<div class="tl-row"><div class="tl-n" title="'+esc(campoName(p.campoId))+'">'+esc(p.nombre)+'</div><div class="tl-t">'+bars+'</div><div class="tl-k">'+f(np)+'</div><div class="tl-k">'+f(nd)+'</div><div class="tl-k">'+f(maxD)+'</div></div>';}
+    var np=0,run=0,maxD=0,gaps='',g0=-1;for(x=0;x<N;x++){if(occ[x]){np++;run=0;}else{run++;if(run>maxD)maxD=run;}
+      /* tramos de descanso: al pasar el cursor muestran los días */
+      if(!occ[x]&&g0<0)g0=x;if(g0>=0&&(occ[x]||x===N-1)){var g1=occ[x]?x-1:x,nG=g1-g0+1,abI=g0===0,abF=g1===N-1;
+        var tg='Descanso: '+f(nG)+' día'+(nG===1?'':'s')+' · '+fFecha(ds((d0+g0)*DAY))+' → '+fFecha(ds((d0+g1)*DAY))+(abI&&abF?' (sin pastoreos en el rango)':abI?' (desde el inicio del rango)':abF?' (hasta el final del rango)':'');
+        gaps+='<span class="tl-g" title="'+esc(tg)+'" style="left:'+(g0/N*100)+'%;width:'+(nG/N*100)+'%"></span>';g0=-1;}}
+    var nd=N-np;tP+=np;tD+=nd;
+    h+='<div class="tl-row"><div class="tl-n" title="'+esc(campoName(p.campoId))+'">'+esc(p.nombre)+'</div><div class="tl-t">'+gaps+bars+'</div><div class="tl-k">'+f(np)+'</div><div class="tl-k">'+f(nd)+'</div><div class="tl-k">'+f(maxD)+'</div></div>';}
   if(!ps.length)h+='<div class="empty">No hay lotes con esos filtros.</div>';
-  h+='</div></div><div class="pnote">Rango: '+fFecha(rg[0])+' → '+fFecha(rg[1])+(TL.desde||TL.hasta?'':' (por defecto, el último año)')+' ('+f(N)+' días). Cada barra es un pastoreo, con el color de su recurso (rayada si está en curso); los espacios vacíos son días de descanso. Pasá el mouse para ver el detalle y tocá la barra para abrir el pastoreo. Días contados dentro del rango; el descanso más largo incluye el tramo desde el inicio del rango o hasta el final. Totales: '+f(tP)+' días de pastoreo · '+f(tD)+' días de descanso (suma de lotes).</div></div>';
+  h+='</div></div><div class="pnote">Rango: '+fFecha(rg[0])+' → '+fFecha(rg[1])+(TL.desde||TL.hasta?'':' (por defecto, el último año)')+' ('+f(N)+' días). Cada barra es un pastoreo, con el color de su recurso (rayada si está en curso); los espacios grises son días de descanso: pasá el cursor para ver cuántos días y entre qué fechas. Pasá el mouse para ver el detalle y tocá la barra para abrir el pastoreo. Días contados dentro del rango; el descanso más largo incluye el tramo desde el inicio del rango o hasta el final. Totales: '+f(tP)+' días de pastoreo · '+f(tD)+' días de descanso (suma de lotes).</div></div>';
   return h;}
 
 /* ===================== IMPORTACIÓN DEL HISTÓRICO (una sola vez por empresa) =====================
@@ -1858,6 +2054,84 @@ function importarHist(){if(!CAN_ADM||yaImportado()||!HIST)return;var d=diagImpor
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&(editId||editNew))cancelar();});
 
 iniciarApp();
+
+/* recurso destino de un pase: si el destino tiene pastoreo en curso, se mantiene el suyo (no se cambia en medio de un pastoreo); si arranca uno nuevo, se elige */
+function recDestCelda(r,kq){if(!r.lote)return '<select class="ed" disabled><option>Elegí el lote</option></select>';if(esCor(r.lote))return '<span class="msg">No aplica (corral)</span>';var od=openOf(r.lote);
+  if(od)return '<span title="El lote destino tiene un pastoreo en curso: se mantiene su recurso">'+esc(od.tipoActividadId?rName(od.tipoActividadId):'sin recurso')+'</span><div class="msg" style="font-size:11px">del pastoreo en curso</div>';
+  var c=campDest(FORM.fecha,S.pastoreos[SEL]?S.pastoreos[SEL].campaniaId:CAMP),cur=r.recD||recDe(r.lote,c)||'';
+  return '<select class="ed" aria-label="Recurso destino" onchange="'+kq+'.recD=this.value">'+actOptions(r.lote,c,cur)+'</select>';}
+
+/* ===================== CONFECCIÓN DE RESERVAS (gan_reservas, BUILD 62) =====================
+   Producción de MS destinada a reservas (rollos y fardos). Se suma a la cosecha del recurso del lote en el mes de confección.
+   kg MS = cantidad × kg tal cual por unidad × % MS / 100. La campaña sale de la fecha (julio-junio).
+   Cuando las reservas se dan a la hacienda se cargan como suplemento (ingrediente de pa-core): se descuentan en ese pastoreo. */
+var RESF=null,RF={desde:'',hasta:'',campo:'',tipo:'',lote:'',rec:''},TIPOS_RES={rollo:'Rollo',fardo:'Fardo'};
+function saveRes(r){return upsert('gan_reservas',r,function(x){return x.id===r.id;});}
+function resMs(r){return (r.cant||0)*(r.kgUnidad||0)*(r.pctMS||0)/100;}
+function resPctSug(tipo){var xs=vals(S.reservas).filter(function(r){return r.tipo===tipo&&typeof r.pctMS==='number';});xs.sort(function(a,b){return (b.actualizado||b.fecha||'').localeCompare(a.actualizado||a.fecha||'');});return xs.length?String(xs[0].pctMS).replace('.',','):'';}
+function resCamp(fecha){var c=campDeFecha(fecha||hoy());return campExiste(c)?c:null;}
+function nuevaRes(){if(!CAN)return;RESF={id:null,fecha:hoy(),lote:'',tipo:'rollo',cant:'',kg:'',pct:resPctSug('rollo'),ha:'',obs:'',err:'',del:false};render();}
+function editRes(id){if(!CAN)return;var r=S.reservas[id];if(!r)return;function t(v){return v==null?'':String(v).replace('.',',');}
+  RESF={id:id,fecha:r.fecha,lote:r.loteId,tipo:r.tipo,cant:t(r.cant),kg:t(r.kgUnidad),pct:t(r.pctMS),ha:t(r.ha),obs:r.obs||'',err:'',del:false};render();}
+function resErr(t){RESF.err=t;render();}
+function resCalc(){var R=RESF,c=num(R.cant),k=num(R.kg),p=num(R.pct),ha=num(R.ha),tc=c!=null&&k!=null?c*k:null,ms=tc!=null&&p!=null?tc*p/100:null;
+  return {tc:tc,ms:ms,uha:c!=null&&ha?c/ha:null,msha:ms!=null&&ha?ms/ha:null};}
+function resUpd(){var e=document.getElementById('res_calc');if(e&&RESF)e.innerHTML=resCalcHtml();}
+function resCalcHtml(){var c=resCalc();return 'kg tal cual: <b>'+f(c.tc)+'</b> · kg MS: <b>'+f(c.ms)+'</b> · unidades/ha: <b>'+f(c.uha,1)+'</b> · kg MS/ha: <b>'+f(c.msha)+'</b>';}
+function resIn(k,lbl,extra){return '<label>'+lbl+'<input class="ed" inputmode="decimal" value="'+esc(RESF[k])+'" oninput="RESF.'+k+'=this.value;resUpd()"'+(extra||'')+'></label>';}
+function formRes(){var R=RESF,L=S.lotes[R.lote],c=resCamp(R.fecha),rec=R.lote&&c?recDe(R.lote,c):null,to='';
+  for(var t in TIPOS_RES)to+='<option value="'+t+'"'+(R.tipo===t?' selected':'')+'>'+TIPOS_RES[t]+'</option>';
+  return '<div class="form form-c"><label class="wide" style="text-transform:none;font-size:12px;color:var(--text);font-weight:600">'+(R.id?'Editar reserva':'Nueva reserva')+'</label>'+
+    '<label>Fecha de confección<input class="ed" type="date" value="'+esc(R.fecha)+'" onchange="RESF.fecha=this.value;render()"></label>'+
+    '<label>Lote<select class="ed" onchange="RESF.lote=this.value;if(!RESF.ha&&S.lotes[this.value]&&S.lotes[this.value].ha)RESF.ha=String(S.lotes[this.value].ha).replace(\'.\',\',\');render()">'+potOptions(R.lote)+'</select></label>'+
+    '<label>Recurso forrajero<input class="ed" disabled value="'+esc(rec?rName(rec):(R.lote?'Sin actividad en el Plan de Uso':'Elegí el lote'))+'"></label>'+
+    resIn('ha','Superficie destinada (ha)'+(L&&L.ha?' · lote '+f(L.ha,1):''))+
+    '<label>Tipo<select class="ed" onchange="RESF.tipo=this.value;if(!RESF.pct)RESF.pct=resPctSug(this.value);render()">'+to+'</select></label>'+
+    resIn('cant','Cantidad (unidades)',' inputmode="numeric"')+resIn('kg','kg/unidad (tal cual)')+resIn('pct','% MS')+
+    '<div class="msg" id="res_calc" style="grid-column:1/-1">'+resCalcHtml()+'</div>'+
+    '<label class="wide">Observaciones<input class="ed" value="'+esc(R.obs)+'" oninput="RESF.obs=this.value"></label>'+
+    '<div class="form-actions"><button class="btn pri" onclick="guardarRes()">Guardar</button><button class="btn" onclick="RESF=null;render()">Cancelar</button>'+
+    (R.id&&CAN_ADM?(R.del?'<button class="btn warn" onclick="borrarRes()">Confirmar eliminación</button>':'<button class="btn warn" onclick="RESF.del=true;render()">Eliminar</button>'):'')+
+    (R.err?'<span class="msg err">'+esc(R.err)+'</span>':'')+'</div></div>';}
+function guardarRes(){if(!CAN||!RESF)return;var R=RESF,L=S.lotes[R.lote];
+  if(!okFecha(R.fecha))return resErr('La fecha tiene que ser válida y no posterior a hoy.');
+  var c=resCamp(R.fecha);if(!c)return resErr('No existe en el sistema la campaña de esa fecha ('+campDeFecha(R.fecha)+').');
+  if(!L)return resErr('Elegí el lote.');var rec=recDe(R.lote,c);if(!rec)return resErr(pName(R.lote)+' no tiene actividad en el Plan de Uso para la campaña '+campName(c)+'.');
+  if(!TIPOS_RES[R.tipo])return resErr('Elegí el tipo.');
+  var cant=num(R.cant),kg=num(R.kg),pct=num(R.pct),ha=num(R.ha);
+  if(cant===null||cant<=0||Math.round(cant)!==cant)return resErr('La cantidad tiene que ser un número entero mayor que cero.');
+  if(kg===null||kg<=0||kg>2000)return resErr('Cargá los kg por unidad (entre 1 y 2.000).');
+  if(pct===null||pct<=0||pct>100)return resErr('Cargá el % MS (mayor que 0 y hasta 100).');
+  if(ha===null||ha<=0)return resErr('Cargá la superficie destinada a la reserva (mayor que cero).');
+  if(L.ha&&ha>L.ha+0.0001)return resErr('La superficie destinada no puede superar la del lote ('+f(L.ha,1)+' ha).');
+  var r=R.id?clone(S.reservas[R.id]):{id:uid('res'),creado:new Date().toISOString()};
+  r.empresaId=EMP;r.campaniaId=c;r.loteId=R.lote;r.campoId=L.campoId||'';r.tipoActividadId=rec;r.fecha=R.fecha;r.tipo=R.tipo;r.cant=cant;r.kgUnidad=kg;r.pctMS=pct;r.ha=ha;r.obs=R.obs||'';r.actualizado=new Date().toISOString();
+  if(!saveRes(r))return resErr(LS_ERR);RESF=null;render();}
+function borrarRes(){if(!CAN_ADM||!RESF||!RESF.id)return;var id=RESF.id;if(!removeWhere('gan_reservas',function(x){return x.id===id;}))return resErr(LS_ERR);RESF=null;render();}
+function viewReservas(){var xs=vals(S.reservas),rows=[],i,k;
+  for(i=0;i<xs.length;i++){var r=xs[i];if(RF.desde&&r.fecha<RF.desde)continue;if(RF.hasta&&r.fecha>RF.hasta)continue;if(RF.campo&&r.campoId!==RF.campo)continue;if(RF.tipo&&r.tipo!==RF.tipo)continue;if(RF.lote&&r.loteId!==RF.lote)continue;if(RF.rec&&r.tipoActividadId!==RF.rec)continue;
+    if(!match(pName(r.loteId)+' '+rName(r.tipoActividadId)+' '+TIPOS_RES[r.tipo]+' '+(r.obs||'')))continue;rows.push(r);}
+  rows.sort(function(a,b){return (b.fecha||'').localeCompare(a.fecha||'');});
+  var h='';
+  if(RESF)h+=formRes();else if(CAN)h+='<div class="tools" style="justify-content:flex-end;margin-bottom:10px"><button class="btn pri" onclick="nuevaRes()">+ Cargar reserva</button></div>';
+  var fo='<option value="">Todos</option>';for(k in S.campos)fo+='<option value="'+k+'"'+(RF.campo===k?' selected':'')+'>'+esc(S.campos[k].nombre)+'</option>';
+  var to='<option value="">Todos</option>';for(k in TIPOS_RES)to+='<option value="'+k+'"'+(RF.tipo===k?' selected':'')+'>'+TIPOS_RES[k]+'</option>';
+  h+='<div class="card"><div class="chd"><span class="ct">Confección de reservas · '+f(rows.length)+'</span><div class="tools">'+
+    (RF.desde||RF.hasta||RF.campo||RF.tipo||RF.lote||RF.rec?'<button class="btn" onclick="RF={desde:\'\',hasta:\'\',campo:\'\',tipo:\'\',lote:\'\',rec:\'\'};render()">Quitar filtros</button>':'')+
+    '<input type="search" id="q" placeholder="Buscar lote, recurso…" value="'+esc(q)+'" oninput="setQ(this.value)"></div></div>';
+  var lu={},ru={},lo='<option value="">Todos</option>',ro='<option value="">Todos</option>',lk2=[],rk2=[];for(i=0;i<xs.length;i++){lu[xs[i].loteId]=1;ru[xs[i].tipoActividadId]=1;}
+  for(k in lu)lk2.push(k);lk2.sort(function(a,b){return pName(a).localeCompare(pName(b),'es',{numeric:true});});for(i=0;i<lk2.length;i++)lo+='<option value="'+lk2[i]+'"'+(RF.lote===lk2[i]?' selected':'')+'>'+esc(pName(lk2[i]))+'</option>';
+  for(k in ru)rk2.push(k);rk2.sort(function(a,b){return rName(a).localeCompare(rName(b),'es');});for(i=0;i<rk2.length;i++)ro+='<option value="'+rk2[i]+'"'+(RF.rec===rk2[i]?' selected':'')+'>'+esc(rName(rk2[i]))+'</option>';
+  var fd=function(k2,lbl){return '<br><input type="date" class="fcol" aria-label="'+lbl+'" title="'+lbl+'" value="'+esc(RF[k2])+'" onchange="RF.'+k2+'=this.value;render()">';};
+  h+='<div class="tw scroll-y"><table><thead><tr><th>Fecha'+fd('desde','Desde')+fd('hasta','Hasta')+'</th><th>Lote'+fcol('rf_lote','RF.lote',lo)+'</th><th>Campo'+fcol('rf_campo','RF.campo',fo)+'</th><th>Recurso'+fcol('rf_rec','RF.rec',ro)+'</th><th>Tipo'+fcol('rf_tipo','RF.tipo',to)+'</th><th class="r">Cantidad</th><th class="r">kg/unidad</th><th class="r">% MS</th><th class="r">ha</th><th class="r">Unidades/ha</th><th class="r">kg tal cual</th><th class="r">kg MS</th><th class="r">kg MS/ha</th><th>Observaciones</th></tr></thead><tbody>';
+  var tC=0,tTC=0,tMS=0,tHa=0;
+  for(i=0;i<rows.length;i++){var x=rows[i],ms=resMs(x),tc=x.cant*x.kgUnidad;tC+=x.cant;tTC+=tc;tMS+=ms;tHa+=x.ha||0;
+    h+='<tr'+(CAN?' class="click'+(RESF&&RESF.id===x.id?' sel':'')+'" onclick="editRes(\''+x.id+'\')"':'')+'><td>'+fFecha(x.fecha)+'</td><td class="tdname">'+esc(pName(x.loteId))+'</td><td>'+esc(campoName(x.campoId))+'</td><td>'+rDot(x.tipoActividadId)+esc(rName(x.tipoActividadId))+'</td><td>'+TIPOS_RES[x.tipo]+'</td>'+
+      '<td class="r">'+f(x.cant)+'</td><td class="r">'+f(x.kgUnidad)+'</td><td class="r">'+f(x.pctMS,1)+'</td><td class="r">'+f(x.ha,1)+'</td><td class="r">'+f(x.ha?x.cant/x.ha:null,1)+'</td><td class="r">'+f(tc)+'</td><td class="r">'+f(ms)+'</td><td class="r">'+f(x.ha?ms/x.ha:null)+'</td><td class="msg">'+esc(x.obs||'')+'</td></tr>';}
+  if(!rows.length)h+='<tr><td colspan="14"><div class="empty">'+(xs.length?'No hay reservas con esos filtros.':'Todavía no hay reservas cargadas.')+'</div></td></tr>';
+  else{var unT={};for(i=0;i<rows.length;i++)unT[rows[i].tipo]=1;var unico=Object.keys(unT).length===1; /* rollos y fardos no se suman en unidades */
+    h+='<tr class="tr-ref"><td colspan="5">Total</td><td class="r">'+(unico?f(tC):'—')+'</td><td></td><td></td><td class="r">'+f(tHa,1)+'</td><td class="r">'+(unico?f(tHa?tC/tHa:null,1):'—')+'</td><td class="r">'+f(tTC)+'</td><td class="r">'+f(tMS)+'</td><td class="r">'+f(tHa?tMS/tHa:null)+'</td><td></td></tr>';}
+  return h+'</tbody></table></div><div class="pnote">kg MS = cantidad × kg/unidad × % MS ÷ 100. El recurso es el actual del lote en la campaña de la fecha. Las reservas se suman a la cosecha del recurso en el mes de confección (solapa Cosecha). Cuando se den a la hacienda, cargalas como suplemento con su ingrediente: así se descuentan en el pastoreo donde se consumen.</div></div>';}
 </script>
 </body>
 </html>

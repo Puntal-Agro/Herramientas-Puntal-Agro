@@ -164,6 +164,7 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
     <div class="nav-item" data-cat="labores" onclick="seleccionarCat('labores')">Labores</div>
     <div class="nav-item" data-cat="cultivos" onclick="seleccionarCat('cultivos')">Cultivos/UN</div>
     <div class="nav-item" data-cat="usos" onclick="seleccionarCat('usos')">Usos</div>
+    <div class="nav-item" data-cat="categhac" onclick="seleccionarCat('categhac')">Categorías de hacienda</div>
     <div class="nav-item" data-cat="especies" onclick="seleccionarCat('especies')">Especies / Granos</div>
     <div class="nav-item" data-cat="unidades" onclick="seleccionarCat('unidades')">Unidades</div>
   </div>
@@ -283,6 +284,20 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
         <tbody></tbody>
       </table>
       <div class="empty" id="empty-uso" style="display:none">No hay usos cargados. Agregá uno con "+ Nuevo".</div>
+    </div>
+
+    <!-- VISTA CATEGORÍAS DE HACIENDA (global Puntal, BUILD 13) -->
+    <div id="vista-categhac" style="display:none">
+      <div class="panel-head">
+        <h2>Categorías de hacienda</h2>
+        <button class="btn btn-nuevo" data-cat="categhac" onclick="abrirModalCh()">+ Nuevo</button>
+      </div>
+      <table id="tbl-ch">
+        <thead><tr><th style="text-align:right">Orden</th><th>Categoría</th><th style="text-align:right">Movimientos</th><th>Estado</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="empty" id="empty-ch" style="display:none">No hay categorías de hacienda cargadas.</div>
+      <div style="font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.5">Catálogo general: las mismas categorías para todas las empresas. Las usa el Registro de Pastoreos al cargar hacienda. Una categoría con movimientos no se elimina: se da de baja y deja de ofrecerse para cargas nuevas.</div>
     </div>
 
     <!-- VISTA ESPECIES / GRANOS -->
@@ -602,6 +617,26 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
   </div>
 </div>
 
+<!-- Modal CATEGORÍA DE HACIENDA -->
+<div class="overlay" id="overlay-ch">
+  <div class="modal">
+    <h3 id="modal-ch-title">Nueva categoría de hacienda</h3>
+    <div class="grid2">
+      <div class="fld full"><label>Nombre</label><input id="ch-nombre" maxlength="40"></div>
+      <div class="fld"><label>Orden <span class="opt">(posición en las listas)</span></label><input id="ch-orden" type="number" step="1" min="1" max="999" inputmode="numeric"></div>
+      <div class="fld"><label>Estado</label>
+        <select id="ch-activo" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px"><option value="1">Activa</option><option value="0">De baja</option></select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="guardarCh()">Guardar</button>
+      <button class="btn-out" onclick="cerrarModalCh()">Cancelar</button>
+      <button class="btn-out del" id="btn-del-ch" style="display:none" onclick="eliminarCh()">Eliminar</button>
+      <span class="msg" id="msg-ch"></span>
+    </div>
+  </div>
+</div>
+
 <!-- Modal UNIDAD -->
 <div class="overlay" id="overlay-uni">
   <div class="modal">
@@ -758,7 +793,7 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
 
 <footer>
   <span>Puntal Agro · Maestros</span>
-  <span>BUILD 12 · v2026-07-24 13:01</span>
+  <span>Versión v2026-11-18 08:41 · BUILD 13</span>
 </footer>
 
 <script src="pa-core.js"></script>
@@ -790,7 +825,8 @@ var empresaId = null;
 // Catálogos globales de Puntal: se ven siempre, los edita solo admin_general.
 var CATS_GLOBALES = {
   categorias: true, labores: true, usos: true, especies: true,
-  unidades: true, modosacc: true, formul: true, ppioactivo: true
+  unidades: true, modosacc: true, formul: true, ppioactivo: true,
+  categhac: true   // categorías de hacienda (BUILD 13)
 };
 
 function esCatGlobal(cat){ return !!CATS_GLOBALES[cat]; }
@@ -1196,7 +1232,7 @@ function renderBadgePermiso(){
 }
 
 function seleccionarCat(c){
-  var vistas = ['terceros','choferes','socios','depositos','labores','cultivos','usos','especies','unidades','insumos','categorias','modosacc','formul','ppioactivo'];
+  var vistas = ['terceros','choferes','socios','depositos','labores','cultivos','usos','especies','unidades','insumos','categorias','modosacc','formul','ppioactivo','categhac'];
   for (var i=0;i<vistas.length;i++){
     document.getElementById('vista-'+vistas[i]).style.display = (c===vistas[i])?'':'none';
   }
@@ -1211,6 +1247,7 @@ function seleccionarCat(c){
   else if (c==='cultivos') renderCultivos();
   else if (c==='usos') renderUsos();
   else if (c==='especies') renderEspecies();
+  else if (c==='categhac') renderCh();
   else if (c==='unidades') renderUnidades();
   else if (c==='insumos') renderInsumos();
   else if (c==='categorias') renderCategs();
@@ -1581,6 +1618,83 @@ function eliminarCategUI(cod){
   if(enUso>0){ alert('No se puede eliminar: hay '+enUso+' insumo(s) usando esta categoría. Reasignalos antes de borrarla.'); return; }
   if(confirm('¿Eliminar esta categoría?')){ borrarCategoria(t); if(!cod){cerrarModalCateg();} renderCategs(); }
 }
+
+/* ---- CATEGORÍAS DE HACIENDA (global Puntal, BUILD 13) ----------------------
+   Catálogo general del sistema, sin empresaId: lo ven todos, lo edita solo admin_general.
+   Mientras pa-core no lo exponga (listarCategoriasHacienda / guardarCategoriaHacienda),
+   se guarda en la clave local 'gan_categorias', la MISMA que lee el Registro de Pastoreos.
+   La semilla (ids cat_0..cat_11) es idéntica a la de esa herramienta para que no se dupliquen.
+   Forma: { id, nombre, orden, activo }. */
+var LS_CATHAC='gan_categorias';
+var CATHAC_SEED=['Orejano','Ternera','Vaq. 1-2','Vaq. 2-3','Ternero','Novillo 1-2','Novillo 2-3','Torito 1-2','Toro 2-3','Vaca cría','Toro padre','Vaca invernada'];
+var editCh=null;
+function chPA(){ return !!(PA.demo && typeof PA.demo.listarCategoriasHacienda==='function'); }
+function listarCh(){
+  var l;
+  if (chPA()) l=PA.demo.listarCategoriasHacienda()||[];
+  else {
+    try{ l=JSON.parse(localStorage.getItem(LS_CATHAC)); }catch(e){ l=null; }
+    if (!l){ l=[]; for(var i=0;i<CATHAC_SEED.length;i++) l.push({id:'cat_'+i,nombre:CATHAC_SEED[i],orden:i+1,activo:true}); try{ localStorage.setItem(LS_CATHAC, JSON.stringify(l)); }catch(e){} }
+  }
+  l=l.slice(); l.sort(function(a,b){ return (a.orden||0)-(b.orden||0); }); return l;
+}
+function guardarChStore(x){
+  if (chPA() && typeof PA.demo.guardarCategoriaHacienda==='function') { PA.demo.guardarCategoriaHacienda(x); return true; }
+  var l=listarCh(), f=false; for(var i=0;i<l.length;i++){ if(l[i].id===x.id){ l[i]=x; f=true; break; } } if(!f) l.push(x);
+  try{ localStorage.setItem(LS_CATHAC, JSON.stringify(l)); return true; }catch(e){ return false; }
+}
+function borrarChStore(id){
+  if (chPA() && typeof PA.demo.borrarCategoriaHacienda==='function') { PA.demo.borrarCategoriaHacienda(id); return true; }
+  var l=listarCh(), out=[]; for(var i=0;i<l.length;i++){ if(l[i].id!==id) out.push(l[i]); }
+  try{ localStorage.setItem(LS_CATHAC, JSON.stringify(out)); return true; }catch(e){ return false; }
+}
+/* movimientos de hacienda que usan cada categoría (todas las empresas: el catálogo es general) */
+function usosCh(){
+  var u={}, gs; try{ gs=JSON.parse(localStorage.getItem('gan_pastoreos'))||[]; }catch(e){ gs=[]; }
+  for(var i=0;i<gs.length;i++){ var ms=gs[i].movs||[]; for(var j=0;j<ms.length;j++){ var c=ms[j].categoriaId; if(c) u[c]=(u[c]||0)+1; } }
+  return u;
+}
+function escH(t){ return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function renderCh(){
+  var lista=listarCh(), u=usosCh();
+  var tb=document.querySelector('#tbl-ch tbody'); tb.innerHTML='';
+  for(var i=0;i<lista.length;i++){(function(c){
+    var tr=document.createElement('tr'); if(c.activo===false) tr.style.color='var(--muted)';
+    tr.innerHTML='<td style="text-align:right;font-variant-numeric:tabular-nums">'+(c.orden||'—')+'</td><td><strong>'+escH(c.nombre)+'</strong></td>'+
+      '<td style="text-align:right;font-variant-numeric:tabular-nums">'+(u[c.id]||0).toLocaleString('es-AR')+'</td>'+
+      '<td>'+(c.activo===false?'De baja':'Activa')+'</td>'+
+      '<td class="row-actions">'+accionesFila('categhac','editarCh',(u[c.id]?null:'eliminarCh'),c.id)+'</td>';
+    tb.appendChild(tr);
+  })(lista[i]);}
+  document.getElementById('empty-ch').style.display=lista.length?'none':'block';
+  document.getElementById('tbl-ch').style.display=lista.length?'':'none';
+}
+function abrirModalCh(){ editCh=null; var l=listarCh(), mx=0; for(var i=0;i<l.length;i++) if((l[i].orden||0)>mx) mx=l[i].orden;
+  document.getElementById('modal-ch-title').textContent='Nueva categoría de hacienda'; document.getElementById('ch-nombre').value=''; document.getElementById('ch-orden').value=mx+1; document.getElementById('ch-activo').value='1';
+  document.getElementById('btn-del-ch').style.display='none'; document.getElementById('msg-ch').textContent=''; document.getElementById('overlay-ch').className='overlay open'; }
+function editarCh(id){ var l=listarCh(), x=null; for(var i=0;i<l.length;i++){ if(l[i].id===id){ x=l[i]; break; } } if(!x) return; editCh=id;
+  document.getElementById('modal-ch-title').textContent='Editar categoría de hacienda'; document.getElementById('ch-nombre').value=x.nombre||''; document.getElementById('ch-orden').value=x.orden||''; document.getElementById('ch-activo').value=(x.activo===false?'0':'1');
+  document.getElementById('btn-del-ch').style.display=usosCh()[id]?'none':''; document.getElementById('msg-ch').textContent=''; document.getElementById('overlay-ch').className='overlay open'; }
+function cerrarModalCh(){ document.getElementById('overlay-ch').className='overlay'; }
+function guardarCh(){
+  if (bloqueaEscritura('categhac','editar')) return;
+  var n=vOracion(document.getElementById('ch-nombre').value);
+  var e=vReq(n,'el nombre'); if(e){ vErr('msg-ch',e); return; }
+  e=vMax(n,40,'Nombre'); if(e){ vErr('msg-ch',e); return; }
+  var o=parseInt(document.getElementById('ch-orden').value,10); if(isNaN(o)||o<1){ vErr('msg-ch','El orden tiene que ser un número entero mayor que cero.'); return; }
+  var l=listarCh();
+  if(vDuplicado(l, n, function(it){return it.nombre;}, editCh)){ vErr('msg-ch','Ya existe una categoría con ese nombre.'); return; }
+  var act=document.getElementById('ch-activo').value!=='0';
+  var x=null; for(var i=0;i<l.length;i++){ if(l[i].id===editCh){ x=JSON.parse(JSON.stringify(l[i])); break; } }
+  if(!x) x={id:'cat_'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36)};
+  x.nombre=n; x.orden=o; x.activo=act;
+  if(!guardarChStore(x)){ vErr('msg-ch','No se pudo guardar en este navegador.'); return; }
+  cerrarModalCh(); renderCh();
+}
+function eliminarCh(id){
+  if (bloqueaEscritura('categhac','borrar')) return; var t=id||editCh; if(!t) return;
+  if(usosCh()[t]){ alert('La categoría tiene movimientos de hacienda: dala de baja en lugar de eliminarla.'); return; }
+  if(confirm('¿Eliminar esta categoría de hacienda?')){ borrarChStore(t); if(!id){cerrarModalCh();} renderCh(); } }
 
 /* ---- ESPECIES / GRANOS (global) ---- */
 var editEsp=null;
