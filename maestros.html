@@ -534,6 +534,12 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
         <span class="opt" style="display:block;margin-top:4px;line-height:1.4">Cultivo: trigo, soja, pastura, verdeo. UN (unidad de negocio): estructura, maquinaria, comercial.</span>
       </div>
     </div>
+    <div class="grid2" id="bloque-un-campos" style="display:none">
+      <div class="fld full">
+        <label class="chk" style="margin-bottom:2px"><input type="checkbox" id="cu-ganadera"> Unidad ganadera</label>
+        <span class="opt" style="display:block;line-height:1.4">Tildala si la UN tiene hacienda (cría, recría, invernada…). Solo las UN ganaderas aparecen en el Registro de Pastoreos.</span>
+      </div>
+    </div>
     <div class="grid2" id="bloque-cul-campos" style="display:none">
       <div class="fld"><label>Uso <span class="opt">(opcional)</span></label>
         <select id="cu-activ" onchange="toggleEspecieCul()" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px"></select>
@@ -793,7 +799,7 @@ tr.sec-head .sec-count{color:var(--muted);font-weight:600;letter-spacing:0;text-
 
 <footer>
   <span>Puntal Agro · Maestros</span>
-  <span>Versión v2026-11-18 08:41 · BUILD 13</span>
+  <span>Versión v2026-11-18 12:28 · BUILD 14</span>
 </footer>
 
 <script src="pa-core.js"></script>
@@ -1412,6 +1418,7 @@ function toggleEspecieCul(){
 function toggleEsCultivo(){
   var es = document.getElementById('cu-escult').value; // '', '1', '0'
   document.getElementById('bloque-cul-campos').style.display = (es==='1') ? '' : 'none';
+  document.getElementById('bloque-un-campos').style.display = (es==='0') ? '' : 'none';
 }
 function renderCultivos(){
   var lista=PA.demo.listarTiposActividad(empresaId);
@@ -1420,7 +1427,7 @@ function renderCultivos(){
     var esCult = (c.esCultivo!==false); // viejos sin flag = cultivo
     var tipoBdg = esCult
       ? '<span class="rol-bdg rb-tipo">Cultivo</span>'
-      : '<span class="rol-bdg" style="background:#EDE4DB;color:#8A5A32">UN</span>';
+      : '<span class="rol-bdg" style="background:#EDE4DB;color:#8A5A32">UN</span>'+(c.ganadera===true?' <span class="rol-bdg" style="background:#EEF3E8;color:#3A5128">Ganadera</span>':'');
     var uso, esp, gram, def2;
     if(esCult){
       uso = c.actividad ? '<span class="rol-bdg rb-tipo">'+labelUso(c.actividad)+'</span>' : '<span style="color:var(--muted)">—</span>';
@@ -1442,8 +1449,8 @@ function renderCultivos(){
   document.getElementById('empty-cul').style.display=lista.length?'none':'block';
   document.getElementById('tbl-cul').style.display=lista.length?'':'none';
 }
-function abrirModalCul(){ editCul=null; document.getElementById('modal-cul-title').textContent='Nuevo cultivo / UN'; document.getElementById('cu-nombre').value=''; document.getElementById('cu-sigla').value=''; document.getElementById('cu-escult').value=''; poblarSelectUso(''); poblarSelectEspecie('cu-especie',''); toggleEspecieCul(); toggleEsCultivo(); document.getElementById('cu-gram').value=''; document.getElementById('cu-def2').checked=false; document.getElementById('btn-del-cul').style.display='none'; document.getElementById('msg-cul').textContent=''; document.getElementById('overlay-cul').className='overlay open'; }
-function editarCul(id){ var l=PA.demo.listarTiposActividad(empresaId); var x=null; for(var i=0;i<l.length;i++){if(l[i].id===id){x=l[i];break;}} if(!x)return; editCul=id; document.getElementById('modal-cul-title').textContent='Editar cultivo / UN'; document.getElementById('cu-nombre').value=x.nombre||''; document.getElementById('cu-sigla').value=x.sigla||''; document.getElementById('cu-escult').value=(x.esCultivo===false?'0':'1'); poblarSelectUso(x.actividad||''); poblarSelectEspecie('cu-especie',x.especieId||''); toggleEspecieCul(); toggleEsCultivo(); document.getElementById('cu-gram').value=(x.graminea==null?'':(x.graminea?'1':'0')); document.getElementById('cu-def2').checked=!!x.default2da; document.getElementById('btn-del-cul').style.display=''; document.getElementById('msg-cul').textContent=''; document.getElementById('overlay-cul').className='overlay open'; }
+function abrirModalCul(){ editCul=null; document.getElementById('modal-cul-title').textContent='Nuevo cultivo / UN'; document.getElementById('cu-nombre').value=''; document.getElementById('cu-sigla').value=''; document.getElementById('cu-escult').value=''; poblarSelectUso(''); poblarSelectEspecie('cu-especie',''); toggleEspecieCul(); toggleEsCultivo(); document.getElementById('cu-gram').value=''; document.getElementById('cu-def2').checked=false; document.getElementById('cu-ganadera').checked=false; document.getElementById('btn-del-cul').style.display='none'; document.getElementById('msg-cul').textContent=''; document.getElementById('overlay-cul').className='overlay open'; }
+function editarCul(id){ var l=PA.demo.listarTiposActividad(empresaId); var x=null; for(var i=0;i<l.length;i++){if(l[i].id===id){x=l[i];break;}} if(!x)return; editCul=id; document.getElementById('modal-cul-title').textContent='Editar cultivo / UN'; document.getElementById('cu-nombre').value=x.nombre||''; document.getElementById('cu-sigla').value=x.sigla||''; document.getElementById('cu-escult').value=(x.esCultivo===false?'0':'1'); poblarSelectUso(x.actividad||''); poblarSelectEspecie('cu-especie',x.especieId||''); toggleEspecieCul(); toggleEsCultivo(); document.getElementById('cu-gram').value=(x.graminea==null?'':(x.graminea?'1':'0')); document.getElementById('cu-def2').checked=!!x.default2da; document.getElementById('cu-ganadera').checked=(x.esCultivo===false&&x.ganadera===true); document.getElementById('btn-del-cul').style.display=''; document.getElementById('msg-cul').textContent=''; document.getElementById('overlay-cul').className='overlay open'; }
 function cerrarModalCul(){ document.getElementById('overlay-cul').className='overlay'; }
 function guardarCul(){
   if (bloqueaEscritura('cultivos','editar')) return;
@@ -1475,7 +1482,8 @@ function guardarCul(){
   }
   // HANDOFF Mariana: esCultivo, graminea y default2da son campos del cultivo en pa-core (ver handoff_maestros_pacore.md).
   // Si esCultivo=false, graminea/especie/uso/default2da van null/false (es una UN no agrícola: estructura, maquinaria, etc.).
-  PA.demo.guardarTipoActividad({id:editCul||undefined,empresaId:empresaId,nombre:n,sigla:sig,esCultivo:esCultivo,actividad:act,especieId:espId,graminea:graminea,default2da:def2,activo:true});
+  // BUILD 14: ganadera (bool) solo para UN; true = la usa el Registro de Pastoreos para asignar rodeos.
+  PA.demo.guardarTipoActividad({id:editCul||undefined,empresaId:empresaId,nombre:n,sigla:sig,esCultivo:esCultivo,ganadera:(!esCultivo&&document.getElementById('cu-ganadera').checked),actividad:act,especieId:espId,graminea:graminea,default2da:def2,activo:true});
   cerrarModalCul(); renderCultivos();
 }
 function eliminarCul(id){

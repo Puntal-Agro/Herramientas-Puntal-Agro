@@ -30,7 +30,16 @@ header{background:var(--card);border-bottom:1px solid var(--border);padding-bloc
 .hright{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .role{font-size:11px;color:var(--muted);background:var(--bg);padding:3px 10px;border-radius:20px;border:1px solid var(--border);white-space:nowrap}
 .inst-bar{background:var(--bar);border-bottom:1px solid var(--border);padding-block:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.inst-lbl{font-size:10px;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;font-weight:500;margin-right:4px}
+.inst-lbl{font-size:10px;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-right:4px}
+.ptit{margin:2px 0 14px}.ptit-sec{font-size:10.5px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--naranja);margin-bottom:2px}
+.ptit h1{font-size:22px;font-weight:700;letter-spacing:-.4px;line-height:1.2;color:var(--text);margin:0}
+.ptit-sub{font-size:13px;color:var(--muted);margin-top:3px}
+.dd{position:relative;display:inline-block}
+.dd-btn{display:inline-flex;align-items:center;gap:4px;padding:6px 14px;font-size:12.5px}
+.dd-btn .dd-cur{font-weight:600}.dd-car{font-size:10px;margin-left:4px;opacity:.75}
+.dd-menu{position:absolute;top:calc(100% + 4px);left:0;z-index:50;min-width:220px;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(15,25,35,.12);padding:4px;display:flex;flex-direction:column}
+.dd-it{display:flex;justify-content:space-between;align-items:center;gap:10px;text-align:left;background:none;border:none;border-radius:7px;padding:8px 12px;font-family:var(--sans);font-size:12.5px;color:var(--text);cursor:pointer}
+.dd-it:hover,.dd-it:focus-visible{background:var(--row);outline:none}.dd-it.on{color:var(--verde);font-weight:600}.dd-it .n{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:400}
 .inst-btn{padding:5px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1.5px solid var(--ctl);background:var(--card);color:var(--sub);font-family:var(--sans)}
 .inst-btn.active{background:var(--verde);color:var(--verde-t);border-color:var(--verde)}
 .inst-btn .n{font-variant-numeric:tabular-nums;opacity:.7;margin-left:4px}
@@ -125,7 +134,7 @@ footer{border-top:1px solid var(--border);background:var(--card);font-size:11px;
 </main>
 <footer class="gut">
   <span>Registro de Pastoreos · Puntal Agro</span>
-  <span>Versión v2026-11-18 08:41 · BUILD 72</span>
+  <span>Versión v2026-11-18 12:28 · BUILD 77</span>
 </footer>
 <script>
 /* ============================================================
@@ -150,6 +159,15 @@ footer{border-top:1px solid var(--border);background:var(--card);font-size:11px;
    Convención: campaña ganadera julio-junio, asignada por fecha de inicio del pastoreo.
    BUILD 58: recurso forrajero por lote editable (Plan de Uso por defecto + corrección manual), como la superficie ganadera.
    BUILD 59: categorías de hacienda generales del sistema; solo Puntal (admin_general) las crea o modifica.
+   BUILD 77: las unidades de negocio son solo las UN de Maestros tildadas como “Unidad ganadera” (ya no se excluye Estructura por nombre).
+   BUILD 76: título en cada pantalla (sección en chico arriba y nombre de la solapa); en Existencias la fecha pasa a subtítulo.
+   BUILD 75: Existencias queda como cuarta sección, botón directo sin desplegable; la sección 2 se llama Registros; el botón
+   de la sección activa muestra solo el nombre de la sección (la solapa abierta se ve resaltada dentro del desplegable).
+   BUILD 74: el menú pasa a tres desplegables (Configuración y altas · Registro · Resultados); el botón de la sección activa
+   muestra la solapa abierta. Se cierra al elegir, al tocar afuera o con Escape.
+   BUILD 73: solapas en tres grupos (Configuración y altas · Registro · Resultados); una sola campaña para toda la herramienta (la del header):
+   Pastoreos, Suplementación, Reservas, Resultado campo y Resultado corral la siguen; las unidades de negocio salen de Maestros → Cultivos/UN
+   (no cultivo, sin Estructura) y acá solo se cargan tenencia y socio.
    BUILD 72 (integración): sin modo oscuro (siempre claro, como el resto del sistema); las categorías de hacienda se administran en Maestros
    (catálogo general, solo admin_general) y acá quedan en solo lectura; el respaldo solo suma categorías si lo restaura Puntal.
    BUILD 71: las listas de rodeo de Pastoreos (iniciar y movimientos) muestran Unidad de negocio - Rodeo.
@@ -322,7 +340,7 @@ function arrancar(empId){
     if(!puede('ver')){setBoot('No tenés habilitado el Registro de Pastoreos para esta empresa. Pedile acceso al administrador o cambiá de empresa desde el menú.');renderHeader();return;}
     cargarCatalogos();cargarPropios();SEL=null;ACT=null;FORM=null;editId=null;editNew=false;render();});}
 function cambiarEmpresa(id){RAC=null;RODF=null;NEGF=null;RESF=null;CORF=null;PA.setEmpresaActiva(id,function(err){if(err){msg=String(err);msgErr=true;return render();}arrancar(id);});}
-function cambiarCampania(id){CAMP=id;CALC=null;render();}
+function cambiarCampania(id){CAMP=id;CALC=null;TL.desde='';TL.hasta='';render();} /* BUILD 73: única campaña de la herramienta */
 function cargarCatalogos(){var i,x;
   S.campos={};var cs=PA.demo.camposDeEmpresa(EMP);for(i=0;i<cs.length;i++)S.campos[cs[i].id]=cs[i];
   S.lotes={};var ls=PA.demo.listarLotes(EMP);for(i=0;i<ls.length;i++){x=clone(ls[i]);x.activo=true;S.lotes[x.id]=x;}
@@ -347,15 +365,16 @@ function cargarPropios(){var i,a;
   for(var ik in S.insumos){var ins=S.insumos[ik],pm=null;if(S.insMs.hasOwnProperty(ik))continue; /* si pa-core suma el % MS al insumo */
     if(typeof ins.pctMS==='number')pm=ins.pctMS;else if(typeof ins.ms==='number')pm=ins.ms<=1?Math.round(ins.ms*10000)/100:ins.ms; /* acepta ms en fracción (cargador demo) */
     if(pm!==null)S.insMs[ik]=pm;}
-  /* unidades de negocio: de pa-core si existe la función; si no, catálogo local con “Campo” por defecto */
-  var ng;if(typeof PA.demo.listarNegocios==='function'){ng=PA.demo.listarNegocios(EMP)||[];NEG_PA=true;}
-  else{NEG_PA=false;ng=deEmp(lsGet('gan_negocios',[]));if(!ng.length){var n0={id:uid('neg'),empresaId:EMP,nombre:'Campo',activo:true};var an=lsGet('gan_negocios',[]);an.push(n0);lsSet('gan_negocios',an);ng=[n0];}
-    var mg=false,an2=lsGet('gan_negocios',[]);for(i=0;i<an2.length;i++)if(an2[i].empresaId===EMP&&!an2[i].tenencia){an2[i].tenencia='propia';mg=true;}if(mg){lsSet('gan_negocios',an2);ng=deEmp(an2);}}
-  S.negocios={};var neg0=null;for(i=0;i<ng.length;i++){S.negocios[ng[i].id]=ng[i];if(!neg0&&ng[i].activo!==false)neg0=ng[i].id;}
+  /* unidades de negocio (BUILD 77): salen de Maestros → Cultivos/UN, solo las UN tildadas como ganaderas (esCultivo===false y ganadera===true).
+     Tenencia y socio son datos propios de esta herramienta: gan_negocios guarda {id (=id de la UN), empresaId, tenencia, socio}. */
+  var ng=[],nloc={},an=deEmp(lsGet('gan_negocios',[]));for(i=0;i<an.length;i++)nloc[an[i].id]=an[i];
+  var tsu=PA.demo.listarTiposActividad(EMP)||[];for(i=0;i<tsu.length;i++){var tu=tsu[i];if(tu.esCultivo!==false||tu.ganadera!==true)continue;var nl=nloc[tu.id]||{};
+    ng.push({id:tu.id,empresaId:EMP,nombre:tu.nombre,activo:tu.activo!==false,tenencia:nl.tenencia||'',socio:nl.socio||''});}
+  S.negocios={};for(i=0;i<ng.length;i++)S.negocios[ng[i].id]=ng[i];
   /* corrales: de pa-core si existe la función; si no, catálogo propio gan_corrales */
   var cr;if(typeof PA.demo.listarCorrales==='function'){cr=PA.demo.listarCorrales(EMP)||[];COR_PA=true;}else{COR_PA=false;cr=deEmp(lsGet('gan_corrales',[]));}
   S.corrales={};for(i=0;i<cr.length;i++){var xc=clone(cr[i]);xc.esCorral=true;xc.activo=cr[i].activo!==false;S.corrales[xc.id]=xc;}
-  S.rodeos={};a=deEmp(lsGet('gan_rodeos',[]));for(i=0;i<a.length;i++){S.rodeos[a[i].id]=a[i];if(!a[i].negocioId||!S.negocios[a[i].negocioId])a[i].negocioId=neg0;} /* rodeos del BUILD 19 sin unidad de negocio */
+  S.rodeos={};a=deEmp(lsGet('gan_rodeos',[]));for(i=0;i<a.length;i++){S.rodeos[a[i].id]=a[i];if(!a[i].negocioId||!S.negocios[a[i].negocioId])a[i].negocioId='';} /* rodeo con unidad que ya no está en Maestros: queda sin unidad hasta reasignarlo */
   S.reservas={};a=deEmp(lsGet('gan_reservas',[]));for(i=0;i<a.length;i++)S.reservas[a[i].id]=a[i];
   S.raciones={};a=deEmp(lsGet('gan_raciones',[]));for(i=0;i<a.length;i++)S.raciones[a[i].id]=a[i];
   S.sup={};a=deEmp(lsGet('gan_superficie',[]));for(i=0;i<a.length;i++)S.sup[a[i].campaniaId+'|'+a[i].loteId]=a[i].ganadera;
@@ -452,13 +471,28 @@ function calc(){if(CALC)return CALC;BYG={};
   CALC=R;return R;}
 
 /* ---------- navegación ---------- */
-var TABS=[['lotes','Lotes y Corrales inicio y recría'],['recursos','Recursos forrajeros'],['ingredientes','Ingredientes'],['categorias','Unidades negocio - Rodeo - Categoría'],['existencias','Existencias'],['pastoreos','Pastoreos'],['suplementacion','Suplementación'],['reservas','Reservas'],['cosecha','Resultado Cosecha de pasto'],['rescorral','Resultado Corral inicio y recría'],['campo','Parámetros y respaldo'],['historico','Alertas e histórico']];
-function setTab(t){RAC=null;RODF=null;NEGF=null;RESF=null;CORF=null;tab=t;SEL=null;ACT=null;FORM=null;editId=null;editNew=false;q='';msg='';delArm=false;try{location.hash=t;}catch(e){}render();}
+/* BUILD 73: solapas en tres grupos (Configuración y altas · Registro · Resultados). El 3er elemento es el grupo. */
+var TABS=[['lotes','Lotes','cfg'],['recursos','Recursos forrajeros','cfg'],['ingredientes','Ingredientes y raciones','cfg'],['categorias','Unidades de negocio','cfg'],['campo','Parámetros y respaldo','cfg'],['pastoreos','Pastoreos','reg'],['suplementacion','Suplementación','reg'],['reservas','Reservas','reg'],['cosecha','Resultado campo','res'],['rescorral','Resultado corral','res'],['historico','Alertas e histórico','res'],['existencias','Existencias','exi']];
+var TAB_GRP={cfg:'Configuración y altas',reg:'Registros',res:'Resultados',exi:'Existencias'};
+function setTab(t){MENU_AB=null;RAC=null;RODF=null;NEGF=null;RESF=null;CORF=null;tab=t;SEL=null;ACT=null;FORM=null;editId=null;editNew=false;q='';msg='';delArm=false;try{location.hash=t;}catch(e){}render();}
 window.addEventListener('hashchange',function(){var h=(location.hash||'').replace('#','');if(h&&h!==tab){tab=h;editId=null;editNew=false;render();}});
-function renderTabs(){var cnt={lotes:vals(S.lotes).length,categorias:vals(S.categorias).length,historico:vals(S.pastoreos).length};
-  var h='<span class="inst-lbl">Sección:</span>';
-  for(var i=0;i<TABS.length;i++){var t=TABS[i];if(t[0]==='cosecha')h+='<span style="flex-basis:100%;height:0"></span>';h+='<button class="inst-btn'+(tab===t[0]?' active':'')+'" onclick="setTab(\''+t[0]+'\')">'+t[1]+(cnt[t[0]]!=null?'<span class="n">'+f(cnt[t[0]])+'</span>':'')+'</button>';}
-  document.getElementById('tabs').innerHTML=h;}
+/* BUILD 74: menú con tres desplegables (uno por sección). El botón de la sección activa muestra la solapa abierta. */
+var MENU_AB=null;
+function renderTabs(){var cnt={lotes:vals(S.lotes).length,categorias:vals(S.negocios).length,historico:vals(S.pastoreos).length};
+  var gs=['cfg','reg','res','exi'],h='',i,k,act=null;for(i=0;i<TABS.length;i++)if(TABS[i][0]===tab)act=TABS[i];
+  for(k=0;k<gs.length;k++){var g=gs[k],on=act&&act[2]===g,ab=MENU_AB===g,solo=null;
+    for(i=0;i<TABS.length;i++)if(TABS[i][2]===g){if(solo===null)solo=TABS[i][0];else{solo=false;break;}}
+    if(solo){h+='<span class="dd"><button class="inst-btn dd-btn'+(on?' active':'')+'" onclick="MENU_AB=null;setTab(\''+solo+'\')">'+TAB_GRP[g]+'</button></span>';continue;} /* sección de una sola solapa: botón directo */
+    h+='<span class="dd"><button class="inst-btn dd-btn'+(on?' active':'')+'" aria-haspopup="true" aria-expanded="'+(ab?'true':'false')+'" onclick="togMenu(\''+g+'\',event)">'+TAB_GRP[g]+'<span class="dd-car">▾</span></button>';
+    if(ab){h+='<div class="dd-menu" role="menu">';for(i=0;i<TABS.length;i++){var t=TABS[i];if(t[2]!==g)continue;
+      h+='<button class="dd-it'+(tab===t[0]?' on':'')+'" role="menuitem" onclick="MENU_AB=null;setTab(\''+t[0]+'\')">'+t[1]+(cnt[t[0]]!=null?'<span class="n">'+f(cnt[t[0]])+'</span>':'')+'</button>';}
+      h+='</div>';}
+    h+='</span>';}
+  document.getElementById('tabs').innerHTML=h;
+  if(MENU_AB){var fi=document.querySelector('.dd-menu .dd-it.on')||document.querySelector('.dd-menu .dd-it');if(fi)try{fi.focus({preventScroll:true});}catch(e){}}}
+function togMenu(g,ev){if(ev&&ev.stopPropagation)ev.stopPropagation();MENU_AB=(MENU_AB===g)?null:g;renderTabs();}
+document.addEventListener('click',function(e){if(!MENU_AB)return;var n=e.target;while(n&&n!==document){if(n.className&&String(n.className).indexOf('dd-menu')>=0)return;n=n.parentNode;}MENU_AB=null;renderTabs();});
+document.addEventListener('keydown',function(e){if(MENU_AB&&(e.key==='Escape'||e.keyCode===27)){MENU_AB=null;renderTabs();}});
 function renderHeader(){var es=CTX.empresasDisponibles||[],h='<label class="hsel">Empresa <select id="h_emp" onchange="cambiarEmpresa(this.value)">',i;
   for(i=0;i<es.length;i++)h+='<option value="'+es[i].id+'"'+(es[i].id===EMP?' selected':'')+'>'+esc(es[i].razonSocial||es[i].id)+'</option>';
   h+='</select></label><label class="hsel">Campaña <select id="h_camp" onchange="cambiarCampania(this.value)">'+campOptions(CAMP)+'</select></label>'+
@@ -472,7 +506,8 @@ function render(){if(!CTX)return;
   renderHeader();renderTabs();
   var a=document.activeElement,keepQ=a&&a.id==='q',kp=KEEP_POS,sy=window.pageYOffset,sc=[],fid=kp&&a&&a.id?a.id:null,j;KEEP_POS=false;
   if(kp){var se=document.querySelectorAll('#main .scroll-y');for(j=0;j<se.length;j++)sc.push(se[j].scrollTop);}
-  var h='';
+  var h='',tt=null;for(j=0;j<TABS.length;j++)if(TABS[j][0]===tab)tt=TABS[j];
+  if(tt)h+='<div class="ptit">'+(TAB_GRP[tt[2]]!==tt[1]?'<div class="ptit-sec">'+TAB_GRP[tt[2]]+'</div>':'')+'<h1>'+tt[1]+'</h1>'+(tab==='existencias'?'<div class="ptit-sub">Situación a la fecha '+dFmt(pd(hoy())).replace(/\/(\d\d)$/,'/20$1')+'</div>':'')+'</div>'; /* BUILD 76: título de cada pantalla */
   if(!vals(S.lotes).length&&tab!=='categorias'&&tab!=='campo'&&tab!=='historico')h+='<div class="card"><div class="empty">La empresa activa no tiene lotes en el sistema. Los lotes se crean en Plan de Uso del Suelo; cuando estén, aparecen acá.</div></div>';
   if(tab==='pastoreos')h+=viewPastoreos();else if(tab==='existencias')h+=viewExistencias();else if(tab==='suplementacion')h+=viewSupl();
   else if(tab==='lotes')h+=viewPotreros();else if(tab==='recursos')h+=viewRecursos();else if(tab==='categorias')h+=viewNegocios()+viewRodeos()+viewSimple('categorias');
@@ -1187,7 +1222,7 @@ function viewExistencias(){calc();var ps=byName(vals(S.lotes)),i,rows=[],porCat=
     for(var c in st){if(!porCat[c])porCat[c]={cab:0,kg:0,ev:0,pot:0};var P=kgProm(st,c)||0;porCat[c].cab+=st[c].cab;porCat[c].kg+=st[c].cab*P;porCat[c].ev+=P?st[c].cab*evCab(P,0):0;porCat[c].pot++;}}
   rows.sort(function(a,b){return a.p.nombre.localeCompare(b.p.nombre,'es');});var G=ganInfo();
   function mc(l,v,u2,hl){return '<div class="mc"'+(hl?'':' style="border-left-color:var(--border)"')+'><div class="mc-lbl">'+l+'</div><div class="mc-val">'+v+(u2?'<span class="mc-unit">'+u2+'</span>':'')+'</div></div>';}
-  var h='<h2 style="font-size:22px;font-weight:700;margin:4px 0 12px;color:var(--text)">Situación a la fecha '+d.substr(8,2)+'/'+d.substr(5,2)+'/'+d.substr(0,4)+'</h2><div class="g2"><div style="display:flex;flex-direction:column;gap:12px;min-width:0">';
+  var h='<div class="g2"><div style="display:flex;flex-direction:column;gap:12px;min-width:0">';
   h+=arbolExist(gsx,d);
   /* requerimiento de forraje */
   var tkL=tk-tkC,tcL=tc-tcC,tevL=tev-tevC,consC=tkC*S.cfg.consumoPV; /* la carga y el requerimiento de forraje son solo de la hacienda en lotes; los corrales van aparte */
@@ -1339,27 +1374,23 @@ function guardarRod(){if(!CAN||!RODF)return;var R=RODF,nom=(R.nombre||'').replac
 function borrarRod(){if(!CAN_ADM||!RODF||!RODF.id)return;if(usos().rod[RODF.id])return rodErr('Tiene movimientos: dalo de baja en lugar de eliminarlo.');
   var id=RODF.id;if(!removeWhere('gan_rodeos',function(x){return x.id===id;}))return rodErr(LS_ERR);RODF=null;render();}
 
-/* ---- unidades de negocio (gan_negocios, fallback local; con “Campo” por defecto) ---- */
+/* ---- unidades de negocio (BUILD 73): nombre y estado vienen de Maestros; acá solo tenencia y socio ---- */
 function viewNegocios(){var xs=byName(vals(S.negocios)),rc={},rs=vals(S.rodeos),i;for(i=0;i<rs.length;i++)rc[rs[i].negocioId]=(rc[rs[i].negocioId]||0)+1;
-  var ed=CAN&&!NEG_PA,h='<div class="card"><div class="chd"><span class="ct">Unidades de negocio <span style="font-weight:400">· '+f(xs.length)+'</span></span><div class="tools">'+(ed&&!NEGF?'<button class="btn" onclick="NEGF={id:null,nombre:\'\',tenencia:\'\',socio:\'\',activo:true,err:\'\'};render()">+ Nueva unidad</button>':'')+'</div></div>';
-  if(NEGF){var N=NEGF;h+='<div class="form"><label>Nombre<input class="ed" id="neg_nom" maxlength="40" value="'+esc(N.nombre)+'" oninput="NEGF.nombre=this.value"></label>'+
+  var ed=CAN,h='<div class="card"><div class="chd"><span class="ct">Unidades de negocio <span style="font-weight:400">· '+f(xs.length)+'</span></span></div>';
+  if(NEGF&&S.negocios[NEGF.id]){var N=NEGF;h+='<div class="form"><label>Unidad de negocio<input class="ed" disabled value="'+esc(S.negocios[N.id].nombre)+'"></label>'+
     '<label>Tenencia<select class="ed" onchange="NEGF.tenencia=this.value;if(this.value!==\'capitalizada\')NEGF.socio=\'\';render();var e=document.getElementById(\'neg_soc\');if(e)e.focus()"><option value="">Elegí</option><option value="propia"'+(N.tenencia==='propia'?' selected':'')+'>Propia</option><option value="capitalizada"'+(N.tenencia==='capitalizada'?' selected':'')+'>Capitalizada</option></select></label>'+
     '<label>Socio'+(N.tenencia==='capitalizada'?'<input class="ed" id="neg_soc" maxlength="60" placeholder="Obligatorio" value="'+esc(N.socio||'')+'" oninput="NEGF.socio=this.value">':'<input class="ed" disabled placeholder="Solo si es capitalizada">')+'</label>'+
-    (N.id?'<label>Estado<select class="ed" onchange="NEGF.activo=this.value===\'1\'"><option value="1"'+(N.activo?' selected':'')+'>Activa</option><option value="0"'+(N.activo?'':' selected')+'>De baja</option></select></label>':'')+
-    '<div class="form-actions"><button class="btn pri" onclick="guardarNeg()">Guardar</button><button class="btn" onclick="NEGF=null;render()">Cancelar</button>'+
-    (N.id&&CAN_ADM&&!rc[N.id]?(N.del?'<button class="btn warn" onclick="borrarNeg()">Confirmar eliminación</button>':'<button class="btn warn" onclick="NEGF.del=true;render()">Eliminar</button>'):'')+(N.err?'<span class="msg err">'+esc(N.err)+'</span>':'')+'</div></div>';}
-  h+='<div class="tw"><table><thead><tr><th>Unidad de negocio</th><th>Tenencia</th><th>Socio</th><th class="r">Rodeos</th><th>Estado</th></tr></thead><tbody>';
-  for(i=0;i<xs.length;i++){var x=xs[i];h+='<tr class="'+(ed?'click ':'')+(x.activo!==false?'':'off ')+(NEGF&&NEGF.id===x.id?'sel':'')+'"'+(ed?' onclick="NEGF={id:\''+x.id+'\',nombre:S.negocios[\''+x.id+'\'].nombre,tenencia:S.negocios[\''+x.id+'\'].tenencia||\'\',socio:S.negocios[\''+x.id+'\'].socio||\'\',activo:S.negocios[\''+x.id+'\'].activo!==false,err:\'\'};render()"':'')+'><td class="tdname">'+esc(x.nombre)+'</td><td>'+esc(TENENCIAS[x.tenencia]||'—')+'</td><td>'+esc(x.tenencia==='capitalizada'?(x.socio||''):'')+'</td><td class="r">'+f(rc[x.id]||0)+'</td><td>'+(x.activo!==false?'<span class="bdg bg">Activa</span>':'<span class="bdg bn">De baja</span>')+'</td></tr>';}
-  return h+'</tbody></table></div><div class="pnote">'+(NEG_PA?'Las unidades de negocio vienen del sistema.':'Catálogo propio de esta herramienta mientras el sistema no tenga unidades de negocio (anotado en la ficha de integración).')+'</div></div>';}
+    '<div class="form-actions"><button class="btn pri" onclick="guardarNeg()">Guardar</button><button class="btn" onclick="NEGF=null;render()">Cancelar</button>'+(N.err?'<span class="msg err">'+esc(N.err)+'</span>':'')+'</div></div>';}
+  if(!xs.length)h+='<div class="empty">Esta empresa no tiene unidades de negocio ganaderas. Se dan de alta en <a href="maestros.html">Maestros</a> → Cultivos/UN, con “¿Es cultivo?” en No y el tilde “Unidad ganadera”.</div>';
+  else{h+='<div class="tw"><table><thead><tr><th>Unidad de negocio</th><th>Tenencia</th><th>Socio</th><th class="r">Rodeos</th><th>Estado</th></tr></thead><tbody>';
+    for(i=0;i<xs.length;i++){var x=xs[i];h+='<tr class="'+(ed?'click ':'')+(x.activo!==false?'':'off ')+(NEGF&&NEGF.id===x.id?'sel':'')+'"'+(ed?' onclick="NEGF={id:\''+x.id+'\',tenencia:S.negocios[\''+x.id+'\'].tenencia||\'\',socio:S.negocios[\''+x.id+'\'].socio||\'\',err:\'\'};render()"':'')+'><td class="tdname">'+esc(x.nombre)+'</td><td>'+(x.tenencia?esc(TENENCIAS[x.tenencia]):'<span class="bdg by">Pendiente</span>')+'</td><td>'+esc(x.tenencia==='capitalizada'?(x.socio||''):'')+'</td><td class="r">'+f(rc[x.id]||0)+'</td><td>'+(x.activo!==false?'<span class="bdg bg">Activa</span>':'<span class="bdg bn">De baja</span>')+'</td></tr>';}
+    h+='</tbody></table></div>';}
+  return h+'<div class="pnote">Las unidades de negocio salen de Maestros → Cultivos/UN (las tildadas como “Unidad ganadera”): el alta, el nombre y la baja se hacen ahí. Acá se completan la tenencia y, si es capitalizada, el socio.</div></div>';}
 function negErr(t){NEGF.err=t;render();}
-function guardarNeg(){if(!CAN||NEG_PA||!NEGF)return;var N=NEGF,nom=(N.nombre||'').replace(/^\s+|\s+$/g,''),xs=vals(S.negocios),i;if(!nom)return negErr('Escribí un nombre.');
+function guardarNeg(){if(!CAN||!NEGF||!S.negocios[NEGF.id])return;var N=NEGF;
   var ten=N.tenencia||'',soc=ten==='capitalizada'?(N.socio||'').replace(/^\s+|\s+$/g,'').replace(/\s+/g,' '):'';
   if(!TENENCIAS[ten])return negErr('Elegí la tenencia.');if(ten==='capitalizada'&&!soc)return negErr('Escribí el socio: es obligatorio en una unidad capitalizada.');
-  var cand={nombre:nom,tenencia:ten,socio:soc};
-  for(i=0;i<xs.length;i++)if(xs[i].id!==N.id&&negLbl(xs[i]).toLowerCase()===negLbl(cand).toLowerCase())return negErr('Ya existe “'+negLbl(cand)+'”.');
-  var r=N.id?clone(S.negocios[N.id]):{id:uid('neg')};r.empresaId=EMP;r.nombre=nom;r.tenencia=ten;if(soc)r.socio=soc;else delete r.socio;r.activo=N.id?!!N.activo:true;if(!saveNeg(r))return negErr(LS_ERR);NEGF=null;render();}
-function borrarNeg(){if(!CAN_ADM||NEG_PA||!NEGF||!NEGF.id)return;var id=NEGF.id,rs=vals(S.rodeos);for(var i=0;i<rs.length;i++)if(rs[i].negocioId===id)return negErr('Tiene rodeos: dala de baja en lugar de eliminarla.');
-  if(!removeWhere('gan_negocios',function(x){return x.id===id;}))return negErr(LS_ERR);NEGF=null;render();}
+  var r={id:N.id,empresaId:EMP,tenencia:ten};if(soc)r.socio=soc;if(!saveNeg(r))return negErr(LS_ERR);NEGF=null;render();}
 
 /* ---- retirar / pase: una fila por rodeo · categoría que hay en el lote ---- */
 function filasSalida(g,fecha,prev){var st=stockRC(g.movs,fecha||hoy()).st,ks=rcKeys(st),o={};
@@ -1599,7 +1630,7 @@ function viewSupl(){var gs=vals(S.pastoreos),all=[],i,j;
   var scs=byName(vals(S.corrales));if(scs.length){po+='<optgroup label="Corrales">';for(i=0;i<scs.length;i++)po+='<option value="'+scs[i].id+'"'+(SF.pot===scs[i].id?' selected':'')+'>'+esc(scs[i].nombre)+'</option>';po+='</optgroup>';}
   var io='<option value="">Todos</option>',is2=byName(vals(S.insumos)),rs2=byName(vals(S.raciones)),io2='';for(i=0;i<is2.length;i++)io2+='<option value="'+is2[i].id+'"'+(SF.ing===is2[i].id?' selected':'')+'>'+esc(is2[i].nombre)+'</option>';
   io+='<optgroup label="Ingredientes">'+io2+'</optgroup>';io2='';for(i=0;i<rs2.length;i++)io2+='<option value="r:'+rs2[i].id+'"'+(SF.ing==='r:'+rs2[i].id?' selected':'')+'>'+esc(rs2[i].nombre)+'</option>';if(io2)io+='<optgroup label="Raciones">'+io2+'</optgroup>';
-  var rows=[];for(i=0;i<all.length;i++){var a=all[i];if(SF.pot&&!inG(a.g,SF.pot))continue;if(SF.ing&&suplKey(a.s)!==SF.ing)continue;if(SF.desde&&a.s.fecha<SF.desde)continue;if(SF.hasta&&a.s.fecha>SF.hasta)continue;if(!match((a.s.remito||'')+' '+suplName(a.s)+' '+gName(a.g)+' '+(a.s.obs||'')))continue;rows.push(a);}
+  var rows=[];for(i=0;i<all.length;i++){var a=all[i];if(campDeMes((a.s.fecha||'').substr(0,7))!==CAMP)continue;if(SF.pot&&!inG(a.g,SF.pot))continue;if(SF.ing&&suplKey(a.s)!==SF.ing)continue;if(SF.desde&&a.s.fecha<SF.desde)continue;if(SF.hasta&&a.s.fecha>SF.hasta)continue;if(!match((a.s.remito||'')+' '+suplName(a.s)+' '+gName(a.g)+' '+(a.s.obs||'')))continue;rows.push(a);}
   h+='<div class="card"><div class="chd"><span class="ct">Registro de entregas · '+f(rows.length)+'</span><div class="tools"><label class="fr">Desde <input type="date" id="sf_desde" value="'+esc(SF.desde||'')+'" onchange="SF.desde=this.value;render()"></label><label class="fr">Hasta <input type="date" id="sf_hasta" value="'+esc(SF.hasta||'')+'" onchange="SF.hasta=this.value;render()"></label>'+(SF.desde||SF.hasta?'<button class="btn" onclick="SF.desde=\'\';SF.hasta=\'\';render()">Quitar fechas</button>':'')+'<input type="search" id="q" placeholder="Buscar remito, lote…" value="'+esc(q)+'" oninput="setQ(this.value)"></div></div>';
   h+='<div class="tw scroll-y"><table><thead><tr><th>Fecha</th><th>Remito</th><th>Lote'+fcol('sf_pot','SF.pot',po)+'</th><th class="r">Pastoreo</th><th>Ingrediente o ración'+fcol('sf_ing','SF.ing',io)+'</th><th class="r">kg tal cual</th><th class="r">% MS</th><th class="r">kg MS</th><th>Observaciones</th></tr></thead><tbody>';
   var rTC=0,rMS=0;
@@ -1767,7 +1798,7 @@ function resGs(gs,nCor){var i,j;
     if(!R.tc){T.convTC=T.convMS=T.c1=T.c2=T.c3=T.c4=T.c5=null;} /* sin entregas cargadas: no se muestra 0 */}
   return R;}
 function rcIng(R,k,n,tc,ms){if(!R.ing[k])R.ing[k]={n:n,tc:0,ms:0};R.ing[k].tc+=tc;R.ing[k].ms+=ms;R.tc+=tc;R.ms+=ms;}
-function viewResCorral(){if(RCF.camp===null)RCF.camp=CAMP;var i,k,cl=camOpts(),co='<option value=""'+(RCF.camp===''?' selected':'')+'>Todas</option>';for(i=0;i<cl.length;i++)co+='<option value="'+cl[i]+'"'+(RCF.camp===cl[i]?' selected':'')+'>'+esc(campName(cl[i]))+'</option>';
+function viewResCorral(){RCF.camp=CAMP;var i,k,cl=camOpts(),co='<option value=""'+(RCF.camp===''?' selected':'')+'>Todas</option>';for(i=0;i<cl.length;i++)co+='<option value="'+cl[i]+'"'+(RCF.camp===cl[i]?' selected':'')+'>'+esc(campName(cl[i]))+'</option>';
   var fo='<option value="">Todos</option>';for(k in S.campos)fo+='<option value="'+k+'"'+(RCF.campo===k?' selected':'')+'>'+esc(S.campos[k].nombre)+'</option>';
   function fs(lbl,code,opts){return '<label class="fr">'+lbl+' <select onchange="'+code+'=this.value;RCF.sel=\'\';render()">'+opts+'</select></label>';}
   var to='<option value="">Todos</option>';for(k in TIPOS_COR)to+='<option value="'+k+'"'+(RCF.tipo===k?' selected':'')+'>'+TIPOS_COR[k]+'</option>';
@@ -1775,7 +1806,7 @@ function viewResCorral(){if(RCF.camp===null)RCF.camp=CAMP;var i,k,cl=camOpts(),c
   var tg={};for(i=0;i<cs.length;i++){var gs1=rcGs(cs[i].id,RCF.camp),R=resGs(gs1);if(!R.ciclos)continue;rows.push({c:cs[i],R:R});
     var tk=cs[i].tipo||'';if(!tg[tk])tg[tk]={gs:[],n:0,nAb:0};if(R.abierto)tg[tk].nAb++;else{tg[tk].gs=tg[tk].gs.concat(gs1);tg[tk].n++;}}
   var tots=[],tks=['inicio','recria',''];for(i=0;i<tks.length;i++){var q=tg[tks[i]];if(!q)continue;var RT=resGs(q.gs,q.n);RT.nAb=q.nAb;tots.push({c:{id:'__t_'+(tks[i]||'x'),nombre:'Total '+(TIPOS_COR[tks[i]]||'sin tipo'),tipo:tks[i],tot:true},R:RT});}
-  var h='<div class="card"><div class="chd"><span class="ct">Resultado corrales de inicio y recría · '+(RCF.camp?'campaña '+esc(campName(RCF.camp)):'todas las campañas')+'</span><div class="tools">'+fs('Campaña','RCF.camp',co)+fs('Campo','RCF.campo',fo)+fs('Tipo','RCF.tipo',to)+'</div></div>';
+  var h='<div class="card"><div class="chd"><span class="ct">Resultado corrales de inicio y recría · '+(RCF.camp?'campaña '+esc(campName(RCF.camp)):'todas las campañas')+'</span><div class="tools">'+fs('Campo','RCF.campo',fo)+fs('Tipo','RCF.tipo',to)+'</div></div>';
   h+='<div class="tw"><table><thead><tr><th>Corral</th><th>Tipo</th><th>Rodeo - Categoría</th><th>Estado</th><th>Fecha inicio</th><th class="r">Ciclos</th><th class="r">Cab. entradas</th><th class="r">Peso entrada</th><th class="r">Cab. salidas</th><th class="r">Peso salida destino</th><th class="r">Mortandad</th><th class="r">Días</th><th class="r">ADPV</th><th class="r">Conversión</th><th class="r">Consumo</th><th class="r">Consumo</th></tr>'+
     '<tr class="sub"><th></th><th></th><th></th><th></th><th></th><th></th><th class="r">cab</th><th class="r">kg/cab</th><th class="r">cab</th><th class="r">kg/cab</th><th class="r">%</th><th class="r"></th><th class="r">kg/cab/día</th><th class="r">kg MS/kg carne</th><th class="r">kg MS/cab/día</th><th class="r">MS % PV</th></tr></thead><tbody>';
   function filaR(r){var T=r.R.T,ok=r.R.ok,tot=r.c.tot;
@@ -1811,13 +1842,13 @@ function rcDetalle(c,R){var T=R.T,ok=R.ok,i;
     '<div class="pnote">Las raciones se abren en sus ingredientes según la composición copiada al cargar la entrega. Producción de carne = peso salida destino × cabezas salidas − peso de entrada × cabezas entradas. Desbaste = 1 − destino ÷ origen. Eficiencia del stock = producción por cabeza ÷ promedio de los pesos de entrada y salida. Consumo por cabeza sobre el promedio de cabezas entradas y salidas.</div></div></div>';
   return h;}
 function camOpts(){var cs={},i,gs=vals(S.pastoreos);for(i=0;i<gs.length;i++)if(gs[i].campaniaId)cs[gs[i].campaniaId]=1;cs[CAMP]=1;var l=[];for(var k in cs)l.push(k);l.sort();return l;}
-function viewCosecha(){if(!CF.camp)CF.camp=CAMP;var D=datosCosecha(),COL=colorRec(),ms=mesesCamp(CF.camp),HA=haRecCamp(CF.camp),i,k,r;
+function viewCosecha(){CF.camp=CAMP;var D=datosCosecha(),COL=colorRec(),ms=mesesCamp(CF.camp),HA=haRecCamp(CF.camp),i,k,r;
   var cl=camOpts(),co='';for(i=0;i<cl.length;i++)co+='<option value="'+cl[i]+'"'+(CF.camp===cl[i]?' selected':'')+'>'+esc(campName(cl[i]))+'</option>';
   var fo='<option value="">Todos</option>';for(k in S.campos)fo+='<option value="'+k+'"'+(CF.campo===k?' selected':'')+'>'+esc(S.campos[k].nombre)+'</option>';
   var ro='<option value="">Todos</option>',rl=[];for(k in S.tipos)if(esGan(k))rl.push(S.tipos[k]);rl=byName(rl);for(i=0;i<rl.length;i++)ro+='<option value="'+rl[i].id+'"'+(CF.rec===rl[i].id?' selected':'')+'>'+esc(rl[i].nombre)+'</option>';
   function fs(lbl,code,opts){return '<label class="fr">'+lbl+' <select onchange="'+code+'=this.value;render()">'+opts+'</select></label>';}
   var h='<div class="card"><div class="chd"><span class="ct">Cosecha de forraje (kg MS neta) · campaña '+esc(campName(CF.camp))+'</span><div class="tools">'+
-    fs('Campaña','CF.camp',co)+fs('Campo','CF.campo',fo)+fs('Recurso','CF.rec',ro)+
+    fs('Campo','CF.campo',fo)+fs('Recurso','CF.rec',ro)+
     '<span class="seg"><button class="btn'+(CF.uni==='ms'?' pri':'')+'" onclick="CF.uni=\'ms\';render()">kg MS</button><button class="btn'+(CF.uni==='ha'?' pri':'')+'" onclick="CF.uni=\'ha\';render()">kg MS/ha</button></span></div></div>';
   /* totales */
   var tP=0,tS=0,tR=0,porRec={},haT=0;for(r in D.mes){porRec[r]=0;for(k in D.mes[r]){porRec[r]+=D.mes[r][k];tP+=D.mes[r][k];}}for(k in D.supMes)tS+=D.supMes[k];for(k in D.resMes)tR+=D.resMes[k];
@@ -1893,30 +1924,28 @@ function drawCosecha(){for(var i=0;i<CHC.length;i++){try{CHC[i].destroy();}catch
     plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:14}},tooltip:{callbacks:{label:function(c){return ' '+c.dataset.label+': '+nAR(c.parsed.y)+(uh?' kg MS/ha':' kg MS');}}}},scales:{x:{grid:{display:false}},y:{ticks:{callback:function(v){return nAR(v);}},grid:{color:'rgba(0,0,0,0.05)'}}}}}));}
 
 /* ===================== LÍNEA DE TIEMPO POR LOTE (pastoreo / descanso) ===================== */
-var PV='lista',TL={camp:'',desde:'',hasta:'',campo:'',rec:'',gan:''};
+var PV='lista',TL={desde:'',hasta:'',campo:'',rec:'',gan:''};
 function dIdx(s){return Math.round(pd(s)/DAY);}
 function addDias(s,n){return ds(pd(s)+n*DAY);}
 /* filtros compartidos de Pastoreos y Línea de tiempo */
-function rangoTL(){var h2=TL.hasta||hoy(),d2=TL.desde||addDias(h2,-365);return [d2,h2];}
+function rangoTL(){var c=campRango(CAMP),d2=c[0],h2=c[1];if(hoy()>=c[0]&&hoy()<h2)h2=hoy(); /* rango de la campaña del header, achicado por desde/hasta */
+  if(TL.desde&&TL.desde>d2)d2=TL.desde;if(TL.hasta&&TL.hasta<h2)h2=TL.hasta;return [d2,h2];}
 function campRango(c){var a=2000+(+c.substr(0,2));return [a+'-07-01',(a+1)+'-06-30'];}
-function setCampTL(c){TL.camp=c;if(c){var r=campRango(c);TL.desde=r[0];TL.hasta=r[1]>hoy()?hoy():r[1];}else{TL.desde='';TL.hasta='';}render();}
 function pasaFP(g,soloRango){var ls=lotesOf(g),ok=false,j;
   if(TL.campo){for(j=0;j<ls.length;j++)if(LT(ls[j])&&LT(ls[j]).campoId===TL.campo)ok=true;if(!ok)return false;}
   if(TL.rec&&g.tipoActividadId!==TL.rec)return false;
   if(TL.gan&&!gCor(g)){ok=false;for(j=0;j<ls.length;j++)if(ganEf(ls[j]))ok=true;if(!ok)return false;}
-  if(TL.desde||TL.hasta){var ini=iniOf(g);if(!ini)return false;var fin=isClosed(g)?(finOf(g)||ini):hoy();if(TL.desde&&fin<TL.desde)return false;if(TL.hasta&&ini>TL.hasta)return false;}
+  var rg=rangoTL(),ini=iniOf(g);if(!ini)return false;var fin=isClosed(g)?(finOf(g)||ini):hoy();if(fin<rg[0]||ini>rg[1])return false; /* activo en algún día de la campaña (y del rango) */
   return true;}
-function barraFP(tl){var k,i,rg=tl?rangoTL():[TL.desde,TL.hasta];
-  var co='<option value="">'+(tl?'Rango libre':'Todas')+'</option>',cl=camOpts();for(i=0;i<cl.length;i++)co+='<option value="'+cl[i]+'"'+(TL.camp===cl[i]?' selected':'')+'>'+esc(campName(cl[i]))+'</option>';
+function barraFP(tl){var k,i,rg=rangoTL(),cr=campRango(CAMP);
   var fo='<option value="">Todos</option>';for(k in S.campos)fo+='<option value="'+k+'"'+(TL.campo===k?' selected':'')+'>'+esc(S.campos[k].nombre)+'</option>';
   var ro='<option value="">Todos</option>',rl=[];for(k in S.tipos)if(esGan(k))rl.push(S.tipos[k]);rl=byName(rl);for(i=0;i<rl.length;i++)ro+='<option value="'+rl[i].id+'"'+(TL.rec===rl[i].id?' selected':'')+'>'+esc(rl[i].nombre)+'</option>';
   return '<div class="card" style="padding:10px 14px"><div class="tools">'+
-    '<label class="fr">Campaña <select onchange="setCampTL(this.value)">'+co+'</select></label>'+
-    '<label class="fr">Desde <input type="date" value="'+esc(rg[0]||'')+'" onchange="TL.desde=this.value;TL.camp=\'\';render()"></label><label class="fr">Hasta <input type="date" value="'+esc(rg[1]||'')+'" onchange="TL.hasta=this.value;TL.camp=\'\';render()"></label>'+
+    '<label class="fr">Desde <input type="date" min="'+cr[0]+'" max="'+cr[1]+'" value="'+esc(rg[0]||'')+'" onchange="TL.desde=this.value;render()"></label><label class="fr">Hasta <input type="date" min="'+cr[0]+'" max="'+cr[1]+'" value="'+esc(rg[1]||'')+'" onchange="TL.hasta=this.value;render()"></label>'+
     '<label class="fr">Campo <select onchange="TL.campo=this.value;render()">'+fo+'</select></label><label class="fr">Recurso <select onchange="TL.rec=this.value;render()">'+ro+'</select></label>'+
     '<label class="fr"><input type="checkbox"'+(TL.gan?' checked':'')+' onchange="TL.gan=this.checked?\'1\':\'\';render()"> Solo lotes ganaderos</label>'+
-    (TL.camp||TL.desde||TL.hasta||TL.campo||TL.rec||TL.gan?'<button class="btn" onclick="TL={camp:\'\',desde:\'\',hasta:\'\',campo:\'\',rec:\'\',gan:\'\'};render()">Quitar filtros</button>':'')+
-    '</div>'+(!tl&&(TL.desde||TL.hasta)?'<div class="msg" style="margin-top:4px">Se muestran los pastoreos que estuvieron activos entre esas fechas.</div>':'')+'</div>';}
+    (TL.desde||TL.hasta||TL.campo||TL.rec||TL.gan?'<button class="btn" onclick="TL={desde:\'\',hasta:\'\',campo:\'\',rec:\'\',gan:\'\'};render()">Quitar filtros</button>':'')+
+    '</div><div class="msg" style="margin-top:4px">Campaña '+esc(campName(CAMP))+' (se cambia arriba): se muestran los pastoreos que estuvieron activos entre el '+dFmt(pd(rg[0]))+' y el '+dFmt(pd(rg[1]))+'.</div></div>';}
 function viewTimeline(){var rg=rangoTL();calc();
   var d0=dIdx(rg[0]),d1=dIdx(rg[1]),N=d1-d0+1,i,k,COL=colorRec();
   var h='<div class="card"><div class="chd"><span class="ct">Línea de tiempo · pastoreo y descanso por lote</span></div>';
@@ -2109,7 +2138,7 @@ function guardarRes(){if(!CAN||!RESF)return;var R=RESF,L=S.lotes[R.lote];
   if(!saveRes(r))return resErr(LS_ERR);RESF=null;render();}
 function borrarRes(){if(!CAN_ADM||!RESF||!RESF.id)return;var id=RESF.id;if(!removeWhere('gan_reservas',function(x){return x.id===id;}))return resErr(LS_ERR);RESF=null;render();}
 function viewReservas(){var xs=vals(S.reservas),rows=[],i,k;
-  for(i=0;i<xs.length;i++){var r=xs[i];if(RF.desde&&r.fecha<RF.desde)continue;if(RF.hasta&&r.fecha>RF.hasta)continue;if(RF.campo&&r.campoId!==RF.campo)continue;if(RF.tipo&&r.tipo!==RF.tipo)continue;if(RF.lote&&r.loteId!==RF.lote)continue;if(RF.rec&&r.tipoActividadId!==RF.rec)continue;
+  for(i=0;i<xs.length;i++){var r=xs[i];if(campDeMes((r.fecha||'').substr(0,7))!==CAMP)continue;if(RF.desde&&r.fecha<RF.desde)continue;if(RF.hasta&&r.fecha>RF.hasta)continue;if(RF.campo&&r.campoId!==RF.campo)continue;if(RF.tipo&&r.tipo!==RF.tipo)continue;if(RF.lote&&r.loteId!==RF.lote)continue;if(RF.rec&&r.tipoActividadId!==RF.rec)continue;
     if(!match(pName(r.loteId)+' '+rName(r.tipoActividadId)+' '+TIPOS_RES[r.tipo]+' '+(r.obs||'')))continue;rows.push(r);}
   rows.sort(function(a,b){return (b.fecha||'').localeCompare(a.fecha||'');});
   var h='';
