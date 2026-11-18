@@ -589,7 +589,7 @@ footer{padding:14px 24px 22px;display:flex;justify-content:space-between;color:v
 
 <footer>
   <span>Puntal Agro · Herramientas para la toma de decisiones</span>
-  <span>Versión v2026-11-18 10:05 · BUILD 82 · Datos leídos: <span id="fts">—</span></span>
+  <span>Versión v2026-11-18 15:20 · BUILD 83 · Datos leídos: <span id="fts">—</span></span>
 </footer>
 
 <div id="dropOv"><div class="drop2">
@@ -2277,7 +2277,8 @@ function fileSafe(s){return String(s).replace(/[\\\/:*?"<>|]+/g,'-');}
 /* flujo de la campaña (misma cuenta que la solapa Flujo financiero) */
 function pFlow(V,s0){var lab=[],acum=[],sit=[],net=[],vend=[],s=V.start,mx=0,i;
   for(i=s0;i<12;i++){lab.push(V.meses[i]);s+=V.neto[i]+(i>s0?V.banks[i]:0);acum.push(s);sit.push(s+V.sdoPdte[i]+V.exG[i]);net.push(s+V.sdoPdte[i]);}
-  acum.forEach(function(a,j){var pv=j===0?V.start:acum[j-1];vend.push(Math.max(0,-(a-pv)));});
+  /* necesidad financiera: caja + insumos pendientes (acumulado) cuando da negativo, igual que el globito del tablero */
+  net.forEach(function(v){vend.push(Math.max(0,-v));});
   return {lab:lab,acum:acum,sit:sit,net:net,vend:vend,gx:V.exG.slice(s0),rs:V.resX.slice(s0)};}
 function pTon(D,m,usd){var g=null;D.granos.forEach(function(x){if(!g&&/^soja/i.test(x.nombre)&&x.unidad==='t')g=x;});
   if(!g)D.granos.forEach(function(x){if(x.unidad==='t'&&!/silo/i.test(x.nombre)&&x.hasPrice&&(!g||x.exArs[11]>g.exArs[11]))g=x;});
@@ -2432,14 +2433,14 @@ function pptPlan(){
   var mi=0;Fl.sit.forEach(function(v,j){if(v<Fl.sit[mi])mi=j;});
   pBox(sl,6.6,1.1,2.95,0.62,'Posición más ajustada hasta el cierre',uM(Fl.sit[mi]),Fl.sit[mi]<0?PC.te:PC.gr,mesAnio(D0,s0+mi));
   pBox(sl,6.6,1.82,2.95,0.62,'Situación al cierre ('+Fl.lab[Fl.lab.length-1]+')',uM(Fl.sit[Fl.sit.length-1]),PC.gr,'sin reservas');
-  var VL=[],vT=0;Fl.vend.forEach(function(v,j){if(v<0.5)return;vT+=v;VL.push([Fl.lab[j],uM(v)]);});
+  var VL=[],vT=0,vM='';Fl.vend.forEach(function(v,j){if(v<0.5)return;if(v>vT){vT=v;vM=Fl.lab[j];}VL.push([Fl.lab[j],uM(-v)]);});
   sl.addShape('rect',{x:6.6,y:2.54,w:2.95,h:2.25,fill:{color:'FBEDE4'},line:{color:'F0D2BE',width:0.75}});
-  sl.addText([{text:'Necesidad financiera del mes',options:{bold:true,fontSize:10.5,color:PC.tdk,breakLine:true}},
-    {text:VL.length?('Total '+uM(vT)):'No hay: el financiero de todos los meses es positivo.',options:{fontSize:9,color:VL.length?PC.tx:PC.dk,bold:!!VL.length}}],
+  sl.addText([{text:'Necesidad financiera',options:{bold:true,fontSize:10.5,color:PC.tdk,breakLine:true}},
+    {text:VL.length?('Máxima '+uM(-vT)+' ('+vM+')'):'No hay: caja + insumos pendientes es positivo todos los meses.',options:{fontSize:9,color:VL.length?PC.tx:PC.dk,bold:!!VL.length}}],
     {x:6.72,y:2.6,w:2.75,h:0.5,fontFace:'Calibri',valign:'top',margin:0});
   if(VL.length){var rr=VL.map(function(v){return [cc(v[0],{al:'left',b:true}),cc(v[1])];});
     sl.addTable(rr,{x:6.68,y:3.12,w:2.8,colW:[0.8,2.0],fontFace:'Calibri',fontSize:VL.length>8?7.5:8.5,rowH:Math.min(0.2,1.6/VL.length),border:{type:'none'},margin:[0,0.04,0,0.04]});}
-  pNote(sl,'Necesidad financiera del mes: financiero del mes cuando es negativo.');
+  pNote(sl,'Necesidad financiera: caja + insumos pendientes (acumulado) cuando da negativo.');
   /* 6. situación de la empresa */
   L.forEach(function(D){var I=D.ind||{},S=D.se||{},R2=D.res||{};if(I.liquidez==null&&S.endAct==null)return;
     sl=pNew(px);pTitle(sl,'Situación de la empresa'+(L.length>1?' · '+D.empresa:''),'Diagnóstico e indicadores al inicio de la campaña');
