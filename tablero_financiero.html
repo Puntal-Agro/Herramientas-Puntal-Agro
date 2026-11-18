@@ -589,7 +589,7 @@ footer{padding:14px 24px 22px;display:flex;justify-content:space-between;color:v
 
 <footer>
   <span>Puntal Agro · Herramientas para la toma de decisiones</span>
-  <span>Versión v2026-11-09 17:55 · BUILD 81 · Datos leídos: <span id="fts">—</span></span>
+  <span>Versión v2026-11-18 10:05 · BUILD 82 · Datos leídos: <span id="fts">—</span></span>
 </footer>
 
 <div id="dropOv"><div class="drop2">
@@ -1328,9 +1328,9 @@ function renderFlow(V){
   /* 3 barras por mes: [saldo mes anterior + financiero del mes + saldo pendiente de insumos] · existencia de granos · reservas */
   var pAnt=[],pMes=[],net=[];
   for(i=0;i<acum.length;i++){var pv=i===0?V.start:acum[i-1];pAnt.push(pv);pMes.push(acum[i]-pv);net.push(acum[i]+sp[i]);}
-  /* necesidad financiera del mes: el financiero del mes cuando es negativo (lo que hay que cubrir ese mes) */
+  /* globito: caja + insumos pendientes (acumulado) cuando da negativo */
   var SR=[],vend=[],mx0=0;
-  for(i=0;i<net.length;i++){vend.push(Math.max(0,-pMes[i]));mx0+=vend[i];SR.push(mx0);}
+  for(i=0;i<net.length;i++){vend.push(Math.max(0,-net[i]));mx0+=vend[i];SR.push(mx0);}
   var GR=(function(){var D=V.list[0],g=null;D.granos.forEach(function(x){if(!g&&/^soja/i.test(x.nombre)&&x.unidad==='t')g=x;});
     if(!g)D.granos.forEach(function(x){if(x.unidad==='t'&&!/silo/i.test(x.nombre)&&x.hasPrice&&(!g||x.exArs[11]>g.exArs[11]))g=x;});return g?{g:g,D:D}:null;})();
   var ton=function(v,j){if(!GR)return null;var m=s0+j,pr=GR.g.pre[m];if(!(pr>0))return null;return STATE.cur==='USD'?v/pr:v/(pr*GR.D.tc[m]);};
@@ -1356,7 +1356,7 @@ function renderFlow(V){
   CMP={lab:labels,y0:s0,it:[['Saldo financiero mes anterior',pAnt,'#2F5A0E'],['Financiero del mes',pMes,'#639922'],['Saldo pendiente de insumos (acumulado)',sp,'#C8642D'],['Existencia de granos',gx,'#E0A526'],['Reservas',rs,'#8E9AAB']],net:net,sit:sit,V:V,vend:vend,SR:SR,gx:gx,ton:ton,gr:GR?GR.g.nombre.replace(/ (1ª|2ª)$/,''):''};
   drawCompDet();
   document.getElementById('compLeg').innerHTML=
-    '<span><i class="sw" style="background:#2F5A0E"></i> Saldo financiero mes anterior</span>'+'<span><i class="sw" style="background:#639922"></i> Financiero del mes</span>'+'<span><i class="sw" style="background:#C8642D"></i> Saldo pendiente de insumos (acumulado)</span>'+'<span><i class="sw" style="background:#E0A526"></i> Existencia de granos</span>'+'<span><i class="glob"></i> Necesidad financiera del mes (financiero del mes negativo)</span>'+'<span><i class="sw" style="background:#8E9AAB"></i> Reservas</span>';
+    '<span><i class="sw" style="background:#2F5A0E"></i> Saldo financiero mes anterior</span>'+'<span><i class="sw" style="background:#639922"></i> Financiero del mes</span>'+'<span><i class="sw" style="background:#C8642D"></i> Saldo pendiente de insumos (acumulado)</span>'+'<span><i class="sw" style="background:#E0A526"></i> Existencia de granos</span>'+'<span><i class="glob"></i> Necesidad financiera (caja + insumos pendientes acumulado negativo)</span>'+'<span><i class="sw" style="background:#8E9AAB"></i> Reservas</span>';
   document.getElementById('flowSub').textContent='De '+V.meses[s0]+' al cierre de la campaña · '+unitTxt().replace('en ','eje en ')+(STATE.cur==='USD'?' · cada mes a su dólar':'');
   var fromTxt=V.startReal?('saldo real cargado'):(V.startFrom>=0?('estimado desde '+V.meses[V.startFrom]):'estimado');
   document.getElementById('flowNote').textContent='';
