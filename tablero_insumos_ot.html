@@ -1091,7 +1091,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
   <div id="ot-list-view">
     <div class="otl-acciones need-cargar">
       <button type="button" class="btn btn-primary btn-lg" onclick="abrirNuevaOT()">＋ Nueva orden de trabajo</button>
-      <button type="button" class="btn btn-lg" onclick="openOtRapida()" title="Registrar en un paso una labor que ya se hizo">⚡ OT rápida (labor ya hecha)</button>
+      <button type="button" class="btn btn-lg" onclick="openOtRapida()" title="Registrar en un paso una labor que ya se hizo">⚡ OT rápida (o consumo sin OT)</button>
     </div>
 
     <div class="card">
@@ -1123,7 +1123,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
     <div id="otPantHd"></div>
     <div id="otTabs" class="otp-tabs"></div>
     <div class="ot-form-wrap">
-      <div class="ot-form-title"><span class="ct-lg" id="otFormTitle">Nueva orden de trabajo</span><button type="button" class="btn btn-sm" style="margin-left:auto" onclick="openOtRapida()" title="Registrar en un paso una labor ya realizada (en un lote o en una unidad de negocio del campo)">⚡ OT rápida (labor ya hecha)</button></div>
+      <div class="ot-form-title"><span class="ct-lg" id="otFormTitle">Nueva orden de trabajo</span><button type="button" class="btn btn-sm" style="margin-left:auto" onclick="openOtRapida()" title="Registrar en un paso una labor ya realizada (en un lote o en una unidad de negocio del campo)">⚡ OT rápida (o consumo sin OT)</button></div>
       <div id="otEditBanner" class="banner-warn" style="display:none;margin-top:8px"></div>
       <form id="otForm" onsubmit="saveOT(event)">
 
@@ -1465,7 +1465,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
 </main>
 
 <footer>
-  <span>Puntal Agro · Insumos &amp; OT · Versión v2026-11-11 16:06 · BUILD 37</span>
+  <span>Puntal Agro · Insumos &amp; OT · Versión v2026-11-21 16:52 · BUILD 38</span>
   <span id="fts">—</span>
 </footer>
 
@@ -2896,6 +2896,21 @@ function stockDe(insId, depId, w){
   return {ini:x.ini, ent:x.ent, sal:x.sal, real:real, comp:cp.cant, disp:real-cp.cant, ots:ots};
 }
 function stockHoy(insId, depId){ return stockDe(insId, depId, WIN_TODO); }
+// BUILD 38: disponible del insumo sumando todos sus depósitos, incluida la fila
+// "Sin depósito" (lo comprometido en OT que todavía no tienen depósito elegido).
+function dispTotalInsumo(insId){
+  var deps=depsDeInsumo(insId, WIN_TODO), t=0;
+  for(var i=0;i<deps.length;i++) t+=stockHoy(insId, deps[i]).disp;
+  return t;
+}
+// Para un insumo sin depósito en la orden: lo que pide la orden de ese insumo (en todos
+// los depósitos) contra el disponible total, devolviendo lo propio si se está editando.
+function chequeoSinDep(insId, req, propio){
+  var pide=0, dev=0, k, pre=insId+'||';
+  for(k in req){ if(req.hasOwnProperty(k) && k.indexOf(pre)===0) pide+=req[k]; }
+  for(k in propio){ if(propio.hasOwnProperty(k) && k.indexOf(pre)===0) dev+=propio[k]; }
+  return {pide:pide, disp:dispTotalInsumo(insId)+dev};
+}
 // Depósitos (ids) con algún dato del insumo en la ventana: saldo, movimiento o compromiso.
 function depsDeInsumo(insId, w){
   var S=stockWin(w), C=comprometido(), set={}, k;
@@ -3939,8 +3954,7 @@ function addTrabajoALaOt(){
   }
   var sinD=insumosSinDosis(destinosTmp);
   if(sinD.length){ avisoSinDosis(sinD, un); return false; }
-  var sinDep=insumosSinDeposito(destinosTmp);
-  if(sinDep.length){ avisoSinDeposito(sinDep); return false; }
+  // BUILD 38: el depósito puede quedar sin elegir al emitir; es obligatorio al confirmar.
   var laborTipo=byId('o_labor_tipo').value;
   if(laborTipo==='LC' && !byId('o_contratista').value){
     if(!state.contratistas.length){
@@ -4575,8 +4589,6 @@ function saveOT(e){
   for(var sd=0;sd<nuevos.length;sd++){
     var sinD=insumosSinDosis(nuevos[sd].destinos);
     if(sinD.length){ avisoSinDosis(sinD, trabajoEsUN(nuevos[sd])); return; }
-    var sinDep=insumosSinDeposito(nuevos[sd].destinos);
-    if(sinDep.length){ avisoSinDeposito(sinDep); return; }
   }
   // Cada lote tiene que tener ese cultivo en el plan de uso de la campaña de la OT.
   var fuera=destinosFueraDePlan(nuevos, campaniaOt);
@@ -4591,13 +4603,16 @@ function saveOT(e){
   var faltantes=[], sinDep=[];
   for(var key in req){ if(!req.hasOwnProperty(key)) continue;
     var pr=key.split('||'), ins=getInsumo(pr[0]);
-    if(pr[1]===DEP_SIN){ sinDep.push(ins?ins.nombre:pr[0]); continue; }
+    if(pr[1]===DEP_SIN){ sinDep.push(ins?ins.nombre:pr[0]);
+      var cs=chequeoSinDep(pr[0], req, propio);
+      if(cs.pide>cs.disp+0.01) faltantes.push((ins?ins.nombre:pr[0])+' (total del insumo, sin depósito elegido): pide '+f(cs.pide,1)+', disponible '+f(cs.disp,1));
+      continue; }
     var disp=stockHoy(pr[0], pr[1]).disp + (propio[key]||0);
     if(req[key]>disp+0.01) faltantes.push((ins?ins.nombre:pr[0])+' en '+getDepNombre(pr[1])+': pide '+f(req[key],1)+', disponible '+f(disp,1));
   }
   var aviso='';
   if(faltantes.length) aviso+='⚠ Stock disponible insuficiente (real − comprometido por otras OT):\n\n'+faltantes.join('\n')+'\n\n';
-  if(sinDep.length) aviso+='Sin depósito asignado: '+sinDep.join(', ')+' (se elige al aplicar).\n\n';
+  if(sinDep.length) aviso+='Sin depósito asignado: '+sinDep.join(', ')+' (se elige al confirmar).\n\n';
   if(aviso && !confirm(aviso+'¿'+(existente?'Guardar':'Emitir')+' la OT igual? El stock se descuenta recién al aplicar.')) return;
 
   if(existente){
@@ -7951,14 +7966,15 @@ function htmlVentanaRevisar(o){
   var nOrd={}, kOrd=0;
   for(var c=0;c<claves.length;c++){
     var pr=claves[c].split('||'), ins=getInsumo(pr[0]), sinDep=pr[1]===DEP_SIN;
-    var disp = sinDep ? null : stockHoy(pr[0], pr[1]).disp + (propio[claves[c]]||0);
-    var ok = disp===null || req[claves[c]]<=disp+0.01; if(!ok) falta++;
+    var cs = sinDep ? chequeoSinDep(pr[0], req, propio) : null;
+    var disp = sinDep ? cs.disp : stockHoy(pr[0], pr[1]).disp + (propio[claves[c]]||0);
+    var ok = sinDep ? cs.pide<=cs.disp+0.01 : req[claves[c]]<=disp+0.01; if(!ok) falta++;
     if(!nOrd[pr[0]]) nOrd[pr[0]]=++kOrd;
     filas+='<tr><td class="num"><span class="det-orden" title="Orden de carga al tanque">'+nOrd[pr[0]]+'</span></td><td class="tdname"><strong>'+(ins?esc(ins.nombre):pr[0])+'</strong></td><td>'+(ins?esc(ins.un):'')+'</td>'+
       '<td class="num"><strong>'+f(req[claves[c]],2)+'</strong></td>'+
       '<td>'+(sinDep?'<span class="bdg-falta">sin depósito</span>':esc(getDepNombre(pr[1])))+'</td>'+
-      '<td class="num">'+(disp===null?'—':f(disp,1))+'</td>'+
-      '<td>'+(disp===null?'<span class="trb-apl-sub">se elige al confirmar</span>':(ok?'<span class="bdg bg">alcanza</span>':'<span class="bdg-falta">no alcanza</span>'))+'</td></tr>';
+      '<td class="num"'+(sinDep?' title="Disponible total del insumo (todos los depósitos)"':'')+'>'+f(disp,1)+(sinDep?' <span class="trb-apl-sub">total</span>':'')+'</td>'+
+      '<td>'+(ok?'<span class="bdg bg">alcanza</span>':'<span class="bdg-falta">no alcanza</span>')+(sinDep?' <span class="trb-apl-sub">· depósito al confirmar</span>':'')+'</td></tr>';
   }
   return head+
     '<div class="reg-kpis">'+
