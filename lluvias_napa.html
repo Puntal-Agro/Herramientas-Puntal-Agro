@@ -388,8 +388,8 @@ table.acum-res tbody td{border-bottom:none;padding:3px 10px 3px 0;background:tra
   <div class="card card-fil">
     <div class="tools">
       <span class="seg" data-pag="ll" style="display:none"><button class="seg-btn" data-v="todo">Todo</button></span>
-      <label class="tl">Desde <input type="date" id="llDesde" class="inp-fecha" onchange="perManual()"></label>
-      <label class="tl">Hasta <input type="date" id="llFecha" class="inp-fecha" onchange="perManual()"></label>
+      <label class="tl">Desde <input type="date" id="llDesde" class="inp-fecha" onchange="if(fechaCompleta(this))perManual()"></label>
+      <label class="tl">Hasta <input type="date" id="llFecha" class="inp-fecha" onchange="if(fechaCompleta(this))perManual()"></label>
       <span class="seg seg-sm" id="llPerAt"><button class="seg-btn" data-a="camp">Campaña</button><button class="seg-btn" data-a="anio">Año</button><button class="seg-btn" data-a="12m">12 meses</button><button class="seg-btn" data-a="mes">Mes</button><button class="seg-btn" data-a="30">30 días</button></span>
       <div class="ms" id="llCampo" data-ph="Todos los campos" data-pl="campos" onchange="selCampoCambio('ll')"></div>
       <div class="ms" id="llPunto" data-ph="Todos los pluviómetros" data-pl="pluviómetros" onchange="renderLluvias()"></div>
@@ -453,7 +453,7 @@ table.acum-res tbody td{border-bottom:none;padding:3px 10px 3px 0;background:tra
   <div class="card card-fil">
     <div class="tools">
       <span class="seg" data-pag="na" style="display:none"><button class="seg-btn" data-v="todo">Todo</button></span>
-      <label class="tl">Al <input type="date" id="naFecha" onchange="renderNapas()"></label>
+      <label class="tl">Al <input type="date" id="naFecha" onchange="if(fechaCompleta(this))renderNapas()"></label>
       <button class="btn" onclick="byId('naFecha').value=todayISO();renderNapas()">Hoy</button>
       <div class="ms" id="naCampo" data-ph="Todos los campos" data-pl="campos" onchange="selCampoCambio('na')"></div>
       <div class="ms" id="naPunto" data-ph="Todos los freatímetros" data-pl="freatímetros" onchange="renderNapas()"></div>
@@ -541,8 +541,8 @@ table.acum-res tbody td{border-bottom:none;padding:3px 10px 3px 0;background:tra
       <div class="ms" id="regPunto" data-ph="Todos los pluviómetros" data-pl="pluviómetros" onchange="renderRegistros()"></div>
       <select id="regDato" onchange="renderRegistros()"><option value="">Todos los datos</option><option value="mm">Con lluvia</option><option value="napa">Con napa</option></select>
       <select id="regAdv" onchange="renderRegistros()"><option value="">Con o sin adversidad</option><option value="*">Con alguna adversidad</option><option value="viento">Viento</option><option value="helada">Helada</option><option value="granizo">Granizo</option><option value="otra">Otra</option></select>
-      <label class="tl">Desde <input type="date" id="regDesde" onchange="renderRegistros()"></label>
-      <label class="tl">Hasta <input type="date" id="regHasta" onchange="renderRegistros()"></label>
+      <label class="tl">Desde <input type="date" id="regDesde" onchange="if(fechaCompleta(this))renderRegistros()"></label>
+      <label class="tl">Hasta <input type="date" id="regHasta" onchange="if(fechaCompleta(this))renderRegistros()"></label>
       <button class="btn" id="regLimpiar" onclick="regLimpiar()">Limpiar filtros</button>
     </div>
     <div class="tw" id="regTabla"></div>
@@ -578,7 +578,7 @@ table.acum-res tbody td{border-bottom:none;padding:3px 10px 3px 0;background:tra
 </main>
 
 <footer>
-  <span>Puntal Agro · Lluvias y Napa · Versión v2026-11-21 16:10 · BUILD 60</span>
+  <span>Puntal Agro · Lluvias y Napa · Versión v2026-11-21 16:36 · BUILD 63</span>
   <span id="fts">—</span>
 </footer>
 
@@ -588,7 +588,7 @@ table.acum-res tbody td{border-bottom:none;padding:3px 10px 3px 0;background:tra
 
 <script>
 /* ================================================================
-   REGISTRO DE LLUVIAS Y NAPA — BUILD 60
+   REGISTRO DE LLUVIAS Y NAPA — BUILD 63
    ES5 estricto. Sesión, empresa y permisos por pa-core.
    Las entidades propias (pluviómetros, registros, fuera de servicio) todavía
    no están en pa-core: se guardan en localStorage detrás de guardas
@@ -1245,11 +1245,15 @@ function perAtajo(a){
   renderLluvias();
 }
 function perManual(){ PER_AT=''; renderLluvias(); }
+/* Mientras se escribe una fecha a mano el navegador dispara «change» con años incompletos (0002, 0020…):
+   recién se usa cuando el año tiene 4 cifras razonables. Así no se pisa lo que se está tipeando. */
+function fechaCompleta(el){ var v=el.value; if(!v) return true; var y=+v.slice(0,4); return y>=1900 && y<=2100; }
 function periodoLl(){
-  var hoy=todayISO(), h=byId('llFecha').value||hoy; if(h>hoy){ h=hoy; byId('llFecha').value=h; }
-  var d=byId('llDesde').value||inicioCampania(h);
-  if(d>h){ d=h; byId('llDesde').value=d; }
-  byId('llFecha').min=d; byId('llDesde').max=h;
+  var hoy=todayISO(), h=byId('llFecha').value||hoy, d=byId('llDesde').value;
+  if(!fechaCompleta(byId('llFecha'))) h=hoy;
+  if(h>hoy) h=hoy;
+  if(!d || !fechaCompleta(byId('llDesde'))) d=inicioCampania(h);
+  if(d>h){ var t=d; d=h; h=t>hoy?hoy:t; }   // si quedaron al revés se usan invertidas, sin tocar lo escrito
   return {desde:d, hasta:h, n:diffDays(d,h)+1};
 }
 function perTexto(P){ return 'del '+fdl(P.desde)+' al '+fdl(P.hasta); }
@@ -2069,7 +2073,7 @@ function abrirCarga(pid, fecha){
   abrirModal('',
     '<h3>'+(CG.edit?'Registro del '+fdl(fecha)+' · '+esc((getPunto(pid)||{}).nombre||''):'Cargar lluvia')+'</h3>'+
     '<div class="form-row r2">'+
-      '<div class="fld"><label>Fecha *</label><input type="date" id="cgFecha" max="'+hoy+'" value="'+f0+'" onchange="cgActualizar(true)"'+(CG.edit?' disabled':'')+'></div>'+
+      '<div class="fld"><label>Fecha *</label><input type="date" id="cgFecha" max="'+hoy+'" value="'+f0+'" onchange="if(fechaCompleta(this))cgActualizar(true)"'+(CG.edit?' disabled':'')+'></div>'+
       '<div class="fld"><label>Pluviómetro *</label><select id="cgPunto" onchange="cgActualizar(true)"'+(CG.edit?' disabled':'')+'>'+o+'</select></div>'+
     '</div>'+
     '<div id="cgVarios" style="display:none;margin:-2px 0 10px">'+chk+'</div>'+
@@ -3085,19 +3089,52 @@ function graficosParaPdf(v){
   }
   return out;
 }
-function exportarVista(v, tipo){
+// Lluvias → PDF: antes pregunta qué gráficos incluir
+function elegirPdfLluvias(){
+  var actual=GRAF_MODO;
+  function op(k, t, sub){ return '<label class="chk" style="display:flex;gap:8px;align-items:flex-start;margin:0 0 10px"><input type="checkbox" class="pdfOp" value="'+k+'"'+(k==='mapa'||k===actual?' checked':'')+'><span><b>'+t+'</b><span class="tdsub">'+sub+'</span></span></label>'; }
+  abrirModal('',
+    '<h3>¿Qué incluir en el PDF?</h3>'+
+    '<div style="margin:6px 0 12px">'+
+      op('mapa','Mapa de lluvias','Lluvia del período en cada pluviómetro')+
+      op('barras','Lluvia por mes','Barras de cada pluviómetro'+(BAR_HIST?' con el promedio histórico':''))+
+      op('desvio','Desvío respecto al promedio', ANOM_MODO==='acum'?'Anomalía acumulada en el período':'Por mes, en mm')+
+      op('acum','Lluvia acumulada vs. histórico','Con el rango normal de la referencia')+
+    '</div><div class="hint" style="margin-bottom:12px">La tabla y los indicadores van siempre.</div>'+
+    '<div class="fact"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="pdfLluviasElegido()">⬇ Bajar PDF</button></div>');
+}
+function pdfLluvias_capturas(sel){
+  // dibuja cada gráfico elegido en la tarjeta (sin animación), lo copia como imagen y vuelve al que estaba
+  var prev=GRAF_MODO, out=[];
+  for(var i=0;i<sel.length;i++){
+    if(sel[i]==='mapa') continue;
+    GRAF_MODO=sel[i]; renderLluviaGraf();
+    var g=graficosParaPdf('lluvias'); if(g.length) out.push(g[0]);
+  }
+  GRAF_MODO=prev; renderLluviaGraf();
+  return out;
+}
+function pdfLluviasElegido(){
+  var cs=document.querySelectorAll('.pdfOp'), sel=[];
+  for(var i=0;i<cs.length;i++) if(cs[i].checked) sel.push(cs[i].value);
+  closeModal();
+  exportarVista('lluvias','pdf', sel);
+}
+function exportarVista(v, tipo, sel){
+  if(v==='lluvias' && tipo==='pdf' && !sel) return elegirPdfLluvias();
   var D=datosExport(v);
   if(!D || (!D.filas.length && !(D.extra&&D.extra.filas.length))){ alert('No hay datos para bajar con estos filtros.'); return; }
   if(tipo==='xlsx') return excelGenerico(D);
-  D.graficos=graficosParaPdf(v);
-  var kp=byId(v==='lluvias'?'llKpis':(v==='napas'?'naKpis':'')); if(kp) D.resumen=[].map.call(kp.querySelectorAll('.kpi'), function(k){ var l=k.querySelector('.kpi-lbl'), vv=k.querySelector('.kpi-val'), sb=k.querySelector('.kpi-sub'); return (l?l.textContent:'')+': '+(vv?vv.textContent.replace(/\s+/g,' '):'')+(sb&&sb.textContent?' ('+sb.textContent+')':''); });
+  D.graficos = (v==='lluvias' && sel) ? pdfLluvias_capturas(sel) : graficosParaPdf(v);
+  var conMapa = !(v==='lluvias' && sel) || sel.indexOf('mapa')>=0;
+  var kp=byId(v==='lluvias'?'llKpis':(v==='napas'?'naKpis':'')); if(kp) D.resumen=[].map.call(kp.querySelectorAll('.kpi'), function(k){ var l=k.querySelector('.kpi-lbl'), vv=k.querySelector('.kpi-val'), sb=k.querySelector('.kpi-sub'); return (l?l.textContent:'')+': '+(vv?vv.textContent.replace(/\s+/g,' '):'')+(sb&&sb.textContent?' ('+sb.textContent+')':''); }); D.kpis=[].map.call(kp.querySelectorAll('.kpi'), function(k){ var l=k.querySelector('.kpi-lbl'), vv=k.querySelector('.kpi-val'), sb=k.querySelector('.kpi-sub'), pc=vv&&vv.querySelector('.kpi-pct'); var t=vv?vv.textContent:''; if(pc) t=t.replace(pc.textContent,''); return {lbl:l?l.textContent:'', val:t.replace(/\s+/g,' ').trim(), pct:pc?pc.textContent.trim():'', sub:sb?sb.textContent:'', at:k.className.indexOf('kpi-attention')>=0}; });
   function armar(){
     try{ pdfGenerico(D).save(nombreExport(D.titulo, 'pdf')); }
     catch(e){ alert('No se pudo armar el PDF: '+(e && e.message ? e.message : e)); }
   }
   function hacer(){
     var km = v==='lluvias' ? 'll' : (v==='napas' ? 'na' : null);
-    if(!km) return armar();
+    if(!km || !conMapa) return armar();
     capturaMapa(km, function(img){
       if(img){ var st=byId(km==='ll'?'llMapaSub':'naMapaSub'); D.mapa={titulo:km==='ll'?'Mapa de lluvias':'Mapa de napas', sub:st?st.textContent:'', url:img.url, r:img.r}; }
       armar();
@@ -3209,25 +3246,43 @@ function pdfGenerico(D){
   doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(GRIS[0],GRIS[1],GRIS[2]);
   var fl=doc.splitTextToSize(pdfTxt(D.filtros.length?D.filtros.join(' · '):'Sin filtros'), W-2*M); doc.text(fl, M, y); y+=fl.length*4+2;
   doc.setDrawColor(LINEA[0],LINEA[1],LINEA[2]); doc.setLineWidth(0.3); doc.line(M,y,W-M,y); y+=4;
-  if(D.resumen && D.resumen.length){
+  if(D.kpis && D.kpis.length){
+    var KN=D.kpis.length, kg=3, kw=(W-2*M-kg*(KN-1))/KN, kh=0, kl=[];
+    doc.setFontSize(7.5);
+    for(var ki=0; ki<KN; ki++){ kl[ki]=doc.splitTextToSize(pdfTxt(D.kpis[ki].sub||''), kw-7); kh=Math.max(kh, 15+kl[ki].length*3.2); }
+    for(ki=0; ki<KN; ki++){
+      var K=D.kpis[ki], kx=M+ki*(kw+kg), kc=K.at?[192,122,48]:VERDE;
+      doc.setFillColor(248,249,246); doc.setDrawColor(LINEA[0],LINEA[1],LINEA[2]); doc.setLineWidth(0.2); doc.rect(kx, y, kw, kh, 'FD');
+      doc.setFillColor(kc[0],kc[1],kc[2]); doc.rect(kx, y, 1.1, kh, 'F');
+      doc.setFont('helvetica','normal'); doc.setFontSize(6.8); doc.setTextColor(GRIS[0],GRIS[1],GRIS[2]); doc.text(pdfTxt(K.lbl.toUpperCase()), kx+4, y+4.6);
+      doc.setFont('helvetica','bold'); doc.setFontSize(12.5); doc.setTextColor(K.at?154:30, K.at?91:30, K.at?30:30); doc.text(pdfTxt(K.val||'—'), kx+4, y+10.6);
+      if(K.pct){ var vw=doc.getTextWidth(pdfTxt(K.val||'—')); doc.setFontSize(9); doc.setTextColor(GRIS[0],GRIS[1],GRIS[2]); doc.text(pdfTxt(K.pct), kx+4+vw+2, y+10.6); }
+      doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(GRIS[0],GRIS[1],GRIS[2]); doc.text(kl[ki], kx+4, y+14.6);
+    }
+    y+=kh+6;
+  } else if(D.resumen && D.resumen.length){
     doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(30,30,30);
     var rs=doc.splitTextToSize(pdfTxt(D.resumen.join('   ·   ')), W-2*M); doc.text(rs, M, y+2); y+=rs.length*4.2+4;
   }
-  if(D.mapa){ D.graficos=[{titulo:D.mapa.titulo, sub:D.mapa.sub, ley:'', url:D.mapa.url, r:D.mapa.r, fmt:'JPEG'}].concat(D.graficos||[]).slice(0,2); }
+  if(D.mapa){ D.graficos=[{titulo:D.mapa.titulo, sub:D.mapa.sub, ley:'', url:D.mapa.url, r:D.mapa.r, fmt:'JPEG'}].concat(D.graficos||[]); }
   if(D.graficos && D.graficos.length){
-    var gw=D.graficos.length>1 ? (W-2*M-6)/2 : W-2*M;
-    var gh=0; for(var g=0;g<D.graficos.length;g++){ gh=Math.max(gh, Math.min(gw*D.graficos[g].r, H-y-M-30, 95)); }
-    for(g=0;g<D.graficos.length;g++){
-      var G=D.graficos[g], gx=M+g*(gw+6), yy=y;
-      doc.setFont('helvetica','bold'); doc.setFontSize(10.5); doc.setTextColor(30,30,30); doc.text(doc.splitTextToSize(pdfTxt(G.titulo), gw)[0], gx, yy+3); yy+=5;
-      doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(GRIS[0],GRIS[1],GRIS[2]);
-      var st=doc.splitTextToSize(pdfTxt([G.sub, G.ley].filter(function(z){ return !!z; }).join(' · ')), gw).slice(0,3); doc.text(st, gx, yy+2); yy+=st.length*3.4+2;
-      var ih=Math.min(gw*G.r, gh), iw=ih/G.r;
-      doc.addImage(G.url, G.fmt||'PNG', gx, yy, iw, ih);
-      G.fin=yy+ih;
+    var GS=D.graficos, gw=GS.length>1 ? (W-2*M-6)/2 : W-2*M, g;
+    for(var f0=0; f0<GS.length; f0+=2){
+      var par=GS.slice(f0, f0+2), gh=0;
+      for(g=0;g<par.length;g++) gh=Math.max(gh, Math.min(gw*par[g].r, 95));
+      if(y+gh+16>H-M-8){ doc.addPage(); y=M; }
+      var yf=y;
+      for(g=0;g<par.length;g++){
+        var G=par[g], gx=M+g*(gw+6), yy=y;
+        doc.setFont('helvetica','bold'); doc.setFontSize(10.5); doc.setTextColor(30,30,30); doc.text(doc.splitTextToSize(pdfTxt(G.titulo), gw)[0], gx, yy+3); yy+=5;
+        doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(GRIS[0],GRIS[1],GRIS[2]);
+        var st=doc.splitTextToSize(pdfTxt([G.sub, G.ley].filter(function(z){ return !!z; }).join(' · ')), gw).slice(0,3); doc.text(st, gx, yy+2); yy+=st.length*3.4+2;
+        var ih=Math.min(gw*G.r, gh), iw=ih/G.r;
+        doc.addImage(G.url, G.fmt||'PNG', gx, yy, iw, ih);
+        yf=Math.max(yf, yy+ih);
+      }
+      y=yf+7;
     }
-    var yf=y; for(g=0;g<D.graficos.length;g++) yf=Math.max(yf, D.graficos[g].fin);
-    y=yf+6;
     if(D.filas.length && y>H-M-40){ doc.addPage(); y=M; }
     doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(30,30,30); doc.text(pdfTxt(D.titulo), M, y+3); y+=7;
   }
