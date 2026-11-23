@@ -843,6 +843,38 @@ body:not([data-tab="maestros"]) .btn-reset-gl{display:none!important}
 .ot-row-num{font-family:var(--mono);font-weight:600;color:#5C6E3A;font-size:13px}
 /* Tabla de órdenes emitidas */
 .otl-table{width:100%}
+/* BUILD 39: selección múltiple de OT y demanda de insumos sumada */
+.otl-chk{width:28px;text-align:center;cursor:default}
+.otl-chk input{width:16px;height:16px;cursor:pointer;accent-color:var(--green)}
+.otl-row.otl-sel{background:#EEF3E8}
+.otl-row.otl-sel:hover{background:#E5EDDC}
+.osr-bar{margin-left:auto;display:inline-flex;gap:6px;align-items:center}
+.osr-bar .btn-dem{border:1.5px solid var(--green);color:var(--green);background:#fff;font-weight:600}
+.osr-bar .btn-dem:disabled{border-color:var(--border);color:var(--muted);cursor:not-allowed}
+.osr-bar .osr-limpiar{background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;text-decoration:underline;padding:0 4px}
+.osr{border:1px solid var(--border);border-radius:var(--radius);background:#fff;overflow:hidden}
+.osr-body{padding:0}
+.osr-tbl{width:100%}
+.osr-tbl thead th{background:#F1F4EC;color:var(--green-d);font-weight:600;border-bottom:2px solid var(--green);padding:9px 12px}
+.osr-tbl tbody td{padding:8px 12px;border-bottom:none;font-size:12.5px}
+.osr-tbl tr.osr-cat td{background:#E4EBDA;color:var(--green-d);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.5px;padding:6px 12px;border-left:3px solid var(--green)}
+.osr-tbl tr.osr-r td{background:#fff}
+.osr-tbl tr.osr-r.osr-alt td{background:#F6F8F2}
+.osr-tbl tr.osr-r:hover td{background:#EAF0E2}
+.osr-tbl td.osr-ins{font-weight:500;color:var(--text)}
+.osr-tbl td.osr-un{color:var(--muted)}
+.osr-tbl td.osr-pend,.osr-tbl th.osr-pend{box-shadow:inset 1px 0 0 #E1E7D8,inset -1px 0 0 #E1E7D8}
+.osr-tbl td.osr-pend{font-weight:700;color:var(--text)}
+.osr-tbl td.osr-cero{color:#B5BEC9}
+.osr-pill{display:inline-block;padding:2px 8px;border-radius:10px;font-weight:600;white-space:nowrap}
+.osr-pill.neg{background:#FBEAE2;color:var(--bad)}
+.osr-pill.ok{background:#E8F0DF;color:var(--green-d)}
+.osr-stkneg{color:var(--bad)}
+.osr-otchip{display:inline-block;background:#EEF1F5;color:#5A6878;border-radius:8px;padding:1px 6px;font-size:11px;margin:1px 2px 1px 0;white-space:nowrap}
+.osr-neg{color:var(--bad);font-weight:600}
+.osr-nota{color:var(--muted);font-size:11.5px;padding:9px 12px;border-top:1px solid var(--border);background:#FAFBF8;line-height:1.45}
+.osr-hdchips{display:flex;gap:4px;flex-wrap:wrap}
+.osr-hdchips span{background:var(--green);color:#fff;border-radius:10px;padding:2px 9px;font-size:11.5px;font-weight:600}
 .otl-row{cursor:pointer;transition:background .1s}
 .otl-row:hover{background:#F4F6F9}
 .otl-num{font-weight:600;color:#5C6E3A;white-space:nowrap}
@@ -1114,6 +1146,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
           <input type="date" id="otDesde" onchange="renderOtList()" title="Desde">
           <input type="date" id="otHasta" onchange="renderOtList()" title="Hasta">
           <button class="btn btn-sm" id="otClearBtn" onclick="clearOtFilters()">Limpiar filtros</button>
+          <span id="otSelResumen" class="osr-bar"></span>
         </div>
       <div id="otList"></div>
     </div>
@@ -1465,7 +1498,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
 </main>
 
 <footer>
-  <span>Puntal Agro · Insumos &amp; OT · Versión v2026-11-21 16:52 · BUILD 38</span>
+  <span>Puntal Agro · Insumos &amp; OT · Versión v2026-11-23 10:55 · BUILD 39</span>
   <span id="fts">—</span>
 </footer>
 
@@ -4699,7 +4732,7 @@ function renderOtList(){
   var fcampania=state.campaniaActivaId||'';
   var fd1=byId('otDesde').value, fh=byId('otHasta').value;
   var sorted=state.ots.slice().sort(function(a,b){ return b.num-a.num; });
-  var rows='', puedeC=puede('cargar'), expO=[];
+  var rows='', puedeC=puede('cargar'), expO=[], visiblesSel=[];
   for(var i=0;i<sorted.length;i++){
     var o=sorted[i];
     var pares=destinosDeOt(o);
@@ -4733,7 +4766,12 @@ function renderOtList(){
     for(var tt=0;tt<(o.trabajos||[]).length;tt++){ if(o.trabajos[tt].laborTipo==='LC') hayLC=true; else hayLP=true; }
     var tipoTxt = (hayLP&&hayLC) ? 'Mixta' : (hayLC?'Contratada':'Propia');
     expO.push(['#'+o.num+(o.rapida?' (rápida)':''), o.fecha||'', getCampaniaNombre(o.campaniaId)||'', labelLaboresDeOt(o), cultTxt, campoNoms.join(', '), tipoTxt, contratistasDeOt(o), lotesNom.length+(unList.length?' + '+unList.length+' UN':''), haDeOt(o), o.estado==='Aplicada'?'Confirmada':o.estado, o.obs||'']);
-    rows+='<tr class="otl-row" onclick="abrirOT(\''+o.id+'\')">'+
+    visiblesSel.push(o.id);
+    var esSel=!!otSel[o.id];
+    rows+='<tr class="otl-row'+(esSel?' otl-sel':'')+'" onclick="abrirOT(\''+o.id+'\')">'+
+      '<td class="otl-chk" onclick="event.stopPropagation()">'+(o.estado==='Cancelada'
+        ? '<input type="checkbox" disabled title="OT cancelada: no tiene demanda de insumos">'
+        : '<input type="checkbox"'+(esSel?' checked':'')+' onchange="otToggleSel(\''+o.id+'\',this.checked)" title="Sumar esta OT a la demanda de insumos">')+'</td>'+
       '<td class="otl-num">OT #'+o.num+(o.rapida?' <span class="bdg bn" title="Registrada con OT rápida (labor ya realizada)">rápida</span>':'')+'</td>'+
       '<td class="otl-act"><span class="otl-act-cult">'+esc(labelLaboresDeOt(o))+'</span> <span class="otl-act-campo">· '+esc(cultTxt)+' · '+esc(campoNoms.join(', '))+'</span></td>'+
       '<td class="otl-tipo">'+tipoTxt+'</td>'+
@@ -4751,12 +4789,139 @@ function renderOtList(){
   }
   byId('otList').innerHTML = rows
     ? '<div class="tw tw-sticky"><table class="otl-table"><thead><tr>'+
-        '<th>OT</th><th>Labores · cultivos · campo</th><th>Tipo</th><th class="num">Lotes</th><th class="num">Ha</th><th>Fecha</th><th>Estado</th><th></th>'+
+        '<th class="otl-chk"><input type="checkbox" id="otSelTodas" onchange="otSelTodasVisibles(this.checked)" title="Tildar / destildar todas las OT que se ven"></th><th>OT</th><th>Labores · cultivos · campo</th><th>Tipo</th><th class="num">Lotes</th><th class="num">Ha</th><th>Fecha</th><th>Estado</th><th></th>'+
       '</tr></thead><tbody>'+rows+'</tbody></table></div>'
     : '<div class="empty" style="padding:20px;text-align:center">Sin órdenes para los filtros aplicados.</div>';
   marcarFiltrosActivos(['otSearch','otCampoFilter','otLoteFilter','otActFilter','otEstadoFilter','otDesde','otHasta'],'otClearBtn');
+  otVisiblesSel=visiblesSel;
+  var cbT=byId('otSelTodas');
+  if(cbT){
+    var nSelV=0, nSelec=0;
+    for(var vs=0;vs<visiblesSel.length;vs++){ var ov=getOtById(visiblesSel[vs]); if(!ov||ov.estado==='Cancelada') continue; nSelec++; if(otSel[ov.id]) nSelV++; }
+    cbT.checked = nSelec>0 && nSelV===nSelec;
+    cbT.indeterminate = nSelV>0 && nSelV<nSelec;
+  }
+  renderOtSelResumen();
   window.expOts=expO; expEstado('ot', expO.length>0);
   ajustarScrollHoriz();
+}
+/* ================================================================
+   BUILD 39 — SELECCIÓN MÚLTIPLE DE OT Y DEMANDA DE INSUMOS SUMADA
+   Se tildan OT en el listado y el botón «Ver demanda de insumos» abre un
+   cuadro (modal) que muestra, por insumo:
+     · Demanda total: lo planificado en la OT (dosis × ha, o cantidad en UN),
+       contando todos sus lotes, aplicados o no.
+     · Ya aplicado: la parte planificada de los lotes ya confirmados.
+     · Pendiente: lo que falta aplicar (es lo que la OT tiene comprometido).
+     · Stock actual: existencia física sumando todos los depósitos.
+     · Saldo: stock actual − pendiente de las OT tildadas.
+   La selección no se guarda en los datos: vive mientras la página está abierta.
+================================================================ */
+var otSel={}, otVisiblesSel=[];
+function otToggleSel(id, on){ if(on) otSel[id]=true; else delete otSel[id]; renderOtList(); }
+function otSelTodasVisibles(on){
+  for(var i=0;i<otVisiblesSel.length;i++){
+    var o=getOtById(otVisiblesSel[i]); if(!o || o.estado==='Cancelada') continue;
+    if(on) otSel[o.id]=true; else delete otSel[o.id];
+  }
+  renderOtList();
+}
+function otLimpiarSel(){ otSel={}; renderOtList(); }
+function otIdsSeleccionadas(){
+  var out=[];
+  for(var id in otSel){ if(!otSel.hasOwnProperty(id)) continue; var o=getOtById(id); if(o && o.estado!=='Cancelada') out.push(o); else delete otSel[id]; }
+  out.sort(function(a,b){ return a.num-b.num; });
+  return out;
+}
+function demandaInsumosDeOts(ots){
+  var por={}, orden=[];
+  for(var i=0;i<ots.length;i++){
+    var o=ots[i], pares=destinosDeOt(o);
+    for(var p=0;p<pares.length;p++){
+      var de=pares[p].destino, ls=de.lineas||[], apl=(de.estadoLote==='Aplicado');
+      for(var j=0;j<ls.length;j++){
+        var ln=ls[j]; if(!ln.insumoId) continue;
+        var cant=cantReq(de, ln); if(cant<=0) continue;
+        if(!por[ln.insumoId]){ por[ln.insumoId]={total:0, apl:0, pend:0, ots:{}}; orden.push(ln.insumoId); }
+        var x=por[ln.insumoId];
+        x.total+=cant; if(apl) x.apl+=cant; else x.pend+=cant;
+        x.ots[o.num]=true;
+      }
+    }
+  }
+  return {por:por, orden:orden};
+}
+function stockFisicoTotal(insId){
+  var deps=depsDeInsumo(insId, WIN_TODO), t=0;
+  for(var i=0;i<deps.length;i++){ if(deps[i]===DEP_SIN) continue; t+=stockHoy(insId, deps[i]).real; }
+  return t;
+}
+// Barra del listado: botón «Ver demanda» (se habilita al tildar) y destildar.
+function renderOtSelResumen(){
+  var box=byId('otSelResumen'); if(!box) return;
+  var n=otIdsSeleccionadas().length;
+  box.innerHTML=
+    (n ? '<button type="button" class="osr-limpiar" onclick="otLimpiarSel()">destildar</button>' : '')+
+    '<button type="button" class="btn btn-sm btn-dem" onclick="verDemandaSel()"'+(n?'':' disabled')+
+      ' title="'+(n?'Ver los insumos que necesitan las OT tildadas':'Tildá una o más OT en el listado para ver cuántos insumos necesitan')+'">'+
+      'Ver demanda de insumos'+(n?' ('+n+' OT)':'')+'</button>';
+}
+// Modal con la demanda sumada de las OT tildadas.
+function verDemandaSel(){
+  var ots=otIdsSeleccionadas();
+  if(!ots.length){ toast('Tildá una o más OT del listado'); return; }
+  var D=demandaInsumosDeOts(ots);
+  var ids=D.orden.slice().sort(function(a,b){
+    var ia=getInsumo(a)||{}, ib=getInsumo(b)||{};
+    var ca=(ia.cat||'')+'|'+(ia.nombre||''), cb=(ib.cat||'')+'|'+(ib.nombre||'');
+    return ca<cb?-1:(ca>cb?1:0);
+  });
+  var ocultas=0; for(var k=0;k<ots.length;k++){ if(otVisiblesSel.indexOf(ots[k].id)<0) ocultas++; }
+  var nums=ots.map(function(o){ return '#'+o.num; }).join(', ');
+  var filas='', exp=[], catPrev=null, hayFalta=false, nAlt=0;
+  for(var i=0;i<ids.length;i++){
+    var ins=getInsumo(ids[i])||{nombre:'(insumo eliminado)', un:'', cat:''};
+    var x=D.por[ids[i]], stk=stockFisicoTotal(ids[i]), saldo=stk-x.pend;
+    if(saldo<-1e-9) hayFalta=true;
+    var otsI=[]; for(var n in x.ots){ if(x.ots.hasOwnProperty(n)) otsI.push(Number(n)); } otsI.sort(function(a,b){return a-b;});
+    if(ins.cat!==catPrev){ filas+='<tr class="osr-cat"><td colspan="8">'+esc(ins.cat||'Sin categoría')+'</td></tr>'; catPrev=ins.cat; nAlt=0; }
+    var neg=saldo<-1e-9;
+    filas+='<tr class="osr-r'+((nAlt++)%2?' osr-alt':'')+'">'+
+      '<td class="osr-ins">'+esc(ins.nombre)+'</td>'+
+      '<td class="osr-un">'+esc(ins.un||'')+'</td>'+
+      '<td class="num">'+f(x.total,2)+'</td>'+
+      '<td class="num'+(x.apl>0?'':' osr-cero')+'">'+(x.apl>0?f(x.apl,2):'—')+'</td>'+
+      '<td class="num osr-pend'+(x.pend>0?'':' osr-cero')+'">'+(x.pend>0?f(x.pend,2):'—')+'</td>'+
+      '<td class="num'+(stk<-1e-9?' osr-stkneg':'')+'"'+(stk<-1e-9?' title="Stock negativo: se registraron consumos sin la entrada correspondiente"':'')+'>'+f(stk,2)+'</td>'+
+      '<td class="num" title="Stock actual − pendiente de las OT tildadas'+(neg?' · FALTAN '+f(-saldo,2)+' '+esc(ins.un||''):'')+'"><span class="osr-pill '+(neg?'neg':'ok')+'">'+f(saldo,2)+'</span></td>'+
+      '<td>'+otsI.map(function(n){ return '<span class="osr-otchip">#'+n+'</span>'; }).join('')+'</td>'+
+    '</tr>';
+    exp.push([ins.cat||'', ins.nombre, ins.un||'', x.total, x.apl, x.pend, stk, saldo, '#'+otsI.join(', #')]);
+  }
+  window.expOtSel=exp;
+  byId('modalContent').className='modal modal-lg';
+  byId('modalContent').innerHTML=
+    '<div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:4px">'+
+      '<span class="ct-lg">Demanda de insumos</span>'+
+      '<span style="color:var(--muted)">'+ots.length+' OT</span>'+
+      '<span class="osr-hdchips">'+ots.map(function(o){ return '<span>#'+o.num+'</span>'; }).join('')+'</span></div>'+
+    (ocultas?'<div style="color:var(--muted);font-size:12px;margin-bottom:6px">'+ocultas+' de estas OT no se ve'+(ocultas>1?'n':'')+' en el listado con los filtros actuales (igual se suman).</div>':'')+
+    '<div class="osr" style="margin-top:8px"><div class="osr-body">'+(ids.length
+      ? '<div class="tw"><table class="osr-tbl"><thead><tr><th>Insumo</th><th>Unidad</th><th class="num">Demanda total</th><th class="num">Ya aplicado</th><th class="num osr-pend">Pendiente</th><th class="num">Stock actual</th><th class="num">Saldo</th><th>OT</th></tr></thead><tbody>'+filas+'</tbody></table></div>'+
+        '<div class="osr-nota">Cantidades planificadas en las OT (dosis × ha del lote). «Pendiente» es lo que falta aplicar en los lotes no confirmados. «Stock actual» suma todos los depósitos; «Saldo» descuenta solo estas OT'+(hayFalta?': <span class="osr-neg">en rojo, lo que no alcanza</span>':'')+'.</div>'
+      : '<div class="empty" style="padding:14px">Las OT tildadas no tienen insumos cargados.</div>')+
+    '</div></div>'+
+    '<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px">'+
+      (ids.length?'<button class="btn" onclick="exportarDemandaSel()">⬇ Excel</button>':'')+
+      '<button class="btn btn-primary" onclick="closeModal()">Cerrar</button></div>';
+  byId('modalBg').classList.add('on');
+}
+function exportarDemandaSel(){
+  var rows=window.expOtSel||[]; if(!rows.length){ toast('No hay insumos para exportar'); return; }
+  var ots=otIdsSeleccionadas().map(function(o){ return '#'+o.num; }).join(', ');
+  excelGenerico({titulo:'Demanda de insumos de OT', filtros:['OT: '+ots],
+    cols:[{t:'Categoría'},{t:'Insumo',w:44},{t:'Un.',w:10},{t:'Demanda total',num:1},{t:'Ya aplicado',num:1},{t:'Pendiente',num:1},{t:'Stock actual',num:1},{t:'Saldo',num:1},{t:'OT',w:30}],
+    filas:rows.map(function(r){ return {vals:r}; })});
 }
 // Superficie de la OT: cada lote cuenta UNA vez aunque tenga varias labores.
 function otHaTotal(o){ return haDeOt(o); }
