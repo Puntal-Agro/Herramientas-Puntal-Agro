@@ -930,6 +930,11 @@ body:not([data-tab="maestros"]) .btn-reset-gl{display:none!important}
 .otl-act-campo{color:var(--muted)}
 .otl-tipo{color:var(--muted)}
 .otl-fecha{color:var(--muted);white-space:nowrap}
+/* BUILD 41: columna Obs. del listado de OT */
+.otl-obs{width:22%;max-width:260px}
+.otl-obs-t{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px}
+.otl-obs-v{color:var(--muted)}
+.hist-obs-l{font-style:normal;font-weight:600;margin-right:4px}
 .otl-acc{white-space:nowrap;text-align:right}
 .otl-acc .btn{margin-left:4px}
 .ot-row-act{font-size:12px;font-weight:500}
@@ -1562,7 +1567,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
 </main>
 
 <footer>
-  <span>Puntal Agro · Insumos &amp; OT · Versión v2026-11-24 09:45 · BUILD 40</span>
+  <span>Puntal Agro · Insumos &amp; OT · Versión v2026-11-25 15:33 · BUILD 41</span>
   <span id="fts">—</span>
 </footer>
 
@@ -2885,6 +2890,19 @@ function tipoLaborDeNombre(nombre){
 ================================================================ */
 // Recorre todos los destinos de la OT, con su trabajo. Es el reemplazo de
 // "for(d of ot.destinos)" cuando hay que ver cada trabajo-sobre-lote.
+// BUILD 41: observación general de la OT para mostrar (listado, búsqueda, exportes, Historia).
+// La OT rápida guarda un texto fijo como observación general: no se muestra; se muestra lo que se escribió en su campo Observaciones (queda en el lote).
+var OBS_OT_RAPIDA_FIJA='OT rápida (labor ya realizada)';
+function obsGeneralOt(o){
+  if(!o) return '';
+  if(o.rapida){
+    var a=[], ps=destinosDeOt(o);
+    for(var i=0;i<ps.length;i++){ var t=String(ps[i].destino.obs||'').trim(); if(t && a.indexOf(t)<0) a.push(t); }
+    return a.join(' · ');
+  }
+  var s=String(o.obs||'').trim();
+  return s===OBS_OT_RAPIDA_FIJA ? '' : s;
+}
 function destinosDeOt(o){
   var out=[];
   var trs=o.trabajos||[];
@@ -5023,7 +5041,7 @@ function renderOtList(){
     if(fd1 && (o.fecha||'')<fd1) continue;
     if(fh && (o.fecha||'')>fh) continue;
     if(q){
-      var hay='OT'+o.num+' #'+o.num+' '+cultList.join(' ')+' '+lotesNom.join(' ')+' '+(o.obs||'')+' '+labelLaboresDeOt(o)+' '+contratistasDeOt(o);
+      var hay='OT'+o.num+' #'+o.num+' '+cultList.join(' ')+' '+lotesNom.join(' ')+' '+obsGeneralOt(o)+' '+labelLaboresDeOt(o)+' '+contratistasDeOt(o);
       if(hay.toLowerCase().indexOf(q)<0) continue;
     }
     var cultTxt = cultList.length ? cultList.join(', ') : 'sin cultivo';
@@ -5031,7 +5049,7 @@ function renderOtList(){
     var hayLP=false, hayLC=false;
     for(var tt=0;tt<(o.trabajos||[]).length;tt++){ if(o.trabajos[tt].laborTipo==='LC') hayLC=true; else hayLP=true; }
     var tipoTxt = (hayLP&&hayLC) ? 'Mixta' : (hayLC?'Contratada':'Propia');
-    expO.push(['#'+o.num+(o.rapida?' (rápida)':''), o.fecha||'', getCampaniaNombre(o.campaniaId)||'', labelLaboresDeOt(o), cultTxt, campoNoms.join(', '), tipoTxt, contratistasDeOt(o), lotesNom.length+(unList.length?' + '+unList.length+' UN':''), haDeOt(o), o.estado==='Aplicada'?'Confirmada':o.estado, o.obs||'']);
+    expO.push(['#'+o.num+(o.rapida?' (rápida)':''), o.fecha||'', getCampaniaNombre(o.campaniaId)||'', labelLaboresDeOt(o), cultTxt, campoNoms.join(', '), tipoTxt, contratistasDeOt(o), lotesNom.length+(unList.length?' + '+unList.length+' UN':''), haDeOt(o), o.estado==='Aplicada'?'Confirmada':o.estado, obsGeneralOt(o)]);
     visiblesSel.push(o.id);
     var esSel=!!otSel[o.id];
     rows+='<tr class="otl-row'+(esSel?' otl-sel':'')+'" onclick="abrirOT(\''+o.id+'\')">'+
@@ -5040,6 +5058,7 @@ function renderOtList(){
         : '<input type="checkbox"'+(esSel?' checked':'')+' onchange="otToggleSel(\''+o.id+'\',this.checked)" title="Sumar esta OT a la demanda de insumos">')+'</td>'+
       '<td class="otl-num">OT #'+o.num+(o.rapida?' <span class="bdg bn" title="Registrada con OT rápida (labor ya realizada)">rápida</span>':'')+'</td>'+
       '<td class="otl-act"><span class="otl-act-cult">'+esc(labelLaboresDeOt(o))+'</span> <span class="otl-act-campo">· '+esc(cultTxt)+' · '+esc(campoNoms.join(', '))+'</span></td>'+
+      (function(){ var ob=obsGeneralOt(o); return ob ? '<td class="otl-obs" title="'+esc(ob)+'"><div class="otl-obs-t">'+esc(ob)+'</div></td>' : '<td class="otl-obs otl-obs-v">—</td>'; })()+
       '<td class="otl-tipo">'+tipoTxt+'</td>'+
       '<td class="num">'+lotesNom.length+(unList.length?' <span class="bdg by" title="'+esc(unList.join(', '))+'">+'+unList.length+' UN</span>':'')+'</td>'+
       '<td class="num">'+f(haDeOt(o),1)+'</td>'+
@@ -5055,7 +5074,7 @@ function renderOtList(){
   }
   byId('otList').innerHTML = rows
     ? '<div class="tw tw-sticky"><table class="otl-table"><thead><tr>'+
-        '<th class="otl-chk"><input type="checkbox" id="otSelTodas" onchange="otSelTodasVisibles(this.checked)" title="Tildar / destildar todas las OT que se ven"></th><th>OT</th><th>Labores · cultivos · campo</th><th>Tipo</th><th class="num">Lotes</th><th class="num">Ha</th><th>Fecha</th><th>Estado</th><th></th>'+
+        '<th class="otl-chk"><input type="checkbox" id="otSelTodas" onchange="otSelTodasVisibles(this.checked)" title="Tildar / destildar todas las OT que se ven"></th><th>OT</th><th>Labores · cultivos · campo</th><th class="otl-obs">Obs.</th><th>Tipo</th><th class="num">Lotes</th><th class="num">Ha</th><th>Fecha</th><th>Estado</th><th></th>'+
       '</tr></thead><tbody>'+rows+'</tbody></table></div>'
     : '<div class="empty" style="padding:20px;text-align:center">Sin órdenes para los filtros aplicados.</div>';
   marcarFiltrosActivos(['otSearch','otCampoFilter','otLoteFilter','otActFilter','otEstadoFilter','otDesde','otHasta'],'otClearBtn');
@@ -7457,7 +7476,8 @@ function datosHistoriaLote(loteId, campania){
       var realizo = tr.laborTipo==='LP' ? 'Propia' : (tr.contratistaId ? getContratistaNombre(tr.contratistaId) : 'Contratada');
       regs.push({pend:pend, fecha:(pend?o.fecha:de.fechaAplicReal)||o.fecha||'', otNum:o.num, campania:o.campaniaId||'', labor:nombreLaborDeTrabajo(tr),
         tipo:tr.laborTipo, realizo:realizo, ha:haR, cultivo:de.cultivo||'', resiembra:!!(tr.esResiembra||esLaborResiembra(tr.laborId, tr.laborTipo)),
-        obs:[de.obs||'', notaCambioCultivo(de)].filter(function(x){ return !!x; }).join(' · '), prods:prods});
+        obs:[de.obs||'', notaCambioCultivo(de)].filter(function(x){ return !!x; }).join(' · '), prods:prods,
+        obsOt:(o.rapida?'':obsGeneralOt(o))}); // BUILD 41: observación general de la OT (la OT rápida ya la muestra como observación del lote)
     }
   }
   var ordC={}; for(var oc=0;oc<(state.campanias||[]).length;oc++) ordC[state.campanias[oc].id]=oc;
@@ -7528,7 +7548,8 @@ function renderHistoriaLote(){
             '<div class="hist-lab"><strong>'+esc(x.labor)+'</strong>'+(x.pend?'<span class="bdg-pend" style="margin-left:6px">Pendiente</span>':'')+(x.resiembra?' <span class="bdg bn">Resiembra</span>':'')+
               '<span class="hist-meta">'+esc(x.realizo)+' · '+f(x.ha,1)+' ha · '+esc(x.cultivo)+' · OT #'+x.otNum+'</span></div>'+
             (prods?'<table class="hist-prod"><thead><tr><th>Producto</th><th class="num">Dosis</th><th class="num">Total</th></tr></thead><tbody>'+prods+'</tbody></table>':'<div class="hist-sin">Sin productos</div>')+
-            (x.obs?'<div class="hist-obs">'+esc(x.obs)+'</div>':'')+
+            (x.obsOt?'<div class="hist-obs"><span class="hist-obs-l">OT:</span>'+esc(x.obsOt)+'</div>':'')+
+            (x.obs?'<div class="hist-obs"'+(x.obsOt?' style="margin-top:2px"':'')+'><span class="hist-obs-l">Lote:</span>'+esc(x.obs)+'</div>':'')+
           '</div>'+
         '</div>';
       }
@@ -7663,7 +7684,9 @@ function dibujarHistoriaLote(doc, loteId, regs, campania){
       }
       var altP=0; for(var q2=0;q2<filasP.length;q2++) altP+=filasP[q2].n.length*LH;
       if(!filasP.length) altP=LH;
-      var obs=x.obs?doc.splitTextToSize(pdfTxt('Obs.: '+x.obs), W-2*M-cols[0].w-3):[];
+      var obs=[]; // BUILD 41: OT y Lote por separado
+      if(x.obsOt) obs=obs.concat(doc.splitTextToSize(pdfTxt('OT: '+x.obsOt), W-2*M-cols[0].w-3));
+      if(x.obs) obs=obs.concat(doc.splitTextToSize(pdfTxt('Lote: '+x.obs), W-2*M-cols[0].w-3));
       var contH=Math.max(lab.length*LH, rea.length*LH+LH, altP);
       var alto=contH+(obs.length?obs.length*LH+1.5:0)+3;
       if(y+alto>H-M-8) nuevaHoja();
