@@ -155,6 +155,14 @@ thead th .thsub{display:block;font-size:9.5px;font-weight:500;color:#AEB7C2;
 /* La campaña a la que pertenece lo que muestra la tarjeta */
 .ct-camp{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:600;white-space:nowrap;background:#EAF0E3;color:#3B5226;border:1px solid #C9D8B9;vertical-align:2px}
 thead th.r{text-align:right}
+/* BUILD 27: encabezados prolijos — todos los títulos sobre la misma línea, apoyados
+   abajo, y la unidad debajo en gris (o un renglón vacío si no tiene). */
+thead th{vertical-align:bottom}
+thead th.fill{width:99%}
+thead th.th-grp{text-align:center;padding-bottom:3px;color:#56626F}
+thead th.th-grp .thsub{display:inline;margin-left:4px}
+thead tr.th-r1 th.th-grp{border-bottom:1px solid #DDE3EA;box-shadow:none}
+.scroll-fijo thead tr.th-r2 th{top:var(--h-g1, 22px)}
 thead th.c{text-align:center}
 /* Una sola línea divisoria donde cambia la naturaleza del dato */
 thead th.gs, tbody td.gs{border-left:1px solid #EEF1F5}
@@ -515,7 +523,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
         <button class="btn" id="bt-ft-calc" onclick="togVista('ft')">Ver análisis</button>
     </div>
     <div class="scroll scroll-fijo"><table>
-      <thead><tr id="th-ft"></tr></thead>
+      <thead id="th-ft"></thead>
       <tbody id="tb-ft"></tbody>
     </table></div>
     <details class="hint ayuda"><summary>Cómo se lee esta tabla</summary>
@@ -861,8 +869,8 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
      suelo y aplicaciones de fertilizante.  → ver handoff para Mariana.
    ═══════════════════════════════════════════════════════════════════════ */
 
-var BUILD = 26;
-var VERSION = 'v2026-11-25 15:56';
+var BUILD = 27;
+var VERSION = 'v2026-11-25 16:22';
 
 /* ── Claves de almacenamiento ──────────────────────────────────────── */
 var K = {
@@ -1922,8 +1930,8 @@ function renderLotes(){
   /* BUILD 23: el campo es una columna (sin filas de agrupación) y todas las columnas se ordenan */
   document.getElementById('th-lot').innerHTML =
       thS('lot','campo','Campo') + thS('lot','lote','Lote') + thS('lot','amb','Amb.')
-    + thS('lot','ha','Sup','r') + thS('lot','cultivo','Cultivo','gs')
-    + thS('lot','estS','Siembra','c gs') + thS('lot','estF','Fertilización','c');
+    + thS('lot','ha','Sup','r','','ha') + thS('lot','cultivo','Cultivo','gs')
+    + thS('lot','estS','Siembra','c gs') + thS('lot','estF','Fertilización','c') + '<th class="fill"><span class="thsub">&nbsp;</span></th>';
 
   for(i=0; i<filas.length; i++){
     r = filas[i];
@@ -1963,16 +1971,16 @@ function renderLotes(){
             'programarDesdeLote(\'' + jsq(r.loteId) + '\',\'' + jsq(r.cultivo) + '\')', 'siembra') + '</td>'
       + '<td class="c">' + badgeAccion(stF,
             'fertDesdeLoteTab(\'' + jsq(r.loteId) + '\',\'' + jsq(r.cultivo) + '\')', 'fertilización') + '</td>'
-      + '</tr>';
+      + '<td></td></tr>';
   }
 
   var tb = document.getElementById('tb-lot');
   if(!filas.length){
-    tb.innerHTML = filaVacia(7, !CAMPANIA
+    tb.innerHTML = filaVacia(8, !CAMPANIA
       ? 'Elegí una campaña para ver sus lotes.'
       : 'No hay actividades cargadas para esta campaña.<br>Los lotes y cultivos se crean en <b>Plan de Uso del Suelo</b>.');
   } else if(!visibles.length){
-    tb.innerHTML = filaVacia(7, 'Ningún lote cumple con los filtros aplicados.');
+    tb.innerHTML = filaVacia(8, 'Ningún lote cumple con los filtros aplicados.');
   } else {
     tb.innerHTML = h;
   }
@@ -2013,7 +2021,7 @@ function thS(t, k, label, cls, title, sub){
     + ' title="' + esc(title ? title + ' · ' : '') + 'Ordenar por esta columna"'
     + ' onclick="setOrden(\'' + t + '\',\'' + k + '\')">' + label
     + (on ? '<span class="sa">' + (o.d > 0 ? '&#9650;' : '&#9660;') + '</span>' : '')
-    + (sub ? '<span class="thsub">' + sub + '</span>' : '') + '</th>';
+    + '<span class="thsub">' + (sub || '&nbsp;') + '</span></th>';
 }
 function setOrden(t, k){
   var o = ORDEN[t];
@@ -2546,18 +2554,18 @@ function renderSiembra(){
   lista.sort(cmpCronograma);
 
   /* ── Encabezado (BUILD 23: campo como columna, todas ordenables) ── */
-  var cols = [thS('sb','campo','Campo'), thS('sb','lote','Lote'), thS('sb','amb','Amb.'), thS('sb','ha','Sup','r'),
+  var cols = [thS('sb','campo','Campo'), thS('sb','lote','Lote'), thS('sb','amb','Amb.'), thS('sb','ha','Sup','r','','ha'),
               thS('sb','cultivo','Cultivo','gs'), thS('sb','partida','Genotipo / Partida'), thS('sb','rango','Rango'),
               thS('sb','orden','Orden','r','Orden de siembra dentro del rango (1 = primero)'),
-              thS('sb','des','Dist. e/surcos','r','Distancia entre surcos (m)'),
-              thS('sb','semMl','Sem/m lineal','r','Semillas por metro lineal de surco')];
+              thS('sb','des','Dist. surcos','r','Distancia entre surcos','m'),
+              thS('sb','semMl','Semillas','r','Semillas por metro lineal de surco','por m lineal')];
   if(verCalc){
-    cols.push(thS('sb','obj','Obj pl/m²','r gs'), thS('sb','vc','VC%','r'),
-              thS('sb','perd','Pérd%','r','Coeficiente de pérdida: va por ambiente'), thS('sb','semM2','sem/m²','r'));
+    cols.push(thS('sb','obj','Objetivo','r gs','','pl/m²'), thS('sb','vc','VC','r','','%'),
+              thS('sb','perd','Pérdida','r','Coeficiente de pérdida: va por ambiente','%'), thS('sb','semM2','Semillas','r','','por m²'));
   }
-  cols.push(thS('sb','dens','Dens/ha','r gs'), thS('sb','total','Semilla','r'),
+  cols.push(thS('sb','dens','Densidad','r gs','','por ha'), thS('sb','total','Semilla','r','','total'),
             thS('sb','trat','Curasemillas e inoculantes','ins gs'),
-            thS('sb','fertS','Fert. a la siembra','ins'), thS('sb','obs','Observación','gs'), '<th></th>');
+            thS('sb','fertS','Fert. a la siembra','ins'), thS('sb','obs','Observación','gs fill'), '<th></th>');
   document.getElementById('th-sb').innerHTML = cols.join('');
   var nCols = cols.length;
 
@@ -2618,7 +2626,7 @@ function renderSiembra(){
       + '<td class="tdname">' + (c.p ? esc(c.p.nombre) : '<span class="bdg br">sin partida</span>') + '</td>'
       + '<td>' + selRangoSiembra(s) + '</td>'
       + '<td class="r">' + (primera ? '<input type="number" class="inp-ord" min="1" step="1" value="' + (s.orden || '') + '" placeholder="—" title="Orden de siembra dentro del rango" onchange="setOrdenSiembra(\'' + s.id + '\', this.value)">' : '') + '</td>';
-    h += '<td class="r">' + (s.des != null && s.des !== '' ? f(s.des, 2) + ' m' : '<span class="bdg-pend">Falta</span>') + '</td>'
+    h += '<td class="r">' + (s.des != null && s.des !== '' ? f(s.des, 2) : '<span class="bdg-pend">Falta</span>') + '</td>'
       +  '<td class="r res">' + (c.wSemMl !== null ? f(c.wSemMl, 1) : '—') + '' + '</td>';
     if(verCalc){
       h += '<td class="r dato gs">' + (multi ? 'pond.' : f(c.filas.length ? c.filas[0].calc.objPl : null, 0)) + '</td>'
@@ -2930,22 +2938,31 @@ function renderFert(){
   ordenarTabla(visibles, 'ft', valorFert, function(x, y){ return x.pos - y.pos; });
 
   /* ── Encabezado (BUILD 23: campo como columna, todas ordenables) ── */
-  var cols = [thS('ft','campo','Campo'), thS('ft','lote','Lote'), thS('ft','amb','Amb.'), thS('ft','ha','Sup','r'),
+  /* BUILD 27: dos renglones. Arriba el grupo «Aplicado · kg/ha» sobre N, P₂O₅, K₂O y S;
+     el resto de las columnas ocupa los dos renglones (rowspan). */
+  function rs(th){ return th.replace('<th ', '<th rowspan="2" '); }
+  var cols = [thS('ft','campo','Campo'), thS('ft','lote','Lote'), thS('ft','amb','Amb.'), thS('ft','ha','Sup','r','','ha'),
               thS('ft','cultivo','Cultivo','gs'),
               thS('ft','prod','Fertilizante','gs'),
-              thS('ft','dosis','Dosis','r','',"kg/ha"),
-              thS('ft','totLote','Total lote','r','',"kg"),
+              thS('ft','dosis','Dosis','r','','kg/ha'),
+              thS('ft','totLote','Total lote','r','','kg'),
               thS('ft','momento','Momento')];
   if(verAn){
-    cols.push(thS('ft','mo','MO%','r gs'), thS('ft','p','P ppm','r'), thS('ft','s','S ppm','r'),
-              thS('ft','k','K ppm','r'), thS('ft','zn','Zn ppm','r'), thS('ft','nSuelo','N suelo','r'));
+    cols.push(thS('ft','mo','M.O.','r gs','','%'), thS('ft','p','P','r','','ppm'), thS('ft','s','S-SO₄','r','','ppm'),
+              thS('ft','k','K','r','','ppm'), thS('ft','zn','Zn','r','','ppm'), thS('ft','nSuelo','N suelo','r','','kg/ha'));
   }
-  cols.push(thS('ft','n','N','r gs'), thS('ft','p2o5','P₂O₅','r'), thS('ft','k2o','K₂O','r'), thS('ft','sApl','S','r'),
-            thS('ft','nLog','N lograble','r gs'), thS('ft','pLog','P lograble','r', 'P del suelo + lo que aporta el P₂O₅ aplicado'),
-            thS('ft','alertas','Alertas','gs'));
-  cols.push('<th class="gs"></th>');
-  document.getElementById('th-ft').innerHTML = cols.join('');
-  var nCols = cols.length;
+  var antes = cols.length;
+  var grupo = [thS('ft','n','N','r gs'), thS('ft','p2o5','P₂O₅','r'), thS('ft','k2o','K₂O','r'), thS('ft','sApl','S','r')];
+  var despues = [thS('ft','nLog','N lograble','r gs','','kg N/ha'), thS('ft','pLog','P lograble','r', 'P del suelo + lo que aporta el P₂O₅ aplicado','ppm'),
+                 thS('ft','alertas','Alertas','gs fill'), '<th class="gs"><span class="thsub">&nbsp;</span></th>'];
+  var r1 = [], k;
+  for(k=0; k<cols.length; k++) r1.push(rs(cols[k]));
+  r1.push('<th colspan="4" class="th-grp gs" title="Nutrientes aplicados por hectárea">Aplicado<span class="thsub">kg/ha</span></th>');
+  for(k=0; k<despues.length; k++) r1.push(rs(despues[k]));
+  document.getElementById('th-ft').innerHTML = '<tr class="th-r1">' + r1.join('') + '</tr><tr class="th-r2">' + grupo.join('') + '</tr>';
+  var gEl = document.querySelector('#th-ft .th-grp');
+  if(gEl) document.getElementById('th-ft').style.setProperty('--h-g1', gEl.offsetHeight + 'px');
+  var nCols = antes + grupo.length + despues.length;
 
   var h = '', j;
   for(i=0; i<visibles.length; i++){
