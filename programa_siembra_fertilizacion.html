@@ -46,6 +46,25 @@ header{background:var(--card);border-bottom:1px solid var(--border);padding:10px
 .inst-lbl{font-size:10px;color:#475569;text-transform:uppercase;letter-spacing:.5px;font-weight:500;white-space:nowrap}
 .inst-btn{padding:5px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1.5px solid #CBD5E1;background:var(--card);color:#475569;transition:all .12s;font-family:var(--sans)}
 .inst-btn.active{background:#4A6533;color:#fff;border-color:#4A6533}
+/* Botón con desplegable (Configuración) */
+.inst-dd{position:relative;display:inline-block}
+.dd-menu{display:none;position:absolute;top:calc(100% + 6px);left:0;min-width:260px;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(15,25,35,.12);padding:6px;z-index:30}
+.dd-menu.open{display:block}
+.dd-menu button{display:block;width:100%;text-align:left;border:none;background:none;padding:8px 10px;border-radius:6px;font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--text);cursor:pointer}
+.dd-menu button span{display:block;font-size:11px;font-weight:400;color:var(--muted);margin-top:1px}
+.dd-menu button:hover{background:#F0F4EC;color:#3B5226}
+/* Encabezado de tarjeta que se pliega (Avanzado) */
+.chd-tog{cursor:pointer;user-select:none;margin-bottom:0}
+.chd-tog:hover .ct{color:var(--verde)}
+.ct-sub{font-size:11.5px;font-weight:400;color:var(--muted);margin-left:8px}
+#avz-chev{display:inline-block;font-size:9px;color:#A8B2BD;transform:rotate(-90deg);transition:transform .15s;vertical-align:2px}
+#avz-body{margin-top:12px}
+/* Grilla pareja de parámetros */
+.frow-par{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px 14px;align-items:end}
+.cfg-sub{display:flex;flex-direction:column;gap:12px}
+.frow-par .fcol input{width:100%}
+.frow-corta{display:flex;gap:12px}
+.frow-corta .fcol{flex:0 0 140px}
 
 /* ── Controles ────────────────────────────────────────── */
 select,input[type=text],input[type=number],input[type=date]{
@@ -140,8 +159,16 @@ thead th.c{text-align:center}
 /* Una sola línea divisoria donde cambia la naturaleza del dato */
 thead th.gs, tbody td.gs{border-left:1px solid #EEF1F5}
 
-/* Filas: sin rayado, hover suave (como Labores) */
-tbody tr:hover > td{background:#FAFBFC}
+/* BUILD 25: filas con fondo intercalado (estándar para todas las herramientas).
+   En Siembra el intercalado va por lote, así sus partidas y ambientes se leen juntos. */
+tbody tr:nth-child(even) > td{background:#F6F8FA}
+#tb-sb tr > td, #tb-ft tr > td{background:#fff}
+#tb-sb tr.par > td, #tb-ft tr.par > td{background:#F6F8FA}
+tbody tr:hover > td, #tb-sb tr:hover > td, #tb-ft tr:hover > td{background:#EEF3E8}
+/* BUILD 26: dosis del lote que sale del promedio de sus ambientes (se edita abajo) */
+.dos-pond{color:#56626F;font-variant-numeric:tabular-nums;cursor:help}
+.dos-pond::before{content:'≈ ';color:#A8B2BD}
+.dos-her{color:#A8B2BD;font-variant-numeric:tabular-nums}
 .campo-c{color:#56626F;font-weight:500;font-variant-numeric:normal}
 /* Segunda partida del mismo lote: se nota que es continuación */
 tbody tr.cont > td{border-top:none}
@@ -198,6 +225,18 @@ thead th.ins{min-width:148px}
 .sel-rg:hover{border-color:var(--verde)}
 .inp-ord{height:26px;box-sizing:border-box;width:46px;text-align:right;font-family:var(--sans);font-size:12px;border:1px solid var(--border);border-radius:6px;padding:0 5px;background:#fff}
 .inp-ord:focus,.sel-rg:focus{outline:none;border-color:var(--verde)}
+/* Dosis editable en la tabla de Fertilización */
+.inp-dos{width:62px;height:24px;margin:1px 0}
+.u-dos{font-size:10px;color:var(--muted);margin-left:3px}
+.fs-l{font-size:12px;line-height:1.6;padding:2px 0}
+.vc-base{display:block;font-size:9.5px;color:#99A3AE;margin-top:1px}
+/* Fecha dd/mm/aaaa con botón de calendario */
+.fecha-w{position:relative;display:flex;align-items:center;gap:4px;width:100%}
+.fecha-w .inp-fecha{flex:1;min-width:0;max-width:140px}
+.btn-cal{border:1px solid var(--border);background:var(--card);border-radius:6px;cursor:pointer;height:30px;width:32px;font-size:13px;line-height:1;padding:0}
+.btn-cal:hover{border-color:var(--verde);background:#F0F4EC}
+.cal-oculto{position:absolute;left:0;bottom:0;width:1px;height:1px;opacity:0;pointer-events:none;border:0;padding:0}
+.fs-l .muted{color:var(--muted)}
 tbody td{padding:6px 8px;border-bottom:1px solid #F5F7FA;font-family:var(--sans);font-variant-numeric:tabular-nums;font-size:12px;white-space:nowrap;vertical-align:middle}
 tbody td.r{text-align:right}
 tbody td.c{text-align:center}
@@ -227,6 +266,7 @@ table.mini .mp-u{color:#99A3AE;font-variant-numeric:normal;white-space:nowrap;pa
 .bamb{background:#EEF0F3;color:#5F6B7A;font-weight:500;letter-spacing:.2px}
 /* Badge que además es el botón de la fila */
 .bdg-act{border:1px solid transparent;cursor:pointer;padding:3px 10px;line-height:1.35;transition:all .12s}
+.bdg-st{padding:1px 8px;font-size:10px;min-width:74px}
 .bdg-act:hover{filter:brightness(.97)}
 .bg.bdg-act:hover{border-color:#B5CC9A}
 .by.bdg-act:hover{border-color:#D9B98F}
@@ -246,12 +286,44 @@ table.mini .mp-u{color:#99A3AE;font-variant-numeric:normal;white-space:nowrap;pa
 .frow:last-child{margin-bottom:0}
 .fcol{flex:1;min-width:120px}
 .fcol input,.fcol select{width:100%}
+/* BUILD 25: en las ventanas, los números van en campos angostos junto a su rótulo */
+#mdl-b .fcol input[type=number]{max-width:170px}
+#mdl-b .frow{align-items:flex-end}
+/* BUILD 26: fertilización por ambiente */
+.chk-amb{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:#2F4220;
+  background:#F0F4EC;border:1px solid #D5E0CB;border-radius:6px;padding:5px 10px;margin-bottom:10px;cursor:pointer}
+.chk-amb input{accent-color:#4A6533}
+.amb-chips{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.amb-chip{font-size:12px;background:#F6F8FA;border:1px solid #E3E8EE;border-radius:12px;padding:3px 10px;font-variant-numeric:tabular-nums}
+.amb-chip b{color:#2F4220;font-weight:600}
+.amb-tot{font-size:12px;color:#56626F;font-variant-numeric:tabular-nums}
+#mdl-b table.tb-amb{width:auto}
+#mdl-b table.tb-amb th, #mdl-b table.tb-amb td{padding:4px 6px}
+#mdl-b table.tb-an input{width:62px}
+#mdl-b table.tb-obj input{width:96px}
+#mdl-b table.tb-amb input::placeholder{color:#A8B2BD}
+.amb-ha{font-size:10px;color:#A8B2BD;font-weight:400}
+.nsu{font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.rec-c{white-space:nowrap}
+.rec-v{display:inline-block;min-width:34px;font-variant-numeric:tabular-nums}
+tr.rec-tot > td{border-top:1px solid #D4DAE4;font-weight:600}
+tr.ap-amb > td{background:#FAFBF8 !important;padding-top:2px;padding-bottom:8px}
+.ap-amb-w{display:flex;flex-wrap:wrap;gap:6px 14px;padding-left:10px;border-left:2px solid #D5E0CB}
+.ap-amb-c{display:flex;align-items:center;gap:6px;font-size:12px}
+.ap-amb-c label{font-weight:600;color:#2F4220;white-space:nowrap}
+.ap-amb-c label span{font-weight:400;color:#A8B2BD;font-size:11px}
+.ap-amb-c input{width:72px}
+.ap-amb-s{font-size:11px;min-width:48px}
+.lote-cab{display:flex;align-items:baseline;gap:10px;padding:0 0 12px;margin-bottom:12px;border-bottom:1px solid #EDF0F4;font-size:15px}
+.lote-cab .fl{margin:0}
+.lote-cab-c{font-size:12px;color:var(--muted)}
 
 /* Nivel 1 de jerarquía: encabezado de sección del formulario.
    Barra de color a la izquierda + aire arriba: separa un bloque del siguiente. */
 .fsec{font-size:14px;font-weight:600;letter-spacing:-.2px;color:var(--text);
       margin:30px 0 12px;padding-left:11px;border-left:3px solid var(--verde);line-height:1.3}
 .fsec:first-child{margin-top:0}
+#ft-amb-sec > .fsec:first-child, #ft-lote-zona > .fsec:first-child{margin-top:30px}
 .fsec-t{border-left-color:var(--terra)}
 .fsec-n{border-left-color:#A86A1F}
 .fsec .fsub{display:block;font-size:11.5px;font-weight:400;color:var(--muted);margin-top:3px;letter-spacing:0}
@@ -272,6 +344,7 @@ table.mini .mp-u{color:#99A3AE;font-variant-numeric:normal;white-space:nowrap;pa
 .fsec.fsec-fija{cursor:default}
 #mdl-b input:disabled,#mdl-b select:disabled{background:#F3F5F7;color:#AEB7C2;cursor:not-allowed}
 .fsec.cerrado + .blk, .fsec.cerrado + .pick, .fsec.cerrado + .scroll{display:none}
+.sec-oculto{display:none!important}
 
 .blk > .frow:last-child{margin-bottom:0}
 .blk table thead th{background:transparent}
@@ -281,7 +354,7 @@ table.mini .mp-u{color:#99A3AE;font-variant-numeric:normal;white-space:nowrap;pa
       display:flex;gap:26px;flex-wrap:wrap;margin-top:14px}
 .calc .ci{min-width:72px}
 .calc .cv{font-size:19px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.15;color:var(--verde)}
-.calc .ci-fin .cv{color:var(--terra)}
+.calc .ci-fin .cv{color:#2F4220;font-weight:700}
 .calc .cl{font-size:10.5px;color:#7F8B79;font-weight:500;margin-top:3px;letter-spacing:.1px}
 
 .warn{background:#FFF8E6;color:#8A5A10;border:1px solid #F3E2BC;border-radius:8px;
@@ -346,7 +419,14 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
 <div class="inst-bar">
   <span class="inst-lbl">Módulo:</span>
   <button class="inst-btn active" id="tb-lotes"   onclick="showTab('lotes',this)">Lotes de la campaña</button>
-  <button class="inst-btn"        id="tb-cfg"     onclick="showTab('cfg',this)">Configuración</button>
+  <div class="inst-dd" id="dd-cfg">
+    <button class="inst-btn" id="tb-cfg" onclick="abrirMenuCfg(event)">Configuración &#9662;</button>
+    <div class="dd-menu" id="dd-cfg-menu">
+      <button onclick="irCfg('campania')">Datos de campaña<span>Partidas, rangos y sembradoras</span></button>
+      <button onclick="irCfg('param')">Parámetros<span>Fertilizantes, pérdida, P, fitotoxicidad y avanzado</span></button>
+      <button onclick="irCfg('datos')">Datos<span>Importar desde Excel y borrar</span></button>
+    </div>
+  </div>
   <button class="inst-btn"        id="tb-siembra" onclick="showTab('siembra',this)">Siembra</button>
   <button class="inst-btn"        id="tb-fert"    onclick="showTab('fert',this)">Fertilización</button>
   <button class="inst-btn"        id="tb-semb"    onclick="showTab('semb',this)">Sembradoras</button>
@@ -424,6 +504,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
         <select id="ft-f-campo" onchange="renderFert()"><option value="">Todos los campos</option></select>
         <select id="ft-f-cult" onchange="renderFert()"><option value="">Todos los cultivos</option></select>
         <select id="ft-f-amb" onchange="renderFert()" title="Ver solo los lotes con ese ambiente"><option value="">Todos los ambientes</option></select>
+        <select id="ft-f-mom" onchange="renderFert()" title="Ver solo las aplicaciones de ese momento"><option value="">Todos los momentos</option></select>
         <select id="ft-f-est" onchange="renderFert()">
           <option value="">Todos los estados</option>
           <option value="falta">Falta programar</option>
@@ -438,14 +519,11 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
       <tbody id="tb-ft"></tbody>
     </table></div>
     <details class="hint ayuda"><summary>Cómo se lee esta tabla</summary>
-      <b>Fertilizante, dosis y total del lote</b> es lo que se aplica. Si hay más de un producto,
-      cada uno lleva su línea y las columnas se leen en paralelo. El total por producto de toda la
-      campaña, que es el que sirve para pedir, está en <b>Necesidad de insumos</b>. Cada nutriente muestra <b>lo aplicado</b> por hectárea; pasá por encima
-      para ver lo recomendado y cuánto falta. <b>N lograble</b> es el N del suelo más el aplicado: se marca
-      en rojo cuando se aparta del objetivo del lote más del porcentaje fijado en Configuración.
-      El <b>ámbar</b> avisa que el N en línea de siembra pasa el límite de fitotoxicidad del cultivo.
-      Con <b>Ver análisis</b> aparecen los resultados del suelo, el N del suelo y el P lograble;
-      el asterisco en el N del suelo quiere decir que se estimó alguna capa.
+      <b>Fertilizante, dosis y total del lote</b> es lo que se aplica; la dosis se puede corregir en la tabla
+      (por ejemplo, para redondear). Cada nutriente muestra lo aplicado por hectárea: <b>rojo</b> si falta y
+      <b>ámbar</b> si sobra respecto de lo recomendado, fuera del % tolerado de Configuración; pasá el mouse para
+      ver el detalle. <b>N y P logrables</b> son lo del suelo más lo aplicado, contra el objetivo del lote.
+      <b>Alertas</b> junta el Zn bajo y los desvíos. Con <b>Ver análisis</b> aparecen los datos del suelo.
     </details>
   </div>
 </div>
@@ -537,9 +615,12 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
 <!-- ═══════════ CONFIGURACIÓN ═══════════ -->
 <div class="view" id="v-cfg">
 
+<!-- ── Configuración · Datos de campaña ── -->
+<div class="cfg-sub" id="cfg-campania">
+
   <div class="card">
     <div class="chd">
-      <div class="ct">Partidas de semilla<span class="ln"></span></div>
+      <div class="ct">Partidas de semilla</div>
       <div class="cact">
         <button class="btn btn-pri" onclick="abrirPartida(null)">+ Agregar partida</button>
       </div>
@@ -548,42 +629,51 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
         <select id="pa-f-esp" onchange="renderPartidas()"><option value="">Todas las especies</option></select>
         <select id="pa-f-aco" onchange="renderPartidas()"><option value="">Todos los acopios</option></select>
         <button class="btn btn-limpiar" onclick="limpiarFiltrosPartidas()">Limpiar filtros</button>
+        <span class="sep-v"></span>
+        <button class="btn" id="bt-pa-ult" onclick="togUltimaPartida()" title="Por cada cultivo y acopio, solo la partida de fecha más reciente (si hay dos con la misma fecha, las dos)">Solo la última de cada acopio</button>
+        <button class="btn" id="bt-pa-full" onclick="togAnalisisPartida()" title="Mostrar u ocultar todos los datos del análisis">+ Análisis completo</button>
     </div>
     <div class="scroll"><table>
       <thead><tr id="th-pa"></tr></thead>
       <tbody id="tb-pa"></tbody>
     </table></div>
-    <div class="hint">VC (valor cultural) = parámetro elegido × Pureza ÷ 100. Cada partida elige con qué se calcula:
-      PG sin curar (por defecto), PG curado, EG sin curar o EG curada. Debajo del VC se ve con cuál se calculó.
-      Las partidas se agrupan por acopio y, dentro de cada uno, van de la más reciente a la más vieja (las sin acopio, al final).</div>
+    <details class="hint ayuda"><summary>Cómo se calcula el VC</summary>
+      VC (valor cultural) = dato elegido × pureza ÷ 100. Cada partida elige con qué dato se calcula: PG sin curar
+      (por defecto), PG curado, EG sin curar o EG curada; debajo del VC se ve cuál usa. La fecha es obligatoria:
+      ordena la tabla y define cuál es la última partida de cada acopio.
+    </details>
   </div>
 
   <div class="g2">
     <div class="card">
       <div class="chd">
-        <div class="ct">Rangos de fecha de siembra<span class="ct-camp" id="ct-ra-camp"></span><span class="ln"></span></div>
+        <div class="ct">Rangos de fecha de siembra<span class="ct-camp" id="ct-ra-camp"></span></div>
         <div class="cact">
-          <select id="ra-f-cult" onchange="renderRangos()" title="Rangos de un cultivo"><option value="">Todos los cultivos</option></select>
-          <label class="fl" style="margin:0">Días por rango</label>
-          <input type="number" id="cfg-dias" style="width:56px" min="1" step="1" onchange="guardarDias()">
-          <button class="btn btn-sm" onclick="generarRangos()">Generar</button>
-          <button class="btn btn-sm" onclick="copiarDeCampania('rangos')">Copiar de otra campaña</button>
           <button class="btn btn-sm btn-pri" onclick="abrirRango(null)">+ Agregar rango</button>
         </div>
+      </div>
+      <div class="cact filtros-row">
+        <select id="ra-f-cult" onchange="renderRangos()" title="Rangos de un cultivo"><option value="">Todos los cultivos</option></select>
+        <span class="sep-v"></span>
+        <label class="fl" style="margin:0">Días por rango</label>
+        <input type="number" id="cfg-dias" style="width:56px" min="1" step="1" onchange="guardarDias()">
+        <button class="btn" onclick="generarRangos()">Generar</button>
+        <button class="btn" onclick="copiarDeCampania('rangos')">Copiar de otra campaña</button>
       </div>
       <div class="scroll" style="max-height:300px;overflow-y:auto"><table>
         <thead><tr><th>Rango</th><th>Cultivo</th><th>Desde</th><th>Hasta</th><th class="r">Días</th><th></th></tr></thead>
         <tbody id="tb-ra"></tbody>
       </table></div>
-      <div class="hint">Los rangos son <b>de esta campaña</b>: cada una lleva sus propias fechas.
-        Cada rango es de un cultivo o de todos; al programar la siembra se ofrecen los del cultivo y los de todos.
-        "Generar" crea rangos consecutivos desde la fecha del primero, con la cantidad de días indicada,
-        para el cultivo elegido en el filtro (o para todos los cultivos si no hay filtro).</div>
+      <details class="hint ayuda"><summary>Cómo funcionan los rangos</summary>
+        Cada campaña tiene sus propios rangos. Un rango es de un cultivo o de todos: al programar se ofrecen los
+        del cultivo y los generales. «Generar» crea rangos seguidos desde la fecha del primero, con los días
+        indicados, para el cultivo del filtro.
+      </details>
     </div>
 
     <div class="card">
       <div class="chd">
-        <div class="ct">Parque de sembradoras<span class="ct-camp" id="ct-se-camp"></span><span class="ln"></span></div>
+        <div class="ct">Parque de sembradoras<span class="ct-camp" id="ct-se-camp"></span></div>
         <div class="cact">
           <button class="btn btn-sm" onclick="copiarDeCampania('sembradoras')">Copiar de otra campaña</button>
           <button class="btn btn-sm btn-pri" onclick="abrirSembradora(null)">+ Agregar sembradora</button>
@@ -597,23 +687,24 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
         </tr></thead>
         <tbody id="tb-se"></tbody>
       </table></div>
-      <div class="frow" style="margin:10px 0 0">
+      <div class="frow frow-corta" style="margin:10px 0 0">
         <div class="fcol"><label class="fl">Horas por día</label><input type="number" id="cfg-horas" step="0.5" onchange="guardarCfg()"></div>
         <div class="fcol"><label class="fl">% días efectivos</label><input type="number" id="cfg-efect" step="1" onchange="guardarCfg()"></div>
-        <div class="fcol" style="flex:2"></div>
       </div>
-      <div class="hint">
-        El parque es <b>de esta campaña</b>: lo que cargues acá no se mezcla con las otras.<br>
-        Capacidad ha/h = hileras × distancia entre hileras × velocidad ÷ 10.<br>
-        Las horas por día y el % de días efectivos salen de la hoja Sembradoras de tu Excel (8 h y 80%).
-        El balance de la Etapa 3 los usa así: ha/h × horas por día × días del rango × % efectivos.
-      </div>
+      <details class="hint ayuda"><summary>Cómo se calcula la capacidad</summary>
+        Capacidad ha/h = hileras × distancia entre hileras × velocidad ÷ 10. La capacidad de cada rango es
+        ha/h × horas por día × días del rango × % de días efectivos.
+      </details>
     </div>
   </div>
+</div>
+
+<!-- ── Configuración · Parámetros ── -->
+<div class="cfg-sub" id="cfg-param" style="display:none">
 
   <div class="card">
     <div class="chd">
-      <div class="ct ct-t">Fertilizantes y grados<span class="ln"></span></div>
+      <div class="ct">Fertilizantes y grados</div>
       <div class="cact">
         <button class="btn btn-sm" onclick="sembrarFertDesdeMaestros()">Traer de Maestros</button>
         <button class="btn btn-sm btn-pri" onclick="abrirFertProd(null)">+ Agregar fertilizante</button>
@@ -626,75 +717,13 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
       </tr></thead>
       <tbody id="tb-fp"></tbody>
     </table></div>
-    <div class="hint">
-      Los grados definen cuánto nutriente aporta cada kilo aplicado. "Traer de Maestros" carga los
-      fertilizantes del padrón con los nutrientes que tengan cargados, sin pisar lo que ya editaste acá.
-      El <b>kg/litro</b> solo hace falta para los líquidos (UAN, Solmix): sirve para pasar de kilos a litros por hectárea.
-      Maestros todavía no guarda la densidad, así que vive acá hasta que esté en pa-core.
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="chd"><div class="ct ct-n">Parámetros de fertilización<span class="ln"></span></div></div>
-    <div class="frow">
-      <div class="fcol"><label class="fl">Factor P → P2O5</label><input type="number" id="cfg-pfac" step="0.001" onchange="guardarCfg()"></div>
-      <div class="fcol"><label class="fl">Aporte P fert. a suelo</label><input type="number" id="cfg-paporte" step="0.001" onchange="guardarCfg()"></div>
-      <div class="fcol"><label class="fl">Umbral S-SO4 (ppm)</label><input type="number" id="cfg-sppm" step="0.1" onchange="guardarCfg()"></div>
-      <div class="fcol"><label class="fl">Umbral MO (%)</label><input type="number" id="cfg-momax" step="0.1" onchange="guardarCfg()"></div>
-      <div class="fcol"><label class="fl">Dosis S (kg/ha)</label><input type="number" id="cfg-sdosis" step="1" onchange="guardarCfg()"></div>
-    </div>
-    <div class="frow">
-      <div class="fcol"><label class="fl">Factor K meq → ppm</label><input type="number" id="cfg-kfac" step="1" onchange="guardarCfg()"></div>
-      <div class="fcol"><label class="fl">Umbral K (ppm)</label><input type="number" id="cfg-kppm" step="1" onchange="guardarCfg()"></div>
-      <div class="fcol"><label class="fl">Dosis K2O (kg/ha)</label><input type="number" id="cfg-kdosis" step="1" onchange="guardarCfg()"></div>
-      <div class="fcol"><label class="fl">Umbral Zn (ppm)</label><input type="number" id="cfg-znppm" step="0.1" onchange="guardarCfg()"></div>
-      <div class="fcol"><label class="fl">Factor N ppm → kg/ha</label><input type="number" id="cfg-nfac" step="0.001" onchange="guardarCfg()"></div>
-      <div class="fcol"><label class="fl">Relación N / NO3</label><input type="number" id="cfg-nratio" step="0.001" onchange="guardarCfg()"></div>
-    </div>
-    <div class="frow">
-      <div class="fcol"><label class="fl">Desvío tolerado del objetivo (%)</label><input type="number" id="cfg-tolobj" step="1" min="0" onchange="guardarCfg()"></div>
-      <div class="fcol"></div><div class="fcol"></div><div class="fcol"></div><div class="fcol"></div><div class="fcol"></div>
-    </div>
-    <div class="hint">
-      Valores del Excel. El factor P → P2O5 (2,293) convierte el P faltante del suelo en óxido a aplicar;
-      el aporte (0,437) es la fracción del P2O5 aplicado que se refleja como P disponible en el suelo.
-      La recomendación de S aplica solo si el suelo está por debajo de los dos umbrales a la vez.
-      El zinc, igual que en tu Excel, se mide y se marca en rojo por debajo del umbral, sin dosis calculada.<br>
-      El <b>desvío tolerado</b> es cuánto puede apartarse lo lograble del objetivo del lote sin que se marque:
-      con 10&nbsp;%, un objetivo de 190 kg N/ha no se marca entre 171 y 209.<br>
-      El N del suelo sale de sumar las tres capas en ppm y multiplicar por el factor. Si el laboratorio lo informa
-      como <b>N-NO3</b> (nitrógeno), el factor se divide por la relación N/NO3; si lo informa como <b>NO3</b> (nitrato),
-      se usa tal cual. Es el mismo criterio de tu Excel.
-    </div>
-  </div>
-
-  <div class="g2">
-    <div class="card">
-      <div class="chd">
-        <div class="ct ct-n">Coeficiente de recuperación de P por ambiente<span class="ln"></span></div>
-      </div>
-      <div class="scroll" style="max-height:240px;overflow-y:auto"><table>
-        <thead><tr><th>Ambiente</th><th>Descripción</th><th class="r">Coef.</th></tr></thead>
-        <tbody id="tb-coefp"></tbody>
-      </table></div>
-      <div class="hint">En el Excel es 0,60 para todos los ambientes. Acá queda editable por ambiente.</div>
-    </div>
-
-    <div class="card">
-      <div class="chd">
-        <div class="ct ct-n">Umbral de fitotoxicidad de N en línea de siembra<span class="ln"></span></div>
-      </div>
-      <div class="scroll" style="max-height:240px;overflow-y:auto"><table>
-        <thead><tr><th>Cultivo</th><th class="r">kg N/ha máx.</th></tr></thead>
-        <tbody id="tb-fito"></tbody>
-      </table></div>
-      <div class="hint">Si el N arrancador supera este valor, la Etapa 2 lo marca en rojo.</div>
-    </div>
+    <div class="hint">El grado es cuánto nutriente aporta cada kilo. El kg/litro solo hace falta en los líquidos (UAN, Solmix).
+      «Traer de Maestros» suma los fertilizantes del padrón sin pisar lo que ya editaste.</div>
   </div>
 
   <div class="card">
     <div class="chd">
-      <div class="ct">Coeficiente de pérdida de plantas por ambiente<span class="ln"></span></div>
+      <div class="ct">Pérdida de plantas por ambiente</div>
       <div class="cact">
         <label class="fl" style="margin:0">Por defecto %</label>
         <input type="number" id="cfg-perddef" style="width:64px" min="0" max="99" step="1" onchange="guardarPerdDef()">
@@ -704,14 +733,66 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
       <thead><tr><th>Ambiente</th><th class="r">Pérdida %</th></tr></thead>
       <tbody id="tb-perd"></tbody>
     </table></div>
-    <div class="hint">Al programar la siembra, cada fila de ambiente toma su pérdida de acá y se puede cambiar en esa programación.
-      El valor <b>por defecto</b> vale para los ambientes que no tienen uno propio y para las filas sin ambiente.
+    <div class="hint">Cada ambiente de la programación toma su pérdida de acá; se puede cambiar al programar.
       Cambiar esta tabla no modifica lo ya programado.</div>
   </div>
 
+  <div class="g2">
+    <div class="card">
+      <div class="chd"><div class="ct">Recuperación de P por ambiente</div></div>
+      <div class="scroll" style="max-height:240px;overflow-y:auto"><table>
+        <thead><tr><th>Ambiente</th><th>Descripción</th><th class="r">Coef.</th></tr></thead>
+        <tbody id="tb-coefp"></tbody>
+      </table></div>
+      <div class="hint">Fracción del P aplicado que se recupera en el suelo, según el ambiente.</div>
+    </div>
+
+    <div class="card">
+      <div class="chd"><div class="ct">Umbral de fitotoxicidad de N en la línea</div></div>
+      <div class="scroll" style="max-height:240px;overflow-y:auto"><table>
+        <thead><tr><th>Cultivo</th><th class="r">kg N/ha máx.</th></tr></thead>
+        <tbody id="tb-fito"></tbody>
+      </table></div>
+      <div class="hint">Máximo de N que puede ir con la semilla. Se controla en Siembra, con el fertilizante a la siembra.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="chd chd-tog" onclick="togAvanzado()">
+      <div class="ct"><span class="chev" id="avz-chev">&#9660;</span> Avanzado<span class="ct-sub">Factores de cálculo de la fertilización</span></div>
+    </div>
+    <div id="avz-body" style="display:none">
+      <div class="frow-par">
+        <div class="fcol"><label class="fl">Factor P → P₂O₅</label><input type="number" id="cfg-pfac" step="0.001" onchange="guardarCfg()"></div>
+        <div class="fcol"><label class="fl">Aporte P fert. a suelo</label><input type="number" id="cfg-paporte" step="0.001" onchange="guardarCfg()"></div>
+        <div class="fcol"><label class="fl">Umbral S-SO₄ (ppm)</label><input type="number" id="cfg-sppm" step="0.1" onchange="guardarCfg()"></div>
+        <div class="fcol"><label class="fl">Umbral MO (%)</label><input type="number" id="cfg-momax" step="0.1" onchange="guardarCfg()"></div>
+        <div class="fcol"><label class="fl">Dosis S (kg/ha)</label><input type="number" id="cfg-sdosis" step="1" onchange="guardarCfg()"></div>
+        <div class="fcol"><label class="fl">Factor K meq → ppm</label><input type="number" id="cfg-kfac" step="1" onchange="guardarCfg()"></div>
+        <div class="fcol"><label class="fl">Umbral K (ppm)</label><input type="number" id="cfg-kppm" step="1" onchange="guardarCfg()"></div>
+        <div class="fcol"><label class="fl">Dosis K₂O (kg/ha)</label><input type="number" id="cfg-kdosis" step="1" onchange="guardarCfg()"></div>
+        <div class="fcol"><label class="fl">Umbral Zn (ppm)</label><input type="number" id="cfg-znppm" step="0.1" onchange="guardarCfg()"></div>
+        <div class="fcol"><label class="fl">Factor N ppm → kg/ha</label><input type="number" id="cfg-nfac" step="0.001" onchange="guardarCfg()"></div>
+        <div class="fcol"><label class="fl">Relación N / NO₃</label><input type="number" id="cfg-nratio" step="0.001" onchange="guardarCfg()"></div>
+        <div class="fcol"><label class="fl">Desvío tolerado (%)</label><input type="number" id="cfg-tolobj" step="1" min="0" onchange="guardarCfg()"></div>
+      </div>
+      <details class="hint ayuda"><summary>Qué hace cada factor</summary>
+        <b>Factor P → P₂O₅</b> pasa el P que le falta al suelo a óxido a aplicar; el <b>aporte</b> es la parte del P₂O₅
+        aplicado que se refleja como P disponible. El S se recomienda solo si el suelo está por debajo de los dos
+        umbrales (S-SO₄ y MO). El Zn se marca bajo el umbral, sin dosis. El <b>N del suelo</b> es la suma de las tres
+        capas en ppm por el factor; si el laboratorio informa N-NO₃, el factor se divide por la relación N/NO₃.
+        El <b>desvío tolerado</b> es cuánto puede apartarse lo lograble del objetivo sin marcarse: con 10 %, un
+        objetivo de 190 kg N/ha no se marca entre 171 y 209.
+      </details>
+    </div>
+  </div>
+</div>
+
+<!-- ── Configuración · Datos ── -->
+<div class="cfg-sub" id="cfg-datos" style="display:none">
   <div class="card">
     <div class="chd">
-      <div class="ct">Importar desde tus Excel<span class="ln"></span></div>
+      <div class="ct">Importar desde Excel</div>
       <div class="cact">
         <label class="btn btn-pri" style="margin:0">
           Elegir archivos…
@@ -720,24 +801,22 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
       </div>
     </div>
     <div id="imp-zona"></div>
-    <div class="hint">
-      Podés elegir los dos archivos juntos. Levanta el <b>Programa de Siembra</b> y el
-      <b>Programa de Fertilización</b> y trae lo que tengan cargado:
-      partidas, rangos, sembradoras, la programación por lote, los fertilizantes con sus grados,
-      los ambientes con su coeficiente y los umbrales. Antes de guardar nada te muestra qué encontró
-      y qué lotes no pudo atar a Plan de Uso.
-    </div>
+    <div class="hint">Toma el Programa de Siembra y el Programa de Fertilización (se pueden elegir juntos):
+      partidas, rangos, sembradoras, programación por lote, fertilizantes, ambientes y umbrales.
+      Antes de guardar muestra qué encontró y qué lotes no pudo relacionar con Plan de Uso.</div>
   </div>
 
   <div class="card">
-    <div class="chd"><div class="ct">Datos<span class="ln"></span></div></div>
+    <div class="chd"><div class="ct">Borrar datos</div></div>
     <div class="cact">
       <button class="btn btn-dan" onclick="borrarTodo()">Borrar todos los datos de esta herramienta</button>
     </div>
     <div class="hint" id="cfg-migr"></div>
   </div>
+</div>
 
 </div>
+
 
 </main>
 
@@ -747,7 +826,7 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
 </footer>
 
 <!-- ═══════════ MODAL ═══════════ -->
-<div class="ovl" id="ovl" onclick="if(event.target===this)pedirCerrarModal()">
+<div class="ovl" id="ovl">
   <div class="mdl">
     <div class="mdl-h">
       <div class="mdl-t" id="mdl-t">—</div>
@@ -782,8 +861,8 @@ footer{padding:10px 24px;border-top:1px solid var(--border);background:var(--car
      suelo y aplicaciones de fertilizante.  → ver handoff para Mariana.
    ═══════════════════════════════════════════════════════════════════════ */
 
-var BUILD = 23;
-var VERSION = 'v2026-11-18 16:56';
+var BUILD = 26;
+var VERSION = 'v2026-11-25 15:56';
 
 /* ── Claves de almacenamiento ──────────────────────────────────────── */
 var K = {
@@ -1445,12 +1524,14 @@ function aporteAplic(ap){
   r.s    = r.kg * (Number(p.s)    || 0) / 100;
   return r;
 }
-/* Cálculo completo de una fertilización. */
-function calcFert(ft, amb){
+/* Cálculo de UN análisis + objetivo + aplicaciones (un ambiente, o el lote
+   entero cuando no se abre en ambientes). */
+function calcFertCore(ft, amb){
   var cfg = DB.cfg;
   var a = ft.analisis || {};
   var o = ft.obj || {};
   var r = {
+    an: a, obj: o,
     nSuelo: calcNSuelo(a),
     coefP: coefPDe(amb || ft.amb),
     rec: { p2o5:null, s:null, k2o:null, n:null },
@@ -1510,6 +1591,182 @@ function calcFert(ft, amb){
     r.avisos.push('El N del suelo usa capas estimadas (la mitad de la capa de arriba) porque falta el dato de laboratorio.');
   }
   return r;
+}
+
+/* ── BUILD 26: fertilización por ambiente ────────────────────────────
+   Los ambientes son los mismos que en Siembra. Si el lote ya tiene
+   programada la siembra de ese cultivo, salen de ahí (Σ ha por ambiente).
+   Si no, de la lista propia de la fertilización (ft.ambs), que después
+   usa Siembra como punto de partida. Sin nada, el ambiente del lote.
+   Datos por ambiente:
+     ft.mismoAnalisis  true = un análisis para todo el lote (por defecto)
+     ft.porAmb[amb]    { analisis, obj:{pObj,nObj} } — el obj vacío hereda del lote
+     aplic[i].porAmb   true = la dosis cambia por ambiente
+     aplic[i].dosisAmb { amb: dosis }; aplic[i].dosis queda como promedio ponderado */
+function ambsSiembraLote(loteId, cultivo, campania){
+  var sbs = siembrasDeLote(loteId, cultivo, campania), m = {}, orden = [], out = [], i, j, k, a;
+  for(i=0; i<sbs.length; i++){
+    for(j=0; j<(sbs[i].ambs || []).length; j++){
+      a = sbs[i].ambs[j]; k = a.amb || '';
+      if(!m.hasOwnProperty(k)){ m[k] = 0; orden.push(k); }
+      m[k] += (num(a.ha) || 0);
+    }
+  }
+  for(i=0; i<orden.length; i++) out.push({ amb:orden[i], ha:m[orden[i]] });
+  return out;
+}
+function ambientesFert(ft){
+  var sb = ft.loteId ? ambsSiembraLote(ft.loteId, ft.cultivo, ft.campania || CAMPANIA) : [];
+  if(sb.length) return { src:'siembra', lista:sb };
+  var i, out = [];
+  if(ft.ambs && ft.ambs.length){
+    for(i=0; i<ft.ambs.length; i++) out.push({ amb:ft.ambs[i].amb || '', ha:num(ft.ambs[i].ha) });
+    return { src:'propio', lista:out };
+  }
+  var ha = ft.loteId ? haActividad(ft.loteId, ft.cultivo, ft.campania || CAMPANIA) : null;
+  return { src:'lote', lista:[{ amb:ft.amb || '', ha:ha }] };
+}
+function dosisDeAmb(ap, amb){
+  if(ap.porAmb && ap.dosisAmb && ap.dosisAmb.hasOwnProperty(amb)){
+    var d = num(ap.dosisAmb[amb]);
+    if(d !== null) return d;
+  }
+  return ap.dosis;
+}
+/* Análisis, objetivo y dosis que valen para un ambiente */
+function fertDeAmb(ft, amb){
+  var pa = (ft.porAmb && ft.porAmb[amb]) ? ft.porAmb[amb] : null;
+  var a = (ft.mismoAnalisis === false && pa && pa.analisis) ? pa.analisis : (ft.analisis || {});
+  var oL = ft.obj || {}, oA = (pa && pa.obj) ? pa.obj : {};
+  var o = { pObj:(num(oA.pObj) !== null ? num(oA.pObj) : num(oL.pObj)),
+            nObj:(num(oA.nObj) !== null ? num(oA.nObj) : num(oL.nObj)) };
+  var aps = [], i, ap;
+  for(i=0; i<(ft.aplic || []).length; i++){
+    ap = ft.aplic[i];
+    aps.push({ prod:ap.prod, momento:ap.momento, unidad:ap.unidad, dosis:dosisDeAmb(ap, amb) });
+  }
+  return { cultivo:ft.cultivo, amb:amb, analisis:a, obj:o, aplic:aps };
+}
+function calcFertAmb(ft, amb){ return calcFertCore(fertDeAmb(ft, amb), amb); }
+
+/* Cálculo del lote. Con un ambiente, igual que siempre. Con varios, cada
+   ambiente se calcula solo y el lote es el promedio ponderado por ha
+   (r.ambs trae el detalle). nSiembra = el peor ambiente (fitotoxicidad). */
+function calcFert(ft, amb){
+  var ae = ambientesFert(ft), L = ae.lista, i, j;
+  if(L.length <= 1){
+    var a0 = L.length ? L[0].amb : (amb || ft.amb || '');
+    var r1 = calcFertCore(fertDeAmb(ft, a0), a0 || amb || ft.amb);
+    r1.multi = false; r1.src = ae.src;
+    r1.ambs = [{ amb:a0, ha:(L.length ? L[0].ha : null), c:r1 }];
+    r1.haAmbs = L.length ? (L[0].ha || 0) : 0;
+    return r1;
+  }
+  var parts = [], haT = 0, sinHa = true;
+  for(i=0; i<L.length; i++){
+    parts.push({ amb:L[i].amb, ha:L[i].ha, c:calcFertAmb(ft, L[i].amb) });
+    if(L[i].ha){ haT += L[i].ha; sinHa = false; }
+  }
+  function peso(p){ return sinHa ? 1 : (p.ha || 0); }
+  /* promedio ponderado de un valor; null si ningún ambiente lo tiene */
+  function prom(get){
+    var s = 0, w = 0, k, v;
+    for(k=0; k<parts.length; k++){
+      v = get(parts[k].c);
+      if(v === null || v === undefined || isNaN(v)) continue;
+      s += v * peso(parts[k]); w += peso(parts[k]);
+    }
+    return w ? s / w : null;
+  }
+  var c0 = parts[0].c;
+  var r = {
+    multi:true, src:ae.src, ambs:parts, haAmbs:haT,
+    an:{ mo:prom(function(c){ return num(c.an.mo); }), pPpm:prom(function(c){ return num(c.an.pPpm); }),
+         sPpm:prom(function(c){ return num(c.an.sPpm); }), kMeq:prom(function(c){ return num(c.an.kMeq); }),
+         znPpm:prom(function(c){ return num(c.an.znPpm); }) },
+    obj:{ pObj:prom(function(c){ return num(c.obj.pObj); }), nObj:prom(function(c){ return num(c.obj.nObj); }) },
+    nSuelo:{ kg:prom(function(c){ return c.nSuelo.kg; }), ppm:prom(function(c){ return c.nSuelo.ppm; }),
+             capas:c0.nSuelo.capas, estimado:false },
+    coefP:prom(function(c){ return c.coefP; }),
+    rec:{ p2o5:prom(function(c){ return c.rec.p2o5; }), s:prom(function(c){ return c.rec.s; }),
+          k2o:prom(function(c){ return c.rec.k2o; }),   n:prom(function(c){ return c.rec.n; }) },
+    apl:{ n:prom(function(c){ return c.apl.n; }) || 0, p2o5:prom(function(c){ return c.apl.p2o5; }) || 0,
+          k2o:prom(function(c){ return c.apl.k2o; }) || 0, s:prom(function(c){ return c.apl.s; }) || 0 },
+    lineas:[], kPpm:prom(function(c){ return c.kPpm; }),
+    pAlcanz:prom(function(c){ return c.pAlcanz; }), nAlcanz:prom(function(c){ return c.nAlcanz; }),
+    nSiembra:0, fitoMax:c0.fitoMax, avisos:[]
+  };
+  var cuenta = {}, orden = [], av, k2;
+  for(i=0; i<parts.length; i++){
+    if(parts[i].c.nSuelo.estimado) r.nSuelo.estimado = true;
+    if(parts[i].c.nSiembra > r.nSiembra) r.nSiembra = parts[i].c.nSiembra;
+    for(j=0; j<parts[i].c.avisos.length; j++){
+      av = parts[i].c.avisos[j];
+      if(!cuenta.hasOwnProperty(av)){ cuenta[av] = []; orden.push(av); }
+      cuenta[av].push(parts[i].amb || 'sin ambiente');
+    }
+  }
+  /* El aviso que vale para todos va una vez; el de algunos, con su ambiente */
+  for(i=0; i<orden.length; i++){
+    av = orden[i];
+    r.avisos.push(cuenta[av].length === parts.length ? av : (cuenta[av].join(', ') + ': ' + av));
+  }
+  for(j=0; j<c0.lineas.length; j++){
+    (function(jj){
+      var L0 = c0.lineas[jj], ln = { prod:L0.prod, momento:L0.momento, p:L0.p, aviso:null };
+      ln.kg     = prom(function(c){ return c.lineas[jj].kg; });
+      ln.litros = prom(function(c){ return c.lineas[jj].litros; });
+      ln.n      = prom(function(c){ return c.lineas[jj].n; }) || 0;
+      ln.p2o5   = prom(function(c){ return c.lineas[jj].p2o5; }) || 0;
+      ln.k2o    = prom(function(c){ return c.lineas[jj].k2o; }) || 0;
+      ln.s      = prom(function(c){ return c.lineas[jj].s; }) || 0;
+      for(k2=0; k2<parts.length; k2++){ if(parts[k2].c.lineas[jj].aviso){ ln.aviso = parts[k2].c.lineas[jj].aviso; break; } }
+      r.lineas.push(ln);
+    })(j);
+  }
+  return r;
+}
+/* Superficie con la que se multiplican las dosis del lote */
+function haFert(ft, c){
+  if(c && c.multi && c.haAmbs) return c.haAmbs;
+  return haActividad(ft.loteId, ft.cultivo, ft.campania);
+}
+/* Partes a sumar en insumos y salidas: un ambiente por parte o el lote entero.
+   flAmb filtra por ambiente. */
+function fertPartes(ft, flAmb){
+  var c = calcFert(ft), out = [], i;
+  if(c.multi){
+    for(i=0; i<c.ambs.length; i++){
+      if(flAmb && c.ambs[i].amb !== flAmb) continue;
+      out.push({ amb:c.ambs[i].amb, ha:c.ambs[i].ha, c:c.ambs[i].c, multi:true });
+    }
+    return out;
+  }
+  var a0 = c.ambs[0].amb || ft.amb || '';
+  if(flAmb && a0 !== flAmb && ft.amb !== flAmb) return out;
+  out.push({ amb:a0, ha:haActividad(ft.loteId, ft.cultivo, ft.campania), c:c, multi:false });
+  return out;
+}
+/* ¿Alguna aplicación cambia la dosis por ambiente? */
+function tieneDosisAmb(ft){
+  var i; for(i=0; i<(ft.aplic || []).length; i++){ if(ft.aplic[i].porAmb) return true; } return false;
+}
+/* Dosis del lote (promedio ponderado) a partir de las de cada ambiente */
+function dosisPonderada(ap, lista){
+  var s = 0, w = 0, i, d, sinHa = true;
+  for(i=0; i<lista.length; i++){ if(lista[i].ha) sinHa = false; }
+  for(i=0; i<lista.length; i++){
+    d = dosisDeAmb(ap, lista[i].amb);
+    d = num(d);
+    if(d === null) continue;
+    s += d * (sinHa ? 1 : (lista[i].ha || 0)); w += (sinHa ? 1 : (lista[i].ha || 0));
+  }
+  return w ? Math.round(s / w * 10) / 10 : null;
+}
+/* Redondeo práctico para arrancar la dosis de cada ambiente */
+function redondeoDosis(d, unidad){
+  if(d === null || d === undefined || isNaN(d)) return null;
+  return unidad === 'l/ha' ? Math.round(d) : Math.round(d / 5) * 5;
 }
 /* Diferencia entre recomendado y aplicado para un nutriente */
 function difNutriente(rec, apl){
@@ -1592,15 +1849,22 @@ function fertDeLote(loteId, cultivo, campania){
 }
 function estadoFert(ft, amb){
   if(!ft) return { e:'nada', t:'Sin programar' };
-  var a = ft.analisis || {};
-  if(num(a.pPpm) === null && num(a.n20) === null) return { e:'parcial', t:'Falta análisis' };
+  var c = calcFert(ft, amb), k, cc, sinAn = [];
+  /* BUILD 26: cada ambiente tiene que tener su análisis y quedar cubierto */
+  for(k=0; k<c.ambs.length; k++){
+    cc = c.ambs[k].c;
+    if(num(cc.an.pPpm) === null && num(cc.an.n20) === null) sinAn.push(c.ambs[k].amb || 'lote');
+  }
+  if(sinAn.length) return { e:'parcial', t:'Falta análisis' + (c.multi ? ' (' + sinAn.join(', ') + ')' : '') };
   if(!ft.aplic || !ft.aplic.length) return { e:'parcial', t:'Sin aplicaciones' };
-  var c = calcFert(ft, amb);
   var falta = [];
-  if(c.rec.p2o5 !== null && c.apl.p2o5 + 0.5 < c.rec.p2o5) falta.push('P');
-  if(c.rec.s    !== null && c.apl.s    + 0.5 < c.rec.s)    falta.push('S');
-  if(c.rec.k2o  !== null && c.apl.k2o  + 0.5 < c.rec.k2o)  falta.push('K');
-  if(c.rec.n    !== null && c.apl.n    + 0.5 < c.rec.n)    falta.push('N');
+  function chequear(x){
+    if(x.rec.p2o5 !== null && x.apl.p2o5 + 0.5 < x.rec.p2o5 && falta.indexOf('P') < 0) falta.push('P');
+    if(x.rec.s    !== null && x.apl.s    + 0.5 < x.rec.s    && falta.indexOf('S') < 0) falta.push('S');
+    if(x.rec.k2o  !== null && x.apl.k2o  + 0.5 < x.rec.k2o  && falta.indexOf('K') < 0) falta.push('K');
+    if(x.rec.n    !== null && x.apl.n    + 0.5 < x.rec.n    && falta.indexOf('N') < 0) falta.push('N');
+  }
+  for(k=0; k<c.ambs.length; k++) chequear(c.ambs[k].c);
   if(falta.length) return { e:'parcial', t:'Falta ' + falta.join(', ') };
   if(c.fitoMax !== null && c.nSiembra > c.fitoMax) return { e:'parcial', t:'Fitotoxicidad' };
   return { e:'listo', t:'Programada' };
@@ -1611,11 +1875,13 @@ function badgeEstado(st){
 }
 /* El estado ES el botón: se toca el de siembra o el de fertilización
    y se abre el que corresponde, sin un botón aparte que no dice cuál. */
+/* BUILD 25: etiqueta de estado corta; el detalle va al pasar el mouse */
 function badgeAccion(st, onclick, que){
   var cls = st.e === 'listo' ? 'bg' : (st.e === 'parcial' ? 'by' : 'bpend');
+  var corto = st.e === 'listo' ? '&#10003; Listo' : (st.e === 'parcial' ? 'Incompleto' : 'Programar');
   var verbo = (st.e === 'nada') ? 'Programar ' : 'Editar ';
-  return '<button class="bdg bdg-act ' + cls + '" onclick="' + onclick + '" title="' + verbo + que + '">'
-       + esc(st.t) + '</button>';
+  return '<button class="bdg bdg-act bdg-st ' + cls + '" onclick="' + onclick + '" title="' + esc(st.t) + ' · ' + verbo + que + '">'
+       + corto + '</button>';
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -2013,18 +2279,119 @@ function listaProd(items){
    lote, en columnas de verdad. Devuelve las cuatro celdas de la fila:
    si hay varios productos, cada columna apila una línea por producto y
    las líneas se alinean entre sí. */
-function celdasAplic(c, ha){
+/* BUILD 25: la dosis se edita en la tabla (para redondear lo programado
+   en la ventana). Se guarda en la aplicación, en su propia unidad. */
+function setDosisFert(ftId, i, v, amb){
+  var ft = null, k;
+  for(k=0; k<DB.fert.length; k++){ if(DB.fert[k].id === ftId){ ft = DB.fert[k]; break; } }
+  if(!ft || !ft.aplic || !ft.aplic[i]) return;
+  var d = num(v);
+  if(d !== null && d < 0){ alert('La dosis no puede ser negativa.'); renderFert(); return; }
+  /* BUILD 26: con dosis por ambiente se edita la del ambiente y el lote
+     queda con el promedio ponderado */
+  if(amb !== undefined && ft.aplic[i].porAmb){
+    if(!ft.aplic[i].dosisAmb) ft.aplic[i].dosisAmb = {};
+    ft.aplic[i].dosisAmb[amb] = d;
+    ft.aplic[i].dosis = dosisPonderada(ft.aplic[i], ambientesFert(ft).lista);
+  } else {
+    ft.aplic[i].dosis = d;
+  }
+  sv('fert');
+  renderFert(); renderInsumos(); renderLotes();
+}
+/* BUILD 25: fecha dd/mm/aaaa igual en todas las computadoras (el selector de
+   fecha del navegador usa el idioma de la máquina). El valor ISO queda en un
+   campo oculto con el mismo id, así el resto del código no cambia. 📅 abre el
+   calendario del navegador. */
+function isoADmy(iso){
+  var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
+  return m ? (m[3] + '/' + m[2] + '/' + m[1]) : '';
+}
+function dmyAIso(t){
+  var m = /^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/.exec(String(t || '').replace(/\s/g, ''));
+  if(!m) return null;
+  var d = Number(m[1]), mo = Number(m[2]), y = Number(m[3]);
+  if(y < 100) y += 2000;
+  var dt = new Date(y, mo - 1, d);
+  if(dt.getFullYear() !== y || dt.getMonth() !== mo - 1 || dt.getDate() !== d) return null;
+  return y + '-' + (mo < 10 ? '0' : '') + mo + '-' + (d < 10 ? '0' : '') + d;
+}
+function inpFecha(id, iso){
+  return '<span class="fecha-w">'
+    + '<input type="text" id="' + id + '__t" class="inp-fecha" value="' + esc(isoADmy(iso)) + '" placeholder="dd/mm/aaaa" maxlength="10" inputmode="numeric"'
+    + ' oninput="mascaraFecha(this,\'' + id + '\')" onblur="validarFecha(this,\'' + id + '\')">'
+    + '<button type="button" class="btn-cal" title="Elegir en el calendario" onclick="abrirCal(\'' + id + '\')">&#128197;</button>'
+    + '<input type="date" class="cal-oculto" id="' + id + '__c" tabindex="-1" onchange="desdeCal(\'' + id + '\',this.value)">'
+    + '<input type="hidden" id="' + id + '" value="' + esc(iso || '') + '">'
+    + '</span>';
+}
+function mascaraFecha(el, id){
+  var d = el.value.replace(/[^\d]/g, '').slice(0, 8), o = d;
+  if(d.length > 4) o = d.slice(0,2) + '/' + d.slice(2,4) + '/' + d.slice(4);
+  else if(d.length > 2) o = d.slice(0,2) + '/' + d.slice(2);
+  if(o !== el.value) el.value = o;
+  var iso = dmyAIso(o), h = document.getElementById(id);
+  if(h){ h.value = iso || ''; }
+  el.classList.remove('malo');
+}
+function validarFecha(el, id){
+  if(el.value && !dmyAIso(el.value)) el.classList.add('malo'); else el.classList.remove('malo');
+}
+function abrirCal(id){
+  var c = document.getElementById(id + '__c'), h = document.getElementById(id);
+  if(!c) return;
+  c.value = h ? h.value : '';
+  try{ if(c.showPicker){ c.showPicker(); return; } }catch(e){}
+  c.focus(); c.click();
+}
+function desdeCal(id, iso){
+  var h = document.getElementById(id), t = document.getElementById(id + '__t');
+  if(h) h.value = iso || '';
+  if(t){ t.value = isoADmy(iso); t.classList.remove('malo'); }
+  marcarSucio();
+}
+
+/* BUILD 25: filtro por momento de aplicación */
+function tieneMomento(ft, mom){
+  var i; for(i=0; i<(ft.aplic||[]).length; i++){ if(ft.aplic[i].momento === mom) return true; } return false;
+}
+function momentosDe(ft, out){
+  var i, m; for(i=0; i<(ft.aplic||[]).length; i++){ m = ft.aplic[i].momento; if(m && out.indexOf(m) < 0) out.push(m); }
+}
+/* BUILD 26: amb definido = fila de un ambiente. Si la aplicación va con
+   dosis por ambiente, se edita en la fila del ambiente y el lote muestra
+   el promedio (≈); si no, se edita en el lote y el ambiente la hereda. */
+function celdasAplic(c, ha, ft, momF, amb){
   var vacia = '<span style="color:#C3CCD6">—</span>';
   if(!c || !c.lineas.length){
     return '<td class="gs ap">' + vacia + '</td><td class="r ap">' + vacia + '</td>'
          + '<td class="r ap">' + vacia + '</td><td class="ap">' + vacia + '</td>';
   }
-  var i, L, kgL, prod = '', dos = '', tot = '', mom = '';
+  var i, L, kgL, prod = '', dos = '', tot = '', mom = '', esAmb = (amb !== undefined);
   for(i=0; i<c.lineas.length; i++){
     L = c.lineas[i];
+    if(momF && L.momento !== momF) continue;
     kgL = (L.kg !== null && ha) ? L.kg * ha : null;
     prod += '<div>' + esc(L.prod || '—') + '</div>';
-    dos  += '<div>' + (L.kg !== null ? f(L.kg,0) : '?') + '</div>';
+    if(ft && ft.aplic && ft.aplic[i]){
+      var ap = ft.aplic[i], apU = ap.unidad === 'l/ha' ? 'l' : '';
+      var multiAmb = c.multi || esAmb;
+      var editable = esAmb ? !!ap.porAmb : !(ap.porAmb && multiAmb);
+      var dv = esAmb ? dosisDeAmb(ap, amb) : ap.dosis;
+      if(editable){
+        dos += '<div><input type="number" class="inp-ord inp-dos" min="0" step="any" value="'
+          + (dv != null && dv !== '' ? esc(String(dv)) : '') + '"'
+          + ' title="Dosis por hectárea' + (apU ? ' (litros)' : ' (kg)') + (esAmb ? ' en ' + esc(amb || 'sin ambiente') : '') + ' · se puede redondear acá"'
+          + ' onchange="setDosisFert(\'' + ft.id + '\',' + i + ',this.value' + (esAmb ? ',\'' + jsq(amb) + '\'' : '') + ')">'
+          + (apU ? '<span class="u-dos">l</span>' : '') + '</div>';
+      } else if(esAmb){
+        dos += '<div class="dos-her" title="Misma dosis en todo el lote: se cambia en la fila del lote">' + f(num(dv), apU ? 1 : 0) + '</div>';
+      } else {
+        dos += '<div class="dos-pond" title="Promedio ponderado de los ambientes: la dosis se cambia en cada ambiente (▶)">' + f(num(dv), apU ? 1 : 0) + '</div>';
+      }
+    } else {
+      dos += '<div>' + (L.kg !== null ? f(L.kg,0) : '?') + '</div>';
+    }
     tot  += '<div>' + (kgL !== null ? f(kgL,0) : '—') + '</div>';
     mom  += '<div>' + esc(L.momento || '—') + '</div>';
   }
@@ -2410,7 +2777,7 @@ function borrarSiembra(id){
    ═══════════════════════════════════════════════════════════════════ */
 
 function limpiarFiltrosFert(){
-  setVal('ft-f-campo',''); setVal('ft-f-cult',''); setVal('ft-f-est',''); setVal('ft-f-amb','');
+  setVal('ft-f-campo',''); setVal('ft-f-cult',''); setVal('ft-f-est',''); setVal('ft-f-amb',''); setVal('ft-f-mom','');
   renderFert();
 }
 function fertById(id){
@@ -2423,26 +2790,116 @@ function fertById(id){
 /* Celda de nutriente: en la tabla va solo lo aplicado. El rojo avisa
    cuando no llega; el recomendado y cuánto falta están en el globito,
    que es donde no ensucian la lectura. */
+/* BUILD 25: desvío de lo aplicado contra lo recomendado, con el mismo % tolerado
+   que el objetivo: rojo si falta, ámbar si sobra. Dentro de la tolerancia, sin marca. */
+function desvioNutri(rec, apl){
+  if(rec === null) return { d:0, txt:'sin recomendación calculada' };
+  var tol = Number(DB.cfg.tolObj); if(isNaN(tol) || tol < 0) tol = 10;
+  var margen = Math.max(rec * tol / 100, 0.5);
+  if(apl < rec - margen) return { d:-1, txt:'faltan ' + f(rec - apl,1) + ' kg/ha (fuera del ' + f(tol,0) + ' % tolerado)' };
+  if(apl > rec + margen) return { d:1, txt:f(apl - rec,1) + ' kg/ha de más (fuera del ' + f(tol,0) + ' % tolerado)' };
+  return { d:0, txt:'cubierto' };
+}
 function celdaNutri(rec, apl, avisoExtra){
-  var falta = (rec !== null && apl + 0.5 < rec);
-  var tip;
-  if(rec === null) tip = 'Aplicado ' + f(apl,1) + ' kg/ha · sin recomendación calculada';
-  else if(falta) tip = 'Aplicado ' + f(apl,1) + ' · recomendado ' + f(rec,1)
-                     + ' · faltan ' + f(rec - apl,1) + ' kg/ha';
-  else if(apl > rec + 0.5) tip = 'Aplicado ' + f(apl,1) + ' · recomendado ' + f(rec,1)
-                     + ' · ' + f(apl - rec,1) + ' kg/ha de más';
-  else tip = 'Aplicado ' + f(apl,1) + ' · recomendado ' + f(rec,1) + ' kg/ha · cubierto';
-
+  var dv = desvioNutri(rec, apl);
+  var tip = 'Aplicado ' + f(apl,1) + (rec !== null ? ' · recomendado ' + f(rec,1) + ' kg/ha' : ' kg/ha') + ' · ' + dv.txt;
   /* El color va en la celda; el número queda limpio y alineado */
   var cls = 'r nu';
   if(avisoExtra){ cls += ' ojo'; tip = avisoExtra + '  ·  ' + tip; }
-  else if(falta) cls += ' mal';
+  else if(dv.d < 0) cls += ' mal';
+  else if(dv.d > 0) cls += ' ojo';
   return '<td class="' + cls + '" title="' + esc(tip) + '">' + f(apl, 1) + '</td>';
 }
+/* Alertas del lote: Zn bajo y desvíos contra recomendación / objetivo */
+/* BUILD 26: alertas como lista, para poder juntar las de varios ambientes */
+function alertasLista(c){
+  var a = c.an || {}, o = c.obj || {}, out = [], zn = num(a.znPpm), tol = Number(DB.cfg.tolObj), d;
+  if(isNaN(tol) || tol < 0) tol = 10;
+  if(zn !== null && zn < Number(DB.cfg.znPpm)) out.push({ k:'zn', rojo:true, mag:99, lbl:'Zn bajo', tip:'Zn ' + f(zn,2) + ' ppm, debajo del umbral de ' + f(DB.cfg.znPpm,2) + ' ppm' });
+  var nO = num(o.nObj), pO = num(o.pObj);
+  if(nO && c.nAlcanz !== null){ d = (c.nAlcanz - nO) / nO * 100; if(Math.abs(d) > tol) out.push({ k:'n', rojo:d < 0, mag:Math.abs(d), lbl:'N ' + (d > 0 ? '+' : '') + f(d,0) + ' %', tip:'N lograble ' + f(c.nAlcanz,0) + ' contra objetivo ' + f(nO,0) + ' kg/ha' }); }
+  if(pO && c.pAlcanz !== null){ d = (c.pAlcanz - pO) / pO * 100; if(Math.abs(d) > tol) out.push({ k:'p', rojo:d < 0, mag:Math.abs(d), lbl:'P ' + (d > 0 ? '+' : '') + f(d,0) + ' %', tip:'P lograble ' + f(c.pAlcanz,1) + ' contra objetivo ' + f(pO,1) + ' ppm' }); }
+  var dS = desvioNutri(c.rec.s, c.apl.s), dK = desvioNutri(c.rec.k2o, c.apl.k2o);
+  if(dS.d) out.push({ k:'s', rojo:dS.d < 0, mag:1, lbl:'S ' + (dS.d < 0 ? 'falta' : 'de más'), tip:'Azufre: ' + dS.txt });
+  if(dK.d) out.push({ k:'k', rojo:dK.d < 0, mag:1, lbl:'K ' + (dK.d < 0 ? 'falta' : 'de más'), tip:'Potasio: ' + dK.txt });
+  return out;
+}
+/* Con varios ambientes, el lote muestra la peor alerta de cada tipo y el
+   globito dice qué le pasa a cada ambiente. */
+function alertasFert(ft, c){
+  var L = [], i, j, x, m = {}, orden = [];
+  if(c.multi){
+    for(i=0; i<c.ambs.length; i++){
+      var la = alertasLista(c.ambs[i].c);
+      for(j=0; j<la.length; j++){
+        x = la[j];
+        var tip = (c.ambs[i].amb || 'sin ambiente') + ': ' + x.tip;
+        if(!m[x.k]){ m[x.k] = { k:x.k, rojo:x.rojo, mag:x.mag, lbl:x.lbl, tips:[tip] }; orden.push(x.k); }
+        else {
+          m[x.k].tips.push(tip);
+          if((x.rojo && !m[x.k].rojo) || (x.rojo === m[x.k].rojo && x.mag > m[x.k].mag)){
+            m[x.k].rojo = x.rojo; m[x.k].mag = x.mag; m[x.k].lbl = x.lbl;
+          }
+        }
+      }
+    }
+    for(i=0; i<orden.length; i++){ x = m[orden[i]]; L.push({ rojo:x.rojo, lbl:x.lbl, tip:x.tips.join(' · ') }); }
+  } else {
+    L = alertasLista(c);
+  }
+  var out = [];
+  for(i=0; i<L.length; i++) out.push('<span class="bdg ' + (L[i].rojo ? 'br' : 'by') + '" title="' + esc(L[i].tip) + '">' + esc(L[i].lbl) + '</span>');
+  return out.length ? out.join(' ') : '<span style="color:#C3CCD6">—</span>';
+}
+function cuentaAlertasFert(ft, c){ var h = alertasFert(ft, c); return (h.match(/class="bdg/g) || []).length; }
 
+/* BUILD 26: ¿el lote tiene ese ambiente? */
+function fertTieneAmb(c, amb){
+  var i; for(i=0; i<c.ambs.length; i++){ if(c.ambs[i].amb === amb) return true; } return false;
+}
+function togAmbFt(id){
+  AMB_ABIERTO['ft_' + id] = !AMB_ABIERTO['ft_' + id];
+  renderFert();
+}
+/* Análisis (opcional), nutrientes aplicados y lo lograble de un cálculo
+   (el lote o uno de sus ambientes). En el lote con varios ambientes, los
+   valores son promedios ponderados por superficie. */
+function celdasFertDatos(c, verAn, pond){
+  var a = c.an || {}, h = '';
+  var zn = num(a.znPpm), znBajo = (zn !== null && zn < Number(DB.cfg.znPpm));
+  var tp = pond ? ' title="Promedio ponderado de los ambientes"' : '';
+  if(verAn){
+    h += '<td class="r dato gs"' + tp + '>' + f(num(a.mo), 2) + '</td>'
+      + '<td class="r dato"' + tp + '>' + f(num(a.pPpm), 1) + '</td>'
+      + '<td class="r dato"' + tp + '>' + f(num(a.sPpm), 1) + '</td>'
+      + '<td class="r dato"' + tp + '>' + f(c.kPpm, 0) + '</td>'
+      + (zn === null ? '<td class="r dato">—</td>'
+         : (znBajo
+            ? '<td class="r mal" title="Zinc por debajo del umbral de ' + f(DB.cfg.znPpm,2) + ' ppm' + (pond ? ' (promedio de los ambientes)' : '') + '">'
+              + f(zn,2) + '</td>'
+            : '<td class="r dato"' + tp + '>' + f(zn,2) + '</td>'))
+      + '<td class="r dato"' + tp + '>' + (c.nSuelo.kg !== null
+          ? f(c.nSuelo.kg,0) + (c.nSuelo.estimado
+              ? '<span title="Incluye capas estimadas" style="color:#A86A1F">*</span>' : '')
+          : '—') + '</td>';
+  }
+  /* BUILD 25: la fitotoxicidad se controla en Siembra (es del fertilizante que va con la semilla) */
+  var o = c.obj || {};
+  h += celdaNutri(c.rec.n, c.apl.n, null).replace('<td class="r ', '<td class="gs r ')
+    + celdaNutri(c.rec.p2o5, c.apl.p2o5)
+    + celdaNutri(c.rec.k2o,  c.apl.k2o)
+    + celdaNutri(c.rec.s,    c.apl.s)
+    + celdaLograble(c.nAlcanz, num(o.nObj), c.nSuelo.kg, c.apl.n, 'kg N/ha', 0)
+        .replace('<td class="r nu', '<td class="gs r nu');
+  /* BUILD 25: el P lograble se ve siempre, igual que el N */
+  h += celdaLograble(c.pAlcanz, num(o.pObj), num(a.pPpm),
+         (c.pAlcanz !== null && num(a.pPpm) !== null ? c.pAlcanz - num(a.pPpm) : 0), 'ppm P', 1);
+  return h;
+}
 function renderFert(){
   var filas = filasCampania();
   var fCampo = val('ft-f-campo'), fCult = val('ft-f-cult'), fEst = val('ft-f-est'), fAmb = val('ft-f-amb');
+  var fMom = val('ft-f-mom'), momsUsados = [];
   var verAn = !!vista('ftCalc');
   var i, r, ft, c, st;
   var haCub = 0, haTot = 0, nAvisos = 0, totN = 0, totP = 0;
@@ -2455,17 +2912,20 @@ function renderFert(){
     haTot += (r.ha || 0);
     if(st.e === 'listo') haCub += (r.ha || 0);
     c = ft ? calcFert(ft, r.amb) : null;
+    var haL = c ? (haFert(ft, c) || r.ha || 0) : 0;
     if(c){
       nAvisos += c.avisos.length;
-      totN += c.apl.n * (r.ha || 0);
-      totP += c.apl.p2o5 * (r.ha || 0);
+      totN += c.apl.n * haL;
+      totP += c.apl.p2o5 * haL;
     }
     if(fCampo && r.campo !== fCampo) continue;
     if(fCult && r.cultivo !== fCult) continue;
-    if(fAmb && r.amb !== fAmb) continue;
+    if(fAmb && r.amb !== fAmb && !(c && fertTieneAmb(c, fAmb))) continue;
     if(fEst === 'falta' && st.e === 'listo') continue;
     if(fEst === 'listo' && st.e !== 'listo') continue;
-    visibles.push({ r:r, ft:ft, c:c, st:st, pos:i });
+    if(ft) momentosDe(ft, momsUsados);
+    if(fMom && !(ft && tieneMomento(ft, fMom))) continue;
+    visibles.push({ r:r, ft:ft, c:c, st:st, pos:i, ha:(c && c.multi ? haL : r.ha) });
   }
   ordenarTabla(visibles, 'ft', valorFert, function(x, y){ return x.pos - y.pos; });
 
@@ -2481,8 +2941,8 @@ function renderFert(){
               thS('ft','k','K ppm','r'), thS('ft','zn','Zn ppm','r'), thS('ft','nSuelo','N suelo','r'));
   }
   cols.push(thS('ft','n','N','r gs'), thS('ft','p2o5','P₂O₅','r'), thS('ft','k2o','K₂O','r'), thS('ft','sApl','S','r'),
-            thS('ft','nLog','N lograble','r gs'));
-  if(verAn) cols.push(thS('ft','pLog','P lograble','r'));
+            thS('ft','nLog','N lograble','r gs'), thS('ft','pLog','P lograble','r', 'P del suelo + lo que aporta el P₂O₅ aplicado'),
+            thS('ft','alertas','Alertas','gs'));
   cols.push('<th class="gs"></th>');
   document.getElementById('th-ft').innerHTML = cols.join('');
   var nCols = cols.length;
@@ -2490,57 +2950,56 @@ function renderFert(){
   var h = '', j;
   for(i=0; i<visibles.length; i++){
     r = visibles[i].r; ft = visibles[i].ft; c = visibles[i].c; st = visibles[i].st;
-    var zebra = '';
-    var a = ft ? (ft.analisis || {}) : {};
-    var zn = num(a.znPpm);
-    var znBajo = (zn !== null && zn < Number(DB.cfg.znPpm));
-    var fito = c && c.fitoMax !== null && c.nSiembra > c.fitoMax;
+    var zebra = (i % 2 === 1) ? 'par' : 'impar';
+    var multi = !!(c && c.multi);
+    /* Con el filtro de ambiente puesto, el lote se abre solo para mostrarlo */
+    var abierto = multi && (fAmb ? true : !!AMB_ABIERTO['ft_' + ft.id]);
+    var ambCel;
+    if(multi){
+      ambCel = '<button class="tog-amb' + (abierto ? ' abierto' : '') + '" onclick="togAmbFt(\'' + ft.id + '\')" '
+        + 'title="Ver cada ambiente con su análisis y su dosis">'
+        + '<span class="c">&#9654;</span>' + c.ambs.length + ' amb.</button>';
+    } else {
+      var amb1 = (c && c.ambs.length && c.ambs[0].amb) ? c.ambs[0].amb : r.amb;
+      ambCel = amb1 ? '<span class="bdg bamb">' + esc(amb1) + '</span>' : '—';
+    }
 
     h += '<tr class="' + zebra + '">'
       + '<td class="campo-c">' + esc(r.campo) + '</td>'
       + '<td class="tdname">' + esc(r.lote) + (r.seg ? ' <span class="bdg bn">2ª</span>' : '') + '</td>'
-      + '<td>' + (r.amb ? '<span class="bdg bamb">' + esc(r.amb) + '</span>' : '—') + '</td>'
-      + '<td class="r">' + f(r.ha, 1) + '</td>'
+      + '<td>' + ambCel + '</td>'
+      + '<td class="r">' + f(visibles[i].ha, 1) + '</td>'
       + '<td class="tdname gs">' + esc(r.cultivo) + '</td>';
 
     if(!ft){
-      h += '<td colspan="' + (nCols - 6) + '" class="gs"><button class="bdg bdg-act bpend" title="Programar fertilización" onclick="abrirFertLote(\'' + jsq(r.loteId) + '\',\'' + jsq(r.cultivo) + '\')">Sin programar</button></td>';
+      h += '<td colspan="' + (nCols - 6) + '" class="gs"><button class="bdg bdg-act bdg-st bpend" title="Sin fertilización programada · Programar" onclick="abrirFertLote(\'' + jsq(r.loteId) + '\',\'' + jsq(r.cultivo) + '\')">Programar</button></td>';
     } else {
       /* Lo primero: qué fertilizante y cuánto, por hectárea y para el lote */
-      h += celdasAplic(c, r.ha);
-      if(verAn){
-        h += '<td class="r dato gs">' + f(a.mo, 2) + '</td>'
-          + '<td class="r dato">' + f(a.pPpm, 1) + '</td>'
-          + '<td class="r dato">' + f(a.sPpm, 1) + '</td>'
-          + '<td class="r dato">' + f(c.kPpm, 0) + '</td>'
-          + (zn === null ? '<td class="r dato">—</td>'
-             : (znBajo
-                ? '<td class="r mal" title="Zinc por debajo del umbral de ' + f(DB.cfg.znPpm,2) + ' ppm">'
-                  + f(zn,2) + '</td>'
-                : '<td class="r dato">' + f(zn,2) + '</td>'))
-          + '<td class="r dato">' + (c.nSuelo.kg !== null
-              ? f(c.nSuelo.kg,0) + (c.nSuelo.estimado
-                  ? '<span title="Incluye capas estimadas" style="color:#A86A1F">*</span>' : '')
-              : '—') + '</td>';
-      }
-      h += celdaNutri(c.rec.n, c.apl.n, fito
-            ? ('Fitotoxicidad: ' + f(c.nSiembra,1) + ' kg N/ha en línea de siembra, sobre el límite de '
-               + f(c.fitoMax,0) + ' kg para ' + ft.cultivo)
-            : null).replace('<td class="r ', '<td class="gs r ')
-        + celdaNutri(c.rec.p2o5, c.apl.p2o5)
-        + celdaNutri(c.rec.k2o,  c.apl.k2o)
-        + celdaNutri(c.rec.s,    c.apl.s)
-        + celdaLograble(c.nAlcanz, num((ft.obj || {}).nObj), c.nSuelo.kg, c.apl.n, 'kg N/ha', 0)
-            .replace('<td class="r nu', '<td class="gs r nu');
-      if(verAn){
-        h += celdaLograble(c.pAlcanz, num((ft.obj || {}).pObj), num(a.pPpm),
-               (c.pAlcanz !== null ? c.pAlcanz - num(a.pPpm) : 0), 'ppm P', 2);
-      }
+      h += celdasAplic(c, visibles[i].ha, ft, fMom);
+      h += celdasFertDatos(c, verAn, multi);
+      h += '<td class="gs">' + alertasFert(ft, c) + '</td>';
     }
     h += '<td class="r gs">'
       + (ft ? '<button class="btn-ico" title="Editar" onclick="abrirFertLote(\'' + jsq(r.loteId) + '\',\'' + jsq(r.cultivo) + '\')">&#9998;</button>'
             + '<button class="btn-ico" title="Borrar" onclick="borrarFert(\'' + ft.id + '\')">&times;</button>' : '')
       + '</td></tr>';
+
+    if(abierto){
+      for(j=0; j<c.ambs.length; j++){
+        var pa = c.ambs[j];
+        if(fAmb && pa.amb !== fAmb) continue;
+        h += '<tr class="amb ' + zebra + '">'
+          + '<td></td>'
+          + '<td class="amb-n">' + esc(pa.amb || 'sin ambiente') + '</td>'
+          + '<td></td>'
+          + '<td class="r">' + f(pa.ha, 1) + '</td>'
+          + '<td class="gs"></td>'
+          + celdasAplic(pa.c, pa.ha, ft, fMom, pa.amb)
+          + celdasFertDatos(pa.c, verAn, false)
+          + '<td class="gs">' + alertasFert(ft, pa.c) + '</td>'
+          + '<td class="gs"></td></tr>';
+      }
+    }
   }
 
   var tb = document.getElementById('tb-ft');
@@ -2567,24 +3026,29 @@ function renderFert(){
   llenarSelect('ft-f-campo', listaCampos(filas), 'Todos los campos', fCampo);
   llenarSelect('ft-f-cult',  listaCultivos(filas), 'Todos los cultivos', fCult);
   llenarSelect('ft-f-amb',   listaAmbientes(filas, null), 'Todos los ambientes', fAmb);
+  momsUsados.sort(function(a, b){
+    var ia = MOMENTOS.indexOf(a), ib = MOMENTOS.indexOf(b);
+    return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || String(a).localeCompare(String(b));
+  });
+  llenarSelect('ft-f-mom', momsUsados, 'Todos los momentos', fMom);
   habilitarExp('fert', visibles.length > 0);
   marcarFiltros();
 }
 /* Valor de cada columna de Fertilización para ordenar. Si hay varios
    productos, manda el primero (dosis y total: la suma de todos). */
 function valorFert(x, k){
-  var r = x.r, c = x.c, ft = x.ft, a = ft ? (ft.analisis || {}) : {}, i, s;
+  var r = x.r, c = x.c, ft = x.ft, a = c ? (c.an || {}) : {}, i, s;
   if(k === 'campo') return r.campo;
   if(k === 'lote') return r.lote;
   if(k === 'amb') return r.amb;
-  if(k === 'ha') return r.ha;
+  if(k === 'ha') return x.ha;
   if(k === 'cultivo') return r.cultivo;
   if(!c) return null;
   if(k === 'prod') return c.lineas.length ? (c.lineas[0].prod || '') : '';
   if(k === 'dosis' || k === 'totLote'){
     s = null;
     for(i=0; i<c.lineas.length; i++){ if(c.lineas[i].kg !== null) s = (s || 0) + c.lineas[i].kg; }
-    return (k === 'totLote' && s !== null) ? s * (r.ha || 0) : s;
+    return (k === 'totLote' && s !== null) ? s * (x.ha || 0) : s;
   }
   if(k === 'momento') return c.lineas.length ? (c.lineas[0].momento || '') : '';
   if(k === 'mo') return num(a.mo);
@@ -2599,6 +3063,7 @@ function valorFert(x, k){
   if(k === 'sApl') return c.apl.s;
   if(k === 'nLog') return c.nAlcanz;
   if(k === 'pLog') return c.pAlcanz;
+  if(k === 'alertas') return cuentaAlertasFert(ft, c) || null;
   return null;
 }
 function abrirFertLote(loteId, cultivo){
@@ -2826,7 +3291,10 @@ function totalesInsumos(fl){
     if(!c.p){
       avisar(avisos, s.lote + ' está programado sin partida de semilla, así que no suma a los totales.');
     } else if(c.total === null || !c.total){
-      avisar(avisos, s.lote + ' no tiene la dosis calculada: falta P1000 o semillas por bolsa en ' + c.p.nombre + '.');
+      /* BUILD 24: decir qué falta de verdad (antes siempre culpaba al P1000) */
+      var qf = faltaVC(c.p) || (unidadDens(c.p) === 'bol' ? (num(c.p.semBolsa) ? '' : 'Semillas por bolsa') : (num(c.p.p1000) ? '' : 'P1000'));
+      avisar(avisos, s.lote + ' no tiene la dosis calculada: '
+        + (qf ? 'falta ' + qf + ' en la partida ' + c.p.nombre : 'revisá hectáreas, objetivo y distancia entre surcos en la programación') + '.');
     }
 
     /* Semilla */
@@ -2864,17 +3332,20 @@ function totalesInsumos(fl){
     if(ft.campania !== CAMPANIA) continue;
     if(fCampo && ft.campo !== fCampo) continue;
     if(fCult && ft.cultivo !== fCult) continue;
-    if(fl.amb && ft.amb !== fl.amb) continue;
     if(!loteEnRango(ft.loteId, ft.cultivo, fl)) continue;
-    ha = haActividad(ft.loteId, ft.cultivo, ft.campania);
+    /* BUILD 26: cada ambiente con su dosis × sus hectáreas */
+    var partes = fertPartes(ft, fl.amb), ip, yaLote = {};
+    for(ip=0; ip<partes.length; ip++){
+    ha = partes[ip].ha;
     if(!ha) continue;
-    cf = calcFert(ft, ft.amb);
+    cf = partes[ip].c;
     for(j=0; j<cf.lineas.length; j++){
       l = cf.lineas[j];
       if(!l.prod || l.kg === null) continue;
       key = l.prod + '|' + l.momento;
       if(!fert[key]) fert[key] = { prod:l.prod, momento:l.momento, lotes:0, ha:0, kg:0, litros:0, sinDens:false, liq:esLiquido(l.p), n:0, p2o5:0, k2o:0, s:0 };
-      fert[key].lotes++; fert[key].ha += ha;
+      if(!yaLote[key]){ fert[key].lotes++; yaLote[key] = 1; }
+      fert[key].ha += ha;
       fert[key].kg += l.kg * ha;
       if(!fert[key].liq) fert[key].sinDens = false;
       else if(l.litros === null) fert[key].sinDens = true;
@@ -2886,6 +3357,7 @@ function totalesInsumos(fl){
       /* Solo lo que afecta a los totales: grados o densidad que faltan.
          Los avisos agronómicos (zinc, N estimado) viven en Fertilización. */
       if(l.aviso) avisar(avisos, l.aviso);
+    }
     }
   }
 
@@ -3059,7 +3531,7 @@ function renderInsumos(){
    Lo que baja es lo que estás viendo, no toda la campaña. */
 function filtrosDe(origen){
   if(origen === 'siembra') return { campo:val('sb-f-campo'), cult:val('sb-f-cult'), rango:val('sb-f-rango'), est:'', amb:val('sb-f-amb') };
-  if(origen === 'fert')    return { campo:val('ft-f-campo'), cult:val('ft-f-cult'), rango:'', est:val('ft-f-est'), amb:val('ft-f-amb') };
+  if(origen === 'fert')    return { campo:val('ft-f-campo'), cult:val('ft-f-cult'), rango:'', est:val('ft-f-est'), amb:val('ft-f-amb'), mom:val('ft-f-mom') };
   if(origen === 'lotes')   return { campo:val('lot-f-campo'), cult:val('lot-f-cult'), rango:'', est:'', estS:val('lot-f-est'), amb:val('lot-f-amb') };
   return { campo:val('in-f-campo'), cult:val('in-f-cult'), rango:'', est:'', amb:val('in-f-amb') };
 }
@@ -3120,6 +3592,7 @@ function textoFiltros(fl){
   if(fl.campo) p.push('Campo ' + fl.campo);
   if(fl.cult) p.push(fl.cult);
   if(fl.amb) p.push('Ambiente ' + fl.amb);
+  if(fl.mom) p.push('Momento ' + fl.mom);
   if(fl.estS === 'falta') p.push('solo lo que falta programar');
   if(fl.estS === 'listo') p.push('solo lo programado');
   if(fl.rango) p.push('Rango ' + fl.rango);
@@ -3287,37 +3760,44 @@ function exportarExcel(origen){
     if(ft.campania !== CAMPANIA) continue;
     if(fl.campo && ft.campo !== fl.campo) continue;
     if(fl.cult && ft.cultivo !== fl.cult) continue;
-    if(fl.amb && ft.amb !== fl.amb) continue;
     if(!loteEnRango(ft.loteId, ft.cultivo, fl)) continue;
-    cf = calcFert(ft, ft.amb);
-    var a = ft.analisis || {}, o = ft.obj || {};
-    filas.push([ft.campo, ft.lote, ft.amb || '', haActividad(ft.loteId, ft.cultivo, ft.campania), ft.cultivo,
-      a.fecha || '', a.mo, a.pPpm, a.sPpm, redondear(cf.kPpm,1), a.znPpm,
+    if(fl.mom && !tieneMomento(ft, fl.mom)) continue;
+    /* BUILD 26: una fila por ambiente, con su análisis, objetivo y dosis */
+    var pts = fertPartes(ft, fl.amb), ip;
+    for(ip=0; ip<pts.length; ip++){
+    cf = pts[ip].c;
+    var a = cf.an || {}, o = cf.obj || {};
+    filas.push([ft.campo, ft.lote, pts[ip].amb || '', pts[ip].ha, ft.cultivo,
+      (ft.analisis || {}).fecha || '', a.mo, a.pPpm, a.sPpm, redondear(cf.kPpm,1), a.znPpm,
       redondear(cf.nSuelo.kg,1), cf.nSuelo.estimado ? 'sí' : 'no', o.pObj, o.nObj,
       redondear(cf.rec.p2o5,2), redondear(cf.rec.s,2), redondear(cf.rec.k2o,2), redondear(cf.rec.n,2),
       redondear(cf.apl.p2o5,2), redondear(cf.apl.s,2), redondear(cf.apl.k2o,2), redondear(cf.apl.n,2),
       redondear(cf.pAlcanz,2), redondear(cf.nAlcanz,1)]);
+    }
   }
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(filas), 'Fertilización');
 
   /* Hoja 3: Aplicaciones */
-  filas = [['Campo','Lote','Cultivo','Sup (ha)','Fertilizante','Momento','Dosis','Unidad',
+  filas = [['Campo','Lote','Ambiente','Cultivo','Sup (ha)','Fertilizante','Momento','Dosis','Unidad',
             'kg/ha','N kg/ha','P2O5 kg/ha','K2O kg/ha','S kg/ha','kg totales']];
   for(i=0; i<DB.fert.length; i++){
     ft = DB.fert[i];
     if(ft.campania !== CAMPANIA) continue;
     if(fl.campo && ft.campo !== fl.campo) continue;
     if(fl.cult && ft.cultivo !== fl.cult) continue;
-    if(fl.amb && ft.amb !== fl.amb) continue;
     if(!loteEnRango(ft.loteId, ft.cultivo, fl)) continue;
-    cf = calcFert(ft, ft.amb);
-    var haF = haActividad(ft.loteId, ft.cultivo, ft.campania);
+    if(fl.mom && !tieneMomento(ft, fl.mom)) continue;
+    var pts2 = fertPartes(ft, fl.amb), iq;
+    for(iq=0; iq<pts2.length; iq++){
+    cf = pts2[iq].c;
+    var haF = pts2[iq].ha;
     for(j=0; j<cf.lineas.length; j++){
       l = cf.lineas[j];
-      filas.push([ft.campo, ft.lote, ft.cultivo, haF, l.prod, l.momento,
-        ft.aplic[j].dosis, ft.aplic[j].unidad, redondear(l.kg,2),
+      filas.push([ft.campo, ft.lote, pts2[iq].amb || '', ft.cultivo, haF, l.prod, l.momento,
+        dosisDeAmb(ft.aplic[j], pts2[iq].amb), ft.aplic[j].unidad, redondear(l.kg,2),
         redondear(l.n,2), redondear(l.p2o5,2), redondear(l.k2o,2), redondear(l.s,2),
         (l.kg !== null && haF) ? redondear(l.kg * haF, 1) : '']);
+    }
     }
   }
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(filas), 'Aplicaciones');
@@ -3459,6 +3939,60 @@ function exportarPDF(origen){
       doc.setFontSize(11); doc.setTextColor(15,25,35); doc.text('Fertilizantes', 40, y); y += 6;
       doc.autoTable(mezcla(estilo, {
         startY:y, head:[['Fertilizante','Momento','Lotes','ha','kg','Litros','N','P2O5','K2O','S']], body:body }));
+    }
+  } else if(origen === 'fert'){
+    /* BUILD 25: impresión de Fertilización para el contratista: solo lo que hay que
+       aplicar (sin análisis, recomendación ni lo lograble). */
+    var lf = [], ftx, cfx, ia, ap, ha;
+    for(i=0; i<DB.fert.length; i++){
+      ftx = DB.fert[i];
+      if(ftx.campania !== CAMPANIA) continue;
+      if(fl.campo && ftx.campo !== fl.campo) continue;
+      if(fl.cult && ftx.cultivo !== fl.cult) continue;
+      if(fl.amb && !fertPartes(ftx, fl.amb).length) continue;
+      if(!loteEnRango(ftx.loteId, ftx.cultivo, fl)) continue;
+      if(fl.mom && !tieneMomento(ftx, fl.mom)) continue;
+      lf.push(ftx);
+    }
+    lf.sort(function(x, z){
+      return String(x.campo).localeCompare(String(z.campo), 'es', {numeric:true})
+          || String(x.lote).localeCompare(String(z.lote), 'es', {numeric:true});
+    });
+    body = [];
+    for(i=0; i<lf.length; i++){
+      ftx = lf[i]; cfx = calcFert(ftx, ftx.amb);
+      /* BUILD 26: si alguna dosis cambia por ambiente, el contratista recibe
+         una línea por ambiente con su superficie; si no, el lote entero. */
+      var pdfP, ipp;
+      if(cfx.multi && (tieneDosisAmb(ftx) || fl.amb)){ pdfP = fertPartes(ftx, fl.amb); }
+      else { pdfP = [{ amb:'', ha:haFert(ftx, cfx), lote:true }]; }
+      var nL = 0;
+      for(ipp=0; ipp<pdfP.length; ipp++){
+      ha = pdfP[ipp].ha;
+      var nA = 0;
+      for(ia=0; ia<(ftx.aplic || []).length; ia++){
+        ap = ftx.aplic[ia];
+        if(!ap.prod) continue;
+        if(fl.mom && ap.momento !== fl.mom) continue;
+        var dl = num(pdfP[ipp].lote ? ap.dosis : dosisDeAmb(ap, pdfP[ipp].amb)), esL = ap.unidad === 'l/ha';
+        var pri = (nL++ === 0), priA = (nA++ === 0);
+        var loteTxt = pdfP[ipp].lote ? (pri ? ftx.lote : '') : (priA ? (pri ? ftx.lote + ' · ' : '   ') + (pdfP[ipp].amb || 'sin ambiente') : '');
+        body.push([pri ? ftx.campo : '', loteTxt, priA ? f(ha,1) : '', pri ? ftx.cultivo : '',
+          ap.prod, ap.momento || '', (dl !== null ? f(dl, esL ? 1 : 0) : ''), esL ? 'l/ha' : 'kg/ha',
+          (dl !== null && ha ? f(dl * ha, 0) + (esL ? ' l' : ' kg') : '')]);
+      }
+      }
+    }
+    if(!body.length){
+      doc.setFontSize(10); doc.setTextColor(122,136,153);
+      doc.text('No hay fertilizaciones programadas que cumplan con los filtros aplicados.', 40, y + 10);
+    } else {
+      doc.autoTable(mezcla(estilo, {
+        startY:y,
+        head:[['Campo','Lote / ambiente','ha','Cultivo','Fertilizante','Momento','Dosis','Unidad','Total']],
+        body:body,
+        columnStyles:{ 2:{halign:'right'}, 6:{halign:'right'}, 8:{halign:'right'} }
+      }));
     }
   } else {
     /* Detalle por lote: lo que se lleva al campo */
@@ -3941,6 +4475,18 @@ function leerFertXls(wb, nombre){
       if(!celT(D, i, 'E') && celN(D, i, 'J') === null) continue;
       var campoX = celT(D, i, 'B');
       var l = buscarLote(lotes, campoX, lote);
+      /* BUILD 26: lote partido en zonas ("EM 50/51 Alto (verde oscuro)"): cada
+         zona entra como un ambiente del lote; el testigo queda afuera. */
+      var zona = null, mz = /^(.*?)\s+(alto|medio|bajo|testigo)\b/i.exec(lote);
+      if(mz && (!l || /testigo/i.test(mz[2]))){
+        if(/testigo/i.test(mz[2])){
+          R.notas.push('Se dejó afuera la fila «' + lote + '»: el testigo no se programa.');
+          continue;
+        }
+        zona = mz[2];
+        lote = mz[1];
+        l = buscarLote(lotes, campoX, lote);
+      }
       var aps = [];
       agregarAplic(aps, celT(D, i, 'S'),  celN(D, i, 'U'),  'Siembra');
       agregarAplic(aps, celT(D, i, 'AB'), celN(D, i, 'AD'), 'Siembra');
@@ -3961,11 +4507,35 @@ function leerFertXls(wb, nombre){
         obj: { pObj: celN(D, i, 'P'), nObj: celN(D, i, 'AS') },
         aplic: aps
       };
+      if(zona){
+        reg.ha = celN(D, i, 'J');
+        if(!reg.amb) reg.amb = zona;
+        /* Si el lote ya vino con otra zona del mismo cultivo, se suma como ambiente */
+        var prev = null, q;
+        for(q=0; q<R.fert.length; q++){
+          if(R.fert[q].partes && R.fert[q].loteTexto === reg.loteTexto && R.fert[q].cultivo === reg.cultivo){ prev = R.fert[q]; break; }
+        }
+        var parte = { amb:reg.amb, ha:reg.ha, analisis:reg.analisis, obj:reg.obj, aplic:reg.aplic };
+        if(prev){
+          for(q=0; q<prev.partes.length; q++){ if(prev.partes[q].amb === parte.amb){ parte.amb = parte.amb + ' ' + zona; break; } }
+          prev.partes.push(parte);
+          continue;
+        }
+        reg.partes = [parte];
+      }
       if(!l) R.sinLote.push(reg.loteTexto);
       R.fert.push(reg);
     }
   }
   if(!R.fert.length) R.notas.push('La hoja Datos no tiene lotes cargados: se importan solo las tablas maestras.');
+  for(i=0; i<R.fert.length; i++){
+    if(!R.fert[i].partes || R.fert[i].partes.length < 2) continue;
+    var sinHa = false, q2;
+    for(q2=0; q2<R.fert[i].partes.length; q2++){ if(!R.fert[i].partes[q2].ha) sinHa = true; }
+    R.notas.push(R.fert[i].loteTexto + ' entra con ' + R.fert[i].partes.length + ' ambientes ('
+      + R.fert[i].partes.map(function(x){ return x.amb; }).join(', ') + ')'
+      + (sinHa ? '. El Excel no trae la superficie de cada zona: cargala en la fertilización del lote.' : '.'));
+  }
   /* Los nombres de cultivo del Excel no siempre coinciden con el padrón */
   var padron = {}, cs = coreCultivos(), sinCult = [];
   for(i=0; i<cs.length; i++) padron[norm(cs[i].nombre)] = 1;
@@ -4235,6 +4805,7 @@ function aplicarFertXls(R, destino, tot){
   for(i=0; i<R.fert.length; i++){
     var y = R.fert[i];
     if(!y.loteId) continue;
+    if(y.partes && y.partes.length > 1){ DB.fert.push(fertDeZonas(y, destino)); tot.fert++; continue; }
     DB.fert.push({
       id: uid('ft'), campania: destino,
       loteId: y.loteId, campo: y.campo, lote: y.lote, amb: y.amb, cultivo: y.cultivo,
@@ -4244,6 +4815,47 @@ function aplicarFertXls(R, destino, tot){
     });
     tot.fert++;
   }
+}
+/* BUILD 26: un lote con varias zonas en el Excel → una fertilización con
+   ambientes, análisis y objetivo de cada uno, y dosis por ambiente donde
+   cambian. El objetivo del lote es el de la primera zona; los demás
+   ambientes guardan el suyo solo si es distinto. */
+function fertDeZonas(y, destino){
+  var P = y.partes, i, j, k, ambs = [], porAmb = {}, lineas = [], idx = {}, ap, key;
+  var o0 = P[0].obj || {};
+  for(i=0; i<P.length; i++){
+    ambs.push({ amb:P[i].amb, ha:P[i].ha });
+    var oi = P[i].obj || {};
+    porAmb[P[i].amb] = { analisis:clonAnalisis(P[i].analisis),
+      obj:{ pObj:(oi.pObj !== o0.pObj ? oi.pObj : null), nObj:(oi.nObj !== o0.nObj ? oi.nObj : null) } };
+    for(j=0; j<(P[i].aplic || []).length; j++){
+      ap = P[i].aplic[j]; key = ap.prod + '|' + ap.momento;
+      if(!idx.hasOwnProperty(key)){
+        idx[key] = lineas.length;
+        lineas.push({ prod:ap.prod, momento:ap.momento, unidad:ap.unidad || 'kg/ha', dosis:null, porAmb:true, dosisAmb:{} });
+      }
+      lineas[idx[key]].dosisAmb[P[i].amb] = ap.dosis;
+    }
+  }
+  /* Donde un ambiente no lleva el producto, va 0; si todos llevan lo mismo, dosis única */
+  for(j=0; j<lineas.length; j++){
+    var d0 = null, iguales = true;
+    for(i=0; i<P.length; i++){
+      k = P[i].amb;
+      if(!lineas[j].dosisAmb.hasOwnProperty(k)) lineas[j].dosisAmb[k] = 0;
+      if(i === 0) d0 = lineas[j].dosisAmb[k]; else if(lineas[j].dosisAmb[k] !== d0) iguales = false;
+    }
+    if(iguales){ lineas[j].dosis = d0; delete lineas[j].porAmb; delete lineas[j].dosisAmb; }
+    else lineas[j].dosis = dosisPonderada(lineas[j], ambs);
+  }
+  return {
+    id: uid('ft'), campania: destino,
+    loteId: y.loteId, campo: y.campo, lote: y.lote, amb: P[0].amb, cultivo: y.cultivo,
+    analisis: clonAnalisis(P[0].analisis),
+    obj: { pObj:o0.pObj, nObj:o0.nObj },
+    ambs: ambs, mismoAnalisis: false, porAmb: porAmb,
+    aplic: lineas
+  };
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -4277,8 +4889,8 @@ function prepararValidacion(){
     }
   }, false);
 }
-/* BUILD 22: si hay cambios sin guardar, se pregunta antes de cerrar la ventana
-   (clic afuera, la cruz, Cancelar o Escape). */
+/* BUILD 22/24: el clic afuera NO cierra la ventana (un toque sin querer no hace nada).
+   Se sale con la cruz, Cancelar o Escape; si hay cambios sin guardar, se pregunta. */
 function marcarSucio(){ if(MODAL) MODAL.sucio = true; }
 function pedirCerrarModal(){
   if(MODAL && MODAL.sucio && !confirm('Tenés cambios sin guardar. ¿Salir sin guardar?')) return;
@@ -4375,7 +4987,9 @@ function especieDeCultivo(cultivo){
   }
   return cultivo;
 }
-function fechaPartida(p){ return (p && (p.fechaIng || p.labFecha)) || ''; }
+/* BUILD 24: la partida lleva una sola fecha (obligatoria). Las cargadas antes
+   toman la del análisis si estaba y, si no, la de ingreso. */
+function fechaPartida(p){ return (p && (p.fecha || p.labFecha || p.fechaIng)) || ''; }
 function hoyISO(){
   var d = new Date(), m = String(d.getMonth()+1), dd = String(d.getDate());
   if(m.length < 2) m = '0' + m;
@@ -4398,27 +5012,27 @@ function abrirPartida(id){
   var h = ''
     + '<div class="fsec">Identificación</div>'
     + '<div class="frow">'
+    +   fcol('Cultivo', '<select id="pa-cult">' + opts(lc, p ? p.cultivo : '', '— elegir —') + '</select>')
     +   fcol('Genotipo / Variedad', '<input type="text" id="pa-geno" value="' + esc(p ? p.genotipo : '') + '" placeholder="DM Catalpa">')
     +   fcol('N° de partida', '<input type="text" id="pa-nro" value="' + esc(p ? p.nro : '') + '" placeholder="1">')
-    +   fcol('Cultivo', '<select id="pa-cult">' + opts(lc, p ? p.cultivo : '', '— elegir —') + '</select>')
     + '</div>'
     + '<div class="frow">'
+    +   fcol('Fecha *', inpFecha('pa-fecha', fechaPartida(p)))
+    +   fcol('Acopio', '<select id="pa-aco">' + optsAcopio(p ? p.acopioId : '') + '</select>')
     +   fcol('Unidad', '<select id="pa-unidad" onchange="togglePartidaUnidad()">'
           + '<option value="Kg"' + (p && p.unidad === 'Kg' ? ' selected' : '') + '>Kg</option>'
           + '<option value="Bolsa"' + (p && p.unidad === 'Bolsa' ? ' selected' : '') + '>Bolsa</option></select>')
-    +   fcolId('Semillas por bolsa', 'lb-pa-sb', inpNum('pa-sb', p ? p.semBolsa : null, 1) + ' oninput="calcVCModal()">')
-    +   fcol('Unidades disponibles', inpNum('pa-cant', p ? p.cantidad : null, 0.01) + '>')
     + '</div>'
     + '<div class="frow">'
-    +   fcol('Fecha de ingreso', '<input type="date" id="pa-fing" value="' + esc(p ? (p.fechaIng || '') : hoyISO()) + '">')
-    +   fcol('Acopio', '<select id="pa-aco">' + optsAcopio(p ? p.acopioId : '') + '</select>')
+    +   fcolId('Semillas por bolsa', 'lb-pa-sb', inpNum('pa-sb', p ? p.semBolsa : null, 1) + ' oninput="calcVCModal()">')
+    +   fcol('Unidades disponibles', inpNum('pa-cant', p ? p.cantidad : null, 0.01) + '>')
     +   '<div class="fcol"></div>'
     + '</div>'
     + '<div class="fsec">Calidad</div>'
     + '<div class="frow">'
     +   fcol('Laboratorio', '<input type="text" id="pa-lab" value="' + esc(p ? p.lab : '') + '">')
-    +   fcol('Fecha del análisis', '<input type="date" id="pa-labf" value="' + esc(p ? (p.labFecha || '') : '') + '">')
     +   fcolId('P1000 (gramos)', 'lb-pa-p1000', inpNum('pa-p1000', p ? p.p1000 : null, 0.1) + ' oninput="calcVCModal()">')
+    +   '<div class="fcol"></div>'
     + '</div>'
     + '<div class="frow">'
     +   fcol('Pureza %', inpNum('pa-pur', p ? p.pureza : null, 0.1, 100) + ' oninput="calcVCModal()">')
@@ -4501,6 +5115,7 @@ function calcVCModal(){
 function guardarPartida(){
   var geno = val('pa-geno');
   if(!geno){ alert('Falta el genotipo o variedad.'); return; }
+  if(!val('pa-fecha')){ alert('Falta la fecha de la partida: es obligatoria.'); return; }
   var u = val('pa-unidad');
   if(u === 'Bolsa' && !num(val('pa-sb'))){ alert('Con unidad Bolsa, las semillas por bolsa son obligatorias.'); return; }
   if(u !== 'Bolsa' && !num(val('pa-p1000'))){ alert('Con unidad Kg, el P1000 es obligatorio.'); return; }
@@ -4514,12 +5129,12 @@ function guardarPartida(){
   p.cultivo    = val('pa-cult');
   p.unidad     = u;
   p.cantidad   = num(val('pa-cant'));
-  p.fechaIng   = val('pa-fing');
+  p.fecha      = val('pa-fecha');
+  delete p.fechaIng; delete p.labFecha;   /* BUILD 24: una sola fecha */
   /* BUILD 23: la partida ya no lleva depósito (el dato viejo se conserva, no se muestra) */
   p.acopioId   = val('pa-aco');
   p.vcBase     = val('pa-vcb') || 'pg';
   p.lab        = val('pa-lab');
-  p.labFecha   = val('pa-labf');
   p.p1000      = num(val('pa-p1000'));
   p.semBolsa   = num(val('pa-sb'));
   p.pureza     = num(val('pa-pur'));
@@ -4546,6 +5161,24 @@ function borrarPartida(id){
   for(i=0; i<DB.partidas.length; i++){ if(DB.partidas[i].id === id){ DB.partidas.splice(i,1); break; } }
   sv('partidas');
   renderPartidas(); renderSiembra(); renderInsumos(); renderLotes();
+}
+/* BUILD 24: "Solo la última de cada acopio". Por cada cultivo + acopio queda
+   la partida de fecha más reciente; si hay varias con esa fecha, todas.
+   Las sin fecha solo quedan si en el grupo no hay ninguna con fecha. */
+var PA_ULTIMA = false;
+function togUltimaPartida(){ PA_ULTIMA = !PA_ULTIMA; renderPartidas(); }
+function soloUltimaPorAcopio(lista){
+  var max = {}, i, k, fe, out = [];
+  for(i=0; i<lista.length; i++){
+    k = (lista[i].cultivo || '') + '|' + (lista[i].acopioId || '');
+    fe = fechaPartida(lista[i]);
+    if(!(k in max) || fe > max[k]) max[k] = fe;
+  }
+  for(i=0; i<lista.length; i++){
+    k = (lista[i].cultivo || '') + '|' + (lista[i].acopioId || '');
+    if(fechaPartida(lista[i]) === max[k]) out.push(lista[i]);
+  }
+  return out;
 }
 function limpiarFiltrosPartidas(){
   setVal('pa-f-esp',''); setVal('pa-f-aco','');
@@ -4584,19 +5217,32 @@ function valorPartida(p, k){
   if(k === 'eg') return num(p.egCur != null ? p.egCur : p.eg);
   return num(p[k]);
 }
+/* BUILD 25: tabla corta por defecto; "+ Análisis completo" muestra el resto */
+var PA_FULL = false;
+function togAnalisisPartida(){ PA_FULL = !PA_FULL; renderPartidas(); }
 function renderPartidas(){
   var fEsp = val('pa-f-esp'), fAco = val('pa-f-aco');
-  var h = '', i, p, vc, lista = [], esp, vistosE = {}, vistosA = {}, lEsp = [], lAco = [], nomA;
+  var h = '', i, p, vc, lista = [], esp, vistosE = {}, vistosA = {}, lEsp = [], lAco = [], nomA, nCol;
 
-  document.getElementById('th-pa').innerHTML =
-      thS('pa','nombre','Partida') + thS('pa','geno','Genotipo / Variedad') + thS('pa','cultivo','Cultivo')
-    + thS('pa','acopio','Acopio') + thS('pa','fecha','Ingreso') + thS('pa','unidad','Unidad')
-    + thS('pa','cantidad','Unid. disp.','r','Unidades disponibles') + thS('pa','semBolsa','Sem/bolsa','r')
-    + thS('pa','p1000','P1000 (g)','r') + thS('pa','pureza','Pureza %','r')
-    + thS('pa','pg','PG %','r') + thS('pa','pgCur','PG cur. %','r')
-    + thS('pa','eg','EG %','r','Energía germinativa (curada si está, si no sin curar)') + thS('pa','vigor','Vigor %','r')
-    + thS('pa','vigTz','Vigor TZ %','r','Vigor por tetrazolio') + thS('pa','viab','Viab. %','r','Viabilidad por tetrazolio')
-    + thS('pa','vc','VC %','r') + thS('pa','lab','Laboratorio') + thS('pa','fung','Curasemilla en test') + '<th></th>';
+  var th = thS('pa','cultivo','Cultivo') + thS('pa','nombre','Partida') + thS('pa','fecha','Fecha')
+    + thS('pa','geno','Genotipo / Variedad') + thS('pa','acopio','Acopio')
+    + thS('pa','cantidad','Disponibles','r','Unidades disponibles');
+  if(PA_FULL){
+    th += thS('pa','semBolsa','Sem/bolsa','r gs') + thS('pa','p1000','P1000 (g)','r') + thS('pa','pureza','Pureza %','r');
+  }
+  th += thS('pa','pg','PG %','r' + (PA_FULL ? '' : ' gs'));
+  if(PA_FULL){
+    th += thS('pa','pgCur','PG cur. %','r')
+      + thS('pa','eg','EG %','r','Energía germinativa (curada si está, si no sin curar)') + thS('pa','vigor','Vigor %','r')
+      + thS('pa','vigTz','Vigor TZ %','r','Vigor por tetrazolio') + thS('pa','viab','Viab. %','r','Viabilidad por tetrazolio');
+  }
+  th += thS('pa','vc','VC %','r gs');
+  if(PA_FULL) th += thS('pa','lab','Laboratorio','gs') + thS('pa','fung','Curasemilla en test');
+  th += '<th></th>';
+  document.getElementById('th-pa').innerHTML = th;
+  nCol = PA_FULL ? 19 : 9;
+  var bf = document.getElementById('bt-pa-full');
+  if(bf){ bf.textContent = PA_FULL ? '− Análisis completo' : '+ Análisis completo'; bf.className = 'btn' + (PA_FULL ? ' btn-on' : ''); }
 
   for(i=0; i<DB.partidas.length; i++){
     p = DB.partidas[i];
@@ -4607,6 +5253,9 @@ function renderPartidas(){
     if(fAco && p.acopioId !== fAco) continue;
     lista.push(p);
   }
+  if(PA_ULTIMA) lista = soloUltimaPorAcopio(lista);
+  var bu = document.getElementById('bt-pa-ult');
+  if(bu) bu.className = 'btn' + (PA_ULTIMA ? ' btn-on' : '');
   /* Con valores iguales en la columna elegida, desempata la fecha (de la más reciente a la más vieja) */
   ordenarTabla(lista, 'pa', valorPartida, ORDEN.pa.k ? cmpFechaPartida : cmpAcopioFecha);
 
@@ -4614,37 +5263,43 @@ function renderPartidas(){
     p = lista[i];
     vc = vcPartida(p);
     nomA = nombreAcopio(p.acopioId);
+    var uDisp = p.unidad === 'Bolsa' ? (Number(p.cantidad) === 1 ? 'bolsa' : 'bolsas') : 'kg';
     h += '<tr>'
-      + '<td class="tdname"><b>' + esc(p.nombre) + '</b></td>'
-      + '<td class="tdname">' + esc(p.genotipo) + '</td>'
       + '<td class="tdname">' + esc(p.cultivo || '—') + '</td>'
+      + '<td class="tdname"><b>' + esc(p.nombre) + '</b></td>'
+      + '<td>' + (fechaPartida(p) ? fmtFecha(fechaPartida(p)) : '<span class="bdg-pend" title="La fecha es obligatoria: editá la partida y cargala">Falta fecha</span>') + '</td>'
+      + '<td class="tdname">' + esc(p.genotipo) + '</td>'
       + '<td class="tdname">' + (nomA ? esc(nomA) + (esAcopio(p.acopioId) ? '' : ' <span class="bdg by" title="Se eligió de Terceros en una versión anterior. Editá la partida y elegí el acopio de Maestros.">revisar</span>') : '—') + '</td>'
-      + '<td>' + fmtFecha(p.fechaIng) + '</td>'
-      + '<td>' + esc(p.unidad) + '</td>'
-      + '<td class="r">' + f(p.cantidad, 0) + '</td>'
-      + '<td class="r">' + f(p.semBolsa, 0) + '</td>'
-      + '<td class="r">' + f(p.p1000, 1) + '</td>'
-      + '<td class="r">' + f(p.pureza, 1) + '</td>'
-      + '<td class="r">' + f(p.pg, 1) + '</td>'
-      + '<td class="r">' + f(p.pgCur, 1) + '</td>'
-      + '<td class="r"' + (p.egCur != null ? ' title="EG curada' + (p.eg != null ? ' · sin curar ' + f(p.eg,1) + '%' : '') + '"' : (p.eg != null ? ' title="EG sin curar"' : '')) + '>' + f(p.egCur != null ? p.egCur : p.eg, 1) + '</td>'
-      + '<td class="r">' + f(p.vigor, 1) + '</td>'
-      + '<td class="r">' + f(p.vigTz, 1) + '</td>'
-      + '<td class="r">' + f(p.viab, 1) + '</td>'
-      + '<td class="r" title="VC calculado con ' + esc(vcBase(p).t) + '">'
+      + '<td class="r">' + (p.cantidad != null && p.cantidad !== '' ? f(p.cantidad, 0) + ' <span class="u-dos">' + uDisp + '</span>' : '—') + '</td>';
+    if(PA_FULL){
+      h += '<td class="r gs">' + f(p.semBolsa, 0) + '</td>'
+        + '<td class="r">' + f(p.p1000, 1) + '</td>'
+        + '<td class="r">' + f(p.pureza, 1) + '</td>';
+    }
+    h += '<td class="r' + (PA_FULL ? '' : ' gs') + '">' + f(p.pg, 1) + '</td>';
+    if(PA_FULL){
+      h += '<td class="r">' + f(p.pgCur, 1) + '</td>'
+        + '<td class="r"' + (p.egCur != null ? ' title="EG curada' + (p.eg != null ? ' · sin curar ' + f(p.eg,1) + '%' : '') + '"' : (p.eg != null ? ' title="EG sin curar"' : '')) + '>' + f(p.egCur != null ? p.egCur : p.eg, 1) + '</td>'
+        + '<td class="r">' + f(p.vigor, 1) + '</td>'
+        + '<td class="r">' + f(p.vigTz, 1) + '</td>'
+        + '<td class="r">' + f(p.viab, 1) + '</td>';
+    }
+    h += '<td class="r gs" title="VC calculado con ' + esc(vcBase(p).t) + '">'
       +   (vc !== null ? '<span class="bdg ' + (vc>=85?'bg':(vc>=70?'by':'br')) + '">' + f(vc,1) + '</span>'
                        : '<span class="bdg-pend" title="Falta ' + esc(faltaVC(p)) + '">Falta</span>')
-      +   '<span class="thsub" style="display:block;font-size:9.5px;color:#99A3AE;margin-top:1px">' + esc(vcBase(p).c) + '</span></td>'
-      + '<td class="tdname">' + esc(p.lab || '—') + (p.labFecha ? ' <span style="color:var(--muted)">' + fmtFecha(p.labFecha) + '</span>' : '') + '</td>'
-      + '<td class="tdname">' + esc(p.fungicida || '—') + '</td>'
-      + '<td class="r">'
+      +   '<span class="vc-base">' + esc(vcBase(p).c) + '</span></td>';
+    if(PA_FULL){
+      h += '<td class="tdname gs">' + esc(p.lab || '—') + '</td>'
+        + '<td class="tdname">' + esc(p.fungicida || '—') + '</td>';
+    }
+    h += '<td class="r">'
       +   '<button class="btn-ico" title="Editar" onclick="abrirPartida(\'' + p.id + '\')">&#9998;</button>'
       +   '<button class="btn-ico" title="Borrar" onclick="borrarPartida(\'' + p.id + '\')">&times;</button>'
       + '</td></tr>';
   }
   var tb = document.getElementById('tb-pa');
-  if(!DB.partidas.length) tb.innerHTML = filaVacia(20, 'Todavía no cargaste partidas de semilla.');
-  else if(!lista.length) tb.innerHTML = filaVacia(20, 'Ninguna partida cumple con los filtros aplicados.');
+  if(!DB.partidas.length) tb.innerHTML = filaVacia(nCol, 'Todavía no cargaste partidas de semilla.');
+  else if(!lista.length) tb.innerHTML = filaVacia(nCol, 'Ninguna partida cumple con los filtros aplicados.');
   else tb.innerHTML = h;
 
   lEsp.sort();
@@ -4693,11 +5348,10 @@ function abrirRango(id){
     + fcol('Código', '<input type="text" id="ra-cod" value="' + esc(r ? r.cod : proximoCodRango(cult)) + '">')
     + fcol('Cultivo', '<select id="ra-cult">' + opts(lc, cult, '') + '</select>')
     + '</div><div class="frow">'
-    + fcol('Fecha mínima', '<input type="date" id="ra-desde" value="' + esc(r ? r.desde : '') + '">')
-    + fcol('Fecha máxima', '<input type="date" id="ra-hasta" value="' + esc(r ? r.hasta : '') + '">')
+    + fcol('Fecha mínima', inpFecha('ra-desde', r ? r.desde : ''))
+    + fcol('Fecha máxima', inpFecha('ra-hasta', r ? r.hasta : ''))
     + '</div></div>'
-    + '<div class="hint">Los rangos son las ventanas de siembra. Un rango de <b>Todos los cultivos</b> se ofrece para cualquier cultivo; '
-    + 'uno de un cultivo, solo al programar ese cultivo. El balance de sembradoras compara la demanda de cada ventana contra la capacidad disponible.</div>';
+    + '<div class="hint">Un rango de <b>Todos los cultivos</b> se ofrece para cualquier cultivo; uno de un cultivo, solo para ese.</div>';
   abrirModalBase(id ? 'Editar rango' : 'Nuevo rango de siembra', h);
 }
 function guardarRango(){
@@ -4946,8 +5600,8 @@ function abrirSiembra(id, pre){
 
   var h = ''
     + '<div class="fsec">Lote y cultivo<span class="fsub">Qué se siembra, con qué partida y en qué ventana de fecha.</span></div>'
-    + (s ? '<div id="sb-lote-zona"></div>' : '')
     + '<div class="blk">'
+    + (s ? '<div id="sb-lote-zona"></div>' : '')
     + '<div class="frow">'
     +   fcol('Cultivo', '<select id="sb-cult" onchange="onSiembraCultivo()">' + opts(lc, cultSel, '— elegir —') + '</select>')
     +   fcol('Partida de semilla', '<select id="sb-partida" onchange="onSiembraPartida()"></select>')
@@ -4955,10 +5609,8 @@ function abrirSiembra(id, pre){
     + '</div>'
     + '<div class="frow">'
     +   fcol('Distancia entre surcos (m)', '<input type="number" id="sb-des" step="0.01" min="0" value="' + (s && s.des != null ? s.des : '') + '" oninput="recalcSiembraModal()">')
-    +   '<div class="fcol"><label class="fl">Coef. de pérdida</label><div style="padding:7px 0;font-size:11.5px;color:var(--muted)">Va por ambiente, más abajo. Sale de Configuración.</div></div>'
-    + '</div>'
-    + '<div class="frow">'
-    +   '<div class="fcol" style="flex:1"><label class="fl">Observación</label>'
+    /* BUILD 24: el coeficiente de pérdida va solo por ambiente (tabla de abajo) */
+    +   '<div class="fcol" style="flex:2"><label class="fl">Observación</label>'
     +     '<input type="text" id="sb-obs" value="' + esc(s ? (s.obs || '') : '') + '" '
     +     'placeholder="Nota libre para este lote"></div>'
     + '</div>'
@@ -4982,10 +5634,9 @@ function abrirSiembra(id, pre){
     +   '<div id="sb-trat"></div>'
     +   '<button class="btn btn-sm" onclick="addTratRow()" style="margin-top:10px">+ Agregar curasemilla o inoculante</button>'
     + '</div>'
-    + '<div class="fsec fsec-t">Fertilizante a la siembra</div>'
-    + '<div class="blk"><div class="hint" style="margin-top:0">El fertilizante se carga una sola vez en <b>Fertilización</b>, '
-    + 'con su momento de aplicación. Lo que caiga en el momento “siembra” aparece acá y es lo que se controla por fitotoxicidad. '
-    + 'Así el N del arrancador se descuenta del N a aplicar y no se cuenta dos veces en la necesidad de insumos.</div></div>';
+    + '<div class="fsec fsec-t">Fertilizante a la siembra'
+    +   '<span class="fsub">El que va con la semilla. Se carga en Fertilización; acá se controla la fitotoxicidad.</span></div>'
+    + '<div class="blk"><div id="sb-fertS"></div></div>';
 
   abrirModalBase(id ? 'Editar programación de siembra' : 'Programar siembra', h);
 
@@ -5042,8 +5693,7 @@ function onSiembraCultivo(primera){
   /* Zona de lotes: en alta se eligen varios; en edición queda fijo */
   var zona = document.getElementById('sb-lote-zona');
   if(MODAL.id && s){
-    zona.innerHTML = '<div class="blk" style="margin-bottom:12px"><label class="fl">Lote</label>'
-      + '<div style="font-weight:600;font-size:14px">' + esc(s.campo) + ' · ' + esc(s.lote) + '</div></div>';
+    zona.innerHTML = '<div class="lote-cab"><span class="fl">Lote</span><b>' + esc(s.lote) + '</b><span class="lote-cab-c">' + esc(s.campo) + '</span></div>';
   } else {
     var disp = lotesDelCultivo(cult);
     var h = '', j, r, chk, ya;
@@ -5066,8 +5716,8 @@ function onSiembraCultivo(primera){
     }
     zona.innerHTML = '<div class="fsec">Lotes</div><div class="blk">'
       + '<div class="pick">' + (h || '<div class="empty">' + (cult ? 'Este cultivo no tiene lotes asignados en la campaña ' + esc(CAMPANIA) + '.<br>Asignalo en <b>Plan de Uso del Suelo</b>.' : 'Elegí un cultivo para ver sus lotes.') + '</div>') + '</div>'
-      + '<div class="hint">Podés programar varios lotes de una vez: se crea una programación por lote, con los mismos parámetros. '
-      + 'Un lote puede llevar más de una partida — elegilo de nuevo y cargá la segunda con su superficie.</div></div>';
+      + '<div class="hint">Podés elegir varios lotes: cada uno queda con su programación y los mismos datos. '
+      + 'Para una segunda partida en el mismo lote, programalo otra vez con su superficie.</div></div>';
   }
 
   if(primera) sincronizarAmbs();
@@ -5082,6 +5732,11 @@ function onToggleLote(){
   for(i=0; i<boxes.length; i++){
     if(boxes[i].checked) MODAL.lotesSel[boxes[i].getAttribute('data-lote')] = 1;
   }
+  /* BUILD 26: si todavía no se cargó ningún objetivo, la lista de ambientes
+     se vuelve a armar para el lote elegido (sus ambientes de Fertilización) */
+  var tocado = false;
+  for(i=0; i<MODAL.ambs.length; i++){ if(MODAL.ambs[i].objPl != null) tocado = true; }
+  if(!MODAL.id && !tocado) MODAL.ambs = [];
   sincronizarAmbs();
 }
 function onSiembraPartida(){ recalcSiembraModal(); }
@@ -5097,7 +5752,15 @@ function sincronizarAmbs(){
       var l = loteById(sel[0]);
       var r = null, filas = filasCampania(), i;
       for(i=0; i<filas.length; i++){ if(filas[i].loteId === sel[0] && filas[i].cultivo === val('sb-cult')){ r = filas[i]; break; } }
-      MODAL.ambs = [{ amb:(l ? l.amb : ''), ha:(r ? r.ha : (l ? l.ha : null)), objPl:null, perd:perdDeAmb(l ? l.amb : '') }];
+      /* BUILD 26: si la fertilización ya abrió el lote en ambientes, se arranca con esos */
+      var ftA = fertDeLote(sel[0], val('sb-cult'), CAMPANIA);
+      if(ftA && ftA.ambs && ftA.ambs.length > 1 && !siembrasDeLote(sel[0], val('sb-cult'), CAMPANIA).length){
+        for(i=0; i<ftA.ambs.length; i++){
+          MODAL.ambs.push({ amb:ftA.ambs[i].amb || '', ha:num(ftA.ambs[i].ha), objPl:null, perd:perdDeAmb(ftA.ambs[i].amb || '') });
+        }
+      } else {
+        MODAL.ambs = [{ amb:(l ? l.amb : ''), ha:(r ? r.ha : (l ? l.ha : null)), objPl:null, perd:perdDeAmb(l ? l.amb : '') }];
+      }
     } else {
       MODAL.ambs = [{ amb:'', ha:null, objPl:null, perd:perdDeAmb('') }];
     }
@@ -5160,7 +5823,7 @@ function renderAmbRows(){
     a = MODAL.ambs[i];
     var c = calcAmb(a, p, des, perd);
     h += '<tr>'
-      + '<td><select onchange="setAmb(' + i + ',\'amb\',this.value)" style="width:110px">'
+      + '<td><select onchange="setAmb(' + i + ',\'amb\',this.value)" style="width:160px">'
       +   opts(ambDisp, a.amb, '— sin ambiente —') + '</select></td>'
       + '<td class="r"><input type="number" step="0.1" min="0" value="' + (a.ha != null ? a.ha : '') + '" '
       +   'oninput="setAmb(' + i + ',\'ha\',this.value)" style="width:82px"></td>'
@@ -5176,9 +5839,7 @@ function renderAmbRows(){
   }
   h += '</tbody></table></div>'
     + '<button class="btn btn-sm" onclick="addAmb()" style="margin-top:6px">+ Agregar ambiente</button>'
-    + '<div class="hint">Si el lote tiene ambientes con distinto potencial, cargá una fila por ambiente con sus '
-    + 'hectáreas y su objetivo. El lote cierra con el promedio ponderado por superficie, igual que tu Hoja1. '
-    + 'La pérdida sale de Configuración según el ambiente y se puede cambiar acá para esta programación.</div>';
+    + '<div class="hint">Una fila por ambiente, con sus hectáreas, objetivo y pérdida. El lote se calcula con el promedio ponderado por superficie.</div>';
   cont.innerHTML = h;
   recalcSiembraModal();
 }
@@ -5197,6 +5858,37 @@ function delAmb(i){
   MODAL.ambs.splice(i, 1);
   renderAmbRows();
 }
+/* BUILD 25: en la ventana de siembra se ve el fertilizante que va con la
+   semilla (momento Siembra de Fertilización) y el control de fitotoxicidad:
+   el umbral de N en la línea es solo para ese fertilizante. */
+function pintarFertSiembraModal(){
+  var z = document.getElementById('sb-fertS');
+  if(!z || !MODAL) return;
+  var cult = val('sb-cult'), ids = [], k, h = '';
+  for(k in MODAL.lotesSel){ if(MODAL.lotesSel.hasOwnProperty(k) && MODAL.lotesSel[k]) ids.push(k); }
+  if(!cult || !ids.length){ z.innerHTML = '<div class="hint" style="margin-top:0">Elegí cultivo y lote para ver el fertilizante a la siembra.</div>'; return; }
+  var max = fitoDe(cult), i, j, ft, c, lote, items, lin;
+  for(i=0; i<ids.length; i++){
+    ft = fertDeLote(ids[i], cult, CAMPANIA);
+    lote = loteById(ids[i]);
+    lin = '<b>' + esc(lote ? lote.nombre : ids[i]) + '</b> · ';
+    if(!ft){ h += '<div class="fs-l">' + lin + '<span class="muted">sin fertilización programada</span></div>'; continue; }
+    c = calcFert(ft, ft.amb);
+    items = [];
+    for(j=0; j<(ft.aplic||[]).length; j++){
+      if(ft.aplic[j].momento === 'Siembra' && ft.aplic[j].prod){
+        items.push(esc(ft.aplic[j].prod) + ' ' + f(num(ft.aplic[j].dosis), 0) + ' ' + esc(ft.aplic[j].unidad === 'l/ha' ? 'l/ha' : 'kg/ha'));
+      }
+    }
+    if(!items.length){ h += '<div class="fs-l">' + lin + '<span class="muted">no lleva fertilizante a la siembra</span></div>'; continue; }
+    lin += items.join(' + ') + ' · N en la línea <b>' + f(c.nSiembra, 1) + ' kg/ha</b>';
+    if(max === null) lin += ' <span class="bdg bn" title="Cargalo en Configuración › Parámetros">sin umbral para ' + esc(cult) + '</span>';
+    else if(c.nSiembra > max) lin += ' <span class="bdg br" title="Supera el máximo de N con la semilla">fitotóxico: máx. ' + f(max,0) + '</span>';
+    else lin += ' <span class="bdg bg">dentro del máximo (' + f(max,0) + ')</span>';
+    h += '<div class="fs-l">' + lin + '</div>';
+  }
+  z.innerHTML = h;
+}
 function recalcSiembraModal(){
   if(!MODAL || MODAL.tipo !== 'siembra') return;
   var p = val('sb-partida') ? partidaById(val('sb-partida')) : null;
@@ -5205,6 +5897,7 @@ function recalcSiembraModal(){
   var c = calcSiembra(tmp);
   var u = unidadDens(p);
 
+  pintarFertSiembraModal();
   setTxt('sb-c-ha',  f(c.haTot, 1));
   setTxt('sb-c-vc',  f(vcPartida(p), 1));
   setTxt('sb-c-vcl', p ? ('VC % · ' + vcBase(p).c) : 'VC %');
@@ -5309,9 +6002,8 @@ function renderTratRows(){
       + '</tr>';
   }
   h += '</tbody></table></div>'
-    + '<div class="hint">"Cada" es contra qué se multiplica la dosis para sacar el total del lote. '
-    + 'Si la etiqueta dice "0,3 lt cada 100 kg de semilla", la dosis es 0,3, la unidad "lt" y la base "/100 kg semilla". '
-    + 'Con <b>Otro</b> escribí cuál es: queda anotado, pero el total de ese producto no se puede calcular.</div>';
+    + '<details class="hint ayuda"><summary>Cómo cargar la dosis</summary>Si la etiqueta dice «0,3 l cada 100 kg de semilla»: '
+    + 'dosis 0,3, unidad l y «Cada» /100 kg semilla. Con <b>Otro</b> queda anotado, pero ese producto no suma al total.</details>';
   cont.innerHTML = h;
 }
 function tratSeparar(){
@@ -5378,8 +6070,8 @@ function renderInsRows(tipo){
       + '</tr>';
   }
   h += '</tbody></table></div>'
-    + '<div class="hint">"Cada" es contra qué se multiplica la dosis para sacar el total del lote. '
-    + 'Si la etiqueta dice "0,3 lt cada 100 kg de semilla", la dosis es 0,3, la unidad "lt" y la base "/100 kg semilla".</div>';
+    + '<details class="hint ayuda"><summary>Cómo cargar la dosis</summary>Si la etiqueta dice «0,3 l cada 100 kg de semilla»: '
+    + 'dosis 0,3, unidad l y «Cada» /100 kg semilla.</details>';
   cont.innerHTML = h;
 }
 
@@ -5547,8 +6239,7 @@ function abrirFertProd(id){
     +   fcol('% K₂O',  '<input type="number" id="fp-k"  step="0.1" min="0" max="100" value="' + (p && p.k2o  != null ? p.k2o  : '') + '">')
     +   fcol('% S',    '<input type="number" id="fp-s"  step="0.1" min="0" max="100" value="' + (p && p.s    != null ? p.s    : '') + '">')
     + '</div></div>'
-    + '<div class="hint">Los grados van en porcentaje, como vienen en la bolsa: MAP es 11 de N y 52 de P₂O₅. '
-    + 'El kg/litro se carga solo para líquidos (UAN ronda 1,32) y sirve para pasar kilos a litros.</div>';
+    + '<div class="hint">Grados en %, como en la bolsa (MAP: 11 de N y 52 de P₂O₅). El kg/litro, solo para líquidos (UAN ≈ 1,32).</div>';
   abrirModalBase(id ? 'Editar fertilizante' : 'Nuevo fertilizante', h);
 }
 function onFpLiq(){
@@ -5640,16 +6331,21 @@ function abrirFert(id, pre){
   var h = ''
     + '<div class="fsec">Lote y cultivo</div>'
     + '<div class="blk">'
+    + '<div id="ft-lote-cab"></div>'
     + '<div class="frow">'
     +   fcol('Cultivo', '<select id="ft-cult" onchange="onFertCultivo()">' + opts(lc, cultSel, '— elegir —') + '</select>')
-    +   fcol('Fecha de muestreo', '<input type="date" id="ft-fecha" value="' + esc(a.fecha || '') + '">')
+    +   fcol('Fecha de muestreo', inpFecha('ft-fecha', a.fecha || ''))
     + '</div>'
     + '</div>'
     + '<div id="ft-lote-zona"></div>'
+    + '<div id="ft-amb-sec"></div>'
 
     + '<div class="fsec fsec-n">Análisis de suelo'
     +   '<span class="fsub">Lo que informó el laboratorio. Las capas de N que falten se estiman.</span></div>'
     + '<div class="blk">'
+    + '<label class="chk-amb" id="ft-mismo-w" style="display:none"><input type="checkbox" id="ft-mismo"'
+    +   (!ft || ft.mismoAnalisis !== false ? ' checked' : '') + ' onchange="togMismoAn()"> Mismo análisis para todo el lote</label>'
+    + '<div id="ft-an-lote">'
     + '<div class="frow">'
     +   fcol('M.O. %',        '<input type="number" id="ft-mo"   step="0.01" min="0" value="' + (a.mo    != null ? a.mo    : '') + '" oninput="recalcFertModal()">')
     +   fcol('P ppm (0-20)',  '<input type="number" id="ft-p"    step="0.1" min="0"  value="' + (a.pPpm  != null ? a.pPpm  : '') + '" oninput="recalcFertModal()">')
@@ -5658,20 +6354,23 @@ function abrirFert(id, pre){
     +   fcol('Zn ppm',        '<input type="number" id="ft-zn"   step="0.01" min="0" value="' + (a.znPpm != null ? a.znPpm : '') + '" oninput="recalcFertModal()">')
     + '</div>'
     + '<div class="frow">'
-    +   fcol('pH 0-20',  '<input type="number" id="ft-ph20" step="0.1" min="0" value="' + (a.ph20 != null ? a.ph20 : '') + '">')
-    +   fcol('pH 20-40', '<input type="number" id="ft-ph40" step="0.1" min="0" value="' + (a.ph40 != null ? a.ph40 : '') + '">')
-    +   fcol('pH 40-60', '<input type="number" id="ft-ph60" step="0.1" min="0" value="' + (a.ph60 != null ? a.ph60 : '') + '">')
-    +   '<div class="fcol"></div><div class="fcol"></div>'
-    + '</div>'
-    + '<div class="frow">'
     +   fcol('N 0-20 (ppm)',  '<input type="number" id="ft-n20" step="0.1" min="0" value="' + (a.n20 != null ? a.n20 : '') + '" oninput="recalcFertModal()">')
     +   fcol('N 20-40 (ppm)', '<input type="number" id="ft-n40" step="0.1" min="0" value="' + (a.n40 != null ? a.n40 : '') + '" oninput="recalcFertModal()" placeholder="se estima">')
     +   fcol('N 40-60 (ppm)', '<input type="number" id="ft-n60" step="0.1" min="0" value="' + (a.n60 != null ? a.n60 : '') + '" oninput="recalcFertModal()" placeholder="se estima">')
-    +   fcol('Informado como', '<select id="ft-nforma" onchange="recalcFertModal()">'
-          + '<option value="No3"' + (a.nForma === 'No3' || !a.nForma ? ' selected' : '') + '>NO3 (nitrato)</option>'
-          + '<option value="N-no3"' + (a.nForma === 'N-no3' ? ' selected' : '') + '>N-NO3 (nitrógeno)</option></select>')
     +   '<div class="fcol"><label class="fl">N del suelo</label>'
     +     '<div style="padding:6px 0;font-weight:600;font-variant-numeric:tabular-nums" id="ft-nsuelo">—</div></div>'
+    +   '<div class="fcol"></div>'
+    + '</div>'
+    + '</div>'
+    + '<div id="ft-an-amb" style="display:none"></div>'
+    + '<div class="frow">'
+    +   fcol('pH 0-20',  '<input type="number" id="ft-ph20" step="0.1" min="0" value="' + (a.ph20 != null ? a.ph20 : '') + '">')
+    +   fcol('pH 20-40', '<input type="number" id="ft-ph40" step="0.1" min="0" value="' + (a.ph40 != null ? a.ph40 : '') + '">')
+    +   fcol('pH 40-60', '<input type="number" id="ft-ph60" step="0.1" min="0" value="' + (a.ph60 != null ? a.ph60 : '') + '">')
+    +   fcol('N informado como', '<select id="ft-nforma" onchange="recalcFertModal()">'
+          + '<option value="No3"' + (a.nForma === 'No3' || !a.nForma ? ' selected' : '') + '>NO3 (nitrato)</option>'
+          + '<option value="N-no3"' + (a.nForma === 'N-no3' ? ' selected' : '') + '>N-NO3 (nitrógeno)</option></select>')
+    +   '<div class="fcol"></div>'
     + '</div>'
     + '<div class="hint" style="margin-top:0">Si falta una capa de N, se estima como la mitad de la de arriba y queda marcada.</div>'
     + '</div>'
@@ -5681,18 +6380,17 @@ function abrirFert(id, pre){
     + '<div class="blk">'
     + '<div class="frow">'
     +   fcol('P objetivo (ppm)',   '<input type="number" id="ft-pobj" step="0.1" min="0" value="' + (o.pObj != null ? o.pObj : '') + '" oninput="recalcFertModal()">')
-    +   fcol('N objetivo (kg/ha)', '<input type="number" id="ft-nobj" step="1" min="0"   value="' + (o.nObj != null ? o.nObj : '') + '" oninput="recalcFertModal()">')
+    +   fcol('N objetivo (kg N/ha)', '<input type="number" id="ft-nobj" step="1" min="0"   value="' + (o.nObj != null ? o.nObj : '') + '" oninput="recalcFertModal()">')
     +   '<div class="fcol" style="flex:2"><label class="fl">Coeficiente de recuperación de P</label>'
     +     '<div style="padding:6px 0;font-variant-numeric:tabular-nums" id="ft-coef">—</div></div>'
     + '</div>'
+    + '<div id="ft-obj-amb"></div>'
     + '</div>'
 
     + '<div class="fsec">Recomendación'
     +   '<span class="fsub">Lo que hace falta aplicar contra lo que ya cargaste abajo.</span></div>'
     + '<div class="blk">'
-    + '<div class="scroll"><table><thead><tr>'
-    +   '<th>Nutriente</th><th class="r">Recomendado kg/ha</th><th class="r">Aplicado kg/ha</th><th class="r">Diferencia</th>'
-    + '</tr></thead><tbody id="ft-rec"></tbody></table></div>'
+    + '<div class="scroll" id="ft-rec-w"></div>'
     + '</div>'
 
     + '<div class="fsec fsec-t">Aplicaciones'
@@ -5707,10 +6405,14 @@ function abrirFert(id, pre){
 
   MODAL.lotesSel = {};
   MODAL.aplic = [];
+  /* BUILD 26: ambientes, análisis y objetivos por ambiente */
+  MODAL.ambs = []; MODAL.ambSrc = ''; MODAL.ambLote = ''; MODAL.ambsTocados = false;
+  MODAL.mismo = !ft || ft.mismoAnalisis !== false;
+  MODAL.porAmb = ft && ft.porAmb ? clonPorAmb(ft.porAmb) : {};
   if(ft){
     MODAL.lotesSel[ft.loteId] = 1;
     for(i=0; i<(ft.aplic || []).length; i++){
-      MODAL.aplic.push({ prod:ft.aplic[i].prod, momento:ft.aplic[i].momento, dosis:ft.aplic[i].dosis, unidad:ft.aplic[i].unidad || 'kg/ha' });
+      MODAL.aplic.push(clonAplic(ft.aplic[i]));
     }
   } else if(pre && pre.loteId){
     MODAL.lotesSel[pre.loteId] = 1;
@@ -5724,8 +6426,9 @@ function onFertCultivo(primera){
   var zona = document.getElementById('ft-lote-zona');
 
   if(MODAL.id && ft){
-    zona.innerHTML = '<div class="blk" style="margin-top:14px"><label class="fl">Lote</label>'
-      + '<div style="font-weight:600;font-size:14px">' + esc(ft.campo) + ' · ' + esc(ft.lote) + '</div></div>';
+    zona.innerHTML = '';
+    var cab = document.getElementById('ft-lote-cab');
+    if(cab) cab.innerHTML = '<div class="lote-cab"><span class="fl">Lote</span><b>' + esc(ft.lote) + '</b><span class="lote-cab-c">' + esc(ft.campo) + '</span></div>';
   } else {
     var disp = lotesDelCultivo(cult), h = '', j, r, ya;
     for(j=0; j<disp.length; j++){
@@ -5744,6 +6447,7 @@ function onFertCultivo(primera){
           : 'Elegí un cultivo para ver sus lotes.') + '</div>') + '</div>'
       + '<div class="hint">El análisis y las aplicaciones se copian a todos los lotes que elijas.</div></div>';
   }
+  prepAmbsModal();
   recalcFertModal();
   prepararSecs();
 }
@@ -5753,84 +6457,368 @@ function onToggleLoteFert(){
   for(i=0; i<boxes.length; i++){
     if(boxes[i].checked) MODAL.lotesSel[boxes[i].getAttribute('data-lote')] = 1;
   }
+  prepAmbsModal();
   recalcFertModal();
+  prepararSecs();
 }
 /* Ambiente del lote elegido (define el coeficiente de recuperación de P) */
 function ambDelModalFert(){
-  var sel = [], k, l;
-  for(k in MODAL.lotesSel){ if(MODAL.lotesSel.hasOwnProperty(k)) sel.push(k); }
-  if(sel.length !== 1) return '';
-  l = loteById(sel[0]);
+  var lid = modalUnLote(), l;
+  if(!lid) return '';
+  l = loteById(lid);
   return l ? l.amb : '';
 }
-function ftDesdeModal(){
+
+/* ── BUILD 26: ambientes en la ventana de Fertilización ────────────── */
+function modalUnLote(){
+  var sel = [], k;
+  for(k in MODAL.lotesSel){ if(MODAL.lotesSel.hasOwnProperty(k)) sel.push(k); }
+  return sel.length === 1 ? sel[0] : null;
+}
+function ambsModal(){ return (MODAL && MODAL.ambs) ? MODAL.ambs : []; }
+function modalMulti(){ return ambsModal().length > 1; }
+function ambOpciones(){
+  var out = coreAmbientes().slice(0), k;
+  for(k in DB.cfg.coefP){ if(DB.cfg.coefP.hasOwnProperty(k) && out.indexOf(k) < 0) out.push(k); }
+  out.sort(function(a, b){ return String(a).localeCompare(String(b), 'es'); });
+  return out;
+}
+function clonPorAmb(pa){
+  var out = {}, k, x;
+  for(k in pa){
+    if(!pa.hasOwnProperty(k)) continue;
+    x = pa[k] || {};
+    out[k] = { analisis:(x.analisis ? clonAnalisis(x.analisis) : null),
+               obj:{ pObj:(x.obj ? x.obj.pObj : null), nObj:(x.obj ? x.obj.nObj : null) } };
+  }
+  return out;
+}
+function clonAplic(ap){
+  var o = { prod:ap.prod, momento:ap.momento, dosis:ap.dosis, unidad:ap.unidad || 'kg/ha', porAmb:!!ap.porAmb, dosisAmb:{} }, k;
+  if(ap.dosisAmb){ for(k in ap.dosisAmb){ if(ap.dosisAmb.hasOwnProperty(k)) o.dosisAmb[k] = ap.dosisAmb[k]; } }
+  return o;
+}
+/* Arma la lista de ambientes del lote elegido: de Siembra si ya está
+   programada; si no, la propia (o el ambiente del lote para arrancar). */
+function prepAmbsModal(){
+  var lid = modalUnLote();
+  if(!lid){ MODAL.ambs = []; MODAL.ambSrc = ''; MODAL.ambLote = ''; renderAmbFert(); return; }
+  if(lid !== MODAL.ambLote){ MODAL.ambsTocados = false; MODAL.ambLote = lid; }
+  var ft = MODAL.id ? fertById(MODAL.id) : null, l = loteById(lid);
+  var base = { loteId:lid, cultivo:val('ft-cult'), campania:CAMPANIA, amb:(l ? l.amb : ''),
+               ambs:(MODAL.ambsTocados ? MODAL.ambs : (ft && ft.loteId === lid ? ft.ambs : null)) };
+  var ae = ambientesFert(base), i;
+  MODAL.ambSrc = ae.src;
+  if(ae.src === 'siembra' || !MODAL.ambsTocados){
+    MODAL.ambs = [];
+    for(i=0; i<ae.lista.length; i++) MODAL.ambs.push({ amb:ae.lista[i].amb, ha:ae.lista[i].ha });
+  }
+  renderAmbFert();
+}
+function renderAmbFert(){
+  var cont = document.getElementById('ft-amb-sec');
+  if(!cont) return;
+  var lid = modalUnLote();
+  if(!lid){ cont.innerHTML = ''; pintarModoAmb(); return; }
+  var L = ambsModal(), i, h, sum = 0;
+  for(i=0; i<L.length; i++) sum += (num(L[i].ha) || 0);
+  var ref = haActividad(lid, val('ft-cult'), CAMPANIA);
+  var difTxt = (ref && Math.abs(sum - ref) >= 0.05)
+    ? ' <span class="bdg by" title="Plan de Uso le asigna ' + f(ref,1) + ' ha a este lote">Plan de Uso: ' + f(ref,1) + ' ha</span>' : '';
+
+  h = '<div class="fsec">Ambientes'
+    + '<span class="fsub">Los mismos de Siembra. Con más de uno, el análisis, el objetivo y la dosis pueden cambiar por ambiente.</span></div>'
+    + '<div class="blk">';
+  if(MODAL.ambSrc === 'siembra'){
+    h += '<div class="amb-chips">';
+    for(i=0; i<L.length; i++){
+      h += '<span class="amb-chip"><b>' + esc(L[i].amb || 'sin ambiente') + '</b> ' + f(L[i].ha, 1) + ' ha</span>';
+    }
+    h += '<span class="amb-tot">Total ' + f(sum, 1) + ' ha' + difTxt + '</span></div>'
+      + '<div class="hint">Vienen de la programación de siembra de este lote. Para cambiarlos, editá la siembra.</div>';
+  } else {
+    var op = ambOpciones();
+    h += '<table class="tb-amb"><thead><tr><th>Ambiente</th><th class="r">Hectáreas</th><th></th></tr></thead><tbody>';
+    for(i=0; i<L.length; i++){
+      h += '<tr><td><select onchange="setAmbFert(' + i + ',\'amb\',this.value)" style="width:170px">'
+        +   opts(op, L[i].amb, '— sin ambiente —') + '</select></td>'
+        + '<td class="r"><input type="number" step="0.1" min="0" value="' + (L[i].ha != null ? L[i].ha : '') + '" '
+        +   'oninput="setAmbFert(' + i + ',\'ha\',this.value)" style="width:90px"></td>'
+        + '<td class="r">' + (L.length > 1 ? '<button class="btn-ico" title="Quitar" onclick="delAmbFert(' + i + ')">&times;</button>' : '') + '</td></tr>';
+    }
+    h += '</tbody></table>'
+      + '<div style="display:flex;align-items:center;gap:12px;margin-top:6px">'
+      + '<button class="btn btn-sm" onclick="addAmbFert()">+ Agregar ambiente</button>'
+      + '<span class="amb-tot" id="ft-amb-tot">Total ' + f(sum, 1) + ' ha' + difTxt + '</span></div>'
+      + '<div class="hint">Si después programás la siembra de este lote, arranca con estos ambientes.</div>';
+  }
+  h += '</div>';
+  cont.innerHTML = h;
+  pintarModoAmb();
+}
+function setAmbFert(i, campo, v){
+  var L = ambsModal();
+  if(!L[i]) return;
+  MODAL.ambsTocados = true;
+  if(campo === 'ha'){
+    L[i].ha = num(v);
+    var sum = 0, k; for(k=0; k<L.length; k++) sum += (num(L[k].ha) || 0);
+    var t = document.getElementById('ft-amb-tot'); if(t) t.textContent = 'Total ' + f(sum, 1) + ' ha';
+    recalcAplicPond();
+    recalcFertModal();
+    return;
+  }
+  /* Cambio de nombre: lo cargado para ese ambiente lo sigue */
+  var viejo = L[i].amb || '', nuevo = v || '', j;
+  for(j=0; j<L.length; j++){
+    if(j !== i && (L[j].amb || '') === nuevo){ alert('Ese ambiente ya está en la lista.'); renderAmbFert(); return; }
+  }
+  L[i].amb = nuevo;
+  if(MODAL.porAmb[viejo] && !MODAL.porAmb[nuevo]){ MODAL.porAmb[nuevo] = MODAL.porAmb[viejo]; delete MODAL.porAmb[viejo]; }
+  for(j=0; j<MODAL.aplic.length; j++){
+    var da = MODAL.aplic[j].dosisAmb;
+    if(da && da.hasOwnProperty(viejo) && !da.hasOwnProperty(nuevo)){ da[nuevo] = da[viejo]; delete da[viejo]; }
+  }
+  renderAmbFert();
+}
+function addAmbFert(){
+  MODAL.ambsTocados = true;
+  MODAL.ambs.push({ amb:'', ha:null });
+  /* Con dos o más, el primero deja de ser "sin ambiente" obligatorio: hay que elegir */
+  renderAmbFert();
+}
+function delAmbFert(i){
+  MODAL.ambsTocados = true;
+  MODAL.ambs.splice(i, 1);
+  renderAmbFert();
+}
+/* Muestra u oculta lo que depende de si el lote va en varios ambientes */
+function pintarModoAmb(){
+  var multi = modalMulti();
+  var w = document.getElementById('ft-mismo-w');
+  if(w) w.style.display = multi ? '' : 'none';
+  var mismo = !multi || MODAL.mismo;
+  var al = document.getElementById('ft-an-lote'), aa = document.getElementById('ft-an-amb');
+  if(al) al.style.display = mismo ? '' : 'none';
+  if(aa) aa.style.display = mismo ? 'none' : '';
+  if(!mismo) renderAnAmb();
+  renderObjAmb();
+  renderAplicRows();
+}
+function leerAnLote(){
   return {
+    fecha: val('ft-fecha'),
+    mo: num(val('ft-mo')), pPpm: num(val('ft-p')), sPpm: num(val('ft-s')),
+    kMeq: num(val('ft-k')), znPpm: num(val('ft-zn')),
+    ph20: num(val('ft-ph20')), ph40: num(val('ft-ph40')), ph60: num(val('ft-ph60')),
+    n20: num(val('ft-n20')), n40: num(val('ft-n40')), n60: num(val('ft-n60')),
+    nForma: val('ft-nforma')
+  };
+}
+function togMismoAn(){
+  var el = document.getElementById('ft-mismo');
+  MODAL.mismo = !el || el.checked;
+  marcarSucio();
+  if(!MODAL.mismo){
+    /* Cada ambiente arranca con lo que estaba cargado para el lote */
+    var L = ambsModal(), lote = leerAnLote(), i, k;
+    for(i=0; i<L.length; i++){
+      k = L[i].amb || '';
+      if(!MODAL.porAmb[k]) MODAL.porAmb[k] = { analisis:null, obj:{ pObj:null, nObj:null } };
+      if(!MODAL.porAmb[k].analisis) MODAL.porAmb[k].analisis = clonAnalisis(lote);
+    }
+  }
+  pintarModoAmb();
+  recalcFertModal();
+}
+var AN_AMB_CAMPOS = [
+  ['mo','M.O. %','0.01'], ['pPpm','P ppm','0.1'], ['sPpm','S-SO4','0.1'], ['kMeq','K meq','0.01'], ['znPpm','Zn ppm','0.01'],
+  ['n20','N 0-20','0.1'], ['n40','N 20-40','0.1'], ['n60','N 40-60','0.1']
+];
+function renderAnAmb(){
+  var cont = document.getElementById('ft-an-amb');
+  if(!cont) return;
+  var L = ambsModal(), i, j, k, an, h, c;
+  h = '<div class="scroll"><table class="tb-amb tb-an"><thead><tr><th>Ambiente</th>';
+  for(j=0; j<AN_AMB_CAMPOS.length; j++) h += '<th class="r">' + AN_AMB_CAMPOS[j][1] + '</th>';
+  h += '<th class="r">N suelo</th></tr></thead><tbody>';
+  for(i=0; i<L.length; i++){
+    k = L[i].amb || '';
+    if(!MODAL.porAmb[k]) MODAL.porAmb[k] = { analisis:clonAnalisis(leerAnLote()), obj:{ pObj:null, nObj:null } };
+    if(!MODAL.porAmb[k].analisis) MODAL.porAmb[k].analisis = clonAnalisis(leerAnLote());
+    an = MODAL.porAmb[k].analisis;
+    h += '<tr><td class="tdname">' + esc(k || 'sin ambiente') + '<div class="amb-ha">' + f(L[i].ha, 1) + ' ha</div></td>';
+    for(j=0; j<AN_AMB_CAMPOS.length; j++){
+      c = AN_AMB_CAMPOS[j][0];
+      h += '<td class="r"><input type="number" min="0" step="' + AN_AMB_CAMPOS[j][2] + '" value="' + (an[c] != null ? an[c] : '') + '"'
+        + (c === 'n40' || c === 'n60' ? ' placeholder="est." title="Si queda vacío se estima"' : '')
+        + ' oninput="setAnAmb(' + i + ',\'' + c + '\',this.value)"></td>';
+    }
+    h += '<td class="r nsu" id="ft-ns-' + i + '">—</td></tr>';
+  }
+  h += '</tbody></table></div>'
+    + '<div class="hint" style="margin:4px 0 12px">Una fila por ambiente con lo que dio su muestra. pH, forma del N y fecha son los mismos para todo el lote.</div>';
+  cont.innerHTML = h;
+}
+function setAnAmb(i, campo, v){
+  var L = ambsModal(); if(!L[i]) return;
+  var k = L[i].amb || '';
+  if(!MODAL.porAmb[k]) MODAL.porAmb[k] = { analisis:clonAnalisis(leerAnLote()), obj:{ pObj:null, nObj:null } };
+  if(!MODAL.porAmb[k].analisis) MODAL.porAmb[k].analisis = clonAnalisis(leerAnLote());
+  MODAL.porAmb[k].analisis[campo] = num(v);
+  recalcFertModal();
+}
+/* Objetivos por ambiente: vacío hereda el del lote (↳ en gris) */
+function renderObjAmb(){
+  var cont = document.getElementById('ft-obj-amb');
+  if(!cont) return;
+  if(!modalMulti()){ cont.innerHTML = ''; return; }
+  var L = ambsModal(), i, k, o, h;
+  h = '<table class="tb-amb tb-obj" style="margin-top:8px"><thead><tr><th>Ambiente</th><th class="r">P objetivo (ppm)</th>'
+    + '<th class="r">N objetivo (kg N/ha)</th><th class="r">Coef. recup. P</th></tr></thead><tbody>';
+  for(i=0; i<L.length; i++){
+    k = L[i].amb || '';
+    o = (MODAL.porAmb[k] && MODAL.porAmb[k].obj) ? MODAL.porAmb[k].obj : {};
+    h += '<tr><td class="tdname">' + esc(k || 'sin ambiente') + '</td>'
+      + '<td class="r"><input type="number" step="0.1" min="0" data-her="pObj" value="' + (o.pObj != null ? o.pObj : '') + '" oninput="setObjAmb(' + i + ',\'pObj\',this.value)"></td>'
+      + '<td class="r"><input type="number" step="1" min="0" data-her="nObj" value="' + (o.nObj != null ? o.nObj : '') + '" oninput="setObjAmb(' + i + ',\'nObj\',this.value)"></td>'
+      + '<td class="r" style="font-variant-numeric:tabular-nums">' + f(coefPDe(k), 2) + '</td></tr>';
+  }
+  h += '</tbody></table>'
+    + '<div class="hint">Vacío = toma el del lote (<span style="color:#A8B2BD">↳</span> en gris). Escribí un valor solo donde ese ambiente apunta a otra cosa.</div>';
+  cont.innerHTML = h;
+  pintarHerencia();
+}
+function pintarHerencia(){
+  var cont = document.getElementById('ft-obj-amb');
+  if(!cont) return;
+  var ins = cont.querySelectorAll('input[data-her]'), i, c, v;
+  for(i=0; i<ins.length; i++){
+    c = ins[i].getAttribute('data-her');
+    v = val(c === 'pObj' ? 'ft-pobj' : 'ft-nobj');
+    ins[i].placeholder = v !== '' ? '↳ ' + v : '↳ —';
+  }
+}
+function setObjAmb(i, campo, v){
+  var L = ambsModal(); if(!L[i]) return;
+  var k = L[i].amb || '';
+  if(!MODAL.porAmb[k]) MODAL.porAmb[k] = { analisis:null, obj:{ pObj:null, nObj:null } };
+  if(!MODAL.porAmb[k].obj) MODAL.porAmb[k].obj = { pObj:null, nObj:null };
+  MODAL.porAmb[k].obj[campo] = num(v);
+  recalcFertModal();
+}
+
+function ftDesdeModal(){
+  var lid = modalUnLote(), multi = modalMulti();
+  return {
+    loteId: lid || '', campania: CAMPANIA,
     cultivo: val('ft-cult'),
     amb: ambDelModalFert(),
-    analisis: {
-      fecha: val('ft-fecha'),
-      mo: num(val('ft-mo')), pPpm: num(val('ft-p')), sPpm: num(val('ft-s')),
-      kMeq: num(val('ft-k')), znPpm: num(val('ft-zn')),
-      ph20: num(val('ft-ph20')), ph40: num(val('ft-ph40')), ph60: num(val('ft-ph60')),
-      n20: num(val('ft-n20')), n40: num(val('ft-n40')), n60: num(val('ft-n60')),
-      nForma: val('ft-nforma')
-    },
+    analisis: leerAnLote(),
     obj: { pObj: num(val('ft-pobj')), nObj: num(val('ft-nobj')) },
+    ambs: (lid ? MODAL.ambs : null),
+    mismoAnalisis: multi ? MODAL.mismo : true,
+    porAmb: multi ? MODAL.porAmb : {},
     aplic: MODAL.aplic
   };
+}
+function badgeDif(rec, apl){
+  var d = difNutriente(rec, apl);
+  if(d === null) return '';
+  return d < -0.5 ? '<span class="bdg br">' + f(d,1) + '</span>'
+    : (d > 0.5 ? '<span class="bdg by">+' + f(d,1) + '</span>' : '<span class="bdg bg">' + f(d,1) + '</span>');
 }
 function recalcFertModal(){
   if(!MODAL || MODAL.tipo !== 'fert') return;
   var ft = ftDesdeModal();
-  var c = calcFert(ft, ft.amb);
+  var c = calcFert(ft, ft.amb), i;
 
   setTxt('ft-nsuelo', c.nSuelo.kg !== null
     ? f(c.nSuelo.kg, 0) + ' kg/ha' + (c.nSuelo.estimado ? ' *' : '') : '—');
-  var amb = ft.amb;
-  setTxt('ft-coef', f(c.coefP, 2) + (amb ? '  (ambiente ' + amb + ')' : '  (valor por defecto)'));
-
-  var filas = [
-    ['Fósforo (P2O5)', c.rec.p2o5, c.apl.p2o5],
-    ['Azufre (S)',     c.rec.s,    c.apl.s],
-    ['Potasio (K2O)',  c.rec.k2o,  c.apl.k2o],
-    ['Nitrógeno (N)',  c.rec.n,    c.apl.n]
-  ];
-  var h = '', i, d;
-  for(i=0; i<filas.length; i++){
-    d = difNutriente(filas[i][1], filas[i][2]);
-    h += '<tr>'
-      + '<td class="tdname">' + filas[i][0] + '</td>'
-      + '<td class="r">' + f(filas[i][1], 1) + '</td>'
-      + '<td class="r">' + f(filas[i][2], 1) + '</td>'
-      + '<td class="r">' + (d === null ? '—'
-          : (d < -0.5 ? '<span class="bdg br">' + f(d,1) + '</span>'
-            : (d > 0.5 ? '<span class="bdg by">+' + f(d,1) + '</span>'
-              : '<span class="bdg bg">' + f(d,1) + '</span>'))) + '</td>'
-      + '</tr>';
+  if(c.multi){
+    setTxt('ft-coef', 'por ambiente (abajo)');
+    for(i=0; i<c.ambs.length; i++){
+      var ns = c.ambs[i].c.nSuelo;
+      setTxt('ft-ns-' + i, ns.kg !== null ? f(ns.kg, 0) + (ns.estimado ? ' *' : '') : '—');
+    }
+  } else {
+    var amb = c.ambs.length && c.ambs[0].amb ? c.ambs[0].amb : ft.amb;
+    setTxt('ft-coef', f(c.coefP, 2) + (amb ? '  (ambiente ' + amb + ')' : '  (valor por defecto)'));
   }
-  document.getElementById('ft-rec').innerHTML = h;
+  pintarHerencia();
 
-  var w = document.getElementById('ft-warn');
+  var rw = document.getElementById('ft-rec-w'), h = '';
+  var nut = [['P₂O₅','p2o5'], ['S','s'], ['K₂O','k2o'], ['N','n']];
+  if(c.multi){
+    /* Una fila por ambiente: recomendado y diferencia con lo aplicado */
+    h = '<table><thead><tr><th>Ambiente</th><th class="r">ha</th>';
+    for(i=0; i<nut.length; i++) h += '<th class="r">' + nut[i][0] + '</th>';
+    h += '</tr></thead><tbody>';
+    var fila = function(nom, ha, x, cls){
+      var t = '<tr' + (cls ? ' class="' + cls + '"' : '') + '><td class="tdname">' + nom + '</td><td class="r">' + f(ha, 1) + '</td>', j;
+      for(j=0; j<nut.length; j++){
+        t += '<td class="r rec-c" title="Recomendado ' + f(x.rec[nut[j][1]],1) + ' · aplicado ' + f(x.apl[nut[j][1]],1) + ' kg/ha">'
+          + '<span class="rec-v">' + f(x.rec[nut[j][1]], 1) + '</span> ' + badgeDif(x.rec[nut[j][1]], x.apl[nut[j][1]]) + '</td>';
+      }
+      return t + '</tr>';
+    };
+    for(i=0; i<c.ambs.length; i++) h += fila(esc(c.ambs[i].amb || 'sin ambiente'), c.ambs[i].ha, c.ambs[i].c, '');
+    h += fila('Lote <span style="font-weight:400;color:#7A8899">(promedio)</span>', c.haAmbs, c, 'rec-tot');
+    h += '</tbody></table><div class="hint">Recomendado en kg/ha y, al lado, cuánto falta (rojo) o sobra (ámbar) con lo que cargaste abajo.</div>';
+  } else {
+    var filas = [
+      ['Fósforo (P2O5)', c.rec.p2o5, c.apl.p2o5],
+      ['Azufre (S)',     c.rec.s,    c.apl.s],
+      ['Potasio (K2O)',  c.rec.k2o,  c.apl.k2o],
+      ['Nitrógeno (N)',  c.rec.n,    c.apl.n]
+    ];
+    h = '<table><thead><tr><th>Nutriente</th><th class="r">Recomendado kg/ha</th><th class="r">Aplicado kg/ha</th><th class="r">Diferencia</th></tr></thead><tbody>';
+    for(i=0; i<filas.length; i++){
+      h += '<tr><td class="tdname">' + filas[i][0] + '</td>'
+        + '<td class="r">' + f(filas[i][1], 1) + '</td>'
+        + '<td class="r">' + f(filas[i][2], 1) + '</td>'
+        + '<td class="r">' + (badgeDif(filas[i][1], filas[i][2]) || '—') + '</td></tr>';
+    }
+    h += '</tbody></table>';
+  }
+  if(rw) rw.innerHTML = h;
+
+  /* La fitotoxicidad se avisa en Siembra (es del fertilizante que va con la semilla) */
+  var w = document.getElementById('ft-warn'), avs = [];
+  for(i=0; i<c.avisos.length; i++){ if(c.avisos[i].indexOf('Fitotoxicidad') < 0) avs.push(esc(c.avisos[i])); }
   if(w){
-    if(c.avisos.length){ w.innerHTML = c.avisos.join('<br>'); w.style.display = 'block'; }
+    if(avs.length){ w.innerHTML = avs.join('<br>'); w.style.display = 'block'; }
     else { w.style.display = 'none'; }
   }
   pintarAportes(c);
 }
-/* Refresca la columna de aportes sin volver a dibujar las filas */
+/* Refresca sugerencias y aportes sin volver a dibujar las filas */
 function pintarAportes(c){
   var cont = document.getElementById('ft-aplic');
   if(!cont) return;
-  var rows = cont.querySelectorAll('tbody tr'), i, td, l, ts, sug;
+  var rows = cont.querySelectorAll('tbody tr.ap-row'), i, td, l, ts, sug, j, L = ambsModal();
   for(i=0; i<rows.length && i<c.lineas.length; i++){
     /* Sugerencia: cuánto haría falta de este producto y para qué nutriente */
     ts = rows[i].querySelector('.ap-sug');
     if(ts){
-      sug = dosisSugerida(i);
-      if(!sug) ts.innerHTML = '<span style="color:#C3CCD6">—</span>';
-      else ts.innerHTML = '<button class="btn-link" onclick="usarSugerida(' + i + ')" '
-        + 'title="Usar esta dosis">' + f(sug.dosis, 1) + ' ' + sug.unidad + '</button>'
-        + '<div style="font-size:10px;color:#A8B2BD;margin-top:1px">cubre ' + sug.et + '</div>';
+      if(MODAL.aplic[i] && MODAL.aplic[i].porAmb && c.multi){
+        ts.innerHTML = '<span style="color:#A8B2BD">por ambiente ↓</span>';
+      } else {
+        sug = dosisSugerida(i);
+        if(!sug) ts.innerHTML = '<span style="color:#C3CCD6">—</span>';
+        else ts.innerHTML = '<button class="btn-link" onclick="usarSugerida(' + i + ')" '
+          + 'title="Usar esta dosis">' + f(sug.dosis, 1) + ' ' + sug.unidad + '</button>'
+          + '<div style="font-size:10px;color:#A8B2BD;margin-top:1px">cubre ' + sug.et + (c.multi ? ' (prom.)' : '') + '</div>';
+      }
+    }
+    /* Sugerida de cada ambiente */
+    if(MODAL.aplic[i] && MODAL.aplic[i].porAmb && c.multi){
+      for(j=0; j<L.length; j++){
+        var sp = document.getElementById('ft-sga-' + i + '-' + j);
+        if(!sp) continue;
+        sug = dosisSugerida(i, L[j].amb || '');
+        sp.innerHTML = sug ? '<button class="btn-link" onclick="usarSugeridaAmb(' + i + ',' + j + ')" title="Usar la sugerida para ' + esc(L[j].amb || 'sin ambiente') + ' (cubre ' + sug.et + ')">sug. ' + f(sug.dosis, 0) + '</button>' : '';
+      }
     }
     td = rows[i].querySelector('.ap-ap');
     if(!td) continue;
@@ -5841,11 +6829,11 @@ function pintarAportes(c){
     if(l.p2o5) pz.push('P2O5 ' + f(l.p2o5,1));
     if(l.k2o)  pz.push('K2O ' + f(l.k2o,1));
     if(l.s)    pz.push('S ' + f(l.s,1));
-    td.innerHTML = pz.length ? pz.join(' · ') : '<span style="color:var(--muted)">sin aporte</span>';
+    td.innerHTML = pz.length ? pz.join(' · ') + (c.multi && MODAL.aplic[i] && MODAL.aplic[i].porAmb ? ' <span style="color:#A8B2BD">(prom.)</span>' : '') : '<span style="color:var(--muted)">sin aporte</span>';
   }
 }
 function addAplic(){
-  MODAL.aplic.push({ prod:'', momento:'Siembra', dosis:null, unidad:'kg/ha' });
+  MODAL.aplic.push({ prod:'', momento:'Siembra', dosis:null, unidad:'kg/ha', porAmb:false, dosisAmb:{} });
   renderAplicRows();
 }
 function delAplic(i){
@@ -5865,8 +6853,8 @@ function setAplic(i, campo, v){
    sin contar esta línea, calculo cuánto haría falta de este producto
    para cubrir cada uno, y propongo el menor — que es el producto
    cumpliendo su papel sin pasarse con el resto.
-   Devuelve {kg, nutriente} o null. */
-function dosisSugerida(i){
+   BUILD 26: con amb, la sugerida de ese ambiente. */
+function dosisSugerida(i, amb){
   var ap = MODAL.aplic[i];
   if(!ap || !ap.prod) return null;
   var prod = fertProdByNombre(ap.prod);
@@ -5876,12 +6864,12 @@ function dosisSugerida(i){
   var copia = [], j;
   for(j=0; j<MODAL.aplic.length; j++){
     copia.push((j === i)
-      ? { prod:ap.prod, momento:ap.momento, dosis:null, unidad:ap.unidad }
+      ? { prod:ap.prod, momento:ap.momento, dosis:null, unidad:ap.unidad, porAmb:false }
       : MODAL.aplic[j]);
   }
   var base = ftDesdeModal();
   base.aplic = copia;
-  var c = calcFert(base, base.amb);
+  var c = (amb !== undefined) ? calcFertAmb(base, amb) : calcFert(base, base.amb);
 
   var nutr = [
     { k:'n',    g:prod.n,    rec:c.rec.n,    apl:c.apl.n,    et:'el N' },
@@ -5920,12 +6908,59 @@ function usarSugerida(i){
   var sug = dosisSugerida(i);
   if(!sug) return;
   MODAL.aplic[i].dosis = Math.round(sug.dosis * 10) / 10;
+  marcarSucio();
+  renderAplicRows();
+}
+/* BUILD 26: dosis por ambiente. La primera vez, cada ambiente arranca
+   con su sugerida redondeada (de a 5 kg, o de a 1 litro); si no hay
+   sugerida, con la dosis del lote. */
+function togAplicAmb(i, on){
+  var ap = MODAL.aplic[i]; if(!ap) return;
+  ap.porAmb = !!on;
+  if(!ap.dosisAmb) ap.dosisAmb = {};
+  if(on){
+    var L = ambsModal(), j, k, sug;
+    for(j=0; j<L.length; j++){
+      k = L[j].amb || '';
+      if(ap.dosisAmb.hasOwnProperty(k) && num(ap.dosisAmb[k]) !== null) continue;
+      sug = dosisSugerida(i, k);
+      ap.dosisAmb[k] = sug ? redondeoDosis(sug.dosis, ap.unidad) : ap.dosis;
+    }
+    ap.dosis = dosisPonderada(ap, L);
+  }
+  marcarSucio();
+  renderAplicRows();
+}
+function recalcAplicPond(){
+  var L = ambsModal(), i, el;
+  for(i=0; i<MODAL.aplic.length; i++){
+    if(!MODAL.aplic[i].porAmb) continue;
+    MODAL.aplic[i].dosis = dosisPonderada(MODAL.aplic[i], L);
+    el = document.getElementById('ft-apd-' + i);
+    if(el) el.textContent = MODAL.aplic[i].dosis !== null ? f(MODAL.aplic[i].dosis, 1) : '—';
+  }
+}
+function setDosisAmbModal(i, j, v){
+  var ap = MODAL.aplic[i], L = ambsModal();
+  if(!ap || !L[j]) return;
+  if(!ap.dosisAmb) ap.dosisAmb = {};
+  ap.dosisAmb[L[j].amb || ''] = num(v);
+  recalcAplicPond();
+  recalcFertModal();
+}
+function usarSugeridaAmb(i, j){
+  var L = ambsModal(); if(!L[j]) return;
+  var sug = dosisSugerida(i, L[j].amb || '');
+  if(!sug) return;
+  MODAL.aplic[i].dosisAmb[L[j].amb || ''] = Math.round(sug.dosis * 10) / 10;
+  marcarSucio();
+  recalcAplicPond();
   renderAplicRows();
 }
 function renderAplicRows(){
   var cont = document.getElementById('ft-aplic');
   if(!cont) return;
-  var lista = [], i;
+  var lista = [], i, j, multi = modalMulti(), L = ambsModal();
   for(i=0; i<DB.fertProd.length; i++) lista.push(DB.fertProd[i].nombre);
 
   if(!MODAL.aplic.length){
@@ -5937,45 +6972,108 @@ function renderAplicRows(){
     recalcFertModal();
     return;
   }
+  var nC = multi ? 8 : 7;
   var h = '<div class="scroll"><table><thead><tr>'
     + '<th>Fertilizante</th><th>Momento</th><th class="r">Dosis</th><th>Unidad</th>'
+    + (multi ? '<th class="c" title="La dosis cambia según el ambiente">Por amb.</th>' : '')
     + '<th>Sugerida</th><th>Aporta kg/ha</th><th></th>'
     + '</tr></thead><tbody>';
   for(i=0; i<MODAL.aplic.length; i++){
-    h += '<tr>'
+    var ap = MODAL.aplic[i], pa = multi && ap.porAmb;
+    h += '<tr class="ap-row">'
       + '<td><select onchange="setAplic(' + i + ',\'prod\',this.value)" style="min-width:150px">'
-      +   opts(lista, MODAL.aplic[i].prod, '— elegir —') + '</select></td>'
+      +   opts(lista, ap.prod, '— elegir —') + '</select></td>'
       + '<td><select onchange="setAplic(' + i + ',\'momento\',this.value)" style="width:120px">'
-      +   opts(MOMENTOS, MODAL.aplic[i].momento, '') + '</select></td>'
-      + '<td class="r"><input type="number" step="0.1" min="0" value="' + (MODAL.aplic[i].dosis != null ? MODAL.aplic[i].dosis : '') + '" '
-      +   'oninput="setAplic(' + i + ',\'dosis\',this.value)" style="width:84px"></td>'
+      +   opts(MOMENTOS, ap.momento, '') + '</select></td>'
+      + '<td class="r">' + (pa
+          ? '<span class="dos-pond" id="ft-apd-' + i + '" title="Promedio ponderado de los ambientes">' + (ap.dosis != null ? f(ap.dosis, 1) : '—') + '</span>'
+          : '<input type="number" step="0.1" min="0" value="' + (ap.dosis != null ? ap.dosis : '') + '" '
+            + 'oninput="setAplic(' + i + ',\'dosis\',this.value)" style="width:84px">') + '</td>'
       + '<td><select onchange="setAplic(' + i + ',\'unidad\',this.value)" style="width:82px">'
-      +   opts(['kg/ha','l/ha'], MODAL.aplic[i].unidad || 'kg/ha', '') + '</select></td>'
+      +   opts(['kg/ha','l/ha'], ap.unidad || 'kg/ha', '') + '</select></td>'
+      + (multi ? '<td class="c"><input type="checkbox"' + (ap.porAmb ? ' checked' : '') + ' onchange="togAplicAmb(' + i + ',this.checked)" title="Dosis por ambiente"></td>' : '')
       + '<td class="ap-sug" style="font-size:11px;color:var(--muted)">—</td>'
       + '<td class="ap-ap" style="font-size:11px;color:var(--muted)">—</td>'
       + '<td class="r"><button class="btn-ico" onclick="delAplic(' + i + ')">&times;</button></td>'
       + '</tr>';
+    if(pa){
+      h += '<tr class="ap-amb"><td colspan="' + nC + '"><div class="ap-amb-w">';
+      for(j=0; j<L.length; j++){
+        var k = L[j].amb || '', dv = ap.dosisAmb && ap.dosisAmb.hasOwnProperty(k) ? ap.dosisAmb[k] : '';
+        h += '<div class="ap-amb-c"><label>' + esc(k || 'sin ambiente') + ' <span>' + f(L[j].ha, 1) + ' ha</span></label>'
+          + '<input type="number" step="0.1" min="0" value="' + (dv != null ? dv : '') + '" oninput="setDosisAmbModal(' + i + ',' + j + ',this.value)">'
+          + '<span class="ap-amb-s" id="ft-sga-' + i + '-' + j + '"></span></div>';
+      }
+      h += '</div></td></tr>';
+    }
   }
   h += '</tbody></table></div>'
-    + '<div class="hint">El momento <b>Siembra</b> es el arrancador: es el que se controla por fitotoxicidad '
-    + 'y el que se ve en la pestaña de Siembra. Cada producto aporta a todos sus nutrientes, así que el N del '
-    + 'arrancador ya se descuenta del N a aplicar.</div>';
+    + '<div class="hint">Lo del momento <b>Siembra</b> va con la semilla: se controla por fitotoxicidad en Siembra. '
+    + 'Cada producto suma todos sus nutrientes (el N del MAP ya descuenta del N a aplicar).'
+    + (multi ? ' Tildá <b>Por amb.</b> para poner una dosis distinta en cada ambiente: arranca con la sugerida redondeada.' : '') + '</div>';
   cont.innerHTML = h;
   recalcFertModal();
 }
 function guardarFert(){
   var cult = val('ft-cult');
   if(!cult){ alert('Elegí el cultivo.'); return; }
-  var base = ftDesdeModal();
-  if(num(val('ft-p')) === null && num(val('ft-n20')) === null){
+  var base = ftDesdeModal(), multi = modalMulti(), L = ambsModal(), i, j, k;
+  var lid = modalUnLote();
+
+  /* Ambientes */
+  if(lid && MODAL.ambSrc !== 'siembra' && L.length > 1){
+    var vistos = {};
+    for(i=0; i<L.length; i++){
+      k = L[i].amb || '';
+      if(!k){ alert('Elegí el ambiente de cada fila (o dejá una sola fila para todo el lote).'); return; }
+      if(vistos[k]){ alert('El ambiente ' + k + ' está dos veces.'); return; }
+      vistos[k] = 1;
+      if(!num(L[i].ha)){ alert('Cargá las hectáreas del ambiente ' + k + '.'); return; }
+    }
+  }
+  /* Análisis: al menos P o N 0-20 (en cada ambiente si van separados) */
+  if(multi && !MODAL.mismo){
+    var sinAn = [];
+    for(i=0; i<L.length; i++){
+      var an = (MODAL.porAmb[L[i].amb || ''] || {}).analisis || {};
+      if(num(an.pPpm) === null && num(an.n20) === null) sinAn.push(L[i].amb || 'sin ambiente');
+    }
+    if(sinAn.length){ alert('Cargá al menos el P del suelo o el N de la capa 0-20 en: ' + sinAn.join(', ') + '.'); return; }
+  } else if(num(val('ft-p')) === null && num(val('ft-n20')) === null){
     alert('Cargá al menos el P del suelo o el N de la capa 0-20 para poder calcular algo.');
     return;
   }
-  var i, j, aplLimpias = [];
+
+  /* Solo lo de los ambientes que quedan */
+  var porAmb = {};
+  if(multi){
+    for(i=0; i<L.length; i++){
+      k = L[i].amb || '';
+      var x = MODAL.porAmb[k];
+      if(!x) continue;
+      porAmb[k] = { analisis:(!MODAL.mismo && x.analisis ? clonAnalisis(x.analisis) : (x.analisis ? clonAnalisis(x.analisis) : null)),
+                    obj:{ pObj:(x.obj ? num(x.obj.pObj) : null), nObj:(x.obj ? num(x.obj.nObj) : null) } };
+    }
+  }
+  var aplLimpias = [];
   for(i=0; i<MODAL.aplic.length; i++){
-    if(!MODAL.aplic[i].prod) continue;
-    aplLimpias.push({ prod:MODAL.aplic[i].prod, momento:MODAL.aplic[i].momento,
-                      dosis:MODAL.aplic[i].dosis, unidad:MODAL.aplic[i].unidad || 'kg/ha' });
+    var ap = MODAL.aplic[i];
+    if(!ap.prod) continue;
+    var o2 = { prod:ap.prod, momento:ap.momento, dosis:ap.dosis, unidad:ap.unidad || 'kg/ha' };
+    if(multi && ap.porAmb){
+      o2.porAmb = true; o2.dosisAmb = {};
+      for(j=0; j<L.length; j++){
+        k = L[j].amb || '';
+        o2.dosisAmb[k] = (ap.dosisAmb && ap.dosisAmb.hasOwnProperty(k)) ? num(ap.dosisAmb[k]) : num(ap.dosis);
+      }
+      o2.dosis = dosisPonderada(o2, L);
+    }
+    aplLimpias.push(o2);
+  }
+  var ambsGuardar = null;
+  if(lid && MODAL.ambSrc !== 'siembra'){
+    ambsGuardar = [];
+    for(i=0; i<L.length; i++) ambsGuardar.push({ amb:L[i].amb || '', ha:num(L[i].ha) });
   }
 
   if(MODAL.id){
@@ -5985,27 +7083,34 @@ function guardarFert(){
     ft.analisis = base.analisis;
     ft.obj = base.obj;
     ft.aplic = aplLimpias;
+    ft.mismoAnalisis = multi ? MODAL.mismo : true;
+    ft.porAmb = porAmb;
+    if(ambsGuardar) ft.ambs = ambsGuardar;
     sv('fert');
   } else {
-    var sel = [], k;
+    var sel = [];
     for(k in MODAL.lotesSel){ if(MODAL.lotesSel.hasOwnProperty(k)) sel.push(k); }
     if(!sel.length){ alert('Elegí al menos un lote.'); return; }
     for(i=0; i<sel.length; i++){
       var l = loteById(sel[i]);
       if(!l) continue;
       var aps = [];
-      for(j=0; j<aplLimpias.length; j++){
-        aps.push({ prod:aplLimpias[j].prod, momento:aplLimpias[j].momento,
-                   dosis:aplLimpias[j].dosis, unidad:aplLimpias[j].unidad });
-      }
-      DB.fert.push({
+      for(j=0; j<aplLimpias.length; j++) aps.push(clonAplic(aplLimpias[j]));
+      for(j=0; j<aps.length; j++){ if(!aps[j].porAmb){ delete aps[j].porAmb; delete aps[j].dosisAmb; } }
+      var nuevo = {
         id: uid('ft'), campania: CAMPANIA,
         loteId: sel[i], campo: l.campo, lote: l.nombre, amb: l.amb,
         cultivo: cult,
         analisis: clonAnalisis(base.analisis),
         obj: { pObj:base.obj.pObj, nObj:base.obj.nObj },
         aplic: aps
-      });
+      };
+      if(sel.length === 1){
+        nuevo.mismoAnalisis = multi ? MODAL.mismo : true;
+        nuevo.porAmb = porAmb;
+        if(ambsGuardar) nuevo.ambs = ambsGuardar;
+      }
+      DB.fert.push(nuevo);
     }
     sv('fert');
   }
@@ -6162,7 +7267,10 @@ function cerradas(){
 function arrancaCerrado(clave){
   var c = cerradas();
   if(c[clave] !== undefined) return !!c[clave];
-  return clave.indexOf('sec:') === 0;
+  /* BUILD 24: las secciones de las ventanas arrancan abiertas (ahora que la
+     flechita pliega todo, cerradas dejaban la ventana vacía); se recuerda
+     lo que cada uno deja plegado. */
+  return false;
 }
 function marcarCerrado(clave, cerrado){
   cerradas()[clave] = cerrado ? 1 : 0;
@@ -6191,7 +7299,16 @@ function prepararSecs(){
     el.className += ' cl';
     el.insertBefore(chevron(), el.firstChild);
     el.onclick = function(){ togSec(this); };
-    if(arrancaCerrado(clave)) el.className += ' cerrado';
+    if(arrancaCerrado(clave)){ el.className += ' cerrado'; plegarSec(el, true); }
+  }
+}
+/* BUILD 24: la sección pliega todo lo que hay hasta la sección siguiente,
+   esté o no dentro de un recuadro. */
+function plegarSec(el, cerrado){
+  var s = el.nextElementSibling;
+  while(s && !(s.classList && s.classList.contains('fsec'))){
+    if(cerrado) s.classList.add('sec-oculto'); else s.classList.remove('sec-oculto');
+    s = s.nextElementSibling;
   }
 }
 function chevron(){
@@ -6203,9 +7320,37 @@ function chevron(){
 function togSec(el){
   var cerrado = el.className.indexOf('cerrado') >= 0;
   el.className = cerrado ? el.className.replace(/\s*cerrado/, '') : el.className + ' cerrado';
+  plegarSec(el, !cerrado);
   marcarCerrado(el.getAttribute('data-sec'), !cerrado);
 }
 
+/* BUILD 25: Configuración se divide en tres partes, elegidas desde un desplegable */
+var CFG_SUB = 'campania';
+var CFG_NOM = { campania:'Datos de campaña', param:'Parámetros', datos:'Datos' };
+function abrirMenuCfg(ev){
+  if(ev) ev.stopPropagation();
+  var m = document.getElementById('dd-cfg-menu');
+  if(m) m.classList.toggle('open');
+}
+function cerrarMenuCfg(){ var m = document.getElementById('dd-cfg-menu'); if(m) m.classList.remove('open'); }
+function irCfg(sub){
+  CFG_SUB = CFG_NOM[sub] ? sub : 'campania';
+  cerrarMenuCfg();
+  showTab('cfg');
+}
+function pintarCfgSub(){
+  var k, el;
+  for(k in CFG_NOM){ if(CFG_NOM.hasOwnProperty(k)){ el = document.getElementById('cfg-' + k); if(el) el.style.display = (k === CFG_SUB ? '' : 'none'); } }
+  var b = document.getElementById('tb-cfg');
+  if(b) b.innerHTML = 'Configuración' + (TAB === 'cfg' ? ' · ' + esc(CFG_NOM[CFG_SUB]) : '') + ' &#9662;';
+}
+function togAvanzado(){
+  var b = document.getElementById('avz-body'), ch = document.getElementById('avz-chev');
+  if(!b) return;
+  var abrir = b.style.display === 'none';
+  b.style.display = abrir ? '' : 'none';
+  if(ch) ch.style.transform = abrir ? 'rotate(0deg)' : 'rotate(-90deg)';
+}
 function showTab(t, btn){
   TAB = t;
   var vs = document.querySelectorAll('.view'), i;
@@ -6216,6 +7361,7 @@ function showTab(t, btn){
   for(i=0; i<ts.length; i++) ts[i].classList.remove('active');
   if(btn) btn.classList.add('active');
   else { var b = document.getElementById('tb-' + t); if(b) b.classList.add('active'); }
+  pintarCfgSub();
 
   /* El gráfico se dibuja mal si el canvas estaba oculto (mide 0 px),
      así que el balance se rearma recién cuando la pestaña se ve. */
@@ -6290,6 +7436,10 @@ function boot(){
   document.getElementById('fver').textContent = 'Versión ' + VERSION + ' · BUILD ' + BUILD;
   ajustarStickies();
   window.addEventListener('resize', ajustarStickies);
+  document.addEventListener('click', function(ev){
+    var dd = document.getElementById('dd-cfg');
+    if(dd && !dd.contains(ev.target)) cerrarMenuCfg();
+  });
   document.addEventListener('keydown', function(ev){
     var o = document.getElementById('ovl');
     if((ev.key === 'Escape' || ev.keyCode === 27) && o && o.className.indexOf('open') >= 0) pedirCerrarModal();
