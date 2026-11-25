@@ -62,7 +62,7 @@ main{flex:1}
 #view-ges{--c:var(--moss);--ct:var(--moss-t)}
 #view-pun{--c:var(--ochre);--ct:var(--ochre-t)}
 #view-adm{--c:var(--terra);--ct:var(--terra-t)}
-#grid-dec-externos{--c:#6E766A;--ct:#EDF0EA}
+#grid-dec-externos,.tool-ext{--c:#6E766A;--ct:#EDF0EA}
 
 .crumb{display:flex;align-items:center;gap:8px;margin-bottom:16px;font-size:12.5px;color:var(--soft)}
 .volver{background:none;border:none;padding:0;font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--muted);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
@@ -311,6 +311,15 @@ table, .num, .cnt, input[type=number]{font-variant-numeric:tabular-nums}
           <span class="t-cat">Planificación</span>
           <span class="t-name">Plan de Uso del Suelo</span>
           <span class="t-desc">Rotaciones, cultivos y superficies por lote y campaña.</span>
+        </a>
+
+        <!-- Auravant: recurso externo (gris). SIN data-tool: visible para todos. -->
+        <a class="tool tool-ext" href="https://www.auravant.com/" target="_blank" rel="noopener" title="Plataforma GIS de Auravant: mapas de lotes, ambientes, puntos de muestreo e imágenes satelitales.">
+          <span class="t-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></svg></span>
+          <svg class="t-go" viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8"/></svg>
+          <span class="t-cat">Externo · GIS</span>
+          <span class="t-name">Auravant</span>
+          <span class="t-desc">Mapas, ambientes, puntos de muestreo e imágenes satelitales.</span>
         </a>
 
         <a class="tool" data-tool="ProgramaSiembra" href="programa_siembra_fertilizacion.html" title="Programación de siembra y fertilización en una sola herramienta: densidad por lote y por ambiente a partir del valor cultural de la partida, rangos de fecha, balance de sembradoras y necesidad total de insumos. Al abrirla migra lo cargado en la versión anterior.">
@@ -605,7 +614,7 @@ PA.init({ modo:'demo' }, function(){
     aplicarCtx(ctx);
     desdeHash();
   });
-  document.getElementById('fts2').textContent = 'Versión v2026-11-18 16:04 · BUILD 20';
+  document.getElementById('fts2').textContent = 'Versión v2026-11-25 10:53 · BUILD 21';
 });
 </script>
 
